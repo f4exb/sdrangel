@@ -137,6 +137,13 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 				m_sampleBuffer.push_back(Sample(demod * SDR_RX_SCALEF, 0.0));
 			}
 
+			// RDS also uses the pilot PLL's third harmonic. Keep the reference
+			// running when mono audio is selected so RDS is independent of the
+			// audio output mode and can free-run for mono+RDS transmissions.
+			if (m_settings.m_audioStereo || m_settings.m_rdsActive) {
+				m_pilotPLL.process(demod, m_pilotPLLSamples);
+			}
+
 			if (m_settings.m_rdsActive)
 			{
 				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
@@ -163,8 +170,6 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 			if (m_settings.m_audioStereo)
 			{
-				m_pilotPLL.process(demod, m_pilotPLLSamples);
-
 				if (m_settings.m_showPilot) {
 					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * SDR_RX_SCALEF, 0.0)); // debug 38 kHz pilot
 				}

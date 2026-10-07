@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "boost/format.hpp"
+#include "util/rds.h"
 
 #include <QTime>
 #include <QDebug>
@@ -559,7 +560,7 @@ void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
         report->setRdsDemodAccumDb(CalcDb::dbPower(std::fabs(getDemodAcc())));
         report->setRdsDemodFrequency(getDemodFclk());
         report->setPid(new QString(str(boost::format("%04X") % getRDSParser()->m_pi_program_identification).c_str()));
-        report->setPiType(new QString(getRDSParser()->pty_table[getRDSParser()->m_pi_program_type].c_str()));
+        report->setPiType(new QString(RDS::m_programmeTypes[getRDSParser()->m_pi_program_type]));
         report->setPiCoverage(new QString(getRDSParser()->coverage_area_codes[getRDSParser()->m_pi_area_coverage_index].c_str()));
         // RDS pads these to a fixed width, which is a transport detail rather than part of the
         // name, and the radio text ends with a carriage return

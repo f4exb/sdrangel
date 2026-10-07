@@ -59,7 +59,6 @@ int NFMModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
         CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, newCWKeyerSettings, apiCwKeyerSettings);
         m_settings.setCWKeyerSettings(newCWKeyerSettings);
-        const QByteArray& serializedNewSettings = m_settings.serialize(); // effectively update CW keyer settings
     }
 
     NFMMod::webapiFormatChannelSettings(response, m_settings);

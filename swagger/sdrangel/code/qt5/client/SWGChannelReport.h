@@ -30,6 +30,7 @@
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
+#include "SWGBFMModReport.h"
 #include "SWGChannelPowerReport.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatModReport.h"
@@ -130,6 +131,9 @@ public:
 
     SWGBFMDemodReport* getBfmDemodReport();
     void setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report);
+
+    SWGBFMModReport* getBfmModReport();
+    void setBfmModReport(SWGBFMModReport* bfm_mod_report);
 
     SWGDABDemodReport* getDabDemodReport();
     void setDabDemodReport(SWGDABDemodReport* dab_demod_report);
@@ -317,6 +321,9 @@ private:
 
     SWGBFMDemodReport* bfm_demod_report;
     bool m_bfm_demod_report_isSet;
+
+    SWGBFMModReport* bfm_mod_report;
+    bool m_bfm_mod_report_isSet;
 
     SWGDABDemodReport* dab_demod_report;
     bool m_dab_demod_report_isSet;

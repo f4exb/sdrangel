@@ -32,6 +32,7 @@
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGBFMModSettings.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChannelPowerSettings.h"
@@ -154,6 +155,9 @@ public:
 
     SWGBFMDemodSettings* getBfmDemodSettings();
     void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
+
+    SWGBFMModSettings* getBfmModSettings();
+    void setBfmModSettings(SWGBFMModSettings* bfm_mod_settings);
 
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
@@ -374,6 +378,9 @@ private:
 
     SWGBFMDemodSettings* bfm_demod_settings;
     bool m_bfm_demod_settings_isSet;
+
+    SWGBFMModSettings* bfm_mod_settings;
+    bool m_bfm_mod_settings_isSet;
 
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;

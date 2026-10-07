@@ -52,6 +52,9 @@ ChannelSettings:
     BFMDemodSettings:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       description: "BFM demod settings configuration for Channel."
+    BFMModSettings:
+      $ref: "/doc/swagger/include/BFMMod.yaml#/BFMModSettings"
+      description: "Broadcast FM mod settings configuration for Channel."
     ChannelAnalyzerSettings:
       $ref: "/doc/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
       description: "Channel analyzer settings configuration for Channel."

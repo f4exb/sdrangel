@@ -37,6 +37,9 @@ ChannelReport:
     BFMDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       description: "BFM demod report data for Channel."
+    BFMModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/BFMMod.yaml#/BFMModReport"
+      description: "Broadcast FM mod report data for Channel."
     DABDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DABDemod.yaml#/DABDemodReport"
       description: "DAB demod report data for Channel."

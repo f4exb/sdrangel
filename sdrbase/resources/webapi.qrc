@@ -24,6 +24,7 @@
         <file>webapi/doc/swagger/include/AudioOutput.yaml</file>
         <file>webapi/doc/swagger/include/BeamSteeringCWMod.yaml</file>
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
+        <file>webapi/doc/swagger/include/BFMMod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
         <file>webapi/doc/swagger/include/ChannelActions.yaml</file>
