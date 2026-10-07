@@ -180,9 +180,8 @@ void BFMModSource::pullOne(Sample& sample)
 
     if (rf_out > 0)
     {
-        memcpy((void *) m_rfFilterBuffer, (const void *) rf, rf_out*sizeof(Complex));
+        memcpy((void *) m_rfFilterBuffer, (const void *) rf, std::min(rf_out*sizeof(Complex), m_rfFilterFFTLength*sizeof(Complex)));
         m_rfFilterBufferIndex = 0;
-
     }
 
     ci = m_rfFilterBuffer[m_rfFilterBufferIndex] * m_carrierNco.nextIQ(); // shift to carrier frequency

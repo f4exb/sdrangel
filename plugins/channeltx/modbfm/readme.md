@@ -116,7 +116,7 @@ Select the Audio file input (17) to transmit the output of these controls.
 
 ![Audio file playback tab](../../../doc/img/BFMMmod_audio_tab.png)
 
-<h3>Select audio file</h3>
+<h3>21: Select audio file</h3>
 
 Opens a file dialog to select a `.wav` or `.raw` file. Supported formats are:
 
@@ -125,24 +125,23 @@ Opens a file dialog to select a `.wav` or `.raw` file. Supported formats are:
 
 Mono files feed both audio channels equally. Stereo WAV files retain separate channels when Stereo is enabled.
 
-<h3>Audio file path</h3>
+<h3>22: Audio file path</h3>
 
 Displays the path of the selected audio file, or dots when no file has been selected.
 
-<h3>Loop audio file</h3>
+<h3>23: Loop audio file</h3>
 
 Restarts playback from the beginning when the end of the file is reached.
 
-<h3>Current file position</h3>
+<h3>24: Current file position</h3>
 
 Displays the current playback time relative to the beginning of the file.
 
-<h3>File length</h3>
+<h3>25: File length</h3>
 
 Displays the total duration of the selected audio file.
 
-<h3>File position slider</h3>
-
+<h3>26: File position slider</h3>
 Shows the playback position as a percentage of the file length. Pause playback to enable the slider, move it to the desired position, then resume playback.
 
 <h2>Morse keyer tab</h2>
@@ -151,55 +150,50 @@ Select the Morse keyer input (17) to transmit the output of these controls.
 
 ![Morse keyer tab](../../../doc/img/BFMMmod_morse_tab.png)
 
-<h3>CW text</h3>
-
+<h3>27: CW text</h3>
 Enter the message to send in text mode. Press Enter or leave the field to apply the text.
 
-<h3>Clear CW text</h3>
+<h3>28: Clear CW text</h3>
 
 Clears the message in the CW text field.
 
-<h3>CW speed</h3>
-
+<h3>29: CW speed</h3>
 Sets the keying speed from 1 to 26 words per minute (WPM). The default is 13 WPM. Timing uses the standard word PARIS: a dot lasts 1.2 / WPM seconds, a dash lasts three dot lengths, and the gaps between elements, characters and words last one, three and seven dot lengths respectively.
 
-<h3>Send dots</h3>
+<h3>30: Send dots</h3>
 
 Sends dots continuously at the selected CW speed. Switch it off before selecting another keying mode.
 
-<h3>Send dashes</h3>
-
+<h3>31: Send dashes</h3>	
 Sends dashes continuously at the selected CW speed. Switch it off before selecting another keying mode.
 
-<h3>Send text</h3>
+<h3>32: Send text</h3>
 
 Selects text mode and starts sending the message in the CW text field.
 
-<h3>Repeat CW text</h3>
-
+<h3>33: Repeat CW text</h3>	
 Repeats the message continuously while text mode is active.
 
-<h3>CW text play/stop</h3>
+<h3>34: CW text play/stop</h3>
 
 Stops or starts text keying. Starting again restarts the message from its beginning.
 
-<h3>Keyboard and mouse keying</h3>
+<h3>35: Keyboard and mouse keying</h3>
 
 Enables manual keying with the assigned keyboard keys or the mouse pad. This mode is mutually exclusive with text, continuous dots and continuous dashes. If the keyboard focus is lost, toggle this control off and on to restore the key bindings.
 
-<h3>Keying style</h3>
+<h3>36: Keying style</h3>
 
 Selects iambic or straight keying. In iambic mode the dot and dash controls act as separate paddles. In straight mode either control keys the tone while held down.
 
-<h3>Mouse keying pad</h3>
+<h3>37: Mouse keying pad</h3>
 
 With keyboard and mouse keying enabled, move the pointer over the pad and use the left mouse button for dots and the right button for dashes. In straight mode both buttons act as key down.
 
-<h3>Dot key assignment</h3>
-
+<h3>38: Dot key assignment</h3>
 Select the dot key capture button, then press the key or key-and-modifier combination to assign to dots. The assigned key is displayed beside the button.
 
-<h3>Dash key assignment</h3>
+<h3>39: Dash key assignment</h3>
 
 Select the dash key capture button, then press the key or key-and-modifier combination to assign to dashes. The assigned key is displayed beside the button.
 
@@ -209,25 +203,25 @@ Check RDS enable (9) to transmit these fields.
 
 ![RDS tab](../../../doc/img/BFMMmod_rds_tab.png)
 
-<h3>RDS programme identification (PI)</h3>
+<h3>40: RDS programme identification (PI)</h3>
 
 Sets the station's 16-bit programme identification code. 
 Enter up to four hexadecimal digits; the display is normalized to four digits when editing finishes. 
 The default is `1234`. An invalid entry leaves the previous value in place.
 
-<h3>RDS programme type (PTY)</h3>
+<h3>41: RDS programme type (PTY)</h3>
 
 Selects the programme type. Receivers use this to describe or select the programme category. 
 The names are those of the RDS programme type table, which the BFM demodulator also displays, and the position in the list is the code transmitted (0 to 31). 
 The default is None (0). North American receivers use the RBDS table, which gives some codes different names.
 
-<h3>RDS programme service name (PS)</h3>
+<h3>42: RDS programme service name (PS)</h3>
 
 Sets the station name displayed by RDS receivers, up to eight characters. 
 Shorter names are padded with spaces for transmission. 
 The default is `SDRangel`. Press Enter or leave the field to apply the change.
 
-<h3>RDS RadioText (RT)</h3>
+<h3>43: RDS RadioText (RT)</h3>
 
 Sets a message of up to 64 characters, such as programme information or a track title. 
 The default is `SDRangel Broadcast FM`. Press Enter or leave the field to apply the change. 

@@ -237,7 +237,7 @@ void RDSEncoder::buildNextGroup()
         // Decoder identification bits are sent one per segment, d3 first. Only
         // d0 (stereo) is set: no dynamic PTY, compression or artificial head.
         const quint16 di = ((segment == 3U) && m_stereo) ? 1U : 0U;
-        blocks[1] = quint16((0U << 12) | (trafficProgramme << 10) | (quint16(m_pty) << 5)
+        blocks[1] = quint16((trafficProgramme << 10) | (quint16(m_pty) << 5)
                   | (trafficAnnouncement << 4) | (musicSpeech << 3) | (di << 2) | (segment & 3U));
         blocks[2] = 0xE0CD; // AF codes: 224 = no alternative frequencies, 205 = filler
         blocks[3] = (quint16(quint8(m_ps[segment * 2])) << 8)
