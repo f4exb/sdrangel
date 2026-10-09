@@ -29,6 +29,7 @@
 #include <string.h>
 #include <algorithm>
 #include <QString>
+#include <utility>
 #include "dsp/dsptypes.h"
 
 #define UDPSINKFEC_UDPSIZE 512
@@ -169,6 +170,15 @@ public:
     }
     ~RemoteDataFrame() {
         delete[] m_superBlocks;
+    }
+    RemoteDataFrame(const RemoteDataFrame&) = delete;
+    RemoteDataFrame& operator=(const RemoteDataFrame&) = delete;
+    RemoteDataFrame(RemoteDataFrame&& other) :
+        m_txControlBlock(std::move(other.m_txControlBlock)),
+        m_rxControlBlock(std::move(other.m_rxControlBlock)),
+        m_superBlocks(other.m_superBlocks)
+    {
+        other.m_superBlocks = nullptr;
     }
     RemoteTxControlBlock m_txControlBlock;
     RemoteRxControlBlock m_rxControlBlock;
