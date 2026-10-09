@@ -55,6 +55,8 @@ public:
     AudioNetSink(QObject *parent); //!< without RTP
     AudioNetSink(QObject *parent, int sampleRate, bool stereo); //!< with RTP
     ~AudioNetSink();
+    AudioNetSink(const AudioNetSink&) = delete;
+    AudioNetSink& operator=(const AudioNetSink&) = delete;
 
     void setDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
