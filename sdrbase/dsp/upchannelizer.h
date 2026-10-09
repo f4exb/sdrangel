@@ -67,6 +67,8 @@ protected:
 
         FilterStage(Mode mode);
         ~FilterStage();
+	FilterStage(const FilterStage&) = delete;
+	FilterStage& operator=(const FilterStage&) = delete;
 
         bool work(Sample* sampleIn, Sample *sampleOut) {
             return (m_filter->*m_workFunction)(sampleIn, sampleOut);
