@@ -800,13 +800,13 @@ void WDSPRx::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getSsbDemodReport()->setChannelPowerDb((float) CalcDb::dbPower(magsqAvg));
+    response.getWdspRxReport()->setChannelPowerDb((float) CalcDb::dbPower(magsqAvg));
 
     if (m_running)
     {
-        response.getSsbDemodReport()->setSquelch(m_basebandSink->getAudioActive() ? 1 : 0);
-        response.getSsbDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-        response.getSsbDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+        response.getWdspRxReport()->setSquelch(m_basebandSink->getAudioActive() ? 1 : 0);
+        response.getWdspRxReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+        response.getWdspRxReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
     }
 }
 
