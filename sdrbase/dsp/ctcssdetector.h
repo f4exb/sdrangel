@@ -32,6 +32,8 @@ class SDRBASE_API CTCSSDetector {
 public:
     CTCSSDetector();
     virtual ~CTCSSDetector();
+    CTCSSDetector(const CTCSSDetector&) = delete;
+    CTCSSDetector& operator=(const CTCSSDetector&) = delete;
 
     // setup the basic parameters and coefficients
     void setCoefficients(
