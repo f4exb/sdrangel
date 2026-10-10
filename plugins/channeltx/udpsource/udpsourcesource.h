@@ -37,6 +37,8 @@ class UDPSourceSource : public ChannelSampleSource {
 public:
     UDPSourceSource();
     virtual ~UDPSourceSource();
+    UDPSourceSource(const UDPSourceSource&) = delete;
+    UDPSourceSource& operator=(const UDPSourceSource&) = delete;
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);

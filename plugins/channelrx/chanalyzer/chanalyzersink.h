@@ -40,7 +40,9 @@ class ScopeVis;
 class ChannelAnalyzerSink : public ChannelSampleSink {
 public:
     ChannelAnalyzerSink();
-	~ChannelAnalyzerSink();
+    ~ChannelAnalyzerSink();
+    ChannelAnalyzerSink(const ChannelAnalyzerSink&) = delete;
+    ChannelAnalyzerSink& operator=(const ChannelAnalyzerSink&) = delete;
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
@@ -63,6 +65,8 @@ private:
     public:
         RRCHelper(int flen);
         ~RRCHelper();
+        RRCHelper(const RRCHelper&) = delete;
+        RRCHelper& operator=(const RRCHelper&) = delete;
         void setUseFFT(bool useFFT);
         void create(float symbolRate, float rolloff, unsigned int samplesPerSymbol, FIRFilterRRC::Normalization normalization);
         int runFilt(const std::complex<float> & in, std::complex<float> **out);

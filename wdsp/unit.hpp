@@ -50,6 +50,9 @@ public:
         int _dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
     ~Unit();
+    Unit(const Unit&) = delete;
+    Unit& operator=(const Unit&) = delete;
+
 
     void flushBuffers();
     void setBuffersInputSamplerate(int _in_rate);

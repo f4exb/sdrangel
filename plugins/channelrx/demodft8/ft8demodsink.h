@@ -35,7 +35,9 @@ class FT8Buffer;
 class FT8DemodSink : public ChannelSampleSink {
 public:
     FT8DemodSink();
-	~FT8DemodSink();
+    ~FT8DemodSink();
+    FT8DemodSink(const FT8DemodSink&) = delete;
+    FT8DemodSink& operator=(const FT8DemodSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

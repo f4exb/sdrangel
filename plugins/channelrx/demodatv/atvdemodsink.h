@@ -39,7 +39,9 @@ class ScopeVis;
 class ATVDemodSink : public ChannelSampleSink {
 public:
     ATVDemodSink();
-	~ATVDemodSink();
+    ~ATVDemodSink();
+    ATVDemodSink(const ATVDemodSink&) = delete;
+    ATVDemodSink& operator=(const ATVDemodSink&) = delete;
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

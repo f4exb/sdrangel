@@ -68,6 +68,9 @@ public:
 		delete m_socket;
 	}
 
+	UDPSinkUtil(const UDPSinkUtil&) = delete;
+	UDPSinkUtil& operator=(const UDPSinkUtil&) = delete;
+
 	void moveToThread(QThread *thread)
 	{
 	    m_socket->moveToThread(thread);

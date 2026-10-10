@@ -35,6 +35,8 @@ public:
 
     FFTNoiseReduction(int len);
     ~FFTNoiseReduction();
+    FFTNoiseReduction(const FFTNoiseReduction&) = delete;
+    FFTNoiseReduction& operator=(const FFTNoiseReduction&) = delete;
 
     void init(); //!< call before start of initial FFT scan
     void push(cmplx data, int index); //!< Push FFT bin during initial FFT scan
