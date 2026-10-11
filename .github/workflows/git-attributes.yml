@@ -9,6 +9,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for line ending violations
         run: |
@@ -27,3 +29,15 @@ jobs:
           fi
 
           echo "All files have correct line endings."
+
+      - name: Check for trailing whitespace
+        run: |
+          if ! git diff --check \
+            "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" \
+            -- ':(attr:text)' ':(attr:text=auto)'; then
+            echo "::error::Trailing whitespace found in the pull request."
+            echo "Remove trailing spaces and tabs from added lines."
+            exit 1
+          fi
+
+          echo "No trailing whitespace found in the pull request."
