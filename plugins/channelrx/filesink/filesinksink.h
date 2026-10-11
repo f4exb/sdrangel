@@ -35,7 +35,9 @@ class SpectrumVis;
 class FileSinkSink : public ChannelSampleSink {
 public:
     FileSinkSink();
-	~FileSinkSink();
+    ~FileSinkSink();
+    FileSinkSink(const FileSinkSink&) = delete;
+    FileSinkSink& operator=(const FileSinkSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

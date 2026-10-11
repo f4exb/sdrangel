@@ -44,7 +44,9 @@ class BasebandSampleSink;
 class BFMDemodSink : public ChannelSampleSink {
 public:
     BFMDemodSink();
-	~BFMDemodSink();
+    ~BFMDemodSink();
+    BFMDemodSink(const BFMDemodSink&) = delete;
+    BFMDemodSink& operator=(const BFMDemodSink&) = delete;
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

@@ -55,6 +55,9 @@ struct hdlc_dec
         delete[] framebuf;
     }
 
+    hdlc_dec(const hdlc_dec&) = delete;
+    hdlc_dec& operator=(const hdlc_dec&) = delete;
+
     void reset()
     {
         shiftreg = 0;

@@ -248,6 +248,9 @@ struct pipebuf : pipebuf_common
         delete[] buf;
     }
 
+    pipebuf(const pipebuf&) = delete;
+    pipebuf& operator=(const pipebuf&) = delete;
+
     int sizeofT() {
         return sizeof(T);
     }

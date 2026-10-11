@@ -408,6 +408,8 @@ struct fir_filter : runnable
     ~fir_filter() {
         delete[] shifted_coeffs;
     }
+    fir_filter(const fir_filter&) = delete;
+    fir_filter& operator=(const fir_filter&) = delete;
 
     void run()
     {
@@ -505,6 +507,9 @@ struct fir_resampler : runnable
     ~fir_resampler() {
         delete[] shifted_coeffs;
     }
+
+    fir_resampler(const fir_resampler&) = delete;
+    fir_resampler& operator=(const fir_resampler&) = delete;
 
     void run()
     {

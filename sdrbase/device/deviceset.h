@@ -56,6 +56,8 @@ public:
 
     DeviceSet(int tabIndex, int deviceType);
     ~DeviceSet();
+    DeviceSet(const DeviceSet&) = delete;
+    DeviceSet& operator=(const DeviceSet&) = delete;
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     int getIndex() const { return m_deviceTabIndex; }

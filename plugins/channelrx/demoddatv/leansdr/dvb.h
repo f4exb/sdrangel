@@ -181,6 +181,8 @@ struct deconvol_sync : runnable
         delete[] punct;
         delete[] conv;
     }
+    deconvol_sync(const deconvol_sync&) = delete;
+    deconvol_sync& operator=(const deconvol_sync&) = delete;
 
     typedef uint64_t signal_t;
     typedef uint64_t iq_t;
@@ -1748,6 +1750,9 @@ struct viterbi_sync : runnable
     {
         delete syncs;
     }
+
+    viterbi_sync(const viterbi_sync&) = delete;
+    viterbi_sync& operator=(const viterbi_sync&) = delete;
 
     TCS *init_map(bool conj, float angle)
     {

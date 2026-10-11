@@ -91,6 +91,9 @@ struct auto_notch : runnable
         delete[] __slots;
     }
 
+    auto_notch(const auto_notch&) = delete;
+    auto_notch& operator=(const auto_notch&) = delete;
+
     void run()
     {
         while (in.readable() >= fft.size() && out.writable() >= fft.size())
@@ -1051,6 +1054,9 @@ struct fir_sampler : sampler_interface<T>
     {
         delete[] shifted_coeffs;
     }
+
+    fir_sampler(const fir_sampler&) = delete;
+    fir_sampler& operator=(const fir_sampler&) = delete;
 
     int readahead() {
         return ncoeffs - 1;

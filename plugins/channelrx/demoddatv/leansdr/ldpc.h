@@ -175,6 +175,9 @@ struct ldpc_engine
         }
     }
 
+    ldpc_engine(const ldpc_engine&) = delete;
+    ldpc_engine& operator=(const ldpc_engine&) = delete;
+
     void print_node_stats()
     {
         int nedges = count_edges(vnodes, k);

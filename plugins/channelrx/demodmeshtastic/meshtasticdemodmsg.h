@@ -40,6 +40,9 @@ namespace MeshtasticDemodMsg
         unsigned int getSyncWord() const { return m_syncWord; }
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
+        // Access the carrier frequency offset in Hz carried by this message.
+        double getCfoHz() const { return m_cfoHz; }
+        void setCfoHz(double cfoHz) { m_cfoHz = cfoHz; }
 
         void pushBackSymbol(unsigned short symbol) {
             m_symbols.push_back(symbol);
@@ -93,6 +96,8 @@ namespace MeshtasticDemodMsg
         unsigned int m_syncWord;
         float m_signalDb;
         float m_noiseDb;
+        // Initialize the carrier frequency offset in Hz for every new message.
+        double m_cfoHz = 0.0;
 
         MsgDecodeSymbols() : //!< create an empty message
             Message(),
@@ -259,6 +264,9 @@ namespace MeshtasticDemodMsg
         unsigned int getSyncWord() const { return m_syncWord; }
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
+        // Access the carrier frequency offset in Hz carried by this message.
+        double getCfoHz() const { return m_cfoHz; }
+        void setCfoHz(double cfoHz) { m_cfoHz = cfoHz; }
         const QString& getMsgTimestamp() const { return m_msgTimestamp; }
         unsigned int getPacketSize() const { return m_packetSize; }
         unsigned int getNbParityBits() const { return m_nbParityBits; }
@@ -338,6 +346,8 @@ namespace MeshtasticDemodMsg
         unsigned int m_syncWord;
         float m_signalDb;
         float m_noiseDb;
+        // Initialize the carrier frequency offset in Hz for every new message.
+        double m_cfoHz = 0.0;
         QString m_msgTimestamp;
         unsigned int m_packetSize;
         unsigned int m_nbParityBits;

@@ -31,6 +31,8 @@ template <typename Type, uint32_t Order> class IIRFilter
 public:
     IIRFilter(const Type *a, const Type *b);
     ~IIRFilter();
+    IIRFilter(const IIRFilter&) = delete;
+    IIRFilter& operator=(const IIRFilter&) = delete;
     void setCoeffs(const Type *a, const Type *b);
     Type run(const Type& sample);
 
@@ -46,6 +48,8 @@ template <typename Type> class IIRFilter<Type, 2>
 public:
     IIRFilter(const Type *a, const Type *b);
     ~IIRFilter();
+    IIRFilter(const IIRFilter&) = delete;
+    IIRFilter& operator=(const IIRFilter&) = delete;
     void setCoeffs(const Type *a, const Type *b);
     Type run(const Type& sample);
 

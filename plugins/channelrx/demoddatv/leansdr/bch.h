@@ -95,6 +95,8 @@ struct bch_engine : bch_interface
         delete[] truncpolys;
         delete[] syndpolys;
     }
+    bch_engine(const bch_engine&) = delete;
+    bch_engine& operator=(const bch_engine&) = delete;
 
     // Generate BCH parity bits.
 

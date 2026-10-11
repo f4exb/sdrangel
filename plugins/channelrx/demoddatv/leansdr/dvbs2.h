@@ -675,6 +675,9 @@ struct s2_frame_receiver : runnable
         }
     }
 
+    s2_frame_receiver(const s2_frame_receiver&) = delete;
+    s2_frame_receiver& operator=(const s2_frame_receiver&) = delete;
+
     enum {
       FRAME_DETECT,   // Looking for PLHEADER
       FRAME_PROBE,    // Aligned with PLHEADER, ready to recover carrier
@@ -3135,6 +3138,9 @@ struct s2_fecdec_soft : runnable
             delete[] code;
         }
     }
+
+    s2_fecdec_soft(const s2_fecdec_soft&) = delete;
+    s2_fecdec_soft& operator=(const s2_fecdec_soft&) = delete;
 
     void run()
     {

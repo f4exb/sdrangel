@@ -37,7 +37,9 @@ class ChannelAPI;
 class SSBDemodSink : public ChannelSampleSink {
 public:
     SSBDemodSink();
-	~SSBDemodSink();
+    ~SSBDemodSink();
+    SSBDemodSink(const SSBDemodSink&) = delete;
+    SSBDemodSink& operator=(const SSBDemodSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

@@ -362,6 +362,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             outputMsg->setSyncWord(msgSyncWord);
             outputMsg->setSignalDb(msgSignalDb);
             outputMsg->setNoiseDb(msgNoiseDb);
+            // Forward this frame's carrier frequency offset to the decode report.
+            outputMsg->setCfoHz(msg.getCfoHz());
             outputMsg->setMsgTimestamp(msgTimestamp);
             outputMsg->setPacketSize(getPacketLength());
             outputMsg->setNbParityBits(getNbParityBits());

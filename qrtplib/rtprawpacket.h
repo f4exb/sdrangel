@@ -58,6 +58,8 @@ public:
      */
     RTPRawPacket(const uint8_t *data, std::size_t datalen, const RTPAddress& address, RTPTime &recvtime, bool rtp);
     ~RTPRawPacket();
+    RTPRawPacket(const RTPRawPacket&) = delete;
+    RTPRawPacket& operator=(const RTPRawPacket&) = delete;
 
     /** Returns the pointer to the data which is contained in this packet. */
     uint8_t *GetData()

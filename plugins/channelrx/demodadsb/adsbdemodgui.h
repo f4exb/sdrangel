@@ -489,6 +489,8 @@ struct Aircraft {
         m_staticAirTempItem = new QTableWidgetItem();
         m_humidityItem = new QTableWidgetItem();
     }
+    Aircraft(const Aircraft&) = delete;
+    Aircraft& operator=(const Aircraft&) = delete;
 
     QString getImage() const;
     QString getText(const ADSBDemodSettings *settings, bool all=false) const;

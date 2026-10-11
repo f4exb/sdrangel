@@ -66,6 +66,8 @@ protected:
 
 		FilterStage(Mode mode);
 		~FilterStage();
+		FilterStage(const FilterStage&) = delete;
+		FilterStage& operator=(const FilterStage&) = delete;
 
 		bool work(Sample* sample)
 		{

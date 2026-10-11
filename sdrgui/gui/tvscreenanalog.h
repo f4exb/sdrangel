@@ -62,6 +62,9 @@ public:
 		delete[] m_outOfBoundsLine;
 	}
 
+	TVScreenAnalogBuffer(const TVScreenAnalogBuffer&) = delete;
+	TVScreenAnalogBuffer& operator=(const TVScreenAnalogBuffer&) = delete;
+
 	int getWidth()
 	{
 		return m_width;

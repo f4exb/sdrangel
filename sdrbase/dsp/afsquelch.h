@@ -27,8 +27,10 @@
 class SDRBASE_API AFSquelch {
 public:
     // constructor with default values
-	AFSquelch();
+    AFSquelch();
     virtual ~AFSquelch();
+    AFSquelch(const AFSquelch&) = delete;
+    AFSquelch& operator=(const AFSquelch&) = delete;
 
     // setup the basic parameters and coefficients
     void setCoefficients(
