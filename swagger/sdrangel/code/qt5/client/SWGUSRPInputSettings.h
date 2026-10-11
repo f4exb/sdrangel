@@ -90,6 +90,9 @@ public:
     qint32 getGpioPins();
     void setGpioPins(qint32 gpio_pins);
 
+    qint32 getWireFormat();
+    void setWireFormat(qint32 wire_format);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -153,6 +156,9 @@ private:
 
     qint32 gpio_pins;
     bool m_gpio_pins_isSet;
+
+    qint32 wire_format;
+    bool m_wire_format_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

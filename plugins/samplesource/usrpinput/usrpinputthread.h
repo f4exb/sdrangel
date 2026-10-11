@@ -56,7 +56,7 @@ public:
         ReplayBuffer<qint16> *replayBuffer, MessageQueue *reportQueue, QObject* parent = nullptr);
     ~USRPInputThread();
 
-    void setStream(uhd::rx_streamer::sptr stream, size_t bufSamples);
+    void setStream(uhd::rx_streamer::sptr stream, size_t bufSamples, bool sc8 = false);
     void releaseStream();
     virtual void startWork();
     virtual void stopWork();
@@ -93,6 +93,7 @@ private:
 
     uhd::rx_streamer::sptr m_stream;
     qint16 *m_buf;
+    qint8 *m_buf8;          //!< With sc8, what's received, before widening into m_buf
     size_t m_bufSamples;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;

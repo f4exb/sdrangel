@@ -39,6 +39,7 @@ USRPInputThread::USRPInputThread(DeviceUSRPParams *deviceParams, int channel, Sa
     m_overflows(0),
     m_timeouts(0),
     m_buf(nullptr),
+    m_buf8(nullptr),
     m_bufSamples(0),
     m_sampleFifo(sampleFifo),
     m_replayBuffer(replayBuffer),
@@ -57,18 +58,21 @@ USRPInputThread::~USRPInputThread()
 {
     stopWork();
     delete[] m_buf;
+    delete[] m_buf8;
 }
 
 // Set stream once it has been created. Must be called before startWork()
-void USRPInputThread::setStream(uhd::rx_streamer::sptr stream, size_t bufSamples)
+void USRPInputThread::setStream(uhd::rx_streamer::sptr stream, size_t bufSamples, bool sc8)
 {
     m_stream = stream;
     m_bufSamples = bufSamples;
     m_convertBuffer.resize(bufSamples);
     delete[] m_buf;
+    delete[] m_buf8;
     // *2 as samples are I+Q
     m_buf = new qint16[2*bufSamples];
     std::fill(m_buf, m_buf + 2*bufSamples, 0);
+    m_buf8 = sc8 ? new qint8[2*bufSamples] : nullptr;
 }
 
 void USRPInputThread::issueStreamCmd(bool start)
@@ -181,7 +185,7 @@ void USRPInputThread::stopWork()
 size_t USRPInputThread::recv(uhd::rx_metadata_t& md, double timeout)
 {
     if (!m_deviceParams) {
-        return m_stream->recv(m_buf, m_bufSamples, md, timeout);
+        return m_stream->recv(m_buf8 ? (void *) m_buf8 : (void *) m_buf, m_bufSamples, md, timeout);
     }
 
     // Only wait for a short time while holding the lock, so if our stream isn't receiving data
@@ -197,7 +201,7 @@ size_t USRPInputThread::recv(uhd::rx_metadata_t& md, double timeout)
 
         {
             std::lock_guard<DeviceUSRPRecvLock> recvLock(m_deviceParams->m_recvLock);
-            samplesReceived = m_stream->recv(m_buf, m_bufSamples, md, lockedTimeout);
+            samplesReceived = m_stream->recv(m_buf8 ? (void *) m_buf8 : (void *) m_buf, m_bufSamples, md, lockedTimeout);
         }
 
         if (md.error_code != uhd::rx_metadata_t::ERROR_CODE_TIMEOUT) {
@@ -274,7 +278,17 @@ void USRPInputThread::run()
                 qDebug("USRPInputThread::run - bad packet error");
 
             if (samples_received > 0)
+            {
+                // 8 bit samples widened to 16, full scale as 16 bit samples' (outside the device's receive lock)
+                if (m_buf8)
+                {
+                    for (size_t i = 0; i < 2 * samples_received; i++) {
+                        m_buf[i] = (qint16) (m_buf8[i] * 256);
+                    }
+                }
+
                 callbackIQ(m_buf, 2 * samples_received);
+            }
         }
     }
     catch (std::exception& e)
