@@ -90,6 +90,7 @@ private:
     int m_symbolSel;                                            //!< I or Q symbol for BPSK modulation only
     int m_symbolIdx;
     int m_samplesPerSymbol;
+    Real m_symbolGain;                                          //!< Of the pulse shaping's output, so its level doesn't change with the samples a symbol
     uint8_t m_iqSymbols[DVBS::m_maxIQSymbols*2];
 
     DVBS2 m_dvbs2;
