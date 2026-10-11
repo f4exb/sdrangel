@@ -1593,6 +1593,8 @@ void MeshcoreDemodGUI::setupMeshcoreAutoProfileControls()
     // MeshCore unchanged.
     ui->meshAutoSampleRate->setChecked(m_settings.m_meshcoreAutoSampleRate);
 
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshcoreDemodGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshApply_clicked);
     QObject::connect(ui->meshKeys, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshKeys_clicked);
     QObject::connect(ui->meshAutoLock, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshAutoLock_clicked);
     QObject::connect(ui->meshAutoSampleRate, &QCheckBox::toggled, this, &MeshcoreDemodGUI::on_meshAutoSampleRate_toggled);
