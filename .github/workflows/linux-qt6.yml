@@ -45,7 +45,7 @@ jobs:
             qml6-module-qt5compat-graphicaleffects qt6-speech-speechd-plugin \
             libfaad-dev libflac-dev zlib1g-dev \
             libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
-            libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev \
+            libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libavfilter-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
             libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev libunwind-dev \
             libavahi-client-dev libavahi-common-dev libaio-dev \

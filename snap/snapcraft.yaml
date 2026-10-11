@@ -311,6 +311,7 @@ parts:
             - libavcodec62
             - libavformat62
             - libavutil60
+            - libavfilter11
             - libbluray3
             - libcairo-gobject2
             - libcairo2
