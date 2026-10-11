@@ -7,7 +7,7 @@ DVBDemodSettings:
       description: "Channel frequency offset from the device center frequency in Hz."
     bandwidth:
       type: integer
-      description: "Channel bandwidth in Hz: 8000000, 7000000 or 6000000."
+      description: "Channel bandwidth in Hz: 10000000 (DVB-T2 only), 8000000, 7000000, 6000000, 5000000 or 1700000 (DVB-T2 only, as for T2-Lite)."
     standard:
       type: integer
       description: "Standard to receive: 0 automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2 (T2-base, or T2-Lite if alone), 3 DVB-T2 T2-Lite profile, 4 automatic (DVB-S or S2), 5 DVB-S, 6 DVB-S2."
