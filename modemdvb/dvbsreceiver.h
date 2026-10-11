@@ -69,7 +69,7 @@ public:
     double snr() const;
     uint64_t acquisitions() const { return m_acquisitions; }
 
-    static const int m_acquireSymbols = 4096;
+    static constexpr int m_acquireSymbols = 4096;
 
 private:
     static constexpr double m_pi = 3.141592653589793;
@@ -252,7 +252,7 @@ private:
     uint64_t m_queueWaits;
     std::atomic<double> m_fecSeconds;   //!< Written in the error correction thread
 
-    static const size_t m_maxQueued = 64;
+    static constexpr size_t m_maxQueued = 64;
 };
 
 } // namespace dvbs

@@ -50,7 +50,7 @@ public:
     int process(const Cf *in, int nbIn, Cf *out, int maxOut);
 
 private:
-    static const int m_phases = 512;
+    static constexpr int m_phases = 512;
     static const double m_pi;
     static const double m_attenuation;  //!< dB
     static const double m_kaiserBeta;

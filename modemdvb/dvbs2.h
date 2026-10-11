@@ -188,7 +188,7 @@ public:
     //! R_n(i), for i from 0 at the first symbol after the PLHEADER
     const std::vector<uint8_t>& sequence() const { return m_sequence; }
 
-    static const int m_length = 66420;  //!< As the standard defines it
+    static constexpr int m_length = 66420;  //!< As the standard defines it
 
 private:
     int m_n;
@@ -244,11 +244,11 @@ public:
         return nearest;
     }
 
-    static const int m_grid = 256;              //!< Cells a side
+    static constexpr int m_grid = 256;              //!< Cells a side
     static constexpr float m_range = 2.0f;      //!< It covers +/- this, at unit energy (beyond, the nearest edge cell's)
     static constexpr float m_cellsPerUnit = m_grid / (2.0f * m_range);
-    static const int m_slots = 4;               //!< Points a cell can list
-    static const uint16_t m_unused = 0xffff;
+    static constexpr int m_slots = 4;               //!< Points a cell can list
+    static constexpr uint16_t m_unused = 0xffff;
 
 private:
     std::vector<uint16_t> m_table;
@@ -271,8 +271,8 @@ public:
         return &m_candidates[m_offsets[point]];
     }
 
-    static const int m_minPoints = 128;         //!< Constellations this size or more have one
-    static const int m_perBit = 4;              //!< Nearest a point with each bit the other way
+    static constexpr int m_minPoints = 128;         //!< Constellations this size or more have one
+    static constexpr int m_perBit = 4;              //!< Nearest a point with each bit the other way
 
 private:
     NearestTable m_nearest;

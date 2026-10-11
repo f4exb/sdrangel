@@ -118,31 +118,31 @@ private:
         bool m_valid = false;   //!< False if lost or misaligned, as when the timing jumps
     };
 
-    static const int m_ringSize = 7; //!< Channel estimation interpolates over +/-3 symbols
+    static constexpr int m_ringSize = 7; //!< Channel estimation interpolates over +/-3 symbols
     //! m_seq is kept below twice this, so it doesn't overflow. A multiple of the ring size and the scattered pilot
     //! period, so subtracting it leaves the ring positions and pilot phases as they were
-    static const int m_seqPeriod = 4 * m_ringSize * (1 << 20);
+    static constexpr int m_seqPeriod = 4 * m_ringSize * (1 << 20);
 
     static const double m_giLossFraction;       //!< Of the usual guard interval correlation, below which the timing is lost
     static const double m_giAveraging;          //!< Of the guard interval correlation, per symbol
     static const double m_twoPi;
-    static const int m_acquireSymbols = 12;     //!< Symbols of the longest mode analysed per acquisition attempt
+    static constexpr int m_acquireSymbols = 12;     //!< Symbols of the longest mode analysed per acquisition attempt
     static const double m_acquireThreshold;     //!< Minimum normalised guard interval correlation
     static const double m_intCFOThreshold;      //!< Minimum normalised continual pilot correlation
     static const double m_frequencyLoopGain;
     static const double m_delaySmoothing;
     //! Symbols whose significant paths all spread over more than the guard interval (net of those that didn't) before
     //! the least spread is taken, rather than the last measurement kept, so bursts of noise don't count
-    static const int m_cirRejectSymbols = 8;
+    static constexpr int m_cirRejectSymbols = 8;
     static const float m_pilotBoost;            //!< Scattered and continual pilot amplitude (4.5.3)
     static const float m_noiseAlpha;            //!< Per symbol, for the noise on each carrier
-    static const int m_noiseSettleSymbols = 64; //!< Before the per-carrier noise is used
+    static constexpr int m_noiseSettleSymbols = 64; //!< Before the per-carrier noise is used
     static const float m_noiseFloor;            //!< Least noise assumed on a carrier, relative to the mean
     //! The carriers near notches are worked out again when the frequency offset has moved this far, as the frequency
     //! loop moves it a little every symbol. Their compensation's phase changes by at most 0.03 degrees a Hz
     static const double m_notchOffsetTolerance; //!< Hz
     //! Samples used are discarded from the buffer once there are this many, keeping it small enough to stay in cache
-    static const int64_t m_bufferDiscard = 1 << 16;
+    static constexpr int64_t m_bufferDiscard = 1 << 16;
 
     static inline Cf complexMultiply(Cf a, Cf b);
     static void rotate(const Cf *x, Cf *y, int n, double phase, double step);
@@ -252,9 +252,9 @@ private:
     std::vector<Cf> m_hi[2];    //!< Interpolated 1 and 2 carriers after each pilot
     std::vector<float> m_smoothingTaps; //!< Low pass filter matched to the delay spread, empty for none
     double m_smoothingCutoff;           //!< Cycles per pilot
-    static const int m_smoothingHalfLength = 40;
+    static constexpr int m_smoothingHalfLength = 40;
     std::vector<float> m_interpolationTaps[3]; //!< Interpolate from every third carrier, per carrier index mod 3
-    static const int m_interpolationHalfLength = 8; //!< Pilots each side
+    static constexpr int m_interpolationHalfLength = 8; //!< Pilots each side
     std::vector<Cf> m_h;        //!< Channel estimate of the symbol being output
     std::vector<Cf> m_equalised;        //!< Every carrier of the symbol being output
     std::vector<float> m_power;         //!< |m_h|^2

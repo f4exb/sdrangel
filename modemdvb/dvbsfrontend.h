@@ -108,7 +108,7 @@ public:
     //! any thread
     void getSpectrum(std::vector<float>& db, int points) const;
 
-    static const int m_fftSize = 1024;
+    static constexpr int m_fftSize = 1024;
 
 private:
     static constexpr double m_pi = 3.141592653589793;
@@ -147,7 +147,7 @@ private:
     double m_samplesPerSymbol;      //!< Input samples
     int m_taps;
     std::vector<float> m_pairs;     //!< The matched filter's phases
-    static const int m_phases = 256;
+    static constexpr int m_phases = 256;
 
     // NCO
     double m_ncoFrequency;          //!< Hz taken out

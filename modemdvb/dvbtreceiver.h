@@ -123,19 +123,19 @@ private:
     void deliverPackets();
     void correctClock();
 
-    static const size_t m_maxQueuedSymbols = 512;
-    static const size_t m_maxFreeSymbols = 16;     //!< Kept for reuse once the queue empties (about 72 kB each)
-    static const size_t m_maxQueuedDemapped = 32;  //!< About 48 kB each
+    static constexpr size_t m_maxQueuedSymbols = 512;
+    static constexpr size_t m_maxFreeSymbols = 16;     //!< Kept for reuse once the queue empties (about 72 kB each)
+    static constexpr size_t m_maxQueuedDemapped = 32;  //!< About 48 kB each
     // Clock offsets beyond this are corrected by resampling, rather than just by moving the FFT window,
     // as they reduce the MER (by a few dB at 20 ppm in 8K mode)
     static const double m_clockCorrectionThreshold;         //!< ppm
-    static const uint64_t m_clockCorrectionPeriod = 256;    //!< Symbols
-    static const int m_clockFirstMeasurements = 20;         //!< Symbols the clock offset is averaged over, to correct it first
+    static constexpr uint64_t m_clockCorrectionPeriod = 256;    //!< Symbols
+    static constexpr int m_clockFirstMeasurements = 20;         //!< Symbols the clock offset is averaged over, to correct it first
     // Viterbi threads are added while the error correction thread is busy over this fraction of the time, with symbols
     // waiting for it, and removed when it would have been under the lower fraction with one fewer, for a few windows
     static const double m_viterbiAddLoad;
     static const double m_viterbiRemoveLoad;
-    static const int m_viterbiRemoveWindows = 3;            //!< Of 2 s
+    static constexpr int m_viterbiRemoveWindows = 3;            //!< Of 2 s
 
     static double now();
 

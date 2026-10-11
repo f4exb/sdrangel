@@ -62,14 +62,14 @@ public:
 private:
     friend class NotchedCarriers;           //!< For m_twoPi and m_poleRadius
 
-    static const int m_fftSize = 4096;
-    static const int m_blocks = 8;          //!< Averaged in each measurement
-    static const int m_maxNotches = 4;
+    static constexpr int m_fftSize = 4096;
+    static constexpr int m_blocks = 8;          //!< Averaged in each measurement
+    static constexpr int m_maxNotches = 4;
     static const double m_twoPi;
     static const double m_thresholdDb;      //!< Above the signal's median level in a bin, to notch (a CW at -23 dBc)
     static const double m_poleRadius;       //!< Notch about 0.0003 of the sample rate wide (3 kHz at 9.14 MS/s)
-    static const int m_matchBins = 3;       //!< A peak this close to a notch, or a candidate, is the same one
-    static const int m_missesToRemove = 3;  //!< Measurements without the interferer
+    static constexpr int m_matchBins = 3;       //!< A peak this close to a notch, or a candidate, is the same one
+    static constexpr int m_missesToRemove = 3;  //!< Measurements without the interferer
 
     void measure(const Cf *block);
     void decide();

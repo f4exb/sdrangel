@@ -79,7 +79,7 @@ struct MODEMDVB_API TPS
     //! Encode into a 68-bit TPS block (s0 is set to 0)
     void encode(uint8_t bits[symbolsPerFrame]) const;
 
-    static const uint16_t m_syncWord = 0x35ee; //!< 0011010111101110, frames 1 and 3
+    static constexpr uint16_t m_syncWord = 0x35ee; //!< 0011010111101110, frames 1 and 3
     static bool checkBCH(const uint8_t bits[symbolsPerFrame]);
     static void addBCH(uint8_t bits[symbolsPerFrame]);
 

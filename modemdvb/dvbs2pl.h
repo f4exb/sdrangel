@@ -241,9 +241,9 @@ private:
     static void turnValues(const Cf *in, Cf *out, int n, Cf rot, const Cf& step, const uint8_t *scrambling = nullptr);
 
     static constexpr double m_pi = 3.141592653589793;
-    static const int m_maxMisses = 3;                       //!< Headers missing in a row before searching again
+    static constexpr int m_maxMisses = 3;                       //!< Headers missing in a row before searching again
     static constexpr double m_candidateSigmas = 3.5;        //!< Of the metric over its mean, for a header in the search
-    static const size_t m_maxCandidates = 64;               //!< Waiting to be confirmed
+    static constexpr size_t m_maxCandidates = 64;               //!< Waiting to be confirmed
     static constexpr double m_verifySigmas = 3.0;           //!< At the candidate's next header
     static constexpr double m_confirmSigmas = 2.0;          //!< At a header's expected place, locked
     static constexpr double m_minMetricSigma = 0.02;        //!< The metric's spread is never taken as less (noise's is about 0.06)
@@ -255,22 +255,22 @@ private:
                                                             //!< repeat (a still picture, padding), data can look like a header in each
     static constexpr double m_minLockEsN0 = -6.5;           //!< dB: a new lock's frames' known symbols below this, it's false (the
                                                             //!< lowest MODCOD's threshold is -2.35, the estimate's spread well within)
-    static const uint64_t m_trustedFrames = 4;              //!< Locked this long, the lock's real (a false one doesn't last)
+    static constexpr uint64_t m_trustedFrames = 4;              //!< Locked this long, the lock's real (a false one doesn't last)
     static constexpr double m_searchStep = 0.0025;          //!< Cycles a symbol, of the frequencies a header's decoded at in the search
-    static const int m_searchSteps = 20;                    //!< Either side: +/- 0.05
-    static const int m_lrLags = 24;                         //!< Of Luise and Reggiannini's estimator: range +/- 1/25 cycles a symbol
+    static constexpr int m_searchSteps = 20;                    //!< Either side: +/- 0.05
+    static constexpr int m_lrLags = 24;                         //!< Of Luise and Reggiannini's estimator: range +/- 1/25 cycles a symbol
     static constexpr double m_coarseLimit = 2.5e-3;         //!< Cycles a symbol: settled, a frame's estimate used only beyond this (it's
                                                             //!< too noisy at low SNR for the pilots' phase steps, which wrap at 3.4e-4)
     static constexpr double m_pilotPeriod = 1476.0;         //!< Symbols from pilot block to pilot block: their steps alias at 1 / this
     static constexpr double m_vlsnrPilotPeriod = 738.0;     //!< VL-SNR frames' (737 and 739 apart in set 1, 736 and 740 in set 2)
-    static const uint64_t m_settledFrames = 1;              //!< Locked this long, the frequency's tracked from the pilots
+    static constexpr uint64_t m_settledFrames = 1;              //!< Locked this long, the frequency's tracked from the pilots
     static constexpr double m_maxFrequency = 0.05;          //!< Cycles a symbol, beyond which the front end's NCO takes it
     static constexpr double m_invertedFrequency = 0.25;     //!< Cycles a symbol: a valid header this far out's of an inverted spectrum
     static constexpr double m_timeSlicingTest = 0.75;       //!< An S2 PLS code correlating under this times the SOF, time slicing's tried
     static constexpr double m_timeSlicingNoise = 0.55;      //!< Time slicing's code correlating under this times its symbols' rms: noise
     static constexpr double m_timeSlicingPairs = 0.3;       //!< Its repeated bits' agreement under this (of half their power): not tried
-    static const int m_sameTsnFrames = 8;                   //!< Frames in a row of one TSN, after which a frame without its header's of it
-    static const int64_t m_modeSymbols = 4 * 33372;         //!< Searching this long without a lock, the other kind of header's metric
+    static constexpr int m_sameTsnFrames = 8;                   //!< Frames in a row of one TSN, after which a frame without its header's of it
+    static constexpr int64_t m_modeSymbols = 4 * 33372;         //!< Searching this long without a lock, the other kind of header's metric
                                                             //!< (S2's or time slicing's): four of the longest frames (with two, S2's
                                                             //!< longest, near threshold, were cut off before a header was confirmed)
     static constexpr int m_ddBlockSymbols = 8;              //!< Without pilots, the decision directed loop's update interval
@@ -282,27 +282,27 @@ private:
     static constexpr double m_ddDriftGain = 0.15;           //!< Of it, for its drift a frame
     static constexpr double m_ddTrustedEnd = 1.0;           //!< Radians: the loop's end from the next header's phase, within which the
                                                             //!< loop's advance is taken (else the headers', within half a turn)
-    static const uint64_t m_aliasSearchFrames = 2;          //!< Without pilots, a new lock's frames whose frequency alias is searched
+    static constexpr uint64_t m_aliasSearchFrames = 2;          //!< Without pilots, a new lock's frames whose frequency alias is searched
     static constexpr double m_aliasSearchUncertainty = 0.75 * m_searchStep;  //!< Cycles a symbol either side tried at lock
-    static const int m_aliasConfirmTurns = 4;               //!< Turns a frame either side tried next
+    static constexpr int m_aliasConfirmTurns = 4;               //!< Turns a frame either side tried next
     static constexpr double m_aliasErrorWeight = 0.1;       //!< Of each frame, in the average of the loop's end from the next header's
-    static const uint64_t m_aliasErrorFrames = 10;          //!< After the search, before the average's taken as the lock's health
+    static constexpr uint64_t m_aliasErrorFrames = 10;          //!< After the search, before the average's taken as the lock's health
     static constexpr double m_aliasLostError = 1.0;         //!< Radians: the average over which the lock's dropped
-    static const uint64_t m_coarseAliasFrames = 16;         //!< Without pilots, frames of the headers' estimates averaged, at least
+    static constexpr uint64_t m_coarseAliasFrames = 16;         //!< Without pilots, frames of the headers' estimates averaged, at least
     static constexpr double m_coarseAliasTurns = 0.9;       //!< Turns a frame their average must be out
     static constexpr double m_coarseAliasSigmas = 5.0;      //!< And standard errors
     static constexpr double m_smoothedPhaseNoise = 0.004;   //!< Radians a symbol: more, the phase is tracked symbol by symbol, less
                                                             //!< (cheaper), slot by slot
     static constexpr double m_vlsnrPresentScore = 6.0;      //!< Standard deviations: a VL-SNR frame's headers there, locked (noise's
                                                             //!< best of the 32 hypotheses is rarely over 3; at -10 dB, a header's ~10)
-    static const int m_maxSlip = 2;                         //!< Symbols either side a VL-SNR frame's next header's looked for
-    static const int m_slipCorrection = 2;                  //!< Slips one way, for the clock to be corrected
-    static const int m_maxSlipFrames = 64;                  //!< Frames, after which slips fewer are forgotten
-    static const int64_t m_vlsnrSearchDelay = 2 * 33282;    //!< Searching this long without a lock, VL-SNR's search too: S2's
+    static constexpr int m_maxSlip = 2;                         //!< Symbols either side a VL-SNR frame's next header's looked for
+    static constexpr int m_slipCorrection = 2;                  //!< Slips one way, for the clock to be corrected
+    static constexpr int m_maxSlipFrames = 64;                  //!< Frames, after which slips fewer are forgotten
+    static constexpr int64_t m_vlsnrSearchDelay = 2 * 33282;    //!< Searching this long without a lock, VL-SNR's search too: S2's
                                                             //!< finds VL-SNR frames above about -3 dB, and at 27.5 MS/s
                                                             //!< VL-SNR's would take much of the search's CPU
-    static const int m_vlsnrSearchFFT = 4096;               //!< VL-SNR's search's FFT: its headers' 990 symbols' differences, and
-    static const int m_vlsnrSearchBlock = 3072;             //!< the positions searched with each (at most its size less theirs)
+    static constexpr int m_vlsnrSearchFFT = 4096;               //!< VL-SNR's search's FFT: its headers' 990 symbols' differences, and
+    static constexpr int m_vlsnrSearchBlock = 3072;             //!< the positions searched with each (at most its size less theirs)
     static constexpr double m_vlsnrSearchSigmas = 3.5;      //!< Of the search's correlation, for a peak to verify: noise's over it
                                                             //!< e^-12 of the time (a few a second at 1 MS/s, each 10 FFTs to verify);
                                                             //!< a header's about 6 at -6 dB, 4 at -8 dB

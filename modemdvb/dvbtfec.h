@@ -161,7 +161,7 @@ private:
     uint64_t m_berErrors;
     uint64_t m_berTotal;
     unsigned int m_berCalls;
-    static const uint64_t m_berWindow = 2000000;    //!< Bits compared
+    static constexpr uint64_t m_berWindow = 2000000;    //!< Bits compared
     static const unsigned int m_berInterval = 8;    //!< Calls, of which one is measured, to save time
 
     // Post-Viterbi BER

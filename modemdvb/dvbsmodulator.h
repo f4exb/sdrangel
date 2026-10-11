@@ -42,7 +42,7 @@ private:
     double m_sampleRate;
     double m_symbolRate;
     int m_span;
-    static const int m_resolution = 256;    //!< Table points a symbol
+    static constexpr int m_resolution = 256;    //!< Table points a symbol
     std::vector<float> m_table;
     std::vector<Cf> m_history;              //!< The symbols the next outputs need
     double m_time;                          //!< Of the next output, in symbols from m_history[0]

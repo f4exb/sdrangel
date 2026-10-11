@@ -67,7 +67,7 @@ public:
         //! messages are each thread's, for any code), a dozen normal frames' (more short ones), so VCM and ACM's
         //! MODCODs don't each make their decoder again and again (with two kept, three MODCODs in turn did, the
         //! demapping and LDPC taking five times as long), while threads that have seen many codes don't hold them all
-        static const size_t m_maxBytes = 16u << 20;
+        static constexpr size_t m_maxBytes = 16u << 20;
     };
 
     struct Job

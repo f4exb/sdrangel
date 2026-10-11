@@ -51,8 +51,8 @@ private:
     int mul(int a, int b) const { return (a && b) ? m_exp[m_log[a] + m_log[b]] : 0; }
     static inline uint64_t loadBigEndian64(const uint8_t *p);
 
-    static const int m_remWords = 3;    //!< The remainder's 64-bit words: up to 192 parity bits (t = 12 of 16 bits)
-    static const int m_maxT = 12;
+    static constexpr int m_remWords = 3;    //!< The remainder's 64-bit words: up to 192 parity bits (t = 12 of 16 bits)
+    static constexpr int m_maxT = 12;
     //! Generator polynomial factors of each frame size (table 7), as the powers of x with non-zero coefficients
     static const std::vector<std::vector<int>> m_bchNormalPolys;
     static const std::vector<std::vector<int>> m_bchMediumPolys;
@@ -191,7 +191,7 @@ public:
 private:
     int nextShift(int& k) const;
 
-    static const int m_maxBlocks = 1024;    //!< A TI-block's FEC blocks: PLP_NUM_BLOCKS_MAX's 10 bits
+    static constexpr int m_maxBlocks = 1024;    //!< A TI-block's FEC blocks: PLP_NUM_BLOCKS_MAX's 10 bits
     int m_ncells;
     int m_nd;
     std::vector<int> m_l0;
@@ -242,13 +242,13 @@ private:
     static void postCellBitMap(L1Constellation constellation, int npost, std::vector<int>& map);
 
     // L1 signalling (7.3)
-    static const int m_preKbch = 3072;
-    static const int m_preKldpc = 3240;
-    static const int m_preKsig = 200;
-    static const int m_preNpunc = 11488;
-    static const int m_postKbch = 7032;
-    static const int m_postKldpc = 7200;
-    static const int m_l1BchParity = 168;
+    static constexpr int m_preKbch = 3072;
+    static constexpr int m_preKldpc = 3240;
+    static constexpr int m_preKsig = 200;
+    static constexpr int m_preNpunc = 11488;
+    static constexpr int m_postKbch = 7032;
+    static constexpr int m_postKldpc = 7200;
+    static constexpr int m_l1BchParity = 168;
     static const int m_preGroups[9];
     static const int m_preParity[36];
     static const int m_postGroups[3][20];

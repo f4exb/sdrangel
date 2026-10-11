@@ -81,12 +81,12 @@ private:
     void processByte(uint8_t byte);
     void processPacket(uint8_t *packet);
 
-    static const int m_syncPackets = 4;     //!< Sync bytes required to sync
-    static const int m_maxSyncMisses = 8;   //!< Consecutive packets without a sync byte before losing sync
-    static const int m_interleaverI = 12;
-    static const int m_interleaverM = 17;
-    static const uint8_t m_syncByte = 0x47;
-    static const uint8_t m_invertedSyncByte = 0xb8;
+    static constexpr int m_syncPackets = 4;     //!< Sync bytes required to sync
+    static constexpr int m_maxSyncMisses = 8;   //!< Consecutive packets without a sync byte before losing sync
+    static constexpr int m_interleaverI = 12;
+    static constexpr int m_interleaverM = 17;
+    static constexpr uint8_t m_syncByte = 0x47;
+    static constexpr uint8_t m_invertedSyncByte = 0xb8;
     static const ReedSolomon::RS<255, 239> m_rs;
     static const SyndromeTables m_syndromeTables;
 

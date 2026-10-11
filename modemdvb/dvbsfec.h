@@ -90,7 +90,7 @@ public:
     void decode(const int8_t *iq, int nbSymbols);
     const Status& getStatus() const { return m_status; }
 
-    static const int m_searchSymbols = 8192;    //!< Tried at a time
+    static constexpr int m_searchSymbols = 8192;    //!< Tried at a time
 
 private:
     struct Hypothesis

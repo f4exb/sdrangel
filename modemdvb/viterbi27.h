@@ -45,7 +45,7 @@ public:
     //! Encode bits (one per byte) into X, Y pairs (one bit per byte). Used for testing
     static void encode(const uint8_t *bits, int nbBits, uint8_t& state, std::vector<uint8_t>& out);
 
-    static const int m_tracebackLength = 192;
+    static constexpr int m_tracebackLength = 192;
 
 private:
     friend struct EncoderOutputs;
@@ -57,8 +57,8 @@ private:
     // State s holds the previous six input bits, the most recent in bit 0. Input u moves state s to
     // ((s << 1) | u) & 63, so new states 2j and 2j+1 both have predecessors j and j+32 (a butterfly)
     // X = u ^ s0 ^ s1 ^ s2 ^ s5 (171 octal), Y = u ^ s1 ^ s2 ^ s4 ^ s5 (133 octal)
-    static const int m_maskX = 0x27;
-    static const int m_maskY = 0x36;
+    static constexpr int m_maskX = 0x27;
+    static constexpr int m_maskY = 0x36;
     static const EncoderOutputs m_encoderOutputs;
     static const BranchCosts m_branchCosts;
 

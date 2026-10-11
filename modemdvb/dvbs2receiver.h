@@ -200,13 +200,13 @@ private:
     static double now();
     static double rollOffValue(int ro);
 
-    static const int m_defaultMaxIterations = 50;
+    static constexpr int m_defaultMaxIterations = 50;
     static constexpr int m_vlsnrIterations = 75;
     static constexpr float m_outlierThreshold = 16.0f;  //!< As DVB-T2's
     static constexpr double m_timingAcquire = 2e-3;
     static constexpr double m_timingTrack = 5e-4;
     static constexpr double m_minRelockSeconds = 3.0;   //!< Without frames, before the spectrum's measured again (at least)
-    static const int m_maxFailedFrames = 32;            //!< Locked, but frames failing in a row: perhaps a false lock, if
+    static constexpr int m_maxFailedFrames = 32;            //!< Locked, but frames failing in a row: perhaps a false lock, if
     static constexpr double m_searchBudget = 0.4;       //!< Of a core, at most, for the physical layer's search (symbols skipped)
     static constexpr double m_threadBudget = 0.6;       //!< Of a core, for the thread as a whole: the search has what's left,
                                                         //!< after the front end (and in Auto, the DVB-S receiver)
@@ -214,16 +214,16 @@ private:
     static constexpr double m_steadyLockSeconds = 2.0;  //!< Locked this long, the search's budget starts again from nothing
     static constexpr double m_maxSkipSeconds = 0.25;    //!< Of symbols the budget skips after a window, at most: one that cost
                                                         //!< far too much (a fault) mustn't stop the search for long
-    static const int64_t m_searchWindow = 131072;       //!< Symbols searched at a time: a few of the longest frames, so a header
+    static constexpr int64_t m_searchWindow = 131072;       //!< Symbols searched at a time: a few of the longest frames, so a header
                                                         //!< and the next are found in it
-    static const int m_lowRollOffFrames = 16;           //!< Trusted frames without an RO of 11, after which S2X's low roll-offs have ended
+    static constexpr int m_lowRollOffFrames = 16;           //!< Trusted frames without an RO of 11, after which S2X's low roll-offs have ended
     static constexpr double m_failingSeconds = 1.0;     //!< Failing for this long too
-    static const uint64_t m_nullOnlyPackets = 1000;     //!< Of an input stream chosen automatically, all null: another's chosen
-    static const uint64_t m_missingStreamFrames = 2000; //!< Of other streams, without the one chosen automatically: it's
+    static constexpr uint64_t m_nullOnlyPackets = 1000;     //!< Of an input stream chosen automatically, all null: another's chosen
+    static constexpr uint64_t m_missingStreamFrames = 2000; //!< Of other streams, without the one chosen automatically: it's
                                                         //!< gone (the transmitter's changed its streams), another's chosen
-    static const size_t m_minTakeBatches = 4;           //!< The FEC thread takes at most whole rounds of its decoders' batches,
+    static constexpr size_t m_minTakeBatches = 4;           //!< The FEC thread takes at most whole rounds of its decoders' batches,
                                                         //!< at least this many: more, and the last round leaves decoders idle
-    static const size_t m_maxLanes = 32;                //!< The LDPC decoder's widest batch (AVX2's), for the slots made at first
+    static constexpr size_t m_maxLanes = 32;                //!< The LDPC decoder's widest batch (AVX2's), for the slots made at first
 
     bool m_threaded;
     double m_inputRate;
@@ -308,7 +308,7 @@ private:
     Status m_fecStatus;
     uint64_t m_queueWaits;
 
-    static const size_t m_maxQueued = 160; //!< 5 batches of 32 lanes: across the decoder threads and this one when the frames are coming faster than they're decoded (3 left a laptop's fourth decoder thread idle, and DVB-S2 waiting a quarter of its time)
+    static constexpr size_t m_maxQueued = 160; //!< 5 batches of 32 lanes: across the decoder threads and this one when the frames are coming faster than they're decoded (3 left a laptop's fourth decoder thread idle, and DVB-S2 waiting a quarter of its time)
     size_t m_takeBatches = 1;           //!< The most the FEC thread takes from the queue at once, in batches
     static constexpr int m_batchWaitMs = 100;   //!< The longest a frame waits for a batch to fill
 };
