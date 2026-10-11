@@ -20,6 +20,7 @@
 
 #include <QDialog>
 #include <QList>
+#include <QStringList>
 
 #include "export.h"
 
@@ -59,10 +60,12 @@ private:
     Workspace *m_currentWorkspace;
     QList<Workspace*> *m_workspaces;
     bool m_presetLoaded;
+    QStringList m_collapsedGroups; //!< Groups the user collapsed, restored next time the dialog is opened
 
     QTreeWidgetItem* addPresetToTree(const Preset* preset);
     void updatePresetControls();
     void loadDeviceSetPresetSettings(const Preset* preset);
+    void saveCollapsedGroups();
 
 private slots:
 	void on_presetSave_clicked();
@@ -74,6 +77,8 @@ private slots:
     void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
+	void on_presetTree_itemCollapsed(QTreeWidgetItem *item);
+	void on_presetTree_itemExpanded(QTreeWidgetItem *item);
 };
 
 #endif // SDRGUI_GUI_DEVICESETPRESETDIALOG_H_

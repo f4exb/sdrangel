@@ -20,6 +20,7 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QFile>
+#include <QSettings>
 
 #include "settings/preset.h"
 #include "gui/presetitem.h"
@@ -41,6 +42,8 @@ DeviceSetPresetsDialog::DeviceSetPresetsDialog(QWidget* parent) :
     m_presetLoaded(false)
 {
     ui->setupUi(this);
+    QSettings settings;
+    m_collapsedGroups = settings.value("presets.collapsed_groups").toStringList();
 }
 
 DeviceSetPresetsDialog::~DeviceSetPresetsDialog()
@@ -65,7 +68,11 @@ void DeviceSetPresetsDialog::populateTree(int deviceType)
             ((*it)->isMIMOPreset() && (deviceType == 2)))
         {
             QTreeWidgetItem *treeItem = addPresetToTree(*it);
-            treeItems.push_back(treeItem);
+
+            // Only select from expanded groups, so selecting doesn't expand a collapsed group
+            if (treeItem->parent()->isExpanded()) {
+                treeItems.push_back(treeItem);
+            }
         }
     }
 
@@ -95,7 +102,7 @@ QTreeWidgetItem* DeviceSetPresetsDialog::addPresetToTree(const Preset* preset)
 		sl.append(preset->getGroup());
 		group = new QTreeWidgetItem(ui->presetTree, sl, PGroup);
 		group->setFirstColumnSpanned(true);
-		group->setExpanded(true);
+		group->setExpanded(!m_collapsedGroups.contains(preset->getGroup()));
 		ui->presetTree->sortByColumn(0, Qt::AscendingOrder);
 	}
 
@@ -458,6 +465,28 @@ void DeviceSetPresetsDialog::on_presetTree_itemActivated(QTreeWidgetItem *item, 
     (void) item;
     (void) column;
 	on_presetLoad_clicked();
+}
+
+void DeviceSetPresetsDialog::on_presetTree_itemCollapsed(QTreeWidgetItem *item)
+{
+    if ((item->type() == PGroup) && !m_collapsedGroups.contains(item->text(0)))
+    {
+        m_collapsedGroups.append(item->text(0));
+        saveCollapsedGroups();
+    }
+}
+
+void DeviceSetPresetsDialog::on_presetTree_itemExpanded(QTreeWidgetItem *item)
+{
+    if ((item->type() == PGroup) && (m_collapsedGroups.removeAll(item->text(0)) > 0)) {
+        saveCollapsedGroups();
+    }
+}
+
+void DeviceSetPresetsDialog::saveCollapsedGroups()
+{
+    QSettings settings;
+    settings.setValue("presets.collapsed_groups", m_collapsedGroups);
 }
 
 void DeviceSetPresetsDialog::loadDeviceSetPresetSettings(const Preset* preset)
