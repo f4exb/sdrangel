@@ -49,7 +49,7 @@ public:
     void discard() { m_datagramFill = 0; }
     uint64_t getDatagrams() const { return m_datagrams; } //!< Sent
 
-    static const int m_packetsPerDatagram = 7;
+    static constexpr int m_packetsPerDatagram = 7;
 
 private:
     void lookup();          //!< The lookup thread's

@@ -101,8 +101,8 @@ private:
     double m_historyInterval;
     qint64 m_lastRowTime;               //!< ms, of the last waterfall row
 
-    static const int m_historyLength = 300;
-    static const int m_waterfallLength = 300;
+    static constexpr int m_historyLength = 300;
+    static constexpr int m_waterfallLength = 300;
 
     static const QColor m_gridColour;
     static const QColor m_zeroColour;

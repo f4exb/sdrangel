@@ -263,7 +263,7 @@ private:
     QMutex m_statusMutex;
     Status m_status;
 
-    static const int m_bufferSize = 16384;
+    static constexpr int m_bufferSize = 16384;
 };
 
 #endif // INCLUDE_DVBDEMODSINK_H

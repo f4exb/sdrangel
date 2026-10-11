@@ -456,7 +456,7 @@ private:
     std::deque<AVPacket *> m_videoPackets;  //!< Null for a discontinuity: those before dropped, the next a keyframe
     size_t m_videoBytes;
     std::atomic<bool> m_videoStop;  //!< Waited on with m_videoMutex, read without in the frame timing loop
-    static const size_t m_maxVideoBytes = 32 * 1024 * 1024; //!< Many seconds, even of HD
+    static constexpr size_t m_maxVideoBytes = 32 * 1024 * 1024; //!< Many seconds, even of HD
     //! In the demultiplexing thread: the video thread fell that far behind, so its packets were dropped, and those
     //! after are until a keyframe
     bool m_videoResync = false;

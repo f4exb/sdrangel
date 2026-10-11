@@ -179,7 +179,7 @@ private:
     Mode m_pressMode;           //!< Before the last mouse press, to ignore a double-click after one that opened or closed a view
     std::vector<HitArea> m_hits;
 
-    static const int m_windowSeconds = 2 * 3600;
+    static constexpr int m_windowSeconds = 2 * 3600;
     static constexpr int m_ribbonSeconds = 6;
     static constexpr int m_guideSeconds = 120;
     static constexpr int m_digitMilliseconds = 1500;
