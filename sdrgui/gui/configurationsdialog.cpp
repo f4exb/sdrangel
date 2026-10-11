@@ -249,6 +249,7 @@ void ConfigurationsDialog::on_configurationEdit_clicked()
 
             if (dlg.exec() == QDialog::Accepted)
             {
+                renameCollapsedGroup(item->text(0), dlg.group());
                 renameConfigurationGroup(item->text(0), dlg.group());
                 newGroupName = dlg.group();
                 change = true;
@@ -329,6 +330,7 @@ void ConfigurationsDialog::on_configurationDelete_clicked()
                 ) == QMessageBox::Yes
             )
             {
+                forgetCollapsedGroup(item->text(0));
                 deleteConfigurationGroup(item->text(0));
 
                 ui->configurationsTree->clear();
@@ -493,6 +495,25 @@ void ConfigurationsDialog::saveCollapsedGroups()
 {
     QSettings settings;
     settings.setValue("configurations.collapsed_groups", m_collapsedGroups);
+}
+
+void ConfigurationsDialog::renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    if (m_collapsedGroups.removeAll(oldGroupName) > 0)
+    {
+        if (!m_collapsedGroups.contains(newGroupName)) {
+            m_collapsedGroups.append(newGroupName);
+        }
+
+        saveCollapsedGroups();
+    }
+}
+
+void ConfigurationsDialog::forgetCollapsedGroup(const QString& groupName)
+{
+    if (m_collapsedGroups.removeAll(groupName) > 0) {
+        saveCollapsedGroups();
+    }
 }
 
 Configuration* ConfigurationsDialog::newConfiguration(const QString& group, const QString& description)

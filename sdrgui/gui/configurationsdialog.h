@@ -57,6 +57,8 @@ private:
     QTreeWidgetItem* addConfigurationToTree(const Configuration* configuration);
     void updateConfigurationControls();
     void saveCollapsedGroups();
+    void renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName);
+    void forgetCollapsedGroup(const QString& groupName);
     Configuration* newConfiguration(const QString& group, const QString& description);
     void addConfiguration(Configuration *configuration);
     void sortConfigurations();

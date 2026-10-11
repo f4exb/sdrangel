@@ -66,6 +66,8 @@ private:
     void updatePresetControls();
     void loadDeviceSetPresetSettings(const Preset* preset);
     void saveCollapsedGroups();
+    void renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName);
+    void forgetCollapsedGroup(const QString& groupName);
 
 private slots:
 	void on_presetSave_clicked();

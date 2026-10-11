@@ -248,6 +248,7 @@ void DeviceSetPresetsDialog::on_presetEdit_clicked()
 
             if (dlg.exec() == QDialog::Accepted)
             {
+                renameCollapsedGroup(item->text(0), dlg.group());
                 MainCore::instance()->m_settings.renamePresetGroup(item->text(0), dlg.group());
                 newGroupName = dlg.group();
                 change = true;
@@ -441,6 +442,7 @@ void DeviceSetPresetsDialog::on_presetDelete_clicked()
                 QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes
             )
             {
+                forgetCollapsedGroup(item->text(0));
                 MainCore::instance()->m_settings.deletePresetGroup(item->text(0));
 
                 ui->presetTree->clear();
@@ -487,6 +489,25 @@ void DeviceSetPresetsDialog::saveCollapsedGroups()
 {
     QSettings settings;
     settings.setValue("presets.collapsed_groups", m_collapsedGroups);
+}
+
+void DeviceSetPresetsDialog::renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    if (m_collapsedGroups.removeAll(oldGroupName) > 0)
+    {
+        if (!m_collapsedGroups.contains(newGroupName)) {
+            m_collapsedGroups.append(newGroupName);
+        }
+
+        saveCollapsedGroups();
+    }
+}
+
+void DeviceSetPresetsDialog::forgetCollapsedGroup(const QString& groupName)
+{
+    if (m_collapsedGroups.removeAll(groupName) > 0) {
+        saveCollapsedGroups();
+    }
 }
 
 void DeviceSetPresetsDialog::loadDeviceSetPresetSettings(const Preset* preset)
