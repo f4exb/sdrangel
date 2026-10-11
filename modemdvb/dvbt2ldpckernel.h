@@ -25,6 +25,7 @@
 // instantiated (std::vector's, std::fill...) would be compiled for that instruction set too, and the linker could keep
 // that copy for every caller. And all in an unnamed namespace, so each file's is its own
 
+#include <cstddef>
 #include <cstdint>
 
 #include "dvbt2ldpc.h"
