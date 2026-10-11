@@ -38,6 +38,8 @@
 //
 // The parameters to PROFILER_STOP are:
 //   name: Name for the code being profiled. Profiles using the same name are averaged.
+//
+// PROFILER_ADD(name, nanoSec) adds a duration measured some other way, such as how late something happened.
 
 #ifdef ENABLE_PROFILER
 #define PROFILER_START()                                                                    \
@@ -45,20 +47,25 @@
     profileTimer.start();
 #define PROFILER_RESTART()                                                                  \
     profileTimer.start();
-#define PROFILER_STOP(name)                                                                 \
+#define PROFILER_ADD(name, nanoSec)                                                         \
     {                                                                                       \
-        qint64 timeNanoSec = profileTimer.nsecsElapsed();                                   \
         QHash<QString, ProfileData>& globalData = GlobalProfileData::getProfileData();      \
         if (!globalData.contains(name)) {                                                   \
             globalData.insert(name, ProfileData());                                         \
         }                                                                                   \
         ProfileData& profileData = globalData[name];                                        \
-        profileData.add(timeNanoSec);                                                       \
+        profileData.add(nanoSec);                                                           \
         GlobalProfileData::releaseProfileData();                                            \
+    }
+#define PROFILER_STOP(name)                                                                 \
+    {                                                                                       \
+        qint64 timeNanoSec = profileTimer.nsecsElapsed();                                   \
+        PROFILER_ADD(name, timeNanoSec)                                                     \
     }
 #else
 #define PROFILER_START()
 #define PROFILER_RESTART()
+#define PROFILER_ADD(name, nanoSec)
 #define PROFILER_STOP(name)
 #endif
 
