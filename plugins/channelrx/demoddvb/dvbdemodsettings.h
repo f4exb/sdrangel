@@ -155,7 +155,16 @@ struct DVBDemodSettings
     static QByteArray serializeSchedule(const QList<ScheduledRecording>& schedule);
     static QByteArray serializeSeries(const QList<SeriesRecording>& series);
     static QList<SeriesRecording> deserializeSeries(const QByteArray& data);
-    static bool isValidBandwidth(int bandwidth) { return (bandwidth == 8000000) || (bandwidth == 7000000) || (bandwidth == 6000000); }
+    //! DVB-T's 5 to 8 MHz (5 MHz in EN 300 744 annex G), and DVB-T2's 1.7 MHz (as used for T2-Lite) and 10 MHz (for
+    //! professional use) too
+    static bool isValidBandwidth(int bandwidth) {
+        return (bandwidth == 10000000) || (bandwidth == 8000000) || (bandwidth == 7000000) || (bandwidth == 6000000)
+            || (bandwidth == 5000000) || (bandwidth == 1700000);
+    }
+    static bool hasDVBT(int bandwidth) { return (bandwidth != 1700000) && (bandwidth != 10000000); }
+    //! The terrestrial receivers' sample rate for a bandwidth: 8/7 times it, but 131/71 MS/s for 1.7 MHz (EN 302 755
+    //! table 65)
+    static double terrestrialSampleRate(int bandwidth);
     static bool isValidStandard(int standard) { return (standard >= StandardAutoTerrestrial) && (standard <= StandardDVBS2); }
     static bool isSatellite(int standard) { return standard >= StandardAutoSatellite; }
     //! 0 for automatic (measured from the signal)
@@ -175,7 +184,9 @@ struct DVBDemodSettings
     static bool isValidFreesatRegion(int region) { return (region >= 0) && (region <= 65535); }
     //! The channel's bandwidth: the terrestrial channel's, or (1 + roll-off) times the symbol rate
     //! Of the symbol rate set, or symbolRate (as found, when automatic): 0 if neither's known
-    int occupiedBandwidth(double symbolRate = 0.0) const;
+    //! Of the signal: the symbol rate times 1 + roll-off, or the terrestrial carriers' span (7.61 MHz in 8 MHz, 7.77 MHz
+    //! in DVB-T2's extended carrier mode)
+    int occupiedBandwidth(double symbolRate = 0.0, bool extended = false) const;
     static bool isValidEPGReport(int epgReport) { return (epgReport >= 0) && (epgReport <= 2); }
     static QList<ScheduledRecording> deserializeSchedule(const QByteArray& data);
 };

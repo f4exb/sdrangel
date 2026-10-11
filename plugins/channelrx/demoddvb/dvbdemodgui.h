@@ -78,7 +78,7 @@ public slots:
     void channelMarkerHighlightedByCursor();
 
 private:
-    static const int m_bandwidths[3];
+    static const int m_bandwidths[6];
 
     //! EN 300 468's polarisations
     static QString polarisationName(int polarisation);

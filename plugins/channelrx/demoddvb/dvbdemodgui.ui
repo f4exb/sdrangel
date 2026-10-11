@@ -174,8 +174,13 @@
       <item>
        <widget class="QComboBox" name="bandwidth">
         <property name="toolTip">
-         <string>Channel bandwidth. The channel sample rate is best at 8/7 times this, e.g. 64/7 MS/s for 8 MHz. Other rates are resampled</string>
+         <string>Channel bandwidth. The channel sample rate is best at 8/7 times this, e.g. 64/7 MS/s for 8 MHz (131/71 MS/s for 1.7 MHz). 10 and 1.7 MHz are DVB-T2's alone. Other rates are resampled</string>
         </property>
+        <item>
+         <property name="text">
+          <string>10 MHz</string>
+         </property>
+        </item>
         <item>
          <property name="text">
           <string>8 MHz</string>
@@ -189,6 +194,16 @@
         <item>
          <property name="text">
           <string>6 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1.7 MHz</string>
          </property>
         </item>
        </widget>

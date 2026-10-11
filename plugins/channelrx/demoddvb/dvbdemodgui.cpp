@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <iterator>
 #include <cmath>
 
 #include <QImage>
@@ -69,7 +70,7 @@
 #include <windows.h>
 #endif
 
-const int DVBDemodGUI::m_bandwidths[3] = {8000000, 7000000, 6000000};
+const int DVBDemodGUI::m_bandwidths[6] = {10000000, 8000000, 7000000, 6000000, 5000000, 1700000}; // As the list
 
 DVBDemodGUI* DVBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -183,7 +184,7 @@ void DVBDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void DVBDemodGUI::on_bandwidth_currentIndexChanged(int index)
 {
-    if ((index < 0) || (index > 2)) {
+    if ((index < 0) || (index >= (int) std::size(m_bandwidths))) {
         return;
     }
 
@@ -1670,7 +1671,7 @@ void DVBDemodGUI::displaySettings()
     ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
     int bandwidthIndex = 0;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < (int) std::size(m_bandwidths); i++)
     {
         if (m_bandwidths[i] == m_settings.m_bandwidth) {
             bandwidthIndex = i;
@@ -2171,8 +2172,7 @@ void DVBDemodGUI::displayStatus()
     // The channel marker shows the occupied bandwidth: 7.61 MHz in 8, or 7.77 MHz for DVB-T2's extended carrier mode, or
     // (1 + roll-off) times the symbol rate
     const bool extended = (status.m_standard == 2) && status.m_t2.m_l1Valid && status.m_t2.m_pre.m_bwtExt;
-    const int markerBandwidth = DVBDemodSettings::isSatellite(m_settings.m_standard) ? m_settings.occupiedBandwidth(std::max(0.0, status.m_autoSymbolRate))
-        : (int) (m_settings.m_bandwidth * (extended ? 0.9714 : 0.951));
+    const int markerBandwidth = m_settings.occupiedBandwidth(std::max(0.0, status.m_autoSymbolRate), extended);
 
     if (markerBandwidth != m_channelMarker.getBandwidth()) {
         m_channelMarker.setBandwidth(markerBandwidth);
@@ -2257,7 +2257,7 @@ void DVBDemodGUI::displayStatus()
 void DVBDemodGUI::displayScopeExtras(const DVBDemodSink::Status& status, double mer, double iterations, uint64_t errors)
 {
     ui->scope->setImpulseResponse(status.m_impulseDb, status.m_impulseResolution, status.m_impulseGuard,
-        dvbt::sampleRate(m_settings.m_bandwidth));
+        DVBDemodSettings::terrestrialSampleRate(m_settings.m_bandwidth));
     const bool sameCount = (status.m_standard == m_lastErrorStandard) && (errors >= m_lastErrorCount);
     const int newErrors = sameCount ? (int) std::min<uint64_t>(errors - m_lastErrorCount, 1000000) : 0;
     m_lastErrorCount = errors;

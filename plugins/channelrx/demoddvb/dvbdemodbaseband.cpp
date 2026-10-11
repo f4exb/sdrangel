@@ -256,7 +256,7 @@ void DVBDemodBaseband::setChannelization()
     // The symbol rate automatic: all the baseband, as it's not known how wide the signal is
     int sampleRate = DVBDemodSettings::isSatellite(m_settings.m_standard)
         ? (m_settings.m_symbolRate > 0 ? 2 * m_settings.m_symbolRate : m_channelizer->getBasebandSampleRate())
-        : (int) std::round(dvbt::sampleRate(m_settings.m_bandwidth));
+        : (int) std::round(DVBDemodSettings::terrestrialSampleRate(m_settings.m_bandwidth));
 
     if (sampleRate <= 0) {
         return; // The baseband's rate isn't known yet

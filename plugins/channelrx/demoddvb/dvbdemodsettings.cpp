@@ -24,6 +24,8 @@
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 
+#include "modemdvb/dvbt2.h"
+
 #include "dvbdemodsettings.h"
 
 QByteArray DVBDemodSettings::serializeSchedule(const QList<ScheduledRecording>& schedule)
@@ -185,13 +187,19 @@ void DVBDemodSettings::resetToDefaults()
     m_scanTo = 0;
 }
 
-int DVBDemodSettings::occupiedBandwidth(double symbolRate) const
+double DVBDemodSettings::terrestrialSampleRate(int bandwidth)
+{
+    return dvbt2::sampleRate(bandwidth);
+}
+
+int DVBDemodSettings::occupiedBandwidth(double symbolRate, bool extended) const
 {
     if (isSatellite(m_standard)) {
         return (int) ((m_symbolRate > 0 ? m_symbolRate : symbolRate) * (1.0 + (m_rollOff > 0 ? m_rollOff : 35) / 100.0));
     }
 
-    return (int) (m_bandwidth * 0.951); // 7.61 MHz in 8
+    // The carriers of 8K's 8192 (6817, or 6913 extended): the same share of the sample rate in every FFT size
+    return (int) (terrestrialSampleRate(m_bandwidth) * (extended ? 6913.0 : 6817.0) / 8192.0);
 }
 
 QByteArray DVBDemodSettings::serialize() const

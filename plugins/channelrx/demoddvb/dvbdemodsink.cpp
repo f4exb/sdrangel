@@ -50,7 +50,7 @@ DVBDemodSink::Status::Status() :
 QString DVBDemodSink::Status::stateText(int bandwidth) const
 {
     if (!m_sampleRateOK) {
-        return QString("Needs %1 MS/s+").arg((m_requiredRate > 0.0 ? m_requiredRate : m_minRateRatio * dvbt::sampleRate(bandwidth)) / 1e6, 0, 'f', 2);
+        return QString("Needs %1 MS/s+").arg((m_requiredRate > 0.0 ? m_requiredRate : m_minRateRatio * S::terrestrialSampleRate(bandwidth)) / 1e6, 0, 'f', 2);
     }
 
     if (isSatellite() && (m_autoSymbolRate < 0.0)) {
@@ -517,10 +517,12 @@ void DVBDemodSink::processBuffer()
         return;
     }
 
-    // Automatically, both receivers search until one locks, then only it runs, until it has lost lock for a while
+    // Automatically, both receivers search until one locks, then only it runs, until it has lost lock for a while.
+    // DVB-T has no 1.7 MHz channels: DVB-T2's alone then
     const int standard = m_settings.m_standard;
     const bool autoStandard = standard == S::StandardAutoTerrestrial;
-    const bool feedT = (standard == S::StandardDVBT) || (autoStandard && (m_active != S::StandardDVBT2));
+    const bool feedT = S::hasDVBT(m_settings.m_bandwidth)
+        && ((standard == S::StandardDVBT) || (autoStandard && (m_active != S::StandardDVBT2)));
     const bool feedT2 = (standard == S::StandardDVBT2) || (standard == S::StandardDVBT2Lite) || (autoStandard && (m_active != S::StandardDVBT));
     dvbt::Receiver::Status tStatus;
     dvbt2::Receiver::Status t2Status;
@@ -1287,8 +1289,8 @@ void DVBDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         }
         else
         {
-            // The receiver resamples to 8 * bandwidth / 7, if the rate is different
-            double required = dvbt::sampleRate(m_settings.m_bandwidth);
+            // The receivers resample to 8 * bandwidth / 7 (131/71 MS/s for 1.7 MHz), if the rate is different
+            double required = S::terrestrialSampleRate(m_settings.m_bandwidth);
             double ratio = required > 0.0 ? channelSampleRate / required : 0.0;
             ok = (ratio >= m_minRateRatio) && (ratio <= m_maxRateRatio);
             requiredRate = m_minRateRatio * required;

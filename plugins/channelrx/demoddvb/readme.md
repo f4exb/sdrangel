@@ -137,7 +137,10 @@ for DVB-S and S2, up to about a third of the symbol rate.
 
 <h3>3: BW - Channel bandwidth</h3>
 
-DVB-T and T2 channel bandwidth: 8, 7 or 6 MHz. UK and most of Europe use 8 MHz for UHF channels.
+DVB-T and T2 channel bandwidth: 10, 8, 7, 6, 5 or 1.7 MHz. Most of Europe use 8 MHz for UHF channels, and 7 MHz for VHF.
+10 MHz (for professional links) and 1.7 MHz (used for T2-Lite, for mobile and digital radio) are DVB-T2 only: the Auto
+standard then looks for DVB-T2 only. 1.7 MHz runs at 131/71 MS/s (1.845 MS/s), so devices of 2 MS/s or so can receive it;
+the others at 8/7 times the bandwidth (5.71 MS/s for 5 MHz, 11.43 MS/s for 10 MHz).
 
 <h3>4: SR - Symbol rate</h3>
 
