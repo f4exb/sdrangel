@@ -92,6 +92,7 @@ public:
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setStatusFrequency(qint64 frequency);
     void setStatusText(const QString& text);
+    void setStatusToolTip(const QString& toolTip);
 
 protected:
     FramelessWindowResizer m_resizer;
