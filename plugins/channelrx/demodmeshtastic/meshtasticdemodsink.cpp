@@ -1019,6 +1019,11 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
                 m_loRaCFOInt = static_cast<int>(std::floor((m_loRaDownVal - static_cast<int>(m_nbSymbols)) / 2.0));
             }
 
+            // Convert the carrier frequency offset (CFO) estimate from FFT bins to Hz.
+            const double cfoHz =
+                (static_cast<double>(m_loRaCFOInt) + static_cast<double>(m_loRaCFOFrac))
+                * static_cast<double>(m_bandwidth) / static_cast<double>(m_nbSymbols);
+
             // Preserve state-machine net ID bin indices for sync word extraction.
             // The corrLen-based refinement overwrites m_loRaNetIds but may produce
             // incorrect results when m_loRaNetIdSamp is not fully populated.
@@ -1140,6 +1145,8 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             m_loRaFrameId++;
             m_decodeMsg = MeshtasticDemodMsg::MsgDecodeSymbols::create();
             m_decodeMsg->setFrameId(m_loRaFrameId);
+            // Attach the measured carrier frequency offset to this frame.
+            m_decodeMsg->setCfoHz(cfoHz);
             {
                 // LoRa sync word is encoded across two net-ID chirps.
                 // First chirp (index 0) carries the high nibble, second (index 1) the low nibble.
