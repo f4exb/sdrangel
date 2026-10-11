@@ -236,6 +236,7 @@ parts:
             - ffmpeg
             - libavcodec-dev
             - libavformat-dev
+            - libavfilter-dev
             - libopus-dev
             - doxygen
             - graphviz
