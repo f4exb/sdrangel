@@ -25,6 +25,7 @@
 #include <QRecursiveMutex>
 #include <QIODevice>
 #include <QAudioFormat>
+#include <atomic>
 #include <list>
 #include <vector>
 #include <stdint.h>
@@ -130,6 +131,8 @@ public:
 	int getNbFifos() const { return m_audioFifos.size(); }
 
 	unsigned int getRate() const { return m_audioFormat.sampleRate(); }
+	//! Seconds of audio the device buffers after taking it from the FIFOs, roughly: its buffer size
+	double getLatency() const { return m_latency; }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
 
 	void setUdpDestination(const QString& address, uint16_t port);
@@ -170,6 +173,7 @@ private:
 
 	std::list<AudioFifo*> m_audioFifos;
 	std::vector<qint32> m_mixBuffer;
+	std::atomic<double> m_latency;
 
 	QAudioFormat m_audioFormat;
     QString m_deviceName;
