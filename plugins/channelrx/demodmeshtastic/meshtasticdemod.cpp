@@ -601,6 +601,8 @@ QString MeshtasticDemod::buildMeshtasticJsonPacket(
     rf["signal_db"]       = msg.getSingalDb();
     rf["noise_db"]        = msg.getNoiseDb();
     rf["snr_db"]          = msg.getSingalDb() - msg.getNoiseDb();
+    // Emit the carrier frequency offset in Hz rounded to two decimal places.
+    rf["cfoHz"]           = std::round(msg.getCfoHz() * 100.0) / 100.0;
     root["rf"] = rf;
 
     // LoRa
