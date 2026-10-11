@@ -115,13 +115,14 @@ void ValueDial::setColorMapper(ColorMapper colorMapper)
 void ValueDial::setValue(quint64 value)
 {
     m_valueNew = value;
-    m_textNew = formatText(m_valueNew);
 
     if (m_valueNew < m_valueMin) {
         m_valueNew = m_valueMin;
     } else if (m_valueNew > m_valueMax) {
         m_valueNew = m_valueMax;
     }
+
+    m_textNew = formatText(m_valueNew);
 
     QAccessibleValueChangeEvent event(this, value);
     QAccessible::updateAccessibility(&event);
@@ -299,7 +300,7 @@ void ValueDial::paintEvent(QPaintEvent *)
     {
         for (int i = 0; i < m_text.length(); i++)
         {
-            if (m_text[i] == m_textNew[i])
+            if ((i < m_textNew.length()) && (m_text[i] == m_textNew[i]))
             {
                 painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
                 painter.setPen(secondaryForegroundColor);
