@@ -1,0 +1,1034 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DVBDemodGUI</class>
+ <widget class="RollupContents" name="DVBDemodGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>440</width>
+    <height>610</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::FocusPolicy::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>DVB Demodulator</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>420</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>400</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="settingsLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="powerLayout">
+      <item>
+       <widget class="QLabel" name="deltaFrequencyLabel">
+        <property name="text">
+         <string>Δf</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Channel centre offset from device centre frequency in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deltaUnits">
+        <property name="text">
+         <string>Hz </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line1">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="standard">
+        <property name="toolTip">
+         <string>Standard to receive. DVB-T/T2 searches for terrestrial DVB-T and T2 until one is found, DVB-S/S2 for satellite DVB-S and S2 (at the symbol rate set, or found). DVB-T2 receives the T2-base profile (or T2-Lite, when it's the only one), DVB-T2-Lite the T2-Lite profile</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>DVB-T/T2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-T</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-T2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-T2-Lite</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-S/S2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-S</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DVB-S2</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bandwidthLabel">
+        <property name="text">
+         <string>BW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="bandwidth">
+        <property name="toolTip">
+         <string>Channel bandwidth. The channel sample rate is best at 8/7 times this, e.g. 64/7 MS/s for 8 MHz. Other rates are resampled</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>8 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>7 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>6 MHz</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="symbolRateLabel">
+        <property name="text">
+         <string>SR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="symbolRate">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>DVB-S and S2 symbol rate, symbols a second (type it, or choose a common one), or Auto to measure it from the strongest signal in the channel. The channel sample rate is twice this or more (all the baseband's for Auto)</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>25000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>33000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>66000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>125000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>250000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>333000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>500000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1000000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1500000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2000000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>22000000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>23000000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>27500000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>29500000</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="rollOff">
+        <property name="toolTip">
+         <string>DVB-S2 roll-off of the root raised cosine pulse (0.15, 0.10 and 0.05 are DVB-S2X's). Auto follows the BBHEADER (starting at 0.35). DVB-S's is 0.35</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.35</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.25</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.20</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.15</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.05</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="codeRate">
+        <property name="toolTip">
+         <string>DVB-S code rate. Auto tries each (and each phase of its puncturing) until one decodes</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1/2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2/3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3/4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5/6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>7/8</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="plpLabel">
+        <property name="text">
+         <string>PLP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="plp">
+        <property name="minimumSize">
+         <size>
+          <width>54</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>DVB-T2 Physical Layer Pipe to decode, or DVB-S2 input stream (ISI) of a multiple input stream, or time slice (TSN) of time slicing. Auto decodes the first data PLP or the first stream</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="plScrambling">
+        <property name="toolTip">
+         <string>DVB-S2 physical layer scrambling code (Gold code n). 0 for broadcasting</string>
+        </property>
+        <property name="maximum">
+         <number>262141</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="equaliser">
+        <property name="toolTip">
+         <string>Equaliser: undo the receive chain's frequency response (the device's filter, the transponder's), measured from the spectrum once locked. Worth 1 to 2 dB of SNR when a wide signal's edges are cut, as at 1.25 to 1.5 times the symbol rate</string>
+        </property>
+        <property name="text">
+         <string>EQ</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="priority">
+        <property name="toolTip">
+         <string>DVB-T hierarchical modes: decode the high priority stream (HP, more robust) or the low priority one (LP, more capacity)</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>HP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>LP</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="spacer1">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="channelPower">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
+        <property name="text">
+         <string>-100.0 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="udpLayout">
+      <item>
+       <widget class="QCheckBox" name="udpEnabled">
+        <property name="toolTip">
+         <string>Send the transport stream over UDP, e.g. to VLC with udp://@:5004</string>
+        </property>
+        <property name="text">
+         <string>UDP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpAddress">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>UDP destination address</string>
+        </property>
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="udpPortSeparator">
+        <property name="text">
+         <string>:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpPort">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>UDP destination port</string>
+        </property>
+        <property name="text">
+         <string>5004</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="spacer5">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="state">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Receiver state</string>
+        </property>
+        <property name="text">
+         <string>Searching</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="displayContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>60</y>
+     <width>420</width>
+     <height>530</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>400</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Signal and Video</string>
+   </property>
+   <layout class="QVBoxLayout" name="displayLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="signalContainer" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>400</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QHBoxLayout" name="signalLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QTableWidget" name="stats">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Receiver measurements</string>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+          </property>
+          <property name="showGrid">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="DVBDemodScope" name="scope" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Constellation of the equalised data cells, and channel frequency response across the carriers</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="videoContainer" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>400</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="videoLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="serviceLayout">
+          <item>
+           <widget class="ButtonSwitch" name="videoEnabled">
+            <property name="toolTip">
+             <string>Decode and display the selected service</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/play.png</normaloff>
+              <normalon>:/stop.png</normalon>:/play.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="service">
+            <property name="minimumSize">
+             <size>
+              <width>180</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Service to play</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="simulcast">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Watch the programme in HD, when the programme guide says it's also on another service</string>
+            </property>
+            <property name="text">
+             <string>HD</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="ButtonSwitch" name="deinterlace">
+            <property name="toolTip">
+             <string>Deinterlace video (bwdif, or the GPU's with hardware decoding)</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/deinterlace.png</normaloff>:/demoddvb/icons/deinterlace.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="ButtonSwitch" name="hardwareDecoding">
+            <property name="toolTip">
+             <string>Decode video with the GPU, where possible</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/gpu.png</normaloff>:/demoddvb/icons/gpu.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacer6">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="avOffsetLabel">
+            <property name="text">
+             <string>A/V</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="avOffset">
+            <property name="toolTip">
+             <string>Lip sync: milliseconds to delay the picture relative to the sound. Increase it if the picture is early, decrease it if it's late</string>
+            </property>
+            <property name="suffix">
+             <string> ms</string>
+            </property>
+            <property name="minimum">
+             <number>-1000</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDial" name="audioVolume">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Audio volume</string>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="audioVolumeText">
+            <property name="minimumSize">
+             <size>
+              <width>24</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>100</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="audioMute">
+            <property name="toolTip">
+             <string>Mute audio. Right click to select the audio device</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/sound_on.png</normaloff>
+              <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="epgLayout">
+          <item>
+           <widget class="QComboBox" name="audioTrack">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Audio to play: language, and audio description where the service has it</string>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="subtitleTrack">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Subtitles to show, where the service has them</string>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="nowNextSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="recordStatus">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="record">
+            <property name="toolTip">
+             <string>Record the service selected, or the whole multiplex, to a .ts file. Right click for the mode, directory and padding</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/record_off.png</normaloff>:/record_off.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="epg">
+            <property name="toolTip">
+             <string>Open the programme guide. Right click to set a command to switch the LNB's polarisation</string>
+            </property>
+            <property name="text">
+             <string>EPG</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="scan">
+            <property name="toolTip">
+             <string>Scan for satellite transponders: each signal in the device's band (or in a range, the device stepped across it) is found, locked and added to the programme guide. Click again to stop</string>
+            </property>
+            <property name="text">
+             <string>Scan</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="GLVideoWidget" name="screenTV" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>384</width>
+            <height>216</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DVBDemodScope</class>
+   <extends>QWidget</extends>
+   <header>dvbdemodscope.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/glvideowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="dvbdemod.qrc"/>
+ </resources>
+ <connections/>
+</ui>

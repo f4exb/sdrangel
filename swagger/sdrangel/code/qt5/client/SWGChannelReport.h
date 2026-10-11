@@ -36,6 +36,7 @@
 #include "SWGChirpChatModReport.h"
 #include "SWGDABDemodReport.h"
 #include "SWGDATVDemodReport.h"
+#include "SWGDVBDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
 #include "SWGDSCDemodReport.h"
@@ -149,6 +150,9 @@ public:
 
     SWGDATVDemodReport* getDatvDemodReport();
     void setDatvDemodReport(SWGDATVDemodReport* datv_demod_report);
+
+    SWGDVBDemodReport* getDvbDemodReport();
+    void setDvbDemodReport(SWGDVBDemodReport* dvb_demod_report);
 
     SWGDATVModReport* getDatvModReport();
     void setDatvModReport(SWGDATVModReport* datv_mod_report);
@@ -339,6 +343,9 @@ private:
 
     SWGDATVDemodReport* datv_demod_report;
     bool m_datv_demod_report_isSet;
+
+    SWGDVBDemodReport* dvb_demod_report;
+    bool m_dvb_demod_report_isSet;
 
     SWGDATVModReport* datv_mod_report;
     bool m_datv_mod_report_isSet;

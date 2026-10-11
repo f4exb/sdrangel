@@ -60,6 +60,8 @@ SWGChannelReport::SWGChannelReport() {
     m_chirp_chat_mod_report_isSet = false;
     datv_demod_report = nullptr;
     m_datv_demod_report_isSet = false;
+    dvb_demod_report = nullptr;
+    m_dvb_demod_report_isSet = false;
     datv_mod_report = nullptr;
     m_datv_mod_report_isSet = false;
     doa2_report = nullptr;
@@ -192,6 +194,8 @@ SWGChannelReport::init() {
     m_chirp_chat_mod_report_isSet = false;
     datv_demod_report = new SWGDATVDemodReport();
     m_datv_demod_report_isSet = false;
+    dvb_demod_report = new SWGDVBDemodReport();
+    m_dvb_demod_report_isSet = false;
     datv_mod_report = new SWGDATVModReport();
     m_datv_mod_report_isSet = false;
     doa2_report = new SWGDOA2Report();
@@ -333,6 +337,9 @@ SWGChannelReport::cleanup() {
     }
     if(datv_demod_report != nullptr) { 
         delete datv_demod_report;
+    }
+    if(dvb_demod_report != nullptr) { 
+        delete dvb_demod_report;
     }
     if(datv_mod_report != nullptr) { 
         delete datv_mod_report;
@@ -515,6 +522,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&datv_demod_report, pJson["DATVDemodReport"], "SWGDATVDemodReport", "SWGDATVDemodReport");
     
+    ::SWGSDRangel::setValue(&dvb_demod_report, pJson["DVBDemodReport"], "SWGDVBDemodReport", "SWGDVBDemodReport");
+    
     ::SWGSDRangel::setValue(&datv_mod_report, pJson["DATVModReport"], "SWGDATVModReport", "SWGDATVModReport");
     
     ::SWGSDRangel::setValue(&doa2_report, pJson["DOA2Report"], "SWGDOA2Report", "SWGDOA2Report");
@@ -669,6 +678,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((datv_demod_report != nullptr) && (datv_demod_report->isSet())){
         toJsonValue(QString("DATVDemodReport"), datv_demod_report, obj, QString("SWGDATVDemodReport"));
+    }
+    if((dvb_demod_report != nullptr) && (dvb_demod_report->isSet())){
+        toJsonValue(QString("DVBDemodReport"), dvb_demod_report, obj, QString("SWGDVBDemodReport"));
     }
     if((datv_mod_report != nullptr) && (datv_mod_report->isSet())){
         toJsonValue(QString("DATVModReport"), datv_mod_report, obj, QString("SWGDATVModReport"));
@@ -970,6 +982,16 @@ void
 SWGChannelReport::setDatvDemodReport(SWGDATVDemodReport* datv_demod_report) {
     this->datv_demod_report = datv_demod_report;
     this->m_datv_demod_report_isSet = true;
+}
+
+SWGDVBDemodReport*
+SWGChannelReport::getDvbDemodReport() {
+    return dvb_demod_report;
+}
+void
+SWGChannelReport::setDvbDemodReport(SWGDVBDemodReport* dvb_demod_report) {
+    this->dvb_demod_report = dvb_demod_report;
+    this->m_dvb_demod_report_isSet = true;
 }
 
 SWGDATVModReport*
@@ -1483,6 +1505,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(datv_demod_report && datv_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dvb_demod_report && dvb_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(datv_mod_report && datv_mod_report->isSet()){

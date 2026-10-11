@@ -40,6 +40,7 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
+#include "SWGDVBDemodSettings.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Settings.h"
 #include "SWGDSCDemodSettings.h"
@@ -176,6 +177,9 @@ public:
 
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
+
+    SWGDVBDemodSettings* getDvbDemodSettings();
+    void setDvbDemodSettings(SWGDVBDemodSettings* dvb_demod_settings);
 
     SWGDABDemodSettings* getDabDemodSettings();
     void setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings);
@@ -399,6 +403,9 @@ private:
 
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
+
+    SWGDVBDemodSettings* dvb_demod_settings;
+    bool m_dvb_demod_settings_isSet;
 
     SWGDABDemodSettings* dab_demod_settings;
     bool m_dab_demod_settings_isSet;

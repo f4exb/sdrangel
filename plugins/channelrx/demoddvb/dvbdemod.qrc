@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/demoddvb/">
+    <file>images/angeltv.png</file>
+    <file>icons/deinterlace.png</file>
+    <file>icons/gpu.png</file>
+  </qresource>
+</RCC>

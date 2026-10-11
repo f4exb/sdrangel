@@ -134,6 +134,7 @@ option(ENABLE_CHANNELRX "Enable channelrx plugins" ON)
 option(ENABLE_CHANNELRX_DEMODADSB "Enable channelrx demodadsb plugin" ON)
 option(ENABLE_CHANNELRX_DEMODAM "Enable channelrx demodam plugin" ON)
 option(ENABLE_CHANNELRX_DEMODDATV "Enable channelrx demoddatv plugin" ON)
+option(ENABLE_CHANNELRX_DEMODDVB "Enable channelrx demoddvb plugin" ON)
 option(ENABLE_CHANNELRX_RADIOCLOCK "Enable channelrx radioclock plugin" ON)
 option(ENABLE_CHANNELRX_RADIOASTRONOMY "Enable channelrx radioastronomy plugin" ON)
 option(ENABLE_CHANNELRX_DEMODRADIOSONDE "Enable channelrx demodradiosonde plugin" ON)
@@ -489,6 +490,8 @@ elseif (WIN32)
   set(SWRESAMPLE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swresample.lib" CACHE INTERNAL "")
   set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
   set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swscale.lib" CACHE INTERNAL "")
+  set(AVFILTER_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVFILTER_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avfilter.lib" CACHE INTERNAL "")
 
   # LimeSuite FX3 support
   set(FX3SDK_DIR "${EXTERNAL_LIBRARY_FOLDER}/FX3SDK" CACHE INTERNAL "")
@@ -715,6 +718,7 @@ elseif(ANDROID)
       ${CMAKE_BINARY_DIR}/lib/libmetisdevice.so
       ${CMAKE_BINARY_DIR}/lib/libmodemm17.so
       ${CMAKE_BINARY_DIR}/lib/libmodemmeshtastic.so
+      ${CMAKE_BINARY_DIR}/lib/libmodemdvb.so
       ${CMAKE_BINARY_DIR}/lib/libwdsp.so
       CACHE INTERNAL ""
     )
@@ -1097,6 +1101,7 @@ add_subdirectory(devices)
 add_subdirectory(modemm17)
 add_subdirectory(modemmeshtastic)
 add_subdirectory(modemmeshcore)
+add_subdirectory(modemdvb)
 
 if (FFTW3F_FOUND)
     add_subdirectory(ft8)

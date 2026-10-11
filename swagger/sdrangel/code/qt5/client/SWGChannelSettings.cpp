@@ -72,6 +72,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = nullptr;
     m_datv_demod_settings_isSet = false;
+    dvb_demod_settings = nullptr;
+    m_dvb_demod_settings_isSet = false;
     dab_demod_settings = nullptr;
     m_dab_demod_settings_isSet = false;
     doa2_settings = nullptr;
@@ -226,6 +228,8 @@ SWGChannelSettings::init() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = new SWGDATVDemodSettings();
     m_datv_demod_settings_isSet = false;
+    dvb_demod_settings = new SWGDVBDemodSettings();
+    m_dvb_demod_settings_isSet = false;
     dab_demod_settings = new SWGDABDemodSettings();
     m_dab_demod_settings_isSet = false;
     doa2_settings = new SWGDOA2Settings();
@@ -391,6 +395,9 @@ SWGChannelSettings::cleanup() {
     }
     if(datv_demod_settings != nullptr) { 
         delete datv_demod_settings;
+    }
+    if(dvb_demod_settings != nullptr) { 
+        delete dvb_demod_settings;
     }
     if(dab_demod_settings != nullptr) { 
         delete dab_demod_settings;
@@ -600,6 +607,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
+    ::SWGSDRangel::setValue(&dvb_demod_settings, pJson["DVBDemodSettings"], "SWGDVBDemodSettings", "SWGDVBDemodSettings");
+    
     ::SWGSDRangel::setValue(&dab_demod_settings, pJson["DABDemodSettings"], "SWGDABDemodSettings", "SWGDABDemodSettings");
     
     ::SWGSDRangel::setValue(&doa2_settings, pJson["DOA2Settings"], "SWGDOA2Settings", "SWGDOA2Settings");
@@ -782,6 +791,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
         toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
+    }
+    if((dvb_demod_settings != nullptr) && (dvb_demod_settings->isSet())){
+        toJsonValue(QString("DVBDemodSettings"), dvb_demod_settings, obj, QString("SWGDVBDemodSettings"));
     }
     if((dab_demod_settings != nullptr) && (dab_demod_settings->isSet())){
         toJsonValue(QString("DABDemodSettings"), dab_demod_settings, obj, QString("SWGDABDemodSettings"));
@@ -1158,6 +1170,16 @@ void
 SWGChannelSettings::setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings) {
     this->datv_demod_settings = datv_demod_settings;
     this->m_datv_demod_settings_isSet = true;
+}
+
+SWGDVBDemodSettings*
+SWGChannelSettings::getDvbDemodSettings() {
+    return dvb_demod_settings;
+}
+void
+SWGChannelSettings::setDvbDemodSettings(SWGDVBDemodSettings* dvb_demod_settings) {
+    this->dvb_demod_settings = dvb_demod_settings;
+    this->m_dvb_demod_settings_isSet = true;
 }
 
 SWGDABDemodSettings*
@@ -1739,6 +1761,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(datv_demod_settings && datv_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dvb_demod_settings && dvb_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(dab_demod_settings && dab_demod_settings->isSet()){

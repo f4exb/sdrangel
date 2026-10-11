@@ -1,0 +1,569 @@
+DVBDemodSettings:
+  description: DVBDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
+    bandwidth:
+      type: integer
+      description: "Channel bandwidth in Hz: 8000000, 7000000 or 6000000."
+    standard:
+      type: integer
+      description: "Standard to receive: 0 automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2 (T2-base, or T2-Lite if alone), 3 DVB-T2 T2-Lite profile, 4 automatic (DVB-S or S2), 5 DVB-S, 6 DVB-S2."
+    plpId:
+      type: integer
+      description: "DVB-T2 Physical Layer Pipe to decode, -1 for the first data PLP."
+    lowPriority:
+      type: integer
+      description: "DVB-T hierarchical modes: 1 to decode the low priority stream, 0 the high priority one."
+    symbolRate:
+      type: integer
+      description: "DVB-S and S2 symbol rate, symbols a second, or 0 to measure it from the strongest signal in the channel. The channel's sample rate is from 2 to 4 times this, at least 1.5 times if the baseband's is less (all the baseband's, when 0)."
+    rollOff:
+      type: integer
+      description: "DVB-S2 roll-off in hundredths (35, 25 or 20, or DVB-S2X's 15, 10 or 5), or 0 to follow the BBHEADER. DVB-S's is 0.35."
+    codeRate:
+      type: integer
+      description: "DVB-S code rate: -1 automatic, 0 1/2, 1 2/3, 2 3/4, 3 5/6, 4 7/8."
+    isi:
+      type: integer
+      description: "DVB-S2 input stream to decode (0 to 255), in a multiple input stream, -1 for the first received that doesn't carry only null packets."
+    plScramblingCode:
+      type: integer
+      description: "DVB-S2 physical layer scrambling code (Gold code n), 0 to 262141. 0 for broadcasting."
+    equaliser:
+      type: integer
+      description: "DVB-S and S2: undo the receive chain's frequency response (the device's and transponder's filters), measured once locked (1, the default) or not (0)."
+    freesatRegion:
+      type: integer
+      description: "Freesat's regional channel numbers: the region id (from the bouquet association table), or 0 for the default region's."
+    recordRetune:
+      type: integer
+      description: >
+        For a scheduled recording of a service on another multiplex: retune to it when nothing else is being recorded,
+        and back afterwards (1), or don't record it (0, the default)
+    recordFollowRunning:
+      type: integer
+      description: >
+        Start and end scheduled recordings by the programme's running status, where the broadcaster sends it, so one
+        that starts late or over-runs is recorded whole (1, the default), or by its time alone (0)
+    udpEnabled:
+      description: Send the transport stream over UDP (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    udpAddress:
+      type: string
+      description: "UDP destination address for the transport stream."
+    udpPort:
+      type: integer
+      description: "UDP destination port for the transport stream."
+      minimum: 1
+      maximum: 65535
+    videoEnabled:
+      description: Decode and display the selected service (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    serviceId:
+      type: integer
+      description: "MPEG program number of the service to play. 0 for the first service with video."
+    deinterlace:
+      description: Deinterlace video (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    avOffset:
+      description: "Milliseconds to delay the picture relative to the sound, for lip sync. Negative to show it earlier."
+      type: integer
+      minimum: -1000
+      maximum: 1000
+    hardwareDecoding:
+      description: Decode video with the GPU, where possible (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    audioLanguage:
+      type: string
+      description: ISO 639-2 code of the audio language to play (e.g. eng), or empty for the first
+    audioDescription:
+      description: Mix in audio description, where a service has it (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    audioDescriptionMixed:
+      description: >
+        With audioDescription, the broadcaster's mix of the audio and description (1), rather than the description
+        mixed in by the receiver (0, the default), where a service has both
+      type: integer
+      minimum: 0
+      maximum: 1
+    cleanAudio:
+      description: Play clean audio (for the hard of hearing), where a service has it (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    subtitlesHardOfHearing:
+      description: The hard of hearing subtitles rather than the normal ones, where a service has both (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    subtitles:
+      description: Show DVB subtitles, where a service has them (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    subtitleLanguage:
+      type: string
+      description: ISO 639-2 code of the subtitle language to show (e.g. eng), or empty for the first
+    recordDirectory:
+      type: string
+      description: Directory recordings are saved in
+    recordMode:
+      type: integer
+      description: >
+        What's recorded
+          * 0 - the whole multiplex
+          * 1 - the service selected
+    recordStartPadding:
+      type: integer
+      description: Seconds recordings of programmes from the guide start before the programme
+    recordEndPadding:
+      type: integer
+      description: Seconds recordings of programmes from the guide continue after the programme
+    epgReport:
+      type: integer
+      description: >
+        What the report gives of the programme guide, besides its size and what's on now and next on one service
+          * 0 - nothing more
+          * 1 - every service, with what's on now and next (epgServiceList)
+          * 2 - also the schedule of the service epgReportServiceId gives (epgSchedule)
+      minimum: 0
+      maximum: 2
+    epgReportServiceId:
+      type: integer
+      description: "Service whose schedule the report gives, when epgReport is 2: its MPEG program number, or 0 for the service epgServiceId gives."
+    epgReportNetworkId:
+      type: integer
+      description: "original_network_id of that service, or -1 for the network being received (or the first with the service id)."
+    audioMute:
+      description: Mute audio (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    audioVolume:
+      type: integer
+      description: "Audio volume, 0 to 100."
+      minimum: 0
+      maximum: 100
+    audioDeviceName:
+      type: string
+      description: "Name of the audio output device."
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+DVBDemodReport:
+  description: DVBDemod
+  properties:
+    channelPowerDB:
+      description: Power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
+    state:
+      type: string
+      description: "Receiver state: Searching, Sync, TPS (DVB-T), L1 (DVB-T2), Carrier and FEC (DVB-S), No TS, Locked, or the sample rate needed if it is wrong."
+    standard:
+      type: string
+      description: "DVB-T, DVB-T2, DVB-T2-Lite, DVB-S or DVB-S2, once found."
+    mode:
+      type: string
+      description: "FFT size: 2K or 8K for DVB-T, 1K to 32K for DVB-T2, with E for extended carrier mode."
+    guardInterval:
+      type: string
+      description: "Guard interval as a fraction of the useful symbol duration, e.g. 1/32."
+    constellation:
+      type: string
+      description: "QPSK, 16-QAM or 64-QAM, from the TPS."
+    codeRate:
+      type: string
+      description: "Inner code rate, e.g. 2/3, from the TPS."
+    hierarchy:
+      type: string
+      description: "Hierarchy: None, a=1, a=2 or a=4."
+    cellId:
+      type: integer
+      description: "Cell identifier from the TPS, -1 if not signalled."
+    mer:
+      description: Modulation error ratio (dB)
+      type: number
+      format: float
+    snr:
+      description: "Signal to noise ratio (dB), 0 if not known: DVB-T and T2 from the pilots, DVB-S2 its Es/N0 from the known symbols, DVB-S its Es/N0 from the symbols' moments. Unlike the MER, not overestimated when noise takes cells past the nearest constellation point."
+      type: number
+      format: float
+    preViterbiBER:
+      description: Bit error rate before Viterbi decoding
+      type: number
+      format: float
+    postViterbiBER:
+      description: Bit error rate after Viterbi decoding. Below 2e-4 is quasi error free
+      type: number
+      format: float
+    frequencyOffset:
+      description: Carrier frequency offset (Hz)
+      type: number
+      format: float
+    clockOffset:
+      description: Sample clock offset (ppm)
+      type: number
+      format: float
+    tsSync:
+      type: integer
+      description: "1 if the transport stream is synchronised."
+    tsBitRate:
+      description: Transport stream bit rate (bit/s)
+      type: number
+      format: float
+    tsPackets:
+      type: integer
+      format: int64
+      description: "Transport stream packets output."
+    searchText:
+      type: string
+      description: >
+        What the multiplex search or the transponder scan is doing, or the last's outcome (the transponders found, or
+        why it failed). Empty if neither has run
+    scanTransponders:
+      type: integer
+      description: "Transponders the scan has found (or found, when it ended), each added to the programme guide."
+    rsCorrected:
+      type: integer
+      format: int64
+      description: "Packets with errors that Reed-Solomon decoding corrected."
+    rsFailed:
+      type: integer
+      format: int64
+      description: "Packets with errors Reed-Solomon decoding couldn't correct."
+    udpDatagrams:
+      type: integer
+      format: int64
+      description: "UDP datagrams sent."
+    pilotPattern:
+      type: string
+      description: "DVB-T2 scattered pilot pattern, PP1 to PP8."
+    extendedCarriers:
+      type: integer
+      description: "1 if DVB-T2 extended carrier mode is used."
+    plpId:
+      type: integer
+      description: "DVB-T2 PLP being decoded."
+    plpCount:
+      type: integer
+      description: "Number of DVB-T2 PLPs."
+    rotation:
+      type: integer
+      description: "1 if the DVB-T2 PLP uses a rotated constellation."
+    fecType:
+      type: string
+      description: "DVB-T2 and S2 LDPC block length (DVB-S2's FECFRAME size): 16K or 64K, or for a DVB-S2X VL-SNR frame 32K (its medium FECFRAME)."
+    ldpcIterations:
+      description: Average LDPC decoder iterations (DVB-T2)
+      type: number
+      format: float
+    fecBlocks:
+      type: integer
+      format: int64
+      description: "DVB-T2 FEC blocks decoded."
+    bchFailures:
+      type: integer
+      format: int64
+      description: "DVB-T2 FEC blocks with errors BCH decoding couldn't correct."
+    l1Errors:
+      type: integer
+      format: int64
+      description: "DVB-T2 frames whose L1 signalling couldn't be decoded."
+    epgServices:
+      type: integer
+      description: "Services in the programme guide, of this and other transport streams of the network."
+    epgEvents:
+      type: integer
+      description: "Events in the programme guide's schedules."
+    epgServiceId:
+      type: integer
+      description: "The service the now and next events are of: the one selected, or the first TV service."
+    epgNowTitle:
+      type: string
+      description: "Title of the programme on now."
+    epgNowStart:
+      type: string
+      description: "Start of the programme on now, UTC, ISO 8601."
+    epgNowDuration:
+      type: integer
+      description: "Duration of the programme on now, in seconds."
+    epgNowDescription:
+      type: string
+      description: "Description of the programme on now."
+    epgNextTitle:
+      type: string
+      description: "Title of the next programme."
+    epgNextStart:
+      type: string
+      description: "Start of the next programme, UTC, ISO 8601."
+    epgNextDuration:
+      type: integer
+      description: "Duration of the next programme, in seconds."
+    epgServiceList:
+      type: array
+      description: "The programme guide's services, of this and other transport streams of the network, in channel number order, when epgReport is 1 or 2."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodEPGService"
+    epgScheduleServiceId:
+      type: integer
+      description: "The service epgSchedule is of."
+    epgScheduleNetworkId:
+      type: integer
+      description: "original_network_id of the service epgSchedule is of."
+    epgSchedule:
+      type: array
+      description: "A service's schedule, in order, from an hour ago, when epgReport is 2."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodEPGEvent"
+    recording:
+      type: integer
+      description: Number of recordings in progress
+    recordingFile:
+      type: string
+      description: File being recorded to (the first, if more than one)
+    recordingSize:
+      type: integer
+      format: int64
+      description: Bytes recorded, in all the recordings in progress
+    scheduledRecordings:
+      type: integer
+      description: Programmes from the guide to be recorded
+    symbolRate:
+      type: integer
+      description: "DVB-S and S2: the symbol rate set, or found when automatic (0 while searching), symbols a second."
+    measuredSymbolRate:
+      type: number
+      format: float
+      description: "DVB-S and S2: the symbol rate measured from the spectrum, 0 if not measured."
+    rollOff:
+      type: number
+      format: float
+      description: "DVB-S2: the roll-off of the matched filter (from the BBHEADER, unless set)."
+    modcod:
+      type: string
+      description: "DVB-S2: modulation and code rate of the last frame, e.g. 8PSK 2/3, or DVB-S2X's canonical name, e.g. 16APSK 2/3-L, or VL-SNR and a very low SNR frame's, e.g. VL-SNR BPSK-S 1/5."
+    streamType:
+      type: string
+      description: "DVB-S2 and T2: the stream's type from its BBFRAMEs' headers: Transport stream, Generic packetized, Generic continuous or GSE. A generic stream (as GSE, carrying IP) isn't decoded."
+    pilots:
+      type: integer
+      description: "DVB-S2: 1 if the frames have pilots."
+    frameSize:
+      type: string
+      description: "DVB-S2: FECFRAME size, normal (64800) or short (16200), or medium (32400, DVB-S2X VL-SNR frames' only)."
+    isi:
+      type: integer
+      description: "DVB-S2: input stream being decoded, -1 in a single input stream."
+    isiCount:
+      type: integer
+      description: "DVB-S2: input streams seen, in a multiple input stream."
+    esN0:
+      type: number
+      format: float
+      description: "DVB-S2: Es/N0 from the known symbols (header and pilots), dB."
+    plFrames:
+      type: integer
+      format: int64
+      description: "DVB-S2: physical layer frames decoded."
+    dummyFrames:
+      type: integer
+      format: int64
+      description: "DVB-S2: dummy physical layer frames."
+    plHeaderMisses:
+      type: integer
+      format: int64
+      description: "DVB-S2: frame headers expected but not found."
+    reacquisitions:
+      type: integer
+      format: int64
+      description: "DVB-S and S2: times acquisition was started again (the spectrum measured again) for want of lock."
+
+DVBDemodActions:
+  description: DVBDemod
+  properties:
+    play:
+      type: integer
+      description: >
+        1 to play serviceId, retuning the device to its multiplex if it's on another: to the frequency the programme guide gives or
+        that was learned when it was received, else searching the UHF channels for it (which continues after the response)
+    record:
+      type: integer
+      description: >
+        Record to a file, of the multiplex or the service selected, as recordMode says
+          * 0 - stop recording
+          * 1 - start recording
+    recordEvent:
+      type: integer
+      description: >
+        A programme from the guide, given by serviceId and eventId
+          * 0 - cancel its recording
+          * 1 - record it
+    recordSeries:
+      type: integer
+      description: >
+        The series of a programme from the guide, given by serviceId and eventId (by its series CRID): every programme
+        of it on the service, each once (not repeats)
+          * 0 - stop recording the series (programmes already scheduled stay so)
+          * 1 - record the series
+    serviceId:
+      type: integer
+      description: Service of the programme to record
+    eventId:
+      type: integer
+      description: Event id of the programme to record, from the guide
+    networkId:
+      type: integer
+      description: >
+        original_network_id of the service, from epgServiceList, where the service id alone is ambiguous. By default, the
+        network being received, else the first with the service id
+    scan:
+      type: integer
+      description: >
+        Scan for satellite transponders (with a satellite standard), each signal found in the spectrum tuned to, its
+        symbol rate found and locked in Auto (DVB-S or S2), and those with a transport stream added to the programme
+        guide with their network's services. The device is stepped across scanFrom to scanTo, or the scan is of its
+        band if they're not given; afterwards it returns to where it was. It continues after the response: see
+        searchText and scanTransponders in the report
+          * 0 - stop scanning
+          * 1 - start scanning
+    scanFrom:
+      type: integer
+      format: int64
+      description: "Downlink frequency (as the device's, with any transverter delta), Hz, the scan starts at."
+    scanTo:
+      type: integer
+      format: int64
+      description: "Downlink frequency, Hz, the scan ends at."
+
+DVBDemodEPGService:
+  description: A service in the DVB programme guide
+  properties:
+    networkId:
+      type: integer
+      description: original_network_id
+    transportStreamId:
+      type: integer
+      description: "Transport stream (multiplex) the service is in, -1 if not known."
+    serviceId:
+      type: integer
+      description: "Service id: the MPEG program number, as the play and recordEvent actions take it."
+    name:
+      type: string
+    provider:
+      type: string
+    type:
+      type: integer
+      description: "service_type (EN 300 468 table 87): 1 TV, 2 radio, 0x0C data, 0x16 to 0x19 advanced codec TV (0x19 HD)..."
+    kind:
+      type: string
+      description: "TV, HD TV, Radio, Data or Other, from type."
+    channel:
+      type: integer
+      description: "Logical channel number, -1 if none."
+    visible:
+      type: integer
+      description: "0 if the broadcaster says the service shouldn't be listed (visible_service_flag)."
+    onMultiplex:
+      type: integer
+      description: "1 if the service is in the transport stream being received."
+    frequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of its transport stream, Hz, from the network information table or learned when received, 0 if not known."
+    events:
+      type: integer
+      description: "Events in its schedule."
+    now:
+      $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodEPGEvent"
+      description: "What's on now: the event's id, title, start and duration."
+    next:
+      $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodEPGEvent"
+      description: "What's on next: the event's id, title, start and duration."
+
+DVBDemodEPGEvent:
+  description: A programme in the DVB programme guide
+  properties:
+    eventId:
+      type: integer
+      description: "Event id, as the recordEvent action takes it."
+    title:
+      type: string
+    start:
+      type: string
+      description: "Start, UTC, ISO 8601."
+    duration:
+      type: integer
+      description: "Duration, in seconds."
+    description:
+      type: string
+      description: "The short description, then any extended description."
+    genre:
+      type: string
+      description: "Genre, from the content descriptor."
+    minimumAge:
+      type: integer
+      description: "Minimum age, from the parental rating, if any."
+    guidance:
+      type: string
+      description: "Guidance, as \"Contains strong language\" (UK)."
+    hd:
+      type: integer
+      description: "1 if in HD."
+    subtitles:
+      type: integer
+      description: "1 if subtitled."
+    audioDescription:
+      type: integer
+      description: "1 if audio described."
+    scheduled:
+      type: integer
+      description: "1 if a recording of it is scheduled."

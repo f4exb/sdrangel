@@ -28,6 +28,9 @@ ChannelActions:
     WefaxDemodActions:
       $ref: "/doc/swagger/include/WefaxDemod.yaml#/WefaxDemodActions"
       description: "WEFAX demodulator actions for Channel."
+    DVBDemodActions:
+      $ref: "/doc/swagger/include/DVBDemod.yaml#/DVBDemodActions"
+      description: "DVB demod actions configuration for Channel."
     FileSinkActions:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

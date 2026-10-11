@@ -54,6 +54,8 @@ ChannelReport:
       description: "Chirp chat mod report data for Channel."
     DATVDemodReport:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodReport"
+    DVBDemodReport:
+      $ref: "/doc/swagger/include/DVBDemod.yaml#/DVBDemodReport"
       description: "Datv demod report data for Channel."
     DATVModReport:
       $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModReport"

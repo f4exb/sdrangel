@@ -72,6 +72,8 @@ ChannelSettings:
       description: "Datv mod settings configuration for Channel."
     DATVDemodSettings:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
+    DVBDemodSettings:
+      $ref: "/doc/swagger/include/DVBDemod.yaml#/DVBDemodSettings"
       description: "Datv demod settings configuration for Channel."
     DABDemodSettings:
       $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodSettings"

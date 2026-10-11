@@ -42,6 +42,7 @@
 #include "SWGAPRSSettings.h"
 #include "SWGAPRSStation.h"
 #include "SWGAPTDemodActions.h"
+#include "SWGDVBDemodActions.h"
 #include "SWGAPTDemodActions_aos.h"
 #include "SWGAPTDemodActions_los.h"
 #include "SWGAPTDemodSettings.h"
@@ -113,7 +114,11 @@
 #include "SWGDABDemodSettings.h"
 #include "SWGDABProgram.h"
 #include "SWGDATVDemodReport.h"
+#include "SWGDVBDemodReport.h"
+#include "SWGDVBDemodEPGService.h"
+#include "SWGDVBDemodEPGEvent.h"
 #include "SWGDATVDemodSettings.h"
+#include "SWGDVBDemodSettings.h"
 #include "SWGDATVModReport.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Report.h"
@@ -575,6 +580,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDVBDemodActions").compare(type) == 0) {
+      SWGDVBDemodActions *obj = new SWGDVBDemodActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAPTDemodActions_aos").compare(type) == 0) {
       SWGAPTDemodActions_aos *obj = new SWGAPTDemodActions_aos();
       obj->init();
@@ -927,8 +937,28 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDVBDemodReport").compare(type) == 0) {
+      SWGDVBDemodReport *obj = new SWGDVBDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVBDemodEPGService").compare(type) == 0) {
+      SWGDVBDemodEPGService *obj = new SWGDVBDemodEPGService();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVBDemodEPGEvent").compare(type) == 0) {
+      SWGDVBDemodEPGEvent *obj = new SWGDVBDemodEPGEvent();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDATVDemodSettings").compare(type) == 0) {
       SWGDATVDemodSettings *obj = new SWGDATVDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVBDemodSettings").compare(type) == 0) {
+      SWGDVBDemodSettings *obj = new SWGDVBDemodSettings();
       obj->init();
       return obj;
     }
