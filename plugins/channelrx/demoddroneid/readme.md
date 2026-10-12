@@ -151,6 +151,8 @@ Pressing this button clears all messages from the table.
 
 The received messages table displays information about each DroneID message received.
 
+![DJI DroneID Messages Table](../../../doc/img/DroneIDDemod_table.png)
+
 * Date/Time - The date and time the message was received.
 * Serial - The drone's serial number.
 * Model - The drone's model, determined from the product type.

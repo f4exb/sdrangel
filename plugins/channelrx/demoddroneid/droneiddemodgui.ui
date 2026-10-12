@@ -28,7 +28,7 @@
    </font>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::StrongFocus</enum>
+   <enum>Qt::FocusPolicy::StrongFocus</enum>
   </property>
   <property name="windowTitle">
    <string>DroneID Demodulator</string>
@@ -108,7 +108,7 @@
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
+         <enum>Qt::FocusPolicy::StrongFocus</enum>
         </property>
         <property name="toolTip">
          <string>Demod shift frequency from center in Hz</string>
@@ -125,7 +125,7 @@
       <item>
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -199,7 +199,7 @@
       <item>
        <spacer name="horizontalSpacer_1">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -217,7 +217,7 @@
            <string>Channel power</string>
           </property>
           <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
+           <enum>Qt::LayoutDirection::RightToLeft</enum>
           </property>
           <property name="text">
            <string>0.0</string>
@@ -273,7 +273,7 @@
     <item>
      <widget class="Line" name="line_6">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -327,7 +327,7 @@
       <item>
        <widget class="Line" name="line_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -357,7 +357,7 @@
       <item>
        <widget class="Line" name="line_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -411,7 +411,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -426,7 +426,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
     <item>
      <widget class="Line" name="line_7">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -458,7 +458,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <widget class="Line" name="line_4">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -488,7 +488,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <widget class="Line" name="line_5">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -518,7 +518,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -533,7 +533,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
     <item>
      <widget class="Line" name="line_8">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -552,7 +552,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
          <string>Forward received messages via UDP</string>
         </property>
         <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
+         <enum>Qt::LayoutDirection::RightToLeft</enum>
         </property>
         <property name="text">
          <string/>
@@ -568,7 +568,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
          </size>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::FocusPolicy::ClickFocus</enum>
         </property>
         <property name="toolTip">
          <string>Destination UDP address</string>
@@ -587,7 +587,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
          <string>:</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -606,7 +606,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
          </size>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::FocusPolicy::ClickFocus</enum>
         </property>
         <property name="toolTip">
          <string>Destination UDP port</string>
@@ -622,7 +622,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <spacer name="horizontalSpacer_4">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -637,7 +637,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
     <item>
      <widget class="Line" name="line_9">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -660,7 +660,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
       <item>
        <spacer name="horizontalSpacer_5">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -687,9 +687,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/clockcurrent.png</normaloff>
-          <normalon>:/clockfile.png</normalon>
-          :/clockcurrent.png
-         </iconset>
+          <normalon>:/clockfile.png</normalon>:/clockcurrent.png</iconset>
         </property>
        </widget>
       </item>
@@ -709,9 +707,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/record_off.png</normaloff>
-          :/record_off.png
-         </iconset>
+          <normaloff>:/record_off.png</normaloff>:/record_off.png</iconset>
         </property>
        </widget>
       </item>
@@ -725,9 +721,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/save.png</normaloff>
-          :/save.png
-         </iconset>
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -744,9 +738,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/load.png</normaloff>
-          :/load.png
-         </iconset>
+          <normaloff>:/load.png</normaloff>:/load.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -763,9 +755,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/bin.png</normaloff>
-          :/bin.png
-         </iconset>
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
         </property>
        </widget>
       </item>
@@ -796,16 +786,16 @@ Height - Height above take-off point, displayed relative to the ground at the dr
      <number>2</number>
     </property>
     <property name="leftMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <item>
      <widget class="QTableWidget" name="messages">
@@ -813,7 +803,7 @@ Height - Height above take-off point, displayed relative to the ground at the dr
        <string>Received messages</string>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
       </property>
       <column>
        <property name="text">
@@ -1014,9 +1004,10 @@ Height - Height above take-off point, displayed relative to the ground at the dr
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
@@ -1025,10 +1016,9 @@ Height - Height above take-off point, displayed relative to the ground at the dr
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>
