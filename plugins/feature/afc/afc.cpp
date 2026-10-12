@@ -318,6 +318,9 @@ void AFC::updateDeviceSetLists()
     if (getMessageQueueToGUI()) {
         getMessageQueueToGUI()->push(msg);
     }
+    else {
+        delete msg;
+    }
 }
 
 int AFC::webapiRun(bool run,
