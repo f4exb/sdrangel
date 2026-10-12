@@ -509,6 +509,11 @@ void ChannelGUI::setStatusText(const QString& text)
     m_statusLabel->setText(text);
 }
 
+void ChannelGUI::setStatusToolTip(const QString& toolTip)
+{
+    m_statusLabel->setToolTip(toolTip);
+}
+
 void ChannelGUI::updateIndexLabel()
 {
     if ((m_deviceType == DeviceType::DeviceMIMO) && (getStreamIndex() >= 0)) {

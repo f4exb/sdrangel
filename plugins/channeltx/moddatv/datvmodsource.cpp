@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #define BOOST_CHRONO_HEADER_ONLY
+#include <algorithm>
+#include <cmath>
 #include <boost/chrono/chrono.hpp>
 
 //#include <time.h>
@@ -220,7 +222,13 @@ void DATVModSource::checkBitrates()
     }
     if (dataBitrate < m_mpegTSBitrate)
         qWarning() << "DVB data bitrate is lower than the bitrate of the MPEG transport stream";
-    m_tsRatio = m_mpegTSBitrate/(float)dataBitrate;
+    const float tsRatio = m_mpegTSBitrate/(float)dataBitrate;
+
+    if ((tsRatio != m_tsRatio) && (tsRatio > 0.0f) && (m_settings.m_source == DATVModSettings::SourceFile) && m_tsFileOK) {
+        m_frameCount = (int)(m_frameIdx / tsRatio);
+    }
+
+    m_tsRatio = tsRatio;
 }
 
 DATVModSource::DATVModSource() :
@@ -235,6 +243,7 @@ DATVModSource::DATVModSource() :
     m_symbolSel(0),
     m_symbolIdx(0),
     m_samplesPerSymbol(1),
+    m_symbolGain(0.5f),
     m_iqSymbols{},
     m_plFrame(nullptr),
     m_udpSocket(nullptr),
@@ -325,8 +334,10 @@ void DATVModSource::pullFinalize(Complex& ci, Sample& sample)
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
     m_movingAverage(magsq);
 
-    sample.m_real = (FixReal) (ci.real() * SDR_TX_SCALEF);
-    sample.m_imag = (FixReal) (ci.imag() * SDR_TX_SCALEF);
+    // Clipped to full scale
+    const Real limit = (SDR_TX_SCALEF - 1.0f) / SDR_TX_SCALEF;
+    sample.m_real = (FixReal) (std::max(-limit, std::min(limit, (Real) ci.real())) * SDR_TX_SCALEF);
+    sample.m_imag = (FixReal) (std::max(-limit, std::min(limit, (Real) ci.imag())) * SDR_TX_SCALEF);
 }
 
 void DATVModSource::modulateSample()
@@ -396,7 +407,7 @@ void DATVModSource::modulateSample()
             }
             else if (m_settings.m_source == DATVModSettings::SourceImage)
             {
-                if (m_frameCount == static_cast<int>(m_tsGenerator.get_buffer_size()/sizeof(m_mpegTS)))
+                if (m_frameCount >= static_cast<int>(m_tsGenerator.get_buffer_size()/sizeof(m_mpegTS)))
                 {
                     int bitrate = static_cast<int>(getDVBSDataBitrate(m_settings) * 1.1f); // Add 10% margin
                     if (bitrate <= 0)
@@ -495,10 +506,11 @@ void DATVModSource::modulateSample()
             // QPSK
             if (m_settings.m_standard == DATVModSettings::DVB_S)
             {
-                // Does the 45-degree rotation matter?
-                // Makes a little difference to amplitude of filter output, but we could scale that
-                i = m_pulseShapeI.filter(m_iqSymbols[m_symbolIdx*2] ? -1.0f : 1.0f);
-                q = m_pulseShapeQ.filter(m_iqSymbols[m_symbolIdx*2+1] ? -1.0f : 1.0f);
+                // Unit magnitude, as the DVB-S2 and BPSK symbols are: +/-1 on each axis put the pulse shaping's peaks
+                // beyond full scale at 2 samples a symbol
+                const float a = 0.70710678f;
+                i = m_pulseShapeI.filter(m_iqSymbols[m_symbolIdx*2] ? -a : a);
+                q = m_pulseShapeQ.filter(m_iqSymbols[m_symbolIdx*2+1] ? -a : a);
                 /*
                 int sym = (m_iqSymbols[m_symbolIdx*2] << 1) | m_iqSymbols[m_symbolIdx*2+1];
                 if (sym == 0)
@@ -547,8 +559,8 @@ void DATVModSource::modulateSample()
         m_sampleIdx = 0;
     }
 
-    m_modSample.real(i);
-    m_modSample.imag(q);
+    m_modSample.real(i * m_symbolGain);
+    m_modSample.imag(q * m_symbolGain);
 
     // These levels aren't currently used in the GUI
     Real t = std::abs(m_modSample);
@@ -578,6 +590,12 @@ void DATVModSource::openTsFile(const QString& fileName)
     m_tsFileOK = false;
     m_mpegTSBitrate = getTSBitrate(fileName);
 
+    if (m_mpegTSStream.is_open()) {
+        m_mpegTSStream.close();
+    }
+
+    m_mpegTSStream.clear();
+
     if (m_mpegTSBitrate > 0)
     {
         m_mpegTSStream.open(qPrintable(fileName), std::ifstream::binary);
@@ -588,7 +606,7 @@ void DATVModSource::openTsFile(const QString& fileName)
             m_mpegTSStream.seekg (0, m_mpegTSStream.beg);
             m_frameIdx = 0;
             m_frameCount = 0;
-            m_tsFileOK = true;
+            m_tsFileOK = m_mpegTSSize > 0;
         }
         checkBitrates();
     }
@@ -714,6 +732,11 @@ void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
 
     m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
     m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
+    // The filter's taps have unit energy, and it's given a symbol every m_samplesPerSymbol samples, so its output's
+    // power is 1 / m_samplesPerSymbol: scaled, whatever the symbol rate, to -3 dB of full scale for QPSK (its peaks, on
+    // each axis, then 0.78 of full scale at roll-off 0.35, 0.94 at 0.20), or -6 dB for 8PSK and APSK (whose outer ring is
+    // at full scale) and BPSK (on one axis), whose peaks are higher
+    m_symbolGain = (m_settings.m_modulation == DATVModSettings::QPSK ? 0.70710678f : 0.5f) * std::sqrt((Real) std::max(1, m_samplesPerSymbol));
 }
 
 void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force)
@@ -916,6 +939,7 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
 
     m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
     m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
+    m_symbolGain = (m_settings.m_modulation == DATVModSettings::QPSK ? 0.70710678f : 0.5f) * std::sqrt((Real) std::max(1, m_samplesPerSymbol));
 
     checkBitrates();
 }

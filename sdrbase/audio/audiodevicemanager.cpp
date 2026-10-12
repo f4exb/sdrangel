@@ -627,6 +627,12 @@ int AudioDeviceManager::getInputSampleRate(int inputDeviceIndex)
     }
 }
 
+double AudioDeviceManager::getOutputLatency(int outputDeviceIndex)
+{
+    QMap<int, AudioOutputDevice*>::const_iterator it = m_audioOutputs.constFind(outputDeviceIndex);
+    return it != m_audioOutputs.constEnd() ? it.value()->getLatency() : 0.0;
+}
+
 int AudioDeviceManager::getOutputSampleRate(int outputDeviceIndex)
 {
     QString deviceName;

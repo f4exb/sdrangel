@@ -36,6 +36,7 @@ void USRPInputSettings::resetToDefaults()
     m_dcBlock = false;
     m_iqCorrection = false;
     m_log2SoftDecim = 0;
+    m_wireFormat = 0;
     m_lpfBW = 10e6f;
     m_gain = 50;
     m_antennaPath = "TX/RX";
@@ -82,6 +83,7 @@ QByteArray USRPInputSettings::serialize() const
     s.writeU32(21, m_gpioDir);
     s.writeU32(22, m_gpioPins);
     s.writeString(23, m_title);
+    s.writeS32(24, m_wireFormat);
 
     return s.final();
 }
@@ -136,6 +138,8 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
         d.readU32(22, &uintval, 0);
         m_gpioPins = uintval & 0xFF;
         d.readString(23, &m_title, "USRP");
+        d.readS32(24, &m_wireFormat, 0);
+        m_wireFormat = m_wireFormat == 1 ? 1 : 0;
 
         return true;
     }
@@ -172,6 +176,9 @@ void USRPInputSettings::applySettings(const QStringList& settingsKeys, const USR
     }
     if (settingsKeys.contains("log2SoftDecim")) {
         m_log2SoftDecim = settings.m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("wireFormat")) {
+        m_wireFormat = settings.m_wireFormat;
     }
     if (settingsKeys.contains("lpfBW")) {
         m_lpfBW = settings.m_lpfBW;
@@ -253,6 +260,9 @@ QString USRPInputSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("log2SoftDecim") || force) {
         ostr << " m_log2SoftDecim: " << m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("wireFormat") || force) {
+        ostr << " m_wireFormat: " << m_wireFormat;
     }
     if (settingsKeys.contains("lpfBW") || force) {
         ostr << " m_lpfBW: " << m_lpfBW;

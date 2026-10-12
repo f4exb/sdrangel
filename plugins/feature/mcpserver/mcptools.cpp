@@ -4247,7 +4247,7 @@ MCPTools::RetuneOutcome MCPTools::retuneOtherChannels(int deviceSetIndex, double
     }
 
     static const QStringList audioDemods = {
-        "AMDemod", "BFMDemod", "DABDemod", "DATVDemod", "DSDDemod", "FreeDVDemod", "ILSDemod", "M17Demod",
+        "AMDemod", "BFMDemod", "DABDemod", "DATVDemod", "DSDDemod", "DVBDemod", "FreeDVDemod", "ILSDemod", "M17Demod",
         "NFMDemod", "SSBDemod", "VORDemod", "VORDemodMC", "WFMDemod", "WDSPRx"
     };
 

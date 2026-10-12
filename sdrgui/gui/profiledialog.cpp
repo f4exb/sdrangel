@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include <QAbstractButton>
 
 #include "profiledialog.h"
@@ -57,6 +59,7 @@ void ProfileDialog::resizeTable()
     ui->table->setRowCount(row + 1);
     ui->table->setItem(row, COL_NAME, new QTableWidgetItem("Random-SDR[0] Spectrum @12345678910"));
     ui->table->setItem(row, COL_TOTAL, new QTableWidgetItem("1000.000 ms"));
+    ui->table->setItem(row, COL_PERCENT, new QTableWidgetItem("100.0"));
     ui->table->setItem(row, COL_AVERAGE, new QTableWidgetItem("1000.000 ns/frame"));
     ui->table->setItem(row, COL_LAST, new QTableWidgetItem("1000.000 ms"));
     ui->table->setItem(row, COL_MAX, new QTableWidgetItem("1000.000 ms"));
@@ -69,6 +72,7 @@ void ProfileDialog::resizeTable()
 void ProfileDialog::updateData()
 {
     QHash<QString, ProfileData>& profileData = GlobalProfileData::getProfileData();
+    const double runTime = GlobalProfileData::getMSSinceStart() * 1e6; // ns
 
     QHashIterator<QString, ProfileData> itr(profileData);
 
@@ -81,6 +85,7 @@ void ProfileDialog::updateData()
         double averageTime = data.getAverage();
         double lastTime = data.getLast();
         double maxTime = data.getMax();
+        double percent = runTime > 0.0 ? std::round(1000.0 * totalTime / runTime) / 10.0 : 0.0;
 
         int i = 0;
         for (; i < ui->table->rowCount(); i++)
@@ -90,6 +95,7 @@ void ProfileDialog::updateData()
             {
                 // Update existing row
                 ui->table->item(i, COL_TOTAL)->setData(Qt::DisplayRole, totalTime);
+                ui->table->item(i, COL_PERCENT)->setData(Qt::DisplayRole, percent);
                 ui->table->item(i, COL_AVERAGE)->setData(Qt::DisplayRole, averageTime);
                 ui->table->item(i, COL_LAST)->setData(Qt::DisplayRole, lastTime);
                 ui->table->item(i, COL_MAX)->setData(Qt::DisplayRole, maxTime);
@@ -106,6 +112,7 @@ void ProfileDialog::updateData()
 
             QTableWidgetItem *name = new QTableWidgetItem(key);
             QTableWidgetItem *total = new QTableWidgetItem();
+            QTableWidgetItem *percentItem = new QTableWidgetItem();
             QTableWidgetItem *average = new QTableWidgetItem();
             QTableWidgetItem *last = new QTableWidgetItem();
             QTableWidgetItem *max = new QTableWidgetItem();
@@ -113,18 +120,21 @@ void ProfileDialog::updateData()
 
             ui->table->setItem(row, COL_NAME, name);
             ui->table->setItem(row, COL_TOTAL, total);
+            ui->table->setItem(row, COL_PERCENT, percentItem);
             ui->table->setItem(row, COL_AVERAGE, average);
             ui->table->setItem(row, COL_LAST, last);
             ui->table->setItem(row, COL_MAX, max);
             ui->table->setItem(row, COL_NUM_SAMPLES, numSamples);
 
             total->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            percentItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             average->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             last->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             max->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             numSamples->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
             total->setData(Qt::DisplayRole, totalTime);
+            percentItem->setData(Qt::DisplayRole, percent);
             average->setData(Qt::DisplayRole, averageTime);
             last->setData(Qt::DisplayRole, lastTime);
             max->setData(Qt::DisplayRole, maxTime);

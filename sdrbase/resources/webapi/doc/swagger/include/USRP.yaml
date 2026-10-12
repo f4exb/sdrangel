@@ -61,6 +61,9 @@ USRPInputSettings:
       type: integer
       format: int8
       description: "GPIO pin-state bit mask, with one bit per pin."
+    wireFormat:
+      type: integer
+      description: "Samples over USB or Ethernet: 0 16 bit (sc16), 1 8 bit (sc8: half the traffic, for high sample rates)."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

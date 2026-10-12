@@ -424,6 +424,7 @@ void USRPInputGUI::displaySettings()
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
+    ui->wireFormat->setCurrentIndex(m_settings.m_wireFormat);
 
     updateSampleRate();
 
@@ -587,6 +588,13 @@ void USRPInputGUI::on_sampleRate_changed(quint64 value)
 
     updateSampleRate();
     m_settingsKeys.append("devSampleRate");
+    sendSettings();
+}
+
+void USRPInputGUI::on_wireFormat_currentIndexChanged(int index)
+{
+    m_settings.m_wireFormat = index == 1 ? 1 : 0;
+    m_settingsKeys.append("wireFormat");
     sendSettings();
 }
 
@@ -827,6 +835,7 @@ void USRPInputGUI::makeUIConnections()
     QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &USRPInputGUI::on_iqImbalance_toggled);
     QObject::connect(ui->sampleRate, &ValueDial::changed, this, &USRPInputGUI::on_sampleRate_changed);
     QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->wireFormat, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_wireFormat_currentIndexChanged);
     QObject::connect(ui->lpf, &ValueDial::changed, this, &USRPInputGUI::on_lpf_changed);
     QObject::connect(ui->loOffset, &ValueDialZ::changed, this, &USRPInputGUI::on_loOffset_changed);
     QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_gainMode_currentIndexChanged);

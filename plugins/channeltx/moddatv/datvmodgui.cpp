@@ -289,6 +289,8 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
     ui->rollOff->blockSignals(false);
     ui->modulation->blockSignals(false);
 
+    // Called from displaySettings() too (applying off then: the settings came from the modulator), so it's restored
+    const bool doApplySettings = m_doApplySettings;
     m_doApplySettings = false;
 
     idx = ui->rollOff->findText(QString("%1").arg(m_settings.m_rollOff, 0, 'f', 2));
@@ -303,9 +305,10 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
     updateFEC();
     setImageBitrate();
 
-    m_doApplySettings = true;
+    m_doApplySettings = doApplySettings;
 
-    applySettings(QStringList("standard"));
+    // The roll-off, modulation and code rate can change with the standard
+    applySettings(QStringList({"standard", "rollOff", "modulation", "fec"}));
 }
 
 void DATVModGUI::updateFEC()
@@ -376,11 +379,14 @@ void DATVModGUI::on_modulation_currentIndexChanged(int index)
         m_settings.m_modulation = (DATVModSettings::DATVModulation) index;
     else
         m_settings.m_modulation = (DATVModSettings::DATVModulation) (index + 1);
+    // The code rate can change with the modulation (as 32APSK has none below 3/4), so it's applied with it. When the
+    // standard's changing, that applies them all once it's done
+    const bool doApplySettings = m_doApplySettings;
     m_doApplySettings = false;
     updateFEC();
     setImageBitrate();
-    m_doApplySettings = true;
-    applySettings(QStringList("modulation"));
+    m_doApplySettings = doApplySettings;
+    applySettings(QStringList({"modulation", "fec"}));
 }
 
 void DATVModGUI::on_rollOff_currentIndexChanged(int index)

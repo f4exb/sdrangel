@@ -17,6 +17,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 
@@ -100,19 +101,23 @@ void WavFileRecord::feed(const SampleVector::const_iterator& begin, const Sample
         if (SDR_RX_SAMP_SZ == 16)
         {
             m_sampleFile.write(reinterpret_cast<const char*>(&*(begin)), (end - begin)*sizeof(Sample));
-            m_byteCount += end - begin;
+            m_byteCount += (end - begin) * sizeof(Sample);
         }
         else
         {
+            // Converted from 24 bit to 16 bit a block at a time for efficiency
+            const std::size_t count = end - begin;
+            m_convertBuffer.resize(2 * count);
+            qint16 *out = m_convertBuffer.data();
+
             for (SampleVector::const_iterator it = begin; it != end; ++it)
             {
-                // Convert from 24-bit to 16-bit
-                int16_t samples[2];
-                samples[0] = std::min(32767, std::max(it->real() >> 8, -32768));
-                samples[1] = std::min(32767, std::max(it->imag() >> 8, -32768));
-                m_sampleFile.write(reinterpret_cast<const char*>(&samples), 4);
-                m_byteCount += 4;
+                *out++ = (qint16) std::min(32767, std::max(it->real() >> 8, -32768));
+                *out++ = (qint16) std::min(32767, std::max(it->imag() >> 8, -32768));
             }
+
+            m_sampleFile.write(reinterpret_cast<const char*>(m_convertBuffer.data()), 4 * count);
+            m_byteCount += 4 * count;
         }
     }
 }

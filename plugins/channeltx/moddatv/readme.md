@@ -42,6 +42,9 @@ If the transport stream is via UDP, null packets will be transmitted when no dat
 
 Average total power in dB relative to a &#177;1.0 amplitude signal generated in the pass band.
 
+The modulated signal's level doesn't depend on the symbol rate (or the samples per symbol): it's -3 dB of full scale for QPSK, and -6 dB for BPSK,
+8PSK, 16APSK and 32APSK, whose peaks are higher. That leaves room for the pulse shaping's peaks, at any roll-off, and anything beyond full scale is clipped.
+
 <h3>5: Channel mute</h3>
 
 Use this button to toggle mute for this channel. The radio waves on the icon are toggled on (active) and off (muted) accordingly. Default is channel active.
@@ -161,11 +164,25 @@ This slider can be used to randomly set the current position in the file when fi
 
 An MPEG transport stream file can be created from a video file using ffmpeg:
 
-    ffmpeg -i input.avi -pix_fmt yuv420p -r 25 -s 720x576 -aspect 4:3 -c:v hevc -c:a libopus -b:v 500k -b:a 64k -maxrate 600k -bufsize 50k -f mpegts -mpegts_original_network_id 1 -mpegts_transport_stream_id 1 -mpegts_service_id 1  -mpegts_pmt_start_pid 4096 -streamid 0:289 -streamid 1:337 -metadata service_provider="SDRangel"  -metadata service_name="SDRangel TV" -y mpeg.ts
+    ffmpeg -i input.avi -pix_fmt yuv420p -r 25 -s 720x576 -aspect 4:3 -c:v hevc -c:a libopus -b:v 400k -b:a 64k -maxrate 450k -bufsize 450k -f mpegts -muxrate 691176 -g 50 -mpegts_original_network_id 1 -mpegts_transport_stream_id 1 -mpegts_service_id 1  -mpegts_pmt_start_pid 4096 -streamid 0:289 -streamid 1:337 -metadata service_provider="SDRangel"  -metadata service_name="SDRangel TV" -y mpeg.ts
+
+The transport stream should have a constant rate, set with `-muxrate` in bits per second, equal to (or a little below) the DVB data rate (3) for the settings it will be transmitted with.
+The example's 691176 is the data rate for DVB-S, QPSK, code rate 1/2 at 0.75 MSym/s.
+ffmpeg then pads the stream with null packets to that rate, and the timing in the stream (its PCRs) matches the rate the modulator transmits it at.
+
+Without `-muxrate`, ffmpeg creates a variable rate stream: its rate follows the video encoder's, which over a few seconds can be several times higher or lower than its average, even with `-maxrate`, which can cause choppy audio or video.
+
+The video and audio bitrates, plus 10 to 15% for the transport stream's overheads, must be less than the `-muxrate`.
+Set the video encoder's `-maxrate` to limit its peak rate, with `-bufsize` (the video buffer it's measured over) about the same value (around a second's worth): a much smaller buffer reduces the picture quality.
+
+A "dts < pcr, TS is invalid" warning from ffmpeg means the video and audio rates need lowering.
 
 To stream from a video camera via UDP (on Windows):
 
-    ffmpeg  -f dshow -i video="c922 Pro Stream Webcam":audio="Microphone (C922 Pro Stream Webcam)" -pix_fmt yuv420p -r 25 -s 720x576 -aspect 4:3 -c:v hevc -c:a libopus -b:v 500k -b:a 64k -maxrate 600k -bufsize 50k -f mpegts -mpegts_original_network_id 1 -mpegts_transport_stream_id 1 -mpegts_service_id 1  -mpegts_pmt_start_pid 4096 -streamid 0:289 -streamid 1:337 -metadata service_provider="SDRangel"  -metadata service_name="SDRangel TV" -flush_packets 0 "udp://127.0.0.1:5004?pkt_size=1316&bitrate=600000"
+    ffmpeg  -f dshow -i video="c922 Pro Stream Webcam":audio="Microphone (C922 Pro Stream Webcam)" -pix_fmt yuv420p -r 25 -s 720x576 -aspect 4:3 -c:v hevc -c:a libopus -b:v 500k -b:a 64k -maxrate 600k -bufsize 600k -f mpegts -muxrate 691180 -g 50 -mpegts_original_network_id 1 -mpegts_transport_stream_id 1 -mpegts_service_id 1  -mpegts_pmt_start_pid 4096 -streamid 0:289 -streamid 1:337 -metadata service_provider="SDRangel"  -metadata service_name="SDRangel TV" -flush_packets 0 "udp://127.0.0.1:5004?pkt_size=1316&bitrate=1350000"
+
+When streaming via UDP, set the URL's `bitrate` to the same value as `-muxrate`, so ffmpeg sends the packets at a steady rate.
+Here, both are set a little (about 2%) below the DVB data rate, so that differences between the PC's and the SDR's clocks don't build up a backlog of packets in the modulator: it transmits null packets whenever it has nothing else to send.
 
 You can list camera devices with:
 

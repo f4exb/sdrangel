@@ -28,6 +28,9 @@ ChannelActions:
     WefaxDemodActions:
       $ref: "http://swgserver:8081/api/swagger/include/WefaxDemod.yaml#/WefaxDemodActions"
       description: "WEFAX demodulator actions for Channel."
+    DVBDemodActions:
+      $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodActions"
+      description: "DVB demod actions configuration for Channel."
     FileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

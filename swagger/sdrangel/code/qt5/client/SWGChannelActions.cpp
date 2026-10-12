@@ -42,6 +42,8 @@ SWGChannelActions::SWGChannelActions() {
     m_apt_demod_actions_isSet = false;
     wefax_demod_actions = nullptr;
     m_wefax_demod_actions_isSet = false;
+    dvb_demod_actions = nullptr;
+    m_dvb_demod_actions_isSet = false;
     file_sink_actions = nullptr;
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
@@ -84,6 +86,8 @@ SWGChannelActions::init() {
     m_apt_demod_actions_isSet = false;
     wefax_demod_actions = new SWGWefaxDemodActions();
     m_wefax_demod_actions_isSet = false;
+    dvb_demod_actions = new SWGDVBDemodActions();
+    m_dvb_demod_actions_isSet = false;
     file_sink_actions = new SWGFileSinkActions();
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
@@ -122,6 +126,9 @@ SWGChannelActions::cleanup() {
     }
     if(wefax_demod_actions != nullptr) {
         delete wefax_demod_actions;
+    }
+    if(dvb_demod_actions != nullptr) { 
+        delete dvb_demod_actions;
     }
     if(file_sink_actions != nullptr) { 
         delete file_sink_actions;
@@ -179,6 +186,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&apt_demod_actions, pJson["APTDemodActions"], "SWGAPTDemodActions", "SWGAPTDemodActions");
     ::SWGSDRangel::setValue(&wefax_demod_actions, pJson["WefaxDemodActions"], "SWGWefaxDemodActions", "SWGWefaxDemodActions");
     
+    ::SWGSDRangel::setValue(&dvb_demod_actions, pJson["DVBDemodActions"], "SWGDVBDemodActions", "SWGDVBDemodActions");
+    
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
@@ -235,6 +244,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((wefax_demod_actions != nullptr) && (wefax_demod_actions->isSet())){
         toJsonValue(QString("WefaxDemodActions"), wefax_demod_actions, obj, QString("SWGWefaxDemodActions"));
+    }
+    if((dvb_demod_actions != nullptr) && (dvb_demod_actions->isSet())){
+        toJsonValue(QString("DVBDemodActions"), dvb_demod_actions, obj, QString("SWGDVBDemodActions"));
     }
     if((file_sink_actions != nullptr) && (file_sink_actions->isSet())){
         toJsonValue(QString("FileSinkActions"), file_sink_actions, obj, QString("SWGFileSinkActions"));
@@ -338,6 +350,16 @@ void
 SWGChannelActions::setWefaxDemodActions(SWGWefaxDemodActions* wefax_demod_actions) {
     this->wefax_demod_actions = wefax_demod_actions;
     this->m_wefax_demod_actions_isSet = true;
+}
+
+SWGDVBDemodActions*
+SWGChannelActions::getDvbDemodActions() {
+    return dvb_demod_actions;
+}
+void
+SWGChannelActions::setDvbDemodActions(SWGDVBDemodActions* dvb_demod_actions) {
+    this->dvb_demod_actions = dvb_demod_actions;
+    this->m_dvb_demod_actions_isSet = true;
 }
 
 SWGFileSinkActions*
@@ -464,6 +486,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(wefax_demod_actions && wefax_demod_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dvb_demod_actions && dvb_demod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_sink_actions && file_sink_actions->isSet()){

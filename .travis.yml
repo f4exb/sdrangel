@@ -54,6 +54,7 @@ addons:
       - ffmpeg
       - libavcodec-dev
       - libavformat-dev
+      - libavfilter-dev
       - libopus-dev
       - libcodec2-dev
       - libairspy-dev

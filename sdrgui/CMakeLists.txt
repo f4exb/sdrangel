@@ -60,6 +60,12 @@ set(sdrgui_SOURCES
     gui/glshaderspectrogram.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
+    gui/glvideorenderer.cpp
+    gui/glvideowidget.cpp
+    gui/glvideointeropd3d11.cpp
+    gui/glvideointeropcuda.cpp
+    gui/glvideointeropdmabuf.cpp
+    gui/glvideointeropiosurface.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
     gui/glspectrumview.cpp
@@ -194,6 +200,10 @@ set(sdrgui_HEADERS
     gui/glshadersimple.h
     gui/glshaderspectrogram.h
     gui/glshadertvarray.h
+    gui/glvideoframe.h
+    gui/glvideointerop.h
+    gui/glvideorenderer.h
+    gui/glvideowidget.h
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
@@ -364,6 +374,15 @@ endif()
 
 if(ANDROID)
   target_link_libraries(sdrgui GLESv3)
+endif()
+
+# GPU video frames shown without copying them: D3D11 on Windows, IOSurface on macOS
+if(WIN32 AND MSVC)
+  target_link_libraries(sdrgui d3d11)
+endif()
+
+if(APPLE)
+  target_link_libraries(sdrgui "-framework IOSurface" "-framework OpenGL")
 endif()
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})

@@ -465,8 +465,9 @@ bool USRPInput::acquireChannel(const USRPInputSettings& settings)
             }
 
             // set up the stream
-            std::string cpu_format("sc16");
-            std::string wire_format("sc16");
+            const bool sc8 = settings.m_wireFormat == 1;
+            std::string cpu_format(sc8 ? "sc8" : "sc16");
+            std::string wire_format(sc8 ? "sc8" : "sc16");
             std::vector<size_t> channel_nums;
             channel_nums.push_back(m_deviceShared.m_channel);
 
@@ -578,7 +579,7 @@ bool USRPInput::start()
 
     {
         QMutexLocker threadLocker(&m_threadMutex);
-        thread->setStream(m_streamId, m_bufSamples);
+        thread->setStream(m_streamId, m_bufSamples, settings.m_wireFormat == 1);
     }
     thread->setLog2Decimation(settings.m_log2SoftDecim);
 
@@ -1086,6 +1087,15 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
         m_deviceShared.m_log2Soft = settings.m_log2SoftDecim; // for buddies
     }
 
+    // The wire format's the stream's, so a change while running restarts it, with the new settings
+    bool restart = false;
+
+    if (settingsKeys.contains("wireFormat") && (settings.m_wireFormat != m_settings.m_wireFormat))
+    {
+        QMutexLocker threadLocker(&m_threadMutex);
+        restart = m_usrpInputThread != nullptr;
+    }
+
     // Applying settings to the device can take a long time (E.g. sample rate, clock source and bandwidth),
     // so when running, they are applied in the device engine thread, rather than blocking the GUI thread.
     // Values actually set are reported back via DeviceUSRPShared::MsgReportDeviceSettings.
@@ -1143,6 +1153,12 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
 
     if (settingsKeys.contains("replayLoop") || force) {
         m_replayBuffer.setLoop(m_settings.m_replayLoop);
+    }
+
+    if (restart)
+    {
+        m_inputMessageQueue.push(MsgStartStop::create(false));
+        m_inputMessageQueue.push(MsgStartStop::create(true));
     }
 
     // forward changes to buddies or oneself
@@ -1382,6 +1398,9 @@ void USRPInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2SoftDecim")) {
         settings.m_log2SoftDecim = qBound(0, response.getUsrpInputSettings()->getLog2SoftDecim(), 6);
     }
+    if (deviceSettingsKeys.contains("wireFormat")) {
+        settings.m_wireFormat = response.getUsrpInputSettings()->getWireFormat() == 1 ? 1 : 0;
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getUsrpInputSettings()->getLpfBw();
     }
@@ -1437,6 +1456,7 @@ void USRPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getUsrpInputSettings()->setGainMode((int) settings.m_gainMode);
     response.getUsrpInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getUsrpInputSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getUsrpInputSettings()->setWireFormat(settings.m_wireFormat);
     response.getUsrpInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getUsrpInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getUsrpInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
@@ -1557,6 +1577,9 @@ void USRPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgUsrpInputSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("wireFormat") || force) {
+        swgUsrpInputSettings->setWireFormat(settings.m_wireFormat);
     }
     if (deviceSettingsKeys.contains("lpfBW") || force) {
         swgUsrpInputSettings->setLpfBw(settings.m_lpfBW);

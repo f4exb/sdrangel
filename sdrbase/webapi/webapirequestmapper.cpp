@@ -4954,6 +4954,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDatvDemodSettings()->init();
             channelSettings->getDatvDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DVBDemodSettings")
+        {
+            channelSettings->setDvbDemodSettings(new SWGSDRangel::SWGDVBDemodSettings());
+            channelSettings->getDvbDemodSettings()->init();
+            channelSettings->getDvbDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DATVModSettings")
         {
             channelSettings->setDatvModSettings(new SWGSDRangel::SWGDATVModSettings());
@@ -5300,6 +5306,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setWefaxDemodActions(new SWGSDRangel::SWGWefaxDemodActions());
             channelActions->getWefaxDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "DVBDemodActions")
+        {
+            channelActions->setDvbDemodActions(new SWGSDRangel::SWGDVBDemodActions());
+            channelActions->getDvbDemodActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "FileSinkActions")
         {
@@ -6075,6 +6086,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setBfmModSettings(nullptr);
     channelSettings.setChannelPowerSettings(nullptr);
     channelSettings.setDatvModSettings(nullptr);
+    channelSettings.setDvbDemodSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setEndOfTrainDemodSettings(nullptr);
@@ -6125,6 +6137,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setBfmModReport(nullptr);
     channelReport.setChannelPowerReport(nullptr);
     channelReport.setDatvModReport(nullptr);
+    channelReport.setDvbDemodReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setEndOfTrainDemodReport(nullptr);
     channelReport.setFreqScannerReport(nullptr);

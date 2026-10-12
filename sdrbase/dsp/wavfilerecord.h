@@ -26,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <vector>
 
 #include <QDateTime>
 #include <QFile>
@@ -149,6 +150,7 @@ private:
 #endif
     QString m_currentFileName;
     quint64 m_byteCount;
+    std::vector<qint16> m_convertBuffer;    //!< 24 bit samples converted to 16, a block at a time
     qint64 m_msShift;
     int m_nbChannels;
 

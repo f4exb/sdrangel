@@ -262,6 +262,13 @@ else()
     message(STATUS "Not building demoddatv (ENABLE_CHANNELRX_DEMODDATV=${ENABLE_CHANNELRX_DEMODDATV} FFMPEG_FOUND=${FFMPEG_FOUND})")
 endif()
 
+# The GUI needs FFmpeg to play video. The server only demodulates, sending the transport stream over UDP
+if (ENABLE_CHANNELRX_DEMODDVB AND (FFMPEG_FOUND OR SERVER_MODE))
+    add_subdirectory(demoddvb)
+else()
+    message(STATUS "Not building demoddvb (ENABLE_CHANNELRX_DEMODDVB=${ENABLE_CHANNELRX_DEMODDVB} FFMPEG_FOUND=${FFMPEG_FOUND})")
+endif()
+
 if(NOT SERVER_MODE)
     if (ENABLE_CHANNELRX_HEATMAP)
         add_subdirectory(heatmap)

@@ -101,6 +101,13 @@ Use this toggle button to switch the sample rate input next (8) between host to 
 
 The I/Q stream from the USRP device can be decimated by a power of two by software inside the plugin before being sent to the baseband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
+<h3>9A: Sample format</h3>
+
+The format of the samples from the device to the host, over USB or Ethernet: 16b (16 bits, the default) or 8b (8 bits). 8 bits halves the traffic,
+which avoids overruns (16) at high sample rates.
+It costs dynamic range (about 48 dB rather than 96), which is plenty for most digital signals, but set the gain so the signal is well above the noise,
+and not much below full scale.
+
 <h3>10: Gain Mode</h3>
 
 Choose between automatic or manual gain control.

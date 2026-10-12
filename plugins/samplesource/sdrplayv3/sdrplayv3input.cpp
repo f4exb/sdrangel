@@ -98,7 +98,7 @@ bool SDRPlayV3Input::openDevice()
         closeDevice();
     }
 
-    if (!m_sampleFifo.setSize(96000 * 4))
+    if (!m_sampleFifo.setSize(std::max(96000U * 4, SampleSinkFifo::getSizePolicy(m_settings.m_devSampleRate))))
     {
         qCritical("SDRPlayV3Input::openDevice: could not allocate SampleFifo");
         return false;
@@ -423,8 +423,10 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
             else
                 qDebug() <<  "SDRPlayV3Input::applySettings: sample rate set to " << sampleRate;
             forwardChange = true;
-            if (settings.m_devSampleRate != m_settings.m_devSampleRate) {
+            if (settings.m_devSampleRate != m_settings.m_devSampleRate)
+            {
                 m_replayBuffer.clear();
+                m_sampleFifo.setSize(std::max(96000U * 4, SampleSinkFifo::getSizePolicy(sampleRate)));
             }
          }
     }
