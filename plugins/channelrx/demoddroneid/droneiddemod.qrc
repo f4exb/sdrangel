@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/droneiddemod/">
+        <file>map/drone.png</file>
+        <file>map/pilot.png</file>
+        <file>map/home.png</file>
+    </qresource>
+</RCC>

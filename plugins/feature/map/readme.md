@@ -19,6 +19,7 @@ On top of this, it can plot data from other plugins, such as:
 * Inmarsat C message geographic areas,
 * SID paths,
 * Pager messages that contain coordinates.
+* DJI drones from the DJI DroneID Demodulator.
 
 As well as internet and built-in data sources:
 

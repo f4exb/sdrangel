@@ -131,4 +131,18 @@ public:
     crcadsb() : crc(24, 0xfff409, true, 0, 0) {}
 };
 
+// LTE CRC24A - 3GPP TS 36.212 section 5.1.1
+class SDRBASE_API crc24a : public crc
+{
+public:
+    crc24a() : crc(24, 0x864cfb, true, 0, 0) {}
+};
+
+// DJI DroneID payload CRC
+class SDRBASE_API crc16droneid : public crc
+{
+public:
+    crc16droneid() : crc(16, 0x1021, false, 0x3692, 0) {}
+};
+
 #endif

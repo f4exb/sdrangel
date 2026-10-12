@@ -4990,6 +4990,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDsdDemodSettings()->init();
             channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DroneIDDemodSettings")
+        {
+            channelSettings->setDroneIdDemodSettings(new SWGSDRangel::SWGDroneIDDemodSettings());
+            channelSettings->getDroneIdDemodSettings()->init();
+            channelSettings->getDroneIdDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "EndOfTrainDemodSettings")
         {
             channelSettings->setEndOfTrainDemodSettings(new SWGSDRangel::SWGEndOfTrainDemodSettings());
@@ -6089,6 +6095,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDvbDemodSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
+    channelSettings.setDroneIdDemodSettings(nullptr);
     channelSettings.setEndOfTrainDemodSettings(nullptr);
     channelSettings.setFreqScannerSettings(nullptr);
     channelSettings.setFreqTrackerSettings(nullptr);
@@ -6139,6 +6146,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDatvModReport(nullptr);
     channelReport.setDvbDemodReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
+    channelReport.setDroneIdDemodReport(nullptr);
     channelReport.setEndOfTrainDemodReport(nullptr);
     channelReport.setFreqScannerReport(nullptr);
     channelReport.setFreqTrackerReport(nullptr);

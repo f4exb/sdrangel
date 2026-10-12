@@ -2354,9 +2354,10 @@ void MCPTools::registerInstanceTools()
 
     add("get_packets",
         "Get recently decoded packets from packet-oriented demodulators (AIS, APRS/AX.25 packet, LoRa/ChirpChat, M17, Meshtastic, "
-        "MeshCore, Inmarsat, radiosonde). Each packet has the raw bytes (hex and printable text) and, where SDRangel can decode it, "
+        "MeshCore, Inmarsat, radiosonde, DJI DroneID). Each packet has the raw bytes (hex and printable text) and, where SDRangel can decode it, "
         "a decoded object: AIS message type, MMSI, position, course and speed; AX.25 from/to/via and data with APRS position and "
-        "comment; RS41 radiosonde serial, position and height. Packets are kept in a buffer of the last 1000; use sinceSequence "
+        "comment; RS41 radiosonde serial, position and height; DroneID drone serial, model, position, altitude and speed, and pilot "
+        "and home positions. Packets are kept in a buffer of the last 1000; use sinceSequence "
         "with the lastSequence of a previous call to read only new packets.",
         schema({
             {"source", strProp("Only packets from this channel, e.g. \"R0:1\" (device set 0, channel 1)")},
@@ -3921,9 +3922,11 @@ const ListenMode listenModes[] = {
     // with the APRS feature to plot the stations
     {"packet",     "PacketDemod",      12500,   48000, "{}",                                      0, nullptr,          0},
     {"aprs",       "PacketDemod",      12500,   48000, "{}",                                      0, "APRS",           0},
+    // DJI DroneID is a 9 MHz wide OFDM burst, needing a 15.36 MS/s baseband
+    {"droneid",    "DroneIDDemod",         0, 15360000, "{}",                                     0, nullptr,          0},
 };
 
-const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, dmr, dpmr, dstar, ysf, nxdn, pager, sonde, packet, aprs";
+const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, dmr, dpmr, dstar, ysf, nxdn, pager, sonde, packet, aprs, droneid";
 
 // The feature a demodulator of this type feeds, by the modes that add one; null for none
 const char *featureForChannelType(const QString& channelType)
@@ -3970,7 +3973,8 @@ void rateFor(int minBaseband, int& devSampleRate, int& log2Decim)
     else if (minBaseband <= 512000)  { devSampleRate = 1024000; log2Decim = 1; }
     else if (minBaseband <= 1024000) { devSampleRate = 1024000; log2Decim = 0; }
     else if (minBaseband <= 2048000) { devSampleRate = 2048000; log2Decim = 0; }
-    else                             { devSampleRate = 2400000; log2Decim = 0; }
+    else if (minBaseband <= 2400000) { devSampleRate = 2400000; log2Decim = 0; }
+    else                             { devSampleRate = minBaseband; log2Decim = 0; } // Beyond an RTL-SDR
 }
 
 // The baseband a channel type needs, from the table listen uses, so that there is one set of
@@ -4573,6 +4577,17 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
         rateKey = "sampleRate";
     }
 
+    // An RTL-SDR tops out at about 3.2 MS/s, so a wider mode (E.g. DroneID) can't be received with it
+    const int rtlSdrMaxRate = 3200000;
+    QString unsupportedRateNote;
+
+    if ((hwType == "RTLSDR") && (minBaseband > rtlSdrMaxRate))
+    {
+        rateKey.clear();
+        unsupportedRateNote = QString("An RTL-SDR can not provide the %1 S/s this mode needs: use a wider band device such as a HackRF, USRP or PlutoSDR.")
+            .arg(minBaseband);
+    }
+
     // A reused device set is already feeding its other channels the width it has. Widening it for
     // the new channel leaves them working, narrowing it to what only the new one needs takes their
     // signal away, so the width already configured is a floor rather than something to overwrite
@@ -4591,7 +4606,7 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
     int log2Decim = 0;
     rateFor(qMax(minBaseband, existingBaseband), devSampleRate, log2Decim);
     QJsonObject partial;
-    QString rateNote;
+    QString rateNote = unsupportedRateNote;
     int baseband = 0;
 
     if (!rateKey.isEmpty())
