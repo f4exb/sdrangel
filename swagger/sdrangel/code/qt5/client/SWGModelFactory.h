@@ -127,6 +127,8 @@
 #include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDroneIDDemodReport.h"
+#include "SWGDroneIDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGDVSerialDevices.h"
 #include "SWGDemodAnalyzerActions.h"
@@ -999,6 +1001,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDSDDemodSettings").compare(type) == 0) {
       SWGDSDDemodSettings *obj = new SWGDSDDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDroneIDDemodReport").compare(type) == 0) {
+      SWGDroneIDDemodReport *obj = new SWGDroneIDDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDroneIDDemodSettings").compare(type) == 0) {
+      SWGDroneIDDemodSettings *obj = new SWGDroneIDDemodSettings();
       obj->init();
       return obj;
     }

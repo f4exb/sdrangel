@@ -45,6 +45,7 @@
 #include "SWGDOA2Settings.h"
 #include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDroneIDDemodSettings.h"
 #include "SWGEndOfTrainDemodSettings.h"
 #include "SWGFT8DemodSettings.h"
 #include "SWGFileSinkSettings.h"
@@ -192,6 +193,9 @@ public:
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
+    SWGDroneIDDemodSettings* getDroneIdDemodSettings();
+    void setDroneIdDemodSettings(SWGDroneIDDemodSettings* drone_id_demod_settings);
 
     SWGEndOfTrainDemodSettings* getEndOfTrainDemodSettings();
     void setEndOfTrainDemodSettings(SWGEndOfTrainDemodSettings* end_of_train_demod_settings);
@@ -418,6 +422,9 @@ private:
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
+
+    SWGDroneIDDemodSettings* drone_id_demod_settings;
+    bool m_drone_id_demod_settings_isSet;
 
     SWGEndOfTrainDemodSettings* end_of_train_demod_settings;
     bool m_end_of_train_demod_settings_isSet;

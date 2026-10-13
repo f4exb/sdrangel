@@ -49,6 +49,7 @@
         <file>webapi/doc/swagger/include/DOA2.yaml</file>
         <file>webapi/doc/swagger/include/DSCDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
+        <file>webapi/doc/swagger/include/DroneIDDemod.yaml</file>
         <file>webapi/doc/swagger/include/EndOfTrainDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>

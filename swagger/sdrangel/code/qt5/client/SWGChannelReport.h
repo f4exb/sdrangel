@@ -41,6 +41,7 @@
 #include "SWGDOA2Report.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGDroneIDDemodReport.h"
 #include "SWGEndOfTrainDemodReport.h"
 #include "SWGFT8DemodReport.h"
 #include "SWGFileSinkReport.h"
@@ -165,6 +166,9 @@ public:
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGDroneIDDemodReport* getDroneIdDemodReport();
+    void setDroneIdDemodReport(SWGDroneIDDemodReport* drone_id_demod_report);
 
     SWGEndOfTrainDemodReport* getEndOfTrainDemodReport();
     void setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report);
@@ -358,6 +362,9 @@ private:
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGDroneIDDemodReport* drone_id_demod_report;
+    bool m_drone_id_demod_report_isSet;
 
     SWGEndOfTrainDemodReport* end_of_train_demod_report;
     bool m_end_of_train_demod_report_isSet;

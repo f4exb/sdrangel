@@ -30,6 +30,7 @@
 #include "util/ax25.h"
 #include "util/aprs.h"
 #include "util/radiosonde.h"
+#include "util/droneid.h"
 
 #include "mcpdatafeed.h"
 
@@ -43,6 +44,7 @@ static const QStringList packetURIs = {
     QStringLiteral("sdrangel.channel.meshcoredemod"),
     QStringLiteral("sdrangel.channel.inmarsatdemod"),
     QStringLiteral("sdrangel.channel.radiosondedemod"),
+    QStringLiteral("sdrangel.channel.droneiddemod"),
 };
 static const QStringList packetPipes = {"packets", "ais", "radiosonde"};
 
@@ -54,6 +56,7 @@ static const QStringList mapURIs = {
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.channel.dscdemod"),
+    QStringLiteral("sdrangel.channel.droneiddemod"),
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.channel.ilsdemod"),
@@ -357,6 +360,58 @@ QJsonObject MCPDataFeed::decodePacket(const QString& sourceType, const QByteArra
             decoded["heightMetres"] = frame.m_height;
             decoded["speedMetresPerSecond"] = frame.m_speed;
             decoded["heading"] = frame.m_heading;
+        }
+    }
+    else if (sourceType == "DroneIDDemod")
+    {
+        DroneIDMessage *msg = DroneIDMessage::decode(bytes);
+        decoded["protocol"] = "DroneID";
+
+        if (msg)
+        {
+            decoded["serial"] = msg->m_serial;
+            decoded["crcValid"] = msg->m_crcValid;
+
+            if (msg->isFlightInformation())
+            {
+                decoded["messageType"] = "FlightInformation";
+                decoded["model"] = msg->getProductTypeName();
+                decoded["productType"] = msg->m_productType;
+                decoded["sequence"] = msg->m_sequence;
+                decoded["state"] = msg->getStateInfoString();
+                if (msg->hasPosition())
+                {
+                    decoded["latitude"] = msg->m_latitude;
+                    decoded["longitude"] = msg->m_longitude;
+                }
+                decoded["altitudeWgs84Metres"] = msg->m_altitude;     // GPS height above WGS84 ellipsoid, not MSL
+                decoded["heightAboveTakeoffMetres"] = msg->m_height;
+                decoded["speedMetresPerSecond"] = msg->getSpeed();
+                decoded["verticalSpeedMetresPerSecond"] = msg->m_vUp;
+                decoded["yaw"] = msg->m_yaw;
+                if (msg->hasPilotPosition())
+                {
+                    decoded["pilotLatitude"] = msg->m_pilotLatitude;
+                    decoded["pilotLongitude"] = msg->m_pilotLongitude;
+                }
+                if (msg->hasHomePosition())
+                {
+                    decoded["homeLatitude"] = msg->m_homeLatitude;
+                    decoded["homeLongitude"] = msg->m_homeLongitude;
+                }
+                if (msg->m_gpsTime.isValid()) {
+                    decoded["gpsTime"] = msg->m_gpsTime.toString(Qt::ISODateWithMs);
+                }
+                if (!msg->m_uuid.isEmpty()) {
+                    decoded["uuid"] = msg->m_uuid;
+                }
+            }
+            else
+            {
+                decoded["messageType"] = "FlightPurpose";
+            }
+
+            delete msg;
         }
     }
     else if ((sourceType == "PacketDemod") || (sourceType == "ChirpChatDemod") || (sourceType == "M17Demod"))

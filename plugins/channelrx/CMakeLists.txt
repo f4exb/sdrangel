@@ -139,6 +139,12 @@ else()
     message(STATUS "Not building demodradiosonde (ENABLE_CHANNELRX_DEMODRADIOSONDE=${ENABLE_CHANNELRX_DEMODRADIOSONDE})")
 endif()
 
+if (ENABLE_CHANNELRX_DEMODDRONEID)
+    add_subdirectory(demoddroneid)
+else()
+    message(STATUS "Not building demoddroneid (ENABLE_CHANNELRX_DEMODDRONEID=${ENABLE_CHANNELRX_DEMODDRONEID})")
+endif()
+
 if(ENABLE_CHANNELRX_DEMODDAB AND DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
     add_subdirectory(demoddab)
 else()

@@ -87,6 +87,9 @@ ChannelSettings:
     DSDDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
       description: "Dsd demod settings configuration for Channel."
+    DroneIDDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/DroneIDDemod.yaml#/DroneIDDemodSettings"
+      description: "DroneID demod settings configuration for Channel."
     EndOfTrainDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodSettings"
       description: "End of train demod settings configuration for Channel."

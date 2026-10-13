@@ -1,0 +1,125 @@
+DroneIDDemodSettings:
+  description: DroneIDDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
+    detectionThreshold:
+      type: number
+      format: float
+      description: "Normalised cyclic prefix correlation threshold (0-1) for burst detection."
+    turboIterations:
+      type: integer
+      description: "Maximum number of turbo decoder iterations."
+    filterSerial:
+      type: string
+      description: "Regular expression to filter serial numbers displayed in the table."
+    mapTimeout:
+      type: integer
+      description: "Time in seconds after last message, before drone is removed from the map. 0 to never remove."
+    mapAltitude:
+      description: "Which value is used for the drone's altitude on the map (0 - Altitude above WGS84 ellipsoid, 1 - Height above take-off point, relative to ground)"
+      type: integer
+    scan:
+      description: "Whether to scan DroneID channels, by changing the device center frequency"
+      type: integer
+      minimum: 0
+      maximum: 1
+    scanBand:
+      description: "Channels to scan (0 - 2.4GHz, 1 - 5.8GHz, 2 - 2.4 and 5.8GHz)"
+      type: integer
+    scanDwell:
+      description: "Time in seconds to wait on each channel for a burst when scanning."
+      type: number
+      format: float
+    scanHold:
+      description: "Time in seconds to remain on a channel after the last burst was detected when scanning."
+      type: number
+      format: float
+    udpEnabled:
+      description: "Whether to forward received messages to specified UDP port"
+      type: integer
+      minimum: 0
+      maximum: 1
+    udpAddress:
+      description: "UDP address to forward received messages to"
+      type: string
+    udpPort:
+      description: "UDP port to forward received messages to"
+      type: integer
+      minimum: 1
+      maximum: 65535
+    logFilename:
+      type: string
+      description: "Log file name or path."
+    logEnabled:
+      type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    useFileTime:
+      type: integer
+      description: "Use time from File Input device rather than system time (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+DroneIDDemodReport:
+  description: DroneIDDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
+    burstsDetected:
+      type: integer
+      description: "Number of bursts detected."
+    burstsDecoded:
+      type: integer
+      description: "Number of bursts successfully decoded."
+    burstsDropped:
+      type: integer
+      description: "Number of bursts dropped because the decoder was busy."
+    dronesTracked:
+      type: integer
+      description: "Number of drones currently being tracked."
+    scanLocked:
+      type: integer
+      description: "1 if scanning is paused on a channel where DroneID bursts are being received, 0 otherwise."

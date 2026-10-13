@@ -69,6 +69,9 @@ ChannelReport:
     DSDDemodReport:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
       description: "Dsd demod report data for Channel."
+    DroneIDDemodReport:
+      $ref: "/doc/swagger/include/DroneIDDemod.yaml#/DroneIDDemodReport"
+      description: "DroneID demod report data for Channel."
     EndOfTrainDemodReport:
       $ref: "/doc/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodReport"
       description: "End of train demod report data for Channel."

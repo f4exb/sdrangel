@@ -31,6 +31,7 @@ Minimum device sample rates:
 | DAB | 2.048 MS/s | Fixed by the standard |
 | DVB-T and DVB-T2 | 9.142857 MS/s for 8 MHz channels | 8/7 times the `bandwidth` is the native rate (64/7 MS/s for 8 MHz; 131/71, about 1.845 MS/s, for DVB-T2's 1.7 MHz). Rates from 0.875 to 2.2 times it are resampled, at a CPU cost. An RTL-SDR can't run fast enough for 5 MHz and over |
 | DVB-S and DVB-S2 | 1.2 times the symbol rate | The signal is 1 + roll-off times the `symbolRate` wide, and losing a little of its edges costs under 0.3 dB. More leaves room for it being off centre and for the device's filter: 33 MS/s or more for 27.5 MS/s broadcasts (a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s, 1 MS/s for QO-100's 333 or 500 kS/s. Measuring the symbol rate (`symbolRate` 0) needs about 1.7 times, to see the noise floor beside the signal. Use `standard` 4, 5 or 6: `standard` 0 is terrestrial, and needs 8 MS/s for an 8 MHz channel whatever the signal |
+| DJI DroneID | 15.36 MS/s | 9 MHz wide OFDM with a 1024 point FFT. Beyond an RTL-SDR: use a HackRF, USRP, PlutoSDR or similar |
 | Broadcast FM | 240 kS/s | Must exceed the channel RF bandwidth. 256 kS/s is recommended for a 180 kHz channel |
 
 ## Aircraft
@@ -42,6 +43,7 @@ Minimum device sample rates:
 | VOR navaids | `VORDemod`, `VORDemodMC` | 108 to 117.975 MHz | `VORDemodMC` receives several VORs at once for a position fix |
 | ILS localizer | `ILSDemod` | 108 to 112 MHz | Horizontal guidance |
 | ILS glide slope | `ILSDemod` | 329 to 335 MHz | Vertical guidance, paired with the localizer |
+| DJI drones (DroneID) | `DroneIDDemod` | 2399.5 to 2474.5 MHz and 5721.5 to 5831.5 MHz | Needs at least 15.36 MS/s. OcuSync drones (Mini 2, Mini 3, Air 2S, Mavic 3...) send a burst every 640 ms while the motors run, staying on a channel for a while, then changing channel or band. Gives drone, pilot and home positions. `listen` with mode `droneid` |
 
 ## Ships
 
@@ -132,6 +134,10 @@ usual for the mode.
 Do not scan for these; they are on fixed frequencies, so `listen` or `add_channel` is the tool:
 
 - **ADS-B**: 1090 MHz only.
+- **DroneID**: 2399.5, 2414.5, 2429.5, 2444.5, 2459.5 and 2474.5 MHz, and 5721.5 to 5831.5 MHz.
+  A drone stays on one channel for many bursts, but can change channel and band. Set the
+  channel's `scan` setting to 1 to step through them, pausing where bursts are found (`scanBand` 0 = 2.4 GHz,
+  1 = 5.8 GHz, 2 = both). It retunes the device, so don't use it while other channels need the device frequency.
 - **DAB**: fixed Band III blocks 5A to 13F (174.928 to 239.200 MHz, 1.712 MHz apart). Start a
   `dab` channel on each block in turn and read the programme list from its report.
 - **AIS**: 161.975 and 162.025 MHz.
@@ -182,13 +188,15 @@ looks like an empty band.
 | DVB-T and DVB-T2 (and DVB-S and S2) | Channel report | `DVBDemodReport`: `state` (Locked when the transport stream is being decoded), `standard`, `mode`, `constellation`, `codeRate`, `mer`, and `postViterbiBER` for DVB-T and DVB-S (below 2e-4 is error free) or `ldpcIterations` and `bchFailures` for DVB-T2 and DVB-S2; for DVB-S2 also `modcod`, `esN0` (dB, compare with the MODCOD's threshold), `plFrames` and `plHeaderMisses`, and `measuredSymbolRate` for both satellite standards. What's on: `epgNowTitle`, `epgNowStart` (UTC), `epgNowDuration` (s), `epgNowDescription` and `epgNextTitle`, `epgNextStart` of `epgServiceId` (the `serviceId` setting, or the first TV service); the guide takes a minute or so to arrive, and is cached. Recording to .ts files in `recordDirectory`: channel_action `{"record": 1}` (or 0 to stop) records the service selected, or with `recordMode` 0 the whole multiplex; `{"recordEvent": 1, "serviceId": id, "eventId": id}` records a programme from the guide (0 cancels), starting `recordStartPadding` s early and ending `recordEndPadding` s late; the report has `recording`, `recordingFile`, `recordingSize` and `scheduledRecordings`. channel_action `{"play": 1, "serviceId": id}` plays a service from the guide, retuning the device to its multiplex if it's on another. Audio and subtitles: `audioLanguage` and `subtitleLanguage` (ISO 639-2, e.g. eng), `audioDescription` 1 to mix in audio description and `subtitles` 1 to show subtitles, where the service has them. Video, the service list and the full guide are in the GUI; with `udpEnabled` the transport stream goes to `udpAddress`:`udpPort` for VLC |
 | ADS-B | Map items | `get_map_items` lists the aircraft with position, altitude, heading and callsign; the channel report only has counts and the tracked target |
 | AIS, APRS and AX.25, LoRa, M17, Meshtastic, MeshCore, Inmarsat, radiosondes | Packet buffer | `get_packets`, which decodes AIS position reports, APRS positions and RS41 frames. Ships, stations and sondes also appear in `get_map_items` when the Map feature is present |
+| DroneID | Packet buffer and map items | `get_packets` decodes serial number, model, drone position, altitude and speed, and pilot and home positions. `get_map_items` lists the drone, pilot and home point when the Map feature is present |
 | VOR | Channel report | `VORDemodReport.radial` with `validRadial`, and the Morse ident |
 | Pagers, DSC, NAVTEX, RTTY, FT8 | GUI only | The decoded messages are shown in the plugin's window; the API carries the channel power only. Say so rather than reporting the band as empty |
 
 How long to wait before reading: RDS a few seconds, the full station name up to ten; DAB sync
 about two seconds and the programme list five to ten; ADS-B ten seconds if aircraft are in
 range; AIS half a minute, as each ship transmits every few seconds at most; APRS minutes,
-as stations transmit rarely; radiosonde frames once a second while a sonde is up; VOR a few
+as stations transmit rarely; radiosonde frames once a second while a sonde is up; DroneID
+several seconds, as the drone only spends part of the time on any one channel; VOR a few
 seconds for a valid radial. A single read immediately after tuning proves nothing; read the
 report again after the interval before concluding a signal has no data.
 

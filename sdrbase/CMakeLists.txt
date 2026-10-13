@@ -138,6 +138,7 @@ set(sdrbase_SOURCES
     dsp/dspdevicesinkengine.cpp
     dsp/dspdevicemimoengine.cpp
     dsp/fftcorr.cpp
+    dsp/lteturbo.cpp
     dsp/fftengine.cpp
     dsp/fftfactory.cpp
     dsp/fftfilt.cpp
@@ -228,6 +229,7 @@ set(sdrbase_SOURCES
     util/corsproxy.cpp
     util/countrydat.cpp
     util/crc.cpp
+    util/droneid.cpp
     util/CRC64.cpp
     util/csv.cpp
     util/db.cpp
@@ -245,6 +247,7 @@ set(sdrbase_SOURCES
     util/jplhorizons.cpp
     util/kiwisdrlist.cpp
     util/lfsr.cpp
+    util/ltegold.cpp
     util/maidenhead.cpp
     util/message.cpp
     util/messagequeue.cpp
@@ -372,6 +375,7 @@ set(sdrbase_HEADERS
     dsp/dspdevicemimoengine.h
     dsp/dsptypes.h
     dsp/fftcorr.h
+    dsp/lteturbo.h
     dsp/fftengine.h
     dsp/fftfactory.h
     dsp/fftfilt.h
@@ -515,6 +519,7 @@ set(sdrbase_HEADERS
     util/jplhorizons.h
     util/kiwisdrlist.h
     util/lfsr.h
+    util/ltegold.h
     util/maidenhead.h
     util/message.h
     util/messagequeue.h
@@ -534,6 +539,7 @@ set(sdrbase_HEADERS
     util/prettyprint.h
     util/profiler.h
     util/psk31.h
+    util/droneid.h
     util/radiosonde.h
     util/rainviewer.h
     util/rds.h
