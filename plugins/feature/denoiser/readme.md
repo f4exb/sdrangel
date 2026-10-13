@@ -16,6 +16,7 @@ Supported sources include:
   - DAB demodulator
   - DSD demodulator
   - NFM demodulator
+  - SELCAL demodulator
   - SSB demodulator
   - WFM demodulator
   - WDSP plugin (multimode)

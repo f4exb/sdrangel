@@ -124,7 +124,9 @@
 #include "SWGDOA2Report.h"
 #include "SWGDOA2Settings.h"
 #include "SWGDSCDemodReport.h"
+#include "SWGSELCALDemodReport.h"
 #include "SWGDSCDemodSettings.h"
+#include "SWGSELCALDemodSettings.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDroneIDDemodReport.h"
@@ -989,8 +991,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGSELCALDemodReport").compare(type) == 0) {
+      SWGSELCALDemodReport *obj = new SWGSELCALDemodReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDSCDemodSettings").compare(type) == 0) {
       SWGDSCDemodSettings *obj = new SWGDSCDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSELCALDemodSettings").compare(type) == 0) {
+      SWGSELCALDemodSettings *obj = new SWGSELCALDemodSettings();
       obj->init();
       return obj;
     }

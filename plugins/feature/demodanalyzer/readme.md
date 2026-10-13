@@ -18,6 +18,7 @@ Rx plugins are:
   - NFM demodulator
   - Packet demodulator
   - Radiosonde demodulator
+  - SELCAL demodulator
   - SSB demodulator
   - WFM demodulator
 

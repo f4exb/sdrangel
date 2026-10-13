@@ -1,0 +1,140 @@
+SELCALDemodSettings:
+  description: SELCAL settings
+  type: object
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    modulation:
+      type: integer
+      format: int32
+      description: "0 = USB, 1 = AM"
+      enum: [0, 1]
+    toneFrequencyOffset:
+      type: number
+      format: float
+      description: Common received audio tone offset in Hz
+      minimum: -100
+      maximum: 100
+    autoToneFrequencyOffset:
+      type: integer
+      format: int32
+      description: Use a detected residual USB carrier within +/-100 Hz as the tone offset; otherwise tones are searched for within +/-6 Hz of the manual offset
+      default: 1
+      enum: [0, 1]
+    threshold:
+      type: number
+      format: float
+      description: Minimum level of each tone above the noise in a tone bin, in dB
+      default: 8
+      minimum: 6
+      maximum: 20
+    volume:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+      format: int32
+    squelch:
+      type: integer
+      format: int32
+      description: Monitoring audio squelch threshold in dBFS; decoding is independent of squelch
+      default: -80
+      minimum: -100
+      maximum: 0
+    audioDeviceName:
+      type: string
+    filter:
+      type: string
+    udpEnabled:
+      type: integer
+      format: int32
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
+      format: int32
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+      format: int32
+    rgbColor:
+      type: integer
+      format: int32
+    title:
+      type: string
+    streamIndex:
+      type: integer
+      format: int32
+    useReverseAPI:
+      type: integer
+      format: int32
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+      format: int32
+    reverseAPIDeviceIndex:
+      type: integer
+      format: int32
+    reverseAPIChannelIndex:
+      type: integer
+      format: int32
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+SELCALDemodReport:
+  description: SELCAL report
+  type: object
+  properties:
+    channelPowerDb:
+      type: number
+      format: double
+    channelSampleRate:
+      type: integer
+      format: int32
+    audioSampleRate:
+      type: integer
+      format: int32
+    squelchOpen:
+      type: integer
+      format: int32
+      description: Monitoring audio squelch is open
+    carrierLocked:
+      type: integer
+      format: int32
+      description: A reliable residual USB carrier, or an AM carrier, has been detected
+    carrierFrequencyOffset:
+      type: number
+      format: float
+      description: Measured carrier error from channel tuning in Hz; valid when carrierLocked is 1
+    toneFrequencyOffset:
+      type: number
+      format: float
+      description: Common tone offset measured by the decoder, or the expected offset when no tones are present, in Hz
+    state:
+      type: string
+    lastCode:
+      type: string
+    lastTimestamp:
+      type: string
+    lastFrequency:
+      type: integer
+      format: int64
+    lastRssi:
+      type: number
+      format: float
+      description: Average channel power during the tone bursts of the last call, in dB
+    lastSnr:
+      type: number
+      format: float
+      description: SNR of the weaker tone of the last call, relative to the noise in a tone bin, in dB
+    callCount:
+      type: integer
+      format: int64

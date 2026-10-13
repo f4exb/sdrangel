@@ -40,6 +40,7 @@
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
 #include "SWGDSCDemodReport.h"
+#include "SWGSELCALDemodReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDroneIDDemodReport.h"
 #include "SWGEndOfTrainDemodReport.h"
@@ -162,7 +163,9 @@ public:
     void setDoa2Report(SWGDOA2Report* doa2_report);
 
     SWGDSCDemodReport* getDscDemodReport();
+    SWGSELCALDemodReport* getSelcalDemodReport();
     void setDscDemodReport(SWGDSCDemodReport* dsc_demod_report);
+    void setSelcalDemodReport(SWGSELCALDemodReport* selcal_demod_report);
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
@@ -358,7 +361,9 @@ private:
     bool m_doa2_report_isSet;
 
     SWGDSCDemodReport* dsc_demod_report;
+    SWGSELCALDemodReport* selcal_demod_report;
     bool m_dsc_demod_report_isSet;
+    bool m_selcal_demod_report_isSet;
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;

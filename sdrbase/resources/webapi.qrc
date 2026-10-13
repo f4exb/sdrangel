@@ -48,6 +48,7 @@
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/DOA2.yaml</file>
         <file>webapi/doc/swagger/include/DSCDemod.yaml</file>
+        <file>webapi/doc/swagger/include/SELCALDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/DroneIDDemod.yaml</file>
         <file>webapi/doc/swagger/include/EndOfTrainDemod.yaml</file>
