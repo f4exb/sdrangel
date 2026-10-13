@@ -93,10 +93,9 @@ comparable with them.
 
 <h3>9: Carrier status</h3>
 
-The text beside the volume dial shows the measured carrier offset and the
+The status text shows the measured carrier offset and the
 tone offset measured by the decoder, for example `Carrier +6.7 Hz, tones +6.7 Hz`.
-Without tones, the tone offset is the offset that the decoder expects. In AM, it
-shows whether coherent detection is in use.
+In AM, it shows whether coherent detection is in use.
 
 <h3>10: Volume</h3>
 
@@ -187,15 +186,11 @@ in its tooltip. The default is `selcal_log.csv`.
 <h3>21: Download SELCAL database</h3>
 
 Click the download button to download the database of SELCAL codes assigned to
-aircraft, from https://sdrangel.org/downloads/selcal.zip. It is used to display
+aircraft. It is used to display
 the registrations, types and images of aircraft assigned a received code. If the
 aircraft database used by the ADS-B demodulator has not been downloaded, you are
 asked whether to download it too (45MB): it provides aircraft types and images.
 The databases are stored in SDRangel's application data directory.
-
-The aircraft database is read when the channel is created. If it is downloaded
-later, for example by the ADS-B demodulator, it is read when the next call is
-received.
 
 <h3>22: Read calls from a CSV log</h3>
 
