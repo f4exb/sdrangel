@@ -81,8 +81,11 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QJsonArray m_telemetryQueue;
+    QJsonArray m_telemetryInFlight;
+    QNetworkReply *m_telemetryReply = nullptr;
     QTimer m_uploadTimer;
     static const int m_uploadPeriodMs = 15000; // SondeHub asks for uploads no more often than every 15s
+    static const int m_maxQueueSize = 1000;
 
 };
 

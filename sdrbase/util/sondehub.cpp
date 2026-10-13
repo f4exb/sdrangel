@@ -131,17 +131,21 @@ void SondeHub::upload(
     //obj.insert("dev", true);
     //qDebug() << obj;
     m_telemetryQueue.append(obj);
+    while (m_telemetryQueue.size() > m_maxQueueSize) {
+        m_telemetryQueue.removeFirst();
+    }
 }
 
 void SondeHub::uploadQueuedTelemetry()
 {
-    if (m_telemetryQueue.isEmpty()) {
+    if (m_telemetryQueue.isEmpty() || m_telemetryReply) {
         return;
     }
 
-    QJsonDocument doc(m_telemetryQueue);
-    QByteArray data = doc.toJson();
+    m_telemetryInFlight = m_telemetryQueue;
     m_telemetryQueue = QJsonArray();
+    QJsonDocument doc(m_telemetryInFlight);
+    QByteArray data = doc.toJson();
 
     QUrl url(QString("https://api.v2.sondehub.org/sondes/telemetry"));
 
@@ -150,7 +154,7 @@ void SondeHub::uploadQueuedTelemetry()
     request.setHeader(QNetworkRequest::UserAgentHeader, "sdrangel");
     request.setRawHeader("Date", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs).toLatin1());
 
-    m_networkManager->put(request, data);
+    m_telemetryReply = m_networkManager->put(request, data);
 }
 
 void SondeHub::updatePosition(
@@ -204,6 +208,25 @@ void SondeHub::getPrediction(const QString& serial)
 
 void SondeHub::handleReply(QNetworkReply* reply)
 {
+    if (reply && (reply == m_telemetryReply))
+    {
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (reply->error() || (status < 200) || (status >= 300))
+        {
+            // Requeue failed batch ahead of newer telemetry
+            for (const auto& value : m_telemetryQueue) {
+                m_telemetryInFlight.append(value);
+            }
+            m_telemetryQueue = m_telemetryInFlight;
+            while (m_telemetryQueue.size() > m_maxQueueSize) {
+                m_telemetryQueue.removeFirst();
+            }
+        }
+        m_telemetryInFlight = QJsonArray();
+        m_telemetryReply = nullptr;
+    }
+
     if (reply)
     {
         if (!reply->error())
