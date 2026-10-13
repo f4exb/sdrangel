@@ -110,7 +110,7 @@ private:
     QDateTime m_lastPositionUpdate;
     QTimer m_positionUpdateTimer;
     static const int m_minMobilePositionUpdateTime = 30; // In seconds
-    static const int m_minFixedPositionUpdateTime = 5 * 60;
+    static const int m_minFixedPositionUpdateTime = 3 * 60 * 60;
 
     QTimer m_predicitionTimer;
     QStringList m_predictions;
