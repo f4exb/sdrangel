@@ -29,6 +29,8 @@ SondeHub::SondeHub()
 {
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, &QNetworkAccessManager::finished, this, &SondeHub::handleReply);
+    connect(&m_uploadTimer, &QTimer::timeout, this, &SondeHub::uploadQueuedTelemetry);
+    m_uploadTimer.start(m_uploadPeriodMs);
 }
 
 SondeHub::~SondeHub()
@@ -128,12 +130,18 @@ void SondeHub::upload(
 
     //obj.insert("dev", true);
     //qDebug() << obj;
-    QJsonArray payloads {
-        obj
-    };
+    m_telemetryQueue.append(obj);
+}
 
-    QJsonDocument doc(payloads);
+void SondeHub::uploadQueuedTelemetry()
+{
+    if (m_telemetryQueue.isEmpty()) {
+        return;
+    }
+
+    QJsonDocument doc(m_telemetryQueue);
     QByteArray data = doc.toJson();
+    m_telemetryQueue = QJsonArray();
 
     QUrl url(QString("https://api.v2.sondehub.org/sondes/telemetry"));
 
