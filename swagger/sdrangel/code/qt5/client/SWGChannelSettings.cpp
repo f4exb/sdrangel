@@ -79,7 +79,9 @@ SWGChannelSettings::SWGChannelSettings() {
     doa2_settings = nullptr;
     m_doa2_settings_isSet = false;
     dsc_demod_settings = nullptr;
+    selcal_demod_settings = nullptr;
     m_dsc_demod_settings_isSet = false;
+    m_selcal_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
     drone_id_demod_settings = nullptr;
@@ -237,7 +239,9 @@ SWGChannelSettings::init() {
     doa2_settings = new SWGDOA2Settings();
     m_doa2_settings_isSet = false;
     dsc_demod_settings = new SWGDSCDemodSettings();
+    selcal_demod_settings = new SWGSELCALDemodSettings();
     m_dsc_demod_settings_isSet = false;
+    m_selcal_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
     drone_id_demod_settings = new SWGDroneIDDemodSettings();
@@ -411,6 +415,9 @@ SWGChannelSettings::cleanup() {
     }
     if(dsc_demod_settings != nullptr) { 
         delete dsc_demod_settings;
+    }
+    if(selcal_demod_settings != nullptr) {
+        delete selcal_demod_settings;
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
@@ -621,6 +628,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&doa2_settings, pJson["DOA2Settings"], "SWGDOA2Settings", "SWGDOA2Settings");
     
     ::SWGSDRangel::setValue(&dsc_demod_settings, pJson["DSCDemodSettings"], "SWGDSCDemodSettings", "SWGDSCDemodSettings");
+    ::SWGSDRangel::setValue(&selcal_demod_settings, pJson["SELCALDemodSettings"], "SWGSELCALDemodSettings", "SWGSELCALDemodSettings");
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
@@ -812,6 +820,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((dsc_demod_settings != nullptr) && (dsc_demod_settings->isSet())){
         toJsonValue(QString("DSCDemodSettings"), dsc_demod_settings, obj, QString("SWGDSCDemodSettings"));
+    }
+    if((selcal_demod_settings != nullptr) && (selcal_demod_settings->isSet())){
+        toJsonValue(QString("SELCALDemodSettings"), selcal_demod_settings, obj, QString("SWGSELCALDemodSettings"));
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
@@ -1222,6 +1233,19 @@ void
 SWGChannelSettings::setDscDemodSettings(SWGDSCDemodSettings* dsc_demod_settings) {
     this->dsc_demod_settings = dsc_demod_settings;
     this->m_dsc_demod_settings_isSet = true;
+}
+
+SWGSELCALDemodSettings*
+SWGChannelSettings::getSelcalDemodSettings() {
+    return selcal_demod_settings;
+}
+void
+SWGChannelSettings::setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings) {
+    if (this->selcal_demod_settings != selcal_demod_settings) {
+        delete this->selcal_demod_settings;
+    }
+    this->selcal_demod_settings = selcal_demod_settings;
+    this->m_selcal_demod_settings_isSet = true;
 }
 
 SWGDSDDemodSettings*
@@ -1795,6 +1819,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsc_demod_settings && dsc_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(selcal_demod_settings && selcal_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){

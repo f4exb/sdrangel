@@ -268,6 +268,7 @@ set(sdrbase_SOURCES
     util/radiosonde.cpp
     util/rainviewer.cpp
     util/rtpsink.cpp
+    util/selcaldb.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
     util/sdrangelserverlist.cpp
@@ -545,6 +546,7 @@ set(sdrbase_HEADERS
     util/rds.h
     util/rtpsink.h
     util/rtty.h
+    util/selcaldb.h
     util/syncmessenger.h
     util/samplesourceserializer.h
     util/sdrangelserverlist.h
