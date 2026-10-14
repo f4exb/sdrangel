@@ -43,6 +43,9 @@ ChannelReport:
     DABDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DABDemod.yaml#/DABDemodReport"
       description: "DAB demod report data for Channel."
+    DRMDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/DRMDemod.yaml#/DRMDemodReport"
+      description: "DRM demod report data for Channel."
     ChannelPowerReport:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelPower.yaml#/ChannelPowerReport"
       description: "Channel power report data for Channel."

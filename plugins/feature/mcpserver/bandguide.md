@@ -32,6 +32,7 @@ Minimum device sample rates:
 | DVB-T and DVB-T2 | 9.142857 MS/s for 8 MHz channels | 8/7 times the `bandwidth` is the native rate (64/7 MS/s for 8 MHz; 131/71, about 1.845 MS/s, for DVB-T2's 1.7 MHz). Rates from 0.875 to 2.2 times it are resampled, at a CPU cost. An RTL-SDR can't run fast enough for 5 MHz and over |
 | DVB-S and DVB-S2 | 1.2 times the symbol rate | The signal is 1 + roll-off times the `symbolRate` wide, and losing a little of its edges costs under 0.3 dB. More leaves room for it being off centre and for the device's filter: 33 MS/s or more for 27.5 MS/s broadcasts (a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s, 1 MS/s for QO-100's 333 or 500 kS/s. Measuring the symbol rate (`symbolRate` 0) needs about 1.7 times, to see the noise floor beside the signal. Use `standard` 4, 5 or 6: `standard` 0 is terrestrial, and needs 8 MS/s for an 8 MHz channel whatever the signal |
 | DJI DroneID | 15.36 MS/s | 9 MHz wide OFDM with a 1024 point FFT. Beyond an RTL-SDR: use a HackRF, USRP, PlutoSDR or similar |
+| DRM | 48 kS/s, 192 kS/s for mode E | The channel is resampled to 192 kHz when it can be, else to 48 kHz, which carries only the HF modes A to D |
 | Broadcast FM | 240 kS/s | Must exceed the channel RF bandwidth. 256 kS/s is recommended for a 180 kHz channel |
 
 ## Aircraft
@@ -97,6 +98,33 @@ briefly, and re-read the channel report. Repeat while SNR improves, and use the 
 gives the best positive SNR rather than the highest available gain. If lower gain makes
 synchronization or SNR worse, restore the better setting and investigate frequency,
 antenna and local interference instead.
+### Checking DRM reception
+
+`DRMDemodReport.syncState` goes from `searching` and `acquiring` to `locked` within a few
+seconds of a usable signal. `services` then lists up to four services with their labels as the
+SDC arrives, which takes a few more seconds; select one by setting `selectedServiceIdentifier`
+to its `serviceIdentifier` with `set_channel_settings` (-1 plays the first audio service).
+`audioActive: 1` means the selected service produced decoded audio in the last 2.5 seconds.
+`mscMERDB`, valid when `mscMERAvailable` is 1, is the quality measure: higher is better, so
+use it to compare antennas, gains and frequencies of the same broadcast rather than against a
+fixed figure. `textMessage` carries the station's text; `error` gives the reason there is no
+audio or no decoding, such as a codec the build cannot decode (`capabilities` lists those it
+can). When `slideshowPresent` is 1 the selected service sends MOT slideshow images;
+`slideshowImages` counts those received and `slideshowName` names the latest. The
+`saveSlideshowImage` channel action writes it to a file, with `slideshowMimeType` giving its
+format. When `websitePresent` is 1 the selected service sends a MOT Broadcast Website:
+`websiteFiles` of `websiteObjects` files have arrived, `websiteStartPage` names its start page,
+and the `saveWebsite` channel action writes the files received into a directory. A service can be
+a data service without audio (`dataService` 1); select it by its `serviceIdentifier` like an
+audio service to decode its slideshow or website, and `audioActive` stays 0. `journalineServices` and `journalineObjects` count the Journaline news services and the
+menus and pages received from them. To read the news, call `get_channel_report` with
+`includeJournaline`: `journaline` has an entry per news service (`services` names the services
+that carry it) with its `objects`. Object 0 is the main menu; a `menu` object's items link to
+other objects by `linkId`, a `text` object's items are paragraphs and a `list` object's items
+are table cells. The station repeats its news in a carousel, so menu entries can link to objects
+that have not arrived yet: the whole service can take a few minutes. An HF signal fades, so
+read the report more than once before judging it; a `syncState` that keeps returning to
+`reacquiring` means the signal is too weak, or the device gain is overloading it as for DAB.
 
 ## Short range and IoT
 
@@ -140,6 +168,7 @@ Do not scan for these; they are on fixed frequencies, so `listen` or `add_channe
   1 = 5.8 GHz, 2 = both). It retunes the device, so don't use it while other channels need the device frequency.
 - **DAB**: fixed Band III blocks 5A to 13F (174.928 to 239.200 MHz, 1.712 MHz apart). Start a
   `dab` channel on each block in turn and read the programme list from its report.
+- **DRM**: the frequencies in the broadcasters' published schedules; listen to each directly.
 - **AIS**: 161.975 and 162.025 MHz.
 - **DSC**: 2187.5 kHz, 8414.5 kHz, 16804.5 kHz and 156.525 MHz.
 - **NAVTEX**: 518, 490 and 4209.5 kHz.
@@ -186,6 +215,7 @@ looks like an empty band.
 | Broadcast FM | Channel report | `BFMDemodReport.rdsReport`: station name, programme type, radio text, once RDS has locked |
 | DAB | Channel report | `DABDemodReport`: `sync`, `snr`, `ensembleName`, `programs`; select a programme with `set_channel_settings` and read `audioActive` |
 | DVB-T and DVB-T2 (and DVB-S and S2) | Channel report | `DVBDemodReport`: `state` (Locked when the transport stream is being decoded), `standard`, `mode`, `constellation`, `codeRate`, `mer`, and `postViterbiBER` for DVB-T and DVB-S (below 2e-4 is error free) or `ldpcIterations` and `bchFailures` for DVB-T2 and DVB-S2; for DVB-S2 also `modcod`, `esN0` (dB, compare with the MODCOD's threshold), `plFrames` and `plHeaderMisses`, and `measuredSymbolRate` for both satellite standards. What's on: `epgNowTitle`, `epgNowStart` (UTC), `epgNowDuration` (s), `epgNowDescription` and `epgNextTitle`, `epgNextStart` of `epgServiceId` (the `serviceId` setting, or the first TV service); the guide takes a minute or so to arrive, and is cached. Recording to .ts files in `recordDirectory`: channel_action `{"record": 1}` (or 0 to stop) records the service selected, or with `recordMode` 0 the whole multiplex; `{"recordEvent": 1, "serviceId": id, "eventId": id}` records a programme from the guide (0 cancels), starting `recordStartPadding` s early and ending `recordEndPadding` s late; the report has `recording`, `recordingFile`, `recordingSize` and `scheduledRecordings`. channel_action `{"play": 1, "serviceId": id}` plays a service from the guide, retuning the device to its multiplex if it's on another. Audio and subtitles: `audioLanguage` and `subtitleLanguage` (ISO 639-2, e.g. eng), `audioDescription` 1 to mix in audio description and `subtitles` 1 to show subtitles, where the service has them. Video, the service list and the full guide are in the GUI; with `udpEnabled` the transport stream goes to `udpAddress`:`udpPort` for VLC |
+| DRM | Channel report | `DRMDemodReport`: `syncState`, `mscMERDB`, `services`, `audioActive`, `textMessage`, `error`; select a service with `set_channel_settings` (see Checking DRM reception) |
 | ADS-B | Map items | `get_map_items` lists the aircraft with position, altitude, heading and callsign; the channel report only has counts and the tracked target |
 | AIS, APRS and AX.25, LoRa, M17, Meshtastic, MeshCore, Inmarsat, radiosondes | Packet buffer | `get_packets`, which decodes AIS position reports, APRS positions and RS41 frames. Ships, stations and sondes also appear in `get_map_items` when the Map feature is present |
 | DroneID | Packet buffer and map items | `get_packets` decodes serial number, model, drone position, altitude and speed, and pilot and home positions. `get_map_items` lists the drone, pilot and home point when the Map feature is present |
@@ -193,7 +223,8 @@ looks like an empty band.
 | Pagers, DSC, NAVTEX, RTTY, FT8 | GUI only | The decoded messages are shown in the plugin's window; the API carries the channel power only. Say so rather than reporting the band as empty |
 
 How long to wait before reading: RDS a few seconds, the full station name up to ten; DAB sync
-about two seconds and the programme list five to ten; ADS-B ten seconds if aircraft are in
+about two seconds and the programme list five to ten; DRM lock a few seconds and the service
+labels and audio up to ten; ADS-B ten seconds if aircraft are in
 range; AIS half a minute, as each ship transmits every few seconds at most; APRS minutes,
 as stations transmit rarely; radiosonde frames once a second while a sonde is up; DroneID
 several seconds, as the drone only spends part of the time on any one channel; VOR a few
@@ -278,7 +309,7 @@ These do not demodulate a protocol but are useful for looking and recording.
   to the device centre frequency, and must fall within half the sample rate either side.
 - **The sample rate is below the minimum** for the mode, most often with ADS-B.
 - **The device cannot tune there.** An RTL-SDR covers about 24 to 1766 MHz; below that (DSC,
-  NAVTEX, FT8, AM and SSB on HF, the time signals) it receives only in direct sampling mode
+  NAVTEX, FT8, AM, SSB and DRM on HF, the time signals) it receives only in direct sampling mode
   (`noModMode` in its settings, with poor sensitivity) or through an upconverter. Check the
   device's readme for its range before tuning outside VHF and UHF.
 - **The radio is already in use.** One dongle serves one device set. `listen` and `scan` reuse the

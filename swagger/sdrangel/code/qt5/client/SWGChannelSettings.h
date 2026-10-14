@@ -43,6 +43,7 @@
 #include "SWGDVBDemodSettings.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Settings.h"
+#include "SWGDRMDemodSettings.h"
 #include "SWGDSCDemodSettings.h"
 #include "SWGSELCALDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
@@ -185,6 +186,9 @@ public:
 
     SWGDABDemodSettings* getDabDemodSettings();
     void setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings);
+
+    SWGDRMDemodSettings* getDrmDemodSettings();
+    void setDrmDemodSettings(SWGDRMDemodSettings* drm_demod_settings);
 
     SWGDOA2Settings* getDoa2Settings();
     void setDoa2Settings(SWGDOA2Settings* doa2_settings);
@@ -416,6 +420,9 @@ private:
 
     SWGDABDemodSettings* dab_demod_settings;
     bool m_dab_demod_settings_isSet;
+
+    SWGDRMDemodSettings* drm_demod_settings;
+    bool m_drm_demod_settings_isSet;
 
     SWGDOA2Settings* doa2_settings;
     bool m_doa2_settings_isSet;

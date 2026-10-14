@@ -23,11 +23,22 @@ IF(NOT FAAD_FOUND)
               /usr/lib64
     )
 
+    FIND_LIBRARY(
+        FAAD_DRM_LIBRARY
+        NAMES faad_drm
+        HINTS ${FAAD_DIR}/lib
+              ${PC_FAAD_LIBRARY_DIRS}
+        PATHS /usr/local/lib
+              /usr/lib
+              /usr/lib64
+    )
+
     message(STATUS "FAAD LIBRARY " ${FAAD_LIBRARY})
+    message(STATUS "FAAD DRM LIBRARY " ${FAAD_DRM_LIBRARY})
     message(STATUS "FAAD INCLUDE DIRS " ${FAAD_INCLUDE_DIR})
 
     INCLUDE(FindPackageHandleStandardArgs)
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(FAAD DEFAULT_MSG FAAD_LIBRARY FAAD_INCLUDE_DIR)
-    MARK_AS_ADVANCED(FAAD_LIBRARY FAAD_INCLUDE_DIR)
+    MARK_AS_ADVANCED(FAAD_LIBRARY FAAD_DRM_LIBRARY FAAD_INCLUDE_DIR)
 
 ENDIF(NOT FAAD_FOUND)

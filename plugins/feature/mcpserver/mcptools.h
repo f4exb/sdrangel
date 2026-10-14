@@ -231,6 +231,7 @@ private:
     //!< Explains an rdsReport that is absent because RDS decoding is switched off, rather than
     //!< because nothing has been decoded yet
     void addRdsHint(QJsonObject& report, const QString& channelType, int deviceSetIndex, int channelIndex);
+    static void removeJournaline(QJsonObject& report);
     QJsonObject getFeatureSettings(int featureIndex);
     QJsonObject patchFeatureSettings(int featureIndex, const QJsonObject& partial);
     QJsonObject deviceState(int deviceSetIndex, int subsystemIndex, int run); //!< run: 1 start, 0 stop, -1 query

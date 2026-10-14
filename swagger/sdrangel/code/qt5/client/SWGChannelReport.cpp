@@ -52,6 +52,8 @@ SWGChannelReport::SWGChannelReport() {
     m_bfm_mod_report_isSet = false;
     dab_demod_report = nullptr;
     m_dab_demod_report_isSet = false;
+    drm_demod_report = nullptr;
+    m_drm_demod_report_isSet = false;
     channel_power_report = nullptr;
     m_channel_power_report_isSet = false;
     chirp_chat_demod_report = nullptr;
@@ -190,6 +192,8 @@ SWGChannelReport::init() {
     m_bfm_mod_report_isSet = false;
     dab_demod_report = new SWGDABDemodReport();
     m_dab_demod_report_isSet = false;
+    drm_demod_report = new SWGDRMDemodReport();
+    m_drm_demod_report_isSet = false;
     channel_power_report = new SWGChannelPowerReport();
     m_channel_power_report_isSet = false;
     chirp_chat_demod_report = new SWGChirpChatDemodReport();
@@ -333,6 +337,9 @@ SWGChannelReport::cleanup() {
     }
     if(dab_demod_report != nullptr) { 
         delete dab_demod_report;
+    }
+    if(drm_demod_report != nullptr) { 
+        delete drm_demod_report;
     }
     if(channel_power_report != nullptr) { 
         delete channel_power_report;
@@ -528,6 +535,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dab_demod_report, pJson["DABDemodReport"], "SWGDABDemodReport", "SWGDABDemodReport");
     
+    ::SWGSDRangel::setValue(&drm_demod_report, pJson["DRMDemodReport"], "SWGDRMDemodReport", "SWGDRMDemodReport");
+    
     ::SWGSDRangel::setValue(&channel_power_report, pJson["ChannelPowerReport"], "SWGChannelPowerReport", "SWGChannelPowerReport");
     
     ::SWGSDRangel::setValue(&chirp_chat_demod_report, pJson["ChirpChatDemodReport"], "SWGChirpChatDemodReport", "SWGChirpChatDemodReport");
@@ -683,6 +692,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((dab_demod_report != nullptr) && (dab_demod_report->isSet())){
         toJsonValue(QString("DABDemodReport"), dab_demod_report, obj, QString("SWGDABDemodReport"));
+    }
+    if((drm_demod_report != nullptr) && (drm_demod_report->isSet())){
+        toJsonValue(QString("DRMDemodReport"), drm_demod_report, obj, QString("SWGDRMDemodReport"));
     }
     if((channel_power_report != nullptr) && (channel_power_report->isSet())){
         toJsonValue(QString("ChannelPowerReport"), channel_power_report, obj, QString("SWGChannelPowerReport"));
@@ -965,6 +977,16 @@ void
 SWGChannelReport::setDabDemodReport(SWGDABDemodReport* dab_demod_report) {
     this->dab_demod_report = dab_demod_report;
     this->m_dab_demod_report_isSet = true;
+}
+
+SWGDRMDemodReport*
+SWGChannelReport::getDrmDemodReport() {
+    return drm_demod_report;
+}
+void
+SWGChannelReport::setDrmDemodReport(SWGDRMDemodReport* drm_demod_report) {
+    this->drm_demod_report = drm_demod_report;
+    this->m_drm_demod_report_isSet = true;
 }
 
 SWGChannelPowerReport*
@@ -1539,6 +1561,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(dab_demod_report && dab_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(drm_demod_report && drm_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(channel_power_report && channel_power_report->isSet()){

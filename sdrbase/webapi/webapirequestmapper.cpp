@@ -4972,6 +4972,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDabDemodSettings()->init();
             channelSettings->getDabDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DRMDemodSettings")
+        {
+            channelSettings->setDrmDemodSettings(new SWGSDRangel::SWGDRMDemodSettings());
+            channelSettings->getDrmDemodSettings()->init();
+            channelSettings->getDrmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DOA2Settings")
         {
             channelSettings->setDoa2Settings(new SWGSDRangel::SWGDOA2Settings());
@@ -5323,6 +5329,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setDvbDemodActions(new SWGSDRangel::SWGDVBDemodActions());
             channelActions->getDvbDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "DRMDemodActions")
+        {
+            channelActions->setDrmDemodActions(new SWGSDRangel::SWGDRMDemodActions());
+            channelActions->getDrmDemodActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "FileSinkActions")
         {
@@ -6100,6 +6111,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDatvModSettings(nullptr);
     channelSettings.setDvbDemodSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
+    channelSettings.setDrmDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setDroneIdDemodSettings(nullptr);
     channelSettings.setEndOfTrainDemodSettings(nullptr);
@@ -6151,6 +6163,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setChannelPowerReport(nullptr);
     channelReport.setDatvModReport(nullptr);
     channelReport.setDvbDemodReport(nullptr);
+    channelReport.setDrmDemodReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setDroneIdDemodReport(nullptr);
     channelReport.setEndOfTrainDemodReport(nullptr);
@@ -6189,6 +6202,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setAptDemodActions(nullptr);
     channelActions.setWefaxDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
+    channelActions.setDrmDemodActions(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setFreqScannerActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);

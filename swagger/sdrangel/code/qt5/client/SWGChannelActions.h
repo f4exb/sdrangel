@@ -25,6 +25,7 @@
 #include "SWGAISModActions.h"
 #include "SWGAPTDemodActions.h"
 #include "SWGWefaxDemodActions.h"
+#include "SWGDRMDemodActions.h"
 #include "SWGDVBDemodActions.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
@@ -76,8 +77,12 @@ public:
 
     SWGWefaxDemodActions* getWefaxDemodActions();
     void setWefaxDemodActions(SWGWefaxDemodActions* wefax_demod_actions);
+
     SWGDVBDemodActions* getDvbDemodActions();
     void setDvbDemodActions(SWGDVBDemodActions* dvb_demod_actions);
+
+    SWGDRMDemodActions* getDrmDemodActions();
+    void setDrmDemodActions(SWGDRMDemodActions* drm_demod_actions);
 
     SWGFileSinkActions* getFileSinkActions();
     void setFileSinkActions(SWGFileSinkActions* file_sink_actions);
@@ -133,8 +138,12 @@ private:
 
     SWGWefaxDemodActions* wefax_demod_actions;
     bool m_wefax_demod_actions_isSet;
+
     SWGDVBDemodActions* dvb_demod_actions;
     bool m_dvb_demod_actions_isSet;
+
+    SWGDRMDemodActions* drm_demod_actions;
+    bool m_drm_demod_actions_isSet;
 
     SWGFileSinkActions* file_sink_actions;
     bool m_file_sink_actions_isSet;

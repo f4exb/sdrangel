@@ -31,6 +31,9 @@ ChannelActions:
     DVBDemodActions:
       $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodActions"
       description: "DVB demod actions configuration for Channel."
+    DRMDemodActions:
+      $ref: "http://swgserver:8081/api/swagger/include/DRMDemod.yaml#/DRMDemodActions"
+      description: "DRM demod actions configuration for Channel."
     FileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

@@ -39,6 +39,7 @@ set(LIBXML2_TAG "v2.10.4")
 set(UHD_TAG "v4.9.0.1")
 set(BOOST_TAG "1.86.0")
 set(BOOST_TAG2 "1_86_0")
+set(FDKAAC_TAG "v2.0.3")
 
 # For some external project macros
 include(ExternalProject)
@@ -332,10 +333,13 @@ if (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
     set(FAAD_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
     if (WIN32)
         set(FAAD_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/libfaad.lib" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/libfaad_drm.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(FAAD_LIBRARY "${install_dir}/lib${LIB_SUFFIX}/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${install_dir}/lib${LIB_SUFFIX}/libfaad_drm${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     elseif (APPLE)
         set(FAAD_LIBRARY "${install_dir}/lib/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${install_dir}/lib/libfaad_drm${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
 endif (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
@@ -1063,6 +1067,42 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif ()
 endif()
+
+# For DRM demodulator AAC/xHE-AAC audio
+# Built as a static library that only modemdrm links, so
+# not clash with the libfdk-aac that FFmpeg may load
+if (ENABLE_CHANNELRX AND ENABLE_CHANNELRX_DEMODDRM AND (NOT FDKAAC_FOUND OR FDKAAC_EXTERNAL))
+    set(FDKAAC_PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fdkaac")
+    if (MSVC)
+        set(FDKAAC_LIBRARY "${FDKAAC_PREFIX}/lib/fdk-aac.lib" CACHE INTERNAL "")
+    else ()
+        set(FDKAAC_LIBRARY "${FDKAAC_PREFIX}/lib/libfdk-aac.a" CACHE INTERNAL "")
+    endif ()
+    set(FDKAAC_CMAKE_ARGS ${COMMON_CMAKE_ARGS})
+    list(FILTER FDKAAC_CMAKE_ARGS EXCLUDE REGEX "^-DCMAKE_(RUNTIME|ARCHIVE|LIBRARY)_OUTPUT_DIRECTORY")
+    ExternalProject_Add(fdkaac
+        GIT_REPOSITORY https://github.com/mstorsjo/fdk-aac.git
+        GIT_TAG ${FDKAAC_TAG}
+        PREFIX "${FDKAAC_PREFIX}"
+        CMAKE_ARGS ${FDKAAC_CMAKE_ARGS}
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        -DBUILD_PROGRAMS=OFF
+        -DFDK_AAC_INSTALL_CMAKE_CONFIG_MODULE=OFF
+        -DFDK_AAC_INSTALL_PKGCONFIG_MODULE=OFF
+        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_INSTALL_LIBDIR=lib
+        BUILD_BYPRODUCTS "${FDKAAC_LIBRARY}"
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(fdkaac source_dir install_dir)
+    set_global(FDKAAC_DEPENDS fdkaac)
+    set_global_cache(FDKAAC_FOUND ON)
+    set(FDKAAC_EXTERNAL ON CACHE INTERNAL "")
+    set(FDKAAC_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
+    # Its licence has to be distributed with the binaries
+    install(FILES "${source_dir}/NOTICE" DESTINATION "${INSTALL_DOC_DIR}/fdk-aac")
+endif ()
 
 # For denoiser feature
 if(ENABLE_FEATURE_DENOISER)
