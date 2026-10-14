@@ -195,7 +195,13 @@ void DTVStreamRemuxer::run()
     }
 
     uint8_t *ioBuffer = (uint8_t *) av_malloc(m_ioBufferSize);
-    out->pb = avio_alloc_context(ioBuffer, m_ioBufferSize, 1, this, nullptr, &DTVStreamRemuxer::writePacket, nullptr);
+    // FFmpeg 7 (libavformat 61) made the buffer const
+#if LIBAVFORMAT_VERSION_MAJOR >= 61
+    int (*write)(void *, const uint8_t *, int) = &DTVStreamRemuxer::writePacket;
+#else
+    int (*write)(void *, uint8_t *, int) = [](void *opaque, uint8_t *buf, int size) { return writePacket(opaque, buf, size); };
+#endif
+    out->pb = avio_alloc_context(ioBuffer, m_ioBufferSize, 1, this, nullptr, write, nullptr);
     out->flags |= AVFMT_FLAG_CUSTOM_IO;
     AVDictionary *muxOptions = nullptr;
     av_dict_set(&muxOptions, "mpegts_flags", "resend_headers", 0);
