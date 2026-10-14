@@ -167,7 +167,7 @@ private:
     QJsonObject channelJson(const Channel& channel) const;
     QString appUrl(const DTVApps::App& app) const;
     void makeTransparent();
-    void downloadRequested(class QWebEngineDownloadRequest *download);
+    void downloadRequested(const QUrl& url, const QString& mimeType);
 
     DTVApps *m_apps;
     DTVCarouselServer *m_server;
@@ -201,6 +201,7 @@ private:
     QElapsedTimer m_userRequest;        //!< Since the user last pressed red or gave the application a key
     QElapsedTimer m_failed;             //!< Since an application last failed to load
     int m_appCarouselPid;               //!< The carousel the running application's loaded from, -1 if none
+    int m_loadsStarted;                 //!< Qt 5: page loads started, to tell a failed load from one replaced by another
     QElapsedTimer m_pendingRedTimer;
 };
 

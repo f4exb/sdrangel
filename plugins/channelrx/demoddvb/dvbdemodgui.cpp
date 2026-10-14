@@ -725,7 +725,7 @@ void DVBDemodGUI::appsMenu(const QPoint& position)
         "carousels or the internet. The coloured buttons are R, G, Y and B (or F1 to F4), and Back is Backspace");
 #ifndef DVBDEMOD_HBBTV
     run->setEnabled(false);
-    run->setToolTip("Not built: Qt WebEngine (Qt 6) is needed");
+    run->setToolTip("Not built: Qt WebEngine is needed");
 #endif
 
     QAction *clear = menu.addAction("Forget HbbTV sign-ins (cookies and cache)");

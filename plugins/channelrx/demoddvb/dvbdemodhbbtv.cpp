@@ -31,8 +31,12 @@
 #include <QNetworkRequest>
 #include <QQuickWidget>
 #include <QWebEngineCookieStore>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QWebEngineDownloadRequest>
 #include <QWebEngineLoadingInfo>
+#else
+#include <QWebEngineDownloadItem>
+#endif
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
 #include <QWebEngineScript>
@@ -169,7 +173,8 @@ DVBDemodHbbTV::DVBDemodHbbTV(DTVApps *apps, QObject *parent) :
     m_keyset(0),
     m_pendingRed(false),
     m_mediaId(0),
-    m_appCarouselPid(-1)
+    m_appCarouselPid(-1),
+    m_loadsStarted(0)
 {
     m_server->start();
     connect(m_server, &DTVCarouselServer::served, this, [this](const QString& path, int status) {
@@ -189,11 +194,25 @@ DVBDemodHbbTV::DVBDemodHbbTV(DTVApps *apps, QObject *parent) :
         agent = "Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36 HbbTV/1.4.1 (+DRM; LGE; 55UJ670V-ZD; WEBOS3.5 06.10.50; W3_K3LP; W3_K3LP;)";
     }
     setUserAgent(agent);
-    connect(m_profile, &QWebEngineProfile::downloadRequested, this, &DVBDemodHbbTV::downloadRequested);
+    // Downloads: of this page's only, as the profile's shared
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(m_profile, &QWebEngineProfile::downloadRequested, this, [this](QWebEngineDownloadRequest *download) {
+#else
+    connect(m_profile, &QWebEngineProfile::downloadRequested, this, [this](QWebEngineDownloadItem *download) {
+#endif
+        if (download->page() == m_page)
+        {
+            const QUrl url = download->url();
+            const QString mimeType = download->mimeType();
+            download->cancel();
+            downloadRequested(url, mimeType);
+        }
+    });
 
     m_page = new DVBDemodHbbTVPage(m_profile, this);
     m_page->setUrlRequestInterceptor(m_interceptor);
     m_page->setBackgroundColor(Qt::transparent);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(m_page, &QWebEnginePage::loadingChanged, this, [this](const QWebEngineLoadingInfo& info) {
         if (info.status() == QWebEngineLoadingInfo::LoadSucceededStatus) {
             loadFinished(true);
@@ -202,6 +221,27 @@ DVBDemodHbbTV::DVBDemodHbbTV(DTVApps *apps, QObject *parent) :
             loadFinished(false);
         }
     });
+#else
+    // Qt 5 says a load's failed when it's replaced by another (as when a page goes to another as it loads): only a
+    // load not followed by another is taken to have failed
+    connect(m_page, &QWebEnginePage::loadStarted, this, [this]() { m_loadsStarted++; });
+    connect(m_page, &QWebEnginePage::loadFinished, this, [this](bool ok) {
+        if (ok)
+        {
+            loadFinished(true);
+            return;
+        }
+
+        const int loads = m_loadsStarted;
+        QTimer::singleShot(500, this, [this, loads]() {
+            if (loads == m_loadsStarted)
+            {
+                emit log(QString("Load failed: %1").arg(m_page->url().toString()));
+                loadFinished(false);
+            }
+        });
+    });
+#endif
 
     connect(&m_timer, &QTimer::timeout, this, &DVBDemodHbbTV::check);
     m_timer.start(m_checkMs);
@@ -1066,16 +1106,8 @@ void DVBDemodHbbTV::createApplication(const QString& uri)
 
 // An HbbTV application served as application/vnd.hbbtv.xhtml+xml, which the browser would download rather than show:
 // fetched, and given to it as HTML
-void DVBDemodHbbTV::downloadRequested(QWebEngineDownloadRequest *download)
+void DVBDemodHbbTV::downloadRequested(const QUrl& url, const QString& mimeType)
 {
-    if (download->page() != m_page) {
-        return;     // Another demodulator's
-    }
-
-    const QUrl url = download->url();
-    const QString mimeType = download->mimeType();
-    download->cancel();
-
     if (!isRunning() || (url != QUrl(m_appUrl)) || !(mimeType.contains("hbbtv") || mimeType.contains("xhtml") || mimeType.contains("cehtml")))
     {
         emit log(QString("Download of %1 (%2) refused").arg(url.toString()).arg(mimeType));
@@ -1150,7 +1182,13 @@ void DVBDemodHbbTV::updateScript()
 {
     QWebEngineScriptCollection& scripts = m_page->scripts();
 
-    for (const QWebEngineScript& old : scripts.find(m_scriptName)) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    const QList<QWebEngineScript> oldScripts = scripts.find(m_scriptName);
+#else
+    const QList<QWebEngineScript> oldScripts = scripts.findScripts(m_scriptName);
+#endif
+
+    for (const QWebEngineScript& old : oldScripts) {
         scripts.remove(old);
     }
 
