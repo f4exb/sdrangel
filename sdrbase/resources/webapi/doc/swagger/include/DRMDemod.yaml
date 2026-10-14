@@ -1,0 +1,557 @@
+DRMDemodSettings:
+  description: Native Digital Radio Mondiale receive channel settings.
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "DRM reference-frequency offset from the device center frequency in Hz."
+    acquisitionSearchRangeHz:
+      type: integer
+      minimum: 0
+      maximum: 5000
+      description: "Symmetric carrier acquisition half-range in Hz. Zero selects the mode default; explicit values from 100 through 5000 are valid (1 through 99 are taken as 100)."
+    forcedMode:
+      type: integer
+      minimum: -1
+      maximum: 4
+      description: "Constrain acquisition to robustness mode A=0 through E=4. Minus one searches all modes."
+    forcedOccupancy:
+      type: integer
+      minimum: -1
+      maximum: 5
+      description: "Constrain acquisition to the DRM spectrum-occupancy code. Minus one searches every occupancy valid for the selected mode; an occupancy the forced mode does not define is replaced by minus one."
+    selectedServiceIdentifier:
+      type: integer
+      format: int64
+      minimum: -1
+      maximum: 16777215
+      description: "Stable 24-bit DRM service identifier. Minus one automatically selects the first available audio service."
+    volume:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 10
+      description: "Audio volume multiplier."
+    audioMute:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Mute audio output (1 muted, 0 unmuted)."
+    audioDeviceName:
+      type: string
+      description: "Name of the audio output device."
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    streamIndex:
+      type: integer
+      minimum: 0
+      description: "Zero-based device RX/MIMO input stream. This does not select an MSC or audio stream."
+    useReverseAPI:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Synchronize settings with the reverse API (1 enabled, 0 disabled)."
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      minimum: 1024
+      maximum: 65535
+      description: "TCP port of the reverse API peer."
+    reverseAPIDeviceIndex:
+      type: integer
+      minimum: 0
+      maximum: 99
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      minimum: 0
+      maximum: 99
+      description: "Channel index used by the reverse API peer."
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+DRMService:
+  description: "A DRM service joined from the current FAC and SDC signalling."
+  properties:
+    serviceIdentifier:
+      type: integer
+      format: int64
+      description: "Stable 24-bit DRM service identifier."
+    shortIdentifier:
+      type: integer
+      description: "FAC/SDC short identifier used internally within the multiplex."
+    audioService:
+      type: integer
+      minimum: 0
+      maximum: 1
+    conditionalAccess:
+      type: integer
+      minimum: 0
+      maximum: 1
+    facLanguageCode:
+      type: integer
+      description: "Raw four-bit FAC language code."
+    facServiceDescriptor:
+      type: integer
+      description: "Raw five-bit FAC service descriptor."
+    label:
+      type: string
+      description: "UTF-8 label from SDC entity 1, or an empty string when absent."
+    language:
+      type: string
+      description: "Three-character language code from SDC entity 12, or an empty string when absent."
+    country:
+      type: string
+      description: "Two-character country code from SDC entity 12, or an empty string when absent."
+    streamId:
+      type: integer
+      description: "MSC stream identifier from SDC entity 9, or -1 for a service without a current audio descriptor."
+    audioCoding:
+      type: integer
+      description: "Raw SDC audio coding value, or -1 when absent."
+    audioMode:
+      type: integer
+      description: "Raw SDC audio mode value, or -1 when absent."
+    samplingRateCode:
+      type: integer
+      description: "Raw SDC audio sampling-rate code, or -1 when absent."
+    sbr:
+      type: integer
+      minimum: 0
+      maximum: 1
+    textFlag:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the audio stream signals an associated text-message field."
+
+DRMAFS:
+  description: "Parsed SDC alternative-frequency signalling. Automatic checking and switching are not performed."
+  properties:
+    entityType:
+      type: integer
+      description: "SDC entity type: 3, 4, 7, 11, 13 or 15."
+    listVersion:
+      type: integer
+      minimum: 0
+      maximum: 1
+    extension:
+      type: integer
+      description: "Entity extension, or -1 when the entity has no extension field."
+    synchronousMultiplex:
+      type: integer
+      minimum: 0
+      maximum: 1
+    baseLayer:
+      type: integer
+      minimum: 0
+      maximum: 1
+    appliesToAllServices:
+      type: integer
+      minimum: 0
+      maximum: 1
+    regionOrScheduleRestricted:
+      type: integer
+      minimum: 0
+      maximum: 1
+    serviceRestrictionField:
+      type: integer
+      description: "Entity 3 Service Restriction field: Short Id flags in the upper four bits (msb Short Id 3). -1 when absent."
+    regionScheduleField:
+      type: integer
+      description: "Entity 3 Region/Schedule field: Region Id in the upper four bits, Schedule Id in the lower four. -1 when absent."
+    frequencies:
+      type: array
+      description: "Frequencies signalled by an entity 3 list."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMAFSFrequency"
+
+DRMAFSFrequency:
+  description: "One frequency of an SDC entity 3 alternative-frequency list."
+  properties:
+    code:
+      type: integer
+      description: "Raw 16-bit code: the msb selects 10 kHz (mode E) rather than 1 kHz units for the lower 15 bits."
+    frequencyKHz:
+      type: integer
+      description: "Decoded frequency in kHz."
+
+DRMJournaline:
+  description: "One Journaline news service of the multiplex: its menus and pages as received so far."
+  properties:
+    services:
+      type: array
+      description: "The services that carry this Journaline service."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMJournalineService"
+    objects:
+      type: array
+      description: "Received menus and pages, by object ID. Object 0 is the main menu; menu items link to other objects by linkId."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMJournalineObject"
+
+DRMJournalineService:
+  description: "A service that carries a Journaline news service."
+  properties:
+    shortIdentifier:
+      type: integer
+      description: "FAC/SDC short identifier of the service."
+    serviceIdentifier:
+      type: integer
+      format: int64
+      description: "24-bit DRM service identifier, or -1 until the FAC has named it."
+    label:
+      type: string
+      description: "The service's label, or an empty string when absent."
+
+DRMJournalineObject:
+  description: "One Journaline object (ETSI TS 102 979): a menu, a page of text or a list."
+  properties:
+    objectId:
+      type: integer
+      description: "Object ID (0 is the main menu)."
+    type:
+      type: string
+      enum: [menu, text, title, list]
+      description: "menu: items are entries linking to other objects; text: items are paragraphs; title: a title only; list: items are table cells."
+    revision:
+      type: integer
+      description: "Revision number of this version of the object."
+    staticObject:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when the broadcaster keeps this object ID for the same content."
+    title:
+      type: string
+    items:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMJournalineItem"
+
+DRMJournalineItem:
+  description: "A menu entry, a paragraph or a list cell of a Journaline object. Line breaks are newline characters."
+  properties:
+    text:
+      type: string
+    linkId:
+      type: integer
+      description: "Menus only: the object ID this entry opens (it may not have arrived yet)."
+    newRow:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Lists only: 1 when this cell starts a new row."
+
+DRMDemodReport:
+  description: "Live native DRM acquisition, signalling, MSC and audio status for the current receiver epoch."
+  properties:
+    audioDecoderBackend:
+      type: string
+      description: "Runtime codec backend name, including none when a codec is unavailable."
+    capabilities:
+      type: array
+      description: "Implemented native functions and codec capabilities available in this build. Validated RF/profile coverage is documented separately."
+      items:
+        type: string
+        enum: [nativeFAC, nativeSDC, nativeMSC, drmAAC, drmXHEAAC]
+    syncState:
+      type: string
+      enum: [stopped, searching, acquiring, locked, reacquiring]
+      description: "RF/FAC synchronization state. SDC, MSC and audio readiness are reported separately."
+    epoch:
+      type: integer
+      format: int64
+      description: "Monotonic receiver epoch, incremented on start, explicit reset/retune and established-lock loss."
+    facValid:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the latest complete FAC result is CRC-valid."
+    sdcValid:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the latest SDC block is CRC-valid. Cached configuration can remain available during a block erasure."
+    facAgeMs:
+      type: integer
+      format: int64
+      description: "Monotonic wall-clock milliseconds since the latest observed FAC slot, valid or invalid; -1 before observation in this RF epoch."
+    sdcAgeMs:
+      type: integer
+      format: int64
+      description: "Monotonic wall-clock milliseconds since the latest attempted SDC block, valid or invalid; -1 before an attempt in this RF epoch. Skipped blocks do not renew this age."
+    audioAgeMs:
+      type: integer
+      format: int64
+      description: "Monotonic wall-clock milliseconds since successful decoded PCM production; -1 before production in this service epoch. Concealment does not renew this age."
+    broadcastTimeAgeMs:
+      type: integer
+      format: int64
+      description: "Monotonic wall-clock milliseconds since a newly received CRC-valid SDC entity-8 time/date; -1 when absent in this RF epoch. Cached SDC does not renew this age."
+    validFACBlocks:
+      type: integer
+      format: int64
+      description: "CRC-valid chronological FAC slots in processed transmission windows in this RF epoch. Acquisition retries are not observations."
+    invalidFACBlocks:
+      type: integer
+      format: int64
+      description: "Rejected or erased chronological FAC slots in processed transmission windows in this RF epoch. The FAC denominator is validFACBlocks plus invalidFACBlocks."
+    validSDCBlocks:
+      type: integer
+      format: int64
+      description: "CRC-valid attempted SDC blocks in this RF epoch."
+    invalidSDCBlocks:
+      type: integer
+      format: int64
+      description: "Rejected attempted SDC blocks in this RF epoch. The SDC CRC denominator is validSDCBlocks plus invalidSDCBlocks."
+    skippedSDCBlocks:
+      type: integer
+      format: int64
+      description: "Transmission superframes whose SDC block was skipped because fresh first-frame FAC was unavailable. Excluded from the SDC CRC denominator."
+    mscReady:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether MSC decoding has valid configuration and sufficient data/interleaver fill."
+    audioActive:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the selected service produced decoded PCM within the last 2500 wall-clock milliseconds while RF is locked. Concealment alone does not activate this flag."
+    mode:
+      type: string
+      description: "Detected DRM robustness mode A through E; empty while unavailable."
+    occupancy:
+      type: integer
+      description: "Detected spectrum occupancy code, or -1 while unavailable."
+    spectrumInverted:
+      type: integer
+      minimum: -1
+      maximum: 1
+      description: "Detected spectrum orientation: 1 mirrored (the input's I and Q swapped), 0 normal, -1 until locked. Acquisition tries both."
+    effectiveSearchRangeHz:
+      type: integer
+      description: "Effective symmetric carrier acquisition half-range in Hz for the detected mode."
+    internalSampleRate:
+      type: integer
+      description: "Sample rate the native modem runs at after resampling the channel: 192000, or 48000 (modes A-D only) when the channel is narrower than 192 kHz."
+    channelSampleRate:
+      type: integer
+      description: "Sample rate of the channel delivered by the channelizer, before resampling to internalSampleRate."
+    channelPowerDB:
+      type: number
+      format: float
+      description: "Power of the DRM band after the input filter (the candidate acquisition bands, or the locked signal) in dB, averaged over about half a second."
+    inputFilterLowHz:
+      type: number
+      format: float
+      description: "Lower edge of the input band filter relative to the DRM reference frequency in Hz: the union of candidate acquisition bands, or the locked occupancy."
+    inputFilterHighHz:
+      type: number
+      format: float
+      description: "Upper edge of the input band filter relative to the DRM reference frequency in Hz."
+    carrierOffsetHz:
+      type: number
+      format: float
+      description: "Estimated residual carrier offset from the requested DRM reference frequency in Hz; valid only when carrierOffsetAvailable is 1."
+    carrierOffsetAvailable:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether a FAC lock has measured carrierOffsetHz in this RF epoch."
+    sampleClockErrorPPM:
+      type: number
+      format: float
+      description: "Pilot-derived input sample-clock error estimate in parts per million; valid only when sampleClockErrorAvailable is 1."
+    sampleClockErrorAvailable:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether enough coherent frames have been received to estimate sampleClockErrorPPM."
+    mscMERAvailable:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the latest bounded decode produced a decision-directed MSC modulation-error-ratio measurement."
+    mscMERDB:
+      type: number
+      format: float
+      description: "Decision-directed MSC MER in dB over deinterleaver-output cells. Each equalized cell is compared with the nearest point in the signalled MSC constellation; valid only when mscMERAvailable is 1."
+    mscMERCellCount:
+      type: integer
+      format: int64
+      description: "Number of MSC constellation cells included in mscMERDB for the latest bounded decode operation."
+    services:
+      type: array
+      description: "Services announced by fresh FAC in the current RF epoch (at most four, cleared at a service-count or reconfiguration boundary), enriched with current SDC labels, language/country and audio descriptors."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMService"
+    selectedServiceIdentifier:
+      type: integer
+      format: int64
+      description: "Stable 24-bit service identifier selected for MSC/audio decoding, or -1 when unavailable."
+    captureWindows:
+      type: integer
+      format: int64
+      description: "Decode steps since the latest start or explicit reset: cold acquisition spans followed by individual tracked transmission superframes."
+    audioDroppedSamples:
+      type: integer
+      format: int64
+      description: "Output stereo sample pairs rejected by the bounded audio FIFO in this service epoch. A short write preserves previously queued audio."
+    inputDroppedSamples:
+      type: integer
+      format: int64
+      description: "RF sample pairs rejected by the input FIFO since channel creation. Gaps the FIFO could have held (up to about 2 seconds) are replaced by zero samples at their stream position, so tracking sees an erasure; a longer gap means decoding is slower than the input, and the receiver restarts from the newest input."
+    processedSuperframes:
+      type: integer
+      description: "Complete transmission superframes processed in this service epoch."
+    retainedSamples:
+      type: integer
+      description: "Samples retained after the latest successful window, including the undecoded tail and one pre-boundary guard interval used for timing tracking."
+    decodedMultiplexFrames:
+      type: integer
+      description: "CRC/fill-valid MSC multiplex frames in this service epoch."
+    invalidMultiplexFrames:
+      type: integer
+      description: "MSC multiplex frames rejected for invalid fill bits or stream extraction in this service epoch."
+    parsedAudioSuperframes:
+      type: integer
+      description: "Valid DRM audio superframes in this service epoch."
+    invalidAudioSuperframes:
+      type: integer
+      description: "DRM audio superframes rejected by transport framing or access-unit validation in this service epoch."
+    decodedPCMFrames:
+      type: integer
+    concealedPCMFrames:
+      type: integer
+      description: "Codec concealment frames delivered in this service epoch, counted separately from decoded frames."
+    decoderAudioSampleRate:
+      type: integer
+      description: "Native sample rate of the most recently selected decoded audio stream, or zero when unavailable."
+    outputAudioSampleRate:
+      type: integer
+      description: "Sample rate of the selected SDRangel audio output device."
+    audioChannels:
+      type: integer
+      description: "Number of channels in the selected decoded audio stream, or zero when unavailable."
+    textMessagePresent:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether a CRC-valid text message is currently available for the selected audio service."
+    textMessage:
+      type: string
+      description: "Latest complete UTF-8 DRM text message."
+    invalidTextSegments:
+      type: integer
+      description: "CRC or sequence-invalid text segments in this service epoch."
+    slideshowPresent:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the selected service has a MOT slideshow data component (SDC entity 5)."
+    slideshowImages:
+      type: integer
+      description: "MOT slideshow images received for the selected service in this service epoch."
+    slideshowName:
+      type: string
+      description: "Content name of the latest slideshow image, or an empty string."
+    slideshowMimeType:
+      type: string
+      description: "MIME type of the latest slideshow image, for example image/jpeg."
+    slideshowSize:
+      type: integer
+      description: "Size in bytes of the latest slideshow image, or zero when none has arrived."
+    slideshowAgeMs:
+      type: integer
+      format: int64
+      description: "Milliseconds since the latest slideshow image arrived, or -1 for none."
+    slideshowValidPackets:
+      type: integer
+      description: "CRC-valid packets of the slideshow component in this service epoch."
+    slideshowInvalidPackets:
+      type: integer
+      description: "Packets of the slideshow component's stream that failed their CRC in this service epoch."
+    websitePresent:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when the selected service carries a MOT Broadcast Website."
+    websiteFiles:
+      type: integer
+      description: "Files of the Broadcast Website received so far."
+    websiteObjects:
+      type: integer
+      description: "Objects the Broadcast Website's current MOT directory describes."
+    websiteStartPage:
+      type: string
+      description: "The Broadcast Website's start page (a file name), or an empty string."
+    websiteValidPackets:
+      type: integer
+      description: "CRC-valid packets of the website component in this service epoch."
+    websiteInvalidPackets:
+      type: integer
+      description: "Packets of the website component's stream that failed their CRC in this service epoch."
+    dataService:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when the selected service is a data service, without audio."
+    journalineServices:
+      type: integer
+      description: "Journaline news services in the multiplex (services that share one are counted once)."
+    journalineObjects:
+      type: integer
+      description: "Journaline menus and pages received from the multiplex's services."
+    journaline:
+      type: array
+      description: "The Journaline news received, one entry per news service."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMJournaline"
+    broadcastTimeUTC:
+      type: string
+      description: "SDC entity-8 UTC date and minute in ISO-8601 form, or an empty string when absent."
+    localTimeOffsetPresent:
+      type: integer
+      minimum: 0
+      maximum: 1
+    localTimeOffsetMinutes:
+      type: integer
+      description: "Signed SDC entity-8 local-time offset in minutes; valid only when localTimeOffsetPresent is 1."
+    afsIndex:
+      type: integer
+      description: "Current SDC AFS index, or -1 while SDC is unavailable."
+    alternativeFrequencies:
+      type: array
+      description: "Parsed AFS metadata. The receiver does not retune from these entries."
+      items:
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMAFS"
+    error:
+      type: string
+      description: "Current reason that acquisition, signalling, MSC or audio is unavailable."
+
+DRMDemodActions:
+  description: DRMDemod
+  properties:
+    reacquire:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Set to 1 to discard synchronization, signalling and audio and restart acquisition on the current channel."
+    saveSlideshowImage:
+      type: string
+      description: "Write the latest slideshow image to this file path on the SDRangel host (the image's own format, as slideshowMimeType says)."
+    saveWebsite:
+      type: string
+      description: "Write the Broadcast Website's files received so far into this directory on the SDRangel host, keeping their paths."

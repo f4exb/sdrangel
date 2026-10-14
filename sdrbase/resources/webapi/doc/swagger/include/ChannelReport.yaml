@@ -43,6 +43,9 @@ ChannelReport:
     DABDemodReport:
       $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodReport"
       description: "DAB demod report data for Channel."
+    DRMDemodReport:
+      $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMDemodReport"
+      description: "DRM demod report data for Channel."
     ChannelPowerReport:
       $ref: "/doc/swagger/include/ChannelPower.yaml#/ChannelPowerReport"
       description: "Channel power report data for Channel."

@@ -78,6 +78,9 @@ ChannelSettings:
     DABDemodSettings:
       $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodSettings"
       description: "Dab demod settings configuration for Channel."
+    DRMDemodSettings:
+      $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMDemodSettings"
+      description: "DRM demod settings configuration for Channel."
     DOA2Settings:
       $ref: "/doc/swagger/include/DOA2.yaml#/DOA2Settings"
       description: "Doa2 settings configuration for Channel."

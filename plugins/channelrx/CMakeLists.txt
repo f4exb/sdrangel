@@ -151,6 +151,12 @@ else()
     message(STATUS "Not building demoddab (ENABLE_CHANNELRX_DEMODDAB=${ENABLE_CHANNELRX_DEMODDAB} DAB_FOUND=${DAB_FOUND} ZLIB_FOUND=${ZLIB_FOUND} FAAD_FOUND=${FAAD_FOUND})")
 endif()
 
+if(ENABLE_CHANNELRX_DEMODDRM)
+    add_subdirectory(demoddrm)
+else()
+    message(STATUS "Not building demoddrm (ENABLE_CHANNELRX_DEMODDRM=${ENABLE_CHANNELRX_DEMODDRM})")
+endif()
+
 if(ENABLE_CHANNELRX_DEMODAPT AND APT_FOUND AND SGP4_FOUND)
     add_subdirectory(demodapt)
 else()

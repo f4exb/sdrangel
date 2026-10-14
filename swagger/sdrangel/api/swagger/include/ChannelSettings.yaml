@@ -78,6 +78,9 @@ ChannelSettings:
     DABDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DABDemod.yaml#/DABDemodSettings"
       description: "Dab demod settings configuration for Channel."
+    DRMDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/DRMDemod.yaml#/DRMDemodSettings"
+      description: "DRM demod settings configuration for Channel."
     DOA2Settings:
       $ref: "http://swgserver:8081/api/swagger/include/DOA2.yaml#/DOA2Settings"
       description: "Doa2 settings configuration for Channel."

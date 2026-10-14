@@ -39,6 +39,7 @@
 #include "SWGDVBDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
+#include "SWGDRMDemodReport.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDroneIDDemodReport.h"
@@ -139,6 +140,9 @@ public:
 
     SWGDABDemodReport* getDabDemodReport();
     void setDabDemodReport(SWGDABDemodReport* dab_demod_report);
+
+    SWGDRMDemodReport* getDrmDemodReport();
+    void setDrmDemodReport(SWGDRMDemodReport* drm_demod_report);
 
     SWGChannelPowerReport* getChannelPowerReport();
     void setChannelPowerReport(SWGChannelPowerReport* channel_power_report);
@@ -335,6 +339,9 @@ private:
 
     SWGDABDemodReport* dab_demod_report;
     bool m_dab_demod_report_isSet;
+
+    SWGDRMDemodReport* drm_demod_report;
+    bool m_drm_demod_report_isSet;
 
     SWGChannelPowerReport* channel_power_report;
     bool m_channel_power_report_isSet;

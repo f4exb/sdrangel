@@ -627,7 +627,7 @@ QJsonValue MCPProtocol::promptsGet(const QJsonObject& params)
             "1. If you do not already know the frequency and which demodulator this signal needs, call get_receiving_guide.\n"
             "2. Call listen with that frequency and mode%3. It picks a device, sets a sample rate that suits the mode, adds the "
             "demodulator, starts everything and reports the run state and signal level, so one call replaces the whole "
-            "device set, settings and channel sequence. Modes are bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais and dsd, "
+            "device set, settings and channel sequence. Modes are bfm, wfm, nfm, am, ssb, usb, lsb, dab, drm, adsb, ais and dsd, "
             "or any channel type id from list_channel_types.\n"
             "3. Read what listen returned. If it reports a note, act on it. Adjust with set_channel_settings if the signal needs "
             "it (squelch, volume, rfBandwidth) and use get_channel_report to confirm.\n"

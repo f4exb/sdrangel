@@ -31,6 +31,9 @@ ChannelActions:
     DVBDemodActions:
       $ref: "/doc/swagger/include/DVBDemod.yaml#/DVBDemodActions"
       description: "DVB demod actions configuration for Channel."
+    DRMDemodActions:
+      $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMDemodActions"
+      description: "DRM demod actions configuration for Channel."
     FileSinkActions:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

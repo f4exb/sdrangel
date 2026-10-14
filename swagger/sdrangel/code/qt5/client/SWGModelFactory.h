@@ -123,6 +123,16 @@
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Report.h"
 #include "SWGDOA2Settings.h"
+#include "SWGDRMAFS.h"
+#include "SWGDRMAFSFrequency.h"
+#include "SWGDRMDemodActions.h"
+#include "SWGDRMDemodReport.h"
+#include "SWGDRMDemodSettings.h"
+#include "SWGDRMJournaline.h"
+#include "SWGDRMJournalineItem.h"
+#include "SWGDRMJournalineObject.h"
+#include "SWGDRMJournalineService.h"
+#include "SWGDRMService.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodReport.h"
@@ -981,6 +991,56 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDOA2Settings").compare(type) == 0) {
       SWGDOA2Settings *obj = new SWGDOA2Settings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMAFS").compare(type) == 0) {
+      SWGDRMAFS *obj = new SWGDRMAFS();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMAFSFrequency").compare(type) == 0) {
+      SWGDRMAFSFrequency *obj = new SWGDRMAFSFrequency();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMDemodActions").compare(type) == 0) {
+      SWGDRMDemodActions *obj = new SWGDRMDemodActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMDemodReport").compare(type) == 0) {
+      SWGDRMDemodReport *obj = new SWGDRMDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMDemodSettings").compare(type) == 0) {
+      SWGDRMDemodSettings *obj = new SWGDRMDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMJournaline").compare(type) == 0) {
+      SWGDRMJournaline *obj = new SWGDRMJournaline();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMJournalineItem").compare(type) == 0) {
+      SWGDRMJournalineItem *obj = new SWGDRMJournalineItem();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMJournalineObject").compare(type) == 0) {
+      SWGDRMJournalineObject *obj = new SWGDRMJournalineObject();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMJournalineService").compare(type) == 0) {
+      SWGDRMJournalineService *obj = new SWGDRMJournalineService();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDRMService").compare(type) == 0) {
+      SWGDRMService *obj = new SWGDRMService();
       obj->init();
       return obj;
     }
