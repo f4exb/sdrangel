@@ -203,3 +203,5 @@ ChannelReport:
     WFMModReport:
       $ref: "http://swgserver:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
       description: "Wfm mod report data for Channel."
+    SELCALDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SELCALDemod.yaml#/SELCALDemodReport"

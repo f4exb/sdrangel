@@ -236,3 +236,5 @@ ChannelSettings:
     WFMModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/WFMMod.yaml#/WFMModSettings"
       description: "Wfm mod settings configuration for Channel."
+    SELCALDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/SELCALDemod.yaml#/SELCALDemodSettings"

@@ -45,6 +45,7 @@
 #include "SWGDOA2Settings.h"
 #include "SWGDRMDemodSettings.h"
 #include "SWGDSCDemodSettings.h"
+#include "SWGSELCALDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDroneIDDemodSettings.h"
 #include "SWGEndOfTrainDemodSettings.h"
@@ -193,7 +194,9 @@ public:
     void setDoa2Settings(SWGDOA2Settings* doa2_settings);
 
     SWGDSCDemodSettings* getDscDemodSettings();
+    SWGSELCALDemodSettings* getSelcalDemodSettings();
     void setDscDemodSettings(SWGDSCDemodSettings* dsc_demod_settings);
+    void setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -425,7 +428,9 @@ private:
     bool m_doa2_settings_isSet;
 
     SWGDSCDemodSettings* dsc_demod_settings;
+    SWGSELCALDemodSettings* selcal_demod_settings;
     bool m_dsc_demod_settings_isSet;
+    bool m_selcal_demod_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;

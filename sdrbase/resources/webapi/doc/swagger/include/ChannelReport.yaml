@@ -203,3 +203,5 @@ ChannelReport:
     WFMModReport:
       $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
       description: "Wfm mod report data for Channel."
+    SELCALDemodReport:
+      $ref: "/doc/swagger/include/SELCALDemod.yaml#/SELCALDemodReport"

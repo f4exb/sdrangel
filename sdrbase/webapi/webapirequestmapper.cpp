@@ -4990,6 +4990,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDscDemodSettings()->init();
             channelSettings->getDscDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "SELCALDemodSettings")
+        {
+            channelSettings->setSelcalDemodSettings(new SWGSDRangel::SWGSELCALDemodSettings());
+            channelSettings->getSelcalDemodSettings()->init();
+            channelSettings->getSelcalDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DSDDemodSettings")
         {
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());

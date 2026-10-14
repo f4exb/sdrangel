@@ -236,3 +236,5 @@ ChannelSettings:
     WFMModSettings:
       $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
       description: "Wfm mod settings configuration for Channel."
+    SELCALDemodSettings:
+      $ref: "/doc/swagger/include/SELCALDemod.yaml#/SELCALDemodSettings"

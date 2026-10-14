@@ -31,6 +31,7 @@ const QStringList DenoiserSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.dsddemod"),
     QStringLiteral("sdrangel.channel.m17demod"),
     QStringLiteral("sdrangel.channel.nfmdemod"),
+    QStringLiteral("sdrangel.channel.selcaldemod"),
     QStringLiteral("sdrangel.channel.ssbdemod"),
     QStringLiteral("sdrangel.channel.wfmdemod"),
     QStringLiteral("sdrangel.channel.wdsprx"),
