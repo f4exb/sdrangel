@@ -16,46 +16,44 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODSECTIONS_H
-#define INCLUDE_DVBDEMODSECTIONS_H
+#include "dtvguide.h"
 
-#include <cstdint>
-#include <functional>
-#include <vector>
-
-//! CRC-32/MPEG-2 of PSI/SI sections: 0 over a section including its CRC, if it's correct
-uint32_t dvbSectionCRC(const uint8_t *data, int length);
-
-//! dvbSectionCRC()'s table
-class DVBDemodSectionCRC
+QString DTVGuide::Service::channelText() const
 {
-private:
-    struct CRCTable;
+    if (m_channel < 0) {
+        return QString();
+    }
 
-    static const CRCTable m_crcTable;
+    return m_minorChannel >= 0 ? QString("%1.%2").arg(m_channel).arg(m_minorChannel) : QString::number(m_channel);
+}
 
-    friend uint32_t dvbSectionCRC(const uint8_t *data, int length);
-};
-
-//! Assembles the sections (ISO/IEC 13818-1 2.4.4) carried by one PID's transport stream packets
-class DVBDemodSectionAssembler
+bool DTVGuide::Service::channelBefore(const Service& other) const
 {
-public:
-    //! Called with each complete section whose CRC is correct, or that has none: sections with the short form
-    //! (section_syntax_indicator 0) other than the TOT, as the TDT. Parsers of long form tables should check the indicator
-    typedef std::function<void(const uint8_t *section, int length)> SectionCallback;
+    // Unsigned, so -1 (none) sorts last
+    if (m_channel != other.m_channel) {
+        return (unsigned) m_channel < (unsigned) other.m_channel;
+    }
 
-    void reset();
-    //! A 188-byte packet of the PID, without uncorrectable errors
-    void packet(const uint8_t *p, const SectionCallback& callback);
+    return (unsigned) m_minorChannel < (unsigned) other.m_minorChannel;
+}
 
-private:
-    void complete(const SectionCallback& callback);
+QString DTVGuide::genreName(int genre, int networkId) const
+{
+    (void) networkId;
+    return genreText(genre);
+}
 
-    std::vector<uint8_t> m_data;    //!< Section being assembled
-    bool m_inSection = false;
-    int m_continuity = -1;
-    uint8_t m_last[188];            //!< The last packet, to recognise a duplicate of it
-};
+// Content level 1: EN 300 468 table 29
+QString DTVGuide::genreText(int genre)
+{
+    static const char *const names[16] = {
+        "", "Film/Drama", "News/Current affairs", "Entertainment", "Sport", "Children's", "Music", "Arts/Culture",
+        "Social/Political", "Education/Factual", "Leisure/Hobbies", "", "", "", "", ""
+    };
 
-#endif // INCLUDE_DVBDEMODSECTIONS_H
+    if (genre < 0) {
+        return QString();
+    }
+
+    return QString(names[(genre >> 4) & 0x0F]);
+}

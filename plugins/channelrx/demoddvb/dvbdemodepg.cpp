@@ -171,7 +171,7 @@ void DVBDemodEPG::feed(const uint8_t *p)
     }
 
     const int pid = ((p[1] & 0x1F) << 8) | p[2];
-    DVBDemodSectionAssembler *assembler;
+    DTVSectionAssembler *assembler;
 
     switch (pid)
     {
@@ -2069,10 +2069,6 @@ QString DVBDemodEPG::defaultCacheFileName()
 // Content level 1: EN 300 468 table 29, or the UK D-Book's
 QString DVBDemodEPG::genreText(int genre, int networkId)
 {
-    static const char *const names[16] = {
-        "", "Film/Drama", "News/Current affairs", "Entertainment", "Sport", "Children's", "Music", "Arts/Culture",
-        "Social/Political", "Education/Factual", "Leisure/Hobbies", "", "", "", "", ""
-    };
     static const char *const ukNames[16] = {
         "", "Film", "News and Factual", "Entertainment", "Sport", "Children's", "Education", "Lifestyle",
         "Drama", "", "", "", "", "", "", ""
@@ -2082,5 +2078,9 @@ QString DVBDemodEPG::genreText(int genre, int networkId)
         return QString();
     }
 
-    return QString((networkId == 0x233A ? ukNames : names)[(genre >> 4) & 0x0F]);
+    if (networkId != 0x233A) {
+        return DTVGuide::genreText(genre);
+    }
+
+    return QString(ukNames[(genre >> 4) & 0x0F]);
 }

@@ -66,6 +66,8 @@ SWGDVBDemodReport::SWGDVBDemodReport() {
     m_ts_bit_rate_isSet = false;
     ts_packets = 0L;
     m_ts_packets_isSet = false;
+    search_text = nullptr;
+    m_search_text_isSet = false;
     scan_transponders = 0;
     m_scan_transponders_isSet = false;
     rs_corrected = 0L;
@@ -122,6 +124,10 @@ SWGDVBDemodReport::SWGDVBDemodReport() {
     m_epg_schedule_network_id_isSet = false;
     epg_schedule = nullptr;
     m_epg_schedule_isSet = false;
+    interactive_apps = nullptr;
+    m_interactive_apps_isSet = false;
+    carousels = nullptr;
+    m_carousels_isSet = false;
     recording = 0;
     m_recording_isSet = false;
     recording_file = nullptr;
@@ -140,8 +146,6 @@ SWGDVBDemodReport::SWGDVBDemodReport() {
     m_modcod_isSet = false;
     stream_type = nullptr;
     m_stream_type_isSet = false;
-    search_text = nullptr;
-    m_search_text_isSet = false;
     pilots = 0;
     m_pilots_isSet = false;
     frame_size = nullptr;
@@ -206,6 +210,8 @@ SWGDVBDemodReport::init() {
     m_ts_bit_rate_isSet = false;
     ts_packets = 0L;
     m_ts_packets_isSet = false;
+    search_text = new QString("");
+    m_search_text_isSet = false;
     scan_transponders = 0;
     m_scan_transponders_isSet = false;
     rs_corrected = 0L;
@@ -262,6 +268,10 @@ SWGDVBDemodReport::init() {
     m_epg_schedule_network_id_isSet = false;
     epg_schedule = new QList<SWGDVBDemodEPGEvent*>();
     m_epg_schedule_isSet = false;
+    interactive_apps = new QList<SWGDVBDemodApp*>();
+    m_interactive_apps_isSet = false;
+    carousels = new QList<SWGDVBDemodCarousel*>();
+    m_carousels_isSet = false;
     recording = 0;
     m_recording_isSet = false;
     recording_file = new QString("");
@@ -280,8 +290,6 @@ SWGDVBDemodReport::init() {
     m_modcod_isSet = false;
     stream_type = new QString("");
     m_stream_type_isSet = false;
-    search_text = new QString("");
-    m_search_text_isSet = false;
     pilots = 0;
     m_pilots_isSet = false;
     frame_size = new QString("");
@@ -337,6 +345,11 @@ SWGDVBDemodReport::cleanup() {
 
 
 
+    if(search_text != nullptr) { 
+        delete search_text;
+    }
+
+
 
 
     if(pilot_pattern != nullptr) { 
@@ -389,10 +402,27 @@ SWGDVBDemodReport::cleanup() {
         }
         delete epg_schedule;
     }
+    if(interactive_apps != nullptr) { 
+        auto arr = interactive_apps;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete interactive_apps;
+    }
+    if(carousels != nullptr) { 
+        auto arr = carousels;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete carousels;
+    }
 
     if(recording_file != nullptr) { 
         delete recording_file;
     }
+
+
+
 
 
     if(modcod != nullptr) { 
@@ -401,12 +431,17 @@ SWGDVBDemodReport::cleanup() {
     if(stream_type != nullptr) { 
         delete stream_type;
     }
-    if(search_text != nullptr) { 
-        delete search_text;
-    }
+
     if(frame_size != nullptr) { 
         delete frame_size;
     }
+
+
+
+
+
+
+
 }
 
 SWGDVBDemodReport*
@@ -457,6 +492,8 @@ SWGDVBDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ts_bit_rate, pJson["tsBitRate"], "float", "");
     
     ::SWGSDRangel::setValue(&ts_packets, pJson["tsPackets"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&search_text, pJson["searchText"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&scan_transponders, pJson["scanTransponders"], "qint32", "");
     
@@ -514,6 +551,10 @@ SWGDVBDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     
     ::SWGSDRangel::setValue(&epg_schedule, pJson["epgSchedule"], "QList", "SWGDVBDemodEPGEvent");
+    
+    ::SWGSDRangel::setValue(&interactive_apps, pJson["interactiveApps"], "QList", "SWGDVBDemodApp");
+    
+    ::SWGSDRangel::setValue(&carousels, pJson["carousels"], "QList", "SWGDVBDemodCarousel");
     ::SWGSDRangel::setValue(&recording, pJson["recording"], "qint32", "");
     
     ::SWGSDRangel::setValue(&recording_file, pJson["recordingFile"], "QString", "QString");
@@ -529,10 +570,8 @@ SWGDVBDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&roll_off, pJson["rollOff"], "float", "");
     
     ::SWGSDRangel::setValue(&modcod, pJson["modcod"], "QString", "QString");
-
-    ::SWGSDRangel::setValue(&stream_type, pJson["streamType"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&search_text, pJson["searchText"], "QString", "QString");
+    ::SWGSDRangel::setValue(&stream_type, pJson["streamType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&pilots, pJson["pilots"], "qint32", "");
     
@@ -625,6 +664,9 @@ SWGDVBDemodReport::asJsonObject() {
     if(m_ts_packets_isSet){
         obj->insert("tsPackets", QJsonValue(ts_packets));
     }
+    if(search_text != nullptr && *search_text != QString("")){
+        toJsonValue(QString("searchText"), search_text, obj, QString("QString"));
+    }
     if(m_scan_transponders_isSet){
         obj->insert("scanTransponders", QJsonValue(scan_transponders));
     }
@@ -709,6 +751,12 @@ SWGDVBDemodReport::asJsonObject() {
     if(epg_schedule && epg_schedule->size() > 0){
         toJsonArray((QList<void*>*)epg_schedule, obj, "epgSchedule", "SWGDVBDemodEPGEvent");
     }
+    if(interactive_apps && interactive_apps->size() > 0){
+        toJsonArray((QList<void*>*)interactive_apps, obj, "interactiveApps", "SWGDVBDemodApp");
+    }
+    if(carousels && carousels->size() > 0){
+        toJsonArray((QList<void*>*)carousels, obj, "carousels", "SWGDVBDemodCarousel");
+    }
     if(m_recording_isSet){
         obj->insert("recording", QJsonValue(recording));
     }
@@ -721,61 +769,45 @@ SWGDVBDemodReport::asJsonObject() {
     if(m_scheduled_recordings_isSet){
         obj->insert("scheduledRecordings", QJsonValue(scheduled_recordings));
     }
-
     if(m_symbol_rate_isSet){
         obj->insert("symbolRate", QJsonValue(symbol_rate));
     }
-
     if(m_measured_symbol_rate_isSet){
         obj->insert("measuredSymbolRate", QJsonValue(measured_symbol_rate));
     }
-
     if(m_roll_off_isSet){
         obj->insert("rollOff", QJsonValue(roll_off));
     }
-
     if(modcod != nullptr && *modcod != QString("")){
         toJsonValue(QString("modcod"), modcod, obj, QString("QString"));
     }
     if(stream_type != nullptr && *stream_type != QString("")){
         toJsonValue(QString("streamType"), stream_type, obj, QString("QString"));
     }
-    if(search_text != nullptr && *search_text != QString("")){
-        toJsonValue(QString("searchText"), search_text, obj, QString("QString"));
-    }
-
     if(m_pilots_isSet){
         obj->insert("pilots", QJsonValue(pilots));
     }
-
     if(frame_size != nullptr && *frame_size != QString("")){
         toJsonValue(QString("frameSize"), frame_size, obj, QString("QString"));
     }
-
     if(m_isi_isSet){
         obj->insert("isi", QJsonValue(isi));
     }
-
     if(m_isi_count_isSet){
         obj->insert("isiCount", QJsonValue(isi_count));
     }
-
     if(m_es_n0_isSet){
         obj->insert("esN0", QJsonValue(es_n0));
     }
-
     if(m_pl_frames_isSet){
         obj->insert("plFrames", QJsonValue(pl_frames));
     }
-
     if(m_dummy_frames_isSet){
         obj->insert("dummyFrames", QJsonValue(dummy_frames));
     }
-
     if(m_pl_header_misses_isSet){
         obj->insert("plHeaderMisses", QJsonValue(pl_header_misses));
     }
-
     if(m_reacquisitions_isSet){
         obj->insert("reacquisitions", QJsonValue(reacquisitions));
     }
@@ -971,6 +1003,16 @@ void
 SWGDVBDemodReport::setTsPackets(qint64 ts_packets) {
     this->ts_packets = ts_packets;
     this->m_ts_packets_isSet = true;
+}
+
+QString*
+SWGDVBDemodReport::getSearchText() {
+    return search_text;
+}
+void
+SWGDVBDemodReport::setSearchText(QString* search_text) {
+    this->search_text = search_text;
+    this->m_search_text_isSet = true;
 }
 
 qint32
@@ -1253,6 +1295,26 @@ SWGDVBDemodReport::setEpgSchedule(QList<SWGDVBDemodEPGEvent*>* epg_schedule) {
     this->m_epg_schedule_isSet = true;
 }
 
+QList<SWGDVBDemodApp*>*
+SWGDVBDemodReport::getInteractiveApps() {
+    return interactive_apps;
+}
+void
+SWGDVBDemodReport::setInteractiveApps(QList<SWGDVBDemodApp*>* interactive_apps) {
+    this->interactive_apps = interactive_apps;
+    this->m_interactive_apps_isSet = true;
+}
+
+QList<SWGDVBDemodCarousel*>*
+SWGDVBDemodReport::getCarousels() {
+    return carousels;
+}
+void
+SWGDVBDemodReport::setCarousels(QList<SWGDVBDemodCarousel*>* carousels) {
+    this->carousels = carousels;
+    this->m_carousels_isSet = true;
+}
+
 qint32
 SWGDVBDemodReport::getRecording() {
     return recording;
@@ -1292,7 +1354,6 @@ SWGDVBDemodReport::setScheduledRecordings(qint32 scheduled_recordings) {
     this->scheduled_recordings = scheduled_recordings;
     this->m_scheduled_recordings_isSet = true;
 }
-
 
 qint32
 SWGDVBDemodReport::getSymbolRate() {
@@ -1342,16 +1403,6 @@ void
 SWGDVBDemodReport::setStreamType(QString* stream_type) {
     this->stream_type = stream_type;
     this->m_stream_type_isSet = true;
-}
-
-QString*
-SWGDVBDemodReport::getSearchText() {
-    return search_text;
-}
-void
-SWGDVBDemodReport::setSearchText(QString* search_text) {
-    this->search_text = search_text;
-    this->m_search_text_isSet = true;
 }
 
 qint32
@@ -1444,6 +1495,7 @@ SWGDVBDemodReport::setReacquisitions(qint64 reacquisitions) {
     this->m_reacquisitions_isSet = true;
 }
 
+
 bool
 SWGDVBDemodReport::isSet(){
     bool isObjectUpdated = false;
@@ -1503,6 +1555,9 @@ SWGDVBDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ts_packets_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(search_text && *search_text != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_scan_transponders_isSet){
@@ -1589,6 +1644,12 @@ SWGDVBDemodReport::isSet(){
         if(epg_schedule && (epg_schedule->size() > 0)){
             isObjectUpdated = true; break;
         }
+        if(interactive_apps && (interactive_apps->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(carousels && (carousels->size() > 0)){
+            isObjectUpdated = true; break;
+        }
         if(m_recording_isSet){
             isObjectUpdated = true; break;
         }
@@ -1614,9 +1675,6 @@ SWGDVBDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(stream_type && *stream_type != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(search_text && *search_text != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_pilots_isSet){

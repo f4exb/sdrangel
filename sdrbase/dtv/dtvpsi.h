@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,23 +16,24 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODPSI_H
-#define INCLUDE_DVBDEMODPSI_H
+#ifndef INCLUDE_DTVPSI_H
+#define INCLUDE_DTVPSI_H
 
 #include <cstdint>
 #include <map>
 #include <vector>
 
-#include "dvbdemodsections.h"
+#include "export.h"
+#include "dtv/dtvsections.h"
 
 // What FFmpeg doesn't give of the transport stream's tables: the transport stream id, from the PAT, which changes
 // with the multiplex, and the logical channel numbers of services (the numbers viewers select them by), from the
 // logical channel descriptors (tag 0x83, as used in the UK, Europe and Australia) in the NIT. Fed with the
 // transport stream, in any size pieces
-class DVBDemodPSI
+class SDRBASE_API DTVPSI
 {
 public:
-    DVBDemodPSI();
+    DTVPSI();
     void reset();       //!< For a new stream: forgets everything
     void feed(const uint8_t *data, int length);
     //! -1 until the PAT has been received
@@ -52,10 +54,10 @@ private:
     void nit(const uint8_t *data, int length);
 
     std::vector<uint8_t> m_partial;     //!< Of a TS packet split between feeds
-    DVBDemodSectionAssembler m_pat;
-    DVBDemodSectionAssembler m_nit;
+    DTVSectionAssembler m_pat;
+    DTVSectionAssembler m_nit;
     int m_transportStreamId;
     std::map<int, std::map<int, int>> m_channels;   //!< By transport stream id (the NIT's): service id to number
 };
 
-#endif // INCLUDE_DVBDEMODPSI_H
+#endif // INCLUDE_DTVPSI_H

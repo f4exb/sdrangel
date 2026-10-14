@@ -686,7 +686,7 @@
          </widget>
         </item>
         <item>
-         <widget class="DVBDemodScope" name="scope" native="true">
+         <widget class="DTVScope" name="scope" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -976,6 +976,29 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="apps">
+            <property name="toolTip">
+             <string>Show the interactive applications (red button) of the service played: HbbTV's and others from its AIT, and its MHEG-5 and HbbTV object carousels, with their files</string>
+            </property>
+            <property name="text">
+             <string>Apps</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="redButton">
+            <property name="toolTip">
+             <string>The red button: the service's interactive application (HbbTV), as R on the video</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QToolButton { color: #e62928; font-weight: bold; }</string>
+            </property>
+            <property name="text">
+             <string>Red</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="scan">
             <property name="toolTip">
              <string>Scan for satellite transponders: each signal in the device's band (or in a range, the device stepped across it) is found, locked and added to the programme guide. Click again to stop</string>
@@ -1029,9 +1052,9 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>DVBDemodScope</class>
+   <class>DTVScope</class>
    <extends>QWidget</extends>
-   <header>dvbdemodscope.h</header>
+   <header>dtv/dtvscope.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

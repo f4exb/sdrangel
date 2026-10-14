@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <cmath>
 
 #include <QFontMetrics>
 #include <QOpenGLContext>
@@ -179,6 +180,15 @@ void GLVideoWidget::setDeinterlace(bool deinterlace)
     m_deinterlace = deinterlace;
 }
 
+void GLVideoWidget::setVideoArea(const QRectF& area)
+{
+    if (area != m_videoArea)
+    {
+        m_videoArea = area;
+        update();
+    }
+}
+
 QSize GLVideoWidget::getFrameSize() const
 {
     return m_frameSize;
@@ -256,7 +266,10 @@ void GLVideoWidget::paintGL()
     else if (m_current)
     {
         m_frameSize = QSize(m_current->m_width, m_current->m_height);
-        m_renderer.drawFrame(m_current, width, height, m_keepAspect, m_deinterlace);
+        const QRect area = m_videoArea.isNull() ? QRect()
+            : QRect((int) std::lround(m_videoArea.x() * width), (int) std::lround(m_videoArea.y() * height),
+                    std::max(1, (int) std::lround(m_videoArea.width() * width)), std::max(1, (int) std::lround(m_videoArea.height() * height)));
+        m_renderer.drawFrame(m_current, width, height, m_keepAspect, m_deinterlace, area);
 
         // The guide shows what the overlay would
         if (!m_overlay.isEmpty() && m_guide.isNull())

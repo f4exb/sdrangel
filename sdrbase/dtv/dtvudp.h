@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODUDP_H
-#define INCLUDE_DVBDEMODUDP_H
+#ifndef INCLUDE_DTVUDP_H
+#define INCLUDE_DTVUDP_H
 
 #include <atomic>
 #include <condition_variable>
@@ -29,14 +29,15 @@
 #include <QHostAddress>
 #include <QString>
 #include <QUdpSocket>
+#include "export.h"
 
 // Sends transport stream packets over UDP, 7 to a datagram, as VLC and ffplay expect for udp:// URLs. Used in the
 // demodulator's thread, where the socket is made, as a socket belongs to the thread that made it
-class DVBDemodUDP
+class SDRBASE_API DTVUDP
 {
 public:
-    DVBDemodUDP();
-    ~DVBDemodUDP();     //!< Waits for a host name lookup under way
+    DTVUDP();
+    ~DTVUDP();     //!< Waits for a host name lookup under way
 
     //! address: an IP address, or a host name, looked up in a thread of its own (a lookup can take seconds, which
     //! would hold up demodulation): nothing's sent until it's found. The same name again isn't looked up again.
@@ -73,4 +74,4 @@ private:
     std::thread m_lookupThread;     //!< Started for the first host name
 };
 
-#endif // INCLUDE_DVBDEMODUDP_H
+#endif // INCLUDE_DTVUDP_H

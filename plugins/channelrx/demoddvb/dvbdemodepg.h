@@ -29,101 +29,29 @@
 #include <QMutex>
 #include <QString>
 
-#include "dvbdemodsections.h"
+#include "dtv/dtvguide.h"
+#include "dtv/dtvsections.h"
 
 // Electronic programme guide, from the service information in the transport stream (EN 300 468): the Event
 // Information Tables (now and next, and schedules of up to 8 days) of the services of this and other transport
 // streams of the network, their names from the SDTs, logical channel numbers from the NITs, and the time from the
-// TDT. Fed with every packet of the transport stream, in the demodulator's thread, and read from others
-class DVBDemodEPG
+// TDT: the guide (DTVGuide) for DVB. Fed with every packet of the transport stream, in the demodulator's thread, and read from others
+class DVBDemodEPG : public DTVGuide
 {
 public:
-    struct Event
-    {
-        int m_eventId = 0;
-        qint64 m_start = 0;         //!< UTC, seconds since 1970
-        int m_duration = 0;         //!< Seconds
-        QString m_title;
-        QString m_text;             //!< The short description, then any extended description
-        int m_genre = -1;           //!< Content nibbles (level 1 * 16 + level 2, EN 300 468 table 29), -1 if none
-        int m_minimumAge = 0;       //!< From the parental rating, 0 if none
-        bool m_hd = false;
-        bool m_subtitles = false;
-        bool m_audioDescription = false;
-        QString m_guidance;         //!< UK, as "Contains strong language"
-        //! The same event on another service (as in HD), from an event linkage descriptor, -1 if none
-        int m_linkNetworkId = -1;
-        int m_linkServiceId = -1;
-        //! From the EIT (table 6): 0 undefined, 1 not running, 2 starts in a few seconds, 3 pausing, 4 running. Kept
-        //! up to date by broadcasters that use it in the present and following table, to start and end recordings
-        int m_runningStatus = 0;
-        //! The content identifier descriptor's CRIDs (TS 102 323, as the UK's D-Book uses them), lower case, empty if
-        //! none: the programme's (a repeat has its first showing's), and its series'. As broadcast: a relative CRID's
-        //! authority is the service's (or its transport stream's, network's), the same for its events
-        QString m_programmeCrid;
-        QString m_seriesCrid;
-
-        qint64 end() const { return m_start + m_duration; }
-        bool isValid() const { return m_duration > 0; }
-    };
-
-    struct Service
-    {
-        int m_networkId = 0;        //!< original_network_id
-        int m_transportStreamId = -1;
-        int m_serviceId = 0;
-        QString m_name;
-        QString m_provider;
-        int m_type = 0;             //!< service_type: 1 TV, 2 radio, 0x16 to 0x19 HD TV, 0x0C data...
-        int m_channel = -1;         //!< Logical channel number, -1 if none
-        bool m_visible = true;      //!< The logical channel's visible_service_flag: false to hide it from lists
-        bool m_actual = false;      //!< In the transport stream being received
-        int m_events = 0;
-        qint64 m_frequency = 0;     //!< Of its transport stream, from the NIT, Hz, 0 if not known
-        //! Its transport stream is described by the NIT (or has been received), so it's in this area and can be
-        //! searched for if its frequency isn't known, unlike other regions' (whose SI the UK also carries)
-        bool m_multiplexKnown = false;
-        //! Left out of its transport stream's SDT (a complete version of it): no longer broadcast there. Not listed by
-        //! getServices(), and never m_actual
-        bool m_removed = false;
-    };
-
-    //! A multiplex of the network, from the NIT's delivery system descriptors
-    struct TransportStream
-    {
-        int m_networkId = 0;        //!< original_network_id
-        int m_transportStreamId = 0;
-        qint64 m_frequency = 0;     //!< Centre, Hz
-        int m_bandwidth = 8000000;  //!< Hz
-        bool m_t2 = false;          //!< From a T2 delivery system descriptor. The UK describes T2 multiplexes as DVB-T
-        int m_plpId = -1;           //!< DVB-T2 PLP, -1 if not known
-        bool m_lowPriority = false; //!< DVB-T hierarchical modes: carried in the low priority stream
-        bool m_actual = false;      //!< From the NIT of the network being received, rather than another's
-        bool m_learned = false;     //!< The frequency was learned by tuning to it (setFrequency), rather than from a NIT
-        // From a satellite delivery system descriptor (or learned receiving DVB-S or S2): the frequency's the downlink's
-        bool m_satellite = false;
-        bool m_s2 = false;          //!< DVB-S2, else DVB-S
-        int m_symbolRate = 0;       //!< Symbols a second
-        int m_polarisation = 0;     //!< 0 linear horizontal, 1 linear vertical, 2 circular left, 3 circular right
-        int m_orbitalPosition = 0;  //!< Tenths of a degree east (west negative)
-        int m_fecInner = 0;         //!< EN 300 468 table 35: 1 1/2, 2 2/3, 3 3/4, 4 5/6, 5 7/8, 15 none, 0 not defined
-        int m_rollOff = -1;         //!< DVB-S2: 0 0.35, 1 0.25, 2 0.20 (as the NIT codes them), S2X's 4 0.15, 5 0.10, 6 0.05 (learned from the BBHEADERs), -1 not known
-        int m_isi = -1;             //!< DVB-S2: the input stream it was received in (of a multiple input stream), -1 if not
-    };
-
     DVBDemodEPG();
     void clear();
     //! A 188-byte transport stream packet
     void feed(const uint8_t *packet);
 
     //! UTC, seconds since 1970, from the TDT and the time since it was received. 0 until received
-    qint64 getTime() const;
-    int getTransportStreamId() const;
-    int getNetworkId() const;   //!< original_network_id of the transport stream being received, -1 if not known
+    qint64 getTime() const override;
+    int getTransportStreamId() const override;
+    int getNetworkId() const override;   //!< original_network_id of the transport stream being received, -1 if not known
     //! The services: one for each service id and name of a network (the UK carries a service in every region's
     //! transport stream), that of the transport stream received, else one whose multiplex is known, else that with the
     //! most programmes. Services with the same ids but other names are each listed
-    std::vector<Service> getServices() const;
+    std::vector<Service> getServices() const override;
     std::vector<TransportStream> getTransportStreams() const;
     //! False if its frequency isn't known
     bool getTransportStream(int networkId, int transportStreamId, TransportStream& transportStream) const;
@@ -140,31 +68,31 @@ public:
     //! The same programme as a service's on now on another service, as in HD, from the event linkage of its event
     //! (the present event, or the schedule's at the time; just the present one, if the time isn't known). False if
     //! none, or it isn't in this area
-    bool getSimulcast(int networkId, int serviceId, Service& simulcast) const;
+    bool getSimulcast(int networkId, int serviceId, Service& simulcast) const override;
     //! A service, as getServices() gives it (or removed). False if not in the guide. A service id can be used in more
     //! than one transport stream of a network: these, given only the network's and service's ids, take the
     //! transport stream being received's, else one with a name, else any
-    bool getService(int networkId, int serviceId, Service& service) const;
+    bool getService(int networkId, int serviceId, Service& service) const override;
     //! A programme of a service's schedule, by its id. False if not in the guide
-    bool getEvent(int networkId, int serviceId, int eventId, Event& event) const;
+    bool getEvent(int networkId, int serviceId, int eventId, Event& event) const override;
     //! The running status of a service's programme, if it's the present or following event of the service's
     //! transport stream being received (whose table's kept up to date): 0 to 4 (as Event's), -1 if not known
     int getRunningStatus(int networkId, int serviceId, int eventId) const;
     //! Changes whenever what the guide gives does (its services, events, multiplexes, or the one received), so views
     //! can skip rebuilding what hasn't changed
-    quint64 getRevision() const { return m_revision; }
+    quint64 getRevision() const override { return m_revision; }
     //! Of a service in the transport stream being received (or the first with the id, if not known yet)
-    bool getNowNext(int serviceId, Event& now, Event& next) const;
+    bool getNowNext(int serviceId, Event& now, Event& next) const override;
     //! Of any service in the guide
-    bool getNowNext(int networkId, int serviceId, Event& now, Event& next) const;
+    bool getNowNext(int networkId, int serviceId, Event& now, Event& next) const override;
     //! A service's schedule, in order, from the TDT time less an hour (or all, if no time)
-    std::vector<Event> getEvents(int networkId, int serviceId) const;
+    std::vector<Event> getEvents(int networkId, int serviceId) const override;
     //! The same for many services (network and service ids) at once, in their order
-    std::vector<std::vector<Event>> getEvents(const std::vector<std::pair<int, int>>& services) const;
+    std::vector<std::vector<Event>> getEvents(const std::vector<std::pair<int, int>>& services) const override;
     //! For each service (network and service ids), a value that changes whenever what getEvents() gives for it may
     //! (but for the time passing), so views can skip fetching schedules that haven't changed. 0 if not in the guide
-    std::vector<quint64> getServiceRevisions(const std::vector<std::pair<int, int>>& services) const;
-    int getEventCount() const;
+    std::vector<quint64> getServiceRevisions(const std::vector<std::pair<int, int>>& services) const override;
+    int getEventCount() const override;
     bool isModified() const;    //!< Since the last save or load
 
     //! Cache, so the guide is complete straight away. Events that ended over an hour before now (UTC, seconds since
@@ -181,6 +109,7 @@ public:
 
     //! The UK (original_network_id 0x233A) uses the D-Book's names, which differ from EN 300 468's from 6
     static QString genreText(int genre, int networkId);
+    QString genreName(int genre, int networkId) const override { return genreText(genre, networkId); }
     static QString defaultCacheFileName();
 
 private:
@@ -300,12 +229,12 @@ private:
     qint64 timeLocked() const;
     bool newVersion(uint64_t sectionKey, int version);
 
-    DVBDemodSectionAssembler m_nitSections;
-    DVBDemodSectionAssembler m_sdtSections;
-    DVBDemodSectionAssembler m_eitSections;
-    DVBDemodSectionAssembler m_timeSections;
-    DVBDemodSectionAssembler m_freesatSiSections[2];    //!< SDT and BAT, on the home transponder's PID, or others'
-    DVBDemodSectionAssembler m_freesatEitSections[2];   //!< The whole network's EIT, the same
+    DTVSectionAssembler m_nitSections;
+    DTVSectionAssembler m_sdtSections;
+    DTVSectionAssembler m_eitSections;
+    DTVSectionAssembler m_timeSections;
+    DTVSectionAssembler m_freesatSiSections[2];    //!< SDT and BAT, on the home transponder's PID, or others'
+    DTVSectionAssembler m_freesatEitSections[2];   //!< The whole network's EIT, the same
 
     struct FreesatChannel
     {

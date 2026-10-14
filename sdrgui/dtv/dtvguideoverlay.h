@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODGUIDEOVERLAY_H
-#define INCLUDE_DVBDEMODGUIDEOVERLAY_H
+#ifndef INCLUDE_DTVGUIDEOVERLAY_H
+#define INCLUDE_DTVGUIDEOVERLAY_H
 
 #include <functional>
 #include <vector>
@@ -29,7 +30,8 @@
 #include <QPointer>
 #include <QTimer>
 
-#include "dvbdemodepg.h"
+#include "dtv/dtvguide.h"
+#include "export.h"
 
 class QKeyEvent;
 class QMouseEvent;
@@ -48,7 +50,7 @@ class GLVideoWidget;
 // mouse: clicking the ribbon opens the guide; in the guide, clicking a programme or channel selects it,
 // double-clicking watches it, buttons watch, record, close, page through the channels and step the time, and the
 // wheel moves through the channels (with Shift, or sideways, the time). Right-clicking opens or closes the guide
-class DVBDemodGuideOverlay : public QObject
+class SDRGUI_API DTVGuideOverlay : public QObject
 {
     Q_OBJECT
 
@@ -56,15 +58,19 @@ public:
     typedef std::function<bool(int networkId, int serviceId, int eventId)> IsScheduled;
     typedef std::function<void(int networkId, int serviceId, int eventId)> ToggleRecording;
 
-    explicit DVBDemodGuideOverlay(DVBDemodEPG *epg, QObject *parent = nullptr);
+    explicit DTVGuideOverlay(DTVGuide *epg, QObject *parent = nullptr);
 
     //! To mark programmes to be recorded, and record them (R)
     void setRecordings(IsScheduled isScheduled, ToggleRecording toggle) { m_isScheduled = isScheduled; m_toggleRecording = toggle; }
 
+    //! Shown at the top right of the guide (as the receiver's brand), none if null
+    void setLogo(const QImage& logo) { m_logo = logo; m_logoScaled = QImage(); }
     //! Where to draw, null for nowhere (hiding the guide)
     void setWidget(GLVideoWidget *widget);
     //! The service playing, in the multiplex being received
     void setPlaying(int serviceId) { m_playingService = serviceId; }
+    //! A red button on the ribbon and in the guide, for the playing service's interactive application
+    void setRedButton(bool shown);
     void showRibbon();
     //! If the guide has the service playing, for the ribbon to show
     bool hasPlaying();
@@ -84,6 +90,7 @@ public:
 
 signals:
     void playService(int networkId, int serviceId);
+    void redButton();               //!< The red button's clicked
 
 private:
     enum Mode { Off, Ribbon, Guide };
@@ -91,7 +98,7 @@ private:
     //! What's under the mouse, from the last image drawn
     struct HitArea
     {
-        enum Kind { Event, Channel, Watch, Simulcast, Record, Close, PageUp, PageDown, Earlier, Later, RibbonBar, ChannelUp, ChannelDown };
+        enum Kind { Event, Channel, Watch, Simulcast, Record, Close, PageUp, PageDown, Earlier, Later, RibbonBar, ChannelUp, ChannelDown, RedButton };
 
         QRectF m_rect;          //!< In the image's pixels
         Kind m_kind;
@@ -114,7 +121,7 @@ private:
     //! The service playing, in the multiplex being received or, until its SI arrives after retuning, the one played
     //! from here or last seen playing. -1 if not known
     int playingRow() const;
-    std::vector<DVBDemodEPG::Event> events(int row) const;
+    std::vector<DTVGuide::Event> events(int row) const;
     qint64 now() const;
     void render();
     void paintRibbon(QPainter& painter, const QSize& size, qint64 t);
@@ -122,9 +129,11 @@ private:
     void paintClock(QPainter& painter, const QSize& size, qint64 t, double u, bool date);
     //! The logo, right-aligned to right and centred on centreY, at most width by height. Returns the width drawn, 0 if none
     double paintLogo(QPainter& painter, double right, double centreY, double width, double height);
-    void paintBadges(QPainter& painter, int x, int y, double u, const DVBDemodEPG::Event& event, const QString& extra);
-    //! A button, outlined, with a key's name before its label, right-aligned to right. Returns its width
-    double paintButton(QPainter& painter, double right, double y, double u, const QString& key, const QString& label, HitArea::Kind kind);
+    void paintBadges(QPainter& painter, int x, int y, double u, const DTVGuide::Event& event, const QString& extra);
+    //! A button, outlined, with a key's name before its label (in keyColor, the accent if invalid), right-aligned to right.
+    //! Returns its width
+    double paintButton(QPainter& painter, double right, double y, double u, const QString& key, const QString& label, HitArea::Kind kind,
+        const QColor& keyColor = QColor());
     void addHit(const QRectF& rect, HitArea::Kind kind, int row = -1, int eventId = -1) { m_hits.push_back({rect, kind, row, eventId}); }
     const HitArea *hit(const QPointF& position) const;
     void stepWindow(int halfHours);
@@ -147,16 +156,17 @@ private:
     void restartHideTimer();
     void showMessage(const QString& message);
 
-    DVBDemodEPG *m_epg;
+    DTVGuide *m_epg;
     IsScheduled m_isScheduled;
     ToggleRecording m_toggleRecording;
     QPointer<GLVideoWidget> m_widget;
     Mode m_mode;
     int m_playingService;
     bool m_stepping;            //!< Stepping with the ribbon's arrows: it stays on the channel asked for, until hidden
+    bool m_redButton;           //!< Shown
     int m_playedNetworkId;      //!< The service last seen playing, or played from here, -1 if none
     int m_playedServiceId;
-    std::vector<DVBDemodEPG::Service> m_services;  //!< By channel number
+    std::vector<DTVGuide::Service> m_services;  //!< By channel number
     int m_row;                  //!< Service browsed or selected
     int m_ribbonEvent;          //!< Programme on the ribbon: 0 for on now, 1 next...
     int m_guideEventId;         //!< Programme selected in the guide, -1 if none
@@ -192,9 +202,10 @@ private:
     static const QColor m_accentColor;
     static const QColor m_warningColor;
     static const QColor m_recordColor;
+    static const QColor m_redButtonColor;
     static const QColor m_ageColor;
     static const QColor m_panelColor;
     static const QColor m_dividerColor;
 };
 
-#endif // INCLUDE_DVBDEMODGUIDEOVERLAY_H
+#endif // INCLUDE_DTVGUIDEOVERLAY_H

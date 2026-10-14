@@ -148,6 +148,7 @@ void DVBDemodSettings::resetToDefaults()
     m_videoEnabled = true;
     m_serviceId = 0;
     m_deinterlace = true;
+    m_hbbtv = false;
     m_hardwareDecoding = true;
     m_audioLanguage = "";
     m_audioDescription = false;
@@ -217,6 +218,7 @@ QByteArray DVBDemodSettings::serialize() const
     s.writeS32(9, m_audioVolume);
     s.writeString(10, m_audioDeviceName);
     s.writeBool(11, m_deinterlace);
+    s.writeBool(65, m_hbbtv);
     s.writeS32(12, m_standard);
     s.writeS32(13, m_plpId);
     s.writeS32(14, m_avOffset);
@@ -309,6 +311,7 @@ bool DVBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(9, &m_audioVolume, 50);
         d.readString(10, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(11, &m_deinterlace, true);
+        d.readBool(65, &m_hbbtv, false);
         d.readS32(12, &m_standard, StandardAutoTerrestrial);
 
         if (!isValidStandard(m_standard)) {
@@ -487,6 +490,9 @@ void DVBDemodSettings::applySettings(const QStringList& settingsKeys, const DVBD
     if (settingsKeys.contains("deinterlace")) {
         m_deinterlace = settings.m_deinterlace;
     }
+    if (settingsKeys.contains("hbbtv")) {
+        m_hbbtv = settings.m_hbbtv;
+    }
     if (settingsKeys.contains("avOffset")) {
         m_avOffset = settings.m_avOffset;
     }
@@ -657,6 +663,9 @@ QString DVBDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("deinterlace") || force) {
         s.append(QString("m_deinterlace: %1").arg(m_deinterlace));
+    }
+    if (settingsKeys.contains("hbbtv") || force) {
+        s.append(QString("m_hbbtv: %1").arg(m_hbbtv));
     }
     if (settingsKeys.contains("avOffset") || force) {
         s.append(QString("m_avOffset: %1").arg(m_avOffset));

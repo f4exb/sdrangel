@@ -28,9 +28,9 @@
 #include <QScrollBar>
 #include <QToolTip>
 
-#include "dvbdemodepggrid.h"
+#include "dtv/dtvepggrid.h"
 
-DVBDemodEPGGrid::DVBDemodEPGGrid(QWidget *parent) :
+DTVEPGGrid::DTVEPGGrid(QWidget *parent) :
     QAbstractScrollArea(parent),
     m_start(0),
     m_end(0),
@@ -44,32 +44,32 @@ DVBDemodEPGGrid::DVBDemodEPGGrid(QWidget *parent) :
     verticalScrollBar()->setSingleStep(20);
 }
 
-int DVBDemodEPGGrid::nameWidth() const
+int DTVEPGGrid::nameWidth() const
 {
     return fontMetrics().horizontalAdvance("0000  Wwwwwwwwwwwwwwwwww");
 }
 
-int DVBDemodEPGGrid::headerHeight() const
+int DTVEPGGrid::headerHeight() const
 {
     return fontMetrics().height() + 8;
 }
 
-int DVBDemodEPGGrid::rowHeight() const
+int DTVEPGGrid::rowHeight() const
 {
     return 2 * fontMetrics().height() + 8;
 }
 
-double DVBDemodEPGGrid::x(qint64 utc) const
+double DTVEPGGrid::x(qint64 utc) const
 {
     return nameWidth() + (utc - m_start) * m_pixelsPerHour / 3600.0 - horizontalScrollBar()->value();
 }
 
-qint64 DVBDemodEPGGrid::timeAt(double px) const
+qint64 DTVEPGGrid::timeAt(double px) const
 {
     return m_start + (qint64) std::floor((px - nameWidth() + horizontalScrollBar()->value()) * 3600.0 / m_pixelsPerHour);
 }
 
-void DVBDemodEPGGrid::setRows(const std::vector<Row>& rows, qint64 start, qint64 now)
+void DTVEPGGrid::setRows(const std::vector<Row>& rows, qint64 start, qint64 now)
 {
     // Keep the selection, by programme
     int networkId = -1, serviceId = -1, eventId = -1;
@@ -96,7 +96,7 @@ void DVBDemodEPGGrid::setRows(const std::vector<Row>& rows, qint64 start, qint64
         const Row& row = m_rows[r];
 
         // Events can overlap (one within another), so the last to start may not be the last to end
-        for (const DVBDemodEPG::Event& e : row.m_events)
+        for (const DTVGuide::Event& e : row.m_events)
         {
             m_end = std::max(m_end, e.end());
             m_longest[r] = std::max(m_longest[r], (qint64) e.m_duration);
@@ -120,7 +120,7 @@ void DVBDemodEPGGrid::setRows(const std::vector<Row>& rows, qint64 start, qint64
     viewport()->update();
 }
 
-void DVBDemodEPGGrid::setNow(qint64 now)
+void DTVEPGGrid::setNow(qint64 now)
 {
     if (std::abs((double) (now - m_now)) * m_pixelsPerHour >= 3600.0)
     {
@@ -129,12 +129,12 @@ void DVBDemodEPGGrid::setNow(qint64 now)
     }
 }
 
-void DVBDemodEPGGrid::scrollToTime(qint64 utc)
+void DTVEPGGrid::scrollToTime(qint64 utc)
 {
     horizontalScrollBar()->setValue((int) std::lround((utc - m_start) * m_pixelsPerHour / 3600.0));
 }
 
-void DVBDemodEPGGrid::scrollToService(int networkId, int serviceId)
+void DTVEPGGrid::scrollToService(int networkId, int serviceId)
 {
     for (int r = 0; r < (int) m_rows.size(); r++)
     {
@@ -152,14 +152,14 @@ void DVBDemodEPGGrid::scrollToService(int networkId, int serviceId)
     }
 }
 
-bool DVBDemodEPGGrid::selection(int& row, int& event) const
+bool DTVEPGGrid::selection(int& row, int& event) const
 {
     row = m_selectedRow;
     event = m_selectedEvent;
     return (row >= 0) && (event >= 0);
 }
 
-void DVBDemodEPGGrid::updateScrollBars()
+void DTVEPGGrid::updateScrollBars()
 {
     const int width = (int) std::ceil((m_end - m_start) * m_pixelsPerHour / 3600.0);
     const int height = (int) m_rows.size() * rowHeight();
@@ -171,14 +171,14 @@ void DVBDemodEPGGrid::updateScrollBars()
     verticalScrollBar()->setPageStep(viewHeight);
 }
 
-void DVBDemodEPGGrid::resizeEvent(QResizeEvent *event)
+void DTVEPGGrid::resizeEvent(QResizeEvent *event)
 {
     QAbstractScrollArea::resizeEvent(event);
     updateScrollBars();
 }
 
 // The row, and programme in it (-1 if none), at a point in the viewport. False if not in the programmes' area
-bool DVBDemodEPGGrid::hit(const QPoint& position, int& row, int& event) const
+bool DTVEPGGrid::hit(const QPoint& position, int& row, int& event) const
 {
     row = -1;
     event = -1;
@@ -196,7 +196,7 @@ bool DVBDemodEPGGrid::hit(const QPoint& position, int& row, int& event) const
     }
 
     const qint64 t = timeAt(position.x());
-    const std::vector<DVBDemodEPG::Event>& events = m_rows[row].m_events;
+    const std::vector<DTVGuide::Event>& events = m_rows[row].m_events;
 
     for (int e = 0; e < (int) events.size(); e++)
     {
@@ -210,7 +210,7 @@ bool DVBDemodEPGGrid::hit(const QPoint& position, int& row, int& event) const
     return true;
 }
 
-void DVBDemodEPGGrid::select(int row, int event)
+void DTVEPGGrid::select(int row, int event)
 {
     if ((row == m_selectedRow) && (event == m_selectedEvent)) {
         return;
@@ -225,7 +225,7 @@ void DVBDemodEPGGrid::select(int row, int event)
     }
 }
 
-void DVBDemodEPGGrid::mousePressEvent(QMouseEvent *event)
+void DTVEPGGrid::mousePressEvent(QMouseEvent *event)
 {
     int row, e;
 
@@ -236,7 +236,7 @@ void DVBDemodEPGGrid::mousePressEvent(QMouseEvent *event)
     QAbstractScrollArea::mousePressEvent(event);
 }
 
-void DVBDemodEPGGrid::mouseDoubleClickEvent(QMouseEvent *event)
+void DTVEPGGrid::mouseDoubleClickEvent(QMouseEvent *event)
 {
     int row, e;
 
@@ -247,7 +247,7 @@ void DVBDemodEPGGrid::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void DVBDemodEPGGrid::contextMenuEvent(QContextMenuEvent *event)
+void DTVEPGGrid::contextMenuEvent(QContextMenuEvent *event)
 {
     int row, e;
 
@@ -259,7 +259,7 @@ void DVBDemodEPGGrid::contextMenuEvent(QContextMenuEvent *event)
 }
 
 // Arrows move between programmes and services, Enter plays
-void DVBDemodEPGGrid::keyPressEvent(QKeyEvent *event)
+void DTVEPGGrid::keyPressEvent(QKeyEvent *event)
 {
     if ((m_selectedRow < 0) || (m_selectedEvent < 0))
     {
@@ -267,8 +267,8 @@ void DVBDemodEPGGrid::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    const std::vector<DVBDemodEPG::Event>& events = m_rows[m_selectedRow].m_events;
-    const DVBDemodEPG::Event& current = events[m_selectedEvent];
+    const std::vector<DTVGuide::Event>& events = m_rows[m_selectedRow].m_events;
+    const DTVGuide::Event& current = events[m_selectedEvent];
     int row = m_selectedRow, e = m_selectedEvent;
 
     switch (event->key())
@@ -288,13 +288,13 @@ void DVBDemodEPGGrid::keyPressEvent(QKeyEvent *event)
 
         for (int r = row + step; (r >= 0) && (r < (int) m_rows.size()); r += step)
         {
-            const std::vector<DVBDemodEPG::Event>& other = m_rows[r].m_events;
+            const std::vector<DTVGuide::Event>& other = m_rows[r].m_events;
 
             if (other.empty()) {
                 continue;
             }
 
-            auto it = std::find_if(other.begin(), other.end(), [t](const DVBDemodEPG::Event& o) { return o.end() > t; });
+            auto it = std::find_if(other.begin(), other.end(), [t](const DTVGuide::Event& o) { return o.end() > t; });
             row = r;
             e = it != other.end() ? (int) (it - other.begin()) : (int) other.size() - 1;
             break;
@@ -313,7 +313,7 @@ void DVBDemodEPGGrid::keyPressEvent(QKeyEvent *event)
     select(row, e);
 
     // Keep it in view
-    const DVBDemodEPG::Event& selected = m_rows[row].m_events[e];
+    const DTVGuide::Event& selected = m_rows[row].m_events[e];
     const double left = x(selected.m_start), right = x(selected.end());
 
     if ((left < nameWidth()) || (right > viewport()->width())) {
@@ -323,7 +323,7 @@ void DVBDemodEPGGrid::keyPressEvent(QKeyEvent *event)
     scrollToService(m_rows[row].m_networkId, m_rows[row].m_serviceId);
 }
 
-bool DVBDemodEPGGrid::viewportEvent(QEvent *event)
+bool DTVEPGGrid::viewportEvent(QEvent *event)
 {
     if (event->type() == QEvent::ToolTip)
     {
@@ -332,7 +332,7 @@ bool DVBDemodEPGGrid::viewportEvent(QEvent *event)
 
         if (hit(help->pos(), row, e) && (e >= 0))
         {
-            const DVBDemodEPG::Event& ev = m_rows[row].m_events[e];
+            const DTVGuide::Event& ev = m_rows[row].m_events[e];
             QToolTip::showText(help->globalPos(), QString("%1 - %2 %3")
                 .arg(QDateTime::fromSecsSinceEpoch(ev.m_start).toLocalTime().toString("hh:mm"))
                 .arg(QDateTime::fromSecsSinceEpoch(ev.end()).toLocalTime().toString("hh:mm"))
@@ -349,7 +349,7 @@ bool DVBDemodEPGGrid::viewportEvent(QEvent *event)
     return QAbstractScrollArea::viewportEvent(event);
 }
 
-void DVBDemodEPGGrid::paintEvent(QPaintEvent *)
+void DTVEPGGrid::paintEvent(QPaintEvent *)
 {
     QPainter painter(viewport());
     const QPalette& pal = palette();
@@ -376,11 +376,11 @@ void DVBDemodEPGGrid::paintEvent(QPaintEvent *)
         // In start order, ends needn't be (an event within another): from the first that could reach the view, by the
         // row's longest, those that do
         const auto first = std::lower_bound(row.m_events.begin(), row.m_events.end(), from - m_longest[r],
-            [](const DVBDemodEPG::Event& e, qint64 t) { return e.m_start < t; });
+            [](const DTVGuide::Event& e, qint64 t) { return e.m_start < t; });
 
         for (auto it = first; (it != row.m_events.end()) && (it->m_start < to); ++it)
         {
-            const DVBDemodEPG::Event& e = *it;
+            const DTVGuide::Event& e = *it;
 
             if (e.end() <= from) {
                 continue;
@@ -474,7 +474,7 @@ void DVBDemodEPGGrid::paintEvent(QPaintEvent *)
         QFont font = painter.font();
         font.setItalic(!row.m_actual);
         painter.setFont(font);
-        const QString text = row.m_channel >= 0 ? QString("%1  %2").arg(row.m_channel).arg(row.m_name) : row.m_name;
+        const QString text = !row.m_channel.isEmpty() ? QString("%1  %2").arg(row.m_channel).arg(row.m_name) : row.m_name;
         painter.drawText(QRect(4, y, names - 8, rh), Qt::AlignVCenter | Qt::AlignLeft,
             painter.fontMetrics().elidedText(text, Qt::ElideRight, names - 8));
         painter.setPen(pal.color(QPalette::Mid));

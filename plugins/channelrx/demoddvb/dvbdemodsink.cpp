@@ -956,6 +956,7 @@ void DVBDemodSink::processPacket(const uint8_t *packet)
 {
     m_ratePackets++;
     m_epg.feed(packet);
+    m_apps.feed(packet);
     m_packetBlock.insert(m_packetBlock.end(), packet, packet + 188);
 
     if (m_packetBlock.size() >= m_packetBlockSize) {
@@ -995,10 +996,10 @@ void DVBDemodSink::flushPackets()
     m_packetBlock.clear();
 }
 
-int DVBDemodSink::startRecording(const QString& fileName, DVBDemodRecorder::Mode mode, int serviceId, QString& error)
+int DVBDemodSink::startRecording(const QString& fileName, DTVRecorder::Mode mode, int serviceId, QString& error)
 {
     // The file is created here, rather than in the demodulator's thread
-    std::unique_ptr<DVBDemodRecorder> recorder(new DVBDemodRecorder());
+    std::unique_ptr<DTVRecorder> recorder(new DTVRecorder());
 
     if (!recorder->start(fileName, mode, serviceId, error)) {
         return -1;
@@ -1012,7 +1013,7 @@ int DVBDemodSink::startRecording(const QString& fileName, DVBDemodRecorder::Mode
 
 void DVBDemodSink::stopRecording(int id)
 {
-    std::shared_ptr<DVBDemodRecorder> recorder;
+    std::shared_ptr<DTVRecorder> recorder;
 
     {
         QMutexLocker locker(&m_recordersMutex);

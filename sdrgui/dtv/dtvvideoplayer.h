@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODVIDEOPLAYER_H
-#define INCLUDE_DVBDEMODVIDEOPLAYER_H
+#ifndef INCLUDE_DTVVIDEOPLAYER_H
+#define INCLUDE_DTVVIDEOPLAYER_H
 
 #include <atomic>
 #include <chrono>
@@ -52,13 +52,15 @@ struct AVFilterGraph;
 struct AVFilterContext;
 struct AVHWFramesContext;
 struct AVSubtitle;
+struct AVFrameSideData;
 
 #include "gui/glvideoframe.h"
 
-#include "dvbdemodpsi.h"
+#include "dtv/dtvpsi.h"
+#include "export.h"
 
 class AudioFifo;
-class DVBDemodTSFifo;
+class DTVTSFifo;
 
 // Demultiplexes the transport stream with FFmpeg, decodes the selected service and displays it. The player's
 // thread demultiplexes and decodes the audio. Video is decoded and shown in another thread, as frames wait there
@@ -66,7 +68,7 @@ class DVBDemodTSFifo;
 // display as GLVideoFrames: decoded by the GPU, they stay there (deinterlaced by FFmpeg's GPU filters, or the
 // display's for D3D11) if the display can show them, else are copied to memory (after FFmpeg's GPU filter has
 // deinterlaced them, if there is one for them, sparing the CPU bwdif)
-class DVBDemodVideoPlayer : public QThread
+class SDRGUI_API DTVVideoPlayer : public QThread
 {
     Q_OBJECT
 
@@ -122,7 +124,7 @@ public:
             SubtitlesHardOfHearing
         };
 
-        int m_pid;
+        int m_pid;                  //!< m_captionPid for closed captions in the video (ATSC's)
         QString m_language;         //!< ISO 639-2 code, e.g. "eng", or empty
         Type m_type;
     };
@@ -143,14 +145,16 @@ public:
     typedef std::function<bool(int type)> CanShowCallback;
 
     //! audioFifo may be null, for no audio
-    DVBDemodVideoPlayer(DVBDemodTSFifo *tsFifo, AudioFifo *audioFifo, QObject *parent = nullptr);
-    ~DVBDemodVideoPlayer();
+    DTVVideoPlayer(DTVTSFifo *tsFifo, AudioFifo *audioFifo, QObject *parent = nullptr);
+    ~DTVVideoPlayer();
 
     void stopPlayer();
     void setService(int id) { m_requestedService = id; }
     void setAudioMute(bool mute) { m_audioMute = mute; }
     void setAudioVolume(int volume); //!< 0..100
     void setDeinterlace(bool deinterlace) { m_deinterlace = deinterlace; }
+    //! This build can deinterlace (FFmpeg's libavfilter was found)
+    static bool canDeinterlace();
     //! Decode video with the GPU, if FFmpeg can for the codec on this platform. Takes effect straight away
     void setHardwareDecoding(bool hardware);
     void setAVOffset(int ms) { m_avOffset = ms / 1000.0; } //!< Delay of the picture relative to the sound
@@ -171,9 +175,9 @@ public:
     Info getInfo();
 
 signals:
-    void servicesChanged(const QList<DVBDemodVideoPlayer::Service>& services);
+    void servicesChanged(const QList<DTVVideoPlayer::Service>& services);
     void serviceSelected(int id, bool hasVideo, bool hasAudio); //!< Whether the service has streams that can be decoded
-    void tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks);
+    void tracksChanged(const DTVVideoPlayer::Tracks& tracks);
 
 protected:
     void run() override;
@@ -205,6 +209,8 @@ private:
     static SwsContext *createConverter(int width, int height, int format);
     static SwrContext *createResampler(const AVFrame *frame, int rate, bool mono);
     static GLVideoSubtitlePtr makeSubtitle(const AVSubtitle& sub, int canvasWidth, int canvasHeight);
+    //! Of a Track of closed captions, which aren't in a stream of their own
+    static constexpr int m_captionPid = 0x10000;
     static bool getTrack(const AVStream *stream, Track& track);
     static int findTrack(const QList<Track>& tracks, std::initializer_list<Track::Type> types, const QString& language);
     static int findTrackInLanguage(const QList<Track>& tracks, Track::Type type, const QString& language);
@@ -219,6 +225,15 @@ private:
     void closeDecoders();
     void selectTracks();
     void closeTrackDecoders();
+    //! A frame's closed captions (A/53, CEA-608), decoded into a page shown from its timestamp. In the video thread
+    void decodeCaptions(const AVFrameSideData *captions, int64_t timestamp);
+    void closeCaptions();
+    //! Caption text (lines apart by newlines) as a page, white on black boxes at the bottom of the picture
+    static GLVideoSubtitlePtr makeCaptions(const QString& text);
+    //! The text of an ASS event, as FFmpeg's text subtitle decoders give it: its fields and override codes removed
+    static QString assText(const char *ass);
+    //! Captions were found in the video: listed as a track, and played if they're preferred
+    void addCaptionTrack();
     void decodeAudioDescription();
     void mixAudioDescription(int16_t *samples, int count, double pts, float gain, bool mute);
     void parseADDescriptors(const uint8_t *buf, int size);
@@ -265,7 +280,7 @@ private:
     bool getAudioClock(double& clock);
     void closeDeinterlacer();
 
-    DVBDemodTSFifo *m_tsFifo;
+    DTVTSFifo *m_tsFifo;
     FrameCallback m_frameCallback;
     CanShowCallback m_canShowCallback;
     AudioFifo *m_audioFifo;
@@ -279,7 +294,7 @@ private:
     int m_selectedRequest;          //!< m_requestedService when the current service was selected
     QList<Service> m_services;      //!< As last signalled
     std::chrono::steady_clock::time_point m_servicesChecked;
-    DVBDemodPSI m_psi;
+    DTVPSI m_psi;
     int m_transportStreamId = -1;   //!< Of the stream opened, to see when the multiplex changes, -1 until known
 
     AVFormatContext *m_formatCtx;
@@ -449,6 +464,14 @@ private:
     std::deque<SubtitlePage> m_subtitlePages;
     SubtitlePage m_subtitleShown;   //!< In the video thread
 
+    // Closed captions, in the video's user data (A/53: CEA-608 in CEA-708's cc_data), as ATSC sends them: listed as a
+    // subtitle track once seen, decoded in the video thread (as FFmpeg gives them with the video frames)
+    std::atomic<bool> m_captionsSeen{false};    //!< Found in the video of the service, since it was selected
+    bool m_captionsListed = false;              //!< In m_tracks
+    std::atomic<bool> m_captionsEnabled{false}; //!< Chosen as the subtitles
+    AVCodecContext *m_captionCtx = nullptr;     //!< FFmpeg's CEA-608 decoder, in the video thread
+    Tracks m_tracks;                            //!< As last signalled
+
     // Video packets waiting for the video thread
     std::thread m_videoThread;
     std::mutex m_videoMutex;
@@ -540,7 +563,7 @@ private:
     Info m_info;
 };
 
-Q_DECLARE_METATYPE(DVBDemodVideoPlayer::Service)
-Q_DECLARE_METATYPE(DVBDemodVideoPlayer::Tracks)
+Q_DECLARE_METATYPE(DTVVideoPlayer::Service)
+Q_DECLARE_METATYPE(DTVVideoPlayer::Tracks)
 
-#endif // INCLUDE_DVBDEMODVIDEOPLAYER_H
+#endif // INCLUDE_DTVVIDEOPLAYER_H

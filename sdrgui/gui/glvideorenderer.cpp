@@ -515,14 +515,15 @@ QRect GLVideoRenderer::subtitleRect(const GLVideoSubtitle& subtitle, const QRect
     return QRect(x0, y0, x1 - x0, y1 - y0);
 }
 
-bool GLVideoRenderer::drawFrame(const GLVideoFramePtr& frame, int width, int height, bool keepAspect, bool deinterlace)
+bool GLVideoRenderer::drawFrame(const GLVideoFramePtr& frame, int width, int height, bool keepAspect, bool deinterlace, const QRect& area)
 {
     if (!m_initialized || !frame || (frame->m_width <= 0) || (frame->m_height <= 0)) {
         return false;
     }
 
     m_deinterlacing = deinterlace;
-    const QRect r = videoRect(*frame, width, height, keepAspect);
+    const QRect r = area.isValid() ? videoRect(*frame, area.width(), area.height(), keepAspect).translated(area.topLeft())
+                                   : videoRect(*frame, width, height, keepAspect);
     glViewport(r.x(), height - r.y() - r.height(), r.width(), r.height());
     glDisable(GL_BLEND);
     QOpenGLShaderProgram *p = nullptr;

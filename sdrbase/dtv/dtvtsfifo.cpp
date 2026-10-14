@@ -23,9 +23,9 @@
 
 #include "util/profiler.h"
 
-#include "dvbdemodtsfifo.h"
+#include "dtv/dtvtsfifo.h"
 
-DVBDemodTSFifo::DVBDemodTSFifo(int size, bool needsReader) :
+DTVTSFifo::DTVTSFifo(int size, bool needsReader) :
     m_size((size_t) std::max(188, size)),
     m_readPos(0),
     m_writePos(0),
@@ -39,7 +39,7 @@ DVBDemodTSFifo::DVBDemodTSFifo(int size, bool needsReader) :
     }
 }
 
-void DVBDemodTSFifo::attachLocked()
+void DTVTSFifo::attachLocked()
 {
     if (m_buffer.size() != m_size) {
         m_buffer.resize(m_size);
@@ -52,7 +52,7 @@ void DVBDemodTSFifo::attachLocked()
     m_accepting = true;
 }
 
-void DVBDemodTSFifo::detachLocked()
+void DTVTSFifo::detachLocked()
 {
     if (!m_needsReader) {
         return;
@@ -65,20 +65,20 @@ void DVBDemodTSFifo::detachLocked()
     std::vector<uint8_t>().swap(m_buffer);
 }
 
-void DVBDemodTSFifo::attachReader()
+void DTVTSFifo::attachReader()
 {
     QMutexLocker locker(&m_mutex);
     attachLocked();
 }
 
-void DVBDemodTSFifo::detachReader()
+void DTVTSFifo::detachReader()
 {
     QMutexLocker locker(&m_mutex);
     detachLocked();
     m_dataAvailable.wakeAll();
 }
 
-void DVBDemodTSFifo::write(const uint8_t *data, int length)
+void DTVTSFifo::write(const uint8_t *data, int length)
 {
     if (!isAccepting() || (length <= 0)) {
         return;
@@ -88,7 +88,7 @@ void DVBDemodTSFifo::write(const uint8_t *data, int length)
     writeLocked(data, length);
 }
 
-void DVBDemodTSFifo::writePackets(const uint8_t *packets, int count)
+void DTVTSFifo::writePackets(const uint8_t *packets, int count)
 {
     if (!isAccepting() || (count <= 0)) {
         return;
@@ -107,7 +107,7 @@ void DVBDemodTSFifo::writePackets(const uint8_t *packets, int count)
     }
 }
 
-void DVBDemodTSFifo::writeLocked(const uint8_t *data, int length)
+void DTVTSFifo::writeLocked(const uint8_t *data, int length)
 {
     if (m_buffer.empty()) {
         return; // Detached meanwhile
@@ -119,11 +119,11 @@ void DVBDemodTSFifo::writeLocked(const uint8_t *data, int length)
     if ((size_t) length > free)
     {
         m_overflows += length;
-        PROFILER_ADD("DVBDemod TS FIFO overflow (count = writes dropping data)", 0)
+        PROFILER_ADD("DTV TS FIFO overflow (count = writes dropping data)", 0)
 
         if (m_needsReader && m_sinceRead.isValid() && (m_sinceRead.elapsed() > m_readerGoneMs))
         {
-            qDebug("DVBDemodTSFifo::writeLocked: nothing read for %lld s: no reader", (long long) (m_sinceRead.elapsed() / 1000));
+            qDebug("DTVTSFifo::writeLocked: nothing read for %lld s: no reader", (long long) (m_sinceRead.elapsed() / 1000));
             detachLocked();
         }
 
@@ -138,7 +138,7 @@ void DVBDemodTSFifo::writeLocked(const uint8_t *data, int length)
     m_dataAvailable.wakeAll();
 }
 
-int DVBDemodTSFifo::read(uint8_t *data, int length, int timeoutMs)
+int DTVTSFifo::read(uint8_t *data, int length, int timeoutMs)
 {
     QMutexLocker locker(&m_mutex);
 
@@ -168,7 +168,7 @@ int DVBDemodTSFifo::read(uint8_t *data, int length, int timeoutMs)
     return length;
 }
 
-void DVBDemodTSFifo::reset()
+void DTVTSFifo::reset()
 {
     QMutexLocker locker(&m_mutex);
     m_readPos = 0;
@@ -176,13 +176,13 @@ void DVBDemodTSFifo::reset()
     m_fill = 0;
 }
 
-int DVBDemodTSFifo::fill()
+int DTVTSFifo::fill()
 {
     QMutexLocker locker(&m_mutex);
     return (int) m_fill;
 }
 
-uint64_t DVBDemodTSFifo::getOverflows()
+uint64_t DTVTSFifo::getOverflows()
 {
     QMutexLocker locker(&m_mutex);
     return m_overflows;

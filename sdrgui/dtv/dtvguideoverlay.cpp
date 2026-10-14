@@ -31,22 +31,23 @@
 
 #include "gui/glvideowidget.h"
 
-#include "dvbdemodguideoverlay.h"
+#include "dtv/dtvguideoverlay.h"
 
 // Light text on translucent dark panels, so the picture shows through, and a colour per kind of programme
-const QColor DVBDemodGuideOverlay::m_textColor(0xF1, 0xEF, 0xE8);
-const QColor DVBDemodGuideOverlay::m_bodyColor(0xD3, 0xD1, 0xC7);
-const QColor DVBDemodGuideOverlay::m_secondaryColor(0xB4, 0xB2, 0xA9);
-const QColor DVBDemodGuideOverlay::m_mutedColor(0x88, 0x87, 0x80);
-const QColor DVBDemodGuideOverlay::m_accentColor(0x5D, 0xCA, 0xA5);
-const QColor DVBDemodGuideOverlay::m_warningColor(0xEF, 0x9F, 0x27);
-const QColor DVBDemodGuideOverlay::m_recordColor(0xE2, 0x4B, 0x4A);
-const QColor DVBDemodGuideOverlay::m_ageColor(0xF0, 0x99, 0x7B);
-const QColor DVBDemodGuideOverlay::m_panelColor(14, 14, 14, 205);
-const QColor DVBDemodGuideOverlay::m_dividerColor(241, 239, 232, 50);
+const QColor DTVGuideOverlay::m_textColor(0xF1, 0xEF, 0xE8);
+const QColor DTVGuideOverlay::m_bodyColor(0xD3, 0xD1, 0xC7);
+const QColor DTVGuideOverlay::m_secondaryColor(0xB4, 0xB2, 0xA9);
+const QColor DTVGuideOverlay::m_mutedColor(0x88, 0x87, 0x80);
+const QColor DTVGuideOverlay::m_accentColor(0x5D, 0xCA, 0xA5);
+const QColor DTVGuideOverlay::m_warningColor(0xEF, 0x9F, 0x27);
+const QColor DTVGuideOverlay::m_recordColor(0xE2, 0x4B, 0x4A);
+const QColor DTVGuideOverlay::m_redButtonColor(0xE6, 0x29, 0x28);
+const QColor DTVGuideOverlay::m_ageColor(0xF0, 0x99, 0x7B);
+const QColor DTVGuideOverlay::m_panelColor(14, 14, 14, 205);
+const QColor DTVGuideOverlay::m_dividerColor(241, 239, 232, 50);
 
 // Text with symbols, written as {dot}, {dash}, {up}, {down}, {left}, {right} and {rec}, so the source is ASCII
-QString DVBDemodGuideOverlay::symbols(const char *text)
+QString DTVGuideOverlay::symbols(const char *text)
 {
     QString s(text);
     s.replace("{dot}", QChar(0x00B7));
@@ -61,12 +62,12 @@ QString DVBDemodGuideOverlay::symbols(const char *text)
 
 // Pixels per pixel of a 1920 x 1080 layout, no less than half, so text is readable in a small window, where the
 // layout is more compact instead
-double DVBDemodGuideOverlay::scale(const QSize& size)
+double DTVGuideOverlay::scale(const QSize& size)
 {
     return std::max(0.5, std::min(size.height() / 1080.0, size.width() / 1920.0));
 }
 
-QFont DVBDemodGuideOverlay::font(double pixels, bool medium)
+QFont DTVGuideOverlay::font(double pixels, bool medium)
 {
     QFont f;
     f.setPixelSize(std::max(8, (int) std::lround(pixels)));
@@ -74,12 +75,12 @@ QFont DVBDemodGuideOverlay::font(double pixels, bool medium)
     return f;
 }
 
-QString DVBDemodGuideOverlay::localTime(qint64 utc, const char *format)
+QString DTVGuideOverlay::localTime(qint64 utc, const char *format)
 {
     return QDateTime::fromSecsSinceEpoch(utc).toLocalTime().toString(format);
 }
 
-QString DVBDemodGuideOverlay::durationText(int seconds)
+QString DTVGuideOverlay::durationText(int seconds)
 {
     const int minutes = (seconds + 30) / 60;
 
@@ -91,7 +92,7 @@ QString DVBDemodGuideOverlay::durationText(int seconds)
 }
 
 // Text, elided to fit width, with its top left at x, y
-void DVBDemodGuideOverlay::drawText(QPainter& painter, int x, int y, int width, const QString& text, const QFont& f, const QColor& color)
+void DTVGuideOverlay::drawText(QPainter& painter, int x, int y, int width, const QString& text, const QFont& f, const QColor& color)
 {
     const QFontMetrics metrics(f);
     painter.setFont(f);
@@ -99,19 +100,20 @@ void DVBDemodGuideOverlay::drawText(QPainter& painter, int x, int y, int width, 
     painter.drawText(x, y + metrics.ascent(), metrics.elidedText(text, Qt::ElideRight, std::max(0, width)));
 }
 
-void DVBDemodGuideOverlay::fillRounded(QPainter& painter, const QRectF& rect, double radius, const QColor& color)
+void DTVGuideOverlay::fillRounded(QPainter& painter, const QRectF& rect, double radius, const QColor& color)
 {
     QPainterPath path;
     path.addRoundedRect(rect, radius, radius);
     painter.fillPath(path, color);
 }
 
-DVBDemodGuideOverlay::DVBDemodGuideOverlay(DVBDemodEPG *epg, QObject *parent) :
+DTVGuideOverlay::DTVGuideOverlay(DTVGuide *epg, QObject *parent) :
     QObject(parent),
     m_epg(epg),
     m_mode(Off),
     m_playingService(0),
     m_stepping(false),
+    m_redButton(false),
     m_playedNetworkId(-1),
     m_playedServiceId(-1),
     m_row(0),
@@ -125,7 +127,7 @@ DVBDemodGuideOverlay::DVBDemodGuideOverlay(DVBDemodEPG *epg, QObject *parent) :
     m_pressMode(Off)
 {
     m_hideTimer.setSingleShot(true);
-    connect(&m_hideTimer, &QTimer::timeout, this, &DVBDemodGuideOverlay::hide);
+    connect(&m_hideTimer, &QTimer::timeout, this, &DTVGuideOverlay::hide);
     m_digitTimer.setSingleShot(true);
     connect(&m_digitTimer, &QTimer::timeout, this, [this]() { digit(-1); });
     m_clickTimer.setSingleShot(true);
@@ -138,7 +140,7 @@ DVBDemodGuideOverlay::DVBDemodGuideOverlay(DVBDemodEPG *epg, QObject *parent) :
     });
 }
 
-void DVBDemodGuideOverlay::setWidget(GLVideoWidget *widget)
+void DTVGuideOverlay::setWidget(GLVideoWidget *widget)
 {
     if (m_widget && (m_widget != widget)) {
         m_widget->setGuide(QImage());
@@ -153,7 +155,7 @@ void DVBDemodGuideOverlay::setWidget(GLVideoWidget *widget)
     }
 }
 
-qint64 DVBDemodGuideOverlay::now() const
+qint64 DTVGuideOverlay::now() const
 {
     const qint64 t = m_epg->getTime();
     return t > 0 ? t : QDateTime::currentSecsSinceEpoch();
@@ -162,7 +164,7 @@ qint64 DVBDemodGuideOverlay::now() const
 // TV and radio services that can be played (received, or on a multiplex of the area, retuned to or searched for if its
 // frequency isn't known), and not hidden by their channel's visible_service_flag, by channel number. The one browsed or
 // selected, and the one at the top of the guide's grid, stay so
-void DVBDemodGuideOverlay::loadServices()
+void DTVGuideOverlay::loadServices()
 {
     auto ids = [this](int row) {
         return (row >= 0) && (row < (int) m_services.size())
@@ -171,12 +173,15 @@ void DVBDemodGuideOverlay::loadServices()
     const std::pair<int, int> selected = ids(m_row), first = ids(m_firstRow);
 
     m_services = m_epg->getServices();
-    m_services.erase(std::remove_if(m_services.begin(), m_services.end(), [](const DVBDemodEPG::Service& s) {
+    m_services.erase(std::remove_if(m_services.begin(), m_services.end(), [](const DTVGuide::Service& s) {
         return s.m_name.isEmpty() || !s.m_visible || (s.m_type == 0x0C) || (s.m_type == 0x10) || (!s.m_actual && !s.m_multiplexKnown);
     }), m_services.end());
-    std::sort(m_services.begin(), m_services.end(), [](const DVBDemodEPG::Service& a, const DVBDemodEPG::Service& b) {
-        const int ca = a.m_channel >= 0 ? a.m_channel : 0x7FFFFFFF, cb = b.m_channel >= 0 ? b.m_channel : 0x7FFFFFFF;
-        return ca != cb ? ca < cb : a.m_name < b.m_name;
+    std::sort(m_services.begin(), m_services.end(), [](const DTVGuide::Service& a, const DTVGuide::Service& b) {
+        if ((a.m_channel != b.m_channel) || (a.m_minorChannel != b.m_minorChannel)) {
+            return a.channelBefore(b);
+        }
+
+        return a.m_name < b.m_name;
     });
     m_row = 0;
     m_firstRow = 0;
@@ -201,13 +206,13 @@ void DVBDemodGuideOverlay::loadServices()
     }
 }
 
-int DVBDemodGuideOverlay::playingRow() const
+int DTVGuideOverlay::playingRow() const
 {
     int remembered = -1;
 
     for (int i = 0; i < (int) m_services.size(); i++)
     {
-        const DVBDemodEPG::Service& s = m_services[i];
+        const DTVGuide::Service& s = m_services[i];
 
         if (s.m_actual && (s.m_serviceId == m_playingService)) {
             return i;
@@ -223,37 +228,37 @@ int DVBDemodGuideOverlay::playingRow() const
 
 // A service's programmes, in order: the schedule, and for the multiplex being received, now and next too, which
 // may be all there is
-std::vector<DVBDemodEPG::Event> DVBDemodGuideOverlay::events(int row) const
+std::vector<DTVGuide::Event> DTVGuideOverlay::events(int row) const
 {
     if ((row < 0) || (row >= (int) m_services.size())) {
         return {};
     }
 
-    const DVBDemodEPG::Service& s = m_services[row];
-    std::vector<DVBDemodEPG::Event> events = m_epg->getEvents(s.m_networkId, s.m_serviceId);
-    DVBDemodEPG::Event present, following;
+    const DTVGuide::Service& s = m_services[row];
+    std::vector<DTVGuide::Event> events = m_epg->getEvents(s.m_networkId, s.m_serviceId);
+    DTVGuide::Event present, following;
 
     if (s.m_actual && m_epg->getNowNext(s.m_serviceId, present, following))
     {
         // Instead of the schedule's copies, which may have the times as planned rather than as broadcast
-        for (const DVBDemodEPG::Event *e : {&present, &following})
+        for (const DTVGuide::Event *e : {&present, &following})
         {
             if (e->isValid())
             {
-                events.erase(std::remove_if(events.begin(), events.end(), [e](const DVBDemodEPG::Event& x) {
+                events.erase(std::remove_if(events.begin(), events.end(), [e](const DTVGuide::Event& x) {
                     return (x.m_eventId == e->m_eventId) || (x.m_start == e->m_start);
                 }), events.end());
                 events.push_back(*e);
             }
         }
 
-        std::sort(events.begin(), events.end(), [](const DVBDemodEPG::Event& a, const DVBDemodEPG::Event& b) { return a.m_start < b.m_start; });
+        std::sort(events.begin(), events.end(), [](const DTVGuide::Event& a, const DTVGuide::Event& b) { return a.m_start < b.m_start; });
     }
 
     return events;
 }
 
-bool DVBDemodGuideOverlay::hasPlaying()
+bool DTVGuideOverlay::hasPlaying()
 {
     loadServices();
 
@@ -265,7 +270,7 @@ bool DVBDemodGuideOverlay::hasPlaying()
     return playingRow() >= 0;
 }
 
-void DVBDemodGuideOverlay::showRibbon()
+void DTVGuideOverlay::showRibbon()
 {
     // Shown again as each service starts playing: while stepping with the arrows, on the last asked for, not the
     // one that's caught up
@@ -283,7 +288,7 @@ void DVBDemodGuideOverlay::showRibbon()
     render();
 }
 
-void DVBDemodGuideOverlay::showGuide()
+void DTVGuideOverlay::showGuide()
 {
     if (m_mode != Ribbon)
     {
@@ -303,7 +308,7 @@ void DVBDemodGuideOverlay::showGuide()
     render();
 }
 
-void DVBDemodGuideOverlay::hide()
+void DTVGuideOverlay::hide()
 {
     m_mode = Off;
     m_stepping = false;
@@ -311,13 +316,13 @@ void DVBDemodGuideOverlay::hide()
     render(); // The channel number being entered, if any
 }
 
-void DVBDemodGuideOverlay::restartHideTimer()
+void DTVGuideOverlay::restartHideTimer()
 {
     m_hideTimer.start((m_mode == Guide ? m_guideSeconds : m_ribbonSeconds) * 1000);
 }
 
 // On the guide if it's shown, else on the ribbon
-void DVBDemodGuideOverlay::showMessage(const QString& message)
+void DTVGuideOverlay::showMessage(const QString& message)
 {
     if (m_mode == Off) {
         showRibbon();
@@ -328,7 +333,7 @@ void DVBDemodGuideOverlay::showMessage(const QString& message)
     render();
 }
 
-void DVBDemodGuideOverlay::refresh(bool force)
+void DTVGuideOverlay::refresh(bool force)
 {
     if (((m_mode == Off) && m_digits.isEmpty()) || !m_widget) {
         return;
@@ -339,7 +344,7 @@ void DVBDemodGuideOverlay::refresh(bool force)
     }
 }
 
-bool DVBDemodGuideOverlay::handleKey(QKeyEvent *event)
+bool DTVGuideOverlay::handleKey(QKeyEvent *event)
 {
     const int key = event->key();
     const bool ok = (key == Qt::Key_Return) || (key == Qt::Key_Enter) || (key == Qt::Key_Select);
@@ -491,7 +496,7 @@ bool DVBDemodGuideOverlay::handleKey(QKeyEvent *event)
 }
 
 // Up to three digits of a channel number, played when complete, after a pause, or on OK (value < 0)
-void DVBDemodGuideOverlay::digit(int value)
+void DTVGuideOverlay::digit(int value)
 {
     if (value >= 0)
     {
@@ -524,7 +529,7 @@ void DVBDemodGuideOverlay::digit(int value)
     render();
 }
 
-void DVBDemodGuideOverlay::channelStep(int delta)
+void DTVGuideOverlay::channelStep(int delta)
 {
     loadServices();
     const int n = (int) m_services.size();
@@ -541,7 +546,7 @@ void DVBDemodGuideOverlay::channelStep(int delta)
     }
 }
 
-void DVBDemodGuideOverlay::stepRibbon(int delta)
+void DTVGuideOverlay::stepRibbon(int delta)
 {
     const int n = (int) m_services.size();
 
@@ -552,7 +557,7 @@ void DVBDemodGuideOverlay::stepRibbon(int delta)
     m_row = (std::max(0, std::min(m_row, n - 1)) + delta + n) % n;
     m_ribbonEvent = 0;
     m_stepping = true;
-    const DVBDemodEPG::Service& s = m_services[m_row];
+    const DTVGuide::Service& s = m_services[m_row];
 
     if (!(s.m_actual && (s.m_serviceId == m_playingService)))
     {
@@ -563,7 +568,7 @@ void DVBDemodGuideOverlay::stepRibbon(int delta)
 }
 
 // The ribbon is shown again once the service changes
-void DVBDemodGuideOverlay::play(int row)
+void DTVGuideOverlay::play(int row)
 {
     if ((row < 0) || (row >= (int) m_services.size()))
     {
@@ -571,7 +576,7 @@ void DVBDemodGuideOverlay::play(int row)
         return;
     }
 
-    const DVBDemodEPG::Service& s = m_services[row];
+    const DTVGuide::Service& s = m_services[row];
     const bool playing = s.m_actual && (s.m_serviceId == m_playingService);
     hide();
 
@@ -584,9 +589,9 @@ void DVBDemodGuideOverlay::play(int row)
     }
 }
 
-bool DVBDemodGuideOverlay::playSimulcast(int networkId, int serviceId)
+bool DTVGuideOverlay::playSimulcast(int networkId, int serviceId)
 {
-    DVBDemodEPG::Service simulcast;
+    DTVGuide::Service simulcast;
 
     if (!m_epg->getSimulcast(networkId, serviceId, simulcast) || (simulcast.m_actual && (simulcast.m_serviceId == m_playingService))) {
         return false;
@@ -599,9 +604,9 @@ bool DVBDemodGuideOverlay::playSimulcast(int networkId, int serviceId)
     return true;
 }
 
-QString DVBDemodGuideOverlay::simulcastName(int row) const
+QString DTVGuideOverlay::simulcastName(int row) const
 {
-    DVBDemodEPG::Service simulcast;
+    DTVGuide::Service simulcast;
 
     if ((row < 0) || (row >= (int) m_services.size())
         || !m_epg->getSimulcast(m_services[row].m_networkId, m_services[row].m_serviceId, simulcast)) {
@@ -611,13 +616,13 @@ QString DVBDemodGuideOverlay::simulcastName(int row) const
     return simulcast.m_name;
 }
 
-void DVBDemodGuideOverlay::toggleRecording()
+void DTVGuideOverlay::toggleRecording()
 {
     if ((m_row < 0) || (m_row >= (int) m_services.size()) || (m_guideEventId < 0)) {
         return;
     }
 
-    const DVBDemodEPG::Service& s = m_services[m_row];
+    const DTVGuide::Service& s = m_services[m_row];
 
     if (m_toggleRecording) {
         m_toggleRecording(s.m_networkId, s.m_serviceId, m_guideEventId);
@@ -625,9 +630,9 @@ void DVBDemodGuideOverlay::toggleRecording()
 }
 
 // The programme on at a time, or the next after it, or the last before it
-void DVBDemodGuideOverlay::selectGuideEventAt(qint64 utc)
+void DTVGuideOverlay::selectGuideEventAt(qint64 utc)
 {
-    const std::vector<DVBDemodEPG::Event> evs = events(m_row);
+    const std::vector<DTVGuide::Event> evs = events(m_row);
     m_guideEventId = -1;
 
     for (const auto& e : evs)
@@ -644,7 +649,7 @@ void DVBDemodGuideOverlay::selectGuideEventAt(qint64 utc)
     }
 }
 
-void DVBDemodGuideOverlay::moveGuideRow(int delta)
+void DTVGuideOverlay::moveGuideRow(int delta)
 {
     const int n = (int) m_services.size();
 
@@ -665,9 +670,9 @@ void DVBDemodGuideOverlay::moveGuideRow(int delta)
 }
 
 // Along the row, scrolling the grid by half hours to keep the programme in view. Not back before the half hour now
-void DVBDemodGuideOverlay::moveGuideEvent(int delta)
+void DTVGuideOverlay::moveGuideEvent(int delta)
 {
-    const std::vector<DVBDemodEPG::Event> evs = events(m_row);
+    const std::vector<DTVGuide::Event> evs = events(m_row);
     const qint64 t = now();
     const qint64 earliest = t - t % 1800;
     int index = -1;
@@ -691,13 +696,13 @@ void DVBDemodGuideOverlay::moveGuideEvent(int delta)
         index++;
     }
 
-    const DVBDemodEPG::Event& e = evs[index];
+    const DTVGuide::Event& e = evs[index];
     m_guideEventId = e.m_eventId;
     m_guideFocus = std::max(e.m_start, t);
     keepGuideEventVisible(e.m_start);
 }
 
-void DVBDemodGuideOverlay::keepGuideEventVisible(qint64 start)
+void DTVGuideOverlay::keepGuideEventVisible(qint64 start)
 {
     const qint64 t = now();
     const qint64 earliest = t - t % 1800;
@@ -711,7 +716,7 @@ void DVBDemodGuideOverlay::keepGuideEventVisible(qint64 start)
     }
 }
 
-void DVBDemodGuideOverlay::keepGuideSelectionVisible()
+void DTVGuideOverlay::keepGuideSelectionVisible()
 {
     if (m_row < m_firstRow) {
         m_firstRow = m_row;
@@ -722,8 +727,20 @@ void DVBDemodGuideOverlay::keepGuideSelectionVisible()
     m_firstRow = std::max(0, std::min(m_firstRow, (int) m_services.size() - m_visibleRows));
 }
 
-double DVBDemodGuideOverlay::paintButton(QPainter& painter, double right, double y, double u, const QString& key,
-    const QString& label, HitArea::Kind kind)
+void DTVGuideOverlay::setRedButton(bool shown)
+{
+    if (shown != m_redButton)
+    {
+        m_redButton = shown;
+
+        if (m_mode != Off) {
+            render();
+        }
+    }
+}
+
+double DTVGuideOverlay::paintButton(QPainter& painter, double right, double y, double u, const QString& key,
+    const QString& label, HitArea::Kind kind, const QColor& keyColor)
 {
     const QFont keyFont = font(19 * u, true);
     const QFont labelFont = font(21 * u);
@@ -736,7 +753,7 @@ double DVBDemodGuideOverlay::paintButton(QPainter& painter, double right, double
     painter.setBrush(Qt::NoBrush);
     painter.drawRoundedRect(r, 19 * u, 19 * u);
     painter.setFont(keyFont);
-    painter.setPen(m_accentColor);
+    painter.setPen(keyColor.isValid() ? keyColor : m_accentColor);
     painter.drawText(QRectF(r.x() + 16 * u, r.y(), keyWidth, r.height()), Qt::AlignLeft | Qt::AlignVCenter, key);
     painter.setFont(labelFont);
     painter.setPen(m_textColor);
@@ -746,7 +763,7 @@ double DVBDemodGuideOverlay::paintButton(QPainter& painter, double right, double
 }
 
 // The topmost: buttons are drawn after the grid they may overlap
-const DVBDemodGuideOverlay::HitArea *DVBDemodGuideOverlay::hit(const QPointF& position) const
+const DTVGuideOverlay::HitArea *DTVGuideOverlay::hit(const QPointF& position) const
 {
     for (auto it = m_hits.rbegin(); it != m_hits.rend(); ++it)
     {
@@ -759,7 +776,7 @@ const DVBDemodGuideOverlay::HitArea *DVBDemodGuideOverlay::hit(const QPointF& po
 }
 
 // Scroll the grid by half hours (not before the half hour now), selecting the programme at its start, or now
-void DVBDemodGuideOverlay::stepWindow(int halfHours)
+void DTVGuideOverlay::stepWindow(int halfHours)
 {
     const qint64 t = now();
     m_windowStart = std::max(t - t % 1800, m_windowStart + halfHours * 1800);
@@ -767,7 +784,7 @@ void DVBDemodGuideOverlay::stepWindow(int halfHours)
     selectGuideEventAt(m_guideFocus);
 }
 
-bool DVBDemodGuideOverlay::handleMouse(QMouseEvent *event)
+bool DTVGuideOverlay::handleMouse(QMouseEvent *event)
 {
     const double ratio = m_widget ? m_widget->devicePixelRatioF() : 1.0; // None when testing
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -841,6 +858,15 @@ bool DVBDemodGuideOverlay::handleMouse(QMouseEvent *event)
     case HitArea::RibbonBar:
         if (!doubleClick) {
             showGuide();
+        }
+        return true;
+
+    case HitArea::RedButton:
+        // The guide out of the way of the application
+        if (!doubleClick)
+        {
+            hide();
+            emit redButton();
         }
         return true;
 
@@ -924,7 +950,7 @@ bool DVBDemodGuideOverlay::handleMouse(QMouseEvent *event)
 }
 
 // A row a notch, or with Shift or sideways, half an hour
-bool DVBDemodGuideOverlay::handleWheel(QWheelEvent *event)
+bool DTVGuideOverlay::handleWheel(QWheelEvent *event)
 {
     if (m_mode != Guide) {
         return false;
@@ -951,7 +977,7 @@ bool DVBDemodGuideOverlay::handleWheel(QWheelEvent *event)
 }
 
 // By the content's level 1 nibble: the UK's D-Book differs from EN 300 468 from 6 on
-QColor DVBDemodGuideOverlay::genreColor(int genre, int networkId) const
+QColor DTVGuideOverlay::genreColor(int genre, int networkId) const
 {
     static const QColor gray(0x88, 0x87, 0x80);
     static const QColor drama(0x7F, 0x77, 0xDD);
@@ -986,7 +1012,7 @@ QColor DVBDemodGuideOverlay::genreColor(int genre, int networkId) const
 }
 
 // Into an image the size of the widget, which shows it over the video
-void DVBDemodGuideOverlay::render()
+void DTVGuideOverlay::render()
 {
     if (!m_widget) {
         return;
@@ -998,7 +1024,7 @@ void DVBDemodGuideOverlay::render()
     m_widget->setGuide(((m_mode == Off) && m_digits.isEmpty()) || size.isEmpty() ? QImage() : image(size));
 }
 
-QImage DVBDemodGuideOverlay::image(const QSize& size)
+QImage DTVGuideOverlay::image(const QSize& size)
 {
     m_hits.clear();
     m_drawn.clear();
@@ -1033,7 +1059,7 @@ QImage DVBDemodGuideOverlay::image(const QSize& size)
     return image;
 }
 
-void DVBDemodGuideOverlay::paintClock(QPainter& painter, const QSize& size, qint64 t, double u, bool date)
+void DTVGuideOverlay::paintClock(QPainter& painter, const QSize& size, qint64 t, double u, bool date)
 {
     const QString text = date ? localTime(t, "ddd d MMM  HH:mm") : localTime(t);
     const QFont f = font(28 * u, date);
@@ -1046,12 +1072,8 @@ void DVBDemodGuideOverlay::paintClock(QPainter& painter, const QSize& size, qint
     painter.drawText(box, Qt::AlignCenter, text);
 }
 
-double DVBDemodGuideOverlay::paintLogo(QPainter& painter, double right, double centreY, double width, double height)
+double DTVGuideOverlay::paintLogo(QPainter& painter, double right, double centreY, double width, double height)
 {
-    if (m_logo.isNull()) {
-        m_logo = QImage(":/demoddvb/images/angeltv.png");
-    }
-
     if (m_logo.isNull() || (width < 1.0) || (height < 1.0)) {
         return 0.0;
     }
@@ -1069,7 +1091,7 @@ double DVBDemodGuideOverlay::paintLogo(QPainter& painter, double right, double c
 }
 
 // HD, subtitles, audio description and age as outlined badges, then extra text
-void DVBDemodGuideOverlay::paintBadges(QPainter& painter, int x, int y, double u, const DVBDemodEPG::Event& event, const QString& extra)
+void DTVGuideOverlay::paintBadges(QPainter& painter, int x, int y, double u, const DTVGuide::Event& event, const QString& extra)
 {
     const QFont f = font(19 * u);
     const QFontMetrics metrics(f);
@@ -1116,7 +1138,7 @@ void DVBDemodGuideOverlay::paintBadges(QPainter& painter, int x, int y, double u
 }
 
 // Channel, programme on now (or browsed) with its progress, and the next, along the bottom
-void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qint64 t)
+void DTVGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qint64 t)
 {
     const double u = scale(size);
     const double margin = 48 * u;
@@ -1128,13 +1150,21 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
     m_drawn.push_back(bar);
     paintClock(painter, size, t, u, false);
 
+    // The red button, above the bar's right end: the playing service's interactive application
+    if (m_redButton)
+    {
+        const double buttonY = bar.y() - 50 * u;
+        const double width = paintButton(painter, bar.right(), buttonY, u, symbols("{rec}"), "Red button", HitArea::RedButton, m_redButtonColor);
+        m_drawn.push_back(QRectF(bar.right() - width, buttonY, width, 38 * u));
+    }
+
     if (m_services.empty())
     {
         drawText(painter, bar.x() + pad, bar.y() + pad, bar.width() - 2 * pad, "No programme guide yet", font(32 * u, true), m_textColor);
         return;
     }
 
-    const DVBDemodEPG::Service& s = m_services[std::min(m_row, (int) m_services.size() - 1)];
+    const DTVGuide::Service& s = m_services[std::min(m_row, (int) m_services.size() - 1)];
 
     // Channel
     const double channelWidth = 210 * u;
@@ -1143,7 +1173,7 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
     painter.setFont(font(58 * u, true));
     const QFontMetrics numberMetrics(painter.font());
     painter.drawText(QRectF(channelRect.x(), channelRect.y() - 10 * u, channelRect.width(), numberMetrics.height()),
-        Qt::AlignHCenter | Qt::AlignTop, s.m_channel >= 0 ? QString::number(s.m_channel) : QString());
+        Qt::AlignHCenter | Qt::AlignTop, s.channelText());
     const QFont nameFont = font(24 * u);
     const QFontMetrics nameMetrics(nameFont);
     painter.setFont(nameFont);
@@ -1177,8 +1207,8 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
     painter.fillRect(QRectF(divider1, bar.y() + pad, std::max(1.0, u), height - 2 * pad), m_dividerColor);
 
     // Programmes that haven't ended
-    std::vector<DVBDemodEPG::Event> evs = events(m_row);
-    evs.erase(std::remove_if(evs.begin(), evs.end(), [t](const DVBDemodEPG::Event& e) { return e.end() <= t; }), evs.end());
+    std::vector<DTVGuide::Event> evs = events(m_row);
+    evs.erase(std::remove_if(evs.begin(), evs.end(), [t](const DTVGuide::Event& e) { return e.end() <= t; }), evs.end());
     m_ribbonEvent = std::max(0, std::min(m_ribbonEvent, (int) evs.size() - 1));
 
     // The logo at the right, the programmes before it, unless the bar is too narrow to spare the room
@@ -1197,12 +1227,12 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
     }
     else
     {
-        const DVBDemodEPG::Event& e = evs[m_ribbonEvent];
+        const DTVGuide::Event& e = evs[m_ribbonEvent];
         const bool onNow = e.m_start <= t;
         const bool next = (m_ribbonEvent == 0) || ((m_ribbonEvent == 1) && (evs[0].m_start <= t));
         const QString when = onNow ? "Now" : next ? "Next" : "Later";
         QString label = symbols("%1  {dot}  %2 {dash} %3").arg(when).arg(localTime(e.m_start)).arg(localTime(e.end()));
-        const QString genre = DVBDemodEPG::genreText(e.m_genre, s.m_networkId);
+        const QString genre = m_epg->genreName(e.m_genre, s.m_networkId);
 
         if (!genre.isEmpty()) {
             label += symbols("  {dot}  %1").arg(genre);
@@ -1238,7 +1268,7 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
 
         if (m_ribbonEvent + 1 < (int) evs.size())
         {
-            const DVBDemodEPG::Event& n = evs[m_ribbonEvent + 1];
+            const DTVGuide::Event& n = evs[m_ribbonEvent + 1];
             drawText(painter, (int) x1, top, (int) sideWidth, symbols("%1  {dot}  %2").arg(onNow ? "Next" : "Then").arg(localTime(n.m_start)),
                 font(21 * u), m_secondaryColor);
             drawText(painter, (int) x1, top + (int) (30 * u), (int) sideWidth, n.m_title, font(30 * u, true), m_textColor);
@@ -1246,7 +1276,7 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
 
         if (m_message.isEmpty() && (m_ribbonEvent + 2 < (int) evs.size()))
         {
-            const DVBDemodEPG::Event& n = evs[m_ribbonEvent + 2];
+            const DTVGuide::Event& n = evs[m_ribbonEvent + 2];
             drawText(painter, (int) x1, top + (int) (78 * u), (int) sideWidth, QString("Then %1  %2").arg(localTime(n.m_start)).arg(n.m_title),
                 font(23 * u), m_mutedColor);
         }
@@ -1258,15 +1288,15 @@ void DVBDemodGuideOverlay::paintRibbon(QPainter& painter, const QSize& size, qin
 }
 
 // The programme selected in detail over the dimmed picture, and channels by time below
-void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint64 t)
+void DTVGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint64 t)
 {
     const double u = scale(size);
     painter.fillRect(QRect(QPoint(0, 0), size), QColor(8, 8, 8, 150));
 
     // The selection
-    const DVBDemodEPG::Service *service = m_services.empty() ? nullptr : &m_services[std::min(m_row, (int) m_services.size() - 1)];
-    const std::vector<DVBDemodEPG::Event> selectedRow = events(m_row);
-    const DVBDemodEPG::Event *selected = nullptr;
+    const DTVGuide::Service *service = m_services.empty() ? nullptr : &m_services[std::min(m_row, (int) m_services.size() - 1)];
+    const std::vector<DTVGuide::Event> selectedRow = events(m_row);
+    const DTVGuide::Event *selected = nullptr;
 
     for (const auto& e : selectedRow)
     {
@@ -1327,9 +1357,9 @@ void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint
     }
     else
     {
-        const DVBDemodEPG::Event& e = *selected;
+        const DTVGuide::Event& e = *selected;
         QStringList parts;
-        const QString genre = DVBDemodEPG::genreText(e.m_genre, service->m_networkId);
+        const QString genre = m_epg->genreName(e.m_genre, service->m_networkId);
 
         if (!genre.isEmpty()) {
             parts.append(genre);
@@ -1372,6 +1402,11 @@ void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint
     // The grid
     double buttonsRight = panel.right() - 4 * u;
     buttonsRight -= paintButton(painter, buttonsRight, buttonsY, u, "G", "Close", HitArea::Close) + 14 * u;
+
+    if (m_redButton) {
+        buttonsRight -= paintButton(painter, buttonsRight, buttonsY, u, symbols("{rec}"), "Red button", HitArea::RedButton, m_redButtonColor) + 14 * u;
+    }
+
     buttonsRight -= paintButton(painter, buttonsRight, buttonsY, u, "R", "Record", HitArea::Record) + 14 * u;
     buttonsRight -= paintButton(painter, buttonsRight, buttonsY, u, "Enter", "Watch", HitArea::Watch) + 14 * u;
 
@@ -1426,7 +1461,7 @@ void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint
             break;
         }
 
-        const DVBDemodEPG::Service& s = m_services[row];
+        const DTVGuide::Service& s = m_services[row];
         const double ry = rowsTop + i * rowHeight;
         const double blockHeight = rowHeight - 8 * u;
         const bool current = row == m_row;
@@ -1441,7 +1476,7 @@ void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint
         painter.setFont(numberFont);
         painter.setPen(current ? m_textColor : m_mutedColor);
         painter.drawText(QRectF(panel.x() + pad + 4 * u, ry, 62 * u, blockHeight), Qt::AlignLeft | Qt::AlignVCenter,
-            s.m_channel >= 0 ? QString::number(s.m_channel) : QString());
+            s.channelText());
         QFont nf = nameFont;
         nf.setItalic(!s.m_actual); // Retunes, as in the guide window
         const QFontMetrics nameMetrics(nf);
@@ -1451,7 +1486,7 @@ void DVBDemodGuideOverlay::paintGuide(QPainter& painter, const QSize& size, qint
             nameMetrics.elidedText(s.m_name, Qt::ElideRight, (int) (labelWidth - 84 * u)));
 
         // Programmes
-        const std::vector<DVBDemodEPG::Event> evs = row == m_row ? selectedRow : events(row);
+        const std::vector<DTVGuide::Event> evs = row == m_row ? selectedRow : events(row);
         bool any = false;
 
         for (const auto& e : evs)

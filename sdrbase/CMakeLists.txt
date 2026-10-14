@@ -184,6 +184,16 @@ set(sdrbase_SOURCES
     dsp/spectrumvis.cpp
     dsp/wavfilerecord.cpp
 
+    dtv/dtvapps.cpp
+    dtv/dtvcarousel.cpp
+    dtv/dtvcarouselserver.cpp
+    dtv/dtvguide.cpp
+    dtv/dtvpsi.cpp
+    dtv/dtvrecorder.cpp
+    dtv/dtvsections.cpp
+    dtv/dtvtsfifo.cpp
+    dtv/dtvudp.cpp
+
     device/deviceapi.cpp
     device/deviceenumerator.cpp
     device/deviceset.cpp
@@ -446,6 +456,16 @@ set(sdrbase_HEADERS
     dsp/devicesamplestatic.h
     dsp/spectrumvis.h
     dsp/wavfilerecord.h
+
+    dtv/dtvapps.h
+    dtv/dtvcarousel.h
+    dtv/dtvcarouselserver.h
+    dtv/dtvguide.h
+    dtv/dtvpsi.h
+    dtv/dtvrecorder.h
+    dtv/dtvsections.h
+    dtv/dtvtsfifo.h
+    dtv/dtvudp.h
 
     device/deviceapi.h
     device/deviceenumerator.h

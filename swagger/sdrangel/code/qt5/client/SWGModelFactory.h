@@ -115,6 +115,8 @@
 #include "SWGDABProgram.h"
 #include "SWGDATVDemodReport.h"
 #include "SWGDVBDemodReport.h"
+#include "SWGDVBDemodApp.h"
+#include "SWGDVBDemodCarousel.h"
 #include "SWGDVBDemodEPGService.h"
 #include "SWGDVBDemodEPGEvent.h"
 #include "SWGDATVDemodSettings.h"
@@ -953,6 +955,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDVBDemodReport").compare(type) == 0) {
       SWGDVBDemodReport *obj = new SWGDVBDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVBDemodApp").compare(type) == 0) {
+      SWGDVBDemodApp *obj = new SWGDVBDemodApp();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVBDemodCarousel").compare(type) == 0) {
+      SWGDVBDemodCarousel *obj = new SWGDVBDemodCarousel();
       obj->init();
       return obj;
     }

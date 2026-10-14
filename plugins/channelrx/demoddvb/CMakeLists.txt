@@ -6,15 +6,10 @@ set(demoddvb_SOURCES
     dvbdemodbaseband.cpp
     dvbdemodsink.cpp
     dvbdemodplugin.cpp
-    dvbdemodtsfifo.cpp
-    dvbdemodpsi.cpp
-    dvbdemodsections.cpp
     dvbdemodfreesat.cpp
     dvbdemodfreesattables.cpp
     dvbdemodtext.cpp
     dvbdemodepg.cpp
-    dvbdemodrecorder.cpp
-    dvbdemodudp.cpp
     dvbdemodwebapiadapter.cpp
 )
 
@@ -24,14 +19,9 @@ set(demoddvb_HEADERS
     dvbdemodbaseband.h
     dvbdemodsink.h
     dvbdemodplugin.h
-    dvbdemodtsfifo.h
-    dvbdemodpsi.h
-    dvbdemodsections.h
     dvbdemodfreesat.h
     dvbdemodtext.h
     dvbdemodepg.h
-    dvbdemodrecorder.h
-    dvbdemodudp.h
     dvbdemodwebapiadapter.h
 )
 
@@ -41,53 +31,30 @@ include_directories(
 )
 
 if(NOT SERVER_MODE)
-    # The service is decoded and displayed with FFmpeg. Without a GUI, the transport stream can be sent over UDP
+    # The service is decoded and displayed with FFmpeg, by sdrgui's DTVVideoPlayer. Without a GUI, the transport stream
+    # can be sent over UDP
     set(demoddvb_SOURCES
         ${demoddvb_SOURCES}
         dvbdemodgui.cpp
         dvbdemodgui.ui
-        dvbdemodvideoplayer.cpp
-        dvbdemodscope.cpp
-        dvbdemodepgdialog.cpp
-        dvbdemodepggrid.cpp
-        dvbdemodguideoverlay.cpp
         dvbdemod.qrc
     )
     set(demoddvb_HEADERS
         ${demoddvb_HEADERS}
         dvbdemodgui.h
-        dvbdemodvideoplayer.h
-        dvbdemodscope.h
-        dvbdemodepgdialog.h
-        dvbdemodepggrid.h
-        dvbdemodguideoverlay.h
     )
-    include_directories(
-        ${AVCODEC_INCLUDE_DIRS}
-        ${AVFORMAT_INCLUDE_DIRS}
-        ${AVUTIL_INCLUDE_DIRS}
-        ${SWSCALE_INCLUDE_DIRS}
-        ${SWRESAMPLE_INCLUDE_DIRS}
-    )
-
-    # Deinterlacing uses libavfilter, if available
-    if(NOT AVFILTER_LIBRARIES)
-        find_library(DVBDEMOD_AVFILTER_LIBRARY NAMES avfilter)
-        find_path(DVBDEMOD_AVFILTER_INCLUDE_DIR libavfilter/avfilter.h HINTS ${AVCODEC_INCLUDE_DIRS})
-        if(DVBDEMOD_AVFILTER_LIBRARY AND DVBDEMOD_AVFILTER_INCLUDE_DIR)
-            set(AVFILTER_LIBRARIES ${DVBDEMOD_AVFILTER_LIBRARY})
-            set(AVFILTER_INCLUDE_DIRS ${DVBDEMOD_AVFILTER_INCLUDE_DIR})
-        endif()
-    endif()
-    if(AVFILTER_LIBRARIES)
-        include_directories(${AVFILTER_INCLUDE_DIRS})
-        add_definitions(-DDVBDEMOD_DEINTERLACE)
-    else()
-        message(STATUS "demoddvb: libavfilter not found, so no deinterlacing")
-    endif()
-
     set(TARGET_NAME ${PLUGINS_PREFIX}demoddvb)
-    set(TARGET_LIB Qt::Widgets ${AVCODEC_LIBRARIES} ${AVFORMAT_LIBRARIES} ${AVUTIL_LIBRARIES} ${SWSCALE_LIBRARIES} ${SWRESAMPLE_LIBRARIES} ${AVFILTER_LIBRARIES})
+    set(TARGET_LIB Qt::Widgets)
+
+    # HbbTV applications are run in Qt WebEngine's browser (Qt 6)
+    if(Qt6WebEngineWidgets_FOUND AND Qt6QuickWidgets_FOUND)
+        set(demoddvb_SOURCES ${demoddvb_SOURCES} dvbdemodhbbtv.cpp)
+        set(demoddvb_HEADERS ${demoddvb_HEADERS} dvbdemodhbbtv.h)
+        set(TARGET_LIB ${TARGET_LIB} Qt::WebEngineCore Qt::WebEngineWidgets Qt::QuickWidgets)
+        set(DEMODDVB_HBBTV ON)
+    else()
+        message(STATUS "DVB demodulator: not running HbbTV applications (no Qt 6 WebEngine)")
+    endif()
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -117,16 +84,8 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     modemdvb
 )
 
-if(WIN32)
-    target_link_libraries(${TARGET_NAME} PRIVATE winmm) # The video player sets the timer resolution
-endif()
-
-if(APPLE AND NOT SERVER_MODE)
-    target_link_libraries(${TARGET_NAME} PRIVATE "-framework CoreVideo") # VideoToolbox frames' IOSurfaces
-endif()
-
-if(DEFINED FFMPEG_DEPENDS)
-    add_dependencies(${TARGET_NAME} ${FFMPEG_DEPENDS})
+if(DEMODDVB_HBBTV)
+    target_compile_definitions(${TARGET_NAME} PRIVATE DVBDEMOD_HBBTV)
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
