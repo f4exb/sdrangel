@@ -157,6 +157,9 @@ void DRMWebsiteBrowser::setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> w
     {
         const int scroll = verticalScrollBar()->value();
         reload();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        pageShown(); // Qt 5's reload does not reach setSource(const QUrl&)
+#endif
         verticalScrollBar()->setValue(scroll);
     }
 }
@@ -426,7 +429,19 @@ QVariant DRMWebsiteBrowser::loadResource(int type, const QUrl& name)
     return QString(QLatin1Char(' '));
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void DRMWebsiteBrowser::doSetSource(const QUrl& name, QTextDocument::ResourceType type)
+{
+    showSource(name, type);
+}
+#else
+void DRMWebsiteBrowser::setSource(const QUrl& name)
+{
+    showSource(name, QTextDocument::UnknownResource);
+}
+#endif
+
+void DRMWebsiteBrowser::showSource(const QUrl& name, QTextDocument::ResourceType type)
 {
     const QUrl url = resolved(name);
 
@@ -446,7 +461,11 @@ void DRMWebsiteBrowser::doSetSource(const QUrl& name, QTextDocument::ResourceTyp
     }
 
     m_page = page;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QTextBrowser::doSetSource(page, type);
+#else
+    QTextBrowser::setSource(page, type);
+#endif
     pageShown();
 }
 

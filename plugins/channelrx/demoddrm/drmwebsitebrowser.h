@@ -68,14 +68,23 @@ public:
     // Colours written as bare hex digits (bgcolor=0088b8), which web browsers
     // accept and Qt does not, with their "#"; only within tags.
     static QByteArray fixColours(const QByteArray& html);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    using QTextBrowser::setSource;
+#endif
 
 public slots:
     void backward() override;
     void forward() override;
     void home() override;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    // Qt 5's hook for a new source (its doSetSource is not virtual)
+    void setSource(const QUrl& name) override;
+#endif
 
 protected:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void doSetSource(const QUrl& name, QTextDocument::ResourceType type) override;
+#endif
     // A title attribute's tooltip would be shown as rich text outside the
     // browser, where Qt reads images as local files: no tooltips
     bool event(QEvent *event) override;
@@ -102,6 +111,8 @@ private:
     static QString htmlText(const QByteArray& html);
     // The image handler on the document's layout, whatever Qt registered
     void useImageHandler();
+    // A new source: the website's own URL for it, shown
+    void showSource(const QUrl& name, QTextDocument::ResourceType type);
     // After a page is shown (a link, a reload or the history): its URL, and its
     // images loaded now (Qt loads them as it paints) so that every file it uses
     // is known even while the tab is hidden
