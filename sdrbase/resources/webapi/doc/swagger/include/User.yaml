@@ -5,5 +5,7 @@ User:
   properties:
     index:
       type: integer
+      description: "Index for User."
     name:
       type: string
+      description: "Name."

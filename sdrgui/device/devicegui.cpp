@@ -37,10 +37,11 @@
 #include "devicegui.h"
 
 DeviceGUI::DeviceGUI(QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_deviceUISet(nullptr),
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
+    m_workspaceIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_resizer(this),
     m_drag(false),
@@ -121,6 +122,12 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_maximizeButton->setIcon(maximizeIcon);
     m_maximizeButton->setToolTip("Adjust window to maximum size");
 
+    m_hideButton = new QPushButton();
+    m_hideButton->setFixedSize(20, 20);
+    QIcon hideIcon(":/hide.png");
+    m_hideButton->setIcon(hideIcon);
+    m_hideButton->setToolTip("Hide device");
+
     m_closeButton = new QPushButton();
     m_closeButton->setFixedSize(20, 20);
     QIcon closeIcon(":/cross.png");
@@ -164,6 +171,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
     m_topLayout->addWidget(m_maximizeButton);
+    m_topLayout->addWidget(m_hideButton);
     m_topLayout->addWidget(m_closeButton);
 
     m_centerLayout = new QVBoxLayout();
@@ -199,6 +207,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
+    connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
     connect(m_showAllChannelsButton, SIGNAL(clicked()), this, SLOT(showAllChannelsHandler()));
@@ -223,6 +232,7 @@ DeviceGUI::~DeviceGUI()
     delete m_showSpectrumButton;
     delete m_statusLabel;
     delete m_closeButton;
+    delete m_hideButton;
     delete m_shrinkButton;
     delete m_maximizeButton;
     delete m_moveButton;
@@ -417,6 +427,7 @@ void DeviceGUI::setTitle(const QString& title)
 {
     setWindowTitle(title + " Device");
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 QString DeviceGUI::getTitle() const
@@ -438,7 +449,7 @@ void DeviceGUI::setIndex(int index)
 void DeviceGUI::setDeviceType(DeviceType type)
 {
     m_deviceType = type;
-    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor()));
+    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor().name()));
 }
 
 void DeviceGUI::setToolTip(const QString& tooltip)
@@ -446,18 +457,18 @@ void DeviceGUI::setToolTip(const QString& tooltip)
     m_titleLabel->setToolTip(tooltip);
 }
 
-QString DeviceGUI::getDeviceTypeColor()
+QColor DeviceGUI::getDeviceTypeColor() const
 {
     switch(m_deviceType)
     {
         case DeviceRx:
-            return "rgb(0, 128, 0)";
+            return QColor(0, 128, 0);
         case DeviceTx:
-            return "rgb(204, 0, 0)";
+            return QColor(204, 0, 0);
         case DeviceMIMO:
-            return "rgb(0, 0, 192)";
+            return QColor(0, 0, 192);
         default:
-            return "rgb(128, 128, 128)";
+            return QColor(128, 128, 128);
     }
 }
 

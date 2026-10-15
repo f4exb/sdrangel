@@ -4,16 +4,22 @@ IEEE_802_15_4_ModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     modulation:
       description: >
         Modulation type
           * 0 - BPSK
           * 1 - OQPSK
       type: integer
+      minimum: 0
+      maximum: 1
     bitRate:
       type: integer
+      description: "Bit rate setting for Ieee 802 15 4 mod."
     subGHzBand:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean value
           * 0 - Over 1 GHz standard
@@ -21,17 +27,23 @@ IEEE_802_15_4_ModSettings:
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     gain:
       type: number
       format: float
+      description: "Gain setting; units and available values depend on the device or plugin."
     channelMute:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         * 0 - Effective transmission
         * 1 - Transmission is muted
     repeat:
       description: Whether to repeated transmit the frame (1 for yes, 0 for no).
       type: integer
+      minimum: 0
+      maximum: 1
     repeatDelay:
       description: Delay between repeated transmissions.
       type: number
@@ -41,55 +53,78 @@ IEEE_802_15_4_ModSettings:
       type: integer
     rampUpBits:
       type: integer
+      description: "Ramp up bits setting for Ieee 802 15 4 mod."
     rampDownBits:
       type: integer
+      description: "Ramp down bits setting for Ieee 802 15 4 mod."
     rampRange:
       type: integer
+      description: "Ramp range setting for Ieee 802 15 4 mod."
     modulateWhileRamping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean value
           * 0 - do not modulate in ramping phase
           * 1 - modulate in ramping phase
     lpfTaps:
       type: integer
+      description: "Number of low-pass FIR filter taps."
     bbNoise:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean value
           * 0 - Do not add gaussian noise in baseband
           * 1 - Add gaussian noise in baseband
     writeToFile:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean value
           * 0 - Do not write frames to .csv file
           * 1 - Write frames to .csv file
     spectrumRate:
       type: integer
+      description: "Spectrum rate setting for Ieee 802 15 4 mod."
     data:
       type: string
       description: Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00)
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     scramble:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean value
           * 0 - Do not scramble data
@@ -99,6 +134,8 @@ IEEE_802_15_4_ModSettings:
       description: Scrambling polynomial
     pulseShaping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Pulse shaping filter
           * 0 - Root Cosime
@@ -109,11 +146,16 @@ IEEE_802_15_4_ModSettings:
       description: Pulse shaping filter beta factor
     symbolSpan:
       type: integer
+      description: "Symbol span setting for Ieee 802 15 4 mod."
     udpEnabled:
       description: Enable forwarding of frames via UDP
       type: integer
+      minimum: 0
+      maximum: 1
     udpBytesFormat:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Payload format
           * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a
@@ -124,10 +166,14 @@ IEEE_802_15_4_ModSettings:
     udpPort:
       description: UDP port to listen for frames to transmit on
       type: integer
+      minimum: 1
+      maximum: 65535
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 IEEE_802_15_4_ModReport:
   description: IEEE_802_15_4_Mod
@@ -138,12 +184,15 @@ IEEE_802_15_4_ModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 
 IEEE_802_15_4_ModActions:
   description: IEEE_802_15_4_Mod
   properties:
     tx:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Initialize a transmission cycle
           * 0 - Do nothing

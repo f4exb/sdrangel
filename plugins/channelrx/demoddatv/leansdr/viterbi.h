@@ -160,7 +160,7 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
 
     struct state
     {
-        TPM cost; // Metric of best path leading to this state
+        TPM cost = 0; // Metric of best path leading to this state
         TP path;  // Best path leading to this state
     };
 
@@ -168,7 +168,9 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
     state statebanks[2][NSTATES];
     statebank *states, *newstates; // Alternate between banks
 
-    viterbi_dec(trellis<TS, NSTATES, TUS, NUS, NCS> *_trellis) : trell(_trellis)
+    viterbi_dec(trellis<TS, NSTATES, TUS, NUS, NCS> *_trellis) :
+        trell(_trellis),
+        statebanks{}
     {
         states = &statebanks[0];
         newstates = &statebanks[1];

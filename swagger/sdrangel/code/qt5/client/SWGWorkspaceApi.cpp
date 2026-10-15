@@ -132,5 +132,62 @@ SWGWorkspaceApi::instanceWorkspacesDeleteEmptyCallback(SWGHttpRequestWorker * wo
     }
 }
 
+void
+SWGWorkspaceApi::workspaceActionsPost(qint32 workspace_index, SWGWorkspaceActions& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/workspace/{workspaceIndex}/actions");
+
+    QString workspace_indexPathParam("{"); workspace_indexPathParam.append("workspaceIndex").append("}");
+    fullPath.replace(workspace_indexPathParam, stringValue(workspace_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGWorkspaceApi::workspaceActionsPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGWorkspaceApi::workspaceActionsPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit workspaceActionsPostSignal(output);
+    } else {
+        emit workspaceActionsPostSignalE(output, error_type, error_str);
+        emit workspaceActionsPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
 
 }

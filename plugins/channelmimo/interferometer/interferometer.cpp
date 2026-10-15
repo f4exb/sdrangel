@@ -124,6 +124,7 @@ void Interferometer::startSinks()
 
     qDebug("Interferometer::startSinks");
     m_thread = new QThread(this);
+    m_thread->setObjectName("Interferometer");
     m_basebandSink = new InterferometerBaseband(m_fftSize);
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setScopeSink(&m_scopeSink);
@@ -255,12 +256,12 @@ void Interferometer::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -742,7 +743,11 @@ void Interferometer::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("Interferometer"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "Interferometer";
+    } else {
+        swgChannelSettings->setChannelType(new QString("Interferometer"));
+    }
     swgChannelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
     SWGSDRangel::SWGInterferometerSettings *swgInterferometerSettings = swgChannelSettings->getInterferometerSettings();
 
@@ -752,7 +757,11 @@ void Interferometer::webapiFormatChannelSettings(
         swgInterferometerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgInterferometerSettings->setTitle(new QString(settings.m_title));
+        if (swgInterferometerSettings->getTitle()) {
+            *swgInterferometerSettings->getTitle() = settings.m_title;
+        } else {
+            swgInterferometerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgInterferometerSettings->setLog2Decim(settings.m_log2Decim);

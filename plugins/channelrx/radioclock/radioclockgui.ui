@@ -259,7 +259,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>1000</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -387,10 +387,20 @@
          </property>
         </item>
         <item>
-         <property name="text">
-          <string>JJY</string>
-         </property>
-        </item>
+          <property name="text">
+           <string>JJY</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>RBU</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>PCSK-225</string>
+          </property>
+         </item>
        </widget>
       </item>
       <item>

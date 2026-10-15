@@ -233,11 +233,12 @@ void MeshcoreDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -1592,6 +1593,8 @@ void MeshcoreDemodGUI::setupMeshcoreAutoProfileControls()
     // MeshCore unchanged.
     ui->meshAutoSampleRate->setChecked(m_settings.m_meshcoreAutoSampleRate);
 
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshcoreDemodGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshApply_clicked);
     QObject::connect(ui->meshKeys, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshKeys_clicked);
     QObject::connect(ui->meshAutoLock, &QPushButton::clicked, this, &MeshcoreDemodGUI::on_meshAutoLock_clicked);
     QObject::connect(ui->meshAutoSampleRate, &QCheckBox::toggled, this, &MeshcoreDemodGUI::on_meshAutoSampleRate_toggled);
@@ -2853,7 +2856,7 @@ void MeshcoreDemodGUI::appendPipelineTreeFields(
         }
 
         bool isIndex = false;
-        rawName.toInt(&isIndex);
+        (void) rawName.toInt(&isIndex);
 
         if (isIndex) {
             return QString("Item (%1)").arg(rawName);

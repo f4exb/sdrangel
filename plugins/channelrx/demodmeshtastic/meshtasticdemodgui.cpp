@@ -233,11 +233,12 @@ void MeshtasticDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -2853,7 +2854,7 @@ void MeshtasticDemodGUI::appendPipelineTreeFields(
         }
 
         bool isIndex = false;
-        rawName.toInt(&isIndex);
+        (void) rawName.toInt(&isIndex);
 
         if (isIndex) {
             return QString("Item (%1)").arg(rawName);

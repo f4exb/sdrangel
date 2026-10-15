@@ -25,6 +25,7 @@
 #include <QByteArray>
 
 #include "gui/framelesswindowresizer.h"
+#include "gui/workspacewindow.h"
 #include "export.h"
 
 class GLSpectrum;
@@ -35,7 +36,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QSizeGrip;
 
-class SDRGUI_API MainSpectrumGUI : public QMdiSubWindow
+class SDRGUI_API MainSpectrumGUI : public WorkspaceWindow
 {
     Q_OBJECT
 public:
@@ -52,12 +53,12 @@ public:
     void setDeviceType(DeviceType type);
     DeviceType getDeviceType() const { return m_deviceType; }
     void setTitle(const QString& title);
-    QString getTitle() const;
+    QString getTitle() const override;
     void setToolTip(const QString& tooltip);
     void setIndex(int index);
     int getIndex() const { return m_deviceSetIndex; }
-    void setWorkspaceIndex(int index);
-    int getWorkspaceIndex() const { return m_workspaceIndex; }
+    void setWorkspaceIndex(int index) override;
+    int getWorkspaceIndex() const override { return m_workspaceIndex; }
     void setGeometryBytes(const QByteArray& blob) { m_geometryBytes = blob; }
     const QByteArray& getGeometryBytes() const { return m_geometryBytes; }
 

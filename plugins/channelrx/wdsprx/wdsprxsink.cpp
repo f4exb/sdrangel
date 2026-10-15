@@ -56,6 +56,7 @@ WDSPRxSink::SpectrumProbe::SpectrumProbe(SampleVector& sampleVector) :
     m_spanLog2(0),
     m_dsb(false),
     m_usb(true),
+    m_undersampleCount(0),
     m_sum(0)
 {}
 
@@ -102,6 +103,7 @@ void WDSPRxSink::SpectrumProbe::proceed(const float *in, int nb_samples)
 }
 
 WDSPRxSink::WDSPRxSink() :
+        m_channel(nullptr),
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_spectrumSink(nullptr),

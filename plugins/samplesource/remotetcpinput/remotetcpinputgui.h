@@ -70,7 +70,9 @@ class RemoteTCPInputGui : public DeviceGUI {
             }
         };
 
-        DeviceGains()
+        DeviceGains() :
+            m_agc(false),
+            m_biasTee(false)
         {
         }
 

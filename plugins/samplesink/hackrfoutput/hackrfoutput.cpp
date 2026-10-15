@@ -388,11 +388,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, const QLi
 			}
 		}
 
-        if (m_deviceAPI->getSourceBuddies().size() > 0)
         {
-            DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-            DeviceHackRFShared::MsgSynchronizeSampleRate *sampleRateMsg = DeviceHackRFShared::MsgSynchronizeSampleRate::create(settings.m_devSampleRate);
-            buddy->getSamplingDeviceInputMessageQueue()->push(sampleRateMsg);
+            // Buddy lists can be changed in the GUI thread, but this is also called from start() in the device engine thread
+            QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
+            if (m_deviceAPI->getSourceBuddies().size() > 0)
+            {
+                DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+                DeviceHackRFShared::MsgSynchronizeSampleRate *sampleRateMsg = DeviceHackRFShared::MsgSynchronizeSampleRate::create(settings.m_devSampleRate);
+                buddy->getSamplingDeviceInputMessageQueue()->push(sampleRateMsg);
+            }
         }
 	}
 

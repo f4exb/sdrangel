@@ -40,6 +40,7 @@
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/mmsi.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/decimaldelegate.h"
 #include "dsp/dspengine.h"
@@ -388,12 +389,12 @@ void DSCDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -614,7 +615,7 @@ DSCDemodGUI::DSCDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
-    m_scopeVis->setLiveRate(DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE);
+    m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
     m_scopeVis->configure(500, 1, 0, 0, true);   // not working!
     //m_scopeVis->setFreeRun(false); // FIXME: add method rather than call m_scopeVis->configure()
 
@@ -1009,6 +1010,8 @@ void DSCDemodGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->mode->setCurrentIndex((int) m_settings.m_mode);
+    m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
 
     updateIndexLabel();
 
@@ -1174,12 +1177,12 @@ void DSCDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "DSC Demod", error);
+                    MessageDialog::critical(this, "DSC Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "DSC Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "DSC Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }
@@ -1191,9 +1194,25 @@ void DSCDemodGUI::on_useFileTime_toggled(bool checked)
     applySettings(QStringList({"useFileTime"}));
 }
 
+void DSCDemodGUI::on_mode_currentIndexChanged(int index)
+{
+    DSCDemodSettings::Mode mode = index == (int) DSCDemodSettings::ModeVHF
+        ? DSCDemodSettings::ModeVHF : DSCDemodSettings::ModeMFHF;
+
+    if (mode != m_settings.m_mode)
+    {
+        m_settings.m_mode = mode;
+        m_settings.m_rfBandwidth = DSCDemodSettings::getDefaultRFBandwidth(mode);
+        m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+        m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
+        applySettings(QStringList({"mode", "rfBandwidth"}));
+    }
+}
+
 void DSCDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DSCDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSCDemodGUI::on_mode_currentIndexChanged);
     QObject::connect(ui->filterInvalid, &ButtonSwitch::clicked, this, &DSCDemodGUI::on_filterInvalid_clicked);
     QObject::connect(ui->filterColumn, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSCDemodGUI::on_filterColumn_currentIndexChanged);
     QObject::connect(ui->filter, &QLineEdit::editingFinished, this, &DSCDemodGUI::on_filter_editingFinished);

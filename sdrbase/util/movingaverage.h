@@ -29,8 +29,11 @@ template <typename T, typename Total, int N>
 class MovingAverageUtil
 {
   public:
-    MovingAverageUtil()
-      : m_num_samples(0), m_index(0), m_total(0)
+    MovingAverageUtil() :
+        m_samples{},
+        m_num_samples(0),
+        m_index(0),
+        m_total(0)
     { }
 
     void reset()

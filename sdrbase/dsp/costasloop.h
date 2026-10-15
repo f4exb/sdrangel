@@ -40,6 +40,7 @@ public:
     void setSampleRate(unsigned int sampleRate);
     void setMaxFreq(float freq) { m_maxFreq = freq; }
     void setMinFreq(float freq) { m_minFreq = freq; }
+    void setFreq(float freq) { m_freq = freq; }
     void feed(float re, float im);
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_y.real(); }

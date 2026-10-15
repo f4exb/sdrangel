@@ -182,11 +182,11 @@ def main():
                 randomize_channels_colors(options, channels) # full randomization (identical to -Hsv)
         else:
             print("Error getting deviceset %d info. HTTP: %d" % (options.device_index, r.status_code))
-            print json.dumps(r.json(), indent=4, sort_keys=True)
+            print(json.dumps(r.json(), indent=4, sort_keys=True))
 
     except Exception as ex:
         tb = traceback.format_exc()
-        print >> sys.stderr, tb
+        print(tb, file=sys.stderr)
 
 
 if __name__ == "__main__":

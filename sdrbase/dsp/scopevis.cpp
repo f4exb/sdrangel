@@ -81,6 +81,10 @@ ScopeVis::ScopeVis() :
 
 ScopeVis::~ScopeVis()
 {
+    if (m_glScope) {
+        m_glScope->setScopeVis(nullptr);
+    }
+
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
@@ -90,8 +94,19 @@ ScopeVis::~ScopeVis()
 
 void ScopeVis::setGLScope(GLScopeInterface* glScope)
 {
+    QMutexLocker configLocker(&m_mutex);
+
+    if (m_glScope && (m_glScope != glScope)) {
+        m_glScope->setScopeVis(nullptr);
+    }
+
     m_glScope = glScope;
-    m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+
+    if (m_glScope)
+    {
+        m_glScope->setScopeVis(this);
+        m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+    }
 }
 
 void ScopeVis::setLiveRate(int sampleRate)
@@ -504,7 +519,7 @@ void ScopeVis::feed(const std::vector<ComplexVector::const_iterator>& vbegin, in
             m_triggerLocation = m_triggerLocation < 0 ? 0 : m_triggerLocation; // trim negative values
             m_triggerLocation = m_triggerLocation > remainder ? remainder : m_triggerLocation; // trim past begin values
 
-            for (auto begin : nvbegin) {
+            for (auto& begin : nvbegin) {
                 begin += m_traceSize;
             }
 
@@ -936,11 +951,12 @@ void ScopeVis::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

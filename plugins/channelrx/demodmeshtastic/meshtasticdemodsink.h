@@ -147,6 +147,7 @@ private:
     unsigned int m_loRaFrameSymbolCount;
     float m_loRaCFOFrac;
     float m_loRaSTOFrac;
+    int m_loRaPendingShift; //!< Extra FIFO samples to consume once after the current step
     float m_loRaSFOHat;
     float m_loRaSFOCum;
     bool m_loRaCFOSTOEstimated;
@@ -194,7 +195,7 @@ private:
         bool publishSpectrum = false
     );
     float estimateLoRaCFOFracBernier(const Complex *samples);
-    float estimateLoRaSTOFrac();
+    float estimateLoRaSTOFrac(int *upBinResidual = nullptr);
     void buildLoRaPayloadDownchirp();
     void finalizeLoRaFrame();
 };

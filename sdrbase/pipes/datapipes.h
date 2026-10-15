@@ -42,6 +42,7 @@ public:
     ObjectPipe *registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
     ObjectPipe *unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
     void getDataPipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes);
+    QList<ObjectPipesRegistrations::Connection> getConnections();
 
 private:
     DataFifoStore m_dataFifoStore;

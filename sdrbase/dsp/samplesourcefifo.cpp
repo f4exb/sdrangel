@@ -18,13 +18,22 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "samplesourcefifo.h"
 
 const unsigned int SampleSourceFifo::m_rwDivisor = 2;
 const unsigned int SampleSourceFifo::m_guardDivisor = 10;
 
 SampleSourceFifo::SampleSourceFifo(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_size(0),
+    m_lowGuard(0),
+    m_highGuard(0),
+    m_midPoint(0),
+    m_readHead(0),
+    m_writeHead(0),
+    m_readCount(0)
 {}
 
 SampleSourceFifo::SampleSourceFifo(unsigned int size, QObject *parent) :
@@ -44,6 +53,8 @@ void SampleSourceFifo::resize(unsigned int size)
     m_readHead = 0;
     m_writeHead = m_midPoint;
     m_data.resize(size);
+    // Clear old data, which would otherwise be read before new data is written
+    std::fill(m_data.begin(), m_data.end(), Sample{0, 0});
 }
 
 void SampleSourceFifo::reset()
@@ -52,6 +63,8 @@ void SampleSourceFifo::reset()
 	m_readCount = 0;
     m_readHead = 0;
     m_writeHead = m_midPoint;
+    // Clear old data, which would otherwise be read before new data is written
+    std::fill(m_data.begin(), m_data.end(), Sample{0, 0});
 }
 
 SampleSourceFifo::~SampleSourceFifo()

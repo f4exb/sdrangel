@@ -187,6 +187,7 @@ class DATVideoRenderThread : public QThread
   public:
     DATVideoRenderThread()
     {
+        setObjectName("DATVideoRender");
         m_renderer = nullptr;
         m_stream = nullptr;
         m_renderingVideo = false;
@@ -194,6 +195,7 @@ class DATVideoRenderThread : public QThread
 
     DATVideoRenderThread(DATVideoRender *renderer, DATVideostream *stream)
     {
+        setObjectName("DATVideoRender");
         m_renderer = renderer;
         m_stream = stream;
         m_renderingVideo = false;
@@ -222,7 +224,7 @@ class DATVideoRenderThread : public QThread
             return;
         }
 
-        while ((m_renderingVideo == true) && (m_renderer))
+        while ((m_renderingVideo == true))
         {
             if (!m_renderer->renderStream()) {
                 break;

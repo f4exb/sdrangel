@@ -140,6 +140,7 @@ private:
 
 private slots:
     void on_deltaFrequency_changed(qint64 value);
+    void on_mode_currentIndexChanged(int index);
     void on_filterInvalid_clicked(bool checked=false);
     void on_filterColumn_currentIndexChanged(int index);
     void on_filter_editingFinished();

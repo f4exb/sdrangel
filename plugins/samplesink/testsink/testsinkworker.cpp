@@ -25,18 +25,19 @@
 #include "testsinkworker.h"
 
 TestSinkWorker::TestSinkWorker(SampleSourceFifo* sampleFifo, QObject* parent) :
-	QObject(parent),
-	m_running(false),
-	m_bufsize(0),
-	m_samplesChunkSize(0),
-	m_sampleFifo(sampleFifo),
-	m_samplesCount(0),
+    QObject(parent),
+    m_running(false),
+    m_bufsize(0),
+    m_samplesChunkSize(0),
+    m_sampleFifo(sampleFifo),
+    m_samplesCount(0),
     m_samplerate(0),
     m_log2Interpolation(0),
     m_throttlems(TESTSINK_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false),
-    m_buf(0)
+    m_buf(0),
+    m_spectrumSink(nullptr)
 {
 }
 

@@ -75,6 +75,7 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_sink.getMagSqLevels(avg, peak, nbSamples);
     }
+    int getChannelSampleRate() const;
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
     ScopeVis *getScopeSink() { return &m_scopeSink; }

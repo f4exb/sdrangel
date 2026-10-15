@@ -13,7 +13,7 @@
 /*
  * SWGPSK31ModActions_payload.h
  *
- * 
+ * Payload data.
  */
 
 #ifndef SWGPSK31ModActions_payload_H_

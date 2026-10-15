@@ -4,6 +4,7 @@ FreeDVDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     volume:
       description: Audio volume
       type: number
@@ -14,40 +15,60 @@ FreeDVDemodSettings:
       format: float
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     audioMute:
       description: Mute audio (1 if muted else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     freeDVMode:
       type: integer
+      description: "Free dv mode setting for Free dv demod."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 FreeDVDemodReport:
   description: FreeDVDemod
@@ -61,5 +82,7 @@ FreeDVDemodReport:
       type: integer
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

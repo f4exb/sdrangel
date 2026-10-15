@@ -60,6 +60,8 @@ RemoteTCPSinkStarter::RemoteTCPSinkStarter(const QString& address, int port, con
     m_dataPort(port),
     m_deviceSet(nullptr)
 {
+    Q_UNUSED(serial);
+
     // Add device of requested type
     SWGSDRangel::SWGDeviceSettings *response = new SWGSDRangel::SWGDeviceSettings();
     response->init();

@@ -87,6 +87,14 @@ struct RadioTimeTransmitter {
     int m_power;            // In kW
 };
 
+struct WEFAXTransmitter {
+    QString m_callsign;         // Empty if not known
+    QString m_location;
+    float m_latitude;           // In degrees
+    float m_longitude;          // In degrees
+    QList<int> m_frequencies;   // In Hz
+};
+
 struct IonosondeStation {
     QString m_name;
     float m_latitude;       // In degrees
@@ -172,6 +180,7 @@ public:
     void addIBPBeacons();
     QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
     void addRadioTimeTransmitters();
+    void addWEFAXTransmitters();
     void addNAT();
     void addRadar();
     void addAurora();
@@ -309,6 +318,7 @@ private:
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
     static const QList<RadioTimeTransmitter> m_natTransmitters;
     static const QList<RadioTimeTransmitter> m_vlfTransmitters;
+    static const QList<WEFAXTransmitter> m_wefaxTransmitters;
 
     enum NASARow {
         NASA_TITLE,

@@ -105,8 +105,8 @@ public:
     }
 
     void setMessageQueueToGUI(MessageQueue* queue) final;
-    uint32_t getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
-    uint32_t getChannelSampleRate() const { return m_running ? m_basebandSink->getChannelSampleRate() : 0; }
+    int getAudioSampleRate() const override { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    int getChannelSampleRate() const override { return m_running ? m_basebandSink->getChannelSampleRate() : 0; }
     double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
 	bool getAudioActive() const { return m_running && m_basebandSink->getAudioActive(); }
 

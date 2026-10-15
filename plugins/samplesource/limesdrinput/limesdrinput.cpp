@@ -409,6 +409,10 @@ void LimeSDRInput::init()
 
 bool LimeSDRInput::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
@@ -442,6 +446,10 @@ bool LimeSDRInput::start()
 
 void LimeSDRInput::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {

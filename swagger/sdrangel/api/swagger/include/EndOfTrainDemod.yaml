@@ -4,49 +4,75 @@ EndOfTrainDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     udpEnabled:
       description: "Whether to forward received packets to specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to forward received packets to"
       type: string
     udpPort:
       description: "UDP port to forward received packets to"
       type: integer
+      minimum: 1
+      maximum: 65535
     logFilename:
       type: string
+      description: "Log file name or path."
     logEnabled:
       type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     useFileTime:
       type: integer
+      description: "Enable file time (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 EndOfTrainDemodReport:
   description: EndOfTrainDemod
@@ -57,3 +83,4 @@ EndOfTrainDemodReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

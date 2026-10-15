@@ -136,6 +136,8 @@ public:
 	typedef std::complex<float> cmplx;
 	sfft(int len);
 	~sfft();
+	sfft(const sfft&) = delete;
+	sfft& operator=(const sfft&) = delete;
 	void run(const cmplx& input);
 	void fetch(float *result);
 private:

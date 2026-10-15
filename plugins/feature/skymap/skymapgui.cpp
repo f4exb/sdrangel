@@ -178,9 +178,10 @@ void SkyMapGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -200,7 +201,7 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_source(nullptr),
-    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}),
+    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}, "RTMF", this),
     m_ready(false)
 {
     m_feature = feature;

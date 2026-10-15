@@ -24,9 +24,17 @@
 MESSAGE_CLASS_DEFINITION(MorseDemod::MsgReportIdent, Message)
 
 MorseDemod::MorseDemod() :
+    m_messageQueueToChannel(nullptr),
     m_movingAverageIdent(5000),
+    m_identMaxs{},
+    m_identNoise(0.0),
+    m_binSampleCnt(0),
+    m_binCnt(0),
+    m_samplesPerDot7wpm(0),
+    m_samplesPerDot10wpm(0),
     m_prevBit(0),
-    m_bitTime(0)
+    m_bitTime(0),
+    m_identThreshold(0)
 {
 }
 

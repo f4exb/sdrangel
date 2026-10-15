@@ -102,6 +102,7 @@ void BeamSteeringCWMod::startSources()
 
     qDebug("BeamSteeringCWMod::startSources");
     m_thread = new QThread(this);
+    m_thread->setObjectName("BeamSteerCWMod");
     m_basebandSource = new BeamSteeringCWModBaseband();
     m_basebandSource->moveToThread(m_thread);
 
@@ -180,12 +181,12 @@ void BeamSteeringCWMod::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -329,7 +330,7 @@ void BeamSteeringCWMod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("steerDegrees")) {
-        settings.m_rgbColor = response.getBeamSteeringCwModSettings()->getSteerDegrees();
+        settings.m_steerDegrees = response.getBeamSteeringCwModSettings()->getSteerDegrees();
     }
 
     if (channelSettingsKeys.contains("rgbColor")) {
@@ -485,7 +486,11 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("BeamSteeringCWSource"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "BeamSteeringCWSource";
+    } else {
+        swgChannelSettings->setChannelType(new QString("BeamSteeringCWSource"));
+    }
     swgChannelSettings->setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
     SWGSDRangel::SWGBeamSteeringCWModSettings *swgBeamSteeringCWSettings = swgChannelSettings->getBeamSteeringCwModSettings();
 
@@ -498,7 +503,11 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
         swgBeamSteeringCWSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgBeamSteeringCWSettings->setTitle(new QString(settings.m_title));
+        if (swgBeamSteeringCWSettings->getTitle()) {
+            *swgBeamSteeringCWSettings->getTitle() = settings.m_title;
+        } else {
+            swgBeamSteeringCWSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgBeamSteeringCWSettings->setLog2Interp(settings.m_log2Interp);

@@ -31,11 +31,17 @@
 #include <intrin.h>
 #define popcount __popcnt
 #else
-static int popcount(int in)
+// https://en.cppreference.com/cpp/numeric/popcount
+// std::popcount requires an unsigned integer type.
+//
+// Brian Kernighan's method:
+// https://graphics.stanford.edu/~seander/bithacks.html
+static int popcount(unsigned int in)
 {
-    int cnt = 0;
-    for(int i = 0; i < 32; i++)
-        cnt += (in >> i) & 1;
+    for (int cnt = 0; in; cnt++)
+    {
+        in &= in - 1; // clear the least significant bit set
+    }
     return cnt;
 }
 #endif

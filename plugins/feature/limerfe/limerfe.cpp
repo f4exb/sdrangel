@@ -58,7 +58,7 @@ LimeRFE::LimeRFE(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_rfeDevice(nullptr)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "LimeRFE error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -85,13 +85,13 @@ LimeRFE::~LimeRFE()
 void LimeRFE::start()
 {
     qDebug("LimeRFE::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void LimeRFE::stop()
 {
     qDebug("LimeRFE::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 void LimeRFE::listComPorts()
@@ -1060,7 +1060,11 @@ void LimeRFE::webapiFormatFeatureSettings(
     }
 
     response.getLimeRfeSettings()->setRgbColor(settings.m_rgbColor);
-    response.getLimeRfeSettings()->setDevicePath(new QString(settings.m_devicePath));
+    if (response.getLimeRfeSettings()->getDevicePath()) {
+        *response.getLimeRfeSettings()->getDevicePath() = settings.m_devicePath;
+    } else {
+        response.getLimeRfeSettings()->setDevicePath(new QString(settings.m_devicePath));
+    }
     response.getLimeRfeSettings()->setRxChannels((int) settings.m_rxChannels);
     response.getLimeRfeSettings()->setRxWidebandChannel((int) settings.m_rxWidebandChannel);
     response.getLimeRfeSettings()->setRxHamChannel((int) settings.m_rxHAMChannel);

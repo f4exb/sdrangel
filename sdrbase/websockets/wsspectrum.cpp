@@ -47,6 +47,17 @@ WSSpectrum::~WSSpectrum()
 
 void WSSpectrum::openSocket()
 {
+    if (m_webSocketServer)
+    {
+        if (m_webSocketServer->isListening())
+        {
+            qDebug() << "WSSpectrum::openSocket: invoked while spectrum server already listening at "
+                     << m_listeningAddress.toString() << " on port " << m_port;
+            return;
+        }
+        closeSocket();
+    }
+
     m_webSocketServer = new QWebSocketServer(
         QStringLiteral("Spectrum Server"),
         QWebSocketServer::NonSecureMode,
@@ -126,10 +137,10 @@ void WSSpectrum::processClientMessage(const QString &message)
 void WSSpectrum::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    qDebug() << getWebSocketIdentifier(pClient) << " disconnected";
 
     if (pClient)
     {
+        qDebug() << getWebSocketIdentifier(pClient) << " disconnected";
         m_clients.removeAll(pClient);
         pClient->deleteLater();
     }

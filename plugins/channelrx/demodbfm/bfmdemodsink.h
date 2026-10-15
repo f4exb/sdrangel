@@ -44,7 +44,9 @@ class BasebandSampleSink;
 class BFMDemodSink : public ChannelSampleSink {
 public:
     BFMDemodSink();
-	~BFMDemodSink();
+    ~BFMDemodSink();
+    BFMDemodSink(const BFMDemodSink&) = delete;
+    BFMDemodSink& operator=(const BFMDemodSink&) = delete;
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
@@ -62,6 +64,7 @@ public:
 	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
 	Real getDemodFclk() const { return m_rdsDemod.m_report.fclk; }
     int getSquelchState() const { return m_squelchState; }
+    bool getSquelchOpen() const { return m_squelchState > m_settings.m_rfBandwidth / 20; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {

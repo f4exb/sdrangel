@@ -251,6 +251,9 @@ int DATVModSettings::getDVBSDataBitrate() const
     case DATVModSettings::APSK32:
         bitsPerSymbol = 5.0f;
         break;
+    default:
+        qWarning("DATVModSettings::getDVBSDataBitrate: Unsupported modulation");
+        return 0;
     }
 
     if (m_standard == DATVModSettings::DVB_S)
@@ -297,6 +300,9 @@ int DATVModSettings::getDVBSDataBitrate() const
         case DATVModSettings::FEC35:
             convFactor = 3.0f/5.0f;
             break;
+        default:
+            qWarning("DATVModSettings::getDVBSDataBitrate: Unsupported DVB-S code rate");
+            return 0;
         }
         fecFactor = rsFactor * convFactor;
         plFactor = 1.0f;

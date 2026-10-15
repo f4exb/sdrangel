@@ -249,6 +249,7 @@ bool AMBEEngine::registerController(const std::string& deviceRef)
         m_controllers.push_back(AMBEController());
         m_controllers.back().worker = worker;
         m_controllers.back().thread = new QThread();
+        m_controllers.back().thread->setObjectName("AMBE:" + QString::fromStdString(deviceRef));
         m_controllers.back().device = deviceRef;
 
         m_controllers.back().worker->moveToThread(m_controllers.back().thread);

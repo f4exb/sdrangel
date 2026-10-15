@@ -49,6 +49,7 @@ AndroidSDRDriverInput::AndroidSDRDriverInput(DeviceAPI *deviceAPI) :
     m_androidSDRDriverInputTCPPHandler(nullptr),
     m_deviceDescription("AndroidSDRDriverInput")
 {
+    m_thread.setObjectName("AndroidSDRBB");
     m_sampleFifo.setLabel(m_deviceDescription);
     m_sampleFifo.setSize(48000 * 8);
     m_androidSDRDriverInputTCPPHandler = new AndroidSDRDriverInputTCPHandler(&m_sampleFifo, m_deviceAPI);
@@ -367,6 +368,10 @@ void AndroidSDRDriverInput::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getAndroidSdrDriverInputSettings()->getAgc() != 0;
+    }
+    // The API exposes a single gain, which is the first stage, as the report does
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain[0] = response.getAndroidSdrDriverInputSettings()->getGain();
     }
     if (deviceSettingsKeys.contains("rfBW")) {
         settings.m_rfBW = response.getAndroidSdrDriverInputSettings()->getRfBw();

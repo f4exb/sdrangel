@@ -77,6 +77,9 @@ public:
     virtual void destroy();
 
     void resetToDefaults();
+    void sendRadiosondeReport();
+    QVariant cellValue(int row, int col) const;
+    QString cellText(int row, int col) const;
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -87,6 +90,7 @@ public:
 
 private:
     Ui::RadiosondeGUI* ui;
+    QTimer m_reportTimer;   //!< Pushes the radiosonde table to the feature for the web API report
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     RadiosondeSettings m_settings;
@@ -106,7 +110,7 @@ private:
     QDateTime m_lastPositionUpdate;
     QTimer m_positionUpdateTimer;
     static const int m_minMobilePositionUpdateTime = 30; // In seconds
-    static const int m_minFixedPositionUpdateTime = 5 * 60;
+    static const int m_minFixedPositionUpdateTime = 3 * 60 * 60;
 
     QTimer m_predicitionTimer;
     QStringList m_predictions;

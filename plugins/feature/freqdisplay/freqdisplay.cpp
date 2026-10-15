@@ -42,7 +42,7 @@ FreqDisplay::FreqDisplay(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("FreqDisplay::FreqDisplay: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,

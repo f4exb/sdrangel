@@ -36,7 +36,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.11.1'
+          version: '6.11.2'
           host: 'mac'
           arch: 'clang_64'
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
@@ -87,7 +87,7 @@ jobs:
           files: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
 
   build_mac_arm64:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -111,7 +111,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.11.1'
+          version: '6.11.2'
           host: 'mac'
           arch: 'clang_64'
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
@@ -175,7 +175,7 @@ jobs:
             runner: macos-15-intel
             artifact_pattern: sdrangel-*-macx64.dmg
           - arch: arm64
-            runner: macos-14
+            runner: macos-15
             artifact_pattern: sdrangel-*-macarm64.dmg
 
     runs-on: ${{ matrix.runner }}

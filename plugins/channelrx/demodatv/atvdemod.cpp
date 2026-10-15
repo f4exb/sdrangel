@@ -41,6 +41,7 @@ ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
 {
     qDebug("ATVDemod::ATVDemod");
     setObjectName(m_channelId);
+    m_thread.setObjectName("ATVDemodBB");
 
     m_basebandSink = new ATVDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
@@ -208,4 +209,9 @@ void ATVDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int ATVDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

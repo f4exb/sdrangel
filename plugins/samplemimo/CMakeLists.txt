@@ -24,6 +24,12 @@ else()
     message(STATUS "Not building plutosdrmimo (ENABLE_IIO=${ENABLE_IIO} LIBIIO_FOUND=${LIBIIO_FOUND})")
 endif()
 
+if(ENABLE_USRP AND UHD_FOUND)
+    add_subdirectory(usrpmimo)
+else()
+    message(STATUS "Not building usrpmimo (ENABLE_USRP=${ENABLE_USRP} UHD_FOUND=${UHD_FOUND})")
+endif()
+
 find_package (Hamlib)
 if(hamlib_FOUND)
     add_subdirectory(audiocatsiso)

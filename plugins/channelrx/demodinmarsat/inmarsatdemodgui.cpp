@@ -36,6 +36,7 @@
 #include "util/db.h"
 #include "util/units.h"
 #include "util/osndb.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "dsp/glscopesettings.h"
@@ -1324,12 +1325,12 @@ void InmarsatDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != nullptr)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -1947,12 +1948,12 @@ void InmarsatDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "Inmarsat Demod", error);
+                    MessageDialog::critical(this, "Inmarsat Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "Inmarsat Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Inmarsat Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

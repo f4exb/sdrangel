@@ -79,6 +79,14 @@
        </column>
        <column>
         <property name="text">
+         <string>% Runtime</string>
+        </property>
+        <property name="toolTip">
+         <string>Total time as a percentage of the run time: the share of a core used, for code in one thread</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Average</string>
         </property>
         <property name="toolTip">

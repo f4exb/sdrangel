@@ -21,6 +21,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTTHREAD_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTTHREAD_H_
 
+#include <atomic>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -47,10 +48,13 @@ public:
     void setFcPos(int fcPos);
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    std::atomic_bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
     int16_t *m_buf;               //!< holds I+Q values of each sample from device

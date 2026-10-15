@@ -3,35 +3,50 @@ AudioCATSISOSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     rxCenterFrequency:
       type: integer
       format: int64
+      description: "Receive center frequency in Hz."
     rxSampleRate:
       type: integer
+      description: "Receive sample rate in samples per second."
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     txSampleRate:
       type: integer
+      description: "Transmit sample rate in samples per second."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
     txEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable or disable transmission
           * 0 - Disable transmission
           * 1 - Enable transmission
     pttSpectrumLink:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Main spectrum display (Rx/Tx) follows PTT (GUI)
           * 0 - Disable PTT following
@@ -41,6 +56,8 @@ AudioCATSISOSettings:
       type: string
     rxIQMapping:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Audio channel to IQ mapping
           * 0 - I=L, Q=R
@@ -52,6 +69,8 @@ AudioCATSISOSettings:
       type: integer
     fcPosRx:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Decimated bandpass center frequency position
           * 0 - Infradyne
@@ -59,12 +78,16 @@ AudioCATSISOSettings:
           * 2 - Centered
     dcBlock:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Auto DC blocking
           * 0 - Off
           * 1 - On
     iqCorrection:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Auto IQ balance (you need auto DC blocking active)
           * 0 - Off
@@ -72,11 +95,14 @@ AudioCATSISOSettings:
     rxVolume:
       type: number
       format: float
+      description: "Receive volume setting for Audio catsiso."
     txDeviceName:
       description: The name of the output audio device
       type: string
     txIQMapping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Audio channel to IQ mapping
           * 0 - I=L, Q=R
@@ -86,6 +112,8 @@ AudioCATSISOSettings:
       description: Tx volume in dB usually negative
     catSpeedIndex:
       type: integer
+      minimum: 0
+      maximum: 7
       description: >
         CAT serial link baud rate
           * 0 - 1200
@@ -98,18 +126,24 @@ AudioCATSISOSettings:
           * 7 - 115200
     catDataBitsIndex:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         CAT serial link data bits
           * 0 - 7
           * 1 - 8 (default)
     catStopBitsIndex:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         CAT serial link stop bits
           * 0 - 1 (default)
           * 1 - 2
     catHandshakeIndex:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         CAT serial link handshake type
           * 0 - none (default)
@@ -117,6 +151,8 @@ AudioCATSISOSettings:
           * 2 - hardware
     catPTTMethodIndex:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         CAT PTT method
           * 0 - PTT (default)
@@ -124,12 +160,16 @@ AudioCATSISOSettings:
           * 2 - RTS
     catDTRHigh:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         CAT DTR control
           * 0 - low
           * 1 - high (default)
     catRTSHigh:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         CAT RTS control
           * 0 - low
@@ -140,9 +180,16 @@ AudioCATSISOSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

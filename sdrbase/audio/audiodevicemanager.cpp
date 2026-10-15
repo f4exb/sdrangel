@@ -290,6 +290,7 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
     if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end())
     {
         QThread *thread = new QThread();
+        thread->setObjectName(QString("AudioOut:%1").arg(outputDeviceIndex));
         AudioOutputDevice *audioOutputDevice = new AudioOutputDevice();
         m_audioOutputs[outputDeviceIndex] = audioOutputDevice;
         m_audioOutputThreads[outputDeviceIndex] = thread;
@@ -383,6 +384,7 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
     if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end())
     {
         QThread *thread = new QThread();
+        thread->setObjectName(QString("AudioIn:%1").arg(inputDeviceIndex));
         AudioInputDevice *audioInputDevice = new AudioInputDevice();
         m_audioInputs[inputDeviceIndex] = audioInputDevice;
         m_audioInputThreads[inputDeviceIndex] = thread;
@@ -623,6 +625,12 @@ int AudioDeviceManager::getInputSampleRate(int inputDeviceIndex)
             return m_defaultAudioSampleRate;
         }
     }
+}
+
+double AudioDeviceManager::getOutputLatency(int outputDeviceIndex)
+{
+    QMap<int, AudioOutputDevice*>::const_iterator it = m_audioOutputs.constFind(outputDeviceIndex);
+    return it != m_audioOutputs.constEnd() ? it.value()->getLatency() : 0.0;
 }
 
 int AudioDeviceManager::getOutputSampleRate(int outputDeviceIndex)
@@ -958,10 +966,11 @@ void AudioDeviceManager::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }

@@ -26,6 +26,7 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/dialpopup.h"
@@ -452,7 +453,7 @@ void MetisMISOGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -543,10 +544,11 @@ void MetisMISOGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
+            if (!handleMessage(*message))
             {
-                delete message;
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }

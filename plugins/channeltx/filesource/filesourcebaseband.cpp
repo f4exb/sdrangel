@@ -125,11 +125,12 @@ void FileSourceBaseband::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 
@@ -198,7 +199,11 @@ void FileSourceBaseband::applySettings(const QStringList& settingsKeys, const Fi
     }
 
     m_source.applySettings(settingsKeys, settings, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FileSourceBaseband::getChannelSampleRate() const

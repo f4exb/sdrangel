@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#fail if trailing spaces
+if ! git diff --cached --check -- \
+    ':(attr:text)' ':(attr:text=auto)'; then
+    echo "Error: Remove trailing whitespace from staged changes."
+    exit 1
+fi

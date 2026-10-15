@@ -13,7 +13,7 @@
 /*
  * SWGWorkspaceInfo.h
  *
- * Workspace information
+ * Where a window is and whether it is shown (GUI). On a PUT either field may be given alone: index moves the window, hidden hides or shows it
  */
 
 #ifndef SWGWorkspaceInfo_H_
@@ -44,12 +44,18 @@ public:
     qint32 getIndex();
     void setIndex(qint32 index);
 
+    qint32 getHidden();
+    void setHidden(qint32 hidden);
+
 
     virtual bool isSet() override;
 
 private:
     qint32 index;
     bool m_index_isSet;
+
+    qint32 hidden;
+    bool m_hidden_isSet;
 
 };
 

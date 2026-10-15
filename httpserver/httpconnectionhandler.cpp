@@ -13,6 +13,7 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
 {
     Q_ASSERT(settings != 0);
     Q_ASSERT(requestHandler != 0);
+    setObjectName("httpCnnctnHndlr");
     this->settings = settings;
     this->listenerSettings = 0;
     this->requestHandler = requestHandler;

@@ -22,7 +22,8 @@
 #include <QHBoxLayout>
 
 WebView::WebView(QWidget *parent) :
-    QWebEngineView(parent)
+    QWebEngineView(parent),
+    m_tabs(nullptr)
 {
 }
 

@@ -22,6 +22,7 @@
 #include <QFileDialog>
 
 #include "mapsettingsdialog.h"
+#include "gui/messagedialog.h"
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
@@ -71,7 +72,11 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QDialog(parent),
+    m_map2DSettingsChanged(false),
+    m_map3DSettingsChanged(false),
+    m_osmURLChanged(false),
     m_settings(settings),
+    m_fileIdx(0),
     m_downloadDialog(this),
     m_progressDialog(nullptr),
     ui(new Ui::MapSettingsDialog)
@@ -520,7 +525,7 @@ void MapSettingsDialog::downloadComplete(const QString &filename, bool success, 
     else
     {
         m_downloadDialog.reject();
-        QMessageBox::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
+        MessageDialog::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
     }
 }
 
@@ -582,7 +587,7 @@ void MapSettingsDialog::downloadProgress(qint64 bytesRead, qint64 totalBytes)
 
 void MapSettingsDialog::downloadError(const QString& error)
 {
-    QMessageBox::critical(this, "Map", error);
+    MessageDialog::critical(this, "Map", error);
     if (m_progressDialog)
     {
         m_progressDialog->close();

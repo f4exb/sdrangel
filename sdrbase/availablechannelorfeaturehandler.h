@@ -33,7 +33,8 @@ class SDRBASE_API AvailableChannelOrFeatureHandler : public QObject
 public:
 
     // Use this constructor to just keep track of available channels and features with specified URIs and kinds
-    AvailableChannelOrFeatureHandler(QStringList uris, const QString& kinds = "RTMF") :
+    AvailableChannelOrFeatureHandler(QStringList uris, const QString& kinds = "RTMF", QObject *parent = nullptr) :
+        QObject(parent),
         m_uris(uris),
         m_kinds(kinds)
     {
@@ -41,7 +42,8 @@ public:
     }
 
     // Use this constructor to keep track of available channels and features with specified URIs and kinds and register pipes with the given names to them
-    AvailableChannelOrFeatureHandler(QStringList uris, QStringList pipeNames, const QString& kinds = "RTMF") :
+    AvailableChannelOrFeatureHandler(QStringList uris, QStringList pipeNames, const QString& kinds = "RTMF", QObject* parent = nullptr) :
+        QObject(parent),
         m_uris(uris),
         m_pipeNames(pipeNames),
         m_kinds(kinds)

@@ -55,6 +55,8 @@ const int NFMDemod::m_udpBlockSize = 512;
 NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(devieAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
         m_centerFrequency(0)
@@ -127,6 +129,7 @@ void NFMDemod::start()
 
     qDebug() << "NFMDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("NFMDemod");
     m_basebandSink = new NFMDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)
@@ -171,6 +174,7 @@ void NFMDemod::stop()
     m_running = false;
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool NFMDemod::handleMessage(const Message& cmd)
@@ -603,7 +607,11 @@ void NFMDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
     SWGSDRangel::SWGNFMDemodSettings *swgNFMDemodSettings = swgChannelSettings->getNfmDemodSettings();
 
@@ -646,13 +654,21 @@ void NFMDemod::webapiFormatChannelSettings(
         swgNFMDemodSettings->setSquelchGate(settings.m_squelchGate);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgNFMDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgNFMDemodSettings->getTitle()) {
+            *swgNFMDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgNFMDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgNFMDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgNFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgNFMDemodSettings->getAudioDeviceName()) {
+            *swgNFMDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgNFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNFMDemodSettings->setStreamIndex(settings.m_streamIndex);
@@ -706,4 +722,9 @@ void NFMDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+int NFMDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

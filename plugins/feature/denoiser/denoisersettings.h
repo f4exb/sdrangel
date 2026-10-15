@@ -20,6 +20,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QStringList>
+#include <QMap>
 
 class Serializable;
 
@@ -29,12 +30,21 @@ struct DenoiserSettings
     {
         DenoiserType_None = 0,
         DenoiserType_RNnoise = 1,
+        DenoiserType_Nvidia = 2,
+        DenoiserType_Vst3 = 3,
     };
 
     DenoiserType m_denoiserType;
+    QString m_selectedSource;
     bool m_enableDenoiser;
     bool m_audioMute;
     int m_volumeTenths;
+    int m_nvidiaIntensity;
+    bool m_nvidiaVad;
+    QString m_vst3ModulePath;
+    QByteArray m_vst3ClassId;
+    QMap<quint32, double> m_vst3Parameters;
+    QByteArray m_vst3State; //!< Opaque plugin state from Vst3Effect::state()
     QString m_audioDeviceName;
     QString m_title;
     quint32 m_rgbColor;

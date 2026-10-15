@@ -41,6 +41,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
     m_downChirps(nullptr),
     m_upChirps(nullptr),
     m_spectrumLine(nullptr),
+    m_magsqMax(0.0),
     m_headerLocked(false),
     m_expectedSymbols(0),
     m_waitHeaderFeedback(false),
@@ -64,6 +65,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
     m_loRaFrameSymbolCount(0),
     m_loRaCFOFrac(0.0f),
     m_loRaSTOFrac(0.0f),
+    m_loRaPendingShift(0),
     m_loRaSFOHat(0.0f),
     m_loRaSFOCum(0.0f),
     m_loRaCFOSTOEstimated(false),
@@ -534,6 +536,7 @@ void MeshtasticDemodSink::resetLoRaFrameSync()
     m_loRaAdditionalUpchirps = 0;
     m_loRaCFOFrac = 0.0f;
     m_loRaSTOFrac = 0.0f;
+    m_loRaPendingShift = 0;
     m_loRaSFOHat = 0.0f;
     m_loRaSFOCum = 0.0f;
     m_loRaCFOSTOEstimated = false;
@@ -684,7 +687,7 @@ float MeshtasticDemodSink::estimateLoRaCFOFracBernier(const Complex *samples)
     return cfoFrac;
 }
 
-float MeshtasticDemodSink::estimateLoRaSTOFrac()
+float MeshtasticDemodSink::estimateLoRaSTOFrac(int *upBinResidual)
 {
     if (m_loRaUpSymbToUse <= 0) {
         return 0.0f;
@@ -724,9 +727,19 @@ float MeshtasticDemodSink::estimateLoRaSTOFrac()
     const double v = u * 2.4674;
     const double wa = (Y1 - Y_1) / (u * (Y1 + Y_1) + v * Y0 + 1e-12);
     const double ka = wa * m_nbSymbols / M_PI;
-    const double kres = std::fmod((k0 + ka) / 2.0, 1.0);
+    const double peak = (k0 + ka) / 2.0;
+    const double kres = std::fmod(peak, 1.0);
+    const double frac = kres - (kres > 0.5 ? 1.0 : 0.0);
 
-    return static_cast<float>(kres - (kres > 0.5 ? 1.0 : 0.0));
+    if (upBinResidual)
+    {
+        // Express the N-wrapped peak as an integer bin plus exactly the same
+        // fractional offset returned to existing callers, including half-bin ties.
+        const double pos = std::remainder(peak, static_cast<double>(m_nbSymbols));
+        *upBinResidual = static_cast<int>(std::round(pos - frac));
+    }
+
+    return static_cast<float>(frac);
 }
 
 void MeshtasticDemodSink::buildLoRaPayloadDownchirp()
@@ -796,6 +809,10 @@ void MeshtasticDemodSink::processSampleLoRa(const Complex& ci)
         }
 
         int consumed = processLoRaFrameSyncStep();
+
+        // Apply a one-shot adjustment requested by the step just processed.
+        consumed += m_loRaPendingShift;
+        m_loRaPendingShift = 0;
 
         if (consumed <= 0) {
             consumed = 1;
@@ -928,7 +945,18 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
                 m_loRaCFOFrac = 0.0f;
             }
 
-            m_loRaSTOFrac = estimateLoRaSTOFrac();
+            int upBinResidual = 0;
+            m_loRaSTOFrac = estimateLoRaSTOFrac(&upBinResidual);
+
+            // Detection aligned on the mode of uncorrected preamble bins. After
+            // fractional CFO correction, an integer upchirp-bin residual can
+            // remain. The current Sync window was already read on the old grid;
+            // adjust consumption so later net-ID windows, downchirps and payload
+            // use the corrected grid. Detection advances osFactor * (N - b) to
+            // move bin b to zero, hence residual r needs -osFactor * r.
+            if (std::abs(upBinResidual) == 1) {
+                m_loRaPendingShift = -upBinResidual * static_cast<int>(m_osFactor);
+            }
 
             for (unsigned int n = 0; n < m_nbSymbols; n++)
             {
@@ -990,6 +1018,11 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             } else {
                 m_loRaCFOInt = static_cast<int>(std::floor((m_loRaDownVal - static_cast<int>(m_nbSymbols)) / 2.0));
             }
+
+            // Convert the carrier frequency offset (CFO) estimate from FFT bins to Hz.
+            const double cfoHz =
+                (static_cast<double>(m_loRaCFOInt) + static_cast<double>(m_loRaCFOFrac))
+                * static_cast<double>(m_bandwidth) / static_cast<double>(m_nbSymbols);
 
             // Preserve state-machine net ID bin indices for sync word extraction.
             // The corrLen-based refinement overwrites m_loRaNetIds but may produce
@@ -1112,6 +1145,8 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             m_loRaFrameId++;
             m_decodeMsg = MeshtasticDemodMsg::MsgDecodeSymbols::create();
             m_decodeMsg->setFrameId(m_loRaFrameId);
+            // Attach the measured carrier frequency offset to this frame.
+            m_decodeMsg->setCfoHz(cfoHz);
             {
                 // LoRa sync word is encoded across two net-ID chirps.
                 // First chirp (index 0) carries the high nibble, second (index 1) the low nibble.
@@ -1233,7 +1268,7 @@ void MeshtasticDemodSink::applyChannelSettings(int channelSampleRate, int bandwi
         const int targetFrameSyncRate = std::max(1, bandwidth * static_cast<int>(m_osFactor));
         // Keep the anti-alias/channel filter narrow around the configured LoRa bandwidth.
         // A too-wide cutoff destabilizes preamble bin tracking in DETECT.
-        m_interpolator.create(16, channelSampleRate, m_bandwidth / 1.9f);
+        m_interpolator.create(16, channelSampleRate, bandwidth / 1.9f);
         m_interpolatorDistance = (Real) channelSampleRate / (Real) targetFrameSyncRate;
         m_sampleDistanceRemain = 0;
         m_osCounter = 0;

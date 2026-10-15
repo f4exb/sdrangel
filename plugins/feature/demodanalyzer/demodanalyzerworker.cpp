@@ -31,7 +31,10 @@ DemodAnalyzerWorker::DemodAnalyzerWorker() :
     m_dataFifo(nullptr),
     m_sinkSampleRate(0),
     m_msgQueueToFeature(nullptr),
+    m_settings(),
+    m_magsq(0.0),
     m_sampleBufferSize(0),
+    m_scopeVis(nullptr),
     m_wavFileRecord(nullptr),
     m_recordSilenceNbSamples(0),
     m_recordSilenceCount(0),
@@ -202,11 +205,12 @@ void DemodAnalyzerWorker::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 
@@ -247,6 +251,7 @@ bool DemodAnalyzerWorker::handleMessage(const Message& cmd)
                 this,
                 &DemodAnalyzerWorker::handleData
             );
+            m_dataFifo = nullptr; // It is freed by the pipes GC after being unregistered.
         }
 
         return true;
@@ -353,6 +358,10 @@ void DemodAnalyzerWorker::applySampleRate(int sampleRate)
 void DemodAnalyzerWorker::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_dataFifo) {
+        return; // A queued dataReady can arrive after the FIFO was disconnected.
+    }
 
     while ((m_dataFifo->fill() > 0) && (m_inputMessageQueue.size() == 0))
     {

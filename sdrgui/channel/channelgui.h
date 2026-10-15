@@ -22,10 +22,12 @@
 #define SDRGUI_CHANNEL_CHANNELGUI_H_
 
 #include <QMdiSubWindow>
+#include <QColor>
 #include <QMap>
 
 #include "gui/qtcompatibility.h"
 #include "gui/framelesswindowresizer.h"
+#include "gui/workspacewindow.h"
 #include "settings/serializableinterface.h"
 #include "export.h"
 
@@ -39,7 +41,7 @@ class QSizeGrip;
 class RollupContents;
 class ChannelMarker;
 
-class SDRGUI_API ChannelGUI : public QMdiSubWindow, public SerializableInterface
+class SDRGUI_API ChannelGUI : public WorkspaceWindow, public SerializableInterface
 {
     Q_OBJECT
 public:
@@ -61,11 +63,11 @@ public:
 
 	virtual void resetToDefaults() = 0;
     // Data saved in the derived settings
-    virtual void setWorkspaceIndex(int index)= 0;
-    virtual int getWorkspaceIndex() const = 0;
+    virtual void setWorkspaceIndex(int index) override = 0;
+    virtual int getWorkspaceIndex() const override = 0;
     virtual void setGeometryBytes(const QByteArray& blob) = 0;
     virtual QByteArray getGeometryBytes() const = 0;
-    virtual QString getTitle() const = 0;
+    virtual QString getTitle() const override = 0;
     virtual QColor getTitleColor() const  = 0;
     virtual void zetHidden(bool hidden) = 0;
     virtual bool getHidden() const = 0;
@@ -79,6 +81,7 @@ public:
     void sizeToContents();
     void setTitle(const QString& title);
     void setTitleColor(const QColor& c);
+    QColor getIndexLabelColor() const { return m_indexLabelColor; }
     void setDeviceType(DeviceType type);
     void setDisplayedame(const QString& name);
     DeviceType getDeviceType() const { return m_deviceType; }
@@ -89,6 +92,7 @@ public:
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setStatusFrequency(qint64 frequency);
     void setStatusText(const QString& text);
+    void setStatusToolTip(const QString& toolTip);
 
 protected:
     FramelessWindowResizer m_resizer;
@@ -119,6 +123,7 @@ private:
     DeviceType m_deviceType;
     int m_deviceSetIndex;
     int m_channelIndex;
+    QColor m_indexLabelColor = QColor(128, 128, 128);
     RollupContents* m_rollupContents;
 
     QLabel *m_indexLabel;

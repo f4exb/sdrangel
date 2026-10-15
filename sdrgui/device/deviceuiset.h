@@ -86,6 +86,7 @@ public:
     void deleteChannel(int channelIndex);
     ChannelAPI *getChannelAt(int channelIndex);
     ChannelGUI *getChannelGUIAt(int channelIndex);
+    int getChannelTypeAt(int channelIndex) const; // 0: Rx, 1: Tx, 2: MIMO
 
     QByteArray serialize() const override;
     bool deserialize(const QByteArray& data) override;

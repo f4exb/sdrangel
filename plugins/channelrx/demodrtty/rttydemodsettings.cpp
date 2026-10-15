@@ -102,7 +102,9 @@ QByteArray RttyDemodSettings::serialize() const
 
     s.writeS32(31, m_scopeCh1);
     s.writeS32(32, m_scopeCh2);
-    s.writeBlob(33, m_scopeGUI->serialize());
+    if (m_scopeGUI) {
+        s.writeBlob(33, m_scopeGUI->serialize());
+    }
 
     s.writeString(25, m_logFilename);
     s.writeBool(26, m_logEnabled);

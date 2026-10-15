@@ -16,7 +16,7 @@ struct PolynomialInterleaver
     using buffer_t = std::array<int8_t, K>;
     using bytes_t = std::array<uint8_t, K / 8>;
 
-    alignas(16) buffer_t buffer_;
+    alignas(16) buffer_t buffer_{};
 
     size_t index(size_t i)
     {

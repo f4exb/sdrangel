@@ -26,6 +26,7 @@
 
 MessagePipesLegacy::MessagePipesLegacy()
 {
+	m_gcThread.setObjectName("LgcyMsgPipe:gc");
 	m_gcWorker = new MessagePipesLegacyGCWorker();
 	m_gcWorker->setC2FRegistrations(
 		m_registrations.getMutex(),

@@ -3,17 +3,23 @@ SigMFFileSinkSettings:
   properties:
     inputFrequencyOffset:
       type: integer
+      description: "Channel frequency offset from the device center frequency in Hz."
     fileRecordName:
       type: string
       description: full path of the meta file
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     spectrumSquelchMode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Spectrum squelch system
         * 0 - deactivated
@@ -30,6 +36,8 @@ SigMFFileSinkSettings:
       description: Number of seconds to record after spectrum squelch closes
     squelchRecordingEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Automatic recording triggered by spectrum squelch
         * 0 - disabled
@@ -43,26 +51,39 @@ SigMFFileSinkSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 SigMFFileSinkReport:
   description: SigMFFileSink
   properties:
     spectrumSquelch:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Spectrum squelch status
         * 0 - closed
@@ -73,10 +94,14 @@ SigMFFileSinkReport:
       description: Current spectrum max in squared magnitude (power)
     sinkSampleRate:
       type: integer
+      description: "Sample rate accepted by the sink in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     recording:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Recording status
         * 0 - not recording
@@ -97,6 +122,8 @@ SigMFFileSinkActions:
   properties:
     record:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Record action
           * 0 - stop recording

@@ -3,39 +3,65 @@ HackRFInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     lnaGain:
       type: integer
+      description: "Low-noise-amplifier gain setting."
     vgaGain:
       type: integer
+      description: "Variable-gain-amplifier gain setting."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     biasT:
       type: integer
+      description: "Enable antenna bias power (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     lnaExt:
       type: integer
+      description: "LNA ext setting for Hack RF input."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -43,49 +69,80 @@ HackRFInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 HackRFOutputSettings:
   description: HackRF
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     vgaGain:
       type: integer
+      description: "Variable-gain-amplifier gain setting."
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     biasT:
       type: integer
+      description: "Enable antenna bias power (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     lnaExt:
       type: integer
+      description: "LNA ext setting for Hack RF output."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

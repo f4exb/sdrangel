@@ -248,11 +248,12 @@ void MorseDecoderWorker::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 
@@ -302,6 +303,7 @@ bool MorseDecoderWorker::handleMessage(const Message& cmd)
                 this,
                 &MorseDecoderWorker::handleData
             );
+            m_dataFifo = nullptr; // It is freed by the pipes GC after being unregistered.
         }
 
         return true;
@@ -364,6 +366,10 @@ void MorseDecoderWorker::applySampleRate(int sampleRate)
 void MorseDecoderWorker::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_dataFifo) {
+        return; // A queued dataReady can arrive after the FIFO was disconnected.
+    }
 
     while ((m_dataFifo->fill() > 0) && (m_inputMessageQueue.size() == 0))
     {

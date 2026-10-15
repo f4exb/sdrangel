@@ -4,10 +4,14 @@ WDSPRxSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     profileIndex:
       type: integer
+      description: "Selected profile index."
     demod:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Demodulator type:
           * 0 - SSB
@@ -17,6 +21,7 @@ WDSPRxSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     audioBinaural:
       description: Audio binaural mode (1 if active else 0)
       type: integer
@@ -29,11 +34,17 @@ WDSPRxSettings:
     audioMute:
       description: Mute audio (1 if muted else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agcMode:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         AGC Mode:
           * 0 - Long
@@ -48,20 +59,27 @@ WDSPRxSettings:
       description: Slope in centi-Bels
     agcHangThreshold:
       type: integer
+      description: "Agc hang threshold setting for Wdsp receive."
     dnb:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Digital Noise Blanker:
           * 0 - Off
           * 1 - On
     nbScheme:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Noise blanker scheme:
           * 0 - NB or Preemptive Wideband Noise Blanker
           * 1 - NB2 or Interpolating Wideband Noise Blanker
     nb2Mode:
       type: integer
+      minimum: 0
+      maximum: 4
       description: >
         NB2 Noise blanking mode:
           * 0 - Zero mode (estimate as zero)
@@ -83,29 +101,39 @@ WDSPRxSettings:
       description: Hang time (S)
     nbThreshold:
       type: integer
+      description: "Nb threshold setting for Wdsp receive."
     nbAvgTime:
       type: number
       format: float
+      description: "Nb avg time setting for Wdsp receive."
     dnr:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Digital Noise Reduction:
           * 0 - Off
           * 1 - On
     anf:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Automatic Notch Filter:
           * 0 - Off
           * 1 - On
     nrScheme:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Noise Reduction Scheme:
           * 0 - NR or LMS Noise Reduction
           * 1 - NR2 or Spectral Noise Reduction
     nr2Gain:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Noise Reduction gain for NR2:
           * 0 - Linear
@@ -113,30 +141,40 @@ WDSPRxSettings:
           * 2 - Gamma
     nr2NPE:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Noise Power Estimation algorithm for NR2:
           * 0 - Optimal Smoothing Minimum Statistics (OSMS)
           * 1 - Minimum Mean‐Square Error (MMSE)
     nrPosition:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Noise reduction position:
           * 0 - Before AGC
           * 1 - After AGC
     nr2ArtifactReduction:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         NR2 artifacts reduction:
           * 0 - Off
           * 1 - On
     amFadeLevel:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         AM fade levelling:
           * 0 - Off
           * 1 - On
     cwPeaking:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         CW peaking filter:
           * 0 - Off
@@ -173,6 +211,8 @@ WDSPRxSettings:
         FM Audio filter high cutoff frequency (HZ)
     fmAFLimiter:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         FM Audio level limiter (audio AGC)
           * 0 - Off
@@ -184,6 +224,8 @@ WDSPRxSettings:
         FM Audio level limiter top gain (Audio AGC top gain)
     fmCTCSSNotch:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         FM CTCSS notch filter
           * 0 - Off
@@ -195,6 +237,8 @@ WDSPRxSettings:
         FM CTCSS notch filter frequency (Hz)
     squelch:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Squelch:
           * 0 - Off
@@ -204,6 +248,8 @@ WDSPRxSettings:
       description: Squelch threshold (percent)
     squelchMode:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Squelch mode:
           * 0 - Voice squelch (for SSB). Based on voice artifacts.
@@ -212,6 +258,8 @@ WDSPRxSettings:
     ssqlTauMute:
       type: number
       format: float
+      minimum: 0
+      maximum: 1
       description: Voice squelch tau mute (s)
     ssqlTauUnmute:
       type: number
@@ -223,6 +271,8 @@ WDSPRxSettings:
       description: AM squelch max tail length (s)
     equalizer:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         AF equalizer:
           * 0 - Off
@@ -241,6 +291,8 @@ WDSPRxSettings:
         format: float
     rit:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         RIT:
           * 0 - Off
@@ -251,44 +303,63 @@ WDSPRxSettings:
       description: RIT shift frequency (Hz)
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     lowCutoff:
       type: number
       format: float
+      description: "Lower filter cutoff frequency in Hz."
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         FFT Window index (FFTWindow::Function):
           * 0 - Blackman-Harris 4 term
           * 1 - Blackman-Harris 7 term
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 WDSPRxReport:
   description: WDSPRx
@@ -302,5 +373,7 @@ WDSPRxReport:
       type: integer
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

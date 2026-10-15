@@ -4,18 +4,25 @@ FT8DemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     filterIndex:
       type: integer
+      description: "Selected filter index."
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     lowCutoff:
       type: number
       format: float
+      description: "Lower filter cutoff frequency in Hz."
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         FFT Window index (FFTWindow::Function):
           * 0 - Bartlett
@@ -30,17 +37,24 @@ FT8DemodSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     recordWav:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Record received audio as 12000S/s 16 bit .wav file
           * 0 - Do not record
           * 1 - Record as sdrangel/ft8/save/YYYYMMDD_HHMMSS.wav in writable location
     logMessages:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Log decoded messages in WSJT CALL.TXT format
           * 0 - Do not log messages
@@ -54,6 +68,8 @@ FT8DemodSettings:
       description: Decoder time budget in seconds (will stop after running this time)
     useOSD:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Use Ordered Statistics Decoding (OSD) to decode messages if some LDPC bits are invalid
           * 0 - Disable
@@ -66,46 +82,66 @@ FT8DemodSettings:
       description: minimum of valid LDPC bits (out of 83) necessary to activate OSD
     verifyOSD:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Verify OSD decoded message against a list of validated callsigns
           * 0 - Disable
           * 1 - Enable
     enablePSKReporter:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable reporting of decoded messages to PSK Reporter server
           * 0 - Disable
           * 1 - Enable
     pskReporterCallsign:
       type: string
+      description: "Psk reporter callsign setting for Ft8 demod."
     pskReporterLocator:
       type: string
+      description: "Psk reporter locator setting for Ft8 demod."
     pskReporterSoftware:
       type: string
+      description: "Psk reporter software setting for Ft8 demod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 FT8DemodReport:
   description: FT8Demod
@@ -119,3 +155,4 @@ FT8DemodReport:
       type: integer
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

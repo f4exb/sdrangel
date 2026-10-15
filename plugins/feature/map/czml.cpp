@@ -779,7 +779,8 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 || (mapItem->m_group == "Waypoints")
                 ) {
                 displayDistanceMax = 1000000;
-            } else if ((mapItem->m_group == "Station") || (mapItem->m_group == "Radar") || (mapItem->m_group == "Radio Time Transmitters")) {
+            } else if ((mapItem->m_group == "Station") || (mapItem->m_group == "Radar") || (mapItem->m_group == "Radio Time Transmitters")
+                || (mapItem->m_group == "WEFAX Transmitters")) {
                 displayDistanceMax = 10000000;
             } else if (mapItem->m_group == "Ionosonde Stations") {
                 displayDistanceMax = 30000000;

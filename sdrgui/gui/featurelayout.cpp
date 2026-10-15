@@ -20,8 +20,11 @@
 
 #include "featurelayout.h"
 
-FeatureLayout::FeatureLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
-    : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
+FeatureLayout::FeatureLayout(QWidget *parent, int margin, int hSpacing, int vSpacing) :
+    QLayout(parent),
+    m_hSpace(hSpacing),
+    m_vSpace(vSpacing),
+    m_orientation(Qt::Horizontal)
 {
     setContentsMargins(margin, margin, margin, margin);
 }

@@ -54,6 +54,7 @@ AudioOutputDevice::AudioOutputDevice() :
     m_recordSilenceNbSamples(0),
     m_recordSilenceCount(0),
 	m_audioFifos(),
+	m_latency(0.0),
     m_managerMessageQueue(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -176,7 +177,8 @@ bool AudioOutputDevice::start(int deviceIndex, int sampleRate)
         if (m_audioOutput->state() != QAudio::ActiveState) {
             qWarning() << "AudioOutputDevice::start: cannot start - " << m_audioOutput->error();
         } else {
-            qDebug("AudioOutputDevice::start: started buffer: %d bytes", (int)m_audioOutput->bufferSize());
+            m_latency = m_audioOutput->bufferSize() / (4.0 * m_audioFormat.sampleRate()); // 16-bit stereo
+            qDebug("AudioOutputDevice::start: started buffer: %d bytes (%.0f ms)", (int)m_audioOutput->bufferSize(), m_latency * 1e3);
         }
 
         if (m_managerMessageQueue) {
@@ -584,10 +586,11 @@ void AudioOutputDevice::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }

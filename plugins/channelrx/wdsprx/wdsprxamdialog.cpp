@@ -20,7 +20,8 @@
 
 WDSPRxAMDialog::WDSPRxAMDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxAMDialog)
+    ui(new Ui::WDSPRxAMDialog),
+    m_fadeLevel(false)
 {
     ui->setupUi(this);
 }

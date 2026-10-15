@@ -40,7 +40,8 @@ Unit::Unit(
     in_rate{_in_rate},
     out_rate(_out_rate),
     dsp_rate(_dsp_rate),
-    dsp_size(_dsp_size)
+    dsp_size(_dsp_size),
+    state(0)
 {
     if (_in_rate  >= _dsp_rate)
         dsp_insize  = _dsp_size * (_in_rate  / _dsp_rate);

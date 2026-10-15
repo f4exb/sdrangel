@@ -36,6 +36,8 @@ public:
 
     DVBS();
     ~DVBS();
+    DVBS(const DVBS&) = delete;
+    DVBS& operator=(const DVBS&) = delete;
 
     int encode(const uint8_t *ts, uint8_t *iq);
     void setCodeRate(CodeRate codeRate);

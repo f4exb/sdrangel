@@ -46,6 +46,9 @@ class ATVModSource : public ChannelSampleSource
 public:
     ATVModSource();
     ~ATVModSource();
+    ATVModSource(const ATVModSource&) = delete;
+    ATVModSource& operator=(const ATVModSource&) = delete;
+
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);

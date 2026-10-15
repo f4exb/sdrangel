@@ -57,12 +57,16 @@ void FT8DemodSink::LevelRMS::accumulate(float level)
 }
 
 FT8DemodSink::FT8DemodSink() :
+        m_channel(nullptr),
         m_agc(12000, m_agcTarget, 1e-2),
         m_agcActive(false),
         m_audioActive(false),
+        SSBFilter(nullptr),
         m_spectrumSink(nullptr),
         m_ft8Buffer(nullptr),
-        m_levelInNbSamples(1200) // 100 ms
+        m_levelInNbSamples(1200), // 100 ms
+        m_rmsLevel(0),
+        m_peakLevel(0)
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;

@@ -40,6 +40,20 @@ M17DemodProcessor::M17DemodProcessor() :
     m_audioFifo(nullptr),
     m_audioMute(false),
     m_volume(1.0f),
+    m_upsamplerLastValue(0.0f),
+    m_dcd(false),
+    m_evm(0.0f),
+    m_deviation(0.0f),
+    m_offset(0.0f),
+    m_status(0),
+    m_syncWordType(0),
+    m_clock(0.0f),
+    m_sampleIndex(0),
+    m_syncIndex(0),
+    m_clockIndex(0),
+    m_viterbiCost(0),
+    m_streamElsePacket(true),
+    m_stdPacketProtocol(StdPacketRaw),
     m_demodInputMessageQueue(nullptr)
 {
     m_this = this;

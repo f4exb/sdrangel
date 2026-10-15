@@ -28,6 +28,8 @@ SWGPagerDemodSettings::SWGPagerDemodSettings(QString* json) {
 }
 
 SWGPagerDemodSettings::SWGPagerDemodSettings() {
+    modulation = 0;
+    m_modulation_isSet = false;
     decode = 0;
     m_decode_isSet = false;
     reverse = 0;
@@ -78,6 +80,8 @@ SWGPagerDemodSettings::~SWGPagerDemodSettings() {
 
 void
 SWGPagerDemodSettings::init() {
+    modulation = 0;
+    m_modulation_isSet = false;
     decode = 0;
     m_decode_isSet = false;
     reverse = 0;
@@ -172,6 +176,8 @@ SWGPagerDemodSettings::fromJson(QString &json) {
 
 void
 SWGPagerDemodSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&modulation, pJson["modulation"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&decode, pJson["decode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse, pJson["reverse"], "qint32", "");
@@ -230,6 +236,9 @@ SWGPagerDemodSettings::asJson ()
 QJsonObject*
 SWGPagerDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_modulation_isSet){
+        obj->insert("modulation", QJsonValue(modulation));
+    }
     if(m_decode_isSet){
         obj->insert("decode", QJsonValue(decode));
     }
@@ -295,6 +304,16 @@ SWGPagerDemodSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGPagerDemodSettings::getModulation() {
+    return modulation;
+}
+void
+SWGPagerDemodSettings::setModulation(qint32 modulation) {
+    this->modulation = modulation;
+    this->m_modulation_isSet = true;
 }
 
 qint32
@@ -512,6 +531,9 @@ bool
 SWGPagerDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_decode_isSet){
             isObjectUpdated = true; break;
         }

@@ -50,14 +50,15 @@
 // bit stuffing and flags is under 5000 symbols.
 #define PACKETDEMOD_SYM_HIST 8192
 
+// Largest Chase depth honoured, matching the GUI spin box. The work is 2^n - 1 rebuilt
+// and re-CRC'd frames for every CRC failure on every detector, so 12 is already 4095;
+// the value reaches here from presets and the REST API, neither of which bounds it,
+// and 1u << n is undefined once n reaches 32.
+#define PACKETDEMOD_CHASE_MAX  12
+
 class PacketDemodFramer
 {
 public:
-    // Largest Chase depth honoured, matching the GUI spin box. The work is 2^n - 1 rebuilt
-    // and re-CRC'd frames for every CRC failure on every detector, so 12 is already 4095;
-    // the value reaches here from presets and the REST API, neither of which bounds it,
-    // and 1u << n is undefined once n reaches 32.
-    static const int PACKETDEMOD_CHASE_MAX = 12;
 
     // Returns true if the frame was accepted - the caller's deduplication decides, and the
     // framer reports that back so callers can count distinct packets rather than the
@@ -85,7 +86,7 @@ public:
         int m_bitCount;
         int m_onesCount;
         bool m_gotSOP;
-        unsigned char m_bytes[512];     // Info field can be 256 bytes
+        unsigned char m_bytes[512]{};     // Info field can be 256 bytes
         int m_byteCount;
 
         std::vector<Real> m_symHist;
@@ -233,7 +234,7 @@ private:
 
         if (bit == 1)
         {
-            d.m_onesCount++;
+            d.m_onesCount = std::min(d.m_onesCount + 1, 7);
 
             // Shouldn't ever get 7 1s in a row
             if ((d.m_onesCount == 7) && d.m_gotSOP)
@@ -284,6 +285,14 @@ private:
                 d.m_byteCount++;
             }
 
+            d.m_bits = 0;
+            d.m_bitCount = 0;
+        }
+        // Outside a frame only the run-of-ones detector is needed to find a flag.
+        // Do not let m_bitCount grow without bound before acquisition or after an
+        // abort: shifting by >= 32 above is undefined (caught by the IQ tests).
+        if (!d.m_gotSOP)
+        {
             d.m_bits = 0;
             d.m_bitCount = 0;
         }

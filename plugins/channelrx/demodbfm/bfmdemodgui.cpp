@@ -22,6 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "bfmdemodgui.h"
+#include "util/rds.h"
 
 #include "device/deviceuiset.h"
 #include <QDockWidget>
@@ -135,12 +136,12 @@ void BFMDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -402,6 +403,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_basebandSampleRate(1),
 	m_rdsTimerCount(0),
     m_radiotext_AB_flag(false),
+	m_squelchOpen(false),
+    m_audioSampleRate(-1),
 	m_rate(625000)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -586,7 +589,24 @@ void BFMDemodGUI::tick()
 	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
     ui->pilotPower->setText(QString::number(pilotPowDb, 'f', 1));
 
-    if (m_bfmDemod->getAudioSampleRate() < 0)
+    int audioSampleRate = m_bfmDemod->getAudioSampleRate();
+    bool squelchOpen = m_bfmDemod->getSquelchOpen();
+
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
+    {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        m_audioSampleRate = audioSampleRate;
+        m_squelchOpen = squelchOpen;
+    }
+
+    if (audioSampleRate < 0)
     {
         ui->audioStereo->setStyleSheet("QToolButton { background-color : red; }");
     }
@@ -680,7 +700,7 @@ void BFMDemodGUI::rdsUpdate(bool force)
 			ui->piTPIndicator->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		}
 
-		ui->piType->setText(QString(m_bfmDemod->getRDSParser()->pty_table[m_bfmDemod->getRDSParser()->m_pi_program_type].c_str()));
+		ui->piType->setText(QString(RDS::m_programmeTypes[m_bfmDemod->getRDSParser()->m_pi_program_type]));
 		ui->piCoverage->setText(QString(m_bfmDemod->getRDSParser()->coverage_area_codes[m_bfmDemod->getRDSParser()->m_pi_area_coverage_index].c_str()));
 	}
 	else
@@ -757,13 +777,13 @@ void BFMDemodGUI::rdsUpdate(bool force)
 		ui->g02CountText->setNum((int) m_bfmDemod->getRDSParser()->m_g2_count);
         bool radiotext_AB_flag = m_bfmDemod->getRDSParser()->m_radiotext_AB_flag;
 
-        if (!m_radiotext_AB_flag && radiotext_AB_flag) // B -> A transiition is start of new text
+        if (m_radiotext_AB_flag != radiotext_AB_flag)
         {
             QString oldText = ui->go2Text->text();
             ui->go2PrevText->setText(oldText);
         }
 
-		ui->go2Text->setText(QString(m_bfmDemod->getRDSParser()->m_g2_radiotext));
+		ui->go2Text->setText(QString(m_bfmDemod->getRDSParser()->m_g2_radiotext).trimmed());
         m_radiotext_AB_flag = radiotext_AB_flag;
 	}
 	else
@@ -867,9 +887,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 
 			RDSParser::psns_map_t::iterator it = m_bfmDemod->getRDSParser()->m_g14_program_service_names.begin();
 			const RDSParser::psns_map_t::iterator itEnd = m_bfmDemod->getRDSParser()->m_g14_program_service_names.end();
-			int i = 0;
 
-			for (; it != itEnd; ++it, i++)
+			for (; it != itEnd; ++it)
 			{
 				m_g14ComboIndex.push_back(it->first);
 				QString pistring(str(boost::format("%04X:%s") % it->first % it->second).c_str());

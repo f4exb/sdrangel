@@ -31,6 +31,7 @@ AISModSource::AISModSource() :
     m_channelSampleRate(AISModSettings::AISMOD_SAMPLE_RATE),
     m_channelFrequencyOffset(0),
     m_fmPhase(0.0),
+    m_nrziBit(0),
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
     m_magsq(0.0),
@@ -44,7 +45,6 @@ AISModSource::AISModSource() :
     m_powRamp(0.0f),
     m_state(idle),
     m_waitCounter(0),
-    m_nrziBit(0),
     m_byteIdx(0),
     m_bitIdx(0),
     m_last5Bits(0),
@@ -339,7 +339,11 @@ void AISModSource::applySettings(const QStringList& settingsKeys, const AISModSe
         addTXPacket(settings.m_data);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Precalculate FM sensensity and linear gain to save doing it in the loop
     m_samplesPerSymbol = AISModSettings::AISMOD_SAMPLE_RATE / m_settings.m_baud;

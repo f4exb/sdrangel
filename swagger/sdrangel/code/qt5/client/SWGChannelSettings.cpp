@@ -50,6 +50,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_am_mod_settings_isSet = false;
     apt_demod_settings = nullptr;
     m_apt_demod_settings_isSet = false;
+    wefax_demod_settings = nullptr;
+    m_wefax_demod_settings_isSet = false;
     atv_demod_settings = nullptr;
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = nullptr;
@@ -58,6 +60,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = nullptr;
     m_bfm_demod_settings_isSet = false;
+    bfm_mod_settings = nullptr;
+    m_bfm_mod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
     m_channel_analyzer_settings_isSet = false;
     channel_power_settings = nullptr;
@@ -70,14 +74,22 @@ SWGChannelSettings::SWGChannelSettings() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = nullptr;
     m_datv_demod_settings_isSet = false;
+    dvb_demod_settings = nullptr;
+    m_dvb_demod_settings_isSet = false;
     dab_demod_settings = nullptr;
     m_dab_demod_settings_isSet = false;
+    drm_demod_settings = nullptr;
+    m_drm_demod_settings_isSet = false;
     doa2_settings = nullptr;
     m_doa2_settings_isSet = false;
     dsc_demod_settings = nullptr;
+    selcal_demod_settings = nullptr;
     m_dsc_demod_settings_isSet = false;
+    m_selcal_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
+    drone_id_demod_settings = nullptr;
+    m_drone_id_demod_settings_isSet = false;
     end_of_train_demod_settings = nullptr;
     m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = nullptr;
@@ -136,6 +148,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_pager_demod_settings_isSet = false;
     psk31_mod_settings = nullptr;
     m_psk31_mod_settings_isSet = false;
+    psk31_demod_settings = nullptr;
+    m_psk31_demod_settings_isSet = false;
     radio_astronomy_settings = nullptr;
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
@@ -200,6 +214,8 @@ SWGChannelSettings::init() {
     m_am_mod_settings_isSet = false;
     apt_demod_settings = new SWGAPTDemodSettings();
     m_apt_demod_settings_isSet = false;
+    wefax_demod_settings = new SWGWefaxDemodSettings();
+    m_wefax_demod_settings_isSet = false;
     atv_demod_settings = new SWGATVDemodSettings();
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = new SWGATVModSettings();
@@ -208,6 +224,8 @@ SWGChannelSettings::init() {
     m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = new SWGBFMDemodSettings();
     m_bfm_demod_settings_isSet = false;
+    bfm_mod_settings = new SWGBFMModSettings();
+    m_bfm_mod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
     m_channel_analyzer_settings_isSet = false;
     channel_power_settings = new SWGChannelPowerSettings();
@@ -220,14 +238,22 @@ SWGChannelSettings::init() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = new SWGDATVDemodSettings();
     m_datv_demod_settings_isSet = false;
+    dvb_demod_settings = new SWGDVBDemodSettings();
+    m_dvb_demod_settings_isSet = false;
     dab_demod_settings = new SWGDABDemodSettings();
     m_dab_demod_settings_isSet = false;
+    drm_demod_settings = new SWGDRMDemodSettings();
+    m_drm_demod_settings_isSet = false;
     doa2_settings = new SWGDOA2Settings();
     m_doa2_settings_isSet = false;
     dsc_demod_settings = new SWGDSCDemodSettings();
+    selcal_demod_settings = new SWGSELCALDemodSettings();
     m_dsc_demod_settings_isSet = false;
+    m_selcal_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
+    drone_id_demod_settings = new SWGDroneIDDemodSettings();
+    m_drone_id_demod_settings_isSet = false;
     end_of_train_demod_settings = new SWGEndOfTrainDemodSettings();
     m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = new SWGFileSinkSettings();
@@ -300,6 +326,8 @@ SWGChannelSettings::init() {
     m_remote_tcp_sink_settings_isSet = false;
     rtty_demod_settings = new SWGRTTYDemodSettings();
     m_rtty_demod_settings_isSet = false;
+    psk31_demod_settings = new SWGPSK31DemodSettings();
+    m_psk31_demod_settings_isSet = false;
     rtty_mod_settings = new SWGRTTYModSettings();
     m_rtty_mod_settings_isSet = false;
     sig_mf_file_sink_settings = new SWGSigMFFileSinkSettings();
@@ -351,6 +379,9 @@ SWGChannelSettings::cleanup() {
     if(apt_demod_settings != nullptr) { 
         delete apt_demod_settings;
     }
+    if(wefax_demod_settings != nullptr) {
+        delete wefax_demod_settings;
+    }
     if(atv_demod_settings != nullptr) { 
         delete atv_demod_settings;
     }
@@ -362,6 +393,9 @@ SWGChannelSettings::cleanup() {
     }
     if(bfm_demod_settings != nullptr) { 
         delete bfm_demod_settings;
+    }
+    if(bfm_mod_settings != nullptr) {
+        delete bfm_mod_settings;
     }
     if(channel_analyzer_settings != nullptr) { 
         delete channel_analyzer_settings;
@@ -381,8 +415,14 @@ SWGChannelSettings::cleanup() {
     if(datv_demod_settings != nullptr) { 
         delete datv_demod_settings;
     }
+    if(dvb_demod_settings != nullptr) { 
+        delete dvb_demod_settings;
+    }
     if(dab_demod_settings != nullptr) { 
         delete dab_demod_settings;
+    }
+    if(drm_demod_settings != nullptr) { 
+        delete drm_demod_settings;
     }
     if(doa2_settings != nullptr) { 
         delete doa2_settings;
@@ -390,8 +430,14 @@ SWGChannelSettings::cleanup() {
     if(dsc_demod_settings != nullptr) { 
         delete dsc_demod_settings;
     }
+    if(selcal_demod_settings != nullptr) {
+        delete selcal_demod_settings;
+    }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
+    }
+    if(drone_id_demod_settings != nullptr) { 
+        delete drone_id_demod_settings;
     }
     if(end_of_train_demod_settings != nullptr) { 
         delete end_of_train_demod_settings;
@@ -501,6 +547,9 @@ SWGChannelSettings::cleanup() {
     if(rtty_demod_settings != nullptr) { 
         delete rtty_demod_settings;
     }
+    if(psk31_demod_settings != nullptr) {
+        delete psk31_demod_settings;
+    }
     if(rtty_mod_settings != nullptr) { 
         delete rtty_mod_settings;
     }
@@ -565,6 +614,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&am_mod_settings, pJson["AMModSettings"], "SWGAMModSettings", "SWGAMModSettings");
     
     ::SWGSDRangel::setValue(&apt_demod_settings, pJson["APTDemodSettings"], "SWGAPTDemodSettings", "SWGAPTDemodSettings");
+    ::SWGSDRangel::setValue(&wefax_demod_settings, pJson["WefaxDemodSettings"], "SWGWefaxDemodSettings", "SWGWefaxDemodSettings");
     
     ::SWGSDRangel::setValue(&atv_demod_settings, pJson["ATVDemodSettings"], "SWGATVDemodSettings", "SWGATVDemodSettings");
     
@@ -573,6 +623,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&beam_steering_cw_mod_settings, pJson["BeamSteeringCWModSettings"], "SWGBeamSteeringCWModSettings", "SWGBeamSteeringCWModSettings");
     
     ::SWGSDRangel::setValue(&bfm_demod_settings, pJson["BFMDemodSettings"], "SWGBFMDemodSettings", "SWGBFMDemodSettings");
+    ::SWGSDRangel::setValue(&bfm_mod_settings, pJson["BFMModSettings"], "SWGBFMModSettings", "SWGBFMModSettings");
     
     ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
     
@@ -586,13 +637,20 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
+    ::SWGSDRangel::setValue(&dvb_demod_settings, pJson["DVBDemodSettings"], "SWGDVBDemodSettings", "SWGDVBDemodSettings");
+    
     ::SWGSDRangel::setValue(&dab_demod_settings, pJson["DABDemodSettings"], "SWGDABDemodSettings", "SWGDABDemodSettings");
+    
+    ::SWGSDRangel::setValue(&drm_demod_settings, pJson["DRMDemodSettings"], "SWGDRMDemodSettings", "SWGDRMDemodSettings");
     
     ::SWGSDRangel::setValue(&doa2_settings, pJson["DOA2Settings"], "SWGDOA2Settings", "SWGDOA2Settings");
     
     ::SWGSDRangel::setValue(&dsc_demod_settings, pJson["DSCDemodSettings"], "SWGDSCDemodSettings", "SWGDSCDemodSettings");
+    ::SWGSDRangel::setValue(&selcal_demod_settings, pJson["SELCALDemodSettings"], "SWGSELCALDemodSettings", "SWGSELCALDemodSettings");
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
+    
+    ::SWGSDRangel::setValue(&drone_id_demod_settings, pJson["DroneIDDemodSettings"], "SWGDroneIDDemodSettings", "SWGDroneIDDemodSettings");
     
     ::SWGSDRangel::setValue(&end_of_train_demod_settings, pJson["EndOfTrainDemodSettings"], "SWGEndOfTrainDemodSettings", "SWGEndOfTrainDemodSettings");
     
@@ -665,6 +723,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_tcp_sink_settings, pJson["RemoteTCPSinkSettings"], "SWGRemoteTCPSinkSettings", "SWGRemoteTCPSinkSettings");
     
     ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
+    ::SWGSDRangel::setValue(&psk31_demod_settings, pJson["PSK31DemodSettings"], "SWGPSK31DemodSettings", "SWGPSK31DemodSettings");
     
     ::SWGSDRangel::setValue(&rtty_mod_settings, pJson["RTTYModSettings"], "SWGRTTYModSettings", "SWGRTTYModSettings");
     
@@ -735,6 +794,9 @@ SWGChannelSettings::asJsonObject() {
     if((apt_demod_settings != nullptr) && (apt_demod_settings->isSet())){
         toJsonValue(QString("APTDemodSettings"), apt_demod_settings, obj, QString("SWGAPTDemodSettings"));
     }
+    if((wefax_demod_settings != nullptr) && (wefax_demod_settings->isSet())){
+        toJsonValue(QString("WefaxDemodSettings"), wefax_demod_settings, obj, QString("SWGWefaxDemodSettings"));
+    }
     if((atv_demod_settings != nullptr) && (atv_demod_settings->isSet())){
         toJsonValue(QString("ATVDemodSettings"), atv_demod_settings, obj, QString("SWGATVDemodSettings"));
     }
@@ -746,6 +808,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((bfm_demod_settings != nullptr) && (bfm_demod_settings->isSet())){
         toJsonValue(QString("BFMDemodSettings"), bfm_demod_settings, obj, QString("SWGBFMDemodSettings"));
+    }
+    if((bfm_mod_settings != nullptr) && (bfm_mod_settings->isSet())){
+        toJsonValue(QString("BFMModSettings"), bfm_mod_settings, obj, QString("SWGBFMModSettings"));
     }
     if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
         toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
@@ -765,8 +830,14 @@ SWGChannelSettings::asJsonObject() {
     if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
         toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
     }
+    if((dvb_demod_settings != nullptr) && (dvb_demod_settings->isSet())){
+        toJsonValue(QString("DVBDemodSettings"), dvb_demod_settings, obj, QString("SWGDVBDemodSettings"));
+    }
     if((dab_demod_settings != nullptr) && (dab_demod_settings->isSet())){
         toJsonValue(QString("DABDemodSettings"), dab_demod_settings, obj, QString("SWGDABDemodSettings"));
+    }
+    if((drm_demod_settings != nullptr) && (drm_demod_settings->isSet())){
+        toJsonValue(QString("DRMDemodSettings"), drm_demod_settings, obj, QString("SWGDRMDemodSettings"));
     }
     if((doa2_settings != nullptr) && (doa2_settings->isSet())){
         toJsonValue(QString("DOA2Settings"), doa2_settings, obj, QString("SWGDOA2Settings"));
@@ -774,8 +845,14 @@ SWGChannelSettings::asJsonObject() {
     if((dsc_demod_settings != nullptr) && (dsc_demod_settings->isSet())){
         toJsonValue(QString("DSCDemodSettings"), dsc_demod_settings, obj, QString("SWGDSCDemodSettings"));
     }
+    if((selcal_demod_settings != nullptr) && (selcal_demod_settings->isSet())){
+        toJsonValue(QString("SELCALDemodSettings"), selcal_demod_settings, obj, QString("SWGSELCALDemodSettings"));
+    }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
+    }
+    if((drone_id_demod_settings != nullptr) && (drone_id_demod_settings->isSet())){
+        toJsonValue(QString("DroneIDDemodSettings"), drone_id_demod_settings, obj, QString("SWGDroneIDDemodSettings"));
     }
     if((end_of_train_demod_settings != nullptr) && (end_of_train_demod_settings->isSet())){
         toJsonValue(QString("EndOfTrainDemodSettings"), end_of_train_demod_settings, obj, QString("SWGEndOfTrainDemodSettings"));
@@ -884,6 +961,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
         toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
+    }
+    if((psk31_demod_settings != nullptr) && (psk31_demod_settings->isSet())){
+        toJsonValue(QString("PSK31DemodSettings"), psk31_demod_settings, obj, QString("SWGPSK31DemodSettings"));
     }
     if((rtty_mod_settings != nullptr) && (rtty_mod_settings->isSet())){
         toJsonValue(QString("RTTYModSettings"), rtty_mod_settings, obj, QString("SWGRTTYModSettings"));
@@ -1029,6 +1109,16 @@ SWGChannelSettings::setAptDemodSettings(SWGAPTDemodSettings* apt_demod_settings)
     this->m_apt_demod_settings_isSet = true;
 }
 
+SWGWefaxDemodSettings*
+SWGChannelSettings::getWefaxDemodSettings() {
+    return wefax_demod_settings;
+}
+void
+SWGChannelSettings::setWefaxDemodSettings(SWGWefaxDemodSettings* wefax_demod_settings) {
+    this->wefax_demod_settings = wefax_demod_settings;
+    this->m_wefax_demod_settings_isSet = true;
+}
+
 SWGATVDemodSettings*
 SWGChannelSettings::getAtvDemodSettings() {
     return atv_demod_settings;
@@ -1067,6 +1157,16 @@ void
 SWGChannelSettings::setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings) {
     this->bfm_demod_settings = bfm_demod_settings;
     this->m_bfm_demod_settings_isSet = true;
+}
+
+SWGBFMModSettings*
+SWGChannelSettings::getBfmModSettings() {
+    return bfm_mod_settings;
+}
+void
+SWGChannelSettings::setBfmModSettings(SWGBFMModSettings* bfm_mod_settings) {
+    this->bfm_mod_settings = bfm_mod_settings;
+    this->m_bfm_mod_settings_isSet = true;
 }
 
 SWGChannelAnalyzerSettings*
@@ -1129,6 +1229,16 @@ SWGChannelSettings::setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settin
     this->m_datv_demod_settings_isSet = true;
 }
 
+SWGDVBDemodSettings*
+SWGChannelSettings::getDvbDemodSettings() {
+    return dvb_demod_settings;
+}
+void
+SWGChannelSettings::setDvbDemodSettings(SWGDVBDemodSettings* dvb_demod_settings) {
+    this->dvb_demod_settings = dvb_demod_settings;
+    this->m_dvb_demod_settings_isSet = true;
+}
+
 SWGDABDemodSettings*
 SWGChannelSettings::getDabDemodSettings() {
     return dab_demod_settings;
@@ -1137,6 +1247,16 @@ void
 SWGChannelSettings::setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings) {
     this->dab_demod_settings = dab_demod_settings;
     this->m_dab_demod_settings_isSet = true;
+}
+
+SWGDRMDemodSettings*
+SWGChannelSettings::getDrmDemodSettings() {
+    return drm_demod_settings;
+}
+void
+SWGChannelSettings::setDrmDemodSettings(SWGDRMDemodSettings* drm_demod_settings) {
+    this->drm_demod_settings = drm_demod_settings;
+    this->m_drm_demod_settings_isSet = true;
 }
 
 SWGDOA2Settings*
@@ -1159,6 +1279,19 @@ SWGChannelSettings::setDscDemodSettings(SWGDSCDemodSettings* dsc_demod_settings)
     this->m_dsc_demod_settings_isSet = true;
 }
 
+SWGSELCALDemodSettings*
+SWGChannelSettings::getSelcalDemodSettings() {
+    return selcal_demod_settings;
+}
+void
+SWGChannelSettings::setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings) {
+    if (this->selcal_demod_settings != selcal_demod_settings) {
+        delete this->selcal_demod_settings;
+    }
+    this->selcal_demod_settings = selcal_demod_settings;
+    this->m_selcal_demod_settings_isSet = true;
+}
+
 SWGDSDDemodSettings*
 SWGChannelSettings::getDsdDemodSettings() {
     return dsd_demod_settings;
@@ -1167,6 +1300,16 @@ void
 SWGChannelSettings::setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings) {
     this->dsd_demod_settings = dsd_demod_settings;
     this->m_dsd_demod_settings_isSet = true;
+}
+
+SWGDroneIDDemodSettings*
+SWGChannelSettings::getDroneIdDemodSettings() {
+    return drone_id_demod_settings;
+}
+void
+SWGChannelSettings::setDroneIdDemodSettings(SWGDroneIDDemodSettings* drone_id_demod_settings) {
+    this->drone_id_demod_settings = drone_id_demod_settings;
+    this->m_drone_id_demod_settings_isSet = true;
 }
 
 SWGEndOfTrainDemodSettings*
@@ -1529,6 +1672,16 @@ SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settin
     this->m_rtty_demod_settings_isSet = true;
 }
 
+SWGPSK31DemodSettings*
+SWGChannelSettings::getPSK31DemodSettings() {
+    return psk31_demod_settings;
+}
+void
+SWGChannelSettings::setPSK31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings) {
+    this->psk31_demod_settings = psk31_demod_settings;
+    this->m_psk31_demod_settings_isSet = true;
+}
+
 SWGRTTYModSettings*
 SWGChannelSettings::getRttyModSettings() {
     return rtty_mod_settings;
@@ -1667,6 +1820,9 @@ SWGChannelSettings::isSet(){
         if(apt_demod_settings && apt_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(wefax_demod_settings && wefax_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(atv_demod_settings && atv_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1677,6 +1833,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_settings && bfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bfm_mod_settings && bfm_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(channel_analyzer_settings && channel_analyzer_settings->isSet()){
@@ -1697,7 +1856,13 @@ SWGChannelSettings::isSet(){
         if(datv_demod_settings && datv_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(dvb_demod_settings && dvb_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(dab_demod_settings && dab_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(drm_demod_settings && drm_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(doa2_settings && doa2_settings->isSet()){
@@ -1706,7 +1871,13 @@ SWGChannelSettings::isSet(){
         if(dsc_demod_settings && dsc_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(selcal_demod_settings && selcal_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(drone_id_demod_settings && drone_id_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(end_of_train_demod_settings && end_of_train_demod_settings->isSet()){
@@ -1796,6 +1967,9 @@ SWGChannelSettings::isSet(){
         if(psk31_mod_settings && psk31_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(psk31_demod_settings && psk31_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(radio_astronomy_settings && radio_astronomy_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1851,4 +2025,3 @@ SWGChannelSettings::isSet(){
     return isObjectUpdated;
 }
 }
-

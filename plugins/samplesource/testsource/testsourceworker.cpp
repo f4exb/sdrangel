@@ -29,7 +29,6 @@
 
 TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
-	m_running(false),
     m_buf(0),
     m_bufsize(0),
     m_chunksize(0),
@@ -42,6 +41,7 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_fmDeviationUnit(0.0f),
 	m_fmPhasor(0.0f),
     m_pulseWidth(150),
+    m_period(2000),
     m_pulseSampleCount(0),
     m_pulsePatternCount(0),
     m_pulsePatternCycle(8),
@@ -62,31 +62,32 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_frequency(435*1000),
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
+    m_timer(this),
     m_throttleToggle(false),
     m_histoCounter(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.setTimerType(Qt::PreciseTimer);
-    m_timer.start(50);
 }
 
 TestSourceWorker::~TestSourceWorker()
 {
-    m_timer.stop();
+    qDebug("TestSourceWorker::~TestSourceWorker");
+    stopWork();
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void TestSourceWorker::startWork()
 {
     qDebug("TestSourceWorker::startWork");
-    m_running = true;
+    m_timer.start(50);
 }
 
 void TestSourceWorker::stopWork()
 {
     qDebug("TestSourceWorker::stopWork");
-	m_running = false;
+    m_timer.stop();
 }
 
 void TestSourceWorker::setSamplerate(int samplerate)
@@ -316,7 +317,7 @@ void TestSourceWorker::generate(quint32 chunksize)
                 m_buf[i++] = 0;
             }
 
-            if (m_pulseSampleCount < 2*m_pulseWidth - 1) {
+            if (m_pulseSampleCount < m_period - 1) {
                 m_pulseSampleCount++;
             } else {
                 m_pulseSampleCount = 0;
@@ -366,39 +367,36 @@ void TestSourceWorker::callback(const qint16* buf, qint32 len)
 
 void TestSourceWorker::tick()
 {
-    if (m_running)
-    {
-        qint64 throttlems = m_elapsedTimer.restart();
+    qint64 throttlems = m_elapsedTimer.restart();
 
-        std::map<int,int>::iterator it;
-        it = m_timerHistogram.find(throttlems);
+    std::map<int,int>::iterator it;
+    it = m_timerHistogram.find(throttlems);
 
-        if (it == m_timerHistogram.end()) {
-            m_timerHistogram[throttlems] = 1;
-        } else {
-            it->second++;
-        }
-
-        if (m_histoCounter < 49) {
-            m_histoCounter++;
-        } else {
-            // qDebug("TestSourceWorker::tick: -----------");
-            // for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
-            //     qDebug("TestSourceWorker::tick: %d: %d", it->first, it->second);
-            // }
-            m_histoCounter = 0;
-        }
-
-        if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
-        {
-            QMutexLocker mutexLocker(&m_mutex);
-            m_throttlems = throttlems;
-            m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
-            m_throttleToggle = !m_throttleToggle;
-        }
-
-        generate(m_chunksize);
+    if (it == m_timerHistogram.end()) {
+        m_timerHistogram[throttlems] = 1;
+    } else {
+        it->second++;
     }
+
+    if (m_histoCounter < 49) {
+        m_histoCounter++;
+    } else {
+        // qDebug("TestSourceWorker::tick: -----------");
+        // for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
+        //     qDebug("TestSourceWorker::tick: %d: %d", it->first, it->second);
+        // }
+        m_histoCounter = 0;
+    }
+
+    if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        m_throttlems = throttlems;
+        m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
+        m_throttleToggle = !m_throttleToggle;
+    }
+
+    generate(m_chunksize);
 }
 
 void TestSourceWorker::handleInputMessages()
@@ -414,14 +412,16 @@ void TestSourceWorker::setPattern0()
     m_pulsePatternPlaces = 3;
 }
 
-void TestSourceWorker::setPattern1()
+void TestSourceWorker::setPattern1(int period)
 {
-    m_pulseWidth = 1000;
+    m_pulseWidth = period < 1 ? 1 : period;
     m_pulseSampleCount = 0;
 }
 
-void TestSourceWorker::setPattern2()
+void TestSourceWorker::setPattern2(int period, int dutyCycle)
 {
-    m_pulseWidth = 1000;
+    m_period = period < 1 ? 1 : period;
+    dutyCycle = dutyCycle < 0 ? 0 : dutyCycle > 100 ? 100 : dutyCycle;
+    m_pulseWidth = m_period * (dutyCycle / 100.0f);
     m_pulseSampleCount = 0;
 }

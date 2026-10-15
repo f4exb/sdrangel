@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "ui_usrpinputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -44,7 +45,7 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true),
     m_statusCounter(0),
-    m_deviceStatusCounter(0)
+    m_deviceStatusCounter(10) // Get device info on first status update
 {
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -57,9 +58,8 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     float minF, maxF;
 
-    m_usrpInput->getLORange(minF, maxF);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
+    updateFrequencyLimits(); // frequency dial is in kHz
 
     m_usrpInput->getSRRange(minF, maxF);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -167,7 +167,10 @@ bool USRPInputGUI::handleMessage(const Message& message)
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
         } else {
+            // Don't overwrite edits that haven't been sent yet
+            USRPInputSettings pending = m_settings;
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+            m_settings.applySettings(m_settingsKeys, pending);
         }
 
         blockApplySettings(true);
@@ -181,14 +184,33 @@ bool USRPInputGUI::handleMessage(const Message& message)
         m_settings.m_masterClockRate = report.getMasterClockRate();
 
         if (report.getRxElseTx()) {
-            m_settings.m_devSampleRate   = report.getDevSampleRate();
-            m_settings.m_centerFrequency = report.getCenterFrequency();
-            m_settings.m_loOffset        = report.getLOOffset();
+            // Don't overwrite edits that haven't been sent yet
+            if (!m_settingsKeys.contains("devSampleRate")) {
+                m_settings.m_devSampleRate = report.getDevSampleRate();
+            }
+            if (!m_settingsKeys.contains("centerFrequency")) {
+                m_settings.m_centerFrequency = report.getCenterFrequency();
+            }
+            if (!m_settingsKeys.contains("loOffset")) {
+                m_settings.m_loOffset = report.getLOOffset();
+            }
         }
 
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
+
+        return true;
+    }
+    else if (DeviceUSRPShared::MsgReportDeviceInfo::match(message))
+    {
+        DeviceUSRPShared::MsgReportDeviceInfo& report = (DeviceUSRPShared::MsgReportDeviceInfo&) message;
+
+        if (report.getTemperatureValid()) {
+            ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
+        }
+        // Hide if device doesn't have a temperature sensor
+        ui->temperatureText->setVisible(report.getTemperatureValid());
 
         return true;
     }
@@ -208,6 +230,10 @@ bool USRPInputGUI::handleMessage(const Message& message)
     {
         USRPInput::MsgReportStreamInfo& report = (USRPInput::MsgReportStreamInfo&) message;
 
+        // Accumulate statistics, as the counts reported can be reset while running
+        m_overrunStats.update(report.getSuccess(), report.getOverruns());
+        m_timeoutStats.update(report.getSuccess(), report.getTimeouts());
+
         if (report.getSuccess())
         {
             if (report.getActive()) {
@@ -216,13 +242,13 @@ bool USRPInputGUI::handleMessage(const Message& message)
                 ui->streamStatusLabel->setStyleSheet("QLabel { background-color : blue; }");
             }
 
-            if (report.getOverruns() > 0) {
+            if (m_overrunStats.getCount() > 0) {
                 ui->overrunLabel->setStyleSheet("QLabel { background-color : red; }");
             } else {
                 ui->overrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
 
-            if (report.getTimeouts() > 0) {
+            if (m_timeoutStats.getCount() > 0) {
                 ui->timeoutLabel->setStyleSheet("QLabel { background-color : red; }");
             } else {
                 ui->timeoutLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -232,6 +258,9 @@ bool USRPInputGUI::handleMessage(const Message& message)
         {
             ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         }
+
+        ui->overrunLabel->setToolTip(m_overrunStats.getToolTip("Red if overruns occurred. Cleared when restarting acquisition", "Overruns"));
+        ui->timeoutLabel->setToolTip(m_timeoutStats.getToolTip("Red if timeouts occurred. Cleared when restarting acquisition", "Timeouts"));
 
         return true;
     }
@@ -297,7 +326,10 @@ void USRPInputGUI::handleInputMessages()
             if (cfg.getForce()) {
                 m_settings = cfg.getSettings();
             } else {
+                // Don't overwrite edits that haven't been sent yet
+                USRPInputSettings pending = m_settings;
                 m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+                m_settings.applySettings(m_settingsKeys, pending);
             }
 
             displaySettings();
@@ -306,9 +338,10 @@ void USRPInputGUI::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message)) {
-                delete message;
+            if (!handleMessage(*message)) {
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }
@@ -391,6 +424,7 @@ void USRPInputGUI::displaySettings()
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
+    ui->wireFormat->setCurrentIndex(m_settings.m_wireFormat);
 
     updateSampleRate();
 
@@ -472,7 +506,7 @@ void USRPInputGUI::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -498,6 +532,7 @@ void USRPInputGUI::updateStatus()
     }
     else
     {
+        // Only one GUI requests device info, which is then sent to all buddies
         if (m_deviceUISet->m_deviceAPI->isBuddyLeader())
         {
             USRPInput::MsgGetDeviceInfo* message = USRPInput::MsgGetDeviceInfo::create();
@@ -553,6 +588,13 @@ void USRPInputGUI::on_sampleRate_changed(quint64 value)
 
     updateSampleRate();
     m_settingsKeys.append("devSampleRate");
+    sendSettings();
+}
+
+void USRPInputGUI::on_wireFormat_currentIndexChanged(int index)
+{
+    m_settings.m_wireFormat = index == 1 ? 1 : 0;
+    m_settingsKeys.append("wireFormat");
     sendSettings();
 }
 
@@ -793,6 +835,7 @@ void USRPInputGUI::makeUIConnections()
     QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &USRPInputGUI::on_iqImbalance_toggled);
     QObject::connect(ui->sampleRate, &ValueDial::changed, this, &USRPInputGUI::on_sampleRate_changed);
     QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->wireFormat, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_wireFormat_currentIndexChanged);
     QObject::connect(ui->lpf, &ValueDial::changed, this, &USRPInputGUI::on_lpf_changed);
     QObject::connect(ui->loOffset, &ValueDialZ::changed, this, &USRPInputGUI::on_loOffset_changed);
     QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_gainMode_currentIndexChanged);

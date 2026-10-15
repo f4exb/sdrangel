@@ -3,46 +3,91 @@ RtlSdrSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     devSampleRate:
       type: integer
+      description: >
+        RTL-SDR device I/Q sample rate in samples per second before software
+        decimation. The baseband sample rate delivered to channels is
+        devSampleRate / 2^log2Decim.
     lowSampleRate:
       type: integer
+      minimum: 0
+      maximum: 1
+      description: "Use the RTL-SDR low sample-rate range (1 enabled, 0 disabled)."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     gain:
       type: integer
+      description: >
+        Tuner gain in tenths of a dB, so 496 means 49.6 dB. Only the discrete values the tuner
+        supports can be used; they are listed in the gains field of RtlSdrReport, which must be
+        read from the device report before setting this. Ignored unless agc is disabled.
     loPpmCorrection:
       type: integer
+      description: "Local-oscillator correction in parts per million."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 6
+      description: >
+        Base-2 exponent of the software decimation factor. The baseband sample
+        rate delivered to channels is devSampleRate / 2^log2Decim and must be
+        high enough for every channel's RF bandwidth. For example, broadcast FM
+        with 180 kHz RF bandwidth should use at least 240 kS/s (256 kS/s is
+        recommended); at 1.024 MS/s set log2Decim to 2, not 4.
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqImbalance:
       type: integer
+      description: "Enable DSP I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     agc:
       type: integer
+      description: "Enable automatic gain control (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     noModMode:
       type: integer
+      description: "No mod mode setting for Rtl sdr."
     offsetTuning:
       type: integer
+      description: "Enable tuner offset tuning (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
     rfBandwidth:
       type: integer
+      description: "RF bandwidth in Hz."
     biasTee:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Bias tee
           * 0 - inactive
@@ -50,19 +95,28 @@ RtlSdrSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 RtlSdrReport:
   description: RTLSDR
   properties:
     gains:
       type: array
+      description: "List of gains."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Gain"
     tunerType:
       type: string
+      description: "Reported tuner type."

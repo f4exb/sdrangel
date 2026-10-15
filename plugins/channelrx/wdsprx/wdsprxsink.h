@@ -42,7 +42,9 @@ namespace WDSP {
 class WDSPRxSink : public ChannelSampleSink {
 public:
     WDSPRxSink();
-	~WDSPRxSink();
+    ~WDSPRxSink();
+    WDSPRxSink(const WDSPRxSink&) = delete;
+    WDSPRxSink& operator=(const WDSPRxSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

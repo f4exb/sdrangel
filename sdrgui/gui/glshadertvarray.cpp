@@ -21,6 +21,20 @@
 
 #include "gui/glshadertvarray.h"
 
+static const int nbVertices = 6;
+
+static const GLfloat vertices[] =
+// 2 3
+// 1 4
+//1             2            3           3           4            1
+{ -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f };
+
+static const GLfloat textureCoords[] =
+// 1 4
+// 2 3
+//1           2           3           3           4           1
+{ 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
+
 const QString GLShaderTVArray::m_strVertexShaderSourceArray2 = QString(
         "uniform highp mat4 uMatrix;\n"
         "attribute highp vec4 vertex;\n"
@@ -137,6 +151,7 @@ void GLShaderTVArray::initializeGL(int majorVersion, int minorVersion, int intCo
         }
 
         m_objProgram->bindAttributeLocation("vertex", 0);
+        m_objProgram->bindAttributeLocation("texCoord", 1);
 
         if (!m_objProgram->link())
         {
@@ -149,13 +164,25 @@ void GLShaderTVArray::initializeGL(int majorVersion, int minorVersion, int intCo
         m_objProgram->setUniformValue(m_textureLoc, 0);
         if (m_vao)
         {
+            // Geometry is constant, so upload it once and record it in the VAO
             m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-            m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+            m_verticesBuf->setUsagePattern(QOpenGLBuffer::StaticDraw);
             m_verticesBuf->create();
+            m_verticesBuf->bind();
+            m_verticesBuf->allocate(vertices, sizeof(vertices));
+            m_objProgram->enableAttributeArray(0);
+            m_objProgram->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+
             m_textureCoordsBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-            m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+            m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::StaticDraw);
             m_textureCoordsBuf->create();
+            m_textureCoordsBuf->bind();
+            m_textureCoordsBuf->allocate(textureCoords, sizeof(textureCoords));
+            m_objProgram->enableAttributeArray(1);
+            m_objProgram->setAttributeBuffer(1, GL_FLOAT, 0, 2);
+
             m_vao->release();
+            m_textureCoordsBuf->release();
         }
         m_objProgram->release();
     }
@@ -170,6 +197,7 @@ void GLShaderTVArray::initializeGL(int majorVersion, int minorVersion, int intCo
     }
 
     //Image container
+    delete m_objImage;
     m_objImage = new QImage(intCols, intRows, QImage::Format_RGBA8888);
     m_objImage->fill(QColor(0, 0, 0));
 
@@ -208,21 +236,8 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
     QOpenGLFunctions *ptrF;
     int intI;
     int intJ;
-    int intNbVertices = 6;
 
     QMatrix4x4 objQMatrix;
-
-    GLfloat arrVertices[] =
-    // 2 3
-    // 1 4
-    //1             2            3           3           4            1
-    { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f };
-
-    GLfloat arrTextureCoords[] =
-    // 1 4
-    // 2 3
-    //1           2           3           3           4           1
-    { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
 
     QRgb *ptrLine;
     int intVal;
@@ -270,13 +285,23 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     if (m_blnAlphaReset)
     {
+        ptrF->glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        ptrF->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         ptrF->glClear(GL_COLOR_BUFFER_BIT);
         m_blnAlphaReset = false;
     }
 
     if (m_blnAlphaBlend)
     {
-        ptrF->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // The image alpha controls the RGB trace fade, but the backing FBO
+        // itself must remain opaque, as QOpenGLWidget composites its alpha
+        // into the window. Keep the destination alpha (cleared to 1) as is.
+        ptrF->glBlendFuncSeparate(
+            GL_SRC_ALPHA,
+            GL_ONE_MINUS_SRC_ALPHA,
+            GL_ZERO,
+            GL_ONE
+        );
         ptrF->glEnable(GL_BLEND);
     }
     else
@@ -292,27 +317,17 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
     if (m_vao)
     {
         m_vao->bind();
-
-        m_verticesBuf->bind();
-        m_verticesBuf->allocate(arrVertices, intNbVertices * 2 * sizeof(GL_FLOAT));
-        m_objProgram->enableAttributeArray(0);
-        m_objProgram->setAttributeBuffer(0, GL_FLOAT, 0, 2);
-
-        m_textureCoordsBuf->bind();
-        m_textureCoordsBuf->allocate(arrTextureCoords, intNbVertices * 2 * sizeof(GL_FLOAT));
-        m_objProgram->enableAttributeArray(1);
-        m_objProgram->setAttributeBuffer(1, GL_FLOAT, 0, 2);
     }
     else
     {
         ptrF->glEnableVertexAttribArray(0); // vertex
-        ptrF->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, arrVertices);
+        ptrF->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 
         ptrF->glEnableVertexAttribArray(1); // texture coordinates
-        ptrF->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
+        ptrF->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
     }
 
-    ptrF->glDrawArrays(GL_TRIANGLES, 0, intNbVertices);
+    ptrF->glDrawArrays(GL_TRIANGLES, 0, nbVertices);
 
     //cleanup
     if (m_vao)
@@ -334,7 +349,10 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 void GLShaderTVArray::ResetPixels()
 {
     if (m_objImage) {
-        m_objImage->fill(0);
+        // This image is copied directly to a QOpenGLWidget framebuffer when
+        // alpha blending is disabled. A value of 0 is transparent black in
+        // RGBA8888, which makes cleared constellation backgrounds transparent.
+        m_objImage->fill(qRgba(0, 0, 0, 255));
     }
 }
 
@@ -419,4 +437,3 @@ bool GLShaderTVArray::SetDataColor(int intCol, QRgb objColor)
 
     return blnRslt;
 }
-

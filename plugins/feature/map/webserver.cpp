@@ -45,7 +45,11 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
 
 WebServer::~WebServer()
 {
-    qDeleteAll(m_substitutions);
+    for (QList<Substitution *> *list : m_substitutions)
+    {
+        qDeleteAll(*list);
+        delete list;
+    }
     qDeleteAll(m_mimeTypes);
 }
 

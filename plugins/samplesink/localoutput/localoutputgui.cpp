@@ -31,6 +31,7 @@
 #include <QJsonObject>
 
 #include "ui_localoutputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
@@ -201,9 +202,10 @@ void LocalOutputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message)) {
-                delete message;
+            if (!handleMessage(*message)) {
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }
@@ -279,7 +281,7 @@ void LocalOutputGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

@@ -30,6 +30,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "ui_freqscannergui.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/tabletapandhold.h"
@@ -95,10 +96,10 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         } else {
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
         }
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
-        blockApplySettings(false);
+        blockApplySettings(blocked);
         return true;
     }
     else if (DSPSignalNotification::match(message))
@@ -300,11 +301,12 @@ void FreqScannerGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -377,25 +379,25 @@ void FreqScannerGUI::on_voiceSquelchType_currentIndexChanged(int index)
     
     if (m_settings.m_voiceSquelchType == FreqScannerSettings::VoiceSquelchType::VoiceLsb)
     {
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         m_settings.m_channelBandwidth = 3000;
         ui->channelBandwidth->setValue(m_settings.m_channelBandwidth);
         m_settings.m_channelShift = 1500;
         ui->channelShift->setValue(m_settings.m_channelShift);
         settingsKeys.append("channelBandwidth");
         settingsKeys.append("channelShift");
-        blockApplySettings(false);
+        blockApplySettings(blocked);
     }
     else if (m_settings.m_voiceSquelchType == FreqScannerSettings::VoiceSquelchType::VoiceUsb)
     {
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         m_settings.m_channelBandwidth = 3000;
         ui->channelBandwidth->setValue(m_settings.m_channelBandwidth);
         m_settings.m_channelShift = -1500;
         ui->channelShift->setValue(m_settings.m_channelShift);
         settingsKeys.append("channelBandwidth");
         settingsKeys.append("channelShift");
-        blockApplySettings(false);
+        blockApplySettings(blocked);
     }
     
     applySettings(settingsKeys);
@@ -599,9 +601,11 @@ FreqScannerGUI::~FreqScannerGUI()
     delete ui;
 }
 
-void FreqScannerGUI::blockApplySettings(bool block)
+bool FreqScannerGUI::blockApplySettings(bool block)
 {
+    bool blocked = !m_doApplySettings;
     m_doApplySettings = !block;
+    return blocked;
 }
 
 void FreqScannerGUI::applySetting(const QString& settingsKey)
@@ -638,7 +642,7 @@ void FreqScannerGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
     setTitle(m_channelMarker.getTitle());
 
-    blockApplySettings(true);
+    bool blocked = blockApplySettings(true);
     int channelIndex = ui->channels->findText(m_settings.m_channel);
     if (channelIndex >= 0) {
         ui->channels->setCurrentIndex(channelIndex);
@@ -688,7 +692,7 @@ void FreqScannerGUI::displaySettings()
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
-    blockApplySettings(false);
+    blockApplySettings(blocked);
 }
 
 void FreqScannerGUI::leaveEvent(QEvent* event)
@@ -795,7 +799,7 @@ void FreqScannerGUI::on_addRange_clicked()
     new DialogPositioner(&dialog, false);
     if (dialog.exec())
     {
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         for (const auto f : dialog.m_frequencies)
         {
             FreqScannerSettings::FrequencySettings frequencySettings;
@@ -803,7 +807,7 @@ void FreqScannerGUI::on_addRange_clicked()
             frequencySettings.m_enabled = true;
             addRow(frequencySettings);
         }
-        blockApplySettings(false);
+        blockApplySettings(blocked);
         applySetting("frequencySettings");
     }
 }
@@ -920,7 +924,7 @@ void FreqScannerGUI::on_importFreqs_clicked()
             if (error.isEmpty())
             {
                 // Clear existing entries
-                blockApplySettings(true);
+                bool blocked = blockApplySettings(true);
                 ui->table->setRowCount(0);
 
                 int freqCol = colIndexes.value("Freq (Hz)");
@@ -951,20 +955,20 @@ void FreqScannerGUI::on_importFreqs_clicked()
                 }
 
                 updateAnnotations();
-                blockApplySettings(false);
+                blockApplySettings(blocked);
                 applySetting("frequencySettings");
             }
             else
             {
                 QString actualColNames = colIndexes.keys().join(" ");
                 QString expectedColNames = colNames.join(" ");
-                QMessageBox::critical(this, "Frequency Scanner", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
+                MessageDialog::critical(this, "Frequency Scanner", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
                 return;
             }
         }
         else
         {
-            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+            MessageDialog::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
         }
     }
 }
@@ -1005,7 +1009,7 @@ void FreqScannerGUI::on_exportFreqs_clicked()
         }
         else
         {
-            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+            MessageDialog::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
         }
     }
 }

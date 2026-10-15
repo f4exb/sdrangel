@@ -63,7 +63,9 @@ const unsigned int Golay2312::m_I12[12] = {
     0b000000000001,
 };
 
-Golay2312::Golay2312()
+Golay2312::Golay2312() :
+    m_corrPL{},
+    m_corrPF{}
 {
     initG();
     initH();

@@ -75,7 +75,6 @@ private:
     SatelliteTracker* m_satelliteTracker;
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
-    int m_lastFeatureState;
     bool m_lastUpdatingSatData;
 
     QHash<QString, SatNogsSatellite *> m_satellites;
@@ -161,6 +160,7 @@ private slots:
     void on_dateTimeSelect_currentIndexChanged(int index);
     void on_dateTime_dateTimeChanged(const QDateTime &datetime);
     void updateStatus();
+    void updateFeatureState();
     void on_viewOnMap_clicked();
     void on_updateSatData_clicked();
     void on_selectSats_clicked();

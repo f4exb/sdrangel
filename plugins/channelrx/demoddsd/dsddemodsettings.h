@@ -30,8 +30,8 @@ struct DSDDemodSettings
 {
     struct AvailableAMBEFeature
     {
-        int m_featureIndex;
-        Feature *m_feature;
+        int m_featureIndex = 0;
+        Feature *m_feature = nullptr;
 
         AvailableAMBEFeature() = default;
         AvailableAMBEFeature(const AvailableAMBEFeature&) = default;

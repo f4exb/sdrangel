@@ -289,7 +289,7 @@ struct convol_multipoly
     const Thist *polys; // [bits_out]
 
     convol_multipoly()
-        : bits_in(0), bits_out(0), bps(0),
+        : bits_in(0), bits_out(0), bps(0), polys(nullptr),
           hist(0), nhist(0), sersymb(0), nsersymb(0)
     {
     }

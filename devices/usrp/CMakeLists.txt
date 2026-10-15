@@ -5,12 +5,14 @@ set(usrpdevice_SOURCES
     deviceusrp.cpp
     deviceusrpparam.cpp
     deviceusrpshared.cpp
+    deviceusrpstreamstats.cpp
 )
 
 set(usrpdevice_HEADERS
     deviceusrp.h
     deviceusrpparam.h
     deviceusrpshared.h
+    deviceusrpstreamstats.h
 )
 
 include_directories(

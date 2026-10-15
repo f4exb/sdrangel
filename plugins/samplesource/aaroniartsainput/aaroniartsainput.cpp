@@ -101,6 +101,7 @@ bool AaroniaRTSAInput::start()
     }
 
     m_aaroniaRTSAWorkerThread = new QThread();
+    m_aaroniaRTSAWorkerThread->setObjectName("AaroniaRTSAIn");
 	m_aaroniaRTSAWorker = new AaroniaRTSAInputWorker(&m_sampleFifo);
     m_aaroniaRTSAWorker->setInputMessageQueue(getInputMessageQueue());
 	m_aaroniaRTSAWorker->moveToThread(m_aaroniaRTSAWorkerThread);

@@ -121,10 +121,14 @@ void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
 void ADSBDemodSink::processOneSample(Real magsq)
 {
-    m_magsqSum += magsq;
-    if (magsq > m_magsqPeak)
-        m_magsqPeak = magsq;
-    m_magsqCount++;
+    {
+        QMutexLocker locker(&m_magsqMutex);
+
+        m_magsqSum += magsq;
+        if (magsq > m_magsqPeak)
+           m_magsqPeak = magsq;
+        m_magsqCount++;
+    }
     m_sampleBuffer[m_writeBuffer][m_writeIdx] = magsq;
     m_writeIdx++;
     if (!m_bufferDateTimeValid[m_writeBuffer])
@@ -137,7 +141,7 @@ void ADSBDemodSink::processOneSample(Real magsq)
         m_bufferDateTimeValid[m_writeBuffer] = true;
 
         // Make sure timestamps from different buffers are in order, even if we receive samples faster than real time
-        const qint64 samplesPerSecondMSec = ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit / 1000;
+        const qint64 samplesPerSecondMSec = qint64(ADS_B_BITS_PER_SECOND) * m_settings.m_samplesPerBit / 1000;
         const qint64 offsetMSec = m_bufferSize / samplesPerSecondMSec;
         m_minFirstSampleDateTime = dateTime.addMSecs(offsetMSec);
     }

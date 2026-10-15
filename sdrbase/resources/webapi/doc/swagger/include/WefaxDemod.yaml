@@ -1,0 +1,234 @@
+WefaxDemodSettings:
+  description: WEFAX demodulator settings
+  properties:
+    inputFrequencyOffset:
+      description: Channel center frequency shift from the baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: Channel RF bandwidth in Hz
+      type: number
+      format: float
+    fmDeviation:
+      description: Black-to-white FM shift in Hz
+      type: number
+      format: float
+    ioc:
+      description: Selected index of cooperation (288 or 576)
+      type: integer
+    linesPerMinute:
+      description: Selected nominal line rate
+      type: integer
+    autoMode:
+      description: Automatically detect IOC, LPM, start, phasing end and stop
+      type: integer
+      minimum: 0
+      maximum: 1
+    inverted:
+      description: Invert black and white video levels
+      type: integer
+      minimum: 0
+      maximum: 1
+    minimumPhasingLines:
+      description: Minimum consistent phasing lines required before reception
+      type: integer
+    startConfirmSeconds:
+      description: Sustained IOC start-tone duration required for acquisition
+      type: number
+      format: float
+    stopConfirmSeconds:
+      description: Sustained stop-tone duration required to finalize a capture
+      type: number
+      format: float
+    manualClockCorrectionPpm:
+      description: Manual line clock correction used when no phasing estimate is available
+      type: number
+      format: float
+    maxRows:
+      description: Maximum raster rows retained for one capture
+      type: integer
+    autoSave:
+      description: Automatically save completed images
+      type: integer
+      minimum: 0
+      maximum: 1
+    autoSavePath:
+      description: Directory used for automatic PNG output
+      type: string
+    displayInverted:
+      description: Invert the displayed image without changing decoded pixels
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayContrast:
+      description: Display-only contrast adjustment from -100 to 100
+      type: integer
+    displayThreshold:
+      description: Display-only monochrome threshold from 0 to 255, or -1 to disable
+      type: integer
+    horizontalAlignment:
+      description: Display-only horizontal raster shift in pixels
+      type: integer
+    displaySlantCorrectionPpm:
+      description: Retrospective display-only line clock correction in ppm
+      type: number
+      format: float
+    displayRotation:
+      description: Clockwise display rotation in degrees (0, 90, 180 or 270)
+      type: integer
+    displayZoomPercent:
+      description: Display zoom percent, or 0 to fit the viewport
+      type: integer
+    autoScroll:
+      description: Follow newly received rows in the image view
+      type: integer
+      minimum: 0
+      maximum: 1
+    autoSlant:
+      description: Straighten the image by measuring slant from its vertical lines (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    rgbColor:
+      description: Display color encoded as an RGB integer
+      type: integer
+    title:
+      description: User-visible channel title
+      type: string
+    streamIndex:
+      description: MIMO stream index
+      type: integer
+    useReverseAPI:
+      description: Synchronize settings with a reverse API peer
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      description: IPv4 address or host name of the reverse API peer
+      type: string
+    reverseAPIPort:
+      description: TCP port of the reverse API peer
+      type: integer
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      description: Device-set index used by the reverse API peer
+      type: integer
+    reverseAPIChannelIndex:
+      description: Channel index used by the reverse API peer
+      type: integer
+
+WefaxDemodReport:
+  description: WEFAX demodulator runtime report
+  properties:
+    channelPowerDB:
+      description: Power received in the channel in dB
+      type: number
+      format: float
+    state:
+      description: Decoder state (idle, phasing or receiving)
+      type: string
+    phasingLineCount:
+      description: Number of accepted phasing lines
+      type: integer
+    samplesPerLine:
+      description: Applied fractional line period at the internal sample rate
+      type: number
+      format: float
+    clockCorrectionPpm:
+      description: Measured line clock correction relative to the nominal rate
+      type: number
+      format: float
+    appliedClockCorrectionPpm:
+      description: Line clock correction actually applied to raster timing
+      type: number
+      format: float
+    confidence:
+      description: Phasing fit confidence from 0 to 1
+      type: number
+      format: float
+    ioc:
+      description: Selected index of cooperation
+      type: integer
+    linesPerMinute:
+      description: Selected nominal line rate
+      type: integer
+    imageWidth:
+      description: Native raster width in pixels
+      type: integer
+    imageHeight:
+      description: Current raster height in pixels
+      type: integer
+    imageQueueOverflows:
+      description: Number of image rows batches rejected because the worker queue was full
+      type: integer
+    imageId:
+      description: Monotonically increasing capture image identifier
+      type: integer
+      format: int64
+    completionReason:
+      description: Reason the latest capture ended
+      type: string
+    lastSaveError:
+      description: Most recent asynchronous PNG save error, or an empty string
+      type: string
+    tuningErrorHz:
+      description: Estimated FM midpoint error in Hz
+      type: number
+      format: float
+    slantCorrectionPpm:
+      description: Line-clock correction in ppm applied by automatic slant correction, 0 when none
+      type: number
+      format: float
+    effectiveLinesPerMinute:
+      description: Line rate implied by the applied fractional line period
+      type: number
+      format: float
+    timingSource:
+      description: Source of the applied line timing estimate
+      type: string
+    timingStatus:
+      description: Acceptance status of the measured phasing timing
+      type: string
+    timingAccepted:
+      description: Whether the measured timing passed confidence and range checks
+      type: integer
+    requiredBandwidthHz:
+      description: Estimated RF bandwidth required by the selected IOC and LPM
+      type: number
+      format: float
+    bandwidthSufficient:
+      description: Whether configured RF and source bandwidth cover the selected mode
+      type: integer
+    complete:
+      description: Whether the latest capture ended with a confirmed stop tone
+      type: integer
+    captureStartTime:
+      description: UTC capture-start time from the processing clock
+      type: string
+    captureFrequencyHz:
+      description: RF fax centre used when the capture started
+      type: integer
+      format: int64
+
+WefaxDemodActions:
+  description: WEFAX decoder actions
+  properties:
+    startPhasing:
+      description: Start or restart phasing acquisition when non-zero
+      type: integer
+    finishPhasing:
+      description: Finish phasing and begin reception when non-zero
+      type: integer
+    startReceiving:
+      description: Begin reception using nominal/manual timing when non-zero
+      type: integer
+    stop:
+      description: Stop the current capture when non-zero
+      type: integer
+    clear:
+      description: Clear the current image when non-zero
+      type: integer
+    save:
+      description: Save the current image using the configured path when non-zero
+      type: integer

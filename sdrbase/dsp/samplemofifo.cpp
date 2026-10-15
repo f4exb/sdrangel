@@ -17,6 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "samplemofifo.h"
 
 const unsigned int SampleMOFifo::m_rwDivisor = 2;
@@ -24,7 +26,14 @@ const unsigned int SampleMOFifo::m_guardDivisor = 10;
 
 SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
-    m_nbStreams(0)
+    m_nbStreams(0),
+    m_size(0),
+    m_lowGuard(0),
+    m_highGuard(0),
+    m_midPoint(0),
+    m_readCount(0),
+    m_readHead(0),
+    m_writeHead(0)
 {}
 
 SampleMOFifo::SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
@@ -71,6 +80,8 @@ void SampleMOFifo::reset()
         m_vReadCount[stream] = 0;
         m_vReadHead[stream] = 0;
         m_vWriteHead[stream] = m_midPoint;
+        // Clear old data, which would otherwise be read before new data is written
+        std::fill(m_data[stream].begin(), m_data[stream].end(), Sample{0, 0});
     }
 }
 

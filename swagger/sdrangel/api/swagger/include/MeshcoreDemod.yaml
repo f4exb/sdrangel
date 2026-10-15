@@ -4,8 +4,11 @@ MeshcoreDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     bandwidthIndex:
       type: integer
+      minimum: 0
+      maximum: 26
       description: >
         standard bandwidths index:
           *  0 -    375 Hz (384000 / 1024)
@@ -37,12 +40,15 @@ MeshcoreDemodSettings:
           * 26 - 500000 Hz (500000 / 1)
     spreadFactor:
       type: integer
+      description: "Spread factor setting for Meshcore demod."
     deBits:
       description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
       type: integer
     decodeActive:
       description: boolean 1 to activate 0 to de-activate decoder
       type: integer
+      minimum: 0
+      maximum: 1
     eomSquelchTenths:
       description: argmax squared magnitude is compared between current multiplied by this factor and maximum during decoding. This value is divided by 10
       type: integer
@@ -61,11 +67,17 @@ MeshcoreDemodSettings:
     sendViaUDP:
       description: boolean 1 to send decoded message via UDP else 0
       type: integer
+      minimum: 0
+      maximum: 1
     sendJsonViaUDP:
       description: boolean 1 to send decoded message as JSON via UDP else 0
       type: integer
+      minimum: 0
+      maximum: 1
     udpEnabled:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Send via UDP
           * 0 - Do not send decoded messages via UDP
@@ -76,36 +88,53 @@ MeshcoreDemodSettings:
     udpPort:
       description: UDP destination port
       type: integer
+      minimum: 1
+      maximum: 65535
     invertRamps:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Invert chirp ramps
           * 0 - Normal chirp ramps (upchirps for preamble and payload)
           * 1 - Inverted chirp ramps (downchirps for preamble and payload)
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 MeshcoreDemodReport:
   description: MeshcoreDemod
@@ -128,9 +157,12 @@ MeshcoreDemodReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     syncWord:
       description: 2 bytes sync word (0..65535)
       type: integer
+      minimum: 0
+      maximum: 65535
     nbParityBits:
       description: Hamming FEC parity bits (LoRa)
       type: integer
@@ -145,6 +177,8 @@ MeshcoreDemodReport:
       type: integer
     headerParityStatus:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Header FEC parity status:
           * 0 - Undefined
@@ -156,6 +190,8 @@ MeshcoreDemodReport:
       type: integer
     payloadParityStatus:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Payload FEC parity status:
           * 0 - Undefined
@@ -184,6 +220,8 @@ MeshcoreDemodReport:
         type: string
     decoding:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - decoding status
           * 0 - no decoding

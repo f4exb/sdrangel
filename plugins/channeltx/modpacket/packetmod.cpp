@@ -64,6 +64,7 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("PacketMod");
     m_basebandSource = new PacketModBaseband();
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->setChannel(this);
@@ -238,7 +239,11 @@ void PacketMod::applySettings(const QStringList& settingsKeys, const PacketModSe
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray PacketMod::serialize() const
@@ -445,6 +450,9 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("polynomial")) {
         settings.m_polynomial = response.getPacketModSettings()->getPolynomial();
     }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = response.getPacketModSettings()->getPulseShaping() != 0;
+    }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getPacketModSettings()->getBeta();
     }
@@ -628,7 +636,11 @@ void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getPacketModSettings()->setBeta(settings.m_beta);
     response.getPacketModSettings()->setSymbolSpan(settings.m_symbolSpan);
     response.getPacketModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getPacketModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getPacketModSettings()->getUdpAddress()) {
+        *response.getPacketModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getPacketModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getPacketModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getPacketModSettings()->setRgbColor(settings.m_rgbColor);
@@ -746,7 +758,11 @@ void PacketMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
     SWGSDRangel::SWGPacketModSettings *swgPacketModSettings = swgChannelSettings->getPacketModSettings();
 
@@ -837,16 +853,32 @@ void PacketMod::webapiFormatChannelSettings(
         swgPacketModSettings->setSpectrumRate(settings.m_spectrumRate);
     }
     if (channelSettingsKeys.contains("callsign")) {
-        swgPacketModSettings->setCallsign(new QString(settings.m_callsign));
+        if (swgPacketModSettings->getCallsign()) {
+            *swgPacketModSettings->getCallsign() = settings.m_callsign;
+        } else {
+            swgPacketModSettings->setCallsign(new QString(settings.m_callsign));
+        }
     }
     if (channelSettingsKeys.contains("to")) {
-        swgPacketModSettings->setTo(new QString(settings.m_to));
+        if (swgPacketModSettings->getTo()) {
+            *swgPacketModSettings->getTo() = settings.m_to;
+        } else {
+            swgPacketModSettings->setTo(new QString(settings.m_to));
+        }
     }
     if (channelSettingsKeys.contains("via")) {
-        swgPacketModSettings->setVia(new QString(settings.m_via));
+        if (swgPacketModSettings->getVia()) {
+            *swgPacketModSettings->getVia() = settings.m_via;
+        } else {
+            swgPacketModSettings->setVia(new QString(settings.m_via));
+        }
     }
     if (channelSettingsKeys.contains("data")) {
-        swgPacketModSettings->setData(new QString(settings.m_data));
+        if (swgPacketModSettings->getData()) {
+            *swgPacketModSettings->getData() = settings.m_data;
+        } else {
+            swgPacketModSettings->setData(new QString(settings.m_data));
+        }
     }
     if (channelSettingsKeys.contains("bpf") || force) {
         swgPacketModSettings->setBpf(settings.m_bpf ? 1 : 0);
@@ -876,7 +908,11 @@ void PacketMod::webapiFormatChannelSettings(
         swgPacketModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgPacketModSettings->setTitle(new QString(settings.m_title));
+        if (swgPacketModSettings->getTitle()) {
+            *swgPacketModSettings->getTitle() = settings.m_title;
+        } else {
+            swgPacketModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPacketModSettings->setStreamIndex(settings.m_streamIndex);
@@ -885,7 +921,11 @@ void PacketMod::webapiFormatChannelSettings(
         swgPacketModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgPacketModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgPacketModSettings->getUdpAddress()) {
+            *swgPacketModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgPacketModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPacketModSettings->setUdpPort(settings.m_udpPort);
@@ -976,4 +1016,14 @@ void PacketMod::udpRx()
         MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
+}
+
+int PacketMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
+
+int PacketMod::getAudioSampleRate() const
+{
+    return getSourceChannelSampleRate();
 }

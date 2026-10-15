@@ -43,7 +43,7 @@ AMBE::AMBE(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AMBE error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -68,13 +68,13 @@ AMBE::~AMBE()
 void AMBE::start()
 {
 	qDebug("AMBE::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void AMBE::stop()
 {
     qDebug("AMBE::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 void AMBE::applySettings(const AMBESettings& settings, const QList<QString>& settingsKeys,  bool force)
@@ -357,7 +357,11 @@ void AMBE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
     for (auto& deviceRef : deviceRefs)
     {
         response.getAmbeReport()->getDevices()->append(new SWGSDRangel::SWGAMBEDeviceReport);
-        response.getAmbeReport()->getDevices()->back()->setDevicePath(new QString(deviceRef.m_devicePath));
+        if (response.getAmbeReport()->getDevices()->back()->getDevicePath()) {
+            *response.getAmbeReport()->getDevices()->back()->getDevicePath() = deviceRef.m_devicePath;
+        } else {
+            response.getAmbeReport()->getDevices()->back()->setDevicePath(new QString(deviceRef.m_devicePath));
+        }
         response.getAmbeReport()->getDevices()->back()->setSuccessCount(deviceRef.m_successCount);
         response.getAmbeReport()->getDevices()->back()->setFailureCount(deviceRef.m_failureCount);
     }

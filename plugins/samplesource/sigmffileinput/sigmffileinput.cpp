@@ -64,6 +64,7 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
 	m_settings()
 {
     m_sampleFifo.setLabel(m_deviceDescription);
+    m_fileInputWorkerThread.setObjectName("SigMFInputWrk");
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("SigMFFileInput::SigMFFileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("SigMFFileInput::SigMFFileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
@@ -897,7 +898,7 @@ void SigMFFileInput::webapiUpdateDeviceSettings(
         settings.m_trackLoop = response.getSigMfFileInputSettings()->getTrackLoop() != 0;
     }
     if (deviceSettingsKeys.contains("fullLoop")) {
-        settings.m_trackLoop = response.getSigMfFileInputSettings()->getFullLoop() != 0;
+        settings.m_fullLoop = response.getSigMfFileInputSettings()->getFullLoop() != 0;
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSigMfFileInputSettings()->getUseReverseApi() != 0;
@@ -1039,7 +1040,11 @@ void SigMFFileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
         response.getSigMfFileInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    if (response.getSigMfFileInputSettings()->getFileName()) {
+        *response.getSigMfFileInputSettings()->getFileName() = settings.m_fileName;
+    } else {
+        response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    }
     response.getSigMfFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getSigMfFileInputSettings()->setTrackLoop(settings.m_trackLoop ? 1 : 0);
     response.getSigMfFileInputSettings()->setFullLoop(settings.m_fullLoop ? 1 : 0);

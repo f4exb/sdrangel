@@ -42,6 +42,7 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_tx(false),
     m_audioFifo(12000),
     m_audioSampleRate(48000),
+    m_audioMagsqPeak(0.0f),
     m_voxLevel(1.0),
     m_voxHoldCount(0),
     m_voxState(false),
@@ -83,11 +84,12 @@ void SimplePTTWorker::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

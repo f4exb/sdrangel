@@ -23,6 +23,7 @@
 
 HeatMapSettings::HeatMapSettings() :
     m_channelMarker(nullptr),
+    m_scopeGUI(nullptr),
     m_rollupState(nullptr)
 {
     resetToDefaults();

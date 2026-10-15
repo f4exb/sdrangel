@@ -1355,7 +1355,7 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
         settings.m_gainTx0 = response.getXtrxMimoSettings()->getGainTx0();
     }
     if (deviceSettingsKeys.contains("pwrmodeTx0")) {
-        settings.m_pwrmodeRx0 = response.getXtrxMimoSettings()->getPwrmodeTx0();
+        settings.m_pwrmodeTx0 = response.getXtrxMimoSettings()->getPwrmodeTx0();
     }
     // Tx1
     if (deviceSettingsKeys.contains("lpfBWTx1")) {
@@ -1365,7 +1365,7 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
         settings.m_gainTx1 = response.getXtrxMimoSettings()->getGainTx1();
     }
     if (deviceSettingsKeys.contains("pwrmodeTx1")) {
-        settings.m_pwrmodeRx1 = response.getXtrxMimoSettings()->getPwrmodeTx1();
+        settings.m_pwrmodeTx1 = response.getXtrxMimoSettings()->getPwrmodeTx1();
     }
 }
 

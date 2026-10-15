@@ -25,8 +25,11 @@ PlutoSDRMOThread::PlutoSDRMOThread(DevicePlutoSDRBox* plutoBox, QObject* parent)
     QThread(parent),
     m_running(false),
     m_plutoBox(plutoBox),
-    m_log2Interp(0)
+    m_sampleFifo(nullptr),
+    m_log2Interp(0),
+    m_fcPos(0)
 {
+    setObjectName("PlutoSDRMO");
     qDebug("PlutoSDRMOThread::PlutoSDRMOThread");
     m_buf[0] = new qint16[2*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples];
     m_buf[1] = new qint16[2*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples];
@@ -126,6 +129,14 @@ void PlutoSDRMOThread::run()
 
         // Schedule TX buffer for sending
         nbytes_tx = m_plutoBox->txBufferPush();
+
+        if (nbytes_tx < 0)
+        {
+            qCritical("PlutoSDRMOThread::run: error pushing buffer: %s (%zd)",
+                strerror(-nbytes_tx), nbytes_tx);
+            emit error((int) nbytes_tx);
+            break;
+        }
 
         if (nbytes_tx != nbChan*sampleSize*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples)
         {

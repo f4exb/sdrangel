@@ -61,7 +61,8 @@ OSCTRL::OSCTRL(
     inbuff(_inbuff),
     outbuff(_outbuff),
     rate(_rate),
-    osgain(_osgain)
+    osgain(_osgain),
+    env_out(0)
 {
     bw = 3000.0;
     calc();

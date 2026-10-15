@@ -60,7 +60,7 @@ AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_trackerChannelAPI(nullptr)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AFC error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -95,6 +95,7 @@ void AFC::start()
 
 	qDebug("AFC::start");
     m_thread = new QThread();
+    m_thread->setObjectName("AFC");
     m_worker = new AFCWorker(getWebAPIAdapterInterface());
     m_worker->moveToThread(m_thread);
 
@@ -123,7 +124,7 @@ void AFC::start()
     AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
-    m_state = StRunning;
+    setState(StRunning);
     m_running = true;
 }
 
@@ -137,7 +138,7 @@ void AFC::stop()
 
     qDebug("AFC::stop");
     m_running = false;
-    m_state = StIdle;
+    setState(StIdle);
     m_thread->quit();
     m_thread->wait();
 }
@@ -503,8 +504,8 @@ void AFC::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("hasTargetFrequency")) {
         settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
     }
-    if (featureSettingsKeys.contains("hasTargetFrequency")) {
-        settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
+    if (featureSettingsKeys.contains("transverterTarget")) {
+        settings.m_transverterTarget = response.getAfcSettings()->getTransverterTarget() != 0;
     }
     if (featureSettingsKeys.contains("targetFrequency")) {
         settings.m_targetFrequency = response.getAfcSettings()->getTargetFrequency();
@@ -571,6 +572,9 @@ void AFC::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("hasTargetFrequency") || force) {
         swgAFCSettings->setHasTargetFrequency(settings.m_hasTargetFrequency ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("transverterTarget") || force) {
+        swgAFCSettings->setTransverterTarget(settings.m_transverterTarget ? 1 : 0);
     }
     if (channelSettingsKeys.contains("targetFrequency") || force) {
         swgAFCSettings->setTargetFrequency(settings.m_targetFrequency ? 1 : 0);

@@ -4,18 +4,28 @@ SkyMapSettings:
     displayNames:
       description: "Display names on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayConstellations:
       description: "Display constellations on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayReticle:
       description: "Display reticle on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayGrid:
       description: "Display grid on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayAntennaFoV:
       description: "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
       type: integer      
+      minimum: 0
+      maximum: 1
     map:
       description: "WWT, ESASky or Aladin"
       type: string
@@ -24,6 +34,7 @@ SkyMapSettings:
       type: string
     projection:
       type: string
+      description: "Projection setting for Sky map."
     source:
       description: "Channel or Feature plugin to get target from"
       type: string
@@ -34,10 +45,14 @@ SkyMapSettings:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude in metres of observation/antenna location"
       type: number
@@ -50,23 +65,36 @@ SkyMapSettings:
       description: "Use My Position instead of latitude/longitude settings"
       type: number
       format: float
+      minimum: 0
+      maximum: 1
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 SkyMapReport:
   description: Sky Map
@@ -86,10 +114,14 @@ SkyMapReport:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude in metres of observation/antenna location"
       type: number
@@ -129,10 +161,14 @@ SkyMapTarget:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude in metres of observation/antenna location"
       type: number

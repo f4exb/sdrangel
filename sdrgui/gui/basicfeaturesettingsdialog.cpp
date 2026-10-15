@@ -29,6 +29,10 @@
 BasicFeatureSettingsDialog::BasicFeatureSettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BasicFeatureSettingsDialog),
+    m_useReverseAPI(false),
+    m_reverseAPIPort(0),
+    m_reverseAPIFeatureSetIndex(0),
+    m_reverseAPIFeatureIndex(0),
     m_hasChanged(false)
 {
     ui->setupUi(this);

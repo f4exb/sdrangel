@@ -42,6 +42,7 @@ class MapItem {
 public:
 
     MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem);
+    virtual ~MapItem() = default;
     virtual void update(SWGSDRangel::SWGMapItem *mapItem);
     QGeoCoordinate getCoordinates();
 
@@ -82,6 +83,8 @@ public:
     ~ObjectMapItem()
     {
         delete m_aircraftState;
+        qDeleteAll(m_takenTrackCoords);
+        qDeleteAll(m_takenTrackDateTimes);
     }
 
     void update(SWGSDRangel::SWGMapItem *mapItem) override;

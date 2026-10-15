@@ -23,6 +23,7 @@
 DataPipes::DataPipes() :
     m_registrations(&m_dataFifoStore)
 {
+	m_gcThread.setObjectName("DataPipes:gc");
   	m_gcWorker = new DataPipesGCWorker(m_registrations);
 	m_gcWorker->moveToThread(&m_gcThread);
 	startGC();
@@ -50,6 +51,11 @@ ObjectPipe *DataPipes::unregisterProducerToConsumer(const QObject *producer, con
 void DataPipes::getDataPipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes)
 {
     return m_registrations.getPipes(producer, type, pipes);
+}
+
+QList<ObjectPipesRegistrations::Connection> DataPipes::getConnections()
+{
+    return m_registrations.getConnections();
 }
 
 void DataPipes::startGC()

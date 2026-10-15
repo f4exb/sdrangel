@@ -19,6 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMutexLocker>
 #include <QNetworkReply>
 #include <QBuffer>
 
@@ -448,6 +449,10 @@ void SoapySDRInput::moveThreadToBuddy()
 
 bool SoapySDRInput::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
     // buddy in the group of source buddies associated with this physical device.
     //
@@ -582,6 +587,10 @@ bool SoapySDRInput::start()
 
 void SoapySDRInput::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // This stop method is responsible for managing the thread and channel disabling when the streaming of
     // a Rx channel is stopped
     //
@@ -1674,10 +1683,22 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     for (const auto& itName : settings.m_tunableElements.keys())
     {
         response.getSoapySdrInputSettings()->getTunableElements()->append(new SWGSDRangel::SWGArgValue);
-        response.getSoapySdrInputSettings()->getTunableElements()->back()->setKey(new QString(itName));
+        if (response.getSoapySdrInputSettings()->getTunableElements()->back()->getKey()) {
+            *response.getSoapySdrInputSettings()->getTunableElements()->back()->getKey() = itName;
+        } else {
+            response.getSoapySdrInputSettings()->getTunableElements()->back()->setKey(new QString(itName));
+        }
         double value = settings.m_tunableElements.value(itName);
-        response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueString(new QString(tr("%1").arg(value)));
-        response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueType(new QString("float"));
+        if (response.getSoapySdrInputSettings()->getTunableElements()->back()->getValueString()) {
+            *response.getSoapySdrInputSettings()->getTunableElements()->back()->getValueString() = tr("%1").arg(value);
+        } else {
+            response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueString(new QString(tr("%1").arg(value)));
+        }
+        if (response.getSoapySdrInputSettings()->getTunableElements()->back()->getValueType()) {
+            *response.getSoapySdrInputSettings()->getTunableElements()->back()->getValueType() = "float";
+        } else {
+            response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueType(new QString("float"));
+        }
     }
 
     response.getSoapySdrInputSettings()->setBandwidth(settings.m_bandwidth);
@@ -1692,10 +1713,22 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     for (const auto& itName : settings.m_individualGains.keys())
     {
         response.getSoapySdrInputSettings()->getIndividualGains()->append(new SWGSDRangel::SWGArgValue);
-        response.getSoapySdrInputSettings()->getIndividualGains()->back()->setKey(new QString(itName));
+        if (response.getSoapySdrInputSettings()->getIndividualGains()->back()->getKey()) {
+            *response.getSoapySdrInputSettings()->getIndividualGains()->back()->getKey() = itName;
+        } else {
+            response.getSoapySdrInputSettings()->getIndividualGains()->back()->setKey(new QString(itName));
+        }
         double value = settings.m_individualGains.value(itName);
-        response.getSoapySdrInputSettings()->getIndividualGains()->back()->setValueString(new QString(tr("%1").arg(value)));
-        response.getSoapySdrInputSettings()->getIndividualGains()->back()->setValueType(new QString("float"));
+        if (response.getSoapySdrInputSettings()->getIndividualGains()->back()->getValueString()) {
+            *response.getSoapySdrInputSettings()->getIndividualGains()->back()->getValueString() = tr("%1").arg(value);
+        } else {
+            response.getSoapySdrInputSettings()->getIndividualGains()->back()->setValueString(new QString(tr("%1").arg(value)));
+        }
+        if (response.getSoapySdrInputSettings()->getIndividualGains()->back()->getValueType()) {
+            *response.getSoapySdrInputSettings()->getIndividualGains()->back()->getValueType() = "float";
+        } else {
+            response.getSoapySdrInputSettings()->getIndividualGains()->back()->setValueType(new QString("float"));
+        }
     }
 
     response.getSoapySdrInputSettings()->setAutoGain(settings.m_autoGain ? 1 : 0);
@@ -1725,7 +1758,11 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     for (const auto& itName : settings.m_streamArgSettings.keys())
     {
         response.getSoapySdrInputSettings()->getStreamArgSettings()->append(new SWGSDRangel::SWGArgValue);
-        response.getSoapySdrInputSettings()->getStreamArgSettings()->back()->setKey(new QString(itName));
+        if (response.getSoapySdrInputSettings()->getStreamArgSettings()->back()->getKey()) {
+            *response.getSoapySdrInputSettings()->getStreamArgSettings()->back()->getKey() = itName;
+        } else {
+            response.getSoapySdrInputSettings()->getStreamArgSettings()->back()->setKey(new QString(itName));
+        }
         const QVariant& v = settings.m_streamArgSettings.value(itName);
         webapiFormatArgValue(v, response.getSoapySdrInputSettings()->getStreamArgSettings()->back());
     }
@@ -1739,7 +1776,11 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     for (const auto& itName : settings.m_deviceArgSettings.keys())
     {
         response.getSoapySdrInputSettings()->getDeviceArgSettings()->append(new SWGSDRangel::SWGArgValue);
-        response.getSoapySdrInputSettings()->getDeviceArgSettings()->back()->setKey(new QString(itName));
+        if (response.getSoapySdrInputSettings()->getDeviceArgSettings()->back()->getKey()) {
+            *response.getSoapySdrInputSettings()->getDeviceArgSettings()->back()->getKey() = itName;
+        } else {
+            response.getSoapySdrInputSettings()->getDeviceArgSettings()->back()->setKey(new QString(itName));
+        }
         const QVariant& v = settings.m_deviceArgSettings.value(itName);
         webapiFormatArgValue(v, response.getSoapySdrInputSettings()->getDeviceArgSettings()->back());
     }
@@ -1816,7 +1857,11 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
             response.getSoapySdrInputReport()->getGainSettings()->back()->setRange(new SWGSDRangel::SWGRangeFloat());
             response.getSoapySdrInputReport()->getGainSettings()->back()->getRange()->setMin(itGain.m_range.minimum());
             response.getSoapySdrInputReport()->getGainSettings()->back()->getRange()->setMax(itGain.m_range.maximum());
-            response.getSoapySdrInputReport()->getGainSettings()->back()->setName(new QString(itGain.m_name.c_str()));
+            if (response.getSoapySdrInputReport()->getGainSettings()->back()->getName()) {
+                *response.getSoapySdrInputReport()->getGainSettings()->back()->getName() = itGain.m_name.c_str();
+            } else {
+                response.getSoapySdrInputReport()->getGainSettings()->back()->setName(new QString(itGain.m_name.c_str()));
+            }
         }
     }
 
@@ -1836,7 +1881,11 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
                 response.getSoapySdrInputReport()->getFrequencySettings()->back()->getRanges()->back()->setMax(itRange.maximum());
             }
 
-            response.getSoapySdrInputReport()->getFrequencySettings()->back()->setName(new QString(itFreq.m_name.c_str()));
+            if (response.getSoapySdrInputReport()->getFrequencySettings()->back()->getName()) {
+                *response.getSoapySdrInputReport()->getFrequencySettings()->back()->getName() = itFreq.m_name.c_str();
+            } else {
+                response.getSoapySdrInputReport()->getFrequencySettings()->back()->setName(new QString(itFreq.m_name.c_str()));
+            }
         }
     }
 

@@ -35,7 +35,9 @@ class ChannelAPI;
 class WFMDemodSink : public ChannelSampleSink {
 public:
     WFMDemodSink();
-	~WFMDemodSink();
+    ~WFMDemodSink();
+    WFMDemodSink(const WFMDemodSink&) = delete;
+    WFMDemodSink& operator=(const WFMDemodSink&) = delete;
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

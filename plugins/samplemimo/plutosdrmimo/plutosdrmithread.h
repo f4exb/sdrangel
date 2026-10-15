@@ -21,6 +21,7 @@
 #ifndef _PLUTOSDR_PLUTOSDRMITHREAD_H_
 #define _PLUTOSDR_PLUTOSDRMITHREAD_H_
 
+#include <atomic>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -47,10 +48,13 @@ public:
     SampleMIFifo *getFifo() { return m_sampleFifo; }
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    std::atomic_bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
     qint16 *m_buf[2]; //!< one buffer per I/Q channel

@@ -25,7 +25,9 @@
 
 MESSAGE_CLASS_DEFINITION(FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband, Message)
 
-FreqTrackerBaseband::FreqTrackerBaseband()
+FreqTrackerBaseband::FreqTrackerBaseband() :
+    m_basebandSampleRate(0),
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
@@ -89,11 +91,12 @@ void FreqTrackerBaseband::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

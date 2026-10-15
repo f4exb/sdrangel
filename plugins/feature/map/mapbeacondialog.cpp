@@ -25,6 +25,8 @@
 #include "channel/channelwebapiutils.h"
 #include "mapgui.h"
 
+#include "gui/messagedialog.h"
+
 MapBeaconDialog::MapBeaconDialog(MapGUI *gui, QWidget* parent) :
     QDialog(parent),
     m_gui(gui),
@@ -126,7 +128,7 @@ void MapBeaconDialog::downloadFinished(const QString& filename, bool success, co
     }
     else
     {
-        QMessageBox::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
+        MessageDialog::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
     }
 }
 

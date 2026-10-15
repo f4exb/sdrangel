@@ -30,8 +30,10 @@
 #include "audio/audiofifo.h"
 
 #include "denoisersettings.h"
+#include "nvidiaaudioeffects.h"
 
 class WavFileRecord;
+class Vst3Effect;
 struct DenoiseState;
 
 class DenoiserWorker : public QObject {
@@ -77,6 +79,33 @@ public:
         { }
     };
 
+    class MsgReportNvidiaStatus : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QString& getError() const { return m_error; }
+        static MsgReportNvidiaStatus* create(const QString& error) { 
+            return new MsgReportNvidiaStatus(error); 
+        }
+    private:
+        QString m_error;
+        explicit MsgReportNvidiaStatus(const QString& error) : Message(), m_error(error) {}
+    };
+
+    class MsgReportVst3Status : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QString& getError() const { return m_error; }
+        static MsgReportVst3Status* create(const QString& error) { 
+            return new MsgReportVst3Status(error); 
+        }
+    private:
+        QString m_error;
+        explicit MsgReportVst3Status(const QString& error) : 
+            Message(), 
+            m_error(error) 
+        {}
+    };
+
     explicit DenoiserWorker(QObject *parent = nullptr);
     ~DenoiserWorker() override;
     void reset();
@@ -84,8 +113,10 @@ public:
     void stopWork();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
+    void setDemodProducer(QObject *producer) { m_demodProducer = producer; }
     void applySampleRate(int sampleRate);
     void applySettings(const DenoiserSettings& settings, const QStringList& settingsKeys, bool force = false);
+    void setVst3Effect(Vst3Effect *effect);
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -105,14 +136,17 @@ signals:
 	void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
 private:
+    static constexpr int m_nvidiaFrameSize = 480;
+    static constexpr int m_vst3BlockSize = 512;
+
     DataFifo *m_dataFifo;
+    QObject *m_demodProducer;
     int m_sinkSampleRate;
 	MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     DenoiserSettings m_settings;
     double m_magsq;
     SampleVector m_sampleBuffer;
-    int m_sampleBufferSize;
     MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     WavFileRecord* m_wavFileRecord;
     int m_recordSilenceNbSamples;
@@ -125,6 +159,22 @@ private:
     float m_rnnoiseIn[480];
     float m_rnnoiseOut[480];
     int m_rnnoiseFill;
+
+    NvidiaAudioEffects m_nvidiaDenoiser;
+    alignas(64) float m_nvidiaIn[m_nvidiaFrameSize];
+    alignas(64) float m_nvidiaOut[m_nvidiaFrameSize];
+    int m_nvidiaFill;
+    bool m_nvidiaInitAttempted;
+    bool m_nvidiaReady;
+    bool m_nvidiaResetPending;
+    bool m_nvidiaStatusReported;
+    quint32 m_nvidiaGeneration;  //!< Incremented on any change that invalidates a model load
+
+    Vst3Effect *m_vst3Effect;
+    float m_vst3Input[2][m_vst3BlockSize];
+    float m_vst3Output[2][m_vst3BlockSize];
+    int m_vst3Fill;
+    bool m_vst3FailureReported;
 
     quint32 m_levelCalcCount = 0;
     qreal m_rmsLevel;
@@ -145,6 +195,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void writeSampleToFile(const Sample& sample);
+    void flushAudio();
     void processSample(
         DataFifo::DataType dataType,
         const QByteArray::const_iterator& begin,
@@ -154,6 +205,11 @@ private:
     void processI16DenoiserRNNoise(const double& samplefp);
     void processCI16DenoiserNone(const double& samplefpRe, const double& samplefpIm);
     void processCI16DenoiserRNNoise(const double& samplefpRe, const double& samplefpIm);
+    void processNvidiaSample(const double& samplefp);
+    void processVst3Sample(double left, double right);
+    void reportNvidiaError(const QString& error);
+    void resetNvidia();
+    void prepareNvidia();
     void calculateLevel(const Real& sample);
 
 private slots:

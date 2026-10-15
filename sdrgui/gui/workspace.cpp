@@ -62,6 +62,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_mdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_mdi->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setWidget(m_mdi);
+    m_connectionOverlay = new ConnectionOverlay(m_mdi);
 
     setWindowTitle(tr("W%1").arg(m_index));
     setObjectName(tr("W%1").arg(m_index));
@@ -160,6 +161,14 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_featurePresetsButton->setFixedSize(20, 20);
     m_featurePresetsButton->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P));
 
+    m_mcpServerButton = new QPushButton("AI");
+    QFont mcpServerFont = m_mcpServerButton->font();
+    mcpServerFont.setBold(true);
+    m_mcpServerButton->setFont(mcpServerFont);
+    m_mcpServerButton->setToolTip("MCP Server feature is not open");
+    m_mcpServerButton->setFixedSize(20, 20);
+    m_mcpServerButton->setEnabled(false);
+
     m_vline3 = new QFrame();
     m_vline3->setFrameShape(QFrame::VLine);
     m_vline3->setFrameShadow(QFrame::Sunken);
@@ -169,28 +178,24 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_cascadeSubWindows->setIcon(cascadeSubWindowsIcon);
     m_cascadeSubWindows->setToolTip("Cascade sub windows");
     m_cascadeSubWindows->setFixedSize(20, 20);
-    m_cascadeSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
 
     m_tileSubWindows = new QPushButton();
     QIcon tileSubWindowsIcon(":/tiles.png");
     m_tileSubWindows->setIcon(tileSubWindowsIcon);
     m_tileSubWindows->setToolTip("Tile sub windows");
     m_tileSubWindows->setFixedSize(20, 20);
-    m_tileSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T));
 
     m_stackVerticalSubWindows = new QPushButton();
     QIcon stackVerticalSubWindowsIcon(":/stackvertical.png");
     m_stackVerticalSubWindows->setIcon(stackVerticalSubWindowsIcon);
     m_stackVerticalSubWindows->setToolTip("Stack sub windows vertically");
     m_stackVerticalSubWindows->setFixedSize(20, 20);
-    m_stackVerticalSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
 
     m_stackSubWindows = new QPushButton();
     QIcon stackSubWindowsIcon(":/stackcolumns.png");
     m_stackSubWindows->setIcon(stackSubWindowsIcon);
     m_stackSubWindows->setToolTip("Stack sub windows in columns. Right click to stack automatically.");
     m_stackSubWindows->setFixedSize(20, 20);
-    m_stackSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     CRightClickEnabler *stackSubWindowsRightClickEnabler = new CRightClickEnabler(m_stackSubWindows);
     connect(stackSubWindowsRightClickEnabler, &CRightClickEnabler::rightClick, this, &Workspace::autoStackSubWindows);
 
@@ -200,7 +205,15 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tabSubWindows->setCheckable(true);
     m_tabSubWindows->setToolTip("Display sub windows in tabs");
     m_tabSubWindows->setFixedSize(20, 20);
-    m_tabSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B));
+
+    m_connectionOverlayButton = new ButtonSwitch();
+    m_connectionOverlayButton->setCheckable(true);
+    m_connectionOverlayButton->setFixedSize(20, 20);
+    // Must match the shortcut created in MainWindow. NativeText shows Cmd on macOS.
+    m_connectionOverlayButton->setToolTip(QString("Show device, channel, spectrum and feature connections (%1)")
+        .arg(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L).toString(QKeySequence::NativeText)));
+    QIcon connectionOverlayIcon(":/wiring.png");
+    m_connectionOverlayButton->setIcon(connectionOverlayIcon);
 
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
@@ -233,7 +246,9 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_stackVerticalSubWindows);
     m_titleBarLayout->addWidget(m_stackSubWindows);
     m_titleBarLayout->addWidget(m_tabSubWindows);
+    m_titleBarLayout->addWidget(m_connectionOverlayButton);
     m_titleBarLayout->addStretch(1);
+    m_titleBarLayout->addWidget(m_mcpServerButton);
 #ifndef ANDROID
     // Can't undock on Android, as windows don't have title bars to allow them to be moved
     m_titleBarLayout->addWidget(m_normalButton);
@@ -278,6 +293,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &Workspace::featurePresetsDialog
+    );
+
+    QObject::connect(
+        m_mcpServerButton,
+        &QPushButton::clicked,
+        this,
+        &Workspace::showMCPServer
     );
 
     QObject::connect(
@@ -329,6 +351,9 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &Workspace::tabSubWindows
     );
 
+    QObject::connect(m_connectionOverlayButton, &ButtonSwitch::clicked,
+        this, &Workspace::connectionOverlayToggled);
+
     QObject::connect(
         m_normalButton,
         &QPushButton::clicked,
@@ -371,6 +396,7 @@ Workspace::~Workspace()
     delete m_closeButton;
     delete m_normalButton;
     delete m_tabSubWindows;
+    delete m_connectionOverlayButton;
     delete m_stackSubWindows;
     delete m_stackVerticalSubWindows;
     delete m_tileSubWindows;
@@ -386,6 +412,7 @@ Workspace::~Workspace()
     delete m_addMIMODeviceButton;
     delete m_addFeatureButton;
     delete m_featurePresetsButton;
+    delete m_mcpServerButton;
     delete m_titleLabel;
     delete m_titleBarLayout;
     delete m_titleBar;
@@ -400,6 +427,17 @@ void Workspace::setIndex(int index)
     setWindowTitle(tr("W%1").arg(m_index));
     setObjectName(tr("W%1").arg(m_index));
     m_titleLabel->setText(windowTitle());
+}
+
+void Workspace::setConnectionOverlayVisible(bool visible)
+{
+    m_connectionOverlayButton->doToggle(visible);
+    m_connectionOverlay->setOverlayVisible(visible);
+}
+
+void Workspace::setConnections(const QList<ConnectionOverlay::Connection>& connections)
+{
+    m_connectionOverlay->setConnections(connections);
 }
 
 QList<QMdiSubWindow *> Workspace::getSubWindowList() const
@@ -924,6 +962,13 @@ void Workspace::tabSubWindows()
 
 void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
 {
+    if (activatedWindow) {
+        emit focused(this);
+    }
+
+    if (m_connectionOverlay->isVisible()) {
+        m_connectionOverlay->raise();
+    }
     if (activatedWindow && m_tabSubWindows->isChecked())
     {
         // Move other windows out of the way
@@ -1032,6 +1077,24 @@ void Workspace::updateStartStopButtonState()
     }
 }
 
+void Workspace::updateMCPServerButton(bool available, bool running, int port)
+{
+    m_mcpServerButton->setEnabled(available);
+    m_mcpServerButton->setStyleSheet(running
+        ? "QPushButton { background-color : green; }"
+        : QString());
+
+    if (!available) {
+        m_mcpServerButton->setToolTip("MCP Server feature is not open");
+    } else if (running && (port > 0)) {
+        m_mcpServerButton->setToolTip(QString("Show MCP Server (running on port %1)").arg(port));
+    } else if (running) {
+        m_mcpServerButton->setToolTip("Show MCP Server (running)");
+    } else {
+        m_mcpServerButton->setToolTip("Show MCP Server");
+    }
+}
+
 void Workspace::deviceStateChanged(int, DeviceAPI *deviceAPI)
 {
     const bool allWorkspaces = (m_startStopMode == StartStopAllWorkspacesDevices)
@@ -1056,6 +1119,9 @@ void Workspace::addToMdiArea(QMdiSubWindow *sub)
     connect(sub, &QObject::destroyed, this, &Workspace::layoutSubWindows);
     m_mdi->addSubWindow(sub);
     sub->show();
+    if (m_connectionOverlay->isVisible()) {
+        m_connectionOverlay->raise();
+    }
     // Auto-stack when sub-window's widgets are rolled up
     ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
     if (channel) {

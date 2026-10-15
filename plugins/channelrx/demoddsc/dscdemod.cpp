@@ -52,6 +52,7 @@ DSCDemod::DSCDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("DSCDemodBB");
 
     m_basebandSink = new DSCDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
@@ -345,7 +346,7 @@ void DSCDemod::sendSampleRateToDemodAnalyzer()
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
                 this,
-                DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE
+                m_settings.getChannelSampleRate()
             );
             messageQueue->push(msg);
         }
@@ -404,13 +405,20 @@ int DSCDemod::webapiSettingsPutPatch(
     DSCDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
+    // A mode change without an explicit bandwidth selects the mode's default
+    // bandwidth, so that setting must be applied too.
+    QStringList settingsKeys = channelSettingsKeys;
+    if (settingsKeys.contains("mode") && !settingsKeys.contains("rfBandwidth")) {
+        settingsKeys.append("rfBandwidth");
+    }
+
+    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DSCDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
+        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -440,6 +448,14 @@ void DSCDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getDscDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("mode"))
+    {
+        settings.m_mode = response.getDscDemodSettings()->getMode() == (qint32) DSCDemodSettings::ModeVHF
+            ? DSCDemodSettings::ModeVHF : DSCDemodSettings::ModeMFHF;
+        if (!channelSettingsKeys.contains("rfBandwidth")) {
+            settings.m_rfBandwidth = DSCDemodSettings::getDefaultRFBandwidth(settings.m_mode);
+        }
     }
     if (channelSettingsKeys.contains("filterInvalid")) {
         settings.m_filterInvalid = response.getDscDemodSettings()->getFilterInvalid();
@@ -507,13 +523,26 @@ void DSCDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getDscDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getDscDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getDscDemodSettings()->setMode((qint32) settings.m_mode);
     response.getDscDemodSettings()->setFilterInvalid(settings.m_filterInvalid);
     response.getDscDemodSettings()->setFilterColumn(settings.m_filterColumn);
-    response.getDscDemodSettings()->setFilter(new QString(settings.m_filter));
+    if (response.getDscDemodSettings()->getFilter()) {
+        *response.getDscDemodSettings()->getFilter() = settings.m_filter;
+    } else {
+        response.getDscDemodSettings()->setFilter(new QString(settings.m_filter));
+    }
     response.getDscDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getDscDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getDscDemodSettings()->getUdpAddress()) {
+        *response.getDscDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getDscDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getDscDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getDscDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getDscDemodSettings()->getLogFilename()) {
+        *response.getDscDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getDscDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getDscDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getDscDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -624,7 +653,11 @@ void DSCDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DSCDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DSCDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DSCDemod"));
+    }
     swgChannelSettings->setDscDemodSettings(new SWGSDRangel::SWGDSCDemodSettings());
     SWGSDRangel::SWGDSCDemodSettings *swgDSCDemodSettings = swgChannelSettings->getDscDemodSettings();
 
@@ -636,6 +669,9 @@ void DSCDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgDSCDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
+    if (channelSettingsKeys.contains("mode") || force) {
+        swgDSCDemodSettings->setMode((qint32) settings.m_mode);
+    }
     if (channelSettingsKeys.contains("filterInvalid") || force) {
         swgDSCDemodSettings->setFilterInvalid(settings.m_filterInvalid);
     }
@@ -643,19 +679,31 @@ void DSCDemod::webapiFormatChannelSettings(
         swgDSCDemodSettings->setFilterColumn(settings.m_filterColumn);
     }
     if (channelSettingsKeys.contains("filter") || force) {
-        swgDSCDemodSettings->setFilter(new QString(settings.m_filter));
+        if (swgDSCDemodSettings->getFilter()) {
+            *swgDSCDemodSettings->getFilter() = settings.m_filter;
+        } else {
+            swgDSCDemodSettings->setFilter(new QString(settings.m_filter));
+        }
     }
     if (channelSettingsKeys.contains("udpEnabled") || force) {
         swgDSCDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgDSCDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgDSCDemodSettings->getUdpAddress()) {
+            *swgDSCDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgDSCDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgDSCDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgDSCDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgDSCDemodSettings->getLogFilename()) {
+            *swgDSCDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgDSCDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgDSCDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -667,7 +715,11 @@ void DSCDemod::webapiFormatChannelSettings(
         swgDSCDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDSCDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDSCDemodSettings->getTitle()) {
+            *swgDSCDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDSCDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDSCDemodSettings->setStreamIndex(settings.m_streamIndex);
@@ -727,4 +779,15 @@ void DSCDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int DSCDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int DSCDemod::getAudioSampleRate() const
+{
+    // Rate the demodulator runs at, which depends on the MF/HF or VHF mode
+    return m_settings.getChannelSampleRate();
 }

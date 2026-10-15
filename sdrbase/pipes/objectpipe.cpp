@@ -47,9 +47,8 @@ int ObjectPipe::getGCCount() const {
 int ObjectPipe::decreaseGCCount()
 {
     if (m_gcCount > 0) {
-        return m_gcCount--;
+        return --m_gcCount;
     } else {
         return m_gcCount;
     }
 }
-

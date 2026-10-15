@@ -53,6 +53,7 @@ public:
     void applyAudioSampleRate(int sampleRate);
     void applyDABAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
+    int getChannelSampleRate() const { return m_channelSampleRate; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 

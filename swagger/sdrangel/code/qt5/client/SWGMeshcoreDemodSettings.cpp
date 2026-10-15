@@ -160,6 +160,7 @@ SWGMeshcoreDemodSettings::cleanup() {
 
 
 
+
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -220,7 +221,7 @@ SWGMeshcoreDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&packet_length, pJson["packetLength"], "qint32", "");
     
     ::SWGSDRangel::setValue(&send_via_udp, pJson["sendViaUDP"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&send_json_via_udp, pJson["sendJsonViaUDP"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");

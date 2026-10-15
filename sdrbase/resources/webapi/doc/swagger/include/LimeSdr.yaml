@@ -3,54 +3,91 @@ LimeSdrInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2HardDecim:
       type: integer
+      description: "Base-2 exponent of the hardware decimation factor."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     splitFreq:
       type: integer
+      description: "Split freq setting for Lime sdr input."
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     log2SoftDecim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor."
     lpfBW:
       type: integer
+      description: "Analog low-pass filter bandwidth in Hz."
     lpfFIREnable:
       type: integer
+      description: "Enable the digital FIR low-pass filter (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     lpfFIRBW:
       type: integer
+      description: "Digital FIR low-pass filter bandwidth in Hz."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     ncoEnable:
       type: integer
+      description: "Enable the numerically controlled oscillator (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     ncoFrequency:
       type: integer
+      description: "Numerically controlled oscillator frequency in Hz."
     antennaPath:
       type: integer
+      description: "Selected RF antenna path."
     gainMode:
       type: integer
+      description: "Gain-control mode selection."
     lnaGain:
       type: integer
+      description: "Low-noise-amplifier gain setting."
     tiaGain:
       type: integer
+      description: "TIA gain setting for Lime sdr input."
     pgaGain:
       type: integer
+      description: "PGA gain setting for Lime sdr input."
     extClock:
       type: integer
+      description: "Use an external reference clock (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     extClockFreq:
       type: integer
+      description: "External reference-clock frequency in Hz."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -58,71 +95,113 @@ LimeSdrInputSettings:
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 LimeSdrOutputSettings:
   description: LimeSDR
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2HardInterp:
       type: integer
+      description: "Base-2 exponent of the hardware interpolation factor."
     log2SoftInterp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor."
     lpfBW:
       type: integer
+      description: "Analog low-pass filter bandwidth in Hz."
     lpfFIREnable:
       type: integer
+      description: "Enable the digital FIR low-pass filter (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     lpfFIRBW:
       type: integer
+      description: "Digital FIR low-pass filter bandwidth in Hz."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     ncoEnable:
       type: integer
+      description: "Enable the numerically controlled oscillator (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     ncoFrequency:
       type: integer
+      description: "Numerically controlled oscillator frequency in Hz."
     antennaPath:
       type: integer
+      description: "Selected RF antenna path."
     extClock:
       type: integer
+      description: "Use an external reference clock (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     extClockFreq:
       type: integer
+      description: "External reference-clock frequency in Hz."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 LimeSdrMIMOSettings:
   description: LimeSDR
@@ -130,8 +209,10 @@ LimeSdrMIMOSettings:
     # General
     title:
       type: string
+      description: "User-visible title."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     gpioDir:
       description: GPIO pin direction LSB first; 0 input, 1 output
       type: integer
@@ -143,40 +224,61 @@ LimeSdrMIMOSettings:
     extClock:
       description: Boolean 1 if external clock source else 0
       type: integer
+      minimum: 0
+      maximum: 1
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
     useReverseAPI:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     # Rx general
     rxCenterFrequency:
       type: integer
       format: int64
+      description: "Receive center frequency in Hz."
     log2HardDecim:
       type: integer
+      description: "Base-2 exponent of the hardware decimation factor."
     log2SoftDecim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor."
     dcBlock:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     iqCorrection:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rxTransverterMode:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rxTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Receive frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -184,6 +286,8 @@ LimeSdrMIMOSettings:
     ncoEnableRx:
       description: Boolean 1 to enable TSP NCO and mixing else 0
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequencyRx:
       description: Rx Actual NCO frequency (the resulting frequency with mixing is displayed)
       type: integer
@@ -195,6 +299,8 @@ LimeSdrMIMOSettings:
     lpfFIREnableRx0:
       description: Boolean 1 to enable Rx[0] LMS digital lowpass FIR filters else 0
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBWRx0:
       description: Rx[0] LMS digital lowpass FIR filters bandwidth (Hz)
       type: number
@@ -213,12 +319,16 @@ LimeSdrMIMOSettings:
           * 4 - LB TX1
           * 5 - LB TX2
       type: integer
+      minimum: 0
+      maximum: 5
     gainModeRx0:
       description: >
         Rx[0] Gain mode:
           * 0 - auto
           * 1 - manual
       type: integer
+      minimum: 0
+      maximum: 1
     lnaGainRx0:
       description: Rx[0] Manual LNA gain
       type: integer
@@ -236,6 +346,8 @@ LimeSdrMIMOSettings:
     lpfFIREnableRx1:
       description: Boolean 1 to enable Rx[1] LMS digital lowpass FIR filters else 0
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBWRx1:
       description: Rx[1] LMS digital lowpass FIR filters bandwidth (Hz)
       type: number
@@ -253,12 +365,16 @@ LimeSdrMIMOSettings:
           * 4 - LB TX1
           * 5 - LB TX2
       type: integer
+      minimum: 0
+      maximum: 5
     gainModeRx1:
       description: >
         Rx[1] Gain mode:
           * 0 - auto
           * 1 - manual
       type: integer
+      minimum: 0
+      maximum: 1
     lnaGainRx1:
       description: Rx[1] Manual LNA gain
       type: integer
@@ -272,19 +388,27 @@ LimeSdrMIMOSettings:
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     log2HardInterp:
       type: integer
+      description: "Base-2 exponent of the hardware interpolation factor."
     log2SoftInterp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor."
     txTransverterMode:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     txTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Transmit frequency translation applied in transverter mode in Hz."
     ncoEnableTx:
       description: Boolean 1 to enable TSP NCO and mixing else 0
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequencyTx:
       description: Tx Actual NCO frequency (the resulting frequency with mixing is displayed)
       type: integer
@@ -296,6 +420,8 @@ LimeSdrMIMOSettings:
     lpfFIREnableTx0:
       description: Boolean 1 to enable Tx[0] LMS digital lowpass FIR filters else 0
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBWTx0:
       description: Tx[0] LMS digital lowpass FIR filters bandwidth (Hz)
       type: number
@@ -310,6 +436,8 @@ LimeSdrMIMOSettings:
           * 1 - RF connector 1
           * 2 - RF connector 2
       type: integer
+      minimum: 0
+      maximum: 2
     # Tx channel 1
     lpfBWTx1:
       description: Tx[1] LMS analog lowpass filter bandwidth (Hz)
@@ -318,6 +446,8 @@ LimeSdrMIMOSettings:
     lpfFIREnableTx1:
       description: Boolean 1 to enable Tx[1] LMS digital lowpass FIR filters else 0
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBWTx1:
       description: Tx[1] LMS digital lowpass FIR filters bandwidth (Hz)
       type: number
@@ -332,6 +462,8 @@ LimeSdrMIMOSettings:
           * 1 - RF connector 1
           * 2 - RF connector 2
       type: integer
+      minimum: 0
+      maximum: 2
 
 LimeSdrInputReport:
   description: LimeSDR
@@ -342,19 +474,27 @@ LimeSdrInputReport:
     streamActive:
       description: 1 if active else 0
       type: integer
+      minimum: 0
+      maximum: 1
     fifoSize:
       type: integer
+      description: "FIFO capacity in samples."
     fifoFill:
       type: integer
+      description: "Current FIFO fill level."
     underrunCount:
       type: integer
+      description: "Number of stream underrun events."
     overrunCount:
       type: integer
+      description: "Number of stream overrun events."
     droppedPacketsCount:
       type: integer
+      description: "Number of dropped packets."
     linkRate:
       type: number
       format: float
+      description: "Measured streaming link rate."
     hwTimestamp:
       description: Hardware timestamp
       type: integer
@@ -362,12 +502,15 @@ LimeSdrInputReport:
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
 
 LimeSdrOutputReport:
   description: LimeSDR
@@ -378,19 +521,27 @@ LimeSdrOutputReport:
     streamActive:
       description: 1 if active else 0
       type: integer
+      minimum: 0
+      maximum: 1
     fifoSize:
       type: integer
+      description: "FIFO capacity in samples."
     fifoFill:
       type: integer
+      description: "Current FIFO fill level."
     underrunCount:
       type: integer
+      description: "Number of stream underrun events."
     overrunCount:
       type: integer
+      description: "Number of stream overrun events."
     droppedPacketsCount:
       type: integer
+      description: "Number of dropped packets."
     linkRate:
       type: number
       format: float
+      description: "Measured streaming link rate."
     hwTimestamp:
       description: Hardware timestamp
       type: integer
@@ -398,12 +549,15 @@ LimeSdrOutputReport:
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
 
 LimeSdrMIMOReport:
   description: LimeSDR
@@ -415,12 +569,15 @@ LimeSdrMIMOReport:
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
     successRx:
       description: 1 if Rx info was successfully retrieved else 0
       type: integer
@@ -429,17 +586,23 @@ LimeSdrMIMOReport:
       type: integer
     fifoSizeRx:
       type: integer
+      description: "Reported fifo size receive."
     fifoFillRx:
       type: integer
+      description: "Current receive FIFO fill level."
     underrunCountRx:
       type: integer
+      description: "Reported underrun count receive."
     overrunCountRx:
       type: integer
+      description: "Reported overrun count receive."
     droppedPacketsCountRx:
       type: integer
+      description: "Reported dropped packets count receive."
     linkRateRx:
       type: number
       format: float
+      description: "Reported link rate receive."
     successTx:
       description: 1 if Tx info was successfully retrieved else 0
       type: integer
@@ -448,14 +611,20 @@ LimeSdrMIMOReport:
       type: integer
     fifoSizeTx:
       type: integer
+      description: "Reported fifo size transmit."
     fifoFillTx:
       type: integer
+      description: "Current transmit FIFO fill level."
     underrunCountTx:
       type: integer
+      description: "Reported underrun count transmit."
     overrunCountTx:
       type: integer
+      description: "Reported overrun count transmit."
     droppedPacketsCountTx:
       type: integer
+      description: "Reported dropped packets count transmit."
     linkRateTx:
       type: number
       format: float
+      description: "Reported link rate transmit."

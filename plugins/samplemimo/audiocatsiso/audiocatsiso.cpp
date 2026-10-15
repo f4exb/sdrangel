@@ -131,6 +131,7 @@ bool AudioCATSISO::startRx()
     audioDeviceManager->addAudioSource(&m_inputFifo, getInputMessageQueue(), m_rxAudioDeviceIndex);
 
     m_inputWorkerThread = new QThread();
+    m_inputWorkerThread->setObjectName(QString("AudCATrx:%1").arg(m_rxAudioDeviceIndex));
     m_inputWorker = new AudioCATInputWorker(&m_sampleMIFifo, &m_inputFifo);
     m_inputWorker->moveToThread(m_inputWorkerThread);
 
@@ -147,6 +148,7 @@ bool AudioCATSISO::startRx()
     qDebug() << "AudioCATSISO::startRx: start CAT";
 
     m_catWorkerThread = new QThread();
+    m_catWorkerThread->setObjectName(QString("AudCATwk:%1").arg(m_rxAudioDeviceIndex));
     m_catWorker = new AudioCATSISOCATWorker();
     m_catWorker->moveToThread(m_catWorkerThread);
 
@@ -193,6 +195,7 @@ bool AudioCATSISO::startTx()
     audioDeviceManager->addAudioSink(&m_outputFifo, getInputMessageQueue(), m_txAudioDeviceIndex);
 
     m_outputWorkerThread = new QThread();
+    m_outputWorkerThread->setObjectName(QString("AudCATtx:%1").arg(m_txAudioDeviceIndex));
 	m_outputWorker = new AudioCATOutputWorker(&m_sampleMOFifo, &m_outputFifo);
     m_outputWorker->moveToThread(m_outputWorkerThread);
 
@@ -799,13 +802,13 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
         settings.m_catPTTMethodIndex = response.getAudioCatsisoSettings()->getCatPttMethodIndex();
     }
-    if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
+    if (deviceSettingsKeys.contains("catDTRHigh")) {
         settings.m_catDTRHigh = response.getAudioCatsisoSettings()->getCatDtrHigh() != 0;
     }
     if (deviceSettingsKeys.contains("catRTSHigh")) {
         settings.m_catRTSHigh = response.getAudioCatsisoSettings()->getCatRtsHigh() != 0;
     }
-    if (deviceSettingsKeys.contains("catRTSHigh")) {
+    if (deviceSettingsKeys.contains("catPollingMs")) {
         settings.m_catPollingMs = response.getAudioCatsisoSettings()->getCatPollingMs();
     }
 
@@ -844,7 +847,11 @@ void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getAudioCatsisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getAudioCatsisoSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAudioCatsisoSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    response.getAudioCatsisoSettings()->setRxDeviceName(new QString(settings.m_rxDeviceName));
+    if (response.getAudioCatsisoSettings()->getRxDeviceName()) {
+        *response.getAudioCatsisoSettings()->getRxDeviceName() = settings.m_rxDeviceName;
+    } else {
+        response.getAudioCatsisoSettings()->setRxDeviceName(new QString(settings.m_rxDeviceName));
+    }
     response.getAudioCatsisoSettings()->setRxIqMapping((int)settings.m_rxIQMapping);
     response.getAudioCatsisoSettings()->setLog2Decim(settings.m_log2Decim);
     response.getAudioCatsisoSettings()->setFcPosRx((int) settings.m_fcPosRx);
@@ -852,7 +859,11 @@ void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getAudioCatsisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getAudioCatsisoSettings()->setRxVolume(settings.m_rxVolume);
 
-    response.getAudioCatsisoSettings()->setTxDeviceName(new QString(settings.m_txDeviceName));
+    if (response.getAudioCatsisoSettings()->getTxDeviceName()) {
+        *response.getAudioCatsisoSettings()->getTxDeviceName() = settings.m_txDeviceName;
+    } else {
+        response.getAudioCatsisoSettings()->setTxDeviceName(new QString(settings.m_txDeviceName));
+    }
     response.getAudioCatsisoSettings()->setTxIqMapping((int)settings.m_txIQMapping);
     response.getAudioCatsisoSettings()->setTxVolume(settings.m_txVolume);
 

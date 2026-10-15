@@ -107,6 +107,7 @@ QByteArray PacketDemodSettings::serialize() const
     s.writeBool(31, m_useFileTime);
     s.writeS32(32, m_chase);
     s.writeBool(33, m_mlse);
+    s.writeS32(41, static_cast<int>(m_mode));
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -192,6 +193,9 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         d.readBool(31, &m_useFileTime, false);
         d.readS32(32, &m_chase, 6);
         d.readBool(33, &m_mlse, true);
+        qint32 mode;
+        d.readS32(41, &mode, ModeAFSK1200);
+        m_mode = isValidMode(mode) ? static_cast<Mode>(mode) : ModeAFSK1200;
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
@@ -381,5 +385,5 @@ QString PacketDemodSettings::getDebugString(const QStringList& settingsKeys, boo
 
 int PacketDemodSettings::getBaudRate() const
 {
-    return 1200;
+    return m_mode == ModeG3RUH9600 ? 9600 : 1200;
 }

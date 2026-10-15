@@ -37,6 +37,7 @@ set(sdrgui_SOURCES
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dialogpositioner.cpp
+    gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
     gui/editcommanddialog.cpp
@@ -60,6 +61,12 @@ set(sdrgui_SOURCES
     gui/glshaderspectrogram.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
+    gui/glvideorenderer.cpp
+    gui/glvideowidget.cpp
+    gui/glvideointeropd3d11.cpp
+    gui/glvideointeropcuda.cpp
+    gui/glvideointeropdmabuf.cpp
+    gui/glvideointeropiosurface.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
     gui/glspectrumview.cpp
@@ -105,7 +112,9 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
     gui/welcomedialog.cpp
     gui/workspace.cpp
+    gui/connectionoverlay.cpp
     gui/workspaceselectiondialog.cpp
+    gui/workspacewindow.cpp
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
     gui/wrappingdial.cpp
@@ -170,6 +179,7 @@ set(sdrgui_HEADERS
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dialogpositioner.h
+    gui/messagedialog.h
     gui/dialpopup.h
     gui/dmsspinbox.h
     gui/doublevalidator.h
@@ -193,6 +203,10 @@ set(sdrgui_HEADERS
     gui/glshadersimple.h
     gui/glshaderspectrogram.h
     gui/glshadertvarray.h
+    gui/glvideoframe.h
+    gui/glvideointerop.h
+    gui/glvideorenderer.h
+    gui/glvideowidget.h
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
@@ -243,6 +257,8 @@ set(sdrgui_HEADERS
     gui/welcomedialog.h
     gui/workspace.h
     gui/workspaceselectiondialog.h
+    gui/workspacewindow.h
+    gui/connectionoverlay.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
     gui/wrappingdial.h
@@ -363,6 +379,15 @@ endif()
 
 if(ANDROID)
   target_link_libraries(sdrgui GLESv3)
+endif()
+
+# GPU video frames shown without copying them: D3D11 on Windows, IOSurface on macOS
+if(WIN32 AND MSVC)
+  target_link_libraries(sdrgui d3d11)
+endif()
+
+if(APPLE)
+  target_link_libraries(sdrgui "-framework IOSurface" "-framework OpenGL")
 endif()
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})

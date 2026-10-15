@@ -42,7 +42,8 @@ LocalInput::LocalInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_centerFrequency(0),
-	m_deviceDescription("LocalInput")
+    m_sampleRate(0),
+    m_deviceDescription("LocalInput")
 {
     m_sampleFifo.setLabel(m_deviceDescription);
 	m_sampleFifo.setSize(96000 * 4);

@@ -191,9 +191,10 @@ void GS232ControllerGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -212,7 +213,6 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_lastOnTarget(false),
     m_dfmStatusDialog(),
     m_inputController(nullptr),
@@ -238,6 +238,8 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(250);
+    connect(m_gs232Controller, &Feature::stateChanged, this, &GS232ControllerGUI::updateFeatureState);
+    updateFeatureState();
 
     ui->coord1CurrentText->setText("-");
     ui->coord2CurrentText->setText("-");
@@ -912,57 +914,31 @@ void GS232ControllerGUI::on_dfmShowStatus_clicked()
 
 void GS232ControllerGUI::updateStatus()
 {
-    int state = m_gs232Controller->getState();
     bool onTarget = m_gs232Controller->getOnTarget();
 
-    if (m_lastFeatureState != state)
+    if (ui->startStop->isChecked() && (onTarget != m_lastOnTarget))
     {
-        // We set checked state of start/stop button, in case it was changed via API
-        bool oldState;
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(false);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(true);
-                ui->startStop->blockSignals(oldState);
-                if (onTarget) {
-                    ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                } else {
-                    ui->startStop->setStyleSheet("QToolButton { background-color : yellow; }");
-                }
-                m_lastOnTarget = onTarget;
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::critical(this, m_settings.m_title, m_gs232Controller->getErrorMessage());
-                break;
-            default:
-                break;
-        }
+        ui->startStop->setStyleSheet(onTarget
+            ? "QToolButton { background-color : green; }"
+            : "QToolButton { background-color : yellow; }");
+    }
 
-        m_lastFeatureState = state;
-    }
-    else if (state == Feature::StRunning)
+    m_lastOnTarget = onTarget;
+}
+
+void GS232ControllerGUI::updateFeatureState()
+{
+    int state = m_gs232Controller->getState();
+    bool onTarget = m_gs232Controller->getOnTarget();
+    updateStartStopButton(ui->startStop);
+
+    if (state == Feature::StRunning)
     {
-        if (onTarget != m_lastOnTarget)
-        {
-            if (onTarget) {
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-            } else {
-                ui->startStop->setStyleSheet("QToolButton { background-color : yellow; }");
-            }
-        }
-        m_lastOnTarget = onTarget;
+        ui->startStop->setStyleSheet(onTarget
+            ? "QToolButton { background-color : green; }"
+            : "QToolButton { background-color : yellow; }");
     }
+    m_lastOnTarget = onTarget;
 }
 
 void GS232ControllerGUI::applySetting(const QString& settingsKey)

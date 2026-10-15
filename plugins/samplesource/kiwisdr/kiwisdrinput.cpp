@@ -103,6 +103,7 @@ bool KiwiSDRInput::start()
     }
 
     m_kiwiSDRWorkerThread = new QThread();
+    m_kiwiSDRWorkerThread->setObjectName("KiwiSDRInput");
 	m_kiwiSDRWorker = new KiwiSDRWorker(&m_sampleFifo);
     m_kiwiSDRWorker->setInputMessageQueue(getInputMessageQueue());
 	m_kiwiSDRWorker->moveToThread(m_kiwiSDRWorkerThread);

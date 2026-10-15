@@ -55,6 +55,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("FreeDVDemod");
     m_basebandSink = new FreeDVDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
@@ -542,7 +543,11 @@ void FreeDVDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
     SWGSDRangel::SWGFreeDVDemodSettings *swgFreeDVDemodSettings = swgChannelSettings->getFreeDvDemodSettings();
 
@@ -573,10 +578,18 @@ void FreeDVDemod::webapiFormatChannelSettings(
         swgFreeDVDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFreeDVDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgFreeDVDemodSettings->getTitle()) {
+            *swgFreeDVDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgFreeDVDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgFreeDVDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgFreeDVDemodSettings->getAudioDeviceName()) {
+            *swgFreeDVDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgFreeDVDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreeDVDemodSettings->setStreamIndex(settings.m_streamIndex);
@@ -642,4 +655,9 @@ void FreeDVDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+int FreeDVDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

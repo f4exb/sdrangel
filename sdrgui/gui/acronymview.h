@@ -26,11 +26,27 @@
 
 #include "export.h"
 
-// Displays text like a QPlainTextEdit, but adds tooltips for acronyms in the text
+class QMouseEvent;
+
+// Displays text like a QPlainTextEdit, with acronym tooltips and links for
+// Maidenhead locators, amateur radio callsigns, and web URLs.
 class SDRGUI_API AcronymView : public QPlainTextEdit {
     Q_OBJECT
 
     QHash<QString, QString> m_acronym;
+    QString m_pressedUrl;
+    QString m_pressedMaidenhead;
+    QString m_pressedCallsign;
+
+    QString wordAt(const QPoint& position) const;
+    QString urlAt(const QPoint& position) const;
+    QString maidenheadAt(const QPoint& position) const;
+    QString callsignAt(const QPoint& position, QString* country = nullptr) const;
+
+protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 public:
 

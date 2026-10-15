@@ -295,6 +295,7 @@ void MeshtasticDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.settings = config.settings;
 
         runtime.decoderThread = new QThread();
+        runtime.decoderThread->setObjectName(QString("Mesh:dc:%1").arg(config.id));
         runtime.decoder = new MeshtasticDemodDecoder();
         runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
         runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -304,6 +305,7 @@ void MeshtasticDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.decoderThread->start();
 
         runtime.basebandThread = new QThread();
+        runtime.basebandThread->setObjectName(QString("Mesh:bb:%1").arg(config.id));
         runtime.basebandSink = new MeshtasticDemodBaseband();
 
         if (config.id == 0) {
@@ -463,6 +465,7 @@ void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSe
             runtime.settings = config.settings;
 
             runtime.decoderThread = new QThread();
+            runtime.decoderThread->setObjectName(QString("Mesh:dc:%1").arg(config.id));
             runtime.decoder = new MeshtasticDemodDecoder();
             runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
             runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -471,6 +474,7 @@ void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSe
             runtime.decoderThread->start();
 
             runtime.basebandThread = new QThread();
+            runtime.basebandThread->setObjectName(QString("Mesh:bb:%1").arg(config.id));
             runtime.basebandSink = new MeshtasticDemodBaseband();
             // Secondary pipelines (id != 0) do not own the spectrum visualiser.
             runtime.basebandSink->setDecoderMessageQueue(runtime.decoder->getInputMessageQueue());
@@ -597,6 +601,8 @@ QString MeshtasticDemod::buildMeshtasticJsonPacket(
     rf["signal_db"]       = msg.getSingalDb();
     rf["noise_db"]        = msg.getNoiseDb();
     rf["snr_db"]          = msg.getSingalDb() - msg.getNoiseDb();
+    // Emit the carrier frequency offset in Hz rounded to two decimal places.
+    rf["cfoHz"]           = std::round(msg.getCfoHz() * 100.0) / 100.0;
     root["rf"] = rf;
 
     // LoRa
@@ -1406,10 +1412,26 @@ void MeshtasticDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& r
     response.getMeshtasticDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
     response.getMeshtasticDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
     response.getMeshtasticDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getMeshtasticDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getMeshtasticDemodReport()->setMessageString(new QString(m_lastMsgString));
-    response.getMeshtasticDemodReport()->setFrameType(new QString(m_lastFrameType));
-    response.getMeshtasticDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    if (response.getMeshtasticDemodReport()->getMessageTimestamp()) {
+        *response.getMeshtasticDemodReport()->getMessageTimestamp() = m_lastMsgTimestamp;
+    } else {
+        response.getMeshtasticDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    }
+    if (response.getMeshtasticDemodReport()->getMessageString()) {
+        *response.getMeshtasticDemodReport()->getMessageString() = m_lastMsgString;
+    } else {
+        response.getMeshtasticDemodReport()->setMessageString(new QString(m_lastMsgString));
+    }
+    if (response.getMeshtasticDemodReport()->getFrameType()) {
+        *response.getMeshtasticDemodReport()->getFrameType() = m_lastFrameType;
+    } else {
+        response.getMeshtasticDemodReport()->setFrameType(new QString(m_lastFrameType));
+    }
+    if (response.getMeshtasticDemodReport()->getChannelType()) {
+        *response.getMeshtasticDemodReport()->getChannelType() = m_lastMsgPipelineName;
+    } else {
+        response.getMeshtasticDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    }
     response.getMeshtasticDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
     response.getMeshtasticDemodReport()->setMessageBytes(new QList<QString *>);
@@ -1482,7 +1504,11 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
     SWGSDRangel::SWGMeshtasticDemodSettings *swgMeshtasticDemodSettings = swgChannelSettings->getMeshtasticDemodSettings();
 
@@ -1525,7 +1551,11 @@ void MeshtasticDemod::webapiFormatChannelSettings(
         swgMeshtasticDemodSettings->setSendJsonViaUdp(settings.m_sendJsonViaUDP ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgMeshtasticDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgMeshtasticDemodSettings->getUdpAddress()) {
+            *swgMeshtasticDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgMeshtasticDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgMeshtasticDemodSettings->setUdpPort(settings.m_udpPort);
@@ -1537,7 +1567,11 @@ void MeshtasticDemod::webapiFormatChannelSettings(
         swgMeshtasticDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgMeshtasticDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgMeshtasticDemodSettings->getTitle()) {
+            *swgMeshtasticDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgMeshtasticDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrumConfig") || force))
@@ -1654,4 +1688,9 @@ void MeshtasticDemod::handleIndexInDeviceSetChanged(int index)
             .arg(runtime.name);
         runtime.basebandSink->setFifoLabel(fifoLabel);
     }
+}
+
+int MeshtasticDemod::getChannelSampleRate() const
+{
+    return m_pipelines.empty() || !m_pipelines[0].basebandSink ? 0 : m_pipelines[0].basebandSink->getChannelSampleRate();
 }

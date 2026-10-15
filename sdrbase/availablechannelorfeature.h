@@ -27,11 +27,11 @@
 struct SDRBASE_API AvailableChannelOrFeature
 {
     QChar m_kind;           //!< 'R' or 'T' for channel, 'M' for MIMO channel, 'F' for feature as from MainCore::getDeviceSetTypeId
-    int m_superIndex;       //!< Device Set index or Feature Set index
-    int m_index;            //!< Channel or Feature index
-    int m_streamIndex;      //!< For MIMO channels only
+    int m_superIndex = 0;   //!< Device Set index or Feature Set index
+    int m_index = 0;        //!< Channel or Feature index
+    int m_streamIndex = 0;  //!< For MIMO channels only
     QString m_type;         //!< Plugin type (E.g. NFMDemod)
-    QObject *m_object;      //!< Pointer to the object (ChannelAPI or Feature object)
+    QObject *m_object = nullptr; //!< Pointer to the object (ChannelAPI or Feature object)
 
     AvailableChannelOrFeature() = default;
     AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;

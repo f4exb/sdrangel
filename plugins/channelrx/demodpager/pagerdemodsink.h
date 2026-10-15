@@ -35,6 +35,7 @@
 #include "util/messagequeue.h"
 
 #include "pagerdemodsettings.h"
+#include "pagerdemodflex.h"
 
 #define PAGERDEMOD_FRAMES_PER_BATCH     8
 #define PAGERDEMOD_CODEWORDS_PER_FRAME  2
@@ -186,6 +187,7 @@ public:
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
     double getMagSq() const { return m_magsq; }
+    const PagerDemodFlex& getFlex() const { return m_flex; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -285,6 +287,8 @@ private:
     quint32 m_alphaBitBuffer;           // Bit buffer to 7-bit chars spread across codewords
     int m_alphaBitBufferBits;           // Count of bits in m_alphaBitBuffer
 
+    PagerDemodFlex m_flex;              // FLEX receiver, run on the same FM demodulator output
+
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
     ComplexVector m_sampleBuffer;
@@ -296,15 +300,12 @@ private:
     void sampleToScope(Complex sample);
     void decodeBatch();
     void sendMessage();
+    void sendFlexMessage(const PagerDemodFlexMessage& flexMessage);
+    void mapCharacters(QString& message) const;
     void addMessageBits(int messageBits);
     void setBaud(int baud);
     void handleBit(int bit);
     bool matchedFilterAndDpll(Real v);
-    int xorBits(quint32 word, int firstBit, int lastBit);
-    bool evenParity(quint32 word, int firstBit, int lastBit, int parityBit);
-    quint32 reverse(quint32 x);
-    quint32 bchEncode(const quint32 cw);
-    bool bchDecode(const quint32 cw, quint32& correctedCW);
 
 };
 

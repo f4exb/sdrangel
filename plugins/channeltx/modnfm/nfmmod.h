@@ -193,6 +193,7 @@ public:
     QString getIdentifier() const final { return objectName(); }
     void getTitle(QString& title) final { title = m_settings.m_title; }
     qint64 getCenterFrequency() const final { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     void setCenterFrequency(qint64 frequency) final;
 
     QByteArray serialize() const final;
@@ -240,18 +241,13 @@ public:
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
     void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
     uint32_t getNumberOfDeviceStreams() const;
-    int getAudioSampleRate() const;
+    int getAudioSampleRate() const override;
     int getFeedbackAudioSampleRate() const;
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 
 private:
-    enum RateState {
-        RSInitialFill,
-        RSRunning
-    };
-
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
     bool m_running = false;
@@ -260,7 +256,6 @@ private:
     int m_basebandSampleRate;
     qint64 m_centerFrequency;
 
-    SampleVector m_sampleBuffer;
     QRecursiveMutex m_settingsMutex;
 
     std::ifstream m_ifstream;

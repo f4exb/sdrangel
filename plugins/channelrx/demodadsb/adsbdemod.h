@@ -75,6 +75,11 @@ public:
             float m_longitude;
             int m_altitude;
             int m_groundSpeed;
+            // Which of the above have been received. Zero is a valid position, altitude and
+            // speed, so a reader cannot otherwise tell a value apart from one not yet known
+            bool m_positionValid;
+            bool m_altitudeValid;
+            bool m_groundSpeedValid;
         };
 
         QList<AircraftReport>& getReport() { return m_report; }
@@ -124,6 +129,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;

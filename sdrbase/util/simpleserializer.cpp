@@ -313,7 +313,8 @@ bool SimpleSerializer::writeTag(Type type, quint32 id, quint32 length)
 }
 
 SimpleDeserializer::SimpleDeserializer(const QByteArray& data) :
-	m_data(data)
+    m_data(data),
+    m_version(0)
 {
 	m_valid = parseAll();
 

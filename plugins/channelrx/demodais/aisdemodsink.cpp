@@ -213,7 +213,6 @@ void AISDemodSink::processOneSample(Complex &ci)
     m_sampleCounter++;
     m_rxBufCnt = std::min(m_rxBufCnt + 1, m_rxBufLength);
 
-    Real corr = 0.0f;
     Real metric = 0.0f;
     bool scopeCRCValid = false;
     bool scopeCRCInvalid = false;
@@ -253,7 +252,6 @@ void AISDemodSink::processOneSample(Complex &ci)
 
             // |m_trainIQ| is 1, so a clean match of amplitude A gives sumMag = A*N against
             // sqrt(iqEnergy*N) = A*N, i.e. 1. Noise lands near 0.886/sqrt(blockLen).
-            corr = (Real) sumMag;
             metric = (Real) (sumMag / (sqrt(iqEnergy * (double) (blockLen*blocks)) + 1e-12));
             thresholdMet = metric >= m_settings.m_correlationThreshold;
         }

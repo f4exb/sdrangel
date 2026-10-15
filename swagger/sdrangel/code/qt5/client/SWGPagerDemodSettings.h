@@ -45,6 +45,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPagerDemodSettings* fromJson(QString &jsonString) override;
 
+    qint32 getModulation();
+    void setModulation(qint32 modulation);
+
     qint32 getDecode();
     void setDecode(qint32 decode);
 
@@ -112,6 +115,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 modulation;
+    bool m_modulation_isSet;
+
     qint32 decode;
     bool m_decode_isSet;
 

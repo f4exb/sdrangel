@@ -55,10 +55,12 @@ RemoteTCPSink::RemoteTCPSink(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
+        m_networkManager(nullptr),
         m_clients(0),
         m_removeRequest(nullptr)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RemoteTCPSinkBB");
 
     m_basebandSink = new RemoteTCPSinkBaseband();
     m_basebandSink->setMessageQueueToChannel(&m_inputMessageQueue);
@@ -570,7 +572,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRemoteTcpSinkSettings(new SWGSDRangel::SWGRemoteTCPSinkSettings());
     SWGSDRangel::SWGRemoteTCPSinkSettings *swgRemoteTCPSinkSettings = swgChannelSettings->getRemoteTcpSinkSettings();
 
@@ -589,7 +595,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
         swgRemoteTCPSinkSettings->setSampleBits(settings.m_sampleBits);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgRemoteTCPSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        if (swgRemoteTCPSinkSettings->getDataAddress()) {
+            *swgRemoteTCPSinkSettings->getDataAddress() = settings.m_dataAddress;
+        } else {
+            swgRemoteTCPSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        }
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
         swgRemoteTCPSinkSettings->setDataPort(settings.m_dataPort);
@@ -601,7 +611,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
         swgRemoteTCPSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRemoteTCPSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgRemoteTCPSinkSettings->getTitle()) {
+            *swgRemoteTCPSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgRemoteTCPSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRemoteTCPSinkSettings->setStreamIndex(settings.m_streamIndex);
@@ -751,4 +765,9 @@ void RemoteTCPSink::updatePublicListing()
     QByteArray data = doc.toJson();
 
     m_networkManager->post(request, data);
+}
+
+int RemoteTCPSink::getChannelSampleRate() const
+{
+    return m_settings.m_channelSampleRate;
 }

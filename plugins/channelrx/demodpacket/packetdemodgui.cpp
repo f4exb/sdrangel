@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QSignalBlocker>
 #include <QMessageBox>
 #include <QAction>
 #include <QRegularExpression>
@@ -36,6 +37,7 @@
 #include "plugin/pluginapi.h"
 #include "util/csv.h"
 #include "util/db.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/dialogpositioner.h"
@@ -233,12 +235,12 @@ void PacketDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -264,9 +266,13 @@ void PacketDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void PacketDemodGUI::on_mode_currentIndexChanged(int value)
 {
-    (void) value;
-    QString mode = ui->mode->currentText();
-    // TODO: Support 9600 FSK
+    if (!PacketDemodSettings::isValidMode(value)) {
+        return;
+    }
+    m_settings.m_mode = static_cast<PacketDemodSettings::Mode>(value);
+    m_settings.m_rfBandwidth = m_settings.isAFSK() ? 12500.0f : 20000.0f;
+    displaySettings();
+    applySettings(QStringList({"mode", "rfBandwidth"}));
 }
 
 void PacketDemodGUI::on_rfBW_valueChanged(int value)
@@ -573,6 +579,10 @@ void PacketDemodGUI::displaySettings()
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
 
+    const QSignalBlocker modeBlocker(ui->mode);
+    ui->mode->setCurrentIndex(static_cast<int>(m_settings.m_mode));
+    ui->mlse->setEnabled(m_settings.isAFSK());
+    ui->chase->setEnabled(m_settings.isAFSK());
     ui->mlse->setChecked(m_settings.m_mlse);
     ui->chase->setValue(m_settings.m_chase);
 
@@ -719,12 +729,12 @@ void PacketDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "Packet Demod", error);
+                    MessageDialog::critical(this, "Packet Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "Packet Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Packet Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

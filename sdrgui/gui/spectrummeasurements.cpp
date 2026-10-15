@@ -197,7 +197,10 @@ SpectrumMeasurements::SpectrumMeasurements(QWidget *parent) :
     QWidget(parent),
     m_measurement(SpectrumSettings::MeasurementPeaks),
     m_precision(1),
+    m_memMask(0),
     m_table(nullptr),
+    m_rowMenu(nullptr),
+    m_columnMenu(nullptr),
     m_peakTable(nullptr),
     m_maskTable(nullptr)
 {

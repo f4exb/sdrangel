@@ -50,6 +50,7 @@
 #include "util/units.h"
 #include "util/morse.h"
 #include "util/profiler.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/clickablelabel.h"
@@ -1544,6 +1545,14 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
             messageQueue->push(msg);
         }
+    }
+    else
+    {
+        // mapPipes.size() == 0
+        for (auto animation : *animations) {
+            delete animation;
+        }
+        delete animations;
     }
 }
 
@@ -5412,12 +5421,12 @@ void ADSBDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -7545,6 +7554,10 @@ void ADSBDemodGUI::removeAircraft(QHash<int, Aircraft *>::iterator& i, Aircraft 
         m_adsbDemod->clearTarget();
         m_trackAircraft = nullptr;
     }
+    if (m_highlightAircraft == aircraft)
+    {
+        highlightAircraft(nullptr);
+    }
 
     // Remove map model
     m_aircraftModel.removeAircraft(aircraft);
@@ -7759,7 +7772,10 @@ void ADSBDemodGUI::sendAircraftReport()
             aircraft->m_latitude,
             aircraft->m_longitude,
             aircraft->m_altitude,
-            aircraft->m_groundspeed
+            aircraft->m_groundspeed,
+            aircraft->m_positionValid,
+            aircraft->m_altitudeValid,
+            aircraft->m_groundspeedValid
         };
 
         report.append(aircraftReport);
@@ -8074,7 +8090,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "ADS-B", error);
+                    MessageDialog::critical(this, "ADS-B", error);
                 }
                 ui->adsbData->blockSignals(false);
                 m_loadingData = false;
@@ -8086,7 +8102,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
             }
             else
             {
-                QMessageBox::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }
@@ -8112,7 +8128,7 @@ void ADSBDemodGUI::downloadProgress(qint64 bytesRead, qint64 totalBytes)
 
 void ADSBDemodGUI::downloadError(const QString& error)
 {
-    QMessageBox::critical(this, "ADS-B", error);
+    MessageDialog::critical(this, "ADS-B", error);
     if (m_progressDialog)
     {
         m_progressDialog->close();

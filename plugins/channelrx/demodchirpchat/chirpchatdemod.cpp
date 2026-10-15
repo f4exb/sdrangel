@@ -136,6 +136,7 @@ void ChirpChatDemod::start()
 
     qDebug() << "ChirpChatDemod::start";
     m_decoderThread = new QThread(this);
+    m_decoderThread->setObjectName("CCDemod:decode");
     m_decoder = new ChirpChatDemodDecoder();
     m_decoder->setOutputMessageQueue(getInputMessageQueue());
     m_decoder->setNbSymbolBits(m_settings.m_spreadFactor, m_settings.m_deBits);
@@ -151,6 +152,7 @@ void ChirpChatDemod::start()
     m_decoderThread->start();
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("CCDemod:bb");
     m_basebandSink = new ChirpChatDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setDecoderMessageQueue(m_decoder->getInputMessageQueue());
@@ -183,6 +185,7 @@ void ChirpChatDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
     m_decoderThread->exit();
     m_decoderThread->wait();
     m_decoderThread = nullptr;
@@ -863,8 +866,16 @@ void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& re
     response.getChirpChatDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
     response.getChirpChatDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
     response.getChirpChatDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
+    if (response.getChirpChatDemodReport()->getMessageTimestamp()) {
+        *response.getChirpChatDemodReport()->getMessageTimestamp() = m_lastMsgTimestamp;
+    } else {
+        response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    }
+    if (response.getChirpChatDemodReport()->getMessageString()) {
+        *response.getChirpChatDemodReport()->getMessageString() = m_lastMsgString;
+    } else {
+        response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
+    }
     response.getChirpChatDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
     response.getChirpChatDemodReport()->setMessageBytes(new QList<QString *>);
@@ -937,7 +948,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
     SWGSDRangel::SWGChirpChatDemodSettings *swgChirpChatDemodSettings = swgChannelSettings->getChirpChatDemodSettings();
 
@@ -989,7 +1004,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
         swgChirpChatDemodSettings->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgChirpChatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgChirpChatDemodSettings->getUdpAddress()) {
+            *swgChirpChatDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgChirpChatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("updPort") || force) {
         swgChirpChatDemodSettings->setUdpPort(settings.m_udpPort);
@@ -1001,7 +1020,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
         swgChirpChatDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgChirpChatDemodSettings->getTitle()) {
+            *swgChirpChatDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
@@ -1073,4 +1096,9 @@ void ChirpChatDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int ChirpChatDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

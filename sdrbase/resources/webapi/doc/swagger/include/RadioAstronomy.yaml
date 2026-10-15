@@ -4,79 +4,115 @@ RadioAstronomySettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     rfBandwidth:
       type: integer
+      description: "RF bandwidth in Hz."
     integration:
       type: integer
+      description: "Integration setting for Radio astronomy."
     fftSize:
       type: integer
+      description: "FFT size in samples."
     fftWindow:
       type: integer
+      description: "FFT window setting for Radio astronomy."
     filterFreqs:
       type: string
+      description: "Filter freqs setting for Radio astronomy."
     starTracker:
       type: string
+      description: "Star tracker setting for Radio astronomy."
     rotator:
       type: string
+      description: "Rotator setting for Radio astronomy."
     runMode:
       description: "(0 for single, 1 for continuous, 2 for sweep)"
       type: integer
+      minimum: 0
+      maximum: 2
     sweepStartAtTime:
       description: "(0 for now, 1 for at sweepStartDateTime)"
       type: integer
+      minimum: 0
+      maximum: 1
     sweepStartDateTime:
       type: string
+      description: "Sweep start date time setting for Radio astronomy."
     sweepType:
       description: "(0 for Az/El, 1 for l/b, 2 for offset)"
       type: integer
+      minimum: 0
+      maximum: 2
     sweep1Start:
       type: number
       format: float
+      description: "Sweep1 start setting for Radio astronomy."
     sweep1Stop:
       type: number
       format: float
+      description: "Sweep1 stop setting for Radio astronomy."
     sweep1Step:
       type: number
       format: float
+      description: "Sweep1 step setting for Radio astronomy."
     sweep1Delay:
       type: number
       format: float
+      description: "Sweep1 delay setting for Radio astronomy."
     sweep2Start:
       type: number
       format: float
+      description: "Sweep2 start setting for Radio astronomy."
     sweep2Stop:
       type: number
       format: float
+      description: "Sweep2 stop setting for Radio astronomy."
     sweep2Step:
       type: number
       format: float
+      description: "Sweep2 step setting for Radio astronomy."
     sweep2Delay:
       type: number
       format: float
+      description: "Sweep2 delay setting for Radio astronomy."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 RadioAstronomyReport:
   description: RadioAstronomy
@@ -87,6 +123,7 @@ RadioAstronomyReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 
 RadioAstronomyActions:
   description: RadioAstronomy

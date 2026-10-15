@@ -29,6 +29,7 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
+    setObjectName("LimeSDROutput");
     std::fill(m_buf, m_buf + 2*DeviceLimeSDR::blockSize, 0);
 }
 

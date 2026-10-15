@@ -72,6 +72,10 @@
 #include "SWGDeviceReport.h"
 #include "SWGDeviceActions.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGWorkspaceActions.h"
+#include "SWGWindowList.h"
+#include "SWGGLSpectrumHistory.h"
+#include "SWGWindowInfo.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -1740,6 +1744,159 @@ int WebAPIAdapter::instanceWorkspaceDelete(
     return 202;
 }
 
+int WebAPIAdapter::workspaceActionsPost(
+        int workspaceIndex,
+        SWGSDRangel::SWGWorkspaceActions& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    // The workspaces live in the GUI, which is the only place their number is known, so the
+    // index is checked there and an out of range one is logged rather than reported
+    (void) error;
+    const QString arrange = query.getArrange() ? *query.getArrange() : QString();
+    MainCore::MsgArrangeWorkspace::Arrangement arrangement;
+
+    if (arrange == "cascade") {
+        arrangement = MainCore::MsgArrangeWorkspace::Cascade;
+    } else if (arrange == "tile") {
+        arrangement = MainCore::MsgArrangeWorkspace::Tile;
+    } else if (arrange == "stackVertical") {
+        arrangement = MainCore::MsgArrangeWorkspace::StackVertical;
+    } else if (arrange == "stack") {
+        arrangement = MainCore::MsgArrangeWorkspace::Stack;
+    } else if (arrange == "autostack") {
+        arrangement = MainCore::MsgArrangeWorkspace::AutoStack;
+    } else if (arrange == "tab") {
+        arrangement = MainCore::MsgArrangeWorkspace::Tab;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Unknown arrangement %1").arg(arrange);
+        return 400;
+    }
+
+    MainCore::MsgArrangeWorkspace *msg = MainCore::MsgArrangeWorkspace::create(workspaceIndex, arrangement);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getMessage() = QString("Message to arrange workspace %1 (MsgArrangeWorkspace) was submitted successfully").arg(workspaceIndex);
+
+    return 202;
+}
+
+void WebAPIAdapter::applyWindowState(const void *owner, SWGSDRangel::SWGWorkspaceInfo& response)
+{
+    MainCore::WindowState state;
+
+    // The GUI's word for the workspace is taken over the channel's own, which channel plugins
+    // update only when their settings are next applied
+    if (m_mainCore->getWindowState(owner, state))
+    {
+        if (state.m_workspaceIndex >= 0) {
+            response.setIndex(state.m_workspaceIndex);
+        }
+
+        response.setHidden(state.m_hidden ? 1 : 0);
+    }
+}
+
+int WebAPIAdapter::channelWorkspaceGet(ChannelAPI *channelAPI, SWGSDRangel::SWGWorkspaceInfo& response, QString& errorMessage)
+{
+    int status = channelAPI->webapiWorkspaceGet(response, errorMessage);
+
+    if (status / 100 == 2) {
+        applyWindowState(channelAPI, response);
+    }
+
+    return status;
+}
+
+bool WebAPIAdapter::postWindowHidden(MainCore::MsgSetWindowHidden::Kind kind, int deviceSetIndex, int index, const SWGSDRangel::SWGWorkspaceInfo& query)
+{
+    // The validator passes -1 for a field the request did not carry
+    const int hidden = const_cast<SWGSDRangel::SWGWorkspaceInfo&>(query).getHidden();
+
+    if (hidden < 0) {
+        return false;
+    }
+
+    m_mainCore->m_mainMessageQueue->push(MainCore::MsgSetWindowHidden::create(kind, deviceSetIndex, index, hidden != 0));
+    return true;
+}
+
+int WebAPIAdapter::instanceWindowsGet(
+        SWGSDRangel::SWGWindowList& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    response.init();
+    QList<SWGSDRangel::SWGWindowInfo*> *windows = response.getWindows();
+
+    auto add = [&](const QString& kind, int deviceSetIndex, int index, const QString& fallbackTitle, int fallbackWorkspace, const void *owner)
+    {
+        MainCore::WindowState state;
+        const bool published = m_mainCore->getWindowState(owner, state);
+        SWGSDRangel::SWGWindowInfo *window = new SWGSDRangel::SWGWindowInfo();
+        window->init();
+        window->setKind(new QString(kind));
+
+        if (deviceSetIndex >= 0) {
+            window->setDeviceSetIndex(deviceSetIndex);
+        }
+
+        if (index >= 0) {
+            window->setIndex(index);
+        }
+
+        window->setTitle(new QString(published && !state.m_title.isEmpty() ? state.m_title : fallbackTitle));
+        window->setWorkspaceIndex(published && (state.m_workspaceIndex >= 0) ? state.m_workspaceIndex : fallbackWorkspace);
+        window->setHidden(published && state.m_hidden ? 1 : 0);
+        windows->append(window);
+    };
+
+    for (int i = 0; i < (int) m_mainCore->m_deviceSets.size(); i++)
+    {
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[i];
+        add("device", i, -1, deviceSet->m_deviceAPI->getSamplingDeviceDisplayName(), deviceSet->m_deviceAPI->getWorkspaceIndex(), deviceSet->m_deviceAPI);
+        add("spectrum", i, -1, "Spectrum", deviceSet->m_spectrumVis->getWorkspaceIndex(), deviceSet->m_spectrumVis);
+
+        for (int c = 0; c < deviceSet->getNumberOfChannels(); c++)
+        {
+            ChannelAPI *channel = deviceSet->getChannelAt(c);
+
+            if (!channel) {
+                continue;
+            }
+
+            QString title;
+            channel->getTitle(title);
+            SWGSDRangel::SWGWorkspaceInfo info;
+            QString ignored;
+            info.init();
+            int workspace = (channel->webapiWorkspaceGet(info, ignored) / 100 == 2) ? info.getIndex() : -1;
+            add("channel", i, c, title.isEmpty() ? channel->getIdentifier() : title, workspace, channel);
+        }
+    }
+
+    if (!m_mainCore->m_featureSets.empty())
+    {
+        const FeatureSet *featureSet = m_mainCore->m_featureSets[0];
+
+        for (int f = 0; f < featureSet->getNumberOfFeatures(); f++)
+        {
+            const Feature *feature = featureSet->getFeatureAt(f);
+
+            if (feature) {
+                add("feature", -1, f, feature->getIdentifier(), feature->getWorkspaceIndex(), feature);
+            }
+        }
+    }
+
+    response.setWindowCount(windows->size());
+    return 200;
+}
+
 int WebAPIAdapter::devicesetGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSet& response,
@@ -1761,11 +1918,126 @@ int WebAPIAdapter::devicesetGet(
     }
 }
 
+int WebAPIAdapter::devicesetSpectrumActionsPost(
+        int deviceSetIndex,
+        const QStringList& spectrumActionsKeys,
+        SWGSDRangel::SWGSpectrumActions& query,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumActionsPost(spectrumActionsKeys, query, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetSpectrumHistoryGet(
+        int deviceSetIndex,
+        double seconds,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        double thresholdDb,
+        SWGSDRangel::SWGGLSpectrumHistory& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumHistoryGet(seconds, bins, startFrequency, stopFrequency, thresholdDb, response, *error.getMessage());
+    }
+
+    *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+    return 404;
+}
+
+int WebAPIAdapter::devicesetSpectrumHistoryImageGet(
+        int deviceSetIndex,
+        double seconds,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        int maxRows,
+        QByteArray& png,
+        QJsonObject& description,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumHistoryImageGet(seconds, bins, startFrequency, stopFrequency, maxRows, png, description, *error.getMessage());
+    }
+
+    *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+    return 404;
+}
+
+int WebAPIAdapter::devicesetSpectrumDataGet(
+        int deviceSetIndex,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        const QString& reduce,
+        SWGSDRangel::SWGGLSpectrumData& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumDataGet(bins, startFrequency, stopFrequency, reduce, response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetSpectrumReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGGLSpectrumReport& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumReportGet(response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapter::devicesetSpectrumSettingsGet(
         int deviceSetIndex,
         SWGSDRangel::SWGGLSpectrum& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
         const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
@@ -1873,6 +2145,7 @@ int WebAPIAdapter::devicesetSpectrumWorkspaceGet(
     {
         const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         response.setIndex(deviceSet->m_spectrumVis->getWorkspaceIndex());
+        applyWindowState(deviceSet->m_spectrumVis, response);
         return 200;
     }
     else
@@ -1892,10 +2165,16 @@ int WebAPIAdapter::devicesetSpectrumWorkspacePut(
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
         int workspaceIndex = query.getIndex();
-        MainCore::MsgMoveMainSpectrumUIToWorkspace *msg = MainCore::MsgMoveMainSpectrumUIToWorkspace::create(deviceSetIndex, workspaceIndex);
-        m_mainCore->m_mainMessageQueue->push(msg);
+
+        if (workspaceIndex >= 0)
+        {
+            MainCore::MsgMoveMainSpectrumUIToWorkspace *msg = MainCore::MsgMoveMainSpectrumUIToWorkspace::create(deviceSetIndex, workspaceIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
+        }
+
+        postWindowHidden(MainCore::MsgSetWindowHidden::Spectrum, deviceSetIndex, -1, query);
         response.init();
-        *response.getMessage() = QString("Message to move a main spectrum to workspace (MsgMoveMainSpectrumUIToWorkspace) was submitted successfully");
+        *response.getMessage() = QString("Message to move or show a main spectrum window (MsgMoveMainSpectrumUIToWorkspace, MsgSetWindowHidden) was submitted successfully");
         return 202;
     }
     else
@@ -2170,6 +2449,7 @@ int WebAPIAdapter::devicesetDeviceWorkspaceGet(
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
         response.setIndex(m_mainCore->m_deviceSets[deviceSetIndex]->m_deviceAPI->getWorkspaceIndex());
+        applyWindowState(m_mainCore->m_deviceSets[deviceSetIndex]->m_deviceAPI, response);
         return 200;
     }
     else
@@ -2189,10 +2469,16 @@ int WebAPIAdapter::devicesetDeviceWorkspacePut(
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
         int workspaceIndex = query.getIndex();
-        MainCore::MsgMoveDeviceUIToWorkspace *msg = MainCore::MsgMoveDeviceUIToWorkspace::create(deviceSetIndex, workspaceIndex);
-        m_mainCore->m_mainMessageQueue->push(msg);
+
+        if (workspaceIndex >= 0)
+        {
+            MainCore::MsgMoveDeviceUIToWorkspace *msg = MainCore::MsgMoveDeviceUIToWorkspace::create(deviceSetIndex, workspaceIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
+        }
+
+        postWindowHidden(MainCore::MsgSetWindowHidden::Device, deviceSetIndex, -1, query);
         response.init();
-        *response.getMessage() = QString("Message to move a device UI to workspace (MsgMoveDeviceUIToWorkspace) was submitted successfully");
+        *response.getMessage() = QString("Message to move or show a device window (MsgMoveDeviceUIToWorkspace, MsgSetWindowHidden) was submitted successfully");
         return 202;
     }
     else
@@ -3096,7 +3382,7 @@ int WebAPIAdapter::devicesetChannelWorkspaceGet(
             }
             else
             {
-                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+                return channelWorkspaceGet(channelAPI, response, *error.getMessage());
             }
         }
         else if (deviceSet->m_deviceSinkEngine) // Single Tx
@@ -3110,7 +3396,7 @@ int WebAPIAdapter::devicesetChannelWorkspaceGet(
             }
             else
             {
-                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+                return channelWorkspaceGet(channelAPI, response, *error.getMessage());
             }
         }
         else if (deviceSet->m_deviceMIMOEngine) // MIMO
@@ -3140,7 +3426,7 @@ int WebAPIAdapter::devicesetChannelWorkspaceGet(
 
             if (channelAPI)
             {
-                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+                return channelWorkspaceGet(channelAPI, response, *error.getMessage());
             }
             else
             {
@@ -3177,10 +3463,16 @@ int WebAPIAdapter::devicesetChannelWorkspacePut(
         if ((channelIndex >= 0) && (channelIndex < deviceSet->getNumberOfChannels()))
         {
             int workspaceIndex = query.getIndex();
-            MainCore::MsgMoveChannelUIToWorkspace *msg = MainCore::MsgMoveChannelUIToWorkspace::create(deviceSetIndex, channelIndex, workspaceIndex);
-            m_mainCore->m_mainMessageQueue->push(msg);
+
+            if (workspaceIndex >= 0)
+            {
+                MainCore::MsgMoveChannelUIToWorkspace *msg = MainCore::MsgMoveChannelUIToWorkspace::create(deviceSetIndex, channelIndex, workspaceIndex);
+                m_mainCore->m_mainMessageQueue->push(msg);
+            }
+
+            postWindowHidden(MainCore::MsgSetWindowHidden::Channel, deviceSetIndex, channelIndex, query);
             response.init();
-            *response.getMessage() = QString("Message to move a channel UI to workspace (MsgMoveChannelUIToWorkspace) was submitted successfully");
+            *response.getMessage() = QString("Message to move or show a channel window (MsgMoveChannelUIToWorkspace, MsgSetWindowHidden) was submitted successfully");
             return 202;
         }
         else
@@ -3783,11 +4075,12 @@ int WebAPIAdapter::featuresetFeatureWorkspaceGet(
         SWGSDRangel::SWGWorkspaceInfo& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    if ((featureIndex >= 0) && (m_mainCore->m_featureSets.size() > 0) && (featureIndex < m_mainCore->m_featureSets[0]->getNumberOfFeatures()))
     {
         FeatureSet *featureSet = m_mainCore->m_featureSets[0];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
         response.setIndex(feature->getWorkspaceIndex());
+        applyWindowState(feature, response);
         return 200;
     }
     else
@@ -3804,13 +4097,19 @@ int WebAPIAdapter::featuresetFeatureWorkspacePut(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    if ((featureIndex >= 0) && (m_mainCore->m_featureSets.size() > 0) && (featureIndex < m_mainCore->m_featureSets[0]->getNumberOfFeatures()))
     {
         int workspaceIndex = query.getIndex();
-        MainCore::MsgMoveFeatureUIToWorkspace *msg = MainCore::MsgMoveFeatureUIToWorkspace::create(featureIndex, workspaceIndex);
-        m_mainCore->m_mainMessageQueue->push(msg);
+
+        if (workspaceIndex >= 0)
+        {
+            MainCore::MsgMoveFeatureUIToWorkspace *msg = MainCore::MsgMoveFeatureUIToWorkspace::create(featureIndex, workspaceIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
+        }
+
+        postWindowHidden(MainCore::MsgSetWindowHidden::Feature, -1, featureIndex, query);
         response.init();
-        *response.getMessage() = QString("Message to move a feature UI to workspace (MsgMoveFeatureUIToWorkspace) was submitted successfully");
+        *response.getMessage() = QString("Message to move or show a feature window (MsgMoveFeatureUIToWorkspace, MsgSetWindowHidden) was submitted successfully");
         return 202;
     }
     else

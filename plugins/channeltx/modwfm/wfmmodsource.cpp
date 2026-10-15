@@ -398,11 +398,13 @@ void WFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
 
     qDebug("WFMModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
 
+    // Resample from the audio input rate to the feedback device rate. The distance is
+    // input samples per output sample and the filter is designed at the input rate.
     m_feedbackInterpolatorDistanceRemain = 0;
     m_feedbackInterpolatorConsumed = false;
-    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    m_feedbackInterpolatorDistance = (Real) m_audioSampleRate / (Real) sampleRate;
     Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
-    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+    m_feedbackInterpolator.create(48, m_audioSampleRate, cutoff, 3.0);
 
     m_feedbackAudioSampleRate = sampleRate;
 }

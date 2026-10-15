@@ -1,0 +1,69 @@
+{
+  "manifest_version": "0.3",
+  "name": "sdrangel",
+  "display_name": "SDRangel",
+  "version": "@MCPBRIDGE_BUNDLE_VERSION@",
+  "description": "Control SDRangel, the software defined radio application: tune a receiver, add demodulators, scan for activity and read what has been decoded.",
+  "long_description": "Connects Claude to a running instance of SDRangel through its MCP Server feature. Ask it to listen to a frequency in a given mode, scan a band and report what it heard, add and configure demodulators, read reports from running plugins, record IQ or audio, and load or save presets and configurations.\n\nSDRangel must be running with the MCP Server feature added and started. The feature's window shows the port it is listening on, which must match the port set here.",
+  "author": {
+    "name": "Jon Beniston, M7RCE",
+    "email": "jon@beniston.com",
+    "url": "https://github.com/f4exb/sdrangel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/f4exb/sdrangel"
+  },
+  "homepage": "https://github.com/f4exb/sdrangel",
+  "documentation": "https://github.com/f4exb/sdrangel/blob/master/plugins/feature/mcpserver/readme.md",
+  "support": "https://github.com/f4exb/sdrangel/issues",
+  "icon": "icon.png",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "sdr",
+    "software-defined-radio",
+    "radio",
+    "rtl-sdr",
+    "scanner",
+    "ham-radio"
+  ],
+  "server": {
+    "type": "binary",
+    "entry_point": "server/sdrangel-mcp-bridge",
+    "mcp_config": {
+      "command": "${__dirname}/server/sdrangel-mcp-bridge",
+      "args": [
+        "--port",
+        "${user_config.port}",
+        "--token",
+        "${user_config.token}"
+      ],
+      "platform_overrides": {
+        "win32": {
+          "command": "${__dirname}/server/sdrangel-mcp-bridge.exe"
+        }
+      }
+    }
+  },
+  "user_config": {
+    "port": {
+      "type": "number",
+      "title": "Port",
+      "description": "The port SDRangel's MCP Server feature is listening on",
+      "default": 8092,
+      "min": 1,
+      "max": 65535,
+      "required": false
+    },
+    "token": {
+      "type": "string",
+      "title": "Bearer token",
+      "description": "Only needed if a token has been set in the MCP Server feature. Leave empty otherwise.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["win32", "darwin", "linux"]
+  }
+}

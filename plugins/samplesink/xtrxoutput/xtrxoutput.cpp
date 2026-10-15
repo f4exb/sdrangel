@@ -242,6 +242,10 @@ void XTRXOutput::moveThreadToBuddy()
 
 bool XTRXOutput::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // There is a single thread per physical device (Tx side). This thread is unique and referenced by a unique
     // buddy in the group of sink buddies associated with this physical device.
     //
@@ -364,6 +368,10 @@ bool XTRXOutput::start()
 
 void XTRXOutput::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // This stop method is responsible for managing the thread when the streaming of a Rx channel is stopped
     //
     // If the thread is currently managing only one channel (SO mode). The thread can be just stopped and deleted.

@@ -56,6 +56,9 @@ const char* const AMMod::m_channelId ="AMMod";
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_thread(nullptr),
+    m_running(false),
+    m_basebandSource(nullptr),
     m_basebandSampleRate(0),
     m_centerFrequency(0)
 {
@@ -113,6 +116,7 @@ void AMMod::start()
 
 	qDebug("AMMod::start");
     m_thread = new QThread(this);
+    m_thread->setObjectName("AMMod");
     m_basebandSource = new AMModBaseband();
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);
@@ -158,6 +162,7 @@ void AMMod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSource = nullptr; // Freed by deleteLater when the thread finished
 }
 
 void AMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
@@ -342,7 +347,11 @@ void AMMod::applySettings(const QStringList& settingsKeys, const AMModSettings& 
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray AMMod::serialize() const
@@ -699,7 +708,11 @@ void AMMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
     SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
 
@@ -715,7 +728,11 @@ void AMMod::webapiFormatChannelSettings(
         swgAMModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgAMModSettings->getAudioDeviceName()) {
+            *swgAMModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgAMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
@@ -727,7 +744,11 @@ void AMMod::webapiFormatChannelSettings(
         swgAMModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAMModSettings->setTitle(new QString(settings.m_title));
+        if (swgAMModSettings->getTitle()) {
+            *swgAMModSettings->getTitle() = settings.m_title;
+        } else {
+            swgAMModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgAMModSettings->setToneFrequency(settings.m_toneFrequency);
@@ -816,4 +837,9 @@ int AMMod::getFeedbackAudioSampleRate() const
     }
 
     return 0;
+}
+
+int AMMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
 }

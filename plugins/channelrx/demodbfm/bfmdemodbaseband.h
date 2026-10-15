@@ -78,6 +78,7 @@ public:
 
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     int getSquelchState() const { return m_sink.getSquelchState(); }
+    bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
 	double getMagSq() const { return m_sink.getMagSq(); }
 	bool getPilotLock() const { return m_sink.getPilotLock(); }
 	Real getPilotLevel() const { return m_sink.getPilotLevel(); }

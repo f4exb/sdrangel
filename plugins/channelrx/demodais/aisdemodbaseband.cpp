@@ -120,11 +120,12 @@ void AISDemodBaseband::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -171,6 +172,11 @@ void AISDemodBaseband::applySettings(const AISDemodSettings& settings, const QSt
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
+}
+
+int AISDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
 }
 
 void AISDemodBaseband::setBasebandSampleRate(int sampleRate)

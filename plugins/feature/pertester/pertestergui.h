@@ -22,7 +22,6 @@
 #ifndef INCLUDE_FEATURE_PERTESTERGUI_H_
 #define INCLUDE_FEATURE_PERTESTERGUI_H_
 
-#include <QTimer>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -64,8 +63,6 @@ private:
 
     PERTester* m_perTester;
     MessageQueue m_inputMessageQueue;
-    QTimer m_statusTimer;
-    int m_lastFeatureState;
 
     explicit PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~PERTesterGUI();
@@ -93,7 +90,7 @@ private slots:
     void on_txUDPPort_editingFinished();
     void on_rxUDPAddress_editingFinished();
     void on_rxUDPPort_editingFinished();
-    void updateStatus();
+    void updateFeatureState();
 };
 
 #endif // INCLUDE_FEATURE_PERTESTERGUI_H_

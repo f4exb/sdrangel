@@ -85,7 +85,6 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
             }
 
 			m_tvScreen->renderImage(0);
-			m_tvScreen->update();
             std::this_thread::sleep_for(std::chrono::microseconds(5000));
 			m_tvScreen->resetImage(m_alphaReset);
             drawGraticule();
@@ -106,11 +105,12 @@ void ScopeVisXY::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

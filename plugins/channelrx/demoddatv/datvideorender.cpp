@@ -34,7 +34,8 @@ extern "C"
 
 DATVideoRender::DATVideoRender(QWidget *parent) :
     TVScreen(true, parent),
-    m_parentWidget(parent)
+    m_parentWidget(parent),
+    m_decodedData{}
 {
     installEventFilter(this);
     m_isFullScreen = false;
@@ -521,7 +522,6 @@ bool DATVideoRender::renderStream()
                     //Rendering device setup
 
                     resizeTVScreen(m_frame->width, m_frame->height);
-                    update();
                     resetImage();
 
                     m_currentRenderWidth = m_frame->width;

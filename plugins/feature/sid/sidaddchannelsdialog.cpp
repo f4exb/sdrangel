@@ -30,7 +30,10 @@
 SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SIDAddChannelsDialog),
-    m_settings(settings)
+    m_settings(settings),
+    m_row(0),
+    m_col(0),
+    m_count(0)
 {
     ui->setupUi(this);
 

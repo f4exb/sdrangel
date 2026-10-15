@@ -47,6 +47,7 @@ InmarsatDemod::InmarsatDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("InmarsatBB");
 
     m_basebandSink = new InmarsatDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
@@ -475,9 +476,17 @@ void InmarsatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     response.getInmarsatDemodSettings()->setRrcRolloff(settings.m_rrcRolloff);
     response.getInmarsatDemodSettings()->setPllBandwidth(settings.m_pllBW);
     response.getInmarsatDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getInmarsatDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getInmarsatDemodSettings()->getUdpAddress()) {
+        *response.getInmarsatDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getInmarsatDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getInmarsatDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getInmarsatDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getInmarsatDemodSettings()->getLogFilename()) {
+        *response.getInmarsatDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getInmarsatDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getInmarsatDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getInmarsatDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -575,7 +584,11 @@ void InmarsatDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("InmarsatDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "InmarsatDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("InmarsatDemod"));
+    }
     swgChannelSettings->setInmarsatDemodSettings(new SWGSDRangel::SWGInmarsatDemodSettings());
     SWGSDRangel::SWGInmarsatDemodSettings *swgInmarsatDemodSettings = swgChannelSettings->getInmarsatDemodSettings();
 
@@ -597,13 +610,21 @@ void InmarsatDemod::webapiFormatChannelSettings(
         swgInmarsatDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgInmarsatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgInmarsatDemodSettings->getUdpAddress()) {
+            *swgInmarsatDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgInmarsatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgInmarsatDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgInmarsatDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgInmarsatDemodSettings->getLogFilename()) {
+            *swgInmarsatDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgInmarsatDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgInmarsatDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -615,7 +636,11 @@ void InmarsatDemod::webapiFormatChannelSettings(
         swgInmarsatDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgInmarsatDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgInmarsatDemodSettings->getTitle()) {
+            *swgInmarsatDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgInmarsatDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgInmarsatDemodSettings->setStreamIndex(settings.m_streamIndex);
@@ -668,4 +693,14 @@ void InmarsatDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int InmarsatDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int InmarsatDemod::getAudioSampleRate() const
+{
+    return InmarsatDemodSettings::CHANNEL_SAMPLE_RATE;
 }

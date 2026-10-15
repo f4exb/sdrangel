@@ -35,6 +35,9 @@ public:
         delete[] m_data;
     }
 
+    DoubleBufferFIFO(const DoubleBufferFIFO&) = delete;
+    DoubleBufferFIFO& operator=(const DoubleBufferFIFO&) = delete;
+
     void resize(int size)
     {
         delete[] m_data;

@@ -130,6 +130,7 @@ void RemoteSink::start()
 
     qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_thread = new QThread();
+    m_thread->setObjectName("RemoteSink");
     m_basebandSink = new RemoteSinkBaseband();
     m_basebandSink->moveToThread(m_thread);
 
@@ -162,6 +163,7 @@ void RemoteSink::stop()
     m_basebandSink->stopWork();
     m_thread->quit();
     m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool RemoteSink::handleMessage(const Message& cmd)
@@ -318,7 +320,11 @@ void RemoteSink::applySettings(const QStringList& settingsKeys, const RemoteSink
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (frequencyOffsetChange) {
         calculateFrequencyOffset();
@@ -604,7 +610,11 @@ void RemoteSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
     SWGSDRangel::SWGRemoteSinkSettings *swgRemoteSinkSettings = swgChannelSettings->getRemoteSinkSettings();
 
@@ -620,7 +630,11 @@ void RemoteSink::webapiFormatChannelSettings(
         swgRemoteSinkSettings->setDeviceCenterFrequency(settings.m_deviceCenterFrequency);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        if (swgRemoteSinkSettings->getDataAddress()) {
+            *swgRemoteSinkSettings->getDataAddress() = settings.m_dataAddress;
+        } else {
+            swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        }
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
         swgRemoteSinkSettings->setDataPort(settings.m_dataPort);
@@ -629,7 +643,11 @@ void RemoteSink::webapiFormatChannelSettings(
         swgRemoteSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgRemoteSinkSettings->getTitle()) {
+            *swgRemoteSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgRemoteSinkSettings->setLog2Decim(settings.m_log2Decim);
@@ -688,4 +706,9 @@ void RemoteSink::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int RemoteSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

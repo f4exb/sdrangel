@@ -96,11 +96,12 @@ void VorLocalizerWorker::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 
@@ -693,7 +694,14 @@ void VorLocalizerWorker::rrNextTurn()
 
     for (auto rrPlan : m_rrPlans)
     {
-        unsigned int turnCount = m_rrTurnCounters[iDevPlan];
+        if (rrPlan.empty())
+        {
+            qDebug() << "VorLocalizerWorker::rrNextTurn: skipping empty plan";
+            iDevPlan++;
+            continue;
+        }
+
+        std::size_t turnCount = m_rrTurnCounters[iDevPlan];
         int deviceIndex = rrPlan[turnCount].m_device.m_deviceIndex;
         int deviceFrequency = rrPlan[turnCount].m_device.m_frequency - m_settings.m_centerShift;
 

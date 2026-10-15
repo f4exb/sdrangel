@@ -30,6 +30,8 @@ SWGWorkspaceInfo::SWGWorkspaceInfo(QString* json) {
 SWGWorkspaceInfo::SWGWorkspaceInfo() {
     index = 0;
     m_index_isSet = false;
+    hidden = 0;
+    m_hidden_isSet = false;
 }
 
 SWGWorkspaceInfo::~SWGWorkspaceInfo() {
@@ -40,10 +42,13 @@ void
 SWGWorkspaceInfo::init() {
     index = 0;
     m_index_isSet = false;
+    hidden = 0;
+    m_hidden_isSet = false;
 }
 
 void
 SWGWorkspaceInfo::cleanup() {
+
 
 }
 
@@ -59,6 +64,8 @@ SWGWorkspaceInfo::fromJson(QString &json) {
 void
 SWGWorkspaceInfo::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&hidden, pJson["hidden"], "qint32", "");
     
 }
 
@@ -79,6 +86,9 @@ SWGWorkspaceInfo::asJsonObject() {
     if(m_index_isSet){
         obj->insert("index", QJsonValue(index));
     }
+    if(m_hidden_isSet){
+        obj->insert("hidden", QJsonValue(hidden));
+    }
 
     return obj;
 }
@@ -93,12 +103,25 @@ SWGWorkspaceInfo::setIndex(qint32 index) {
     this->m_index_isSet = true;
 }
 
+qint32
+SWGWorkspaceInfo::getHidden() {
+    return hidden;
+}
+void
+SWGWorkspaceInfo::setHidden(qint32 hidden) {
+    this->hidden = hidden;
+    this->m_hidden_isSet = true;
+}
+
 
 bool
 SWGWorkspaceInfo::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_hidden_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

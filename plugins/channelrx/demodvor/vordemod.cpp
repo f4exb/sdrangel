@@ -57,7 +57,11 @@ VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         m_thread(nullptr),
         m_basebandSink(nullptr),
         m_running(false),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0),
+        m_radial(0),
+        m_refMag(0),
+        m_varMag(0)
 {
     setObjectName(m_channelId);
     applySettings(QStringList(), m_settings, true);
@@ -129,6 +133,7 @@ void VORDemod::start()
 
     qDebug("VORDemod::start");
     m_thread = new QThread();
+    m_thread->setObjectName("VORDemod");
     m_basebandSink = new VORDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(m_thread);
@@ -160,6 +165,7 @@ void VORDemod::stop()
     m_basebandSink->stopWork();
     m_thread->quit();
     m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool VORDemod::handleMessage(const Message& cmd)
@@ -296,7 +302,11 @@ void VORDemod::applySettings(const QStringList& settingsKeys, const VORDemodSett
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray VORDemod::serialize() const
@@ -613,7 +623,11 @@ void VORDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("VORDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "VORDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("VORDemod"));
+    }
     swgChannelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
     SWGSDRangel::SWGVORDemodSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodSettings();
 
@@ -638,13 +652,21 @@ void VORDemod::webapiFormatChannelSettings(
         swgVORDemodSettings->setIdentBandpassEnable(settings.m_identBandpassEnable);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgVORDemodSettings->getTitle()) {
+            *swgVORDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgVORDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgVORDemodSettings->getAudioDeviceName()) {
+            *swgVORDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);

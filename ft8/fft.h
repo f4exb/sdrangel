@@ -49,6 +49,8 @@ public:
 
     FFTEngine();
     ~FFTEngine();
+    FFTEngine(const FFTEngine&) = delete;
+    FFTEngine& operator=(const FFTEngine&) = delete;
 
 private:
     std::vector<std::complex<float>> analytic(const std::vector<float> &x);

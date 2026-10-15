@@ -29,15 +29,22 @@ PSK31Source::PSK31Source() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_spectrumRate(2000),
+    m_bit(0),
+    m_symbol(0),
+    m_prevSymbol(0),
     m_spectrumSink(nullptr),
     m_specSampleBufferIndex(0),
     m_magsq(0.0),
     m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
+    m_sampleIdx(0),
     m_byteIdx(0),
     m_bitIdx(0),
-    m_bitCount(0)
+    m_bitCount(0),
+    m_messageQueueToGUI(nullptr)
  {
     m_bits.append(0);
     m_lowpass.create(301, m_channelSampleRate, 100.0 / 2.0);
@@ -366,18 +373,15 @@ void PSK31Source::addTXText(QString text)
 {
     int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
 
+    // PSK31 defines both CR and LF Varicode characters but no message delimiter.
+    // Terminate messages with a single LF unless the caller supplied a line ending.
+    if (!text.endsWith('\r') && !text.endsWith('\n')) {
+        text.append('\n');
+    }
+
     for (int i = 0; i < count; i++) {
 
-        QString s = text;
-
-        if (m_settings.m_prefixCRLF) {
-            s.prepend("\r\r\n");
-        }
-        if (m_settings.m_postfixCRLF) {
-            s.append("\r\r\n");
-        }
-
-        m_textToTransmit.append(s);
+        m_textToTransmit.append(text);
     }
 }
 

@@ -115,7 +115,9 @@ struct scheduler
     bool verbose, debug, debug2;
 
     scheduler() :
+        pipes{},
         npipes(0),
+        runnables{},
         nrunnables(0),
         windows(nullptr),
         verbose(false),
@@ -229,6 +231,7 @@ struct pipebuf : pipebuf_common
         unsigned long size
     ) :
         pipebuf_common(name),
+        rds{},
         nrd(0),
         min_write(1),
         total_written(0),
@@ -244,6 +247,9 @@ struct pipebuf : pipebuf_common
     {
         delete[] buf;
     }
+
+    pipebuf(const pipebuf&) = delete;
+    pipebuf& operator=(const pipebuf&) = delete;
 
     int sizeofT() {
         return sizeof(T);

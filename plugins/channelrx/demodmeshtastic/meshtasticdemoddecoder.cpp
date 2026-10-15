@@ -362,6 +362,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             outputMsg->setSyncWord(msgSyncWord);
             outputMsg->setSignalDb(msgSignalDb);
             outputMsg->setNoiseDb(msgNoiseDb);
+            // Forward this frame's carrier frequency offset to the decode report.
+            outputMsg->setCfoHz(msg.getCfoHz());
             outputMsg->setMsgTimestamp(msgTimestamp);
             outputMsg->setPacketSize(getPacketLength());
             outputMsg->setNbParityBits(getNbParityBits());
@@ -388,10 +390,11 @@ void MeshtasticDemodDecoder::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }

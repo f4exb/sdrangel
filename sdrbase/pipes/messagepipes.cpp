@@ -23,6 +23,7 @@
 MessagePipes::MessagePipes() :
     m_registrations(&m_messageQueueStore)
 {
+	m_gcThread.setObjectName("MessagePipes:gc");
   	m_gcWorker = new MessagePipesGCWorker(m_registrations);
 	m_gcWorker->moveToThread(&m_gcThread);
 	startGC();
@@ -50,6 +51,11 @@ ObjectPipe *MessagePipes::unregisterProducerToConsumer(const QObject *producer, 
 void MessagePipes::getMessagePipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes)
 {
     return m_registrations.getPipes(producer, type, pipes);
+}
+
+QList<ObjectPipesRegistrations::Connection> MessagePipes::getConnections()
+{
+    return m_registrations.getConnections();
 }
 
 void MessagePipes::startGC()

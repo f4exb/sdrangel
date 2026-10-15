@@ -85,6 +85,7 @@ bool AudioOutput::start()
     audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), m_audioDeviceIndex);
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("AudioOutput:wrk");
 	m_worker = new AudioOutputWorker(&m_sampleSourceFifo, &m_audioFifo);
     m_worker->moveToThread(m_workerThread);
 
@@ -366,7 +367,11 @@ void AudioOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
         response.getAudioOutputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getAudioOutputSettings()->setDeviceName(new QString(settings.m_deviceName));
+    if (response.getAudioOutputSettings()->getDeviceName()) {
+        *response.getAudioOutputSettings()->getDeviceName() = settings.m_deviceName;
+    } else {
+        response.getAudioOutputSettings()->setDeviceName(new QString(settings.m_deviceName));
+    }
     response.getAudioOutputSettings()->setVolume(settings.m_volume);
     response.getAudioOutputSettings()->setIqMapping((int) settings.m_iqMapping);
 

@@ -1,0 +1,20 @@
+---
+# Codacy exclusions for files that should not be analyzed.
+# These paths are either vendored third-party content or generated code.
+
+exclude_paths:
+    # Vendored Cesium content. This code is maintained upstream and is not
+    # part of the SDRangel source code being developed in this repository.
+    - "plugins/feature/map/Cesium/**"
+
+    # Generated Swagger UI files. These files are generated from the Swagger
+    # definition and should not be modified or analyzed as source code.
+    - "sdrbase/resources/webapi/doc/swagger-ui/**"
+
+    # Generated Swagger documentation. The contents are generated from the
+    # API definition rather than maintained manually.
+    - "sdrbase/resources/webapi/doc/swagger/**"
+
+    # Generated Swagger client code. This code is produced by the Swagger
+    # code generator and should not be analyzed as manually maintained code.
+    - "swagger/sdrangel/code/**"

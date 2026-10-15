@@ -30,8 +30,6 @@ PSK31TXSettingsDialog::PSK31TXSettingsDialog(PSK31Settings* settings, QWidget *p
     ui(new Ui::PSK31TXSettingsDialog)
 {
     ui->setupUi(this);
-    ui->prefixCRLF->setChecked(m_settings->m_prefixCRLF);
-    ui->postfixCRLF->setChecked(m_settings->m_postfixCRLF);
     for (const auto& text : m_settings->m_predefinedTexts) {
         ui->predefinedText->addItem(newItem(text));
     }
@@ -49,8 +47,6 @@ PSK31TXSettingsDialog::~PSK31TXSettingsDialog()
 
 void PSK31TXSettingsDialog::accept()
 {
-    m_settings->m_prefixCRLF = ui->prefixCRLF->isChecked();
-    m_settings->m_postfixCRLF = ui->postfixCRLF->isChecked();
     m_settings->m_predefinedTexts.clear();
     for (int i = 0; i < ui->predefinedText->count(); i++) {
         m_settings->m_predefinedTexts.append(ui->predefinedText->item(i)->text());

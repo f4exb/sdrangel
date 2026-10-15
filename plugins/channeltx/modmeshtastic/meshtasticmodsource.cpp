@@ -31,9 +31,11 @@ MeshtasticModSource::MeshtasticModSource() :
     m_txFrameToken(0U),
     m_active(false),
     m_modPhasor(0.0f),
-	m_levelCalcCount(0),
-	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+    m_levelCalcCount(0),
+    m_rmsLevel(0.0f),
+    m_peakLevelOut(0.0f),
+    m_peakLevel(0.0f),
+    m_levelSum(0.0f)
 {
 	m_magsq = 0.0;
 

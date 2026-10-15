@@ -20,7 +20,14 @@
 
 WDSPRxFMDialog::WDSPRxFMDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxFMDialog)
+    ui(new Ui::WDSPRxFMDialog),
+    m_deviation(0.0),
+    m_afLow(0.0),
+    m_afHigh(0.0),
+    m_afLimiter(false),
+    m_afLimiterGain(0.0),
+    m_ctcssNotch(false),
+    m_ctcssNotchFrequency(0.0)
 {
     ui->setupUi(this);
 

@@ -45,7 +45,13 @@ struct SSBDemodFilterSettings
         m_spanLog2(3),
         m_rfBandwidth(3000),
         m_lowCutoff(300),
-        m_fftWindow(FFTWindow::Blackman)
+        m_fftWindow(FFTWindow::Blackman),
+        m_dnr(false),
+        m_dnrScheme(0),
+        m_dnrAboveAvgFactor(40.0f),
+        m_dnrSigmaFactor(4.0f),
+        m_dnrNbPeaks(20),
+        m_dnrAlpha(1.0f)
     {}
 };
 

@@ -38,10 +38,14 @@ StarTrackerSettings:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     dateTime:
       description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
       type: string
@@ -75,6 +79,8 @@ StarTrackerSettings:
     stellariumServerEnabled:
       description: "Enable Stellarium server (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     stellariumPort:
       description: "IP port number for Stellarium server to listen on (Default is 10001)."
       type: integer
@@ -88,29 +94,46 @@ StarTrackerSettings:
     drawSunOnMap:
       description: "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     drawMoonOnMap:
       description: "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     drawStarOnMap:
       description: "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 StarTrackerTarget:
   description: "Star Tracker target. Sent to startracker.target message queue for other plugins to use."
@@ -191,6 +214,7 @@ StarTrackerDisplayLoSSettings:
   properties:
     name:
       type: string
+      description: "Name."
     b:
       description: "Galactic latitude in degrees"
       type: number
@@ -209,6 +233,8 @@ StarTrackerReport:
   properties:
     runningState:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Running state
           * 0 - not started
@@ -221,6 +247,8 @@ StarTrackerActions:
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle

@@ -23,7 +23,10 @@
 
 const float NFMModDCS::m_codeRate = 134.3; //!< bits per second
 
-NFMModDCS::NFMModDCS()
+NFMModDCS::NFMModDCS() :
+    m_dcsWord{},
+    m_positive(false),
+    m_bitPerStep(0.0f)
 {
     reset();
 }

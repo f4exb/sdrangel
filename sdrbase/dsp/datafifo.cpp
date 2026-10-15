@@ -22,293 +22,323 @@
 
 void DataFifo::create(unsigned int s)
 {
-	m_size = 0;
-	m_fill = 0;
-	m_head = 0;
-	m_tail = 0;
+    m_size = 0;
+    m_fill = 0;
+    m_head = 0;
+    m_tail = 0;
 
-	m_data.resize(s);
-	m_size = m_data.size();
+    m_data.resize(s);
+    m_size = m_data.size();
 }
 
 void DataFifo::reset()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	m_suppressed = -1;
-	m_fill = 0;
-	m_head = 0;
-	m_tail = 0;
+    QMutexLocker mutexLocker(&m_mutex);
+    m_suppressed = -1;
+    m_suppressedSamples = 0;
+    m_fill = 0;
+    m_head = 0;
+    m_tail = 0;
 }
 
 DataFifo::DataFifo(QObject* parent) :
-	QObject(parent),
-	m_data(),
-	m_currentDataType(DataTypeI16)
+    QObject(parent),
+    m_data(),
+    m_currentDataType(DataTypeI16)
 {
-	setObjectName("DataFifo");
-	m_suppressed = -1;
-	m_size = 0;
-	m_fill = 0;
-	m_head = 0;
-	m_tail = 0;
+    setObjectName("DataFifo");
+    m_suppressed = -1;
+    m_suppressedSamples = 0;
+    m_size = 0;
+    m_fill = 0;
+    m_head = 0;
+    m_tail = 0;
 }
 
 DataFifo::DataFifo(int size, QObject* parent) :
-	QObject(parent),
-	m_data(),
-	m_currentDataType(DataTypeI16)
+    QObject(parent),
+    m_data(),
+    m_currentDataType(DataTypeI16)
 {
-	setObjectName("DataFifo");
-	m_suppressed = -1;
-	create(size);
+    setObjectName("DataFifo");
+    m_suppressed = -1;
+    m_suppressedSamples = 0;
+    create(size);
 }
 
 DataFifo::DataFifo(const DataFifo& other) :
     QObject(other.parent()),
     m_data(other.m_data),
-	m_currentDataType(DataTypeI16)
+    m_currentDataType(DataTypeI16)
 {
-	setObjectName("DataFifo");
-  	m_suppressed = -1;
-	m_size = m_data.size();
-	m_fill = 0;
-	m_head = 0;
-	m_tail = 0;
+    setObjectName("DataFifo");
+    m_suppressed = -1;
+    m_suppressedSamples = 0;
+    m_size = m_data.size();
+    m_fill = 0;
+    m_head = 0;
+    m_tail = 0;
 }
 
 DataFifo::~DataFifo()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	m_size = 0;
+    QMutexLocker mutexLocker(&m_mutex);
+    m_size = 0;
 }
 
 bool DataFifo::setSize(int size)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	create(size);
-	return m_data.size() == size;
+    QMutexLocker mutexLocker(&m_mutex);
+    create(size);
+    return m_data.size() == size;
+}
+
+// Rate-limit overflow messages while continuing to report every overflow.
+// After an overflow, messages are suppressed for 2.5 seconds and the
+// accumulated loss is reported as a single message. A 2.5 second recovery
+// interval without further overflow is then required before immediate
+// reporting resumes.
+void DataFifo::logOverflow(unsigned int total, unsigned int count)
+{
+    const bool hasOverflow = total < count;
+    const unsigned int dropped = count - total;
+
+    // m_suppressed: -1 = immediate reporting, 0+ = suppressed message count,
+    //               -2 = recovery monitoring
+
+    if (m_suppressed == -1)
+    {
+        if (hasOverflow)
+        {
+            qCritical("DataFifo: overflow - dropped %u samples", dropped);
+
+            // The current overflow was already reported, so don't count it again.
+            m_suppressed = 0;
+            m_suppressedSamples = 0;
+            m_msgRateTimer.start();
+        }
+    }
+    else if (m_suppressed == -2)
+    {
+        if (hasOverflow)
+        {
+            // Resume accumulation without restarting the recovery timer.
+            m_suppressed = 1;
+            m_suppressedSamples += dropped;
+        }
+        else if (m_msgRateTimer.elapsed() > 2500)
+        {
+            // No overflow for the recovery interval: resume immediate reporting.
+            m_suppressed = -1;
+        }
+    }
+    else // m_suppressed >= 0
+    {
+        if (m_msgRateTimer.elapsed() > 2500)
+        {
+            if (m_suppressed)
+            {
+                qCritical("DataFifo: overflow - dropped %lld samples (%u event%s)",
+                    m_suppressedSamples, m_suppressed, m_suppressed > 1 ? "s" : "");
+            }
+            m_suppressed = -2;
+            m_suppressedSamples = 0;
+            m_msgRateTimer.restart();
+        }
+        else if (hasOverflow)
+        {
+            ++m_suppressed;
+            m_suppressedSamples += dropped;
+        }
+    }
 }
 
 unsigned int DataFifo::write(const quint8* data, unsigned int count, DataType dataType)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
 
-	if (dataType != m_currentDataType)
-	{
-		m_suppressed = -1;
-		m_fill = 0;
-		m_head = 0;
-		m_tail = 0;
-		m_currentDataType = dataType;
-	}
+    if (dataType != m_currentDataType)
+    {
+        m_suppressed = -1;
+        m_suppressedSamples = 0;
+        m_fill = 0;
+        m_head = 0;
+        m_tail = 0;
+        m_currentDataType = dataType;
+    }
 
-	unsigned int total;
-	unsigned int remaining;
-	unsigned int len;
-	const quint8* begin = (const quint8*) data;
-	//count /= sizeof(Sample);
+    unsigned int total;
+    unsigned int remaining;
+    unsigned int len;
+    const quint8* begin = (const quint8*) data;
+    //count /= sizeof(Sample);
 
-	total = std::min(count, m_size - m_fill);
+    total = std::min(count, m_size - m_fill);
 
     if (total < count)
     {
-		if (m_suppressed < 0)
-        {
-			m_suppressed = 0;
-			m_msgRateTimer.start();
-			qCritical("DataFifo::write: overflow - dropping %u samples (size=%u)", count - total, m_size);
-		}
-        else
-        {
-			if (m_msgRateTimer.elapsed() > 2500)
-            {
-				qCritical("DataFifo::write: %u messages dropped", m_suppressed);
-				qCritical("DataFifo::write: overflow - dropping %u samples (size=%u)", count - total, m_size);
-				m_suppressed = -1;
-			}
-            else
-            {
-				m_suppressed++;
-			}
-		}
-	}
+        logOverflow(total, count);
+    }
 
-	remaining = total;
+    remaining = total;
 
     while (remaining > 0)
     {
-		len = std::min(remaining, m_size - m_tail);
-		std::copy(begin, begin + len, m_data.begin() + m_tail);
-		m_tail += len;
-		m_tail %= m_size;
-		m_fill += len;
-		begin += len;
-		remaining -= len;
-	}
-
-	if (m_fill > 0) {
-		emit dataReady();
+        len = std::min(remaining, m_size - m_tail);
+        std::copy(begin, begin + len, m_data.begin() + m_tail);
+        m_tail += len;
+        m_tail %= m_size;
+        m_fill += len;
+        begin += len;
+        remaining -= len;
     }
 
-	return total;
+    if (m_fill > 0) {
+        emit dataReady();
+    }
+
+    return total;
 }
 
 unsigned int DataFifo::write(QByteArray::const_iterator begin, QByteArray::const_iterator end, DataType dataType)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
 
-	if (dataType != m_currentDataType)
-	{
-		m_suppressed = -1;
-		m_fill = 0;
-		m_head = 0;
-		m_tail = 0;
-		m_currentDataType = dataType;
-	}
+    if (dataType != m_currentDataType)
+    {
+        m_suppressed = -1;
+        m_suppressedSamples = 0;
+        m_fill = 0;
+        m_head = 0;
+        m_tail = 0;
+        m_currentDataType = dataType;
+    }
 
-	unsigned int count = end - begin;
-	unsigned int total;
-	unsigned int remaining;
-	unsigned int len;
+    unsigned int count = end - begin;
+    unsigned int total;
+    unsigned int remaining;
+    unsigned int len;
 
-	total = std::min(count, m_size - m_fill);
+    total = std::min(count, m_size - m_fill);
 
     if (total < count)
     {
-		if (m_suppressed < 0)
-        {
-			m_suppressed = 0;
-			m_msgRateTimer.start();
-			qCritical("DataFifo::write: overflow - dropping %u samples", count - total);
-		}
-        else
-        {
-			if (m_msgRateTimer.elapsed() > 2500)
-            {
-				qCritical("DataFifo::write: %u messages dropped", m_suppressed);
-				qCritical("DataFifo::write: overflow - dropping %u samples", count - total);
-				m_suppressed = -1;
-			}
-            else
-            {
-				m_suppressed++;
-			}
-		}
-	}
+        logOverflow(total, count);
+    }
 
-	remaining = total;
+    remaining = total;
 
     while (remaining > 0)
     {
-		len = std::min(remaining, m_size - m_tail);
-		std::copy(begin, begin + len, m_data.begin() + m_tail);
-		m_tail += len;
-		m_tail %= m_size;
-		m_fill += len;
-		begin += len;
-		remaining -= len;
-	}
-
-	if (m_fill > 0) {
-		emit dataReady();
+        len = std::min(remaining, m_size - m_tail);
+        std::copy(begin, begin + len, m_data.begin() + m_tail);
+        m_tail += len;
+        m_tail %= m_size;
+        m_fill += len;
+        begin += len;
+        remaining -= len;
     }
 
-	return total;
+    if (m_fill > 0) {
+        emit dataReady();
+    }
+
+    return total;
 }
 
 unsigned int DataFifo::read(QByteArray::iterator begin, QByteArray::iterator end, DataType& dataType)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	dataType = m_currentDataType;
-	unsigned int count = end - begin;
-	unsigned int total;
-	unsigned int remaining;
-	unsigned int len;
+    QMutexLocker mutexLocker(&m_mutex);
+    dataType = m_currentDataType;
+    unsigned int count = end - begin;
+    unsigned int total;
+    unsigned int remaining;
+    unsigned int len;
 
-	total = std::min(count, m_fill);
+    total = std::min(count, m_fill);
 
     if (total < count) {
-		qCritical("DataFifo::read: underflow - missing %u samples", count - total);
+        qCritical("DataFifo::read: underflow - missing %u samples", count - total);
     }
 
-	remaining = total;
+    remaining = total;
 
     while (remaining > 0)
     {
-		len = std::min(remaining, m_size - m_head);
-		std::copy(m_data.begin() + m_head, m_data.begin() + m_head + len, begin);
-		m_head += len;
-		m_head %= m_size;
-		m_fill -= len;
-		begin += len;
-		remaining -= len;
-	}
+        len = std::min(remaining, m_size - m_head);
+        std::copy(m_data.begin() + m_head, m_data.begin() + m_head + len, begin);
+        m_head += len;
+        m_head %= m_size;
+        m_fill -= len;
+        begin += len;
+        remaining -= len;
+    }
 
-	return total;
+    return total;
 }
 
 unsigned int DataFifo::readBegin(unsigned int count,
-	QByteArray::iterator* part1Begin, QByteArray::iterator* part1End,
-	QByteArray::iterator* part2Begin, QByteArray::iterator* part2End,
-	DataType& dataType)
+    QByteArray::iterator* part1Begin, QByteArray::iterator* part1End,
+    QByteArray::iterator* part2Begin, QByteArray::iterator* part2End,
+    DataType& dataType)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-	dataType = m_currentDataType;
-	unsigned int total;
-	unsigned int remaining;
-	unsigned int len;
-	unsigned int head = m_head;
+    QMutexLocker mutexLocker(&m_mutex);
+    dataType = m_currentDataType;
+    unsigned int total;
+    unsigned int remaining;
+    unsigned int len;
+    unsigned int head = m_head;
 
-	total = std::min(count, m_fill);
+    total = std::min(count, m_fill);
 
     if (total < count) {
-		qCritical("DataFifo::readBegin: underflow - missing %u samples", count - total);
+        qCritical("DataFifo::readBegin: underflow - missing %u samples", count - total);
     }
 
-	remaining = total;
+    remaining = total;
 
     if (remaining > 0)
     {
-		len = std::min(remaining, m_size - head);
-		*part1Begin = m_data.begin() + head;
-		*part1End = m_data.begin() + head + len;
-		head += len;
-		head %= m_size;
-		remaining -= len;
-	}
+        len = std::min(remaining, m_size - head);
+        *part1Begin = m_data.begin() + head;
+        *part1End = m_data.begin() + head + len;
+        head += len;
+        head %= m_size;
+        remaining -= len;
+    }
     else
     {
-		*part1Begin = m_data.end();
-		*part1End = m_data.end();
-	}
+        *part1Begin = m_data.end();
+        *part1End = m_data.end();
+    }
 
     if (remaining > 0)
     {
-		len = std::min(remaining, m_size - head);
-		*part2Begin = m_data.begin() + head;
-		*part2End = m_data.begin() + head + len;
-	}
+        len = std::min(remaining, m_size - head);
+        *part2Begin = m_data.begin() + head;
+        *part2End = m_data.begin() + head + len;
+    }
     else
     {
-		*part2Begin = m_data.end();
-		*part2End = m_data.end();
-	}
+        *part2Begin = m_data.end();
+        *part2End = m_data.end();
+    }
 
-	return total;
+    return total;
 }
 
 unsigned int DataFifo::readCommit(unsigned int count)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
 
-	if (count > m_fill)
+    if (count > m_fill)
     {
-		qCritical("DataFifo::readCommit: cannot commit more than available samples");
-		count = m_fill;
-	}
+        qCritical("DataFifo::readCommit: cannot commit more than available samples");
+        count = m_fill;
+    }
 
     m_head = (m_head + count) % m_size;
-	m_fill -= count;
+    m_fill -= count;
 
-	return count;
+    return count;
 }

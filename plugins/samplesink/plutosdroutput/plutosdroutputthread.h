@@ -21,6 +21,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTTHREAD_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTTHREAD_H_
 
+#include <atomic>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -45,10 +46,13 @@ public:
     virtual bool isRunning() { return m_running; }
     void setLog2Interpolation(unsigned int log2_interp);
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    std::atomic_bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
     int16_t *m_buf;                 //!< holds I+Q values of each sample from device

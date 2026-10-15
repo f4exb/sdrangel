@@ -49,6 +49,22 @@ public:
     qint32 getEnableDenoiser();
     void setEnableDenoiser(qint32 enable_denoiser);
 
+    qint32 getNvidiaIntensity();
+    void setNvidiaIntensity(qint32 nvidia_intensity);
+
+    qint32 getNvidiaVad();
+    void setNvidiaVad(qint32 nvidia_vad);
+
+    QString* getVst3ModulePath();
+    void setVst3ModulePath(QString* vst3_module_path);
+    QString* getVst3ClassId();
+    void setVst3ClassId(QString* vst3_class_id);
+    QString* getVst3Parameters();
+    void setVst3Parameters(QString* vst3_parameters);
+
+    QString* getVst3State();
+    void setVst3State(QString* vst3_state);
+
     qint32 getVolumeTenths();
     void setVolumeTenths(qint32 volume_tenths);
 
@@ -97,6 +113,22 @@ private:
 
     qint32 enable_denoiser;
     bool m_enable_denoiser_isSet;
+
+    qint32 nvidia_intensity;
+    bool m_nvidia_intensity_isSet;
+
+    qint32 nvidia_vad;
+    bool m_nvidia_vad_isSet;
+
+    QString* vst3_module_path;
+    bool m_vst3_module_path_isSet;
+    QString* vst3_class_id;
+    bool m_vst3_class_id_isSet;
+    QString* vst3_parameters;
+    bool m_vst3_parameters_isSet;
+
+    QString* vst3_state;
+    bool m_vst3_state_isSet;
 
     qint32 volume_tenths;
     bool m_volume_tenths_isSet;

@@ -127,6 +127,7 @@ void AMDemod::start()
 
 	qDebug("AMDemod::start");
     m_thread = new QThread();
+    m_thread->setObjectName("AMDemod");
     m_basebandSink = new AMDemodBaseband();
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);
@@ -157,6 +158,7 @@ void AMDemod::stop()
     m_running = false;
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool AMDemod::handleMessage(const Message& cmd)
@@ -589,7 +591,11 @@ void AMDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("AMDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "AMDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("AMDemod"));
+    }
     swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
     SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();
 
@@ -614,7 +620,11 @@ void AMDemod::webapiFormatChannelSettings(
         swgAMDemodSettings->setSquelch(settings.m_squelch);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAMDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgAMDemodSettings->getTitle()) {
+            *swgAMDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgAMDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgAMDemodSettings->setVolume(settings.m_volume);
@@ -623,7 +633,11 @@ void AMDemod::webapiFormatChannelSettings(
         swgAMDemodSettings->setBandpassEnable(settings.m_bandpassEnable ? 1 : 0);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgAMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgAMDemodSettings->getAudioDeviceName()) {
+            *swgAMDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgAMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("pll") || force) {
         swgAMDemodSettings->setPll(settings.m_pll);
@@ -704,4 +718,9 @@ void AMDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+int AMDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

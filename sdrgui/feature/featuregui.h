@@ -25,11 +25,13 @@
 #include <QMap>
 
 #include "gui/framelesswindowresizer.h"
+#include "gui/workspacewindow.h"
 #include "gui/rollupcontents.h"
 #include "settings/serializableinterface.h"
 #include "export.h"
 
 class QCloseEvent;
+class QAbstractButton;
 class MessageQueue;
 class QLabel;
 class QPushButton;
@@ -38,7 +40,7 @@ class QHBoxLayout;
 class QSizeGrip;
 class Feature;
 
-class SDRGUI_API FeatureGUI : public QMdiSubWindow, public SerializableInterface
+class SDRGUI_API FeatureGUI : public WorkspaceWindow, public SerializableInterface
 {
     Q_OBJECT
 public:
@@ -54,8 +56,8 @@ public:
 
 	virtual void resetToDefaults() = 0;
     // Data saved in the derived settings
-    virtual void setWorkspaceIndex(int index)= 0;
-    virtual int getWorkspaceIndex() const = 0;
+    virtual void setWorkspaceIndex(int index) override = 0;
+    virtual int getWorkspaceIndex() const override = 0;
     virtual void setGeometryBytes(const QByteArray& blob) = 0;
     virtual QByteArray getGeometryBytes() const = 0;
 
@@ -65,6 +67,7 @@ public:
     void sizeToContents();
     void setTitleColor(const QColor&) {} // not implemented for a feature
     void setTitle(const QString& title);
+    QString getTitle() const override;
     void setIndex(int index);
     int getIndex() const { return m_featureIndex; }
     void setDisplayedame(const QString& name);
@@ -79,6 +82,7 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     int getAdditionalHeight() const { return 22 + 22; } // height of top and bottom bars
     int gripSize() { return m_resizer.m_gripSize; } // size in pixels of resize grip around the window
+    void updateStartStopButton(QAbstractButton *startStopButton);
 
     Feature *m_feature;
     int m_featureIndex;
@@ -102,6 +106,7 @@ private:
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
     QPushButton *m_maximizeButton;
+    QPushButton *m_hideButton;
     QPushButton *m_closeButton;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;

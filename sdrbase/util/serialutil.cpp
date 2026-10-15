@@ -58,7 +58,7 @@ void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::stri
 void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::string& regexStr)
 {
     int n;
-    struct dirent **namelist;
+    struct dirent **namelist = nullptr;
     comPorts.clear();
     const char* sysdir = "/sys/class/tty/";
     struct stat fileStat;

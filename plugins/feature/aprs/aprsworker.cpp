@@ -38,7 +38,8 @@ APRSWorker::APRSWorker(APRS *aprs, WebAPIAdapterInterface *webAPIAdapterInterfac
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
-    m_socket(this)
+    m_socket(this),
+    m_loggedIn(false)
 {
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
     connect(&m_socket, SIGNAL(connected()), this, SLOT(connected()));
@@ -80,11 +81,12 @@ void APRSWorker::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 

@@ -1,3 +1,23 @@
+## Enable Git pre-commit hooks
+SDRangel provides a Git pre-commit hook to check staged changes for trailing
+whitespace before a commit is created. The hook is maintained in
+`.githooks/pre-commit` and uses `.gitattributes` to determine which files to
+check.
+
+To enable the hook, run the following command from your repository root:
+```bash
+git config core.hooksPath .githooks
+```
+
+This configuration is local to your clone and only needs to be set once.
+After enabling it, Git automatically runs the hook before each commit. If
+trailing whitespace is detected, the commit is rejected. Correct the affected
+lines, stage the changes, and try again.
+
+The hook is shared through the repository, but enabling it is a per-clone setup
+step. GitHub Actions also checks pull requests for trailing whitespace, providing
+a server-side check independent of the local hook.
+
 ## meshtasticdemodgui.cpp - checkbox signal pattern
 All checkboxes currently use stateChanged(int) pattern.
 Consider refactoring all to clicked(bool) for simplicity in a future cleanup commit.

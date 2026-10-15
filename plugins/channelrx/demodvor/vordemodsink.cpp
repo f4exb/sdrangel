@@ -32,13 +32,18 @@ VORDemodSCSink::VORDemodSCSink() :
         m_channelFrequencyOffset(0),
         m_channelSampleRate(VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE),
         m_audioSampleRate(48000),
+        m_interpolatorDistance(0),
+        m_interpolatorDistanceRemain(0),
         m_squelchCount(0),
         m_squelchOpen(false),
         m_squelchDelayLine(9600),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
+        m_messageQueueToChannel(nullptr),
         m_volumeAGC(0.003),
+        m_audioInterpolatorDistance(0.0f),
+        m_audioInterpolatorDistanceRemain(0.0f),
         m_audioFifo(48000),
         m_refPrev(0.0f),
         m_varGoertzel(30, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE),
@@ -189,8 +194,8 @@ void VORDemodSCSink::processOneSample(Complex &ci)
     Real mag = std::sqrt(magsq);
 
     // Calculate phase of 30Hz variable AM signal
-    double varPhase;
-    double varMag;
+    double varPhase = 0.0;
+    double varMag = 0.0;
     if (m_varGoertzel.size() == VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_varGoertzel.goertzel(mag);

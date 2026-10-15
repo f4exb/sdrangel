@@ -66,6 +66,12 @@ AMD::AMD
     omegaN(_omegaN),
     tauR(_tauR),
     tauI(_tauI),
+    a{},
+    b{},
+    c{},
+    d{},
+    dsI(0),
+    dsQ(0),
     sbmode(_sbmode),
     levelfade(_levelfade)
 {
@@ -117,7 +123,7 @@ void AMD::flush()
 
 void AMD::execute()
 {
-    double audio;
+    double audio = 0.0;
     std::array<double, 2> vco;
     std::array<double, 2> corr;
     double det;

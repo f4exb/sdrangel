@@ -422,7 +422,7 @@ void ScaleEngine::reCalcStd()
 	double value2;
 	int i;
 	int j;
-	Tick tick;
+	Tick tick{};
 	float pos;
 	QString str;
 	QFontMetricsF fontMetrics(m_font);

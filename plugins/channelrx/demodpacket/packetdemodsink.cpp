@@ -116,7 +116,16 @@ void PacketDemodSink::processOneSample(Complex &ci)
     }
     m_magsqCount++;
 
-    if (m_settings.m_mlse)
+    if (!m_settings.isAFSK())
+    {
+        int symbol;
+        if (m_g3ruh.process(fmDemod, symbol)) {
+            // Descrambling spreads a radio-symbol error to positions n, n+12,
+            // n+17. AFSK Chase cannot replay that error model.
+            m_framer.process(m_deframer, symbol, symbol ? 1.0f : -1.0f, false);
+        }
+    }
+    else if (m_settings.isMLSEEnabled())
     {
         // Detect on the complex baseband. The discriminator output is still produced
         // above; the symbol rate estimator decodes its tone transitions to keep the
@@ -157,7 +166,10 @@ void PacketDemodSink::processOneSample(Complex &ci)
         }
     }
 
-    m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
+    // G3RUH deviation and residual carrier offset can exceed the analyzer's
+    // normalized range. Saturate the trace before narrowing; leave DSP untouched.
+    const Real trace = std::max(-1.0f, std::min(1.0f, fmDemod));
+    m_demodBuffer[m_demodBufferFill++] = trace * std::numeric_limits<int16_t>::max();
 
     if (m_demodBufferFill >= m_demodBuffer.size())
     {
@@ -188,7 +200,7 @@ bool PacketDemodSink::sendPacket(const QByteArray& packet, quint64 stamp)
     // same transmission, a symbol period or so apart. Report it once. Genuine retransmissions
     // are seconds to minutes apart, and a digipeated repeat has the via path marked, so it
     // does not compare equal.
-    if (m_settings.m_mlse)
+    if (m_settings.isMLSEEnabled())
     {
         const quint64 rate = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
 
@@ -268,7 +280,7 @@ static PacketDemodCore::Config coreConfig(const PacketDemodSettings& settings)
 {
     PacketDemodCore::Config cfg;
     cfg.m_chase = settings.m_chase;
-    cfg.m_mlse = settings.m_mlse;
+    cfg.m_mlse = settings.isMLSEEnabled();
     cfg.m_baudRate = settings.getBaudRate();
 
     return cfg;
@@ -293,38 +305,43 @@ void PacketDemodSink::applySettings(const QStringList& settingsKeys, const Packe
         m_core.setChaseDepth(settings.m_chase);
     }
 
-    if (settingsKeys.contains("mlse") || force) {
-        m_framer.setRequirePlausible(settings.m_mlse);
+    PacketDemodSettings next = m_settings;
+    if (force) {
+        next = settings;
+    } else {
+        next.applySettings(settingsKeys, settings);
     }
 
-    if (force)
+    const bool rebuild = force || next.m_mode != m_settings.m_mode
+        || next.isMLSEEnabled() != m_settings.isMLSEEnabled();
+    m_settings = next;
+    m_framer.setRequirePlausible(m_settings.isMLSEEnabled());
+
+    if (rebuild)
     {
-        // Deviation is a constant now, so the discriminator scaling is set once
+        static_assert(PacketDemodG3RUH::SampleRate == PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
+            "G3RUH clock must match the channel rate");
+        // Amplitude normalization in G3RUH makes the existing scaling sufficient.
         m_phaseDiscri.setFMScaling(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
             / (2.0f * PacketDemodSettings::PACKETDEMOD_FM_DEVIATION));
+        m_phaseDiscri.reset();
 
-        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.getBaudRate();
+        // Always build the AFSK path for 1200; it must also work after returning
+        // from 9600 without a forced settings update.
+        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / 1200;
         m_correlator.create(m_correlationLength,
-                            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
-                            2200.0, 1200.0);
-
-        m_lowpassF1.create(PACKETDEMOD_LOWPASS_TAPS, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
-        m_lowpassF0.create(PACKETDEMOD_LOWPASS_TAPS, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
+            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, 2200.0, 1200.0);
+        m_lowpassF1.create(PACKETDEMOD_LOWPASS_TAPS,
+            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, 1200.0f * 1.1f);
+        m_lowpassF0.create(PACKETDEMOD_LOWPASS_TAPS,
+            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, 1200.0f * 1.1f);
+        m_g3ruh.reset();
         m_deframer.reset();
         m_samplePrev = 0;
         m_syncCount = 0;
-        m_settings = settings;
-        m_core.applyConfig(coreConfig(settings));
-    }
-    else
-    {
-        bool rebuild = settingsKeys.contains("mlse")
-            || settingsKeys.contains("mode");
-
-        m_settings.applySettings(settingsKeys, settings);
-
-        if (rebuild) {
-            m_core.applyConfig(coreConfig(m_settings));
-        }
+        m_recent.clear();
+        // isMLSEEnabled() releases the AFSK detector's chains/replay storage in
+        // G3RUH mode even if an API client leaves the saved MLSE preference true.
+        m_core.applyConfig(coreConfig(m_settings));
     }
 }

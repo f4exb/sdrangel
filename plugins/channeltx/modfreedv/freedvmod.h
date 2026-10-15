@@ -195,6 +195,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -239,7 +240,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    int getAudioSampleRate() const;
+    int getAudioSampleRate() const override;
     uint32_t getModemSampleRate() const;
     Real getLowCutoff() const;
     Real getHiCutoff() const;

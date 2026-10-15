@@ -119,11 +119,12 @@ void RadiosondeDemodBaseband::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -170,6 +171,11 @@ void RadiosondeDemodBaseband::applySettings(const QStringList& settingsKeys, con
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
+}
+
+int RadiosondeDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
 }
 
 void RadiosondeDemodBaseband::setBasebandSampleRate(int sampleRate)

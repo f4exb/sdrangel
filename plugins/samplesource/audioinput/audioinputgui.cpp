@@ -20,6 +20,7 @@
 #include <QFileDialog>
 
 #include "ui_audioinputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialpopup.h"
@@ -150,13 +151,12 @@ void AudioInputGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        qDebug("AudioInputGui::handleInputMessages: message: %s", message->getIdentifier());
-
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -384,7 +384,7 @@ void AudioInputGui::updateStatus()
             break;
         case DeviceAPI::StError:
             ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-            QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+            MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
             break;
         default:
             break;

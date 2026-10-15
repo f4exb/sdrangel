@@ -22,6 +22,7 @@
 #include <libbladeRF.h>
 
 #include "ui_bladerf1outputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -173,9 +174,10 @@ void Bladerf1OutputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message)) {
-                delete message;
+            if (!handleMessage(*message)) {
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }
@@ -431,7 +433,7 @@ void Bladerf1OutputGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

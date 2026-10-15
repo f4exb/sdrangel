@@ -68,6 +68,8 @@ public:
     virtual const QString& getName() const { return m_name; }
     virtual qint64 getCenterFrequency() const = 0; //!< Applies to a default stream
     virtual void setCenterFrequency(qint64 frequency) = 0;
+    virtual int getChannelSampleRate() const { return 0; } //!< Sample rate after channelization, 0 if unknown
+    virtual int getAudioSampleRate() const { return 0; }   //!< Sample rate of the audio or demodulated output (e.g. "demod" pipe), 0 if none
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;

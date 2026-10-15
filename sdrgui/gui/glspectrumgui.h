@@ -74,7 +74,7 @@ private:
     SpectrumMarkersDialog *m_markersDialog;
 	QMenu *m_contextMenu;
 
-    void blockApplySettings(bool block);
+    bool blockApplySettings(bool block);
 	void applySettings();
     void applySpectrumSettings();
 	void setPowerAndRefRange();

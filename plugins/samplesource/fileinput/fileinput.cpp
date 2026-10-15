@@ -64,6 +64,7 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_recordLengthMuSec(0),
     m_startingTimeStamp(0)
 {
+    m_fileInputWorkerThread.setObjectName("FileInputWrk");
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileInput::FileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
@@ -689,7 +690,11 @@ void FileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
         response.getFileInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    if (response.getFileInputSettings()->getFileName()) {
+        *response.getFileInputSettings()->getFileName() = settings.m_fileName;
+    } else {
+        response.getFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    }
     response.getFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getFileInputSettings()->setLoop(settings.m_loop ? 1 : 0);
 
@@ -724,19 +729,35 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+    if (response.getFileInputReport()->getElapsedTime()) {
+        *response.getFileInputReport()->getElapsedTime() = t.toString("HH:mm:ss.zzz");
+    } else {
+        response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+    }
 
     qint64 startingTimeStampMsec = m_startingTimeStamp;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
-    response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+    if (response.getFileInputReport()->getAbsoluteTime()) {
+        *response.getFileInputReport()->getAbsoluteTime() = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
+    } else {
+        response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+    }
 
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addMSecs(m_recordLengthMuSec / 1000UL);
-    response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss.zzz")));
+    if (response.getFileInputReport()->getDurationTime()) {
+        *response.getFileInputReport()->getDurationTime() = recordLength.toString("HH:mm:ss.zzz");
+    } else {
+        response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss.zzz")));
+    }
 
-    response.getFileInputReport()->setFileName(new QString(m_settings.m_fileName));
+    if (response.getFileInputReport()->getFileName()) {
+        *response.getFileInputReport()->getFileName() = m_settings.m_fileName;
+    } else {
+        response.getFileInputReport()->setFileName(new QString(m_settings.m_fileName));
+    }
     response.getFileInputReport()->setSampleRate(m_sampleRate);
     response.getFileInputReport()->setSampleSize(m_sampleSize);
 }

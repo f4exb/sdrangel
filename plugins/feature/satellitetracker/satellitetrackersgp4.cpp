@@ -499,7 +499,7 @@ void getSatelliteState(QDateTime dateTime,
         satState->m_azimuth = Units::radiansToDegrees(topo.azimuth);
         satState->m_elevation = Units::radiansToDegrees(topo.elevation);
         satState->m_range = topo.range;
-        satState->m_rangeRate = topo.range_rate;
+        satState->m_rangeRate = topo.rangeRate;
         OrbitalElements ele(tle);
         satState->m_speed = eci.Velocity().Magnitude();
         satState->m_period = ele.Period();

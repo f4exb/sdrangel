@@ -432,6 +432,8 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
 {
     payloadCRCStatus = false;
     payloadParityStatus = (int) MeshtasticDemodSettings::ParityUndefined;
+    bool error = false; // set if any payload codeword requires soft FEC correction
+    bool bad = false;   // set if any payload codeword has a structural decode failure
 
     if (inSymbols.size() < headerSymbols)
     {
@@ -542,7 +544,18 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
         }
     }
 
-    auto decodeSoftBlock = [&llrs, spreadFactor](unsigned int symOfs, unsigned int cwLen, unsigned int sfApp, unsigned int crApp, std::vector<uint8_t>& nibbles) {
+    auto decodeSoftBlock = [
+        &llrs,
+        spreadFactor,
+        &error, &bad // accumulated payload FEC status
+    ](
+        unsigned int symOfs,
+        unsigned int cwLen,
+        unsigned int sfApp,
+        unsigned int crApp,
+        unsigned int payloadRowStart, // first row that contributes to payload FEC status
+        std::vector<uint8_t>& nibbles) {
+
         if (sfApp == 0U) {
             return false;
         }
@@ -569,8 +582,22 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
             }
         }
 
-        for (unsigned int row = 0; row < sfApp; row++) {
-            nibbles.push_back(decodeCodewordSoft(deinterBin[row], crApp));
+        for (unsigned int row = 0; row < sfApp; row++)
+        {
+            if (row < payloadRowStart)
+            {
+                // Still in header, don't accumulate payload FEC
+                bool ignoredError = false;
+                bool ignoredBad = false;
+                nibbles.push_back(
+                    decodeCodewordSoft(deinterBin[row], crApp, ignoredError, ignoredBad));
+            }
+            else
+            {
+                // Payload row contributes to accumulated payload FEC status
+                nibbles.push_back(
+                    decodeCodewordSoft(deinterBin[row], crApp, error, bad));
+            }
         }
 
         return true;
@@ -587,7 +614,15 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
             return;
         }
 
-        if (!decodeSoftBlock(symOfs, 8U, headerNbSymbolBits, 4U, nibbles)) {
+        const unsigned int payloadRowStart = headerCodewords; // payload starts after the 5 header codewords
+
+        if (!decodeSoftBlock(
+                symOfs,
+                headerSymbols,
+                headerNbSymbolBits,
+                headerParityBits,
+                payloadRowStart,
+                nibbles)) {
             earlyEOM = true;
             return;
         }
@@ -595,9 +630,17 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
         symOfs += headerSymbols;
     }
 
+    const unsigned int payloadOnlyRowStart = 0U; // all rows in these blocks are payload
+
     while (symOfs + payloadBlockSymbols <= numSymbols)
     {
-        if (!decodeSoftBlock(symOfs, payloadBlockSymbols, payloadNbSymbolBits, nbParityBits, nibbles)) {
+        if (!decodeSoftBlock(
+                symOfs,
+                payloadBlockSymbols,
+                payloadNbSymbolBits,
+                nbParityBits,
+                payloadOnlyRowStart,
+                nibbles)) {
             earlyEOM = true;
             return;
         }
@@ -626,6 +669,15 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
 
     if (packetLength > 0U) {
         dewhitenPayloadBytes(bytes.data(), packetLength);
+    }
+
+    // Report accumulated payload FEC result independently of CRC
+    if (bad) {
+        payloadParityStatus = (int) MeshtasticDemodSettings::ParityError;
+    } else if (error) {
+        payloadParityStatus = (int) MeshtasticDemodSettings::ParityCorrected;
+    } else {
+        payloadParityStatus = (int) MeshtasticDemodSettings::ParityOK;
     }
 
     if (hasCRC)

@@ -3,36 +3,60 @@ BladeRF2InputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     gainMode:
       type: integer
+      description: "Gain-control mode selection."
     globalGain:
       type: integer
+      description: "Overall device gain setting."
     biasTee:
       type: integer
+      description: "Enable the antenna bias tee (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -40,26 +64,38 @@ BladeRF2InputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 BladeRF2InputReport:
   description: BladeRF2
   properties:
     frequencyRange:
       $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+      description: "Frequency range data for Blade rf2 input."
     sampleRateRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Sample rate range data for Blade rf2 input."
     bandwidthRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Bandwidth range data for Blade rf2 input."
     globalGainRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Global gain range data for Blade rf2 input."
     gainModes:
       type: array
+      description: "List of gain modes."
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/NamedEnum"
 
@@ -68,92 +104,138 @@ BladeRF2OutputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     globalGain:
       type: integer
+      description: "Overall device gain setting."
     biasTee:
       type: integer
+      description: "Enable the antenna bias tee (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 BladeRF2OutputReport:
   description: BladeRF2
   properties:
     frequencyRange:
       $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+      description: "Frequency range data for Blade rf2 output."
     sampleRateRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Sample rate range data for Blade rf2 output."
     bandwidthRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Bandwidth range data for Blade rf2 output."
     globalGainRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Global gain range data for Blade rf2 output."
 
 BladeRF2MIMOSettings:
   description: BladeRF2
   properties:
     title:
       type: string
+      description: "User-visible title."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     rxCenterFrequency:
       type: integer
       format: int64
+      description: "Receive center frequency in Hz."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPosRx:
       description: See BladeRF2MIMO::fcPos_t
       type: integer
     rxBandwidth:
       type: integer
+      description: "Receive bandwidth in Hz."
     rx0GainMode:
       type: integer
+      description: "Rx0 gain mode setting for Blade rf2 MIMO."
     rx0GlobalGain:
       type: integer
+      description: "Rx0 global gain setting for Blade rf2 MIMO."
     rx1GainMode:
       type: integer
+      description: "Rx1 gain mode setting for Blade rf2 MIMO."
     rx1GlobalGain:
       type: integer
+      description: "Rx1 global gain setting for Blade rf2 MIMO."
     rxBiasTee:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     dcBlock:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     iqCorrection:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rxTransverterMode:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rxTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Receive frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -161,56 +243,82 @@ BladeRF2MIMOSettings:
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     fcPosTx:
       description: See BladeRF2MIMO::fcPos_t
       type: integer
     txBandwidth:
       type: integer
+      description: "Transmit bandwidth in Hz."
     tx0GlobalGain:
       type: integer
+      description: "Tx0 global gain setting for Blade rf2 MIMO."
     tx1GlobalGain:
       type: integer
+      description: "Tx1 global gain setting for Blade rf2 MIMO."
     txBiasTee:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     txTransverterMode:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     txTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Transmit frequency translation applied in transverter mode in Hz."
     useReverseAPI:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 BladeRF2MIMOReport:
   description: BladeRF2
   properties:
     frequencyRangeRx:
       $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+      description: "Frequency range receive data for Blade rf2 MIMO."
     sampleRateRangeRx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Sample rate range receive data for Blade rf2 MIMO."
     bandwidthRangeRx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Bandwidth range receive data for Blade rf2 MIMO."
     globalGainRangeRx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Global gain range receive data for Blade rf2 MIMO."
     gainModesRx:
       type: array
+      description: "List of gain modes receive."
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/NamedEnum"
     frequencyRangeTx:
       $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+      description: "Frequency range transmit data for Blade rf2 MIMO."
     sampleRateRangeTx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Sample rate range transmit data for Blade rf2 MIMO."
     bandwidthRangeTx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Bandwidth range transmit data for Blade rf2 MIMO."
     globalGainRangeTx:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      description: "Global gain range transmit data for Blade rf2 MIMO."

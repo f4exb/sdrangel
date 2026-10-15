@@ -50,6 +50,7 @@ private:
     enum Cols {
         COL_NAME,
         COL_TOTAL,
+        COL_PERCENT,
         COL_AVERAGE,
         COL_LAST,
         COL_MAX,

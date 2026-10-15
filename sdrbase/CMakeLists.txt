@@ -1,10 +1,5 @@
 project (sdrbase)
 
-if(WIN32)
-    # This should probably be in ../CMakeLists.txt with the other variables like it
-    set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/libopus/include")
-    set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus/lib/x64/libopus.lib")
-endif()
 find_package(Opus REQUIRED)
 
 if(FFTW3F_FOUND)
@@ -101,6 +96,7 @@ set(sdrbase_SOURCES
     audio/audiocompressorsnd.cpp
     audio/audiodeviceinfo.cpp
     audio/audiodevicemanager.cpp
+    audio/audiofilereader.cpp
     audio/audiofifo.cpp
     audio/audiofilter.cpp
     audio/audiog722.cpp
@@ -142,6 +138,7 @@ set(sdrbase_SOURCES
     dsp/dspdevicesinkengine.cpp
     dsp/dspdevicemimoengine.cpp
     dsp/fftcorr.cpp
+    dsp/lteturbo.cpp
     dsp/fftengine.cpp
     dsp/fftfactory.cpp
     dsp/fftfilt.cpp
@@ -232,6 +229,7 @@ set(sdrbase_SOURCES
     util/corsproxy.cpp
     util/countrydat.cpp
     util/crc.cpp
+    util/droneid.cpp
     util/CRC64.cpp
     util/csv.cpp
     util/db.cpp
@@ -249,6 +247,7 @@ set(sdrbase_SOURCES
     util/jplhorizons.cpp
     util/kiwisdrlist.cpp
     util/lfsr.cpp
+    util/ltegold.cpp
     util/maidenhead.cpp
     util/message.cpp
     util/messagequeue.cpp
@@ -269,6 +268,7 @@ set(sdrbase_SOURCES
     util/radiosonde.cpp
     util/rainviewer.cpp
     util/rtpsink.cpp
+    util/selcaldb.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
     util/sdrangelserverlist.cpp
@@ -281,6 +281,7 @@ set(sdrbase_SOURCES
     util/spyserverlist.cpp
     util/stix.cpp
     util/stringlist.cpp
+    util/rds.cpp
     util/rtty.cpp
     util/uid.cpp
     util/units.cpp
@@ -325,6 +326,7 @@ set(sdrbase_HEADERS
     audio/audiocompressorsnd.h
     audio/audiodeviceinfo.h
     audio/audiodevicemanager.h
+    audio/audiofilereader.h
     audio/audiofifo.h
     audio/audiofilter.h
     audio/audiog722.h
@@ -374,6 +376,7 @@ set(sdrbase_HEADERS
     dsp/dspdevicemimoengine.h
     dsp/dsptypes.h
     dsp/fftcorr.h
+    dsp/lteturbo.h
     dsp/fftengine.h
     dsp/fftfactory.h
     dsp/fftfilt.h
@@ -517,6 +520,7 @@ set(sdrbase_HEADERS
     util/jplhorizons.h
     util/kiwisdrlist.h
     util/lfsr.h
+    util/ltegold.h
     util/maidenhead.h
     util/message.h
     util/messagequeue.h
@@ -536,10 +540,13 @@ set(sdrbase_HEADERS
     util/prettyprint.h
     util/profiler.h
     util/psk31.h
+    util/droneid.h
     util/radiosonde.h
     util/rainviewer.h
+    util/rds.h
     util/rtpsink.h
     util/rtty.h
+    util/selcaldb.h
     util/syncmessenger.h
     util/samplesourceserializer.h
     util/sdrangelserverlist.h

@@ -82,9 +82,14 @@ private:
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceWorkspaceService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceWindowsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumDataService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumHistoryService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response, bool image);
     void devicesetSpectrumServerService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -111,6 +116,7 @@ private:
     void featuresetFeatureReportService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureActionsService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureWorkspaceService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void workspaceActionsService(const std::string& workspaceIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
@@ -128,6 +134,7 @@ private:
     bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
     bool validateWorkspaceInfo(SWGSDRangel::SWGWorkspaceInfo& workspaceInfo, QJsonObject& jsonObject);
+    bool validateWorkspaceActions(SWGSDRangel::SWGWorkspaceActions& workspaceActions, QJsonObject& jsonObject);
     bool validateConfigurationIdentifier(SWGSDRangel::SWGConfigurationIdentifier& configurationIdentifier);
     bool validateConfigurationImportExport(SWGSDRangel::SWGConfigurationImportExport& configuratopmImportExport);
 
@@ -210,6 +217,7 @@ private:
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings);
+    void resetSpectrumReport(SWGSDRangel::SWGGLSpectrumReport& spectrumReport);
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
     void resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions);

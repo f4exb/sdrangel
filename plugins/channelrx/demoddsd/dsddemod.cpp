@@ -61,6 +61,7 @@ const int DSDDemod::m_udpBlockSize = 512;
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
@@ -155,6 +156,7 @@ void DSDDemod::start()
 
     qDebug() << "DSDDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("DSDDemod");
     m_basebandSink = new DSDDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)
@@ -202,6 +204,7 @@ void DSDDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 void DSDDemod::setScopeXYSink(BasebandSampleSink* sampleSink)
@@ -333,7 +336,11 @@ void DSDDemod::applySettings(const QStringList& settingsKeys, const DSDDemodSett
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray DSDDemod::serialize() const
@@ -657,12 +664,20 @@ void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getDsdDemodReport()->setPllLocked(getDecoder().getSymbolPLLLocked() ? 1 : 0);
     response.getDsdDemodReport()->setSlot1On(getDecoder().getVoice1On() ? 1 : 0);
     response.getDsdDemodReport()->setSlot2On(getDecoder().getVoice2On() ? 1 : 0);
-    response.getDsdDemodReport()->setSyncType(new QString(getDecoder().getFrameTypeText()));
+    if (response.getDsdDemodReport()->getSyncType()) {
+        *response.getDsdDemodReport()->getSyncType() = getDecoder().getFrameTypeText();
+    } else {
+        response.getDsdDemodReport()->setSyncType(new QString(getDecoder().getFrameTypeText()));
+    }
     response.getDsdDemodReport()->setInLevel(getDecoder().getInLevel());
     response.getDsdDemodReport()->setCarierPosition(getDecoder().getCarrierPos());
     response.getDsdDemodReport()->setZeroCrossingPosition(getDecoder().getZeroCrossingPos());
     response.getDsdDemodReport()->setSyncRate(getDecoder().getSymbolSyncQuality());
-    response.getDsdDemodReport()->setStatusText(new QString(updateAndGetStatusText()));
+    if (response.getDsdDemodReport()->getStatusText()) {
+        *response.getDsdDemodReport()->getStatusText() = updateAndGetStatusText();
+    } else {
+        response.getDsdDemodReport()->setStatusText(new QString(updateAndGetStatusText()));
+    }
 }
 
 void DSDDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force)
@@ -725,7 +740,11 @@ void DSDDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
     SWGSDRangel::SWGDSDDemodSettings *swgDSDDemodSettings = swgChannelSettings->getDsdDemodSettings();
 
@@ -780,10 +799,18 @@ void DSDDemod::webapiFormatChannelSettings(
         swgDSDDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDSDDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDSDDemodSettings->getTitle()) {
+            *swgDSDDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDSDDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgDSDDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgDSDDemodSettings->getAudioDeviceName()) {
+            *swgDSDDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgDSDDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("highPassFilter") || force) {
         swgDSDDemodSettings->setHighPassFilter(settings.m_highPassFilter ? 1 : 0);
@@ -895,4 +922,9 @@ void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
         m_availableAMBEFeatures.remove(feature);
         notifyUpdateAMBEFeatures();
     }
+}
+
+int DSDDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

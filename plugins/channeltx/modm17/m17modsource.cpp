@@ -43,6 +43,7 @@ M17ModSource::M17ModSource() :
     m_preemphasisFilter(m_preemphasis*48000)
 {
     m_audioFifo.setLabel("M17ModSource.m_audioFifo");
+    m_processorThread.setObjectName("M17ModSourceWrk");
     m_feedbackAudioFifo.setLabel("M17ModSource.m_feedbackAudioFifo");
 	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
@@ -157,7 +158,7 @@ void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
 
 void M17ModSource::modulateSample()
 {
-	Real t1, t;
+    Real t1 = 0.0f, t;
     bool carrier;
 
     if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio))
@@ -517,11 +518,13 @@ void M17ModSource::applyFeedbackAudioSampleRate(int sampleRate)
 
     qDebug("NFMModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
 
+    // Resample from the audio input rate to the feedback device rate. The distance is
+    // input samples per output sample and the filter is designed at the input rate.
     m_feedbackInterpolatorDistanceRemain = 0;
     m_feedbackInterpolatorConsumed = false;
-    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    m_feedbackInterpolatorDistance = (Real) m_audioSampleRate / (Real) sampleRate;
     Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
-    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+    m_feedbackInterpolator.create(48, m_audioSampleRate, cutoff, 3.0);
     m_feedbackAudioSampleRate = sampleRate;
 }
 

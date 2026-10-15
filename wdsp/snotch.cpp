@@ -69,7 +69,8 @@ SNOTCH::SNOTCH(
     out(_out),
     rate(_rate),
     f(_f),
-    bw(_bw)
+    bw(_bw),
+    x0(0)
 {
     calc();
 }

@@ -35,7 +35,8 @@ DSCDemodSettings::DSCDemodSettings() :
 void DSCDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 450.0f; // OBW for 2FSK = 2 * deviation + data rate. Then add a bit for carrier frequency offset
+    m_mode = ModeMFHF;
+    m_rfBandwidth = getDefaultRFBandwidth(m_mode); // OBW for 2FSK = 2 * deviation + data rate. Then add a bit for carrier frequency offset
     m_filterInvalid = true;
     m_filterColumn = 4;
     m_filter = "";
@@ -78,6 +79,7 @@ QByteArray DSCDemodSettings::serialize() const
         s.writeBlob(6, m_channelMarker->serialize());
     }
     s.writeFloat(7, m_rfBandwidth);
+    s.writeS32(8, (qint32) m_mode);
 
     s.writeBool(9, m_udpEnabled);
     s.writeString(10, m_udpAddress);
@@ -143,6 +145,9 @@ bool DSCDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
         d.readFloat(7, &m_rfBandwidth, 450.0f);
+        qint32 mode;
+        d.readS32(8, &mode, (qint32) ModeMFHF);
+        m_mode = mode == (qint32) ModeVHF ? ModeVHF : ModeMFHF;
 
         d.readBool(9, &m_udpEnabled);
         d.readString(10, &m_udpAddress);
@@ -216,6 +221,9 @@ void DSCDemodSettings::applySettings(const QStringList& settingsKeys, const DSCD
     if (settingsKeys.contains("rfBandwidth")) {
         m_rfBandwidth = settings.m_rfBandwidth;
     }
+    if (settingsKeys.contains("mode")) {
+        m_mode = settings.m_mode;
+    }
     if (settingsKeys.contains("filterInvalid")) {
         m_filterInvalid = settings.m_filterInvalid;
     }
@@ -287,6 +295,9 @@ QString DSCDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("mode") || force) {
+        ostr << " m_mode: " << (int) m_mode;
     }
     if (settingsKeys.contains("filterInvalid") || force) {
         ostr << " m_filterInvalid: " << m_filterInvalid;

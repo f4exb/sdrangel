@@ -206,6 +206,7 @@ bool AirspyInput::start()
     }
 
     m_airspyWorkerThread = new QThread();
+    m_airspyWorkerThread->setObjectName("AirspyInput");
 	m_airspyWorker = new AirspyWorker(m_dev, &m_sampleFifo);
     m_airspyWorker->moveToThread(m_airspyWorkerThread);
 

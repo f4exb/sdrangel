@@ -95,11 +95,13 @@ bool TestMI::startRx()
     qDebug("TestMI::startRx");
     m_testSourceWorkers.push_back(new TestMIWorker(&m_sampleMIFifo, 0));
     m_testSourceWorkerThreads.push_back(new QThread());
+    m_testSourceWorkerThreads.back()->setObjectName("TestMI:0");
     m_testSourceWorkers.back()->moveToThread(m_testSourceWorkerThreads.back());
 	m_testSourceWorkers.back()->setSamplerate(m_settings.m_streams[0].m_sampleRate);
 
     m_testSourceWorkers.push_back(new TestMIWorker(&m_sampleMIFifo, 1));
     m_testSourceWorkerThreads.push_back(new QThread());
+    m_testSourceWorkerThreads.back()->setObjectName("TestMI:1");
     m_testSourceWorkers.back()->moveToThread(m_testSourceWorkerThreads.back());
 	m_testSourceWorkers.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
 

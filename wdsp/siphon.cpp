@@ -75,6 +75,7 @@ SIPHON::SIPHON(
     insize(_insize),
     in(_in),
     sipsize(_sipsize),   // NOTE:  sipsize MUST BE A POWER OF TWO!!
+    outsize(0),
     fftsize(_fftsize),
     specmode(_specmode)
 {

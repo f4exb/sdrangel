@@ -24,6 +24,7 @@
 
 RttyModRepeatDialog::RttyModRepeatDialog(int repeatCount, QWidget* parent) :
     QDialog(parent),
+    m_repeatCount(repeatCount),
     ui(new Ui::RttyModRepeatDialog)
 {
     ui->setupUi(this);

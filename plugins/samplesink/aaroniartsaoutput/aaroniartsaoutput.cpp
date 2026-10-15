@@ -93,6 +93,7 @@ bool AaroniaRTSAOutput::start()
 	qDebug() << "AaroniaRTSAOutput::start";
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("AaroniaRTSAOut");
 	m_worker = new AaroniaRTSAOutputWorker(&m_sampleSourceFifo);
     m_worker->moveToThread(m_workerThread);
 

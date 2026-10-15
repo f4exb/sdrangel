@@ -46,6 +46,7 @@ struct USRPInputSettings
     bool     m_dcBlock;
     bool     m_iqCorrection;
     uint32_t m_log2SoftDecim;
+    int      m_wireFormat;   //!< Samples over USB or Ethernet: 0 16 bit (sc16), 1 8 bit (sc8, half the traffic)
     float    m_lpfBW;        //!< Analog lowpass filter bandwidth (Hz)
     uint32_t m_gain;         //!< Optimally distributed gain (dB)
     QString  m_antennaPath;

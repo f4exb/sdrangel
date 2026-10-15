@@ -3,8 +3,10 @@ RemoteOutputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     nbFECBlocks:
       type: integer
+      description: "Nb fec blocks setting for Remote output."
     nbTxBytes:
       type: integer
       description: >
@@ -14,12 +16,20 @@ RemoteOutputSettings:
           * 4
     apiAddress:
       type: string
+      description: "IPv4 address or host name of the API endpoint."
     apiPort:
       type: integer
+      description: "TCP port of the API endpoint."
+      minimum: 1
+      maximum: 65535
     dataAddress:
       type: string
+      description: "IPv4 address or host name used for data traffic."
     dataPort:
       type: integer
+      description: "Network port used for data traffic."
+      minimum: 1
+      maximum: 65535
     deviceIndex:
       description: remote SDRangel instance deviceset index
       type: integer
@@ -29,12 +39,19 @@ RemoteOutputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 RemoteOutputReport:
   description: RemoteOutput
@@ -42,8 +59,10 @@ RemoteOutputReport:
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     queueLength:
       description: "Data read/write queue length in number of data frames"
       type: integer

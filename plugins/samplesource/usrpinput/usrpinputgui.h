@@ -24,6 +24,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
+#include "usrp/deviceusrpstreamstats.h"
 
 #include "usrpinput.h"
 
@@ -68,6 +69,8 @@ private:
     bool m_forceSettings;
     int m_statusCounter;
     int m_deviceStatusCounter;
+    DeviceUSRPStreamStats m_overrunStats;
+    DeviceUSRPStreamStats m_timeoutStats;
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();
@@ -93,6 +96,7 @@ private slots:
     void on_iqImbalance_toggled(bool checked);
     void on_sampleRate_changed(quint64 value);
     void on_swDecim_currentIndexChanged(int index);
+    void on_wireFormat_currentIndexChanged(int index);
     void on_lpf_changed(quint64 value);
     void on_loOffset_changed(qint64 value);
     void on_gainMode_currentIndexChanged(int index);

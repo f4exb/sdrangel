@@ -31,6 +31,7 @@ SDRPlayThread::SDRPlayThread(mirisdr_dev_t* dev, SampleSinkFifo* sampleFifo, QOb
     m_fcPos(0),
     m_iqOrder(true)
 {
+    setObjectName("SDRPlay");
 }
 
 SDRPlayThread::~SDRPlayThread()

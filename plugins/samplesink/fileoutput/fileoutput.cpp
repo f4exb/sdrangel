@@ -49,6 +49,7 @@ FileOutput::FileOutput(DeviceAPI *deviceAPI) :
 	m_deviceDescription("FileOutput"),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_fileOutputWorkerThread.setObjectName("FileOutputWrk");
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
 }
@@ -72,7 +73,7 @@ void FileOutput::openFileStream()
 
 	m_ofstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
 
-    FileRecord::Header header;
+    FileRecord::Header header{};
 	auto actualSampleRate = (int) (m_settings.m_sampleRate * (1<<m_settings.m_log2Interp));
     header.sampleRate = actualSampleRate;
     header.centerFrequency = m_settings.m_centerFrequency;
@@ -417,7 +418,11 @@ void FileOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
         response.getFileOutputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getFileOutputSettings()->setFileName(new QString(settings.m_fileName));
+    if (response.getFileOutputSettings()->getFileName()) {
+        *response.getFileOutputSettings()->getFileName() = settings.m_fileName;
+    } else {
+        response.getFileOutputSettings()->setFileName(new QString(settings.m_fileName));
+    }
     response.getFileOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getFileOutputSettings()->setSampleRate(settings.m_sampleRate);
     response.getFileOutputSettings()->setLog2Interp(settings.m_log2Interp);

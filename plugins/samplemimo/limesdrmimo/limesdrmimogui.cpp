@@ -26,6 +26,7 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -148,13 +149,12 @@ void LimeSDRMIMOGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
-        } else {
-            qDebug("LimeSDRMIMOGUI::handleInputMessages: unhandled message: %s", message->getIdentifier());
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -691,7 +691,7 @@ void LimeSDRMIMOGUI::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(0));
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(0));
                 break;
             default:
                 break;
@@ -716,7 +716,7 @@ void LimeSDRMIMOGUI::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(1));
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(1));
                 break;
             default:
                 break;

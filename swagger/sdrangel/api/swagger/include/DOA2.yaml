@@ -6,20 +6,28 @@ DOA2Settings:
       type: integer
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     filterChainHash:
       type: integer
+      description: "Identifier of the selected half-band filter chain."
     phase:
       type: integer
       description: Phase difference correction in degrees from -180 to +180
     antennaAz:
       type: integer
+      minimum: 0
+      maximum: 359
       description: Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359
     basebandDistance:
       type: integer
+      minimum: 1
+      maximum: 99999
       description: Antennas baseline distance in millimeters from 1 to 99999
     squelchdB:
       type: integer
@@ -30,32 +38,49 @@ DOA2Settings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     scopeConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 DOA2Report:
   description: DOA2
   properties:
     phi:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Raw phase difference in degrees from 0 to 180
     posAz:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Calculated port side (positive) arrival angle in degrees from 0 to 180
     negAz:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Calculated starboard side (negative) arrival angle in degrees from 0 to 180
     blindAngle:
       type: integer

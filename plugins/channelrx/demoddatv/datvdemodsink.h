@@ -57,7 +57,9 @@ class QLabel;
 class DATVDemodSink : public ChannelSampleSink {
 public:
     DATVDemodSink();
-	~DATVDemodSink();
+    ~DATVDemodSink();
+    DATVDemodSink(const DATVDemodSink&) = delete;
+    DATVDemodSink& operator=(const DATVDemodSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

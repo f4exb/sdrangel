@@ -4,7 +4,7 @@
 
 This plugin can be used to demodulate DSC (Digital Selective Calling) transmissions, which are short, pre-defined digital messages transmitted by marine radios.
 
-DSC messages are transmitted using FSK with 170Hz separation at 100 baud, as specified by [ITU-R M.493](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.493-15-201901-I!!PDF-E.pdf]).
+DSC messages are transmitted as specified by ITU-R M.493. On MF/HF the signal is 100-baud FSK with 170Hz separation. On VHF it uses 1,300Hz and 2,100Hz tones at 1,200 baud over an FM channel.
 
 DSC messages can be transmitted on a variety of frequencies, but are most commonly found on: 2,187.5kHz, 8,414.5kHz, 16,804.5kHz and 156.525 MHz (VHF Ch. 70).
 
@@ -40,19 +40,23 @@ IP address of the host to forward received messages to via UDP.
 
 UDP port number to forward received messages to.
 
-<h3>7: Filter</h3>
+<h3>7: Mode</h3>
 
-This drop down displays a list of all columns which can be used for filtering (8).
+Select **MF/HF** or **VHF**. The mode selects the appropriate modulation rate, channel bandwidth and demodulator. Use VHF mode when receiving channel 70. In VHF mode the RF bandwidth is 20kHz, which tolerates a tuning error of about &plusmn;3kHz.
 
-<h3>8: Filter Reg Exp</h3>
+<h3>8: Filter</h3>
 
-Specifies a [regular expression](https://regexr.com/) used to filter data in the table, using data in the column specified by (7).
+This drop down displays a list of all columns which can be used for filtering (9).
 
-<h3>9: Filter Invalid</h3>
+<h3>9: Filter Reg Exp</h3>
+
+Specifies a [regular expression](https://regexr.com/) used to filter data in the table, using data in the column specified by (8).
+
+<h3>10: Filter Invalid</h3>
 
 When checked, invalid messages will be filtered from the table.
 
-<h3>10: Feed to YaDDNet</h3>
+<h3>11: Feed to YaDDNet</h3>
 
 When checked, valid messages will be forwarded to [YaDDNet](http://yaddnet.org/).
 YaDDNet aggregates DSC messages from different users around the world storing them in a searchable database.
@@ -60,24 +64,24 @@ The messages are submitted with Preferences > My Position... > Station name used
 
 Right click to open http://yaddnet.org/ in your browser, showing recent messages received from this ID.
 
-<h3>11: Use Date and Time from File</h3>
+<h3>12: Use Date and Time from File</h3>
 
 When checked, if the source device is a File Input device, the date and time used for
 packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
 
-<h3>12: Start/stop Logging Messages to .csv File</h3>
+<h3>13: Start/stop Logging Messages to .csv File</h3>
 
-When checked, writes all received messages to a .csv file, specified by (13).
+When checked, writes all received messages to a .csv file, specified by (14).
 
-<h3>13: .csv Log Filename</h3>
+<h3>14: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received messages are logged to.
 
-<h3>14: Read Data from .csv File</h3>
+<h3>15: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
-<h3>15: Received Messages Table</h3>
+<h3>16: Received Messages Table</h3>
 
 ![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_messages.png)
 

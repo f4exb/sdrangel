@@ -21,6 +21,7 @@
 
 #include <QDialog>
 #include <QList>
+#include <QStringList>
 #include <QTreeWidgetItem>
 
 #include "export.h"
@@ -51,9 +52,13 @@ private:
 
     Ui::ConfigurationsDialog* ui;
     QList<Configuration*> *m_configurations;
+    QStringList m_collapsedGroups; //!< Groups the user collapsed, restored next time the dialog is opened
 
     QTreeWidgetItem* addConfigurationToTree(const Configuration* configuration);
     void updateConfigurationControls();
+    void saveCollapsedGroups();
+    void renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName);
+    void forgetCollapsedGroup(const QString& groupName);
     Configuration* newConfiguration(const QString& group, const QString& description);
     void addConfiguration(Configuration *configuration);
     void sortConfigurations();
@@ -71,6 +76,8 @@ private slots:
 	void on_configurationLoad_clicked();
 	void on_configurationsTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_configurationsTree_itemActivated(QTreeWidgetItem *item, int column);
+	void on_configurationsTree_itemCollapsed(QTreeWidgetItem *item);
+	void on_configurationsTree_itemExpanded(QTreeWidgetItem *item);
     void accept() override;
 
 signals:

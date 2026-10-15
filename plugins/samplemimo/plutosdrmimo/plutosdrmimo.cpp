@@ -183,6 +183,7 @@ bool PlutoSDRMIMO::startRx()
     qDebug("PlutoSDRMIMO::startRx");
 
     m_sourceThread = new PlutoSDRMIThread(m_plutoParams->getBox());
+    connect(m_sourceThread, &PlutoSDRMIThread::error, this, &PlutoSDRMIMO::handleError, Qt::QueuedConnection);
     m_sampleMIFifo.reset();
     m_sourceThread->setFifo(&m_sampleMIFifo);
     m_sourceThread->setFcPos(m_settings.m_fcPosRx);
@@ -221,6 +222,7 @@ bool PlutoSDRMIMO::startTx()
     qDebug("PlutoSDRMIMO::startTx");
 
     m_sinkThread = new PlutoSDRMOThread(m_plutoParams->getBox());
+    connect(m_sinkThread, &PlutoSDRMOThread::error, this, &PlutoSDRMIMO::handleError, Qt::QueuedConnection);
     m_sampleMOFifo.reset();
     m_sinkThread->setFifo(&m_sampleMOFifo);
     m_sinkThread->setFcPos(m_settings.m_fcPosTx);
@@ -301,6 +303,62 @@ void PlutoSDRMIMO::stopTx()
 
     m_plutoParams->getBox()->deleteTxBuffer();
     m_plutoRxBuffer = nullptr;
+}
+
+void PlutoSDRMIMO::handleError(int errorCode)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    // fatal error - shut it all off.
+    if (m_sourceThread) {
+        if (m_sourceThread->isRunning()) {
+            m_sourceThread->stopWork();
+        }
+        m_sourceThread->wait();
+        delete m_sourceThread;
+        m_sourceThread = nullptr;
+    }
+    if (m_nbRx > 1) {
+        m_plutoParams->getBox()->closeSecondRx();
+    }
+
+    if (m_nbRx > 0) {
+        m_plutoParams->getBox()->closeRx();
+    }
+
+    m_plutoParams->getBox()->deleteRxBuffer();
+    m_plutoTxBuffer = nullptr;
+
+    if (m_sinkThread) {
+        if (m_sinkThread->isRunning()) {
+            m_sinkThread->stopWork();
+        }
+        m_sinkThread->wait();
+        delete m_sinkThread;
+        m_sinkThread = nullptr;
+    }
+    if (m_nbTx > 1) {
+        m_plutoParams->getBox()->closeSecondTx();
+    }
+
+    if (m_nbTx > 0) {
+        m_plutoParams->getBox()->closeTx();
+    }
+
+    m_plutoParams->getBox()->deleteTxBuffer();
+    m_plutoRxBuffer = nullptr;
+
+    m_plutoParams->close();
+    delete m_plutoParams;
+    m_plutoParams = nullptr;
+    m_open = false;
+
+    const QString errorMessage =
+        tr("PlutoSDR needs a restart: %1 (%2)")
+            .arg(strerror(-errorCode))
+            .arg(errorCode);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(new DSPAcquisitionError(errorMessage));
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(new DSPGenerationError(errorMessage));
 }
 
 QByteArray PlutoSDRMIMO::serialize() const
@@ -1219,9 +1277,17 @@ void PlutoSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getPlutoSdrMimoReport()->setAdcRate(getADCSampleRate());
     std::string rssiStr;
     getRxRSSI(rssiStr, 0);
-    response.getPlutoSdrMimoReport()->setRssiRx0(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiRx0()) {
+        *response.getPlutoSdrMimoReport()->getRssiRx0() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiRx0(new QString(rssiStr.c_str()));
+    }
     getRxRSSI(rssiStr, 1);
-    response.getPlutoSdrMimoReport()->setRssiRx1(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiRx1()) {
+        *response.getPlutoSdrMimoReport()->getRssiRx1() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiRx1(new QString(rssiStr.c_str()));
+    }
     int gainDB;
     getRxGain(gainDB, 0);
     response.getPlutoSdrMimoReport()->setRx0GainDb(gainDB);
@@ -1229,9 +1295,17 @@ void PlutoSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getPlutoSdrMimoReport()->setRx1GainDb(gainDB);
     response.getPlutoSdrMimoReport()->setDacRate(getDACSampleRate());
     getTxRSSI(rssiStr, 0);
-    response.getPlutoSdrMimoReport()->setRssiTx0(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiTx0()) {
+        *response.getPlutoSdrMimoReport()->getRssiTx0() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiTx0(new QString(rssiStr.c_str()));
+    }
     getTxRSSI(rssiStr, 1);
-    response.getPlutoSdrMimoReport()->setRssiTx1(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiTx1()) {
+        *response.getPlutoSdrMimoReport()->getRssiTx1() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiTx1(new QString(rssiStr.c_str()));
+    }
 }
 
 void PlutoSDRMIMO::networkManagerFinished(QNetworkReply *reply)

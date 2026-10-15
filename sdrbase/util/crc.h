@@ -30,6 +30,7 @@ public:
     // Create and initialise CRC with specified polynomial and parameters
     crc(int poly_bits, uint32_t polynomial, bool msb_first, uint32_t init_value, uint32_t final_xor) :
         m_polynomial(polynomial),
+        m_polynomial_rev(0),
         m_poly_bits(poly_bits),
         m_msb_first(msb_first),
         m_init_value(init_value),
@@ -128,6 +129,20 @@ class SDRBASE_API crcadsb : public crc
 {
 public:
     crcadsb() : crc(24, 0xfff409, true, 0, 0) {}
+};
+
+// LTE CRC24A - 3GPP TS 36.212 section 5.1.1
+class SDRBASE_API crc24a : public crc
+{
+public:
+    crc24a() : crc(24, 0x864cfb, true, 0, 0) {}
+};
+
+// DJI DroneID payload CRC
+class SDRBASE_API crc16droneid : public crc
+{
+public:
+    crc16droneid() : crc(16, 0x1021, false, 0x3692, 0) {}
 };
 
 #endif

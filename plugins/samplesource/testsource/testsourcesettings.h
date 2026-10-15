@@ -64,6 +64,8 @@ struct TestSourceSettings {
     float m_iFactor;        //!< -1.0 < x < 1.0
     float m_qFactor;        //!< -1.0 < x < 1.0
     float m_phaseImbalance; //!< -1.0 < x < 1.0
+    qint32 m_period;        //!< Period of the P1 and P2 patterns in samples
+    qint32 m_dutyCycle;     //!< Percentage of the period the P2 pattern is high
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

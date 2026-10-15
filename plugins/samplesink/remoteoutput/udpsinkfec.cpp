@@ -46,6 +46,7 @@ UDPSinkFEC::UDPSinkFEC() :
     m_currentMetaFEC.init();
 
     m_senderThread = new QThread(this);
+    m_senderThread->setObjectName("UDPSinkFEC");
     m_remoteOutputSender = new RemoteOutputSender();
     m_remoteOutputSender->moveToThread(m_senderThread);
 }

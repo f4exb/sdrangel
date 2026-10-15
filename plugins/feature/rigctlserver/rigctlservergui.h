@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_RIGCTLSERVERGUI_H_
 #define INCLUDE_FEATURE_RIGCTLSERVERGUI_H_
 
-#include <QTimer>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -61,8 +60,6 @@ private:
 
 	RigCtlServer* m_rigCtlServer;
 	MessageQueue m_inputMessageQueue;
-	QTimer m_statusTimer;
-	int m_lastFeatureState;
 
 	explicit RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
 	virtual ~RigCtlServerGUI();
@@ -86,7 +83,7 @@ private slots:
 	void on_channel_currentIndexChanged(int index);
 	void on_rigCtrlPort_valueChanged(int value);
 	void on_maxFrequencyOffset_valueChanged(int value);
-	void updateStatus();
+	void updateFeatureState();
 };
 
 

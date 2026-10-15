@@ -67,7 +67,6 @@ private:
     GS232Controller* m_gs232Controller;
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
-    int m_lastFeatureState;
     bool m_lastOnTarget;
 
     DFMStatusDialog m_dfmStatusDialog;
@@ -132,6 +131,7 @@ private slots:
     void on_dfmDrives_clicked(bool checked=false);
     void on_dfmShowStatus_clicked();
     void updateStatus();
+    void updateFeatureState();
     void on_inputController_currentIndexChanged(int index);
     void on_inputConfigure_clicked();
     void on_highSensitivity_clicked(bool checked);

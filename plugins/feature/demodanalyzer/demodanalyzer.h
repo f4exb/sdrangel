@@ -118,15 +118,15 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        ChannelAPI *getChannel() { return m_channel; }
-        static MsgSelectChannel* create(ChannelAPI *channel) {
+        QObject *getChannel() { return m_channel; }
+        static MsgSelectChannel* create(QObject *channel) {
             return new MsgSelectChannel(channel);
         }
 
     protected:
-        ChannelAPI *m_channel;
+        QObject *m_channel;
 
-        MsgSelectChannel(ChannelAPI *channel) :
+        MsgSelectChannel(QObject *channel) :
             Message(),
             m_channel(channel)
         { }
@@ -209,7 +209,7 @@ private:
     ScopeVis m_scopeVis;
     AvailableChannelOrFeatureList m_availableChannels;
     AvailableChannelOrFeatureHandler m_availableChannelOrFeatureHandler;
-    ChannelAPI *m_selectedChannel;
+    QObject *m_selectedChannel;
     ObjectPipe *m_dataPipe;
     int m_sampleRate;
 
@@ -220,7 +220,8 @@ private:
     void stop();
     void applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo);
-    void setChannel(ChannelAPI *selectedChannel);
+    void setChannel(QObject *selectedChannel);
+    void applyReportedSampleRate(int sampleRate);
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force);
 
 private slots:

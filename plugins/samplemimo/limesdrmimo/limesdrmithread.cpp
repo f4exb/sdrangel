@@ -27,6 +27,7 @@ LimeSDRMIThread::LimeSDRMIThread(lms_stream_t* stream0, lms_stream_t* stream1, Q
     m_sampleFifo(nullptr),
     m_iqOrder(true)
 {
+    setObjectName("LimeSDRMI");
     qDebug("LimeSDRMIThread::LimeSDRMIThread");
 
     for (unsigned int i = 0; i < 2; i++) {

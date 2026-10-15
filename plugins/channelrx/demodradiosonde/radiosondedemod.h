@@ -124,6 +124,8 @@ public:
     virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
+    int getAudioSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -152,6 +154,10 @@ public:
             bool force,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
     static void webapiFormatChannelSettings(
@@ -194,6 +200,7 @@ private:
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QStringList& channelSettingsKeys, const RadiosondeDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         const QStringList& channelSettingsKeys,

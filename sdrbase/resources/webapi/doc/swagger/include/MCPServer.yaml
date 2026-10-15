@@ -1,0 +1,77 @@
+MCPServerSettings:
+  description: "MCP (Model Context Protocol) server settings"
+  properties:
+    address:
+      type: string
+      description: Address to bind the HTTP listener to. Defaults to 127.0.0.1 (local connections only)
+    port:
+      type: integer
+      minimum: 1024
+      maximum: 65535
+      description: TCP port the MCP server listens on
+    token:
+      type: string
+      description: Optional bearer token clients must present in the Authorization header. Empty for no authentication
+    captureDir:
+      type: string
+      description: Directory that IQ and audio captures are written to. Capture tools refuse paths outside it
+    title:
+      type: string
+      description: "User-visible title."
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    useReverseAPI:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: >
+        Synchronize with reverse API
+          * 1 - yes
+          * 0 - no
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIFeatureSetIndex:
+      type: integer
+      description: "Feature-set index used by the reverse API peer."
+    reverseAPIFeatureIndex:
+      type: integer
+      description: "Feature index used by the reverse API peer."
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+MCPServerReport:
+  description: MCP server report
+  properties:
+    runningState:
+      type: integer
+      minimum: 0
+      maximum: 3
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
+    requestCount:
+      type: integer
+      description: Number of MCP requests served since the server was started
+
+MCPServerActions:
+  description: MCP server actions
+  properties:
+    run:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

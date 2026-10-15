@@ -29,6 +29,7 @@ XTRXMOThread::XTRXMOThread(struct xtrx_dev *dev, QObject* parent) :
     m_dev(dev),
     m_sampleFifo(nullptr)
 {
+    setObjectName("XTRXMO");
     qDebug("XTRXMOThread::XTRXMOThread");
     m_buf = new qint16[2*DeviceXTRX::blockSize*2];
     std::fill(m_buf, m_buf + 2*DeviceXTRX::blockSize*2, 0);

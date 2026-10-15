@@ -5,6 +5,7 @@ Comment=SDR/Analyzer frontend for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, 
 Exec=@CMAKE_PROJECT_NAME@
 Icon=@CMAKE_PROJECT_NAME@_icon
 StartupNotify=true
+StartupWMClass=SDRangel
 Terminal=false
 Type=Application
 Categories=Network;HamRadio;

@@ -25,7 +25,8 @@
 #include "remotetcpsinkbaseband.h"
 #include "remotetcpsink.h"
 
-RemoteTCPSinkBaseband::RemoteTCPSinkBaseband()
+RemoteTCPSinkBaseband::RemoteTCPSinkBaseband() :
+    m_running(false)
 {
     qDebug("RemoteTCPSinkBaseband::RemoteTCPSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
@@ -113,11 +114,12 @@ void RemoteTCPSinkBaseband::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 

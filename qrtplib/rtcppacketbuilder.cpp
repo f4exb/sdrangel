@@ -41,7 +41,27 @@ namespace qrtplib
 {
 
 RTCPPacketBuilder::RTCPPacketBuilder(RTPSources &s, RTPPacketBuilder &pb) :
-        sources(s), rtppacketbuilder(pb), prevbuildtime(0, 0), transmissiondelay(0, 0)
+    sources(s),
+    rtppacketbuilder(pb),
+    maxpacketsize(0),
+    timestampunit(0.0),
+    firstpacket(false),
+    prevbuildtime(0, 0),
+    transmissiondelay(0, 0),
+    interval_name(0),
+    interval_email(0),
+    interval_location(0),
+    interval_phone(0),
+    interval_tool(0),
+    interval_note(0),
+    doname(false),
+    doemail(false),
+    doloc(false),
+    dophone(false),
+    dotool(false),
+    donote(false),
+    processingsdes(false),
+    sdesbuildcount(0)
 {
     init = false;
     timeinit.Dummy();

@@ -38,6 +38,7 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, Replay
 	m_sampleFifo(sampleFifo),
 	m_replayBuffer(replayBuffer)
 {
+    setObjectName("RTLSDR");
     applySettings(settings, QStringList(), true);
     connect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);
 }
@@ -374,11 +375,12 @@ void RTLSDRThread::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -453,6 +455,11 @@ bool RTLSDRThread::applySettings(const RTLSDRSettings& settings, const QStringLi
 
         if (rtlsdr_set_center_freq(m_dev, deviceCenterFrequency) != 0) {
             qWarning("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+            // Retry after PLL has settled
+            QThread::msleep(5);
+            if (rtlsdr_set_center_freq(m_dev, deviceCenterFrequency) != 0) {
+                qWarning("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+            }
         } else {
             qDebug("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld)", deviceCenterFrequency);
         }

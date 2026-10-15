@@ -85,6 +85,8 @@ struct ldpc_engine
     node *cnodes; // [n-k]
 
     ldpc_engine() :
+        k(0),
+        n(0),
         vnodes(nullptr),
         cnodes(nullptr)
     {
@@ -172,6 +174,9 @@ struct ldpc_engine
             delete[] cnodes;
         }
     }
+
+    ldpc_engine(const ldpc_engine&) = delete;
+    ldpc_engine& operator=(const ldpc_engine&) = delete;
 
     void print_node_stats()
     {

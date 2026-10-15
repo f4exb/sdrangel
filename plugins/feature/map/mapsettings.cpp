@@ -35,6 +35,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("APRS"),
     QStringLiteral("APTDemod"),
     QStringLiteral("DSCDemod"),
+    QStringLiteral("DroneIDDemod"),
     QStringLiteral("FT8Demod"),
     QStringLiteral("HeatMap"),
     QStringLiteral("ILSDemod"),
@@ -54,6 +55,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.channel.dscdemod"),
+    QStringLiteral("sdrangel.channel.droneiddemod"),
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.channel.ilsdemod"),
@@ -82,6 +84,7 @@ const QStringList MapSettings::m_mapProviderNames = {
 };
 
 MapSettings::MapSettings() :
+    m_rgbColor(QColor(0, 0, 0).rgb()),
     m_rollupState(nullptr)
 {
     // Source names should match m_pipeTypes
@@ -97,12 +100,14 @@ MapSettings::MapSettings() :
     aprsSettings->m_extrapolate = 0;
     m_itemSettings.insert("APRS", aprsSettings);
     m_itemSettings.insert("DSCDemod", new MapItemSettings("DSCDemod", true,  QColor(181, 230, 29), true, true, 3));
+    m_itemSettings.insert("DroneIDDemod", new MapItemSettings("DroneIDDemod", true, QColor(255, 128, 0), true, false, 11, modelMinPixelSize));
     m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", true,  QColor(230, 230, 230), true, true, 3));
     m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", true, QColor(0, 0, 255), true, false, 0, modelMinPixelSize));
     m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("PagerDemod", new MapItemSettings("PagerDemod", true, QColor(200, 191, 231), true, false, 11));
     m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", true, QColor(102, 0, 102), true, false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("WEFAX Transmitters", new MapItemSettings("WEFAX Transmitters", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("NAT ATC Transmitters", new MapItemSettings("NAT ATC Transmitters", false, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", true, QColor(0, 192, 255), true, true, 8));
@@ -175,9 +180,28 @@ MapSettings::MapSettings() :
     resetToDefaults();
 }
 
+MapSettings::MapSettings(const MapSettings& other) :
+    MapSettings()
+{
+    deserialize(other.serialize());
+    m_rollupState = other.m_rollupState;
+}
+
+
+MapSettings& MapSettings::operator=(const MapSettings& other)
+{
+    if (this != &other)
+    {
+        deserialize(other.serialize());
+        m_rollupState = other.m_rollupState;
+    }
+
+    return *this;
+}
+
 MapSettings::~MapSettings()
 {
-    //qDeleteAll(m_itemSettings);
+    qDeleteAll(m_itemSettings);
 }
 
 void MapSettings::resetToDefaults()
@@ -583,9 +607,14 @@ void MapSettings::deserializeItemSettings(const QByteArray& data, QHash<QString,
         }
         else
         {
-            d.readBlob(idx+2, &blob);
-            MapItemSettings *settings = new MapItemSettings(blob);
-            itemSettings.insert(key, settings);
+            if (itemSettings.contains(key))
+            {
+                itemSettings[key]->deserialize(blob);
+            }
+            else
+            {
+                itemSettings.insert(key, new MapItemSettings(blob));
+            }
         }
 
         idx += 2;
@@ -596,6 +625,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
 {
     if (settingsKeys.contains("displayNames")) {
         m_displayNames = settings.m_displayNames;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
     }
     if (settingsKeys.contains("mapProvider")) {
         m_mapProvider = settings.m_mapProvider;
@@ -611,6 +643,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("mapBoxStyles")) {
         m_mapBoxStyles = settings.m_mapBoxStyles;
+    }
+    if (settingsKeys.contains("mapType")) {
+        m_mapType = settings.m_mapType;
     }
     if (settingsKeys.contains("displaySelectedGroundTracks")) {
         m_displaySelectedGroundTracks = settings.m_displaySelectedGroundTracks;

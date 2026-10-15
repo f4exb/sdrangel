@@ -37,6 +37,7 @@ PagerDemodSettings::PagerDemodSettings() :
 void PagerDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
+    m_modulation = Auto;
     m_rfBandwidth = 20000.0f;
     m_fmDeviation = 4500.0f;
     m_decode = Standard;
@@ -121,6 +122,7 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeBool(32, m_filterDuplicates);
     s.writeBool(33, m_duplicateMatchMessageOnly);
     s.writeBool(34, m_duplicateMatchLastOnly);
+    s.writeS32(35, (int)m_modulation);
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -221,6 +223,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readBool(32, &m_filterDuplicates);
         d.readBool(33, &m_duplicateMatchMessageOnly);
         d.readBool(34, &m_duplicateMatchLastOnly);
+        d.readS32(35, (int*)&m_modulation, (int)Auto);
 
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
@@ -243,6 +246,9 @@ void PagerDemodSettings::applySettings(const QStringList& settingsKeys, const Pa
 {
     if (settingsKeys.contains("inputFrequencyOffset")) {
         m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
     }
     if (settingsKeys.contains("rfBandwidth")) {
         m_rfBandwidth = settings.m_rfBandwidth;
@@ -349,6 +355,9 @@ QString PagerDemodSettings::getDebugString(const QStringList& settingsKeys, bool
 
     if (settingsKeys.contains("inputFrequencyOffset") || force) {
         ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
     }
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;

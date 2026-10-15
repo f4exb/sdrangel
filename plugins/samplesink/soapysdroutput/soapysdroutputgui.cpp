@@ -24,6 +24,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "ui_soapysdroutputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
@@ -201,7 +202,7 @@ void SoapySDROutputGui::createTunableElementsControl(const std::vector<DeviceSoa
 
     std::vector<DeviceSoapySDRParams::FrequencySetting>::const_iterator it = tunableElementsList.begin() + 1;
 
-    for (int i = 0; it != tunableElementsList.end(); ++it, i++)
+    for (; it != tunableElementsList.end(); ++it)
     {
         if (it->m_ranges.size() == 0) { // skip empty ranges lists
             continue;
@@ -259,7 +260,7 @@ void SoapySDROutputGui::createIndividualGainsControl(const std::vector<DeviceSoa
     QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
     std::vector<DeviceSoapySDRParams::GainSetting>::const_iterator it = individualGainsList.begin();
 
-    for (int i = 0; it != individualGainsList.end(); ++it, i++)
+    for (; it != individualGainsList.end(); ++it)
     {
         IntervalSliderGUI *gainGUI = new IntervalSliderGUI(this);
         gainGUI->setInterval(it->m_range.minimum(), it->m_range.maximum());
@@ -373,7 +374,7 @@ void SoapySDROutputGui::createArgumentsControl(const SoapySDR::ArgInfoList& argI
             std::vector<std::string>::const_iterator optionIt = it->options.begin();
             std::vector<std::string>::const_iterator optionNameIt = it->optionNames.begin();
 
-            for (int i = 0; optionIt != it->options.end(); ++optionIt, i++)
+            for (; optionIt != it->options.end(); ++optionIt)
             {
                 QString name(optionNameIt == it->optionNames.end() ? optionIt->c_str() : optionNameIt->c_str());
 
@@ -527,10 +528,11 @@ void SoapySDROutputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
+            if (!handleMessage(*message))
             {
-                delete message;
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }
@@ -877,7 +879,7 @@ void SoapySDROutputGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

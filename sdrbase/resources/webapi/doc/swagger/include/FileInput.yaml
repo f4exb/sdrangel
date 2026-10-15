@@ -3,6 +3,7 @@ FileInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     fileName:
       description: The name (path) of the file being read
       type: string
@@ -15,18 +16,26 @@ FileInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 FileInputReport:
   description: FileInput
   properties:
     fileName:
       type: string
+      description: "File name or path."
     sampleRate:
       description: Record sample rate in S/s
       type: integer

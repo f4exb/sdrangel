@@ -78,6 +78,7 @@ void AudioCATSISOSettings::resetToDefaults()
     m_txSampleRate = 48000; // Default sample rate
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = false;
     m_rxDeviceName = "";
     m_rxVolume = 1.0f;
     m_log2Decim = 0;
@@ -116,6 +117,7 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_txSampleRate = other.m_txSampleRate;
     m_transverterMode = other.m_transverterMode;
     m_transverterDeltaFrequency = other.m_transverterDeltaFrequency;
+    m_iqOrder = other.m_iqOrder;
     m_rxDeviceName = other.m_rxDeviceName;
     m_rxVolume = other.m_rxVolume;
     m_log2Decim = other.m_log2Decim;
@@ -283,6 +285,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     }
     if (settingsKeys.contains("log2Decim")) {
         m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
     }
     if (settingsKeys.contains("rxIQMapping")) {
         m_rxIQMapping = settings.m_rxIQMapping;

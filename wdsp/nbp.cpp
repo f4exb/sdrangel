@@ -41,7 +41,9 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-NOTCHDB::NOTCHDB(int _master_run, int _maxnotches)
+NOTCHDB::NOTCHDB(int _master_run, int _maxnotches) :
+    tunefreq(0),
+    shift(0)
 {
     master_run = _master_run;
     maxnotches = _maxnotches;
@@ -433,7 +435,8 @@ NBP::NBP(
     flow(_flow),
     fhigh(_fhigh),
     maxpb(_maxpb),
-    notchdb(_notchdb)
+    notchdb(_notchdb),
+    hadnotch(0)
 {
     bplow.resize(maxpb);
     bphigh.resize(maxpb);

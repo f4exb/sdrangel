@@ -93,6 +93,12 @@ public:
     float getPhaseImbalance();
     void setPhaseImbalance(float phase_imbalance);
 
+    qint32 getPeriod();
+    void setPeriod(qint32 period);
+
+    qint32 getDutyCycle();
+    void setDutyCycle(qint32 duty_cycle);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -159,6 +165,12 @@ private:
 
     float phase_imbalance;
     bool m_phase_imbalance_isSet;
+
+    qint32 period;
+    bool m_period_isSet;
+
+    qint32 duty_cycle;
+    bool m_duty_cycle_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

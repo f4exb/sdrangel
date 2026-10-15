@@ -85,6 +85,8 @@ struct SDRBASE_API AircraftInformation {
 
     // Try to find an flag logo based on a country
     static QIcon *getFlagIcon(const QString &country);
+    static void cleanupFlagIcons();
+    static void cleanupAirlineIcons();
 
     static QString resourcePathToURL(const QString &path);
 

@@ -81,6 +81,8 @@ void MainBench::run()
         testFIRRRCFilter();
     } else if (m_parser.getTestType() == ParserBench::TestMeshtastic) {
         testMeshtastic(m_parser.getArgsStr());
+    } else if (m_parser.getTestType() == ParserBench::TestPSK31) {
+        testPSK31(m_parser.getArgsStr());
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }

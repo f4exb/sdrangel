@@ -3,20 +3,28 @@ DATVDemodSettings:
   properties:
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     rfBandwidth:
       type: integer
+      description: "RF bandwidth in Hz."
     centerFrequency:
       type: integer
+      description: "Device center frequency in Hz."
     standard:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         DVB bersion (see DATVDemodSettings::dvb_version)
           * 0 - DVB-S
           * 1 - DVB-S2
     modulation:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         Modulation type (DATVDemodSettings::DATVModulation)
           * 0 - BPSK
@@ -30,6 +38,8 @@ DATVDemodSettings:
           * 8 - QAM256
     fec:
       type: integer
+      minimum: 0
+      maximum: 12
       description: >
         FEC rate (see DATVDemodSettings::DATVCodeRate)
           * 0 - 1/2
@@ -57,12 +67,17 @@ DATVDemodSettings:
     audioMute:
       description: (boolean) mute audio output
       type: integer
+      minimum: 0
+      maximum: 1
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     symbolRate:
       type: integer
+      description: "Symbol rate setting for Datv demod."
     notchFilters:
       type: integer
+      description: "Notch filters setting for Datv demod."
     allowDrift:
       description: (boolean) allow a larger frequency drift (DVB-S)
       type: integer
@@ -76,6 +91,8 @@ DATVDemodSettings:
           * 1 - Linear
           * 2 - Root Raised Cosine
       type: integer
+      minimum: 0
+      maximum: 2
     hardMetric:
       description: (boolean) (DVB-S)
       type: integer
@@ -83,6 +100,8 @@ DATVDemodSettings:
       description: RRC filter roll-off factor (0..1)
       type: number
       format: float
+      minimum: 0
+      maximum: 1
     viterbi:
       description: (boolean) (DVB-S)
       type: integer
@@ -91,37 +110,56 @@ DATVDemodSettings:
       type: integer
     audioVolume:
       type: integer
+      description: "Audio volume setting for Datv demod."
     videoMute:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     udpTSAddress:
       type: string
+      description: "UDP ts address."
     udpTSPort:
       type: integer
+      description: "UDP ts port."
     udpTS:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     playerEnable:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 DATVDemodReport:
   description: DATVDemod
@@ -133,15 +171,23 @@ DATVDemodReport:
     audioActive:
       description: Audio is active (1 for yes, 0 for now)
       type: integer
+      minimum: 0
+      maximum: 1
     audioDecodeOK:
       description: Audio decode (1 for OK, 0 for KO)
       type: integer
+      minimum: 0
+      maximum: 1
     videoActive:
       description: Audio is active (1 for yes, 0 for now)
       type: integer
+      minimum: 0
+      maximum: 1
     videoDecodeOK:
       description: Video decode (1 for OK, 0 for KO)
       type: integer
+      minimum: 0
+      maximum: 1
     udpRunning:
       description: UDP thread (1 running, 0 idle)
       type: integer
@@ -183,10 +229,14 @@ DATVDemodReport:
           * 12: 3/5
     setByModcod:
       type: integer
+      minimum: 0
+      maximum: 1
       description: Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)
     mer:
       type: number
       format: float
+      description: "Reported mer."
     cnr:
       type: number
       format: float
+      description: "Reported cnr."

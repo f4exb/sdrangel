@@ -3,28 +3,43 @@ KiwiSDRSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     useAGC:
       description: AGC active (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     serverAddress:
       description: Distant KiwiSDR instance URL or IPv4 address with port
       type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 KiwiSDRReport:
   description: KiwiSDR
@@ -32,12 +47,21 @@ KiwiSDRReport:
     status:
       description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
+      minimum: 0
+      maximum: 4
     latitude:
       type: number
       format: float
+      description: "Latitude in degrees, positive north."
+      minimum: -90
+      maximum: 90
     longitude:
       type: number
       format: float
+      description: "Longitude in degrees, positive east."
+      minimum: -180
+      maximum: 180
     altitude:
       type: number
       format: float
+      description: "Altitude above mean sea level."

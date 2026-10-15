@@ -42,13 +42,16 @@ const QStringList DemodAnalyzerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.packetdemod"),
     QStringLiteral("sdrangel.channeltx.modpacket"),
     QStringLiteral("sdrangel.channel.radiosondedemod"),
+    QStringLiteral("sdrangel.channel.selcaldemod"),
     QStringLiteral("sdrangel.channeltx.modpsk31"),
     QStringLiteral("sdrangel.channeltx.modrtty"),
     QStringLiteral("sdrangel.channel.ssbdemod"),
     QStringLiteral("sdrangel.channeltx.modssb"),
     QStringLiteral("sdrangel.channel.wfmdemod"),
     QStringLiteral("sdrangel.channeltx.modwfm"),
+    QStringLiteral("sdrangel.channeltx.modbfm"),
     QStringLiteral("sdrangel.channel.wdsprx"),
+    QStringLiteral("sdrangel.feature.denoiser"),
 };
 
 DemodAnalyzerSettings::DemodAnalyzerSettings() :

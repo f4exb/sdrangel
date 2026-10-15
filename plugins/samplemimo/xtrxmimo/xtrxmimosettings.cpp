@@ -225,6 +225,12 @@ void XTRXMIMOSettings::applySettings(const QStringList& settingsKeys, const XTRX
     if (settingsKeys.contains("title")) {
         m_title = settings.m_title;
     }
+    if (settingsKeys.contains("gpioDir")) {
+        m_gpioDir = settings.m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins")) {
+        m_gpioPins = settings.m_gpioPins;
+    }
     if (settingsKeys.contains("extClock")) {
         m_extClock = settings.m_extClock;
     }

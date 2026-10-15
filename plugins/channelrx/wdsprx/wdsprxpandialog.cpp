@@ -20,7 +20,8 @@
 
 WDSPRxPanDialog::WDSPRxPanDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxPanDialog)
+    ui(new Ui::WDSPRxPanDialog),
+    m_pan(0.0)
 {
     ui->setupUi(this);
 }

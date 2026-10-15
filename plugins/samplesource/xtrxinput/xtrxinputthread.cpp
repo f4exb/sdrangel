@@ -31,6 +31,7 @@ XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, 
     m_uniqueChannelIndex(uniqueChannelIndex),
     m_iqOrder(true)
 {
+    setObjectName("XTRXInput");
     qDebug("XTRXInputThread::XTRXInputThread: nbChannels: %u uniqueChannelIndex: %u", nbChannels, uniqueChannelIndex);
     m_channels = new Channel[2];
 

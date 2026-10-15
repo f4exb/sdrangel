@@ -72,8 +72,16 @@ void ATVDemodWebAPIAdapter::webapiFormatChannelSettings(
     response.getAtvDemodSettings()->setIntNumberOfLines(settings.m_nbLines);
     response.getAtvDemodSettings()->setNbLinesIndex(ATVDemodSettings::getNumberOfLinesIndex(settings.m_nbLines));
     response.getAtvDemodSettings()->setRgbColor(settings.m_rgbColor);
-    response.getAtvDemodSettings()->setTitle(new QString(settings.m_title));
-    response.getAtvDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getAtvDemodSettings()->getTitle()) {
+        *response.getAtvDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAtvDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+    if (response.getAtvDemodSettings()->getUdpAddress()) {
+        *response.getAtvDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getAtvDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getAtvDemodSettings()->setUdpPort(settings.m_udpPort);
 }
 

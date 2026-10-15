@@ -3,15 +3,22 @@ PerseusSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     devSampleRateIndex:
       type: integer
+      description: "Selected dev sample rate index."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 2
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     adcDither:
       description: ADC dithering (1 if active else 0)
       type: integer
@@ -23,11 +30,17 @@ PerseusSettings:
       type: integer
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -38,17 +51,25 @@ PerseusSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 PerseusReport:
   description: Perseus
   properties:
     sampleRates:
       type: array
+      description: "Supported sample rates in samples per second."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"

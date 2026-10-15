@@ -35,8 +35,9 @@ VISA::VISA() :
     viScanf(nullptr),
     viFindRsrc(nullptr),
     viFindNext(nullptr),
-    visaLibrary(nullptr),
-    m_available(false)
+    m_available(false),
+    m_debugIO(false),
+    visaLibrary(nullptr)
 {
 #ifdef _MSC_VER
     const char *visaName = "visa32.dll";  // Loads visa64.dll on WIN64

@@ -3,35 +3,55 @@ BladeRF1InputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     lnaGain:
       type: integer
+      description: "Low-noise-amplifier gain setting."
     vga1:
       type: integer
+      description: "First variable-gain-amplifier gain setting."
     vga2:
       type: integer
+      description: "Second variable-gain-amplifier gain setting."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     xb200:
       type: integer
+      description: "Xb200 setting for Blade rf1 input."
     xb200Path:
       type: integer
+      description: "Xb200 path setting for Blade rf1 input."
     xb200Filter:
       type: integer
+      description: "Xb200 filter setting for Blade rf1 input."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -39,43 +59,67 @@ BladeRF1InputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 BladeRF1OutputSettings:
   description: BladeRF1
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     vga1:
       type: integer
+      description: "First variable-gain-amplifier gain setting."
     vga2:
       type: integer
+      description: "Second variable-gain-amplifier gain setting."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     xb200:
       type: integer
+      description: "Xb200 setting for Blade rf1 output."
     xb200Path:
       type: integer
+      description: "Xb200 path setting for Blade rf1 output."
     xb200Filter:
       type: integer
+      description: "Xb200 filter setting for Blade rf1 output."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

@@ -127,9 +127,10 @@ void MorseDecoderGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -188,7 +189,6 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_featureUISet(featureUISet),
     m_sampleRate(48000),
 	m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
     m_feature = feature;
@@ -209,8 +209,8 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	connect(m_morseDecoder, &Feature::stateChanged, this, &MorseDecoderGUI::updateFeatureState);
+	updateFeatureState();
 
     displaySampleRate(m_sampleRate);
 
@@ -408,33 +408,9 @@ void MorseDecoderGUI::tick()
 {
 }
 
-void MorseDecoderGUI::updateStatus()
+void MorseDecoderGUI::updateFeatureState()
 {
-    int state = m_morseDecoder->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_morseDecoder->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void MorseDecoderGUI::applySettings(bool force)

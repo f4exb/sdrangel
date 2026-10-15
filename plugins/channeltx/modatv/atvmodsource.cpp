@@ -110,19 +110,31 @@ const ATVModSource::LineType ATVModSource::StdShort_F2Start[] = {
 ATVModSource::ATVModSource() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
-	m_modPhasor(0.0f),
+    m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
+    m_pointsPerImgLine(0),
+    m_nbImageLines(0),
     m_horizontalCount(0),
     m_lineCount(0),
     m_imageLine(0),
-	m_imageOK(false),
-	m_videoFPSq(1.0f),
+    m_fps(25.0f),
+    m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
+    m_peakLevel(0.0),
+    m_levelSum(0.0),
+    m_imageOK(false),
+    m_videoFPS(0.0f),
+    m_videoWidth(0),
+    m_videoHeight(0),
+    m_videoFPSq(1.0f),
     m_videoFPSCount(0.0f),
-	m_videoPrevFPSCount(0),
-	m_videoEOF(false),
-	m_videoOK(false),
-	m_cameraIndex(-1),
-	//m_showOverlayText(false),
+    m_videoPrevFPSCount(0),
+    m_videoLength(0),
+    m_videoEOF(false),
+    m_videoOK(false),
+    m_cameraIndex(-1),
+    //m_showOverlayText(false),
     m_SSBFilter(nullptr),
     m_SSBFilterBuffer(nullptr),
     m_SSBFilterBufferIndex(0),
@@ -153,8 +165,8 @@ ATVModSource::ATVModSource() :
 ATVModSource::~ATVModSource()
 {
     if (m_video.isOpened()) {
-	    m_video.release();
-	}
+        m_video.release();
+    }
 
     releaseCameras();
     delete m_SSBFilter;
@@ -181,12 +193,12 @@ void ATVModSource::prefetch(unsigned int nbSamples)
 
 void ATVModSource::pullOne(Sample& sample)
 {
-	if (m_settings.m_channelMute)
-	{
-		sample.m_real = 0.0f;
-		sample.m_imag = 0.0f;
-		return;
-	}
+    if (m_settings.m_channelMute)
+    {
+        sample.m_real = 0.0f;
+        sample.m_imag = 0.0f;
+        return;
+    }
 
     Complex ci;
 
@@ -243,12 +255,12 @@ void ATVModSource::modulateSample()
     switch (m_settings.m_atvModulation)
     {
     case ATVModSettings::ATVModulationFM: // FM half bandwidth deviation
-    	m_modPhasor += (t - 0.5f) * m_settings.m_fmExcursion * M_PI;
-    	if (m_modPhasor > 2.0f * M_PI)  m_modPhasor -= 2.0f * M_PI;  // limit growth
-    	if (m_modPhasor < 0) m_modPhasor += 2.0f * M_PI;             // limit growth
-    	m_modSample.real(cos(m_modPhasor) * m_settings.m_rfScalingFactor); // -1 dB
-    	m_modSample.imag(sin(m_modPhasor) * m_settings.m_rfScalingFactor);
-    	break;
+        m_modPhasor += (t - 0.5f) * m_settings.m_fmExcursion * M_PI;
+        if (m_modPhasor > 2.0f * M_PI)  m_modPhasor -= 2.0f * M_PI;  // limit growth
+        if (m_modPhasor < 0) m_modPhasor += 2.0f * M_PI;             // limit growth
+        m_modSample.real(cos(m_modPhasor) * m_settings.m_rfScalingFactor); // -1 dB
+        m_modSample.imag(sin(m_modPhasor) * m_settings.m_rfScalingFactor);
+        break;
     case ATVModSettings::ATVModulationLSB:
     case ATVModSettings::ATVModulationUSB:
         m_modSample = modulateSSB(t);
@@ -378,52 +390,52 @@ void ATVModSource::pullVideo(Real& sample)
 
             if ((m_settings.m_atvModInput == ATVModSettings::ATVModInputVideo) && m_videoOK && (m_settings.m_videoPlay) && !m_videoEOF)
             {
-            	int grabOK = 0;
-            	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
+                int grabOK = 0;
+                int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
 
-            	// move a number of frames according to increment
-            	// use grab to test for EOF then retrieve to preserve last valid frame as the current original frame
-            	// TODO: handle pause (no move)
-            	for (int i = 0; i < fpsIncrement; i++)
-            	{
-            		grabOK = m_video.grab();
-            		if (!grabOK) break;
-            	}
+                // move a number of frames according to increment
+                // use grab to test for EOF then retrieve to preserve last valid frame as the current original frame
+                // TODO: handle pause (no move)
+                for (int i = 0; i < fpsIncrement; i++)
+                {
+                    grabOK = m_video.grab();
+                    if (!grabOK) break;
+                }
 
-            	if (grabOK)
-            	{
-            		cv::Mat colorFrame;
-            		m_video.retrieve(colorFrame);
+                if (grabOK)
+                {
+                    cv::Mat colorFrame;
+                    m_video.retrieve(colorFrame);
 
-            		if (!colorFrame.empty()) // some frames may not come out properly
-            		{
-            		    if (m_settings.m_showOverlayText) {
-            		        mixImageAndText(colorFrame);
-            		    }
+                    if (!colorFrame.empty()) // some frames may not come out properly
+                    {
+                        if (m_settings.m_showOverlayText) {
+                            mixImageAndText(colorFrame);
+                        }
 
-            		    cv::cvtColor(colorFrame, m_videoframeOriginal, cv::COLOR_RGB2GRAY);
-            		    resizeVideo();
-            		}
-            	}
-            	else
-            	{
-            	    if (m_settings.m_videoPlayLoop) { // play loop
-            	        seekVideoFileStream(0);
-            	    } else { // stops
-            	        m_videoEOF = true;
-            	    }
-            	}
+                        cv::cvtColor(colorFrame, m_videoframeOriginal, cv::COLOR_RGB2GRAY);
+                        resizeVideo();
+                    }
+                }
+                else
+                {
+                    if (m_settings.m_videoPlayLoop) { // play loop
+                        seekVideoFileStream(0);
+                    } else { // stops
+                        m_videoEOF = true;
+                    }
+                }
 
-            	if (m_videoFPSCount < m_videoFPS)
-            	{
-            		m_videoPrevFPSCount = (int) m_videoFPSCount;
-                	m_videoFPSCount += m_videoFPSq;
-            	}
-            	else
-            	{
-            		m_videoPrevFPSCount = 0;
-            		m_videoFPSCount = m_videoFPSq;
-            	}
+                if (m_videoFPSCount < m_videoFPS)
+                {
+                    m_videoPrevFPSCount = (int) m_videoFPSCount;
+                    m_videoFPSCount += m_videoFPSq;
+                }
+                else
+                {
+                    m_videoPrevFPSCount = 0;
+                    m_videoFPSCount = m_videoFPSq;
+                }
             }
             else if ((m_settings.m_atvModInput == ATVModSettings::ATVModInputCamera) && (m_settings.m_cameraPlay))
             {
@@ -694,8 +706,8 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
 
     if (m_videoOK)
     {
-    	calculateVideoSizes();
-    	resizeVideo();
+        calculateVideoSizes();
+        resizeVideo();
     }
 
     calculateCamerasSizes();
@@ -704,29 +716,29 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
 void ATVModSource::openImage(const QString& fileName)
 {
     m_imageFromFile = cv::imread(qPrintable(fileName), cv::ImreadModes::IMREAD_GRAYSCALE);
-	m_imageOK = m_imageFromFile.data != 0;
+    m_imageOK = m_imageFromFile.data != 0;
 
-	if (m_imageOK)
-	{
+    if (m_imageOK)
+    {
         m_settings.m_imageFileName = fileName;
         m_imageFromFile.copyTo(m_imageOriginal);
 
         if (m_settings.m_showOverlayText) {
             mixImageAndText(m_imageOriginal);
-	    }
+        }
 
-	    resizeImage();
-	}
-	else
-	{
-	    m_settings.m_imageFileName.clear();
+        resizeImage();
+    }
+    else
+    {
+        m_settings.m_imageFileName.clear();
         qDebug("ATVModSource::openImage: cannot open image file %s", qPrintable(fileName));
-	}
+    }
 }
 
 void ATVModSource::openVideo(const QString& fileName)
 {
-	//if (m_videoOK && m_video.isOpened()) m_video.release(); should be done by OpenCV in open method
+    //if (m_videoOK && m_video.isOpened()) m_video.release(); should be done by OpenCV in open method
 
     m_videoOK = m_video.open(qPrintable(fileName));
 
@@ -775,46 +787,46 @@ void ATVModSource::resizeImage()
 
 void ATVModSource::calculateVideoSizes()
 {
-	m_videoFy = (float) m_nbImageLines / (float) m_videoHeight;
-	m_videoFx = m_pointsPerImgLine / (float) m_videoWidth;
-	m_videoFPSq = m_videoFPS / m_fps;
+    m_videoFy = (float) m_nbImageLines / (float) m_videoHeight;
+    m_videoFx = m_pointsPerImgLine / (float) m_videoWidth;
+    m_videoFPSq = m_videoFPS / m_fps;
     m_videoFPSCount = m_videoFPSq;
     m_videoPrevFPSCount = 0;
 
-	qDebug("ATVModSource::calculateVideoSizes: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
+    qDebug("ATVModSource::calculateVideoSizes: factors: %f x %f FPSq: %f", m_videoFx, m_videoFy, m_videoFPSq);
 }
 
 void ATVModSource::resizeVideo()
 {
-	if (!m_videoframeOriginal.empty()) {
-		cv::resize(m_videoframeOriginal, m_videoFrame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
-	}
+    if (!m_videoframeOriginal.empty()) {
+        cv::resize(m_videoframeOriginal, m_videoFrame, cv::Size(), m_videoFx, m_videoFy); // resize current frame
+    }
 }
 
 void ATVModSource::calculateCamerasSizes()
 {
     for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
-	{
-		it->m_videoFy = (float) m_nbImageLines / (float) it->m_videoHeight;
-		it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
-		it->m_videoFPSq = it->m_videoFPS / m_fps;
-		it->m_videoFPSqManual = it->m_videoFPSManual / m_fps;
-	    it->m_videoFPSCount = 0; //it->m_videoFPSq;
-	    it->m_videoPrevFPSCount = 0;
+    {
+        it->m_videoFy = (float) m_nbImageLines / (float) it->m_videoHeight;
+        it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
+        it->m_videoFPSq = it->m_videoFPS / m_fps;
+        it->m_videoFPSqManual = it->m_videoFPSManual / m_fps;
+        it->m_videoFPSCount = 0; //it->m_videoFPSq;
+        it->m_videoPrevFPSCount = 0;
 
         qDebug("ATVModSource::calculateCamerasSizes: [%d] factors: %f x %f FPSq: %f",
             (int) (it - m_cameras.begin()),  it->m_videoFx, it->m_videoFy, it->m_videoFPSq);
-	}
+    }
 }
 
 void ATVModSource::resizeCameras()
 {
     for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
-	{
-		if (!it->m_videoframeOriginal.empty()) {
-			cv::resize(it->m_videoframeOriginal, it->m_videoFrame, cv::Size(), it->m_videoFx, it->m_videoFy); // resize current frame
-		}
-	}
+    {
+        if (!it->m_videoframeOriginal.empty()) {
+            cv::resize(it->m_videoframeOriginal, it->m_videoFrame, cv::Size(), it->m_videoFx, it->m_videoFy); // resize current frame
+        }
+    }
 }
 
 void ATVModSource::resizeCamera()
@@ -838,46 +850,46 @@ void ATVModSource::seekVideoFileStream(int seekPercentage)
 
 void ATVModSource::scanCameras()
 {
-	for (int i = 0; i < 4; i++)
-	{
-		ATVCamera newCamera;
-		m_cameras.push_back(newCamera);
-		m_cameras.back().m_cameraNumber = i;
-		m_cameras.back().m_camera.open(i);
+    for (int i = 0; i < 4; i++)
+    {
+        ATVCamera newCamera;
+        m_cameras.push_back(newCamera);
+        m_cameras.back().m_cameraNumber = i;
+        m_cameras.back().m_camera.open(i);
 
-		if (m_cameras.back().m_camera.isOpened())
-		{
-			m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(cv::CAP_PROP_FPS);
-			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_WIDTH);
-			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_HEIGHT);
+        if (m_cameras.back().m_camera.isOpened())
+        {
+            m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(cv::CAP_PROP_FPS);
+            m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_WIDTH);
+            m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-			//m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 16.3f : m_cameras.back().m_videoFPS;
+            //m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 16.3f : m_cameras.back().m_videoFPS;
 
-			qDebug("ATVModSource::scanCameras: [%d] FPS: %f %dx%d",
-			        i,
-			        m_cameras.back().m_videoFPS,
-			        m_cameras.back().m_videoWidth ,
-			        m_cameras.back().m_videoHeight);
-		}
-		else
-		{
-			m_cameras.pop_back();
-		}
-	}
+            qDebug("ATVModSource::scanCameras: [%d] FPS: %f %dx%d",
+                    i,
+                    m_cameras.back().m_videoFPS,
+                    m_cameras.back().m_videoWidth ,
+                    m_cameras.back().m_videoHeight);
+        }
+        else
+        {
+            m_cameras.pop_back();
+        }
+    }
 
-	if (m_cameras.size() > 0)
-	{
-	    calculateCamerasSizes();
-		m_cameraIndex = 0;
-	}
+    if (m_cameras.size() > 0)
+    {
+        calculateCamerasSizes();
+        m_cameraIndex = 0;
+    }
 }
 
 void ATVModSource::releaseCameras()
 {
-	for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
-	{
-		if (it->m_camera.isOpened()) it->m_camera.release();
-	}
+    for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
+    {
+        if (it->m_camera.isOpened()) it->m_camera.release();
+    }
 }
 
 void ATVModSource::getCameraNumbers(std::vector<int>& numbers)

@@ -188,15 +188,15 @@ public:
 private:
     struct VORChannelReport
     {
-        float m_radial; //!< current detected radial
-        float m_refMag; //!< current reference signal magnitude
-        float m_varMag; //!< current variable signal magnitude
+        float m_radial{0.0f}; //!< current detected radial
+        float m_refMag{0.0f}; //!< current reference signal magnitude
+        float m_varMag{0.0f}; //!< current variable signal magnitude
         AverageUtil<float, double> m_radialAvg;
         AverageUtil<float, double> m_refMagAvg;
         AverageUtil<float, double> m_varMagAvg;
-        bool m_validRadial;
-        bool m_validRefMag;
-        bool m_validVarMag;
+        bool m_validRadial{false};
+        bool m_validRefMag{false};
+        bool m_validVarMag{false};
         QString m_morseIdent; //!< identification morse code transcript
 
         VORChannelReport() = default;

@@ -24,6 +24,7 @@
         <file>webapi/doc/swagger/include/AudioOutput.yaml</file>
         <file>webapi/doc/swagger/include/BeamSteeringCWMod.yaml</file>
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
+        <file>webapi/doc/swagger/include/BFMMod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
         <file>webapi/doc/swagger/include/ChannelActions.yaml</file>
@@ -38,6 +39,7 @@
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DABDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
+        <file>webapi/doc/swagger/include/DVBDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>
         <file>webapi/doc/swagger/include/DemodAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/Denoiser.yaml</file>
@@ -46,7 +48,9 @@
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/DOA2.yaml</file>
         <file>webapi/doc/swagger/include/DSCDemod.yaml</file>
+        <file>webapi/doc/swagger/include/SELCALDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
+        <file>webapi/doc/swagger/include/DroneIDDemod.yaml</file>
         <file>webapi/doc/swagger/include/EndOfTrainDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
@@ -108,9 +112,11 @@
         <file>webapi/doc/swagger/include/RemoteTCPInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteTCPSink.yaml</file>
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
+        <file>webapi/doc/swagger/include/MCPServer.yaml</file>
         <file>webapi/doc/swagger/include/RollupState.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RTTYDemod.yaml</file>
+        <file>webapi/doc/swagger/include/PSK31Demod.yaml</file>
         <file>webapi/doc/swagger/include/RTTYMod.yaml</file>
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>

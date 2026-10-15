@@ -117,11 +117,12 @@ void NoiseFigureBaseband::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -163,6 +164,11 @@ void NoiseFigureBaseband::applySettings(const QStringList& settingsKeys, const N
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
+}
+
+int NoiseFigureBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
 }
 
 void NoiseFigureBaseband::setBasebandSampleRate(int sampleRate)

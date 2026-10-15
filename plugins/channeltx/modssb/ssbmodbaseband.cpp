@@ -27,7 +27,8 @@
 
 MESSAGE_CLASS_DEFINITION(SSBModBaseband::MsgConfigureSSBModBaseband, Message)
 
-SSBModBaseband::SSBModBaseband()
+SSBModBaseband::SSBModBaseband() :
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);
@@ -134,11 +135,12 @@ void SSBModBaseband::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

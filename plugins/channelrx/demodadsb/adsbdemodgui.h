@@ -489,6 +489,8 @@ struct Aircraft {
         m_staticAirTempItem = new QTableWidgetItem();
         m_humidityItem = new QTableWidgetItem();
     }
+    Aircraft(const Aircraft&) = delete;
+    Aircraft& operator=(const Aircraft&) = delete;
 
     QString getImage() const;
     QString getText(const ADSBDemodSettings *settings, bool all=false) const;
@@ -526,7 +528,8 @@ public:
         colorRole = Qt::UserRole + 2,
     };
 
-    AircraftPathModel(AircraftModel *aircraftModel, Aircraft *aircraft) :
+    AircraftPathModel(AircraftModel *aircraftModel, Aircraft *aircraft, QObject *parent) :
+        QAbstractListModel(parent),
         m_aircraftModel(aircraftModel),
         m_aircraft(aircraft),
         m_paths(0),
@@ -595,7 +598,7 @@ public:
     Q_INVOKABLE void addAircraft(Aircraft *aircraft) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         m_aircrafts.append(aircraft);
-        m_pathModels.append(new AircraftPathModel(this, aircraft));
+        m_pathModels.append(new AircraftPathModel(this, aircraft, this));
         endInsertRows();
     }
 

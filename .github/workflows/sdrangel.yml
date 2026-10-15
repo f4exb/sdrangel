@@ -94,6 +94,7 @@ jobs:
           choco install patch
           mkdir build && cd build
           cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DENABLE_QT6=ON -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\6.9.3\msvc2022_64;C:\Libraries\boost_1_73_0"
+          cmake --build . --config Release
           cmake --build . --config Release --target package
       - name: Check disk space
         run: Get-PSDrive
@@ -107,7 +108,7 @@ jobs:
           path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
 
   build_mac:
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
         with:
@@ -128,12 +129,47 @@ jobs:
           rm -f /usr/local/bin/2to3
           brew install opencv
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg@5 faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion ncurses
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion ncurses
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DCMAKE_PREFIX_PATH="/usr/local/opt/ffmpeg@5/"
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Build SDRangel on Mac
         run: |
           cd build
           make -j3
+
+  build_linux:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install software-properties-common
+          sudo add-apt-repository -y ppa:ettusresearch/uhd
+          sudo apt-get update
+          sudo apt-get -y install build-essential cmake git xxd \
+            devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libopengl-dev libqt5opengl5-dev \
+            qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
+            libqt5quick5 qtwebengine5-dev qtbase5-private-dev \
+            qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs \
+            qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts qml-module-qtgraphicaleffects \
+            libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev \
+            libqt5charts5-dev libqt5texttospeech5-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev libflac-dev zlib1g-dev \
+            libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
+            libxml2-dev bison flex ffmpeg libpostproc-dev libavcodec-dev libavformat-dev libavfilter-dev \
+            libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
+            libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev libunwind-dev \
+            libavahi-client-dev libavahi-common-dev libaio-dev \
+            python3-mako python3-cheetah python3-numpy \
+            autoconf automake libtool ninja-build
+          bash cmake/ci/build_sdrplay.sh
+      - name: Build SDRangel on Linux
+        run: |
+          debuild -i -us -uc -b

@@ -28,6 +28,8 @@
 #include <QMessageBox>
 #include <QTextStream>
 
+#include "gui/messagedialog.h"
+
 M17StatusTextDialog::M17StatusTextDialog(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::M17StatusTextDialog)
@@ -84,7 +86,7 @@ void M17StatusTextDialog::on_saveLog_clicked()
         }
         else
         {
-            QMessageBox::information(this, tr("Message"), tr("Cannot open file for writing"));
+            MessageDialog::information(this, tr("Message"), tr("Cannot open file for writing"));
         }
     }
 

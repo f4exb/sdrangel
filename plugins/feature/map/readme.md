@@ -19,6 +19,7 @@ On top of this, it can plot data from other plugins, such as:
 * Inmarsat C message geographic areas,
 * SID paths,
 * Pager messages that contain coordinates.
+* DJI drones from the DJI DroneID Demodulator.
 
 As well as internet and built-in data sources:
 
@@ -26,6 +27,7 @@ As well as internet and built-in data sources:
 * Airports, NavAids and airspaces,
 * Beacons based on the IARU Region 1 beacon database and International Beacon Project,
 * Radio time transmitters,
+* WEFAX (weather fax) transmitters,
 * GRAVES radar,
 * Ionosonde station data,
 * Navtex transmitters,

@@ -76,23 +76,29 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getAddress() const { return m_address; }
+        qint64 getAddress() const { return m_address; }
         int getFunctionBits() const { return m_functionBits; }
         QString getAlphaMessage() const { return m_alphaMessage; }
         QString getNumericMessage() const { return m_numericMessage; }
         int getEvenParityErrors() const { return m_evenParityErrors; }
         int getBCHParityErrors() const { return m_bchParityErrors; }
         int getBaud() const { return m_baud; }
+        PagerDemodSettings::Modulation getProtocol() const { return m_protocol; }
+        QString getType() const { return m_type; }
+        QString getFrame() const { return m_frame; }
         QDateTime getDateTime() const { return m_dateTime; }
 
         static MsgPagerMessage* create(
-            int address,
+            qint64 address,
             int functionBits,
             const QString& alphaMessage,
             const QString& numericMessage,
             int evenParityErrors,
             int bchParityErrors,
-            int baud
+            int baud,
+            PagerDemodSettings::Modulation protocol = PagerDemodSettings::POCSAG,
+            const QString& type = QString(),
+            const QString& frame = QString()
         )
         {
             return new MsgPagerMessage(
@@ -103,21 +109,29 @@ public:
                 evenParityErrors,
                 bchParityErrors,
                 baud,
+                protocol,
+                type,
+                frame,
                 QDateTime::currentDateTime()
             );
         }
 
     private:
-        int m_address;
-        int m_functionBits;
+        qint64 m_address;               //!< POCSAG address or FLEX capcode
+        int m_functionBits;             //!< POCSAG only
         QString m_alphaMessage;
         QString m_numericMessage;
         int m_evenParityErrors;
         int m_bchParityErrors;
-        int m_baud;
+        int m_baud;                     //!< POCSAG baud rate or FLEX bit rate
+        PagerDemodSettings::Modulation m_protocol;
+        QString m_type;                 //!< FLEX message type. Empty for POCSAG, where it's ambiguous
+        QString m_frame;                //!< FLEX cycle/frame and phase
         QDateTime m_dateTime;
 
-        MsgPagerMessage(int address, int functionBits, const QString& alphaMessage, const QString& numericMessage, int evenParityErrors, int bchParityErrors, int baud, QDateTime dateTime) :
+        MsgPagerMessage(qint64 address, int functionBits, const QString& alphaMessage, const QString& numericMessage,
+                int evenParityErrors, int bchParityErrors, int baud, PagerDemodSettings::Modulation protocol,
+                const QString& type, const QString& frame, QDateTime dateTime) :
             Message(),
             m_address(address),
             m_functionBits(functionBits),
@@ -126,6 +140,9 @@ public:
             m_evenParityErrors(evenParityErrors),
             m_bchParityErrors(bchParityErrors),
             m_baud(baud),
+            m_protocol(protocol),
+            m_type(type),
+            m_frame(frame),
             m_dateTime(dateTime)
         {
         }
@@ -149,6 +166,8 @@ public:
     virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
+    int getAudioSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;

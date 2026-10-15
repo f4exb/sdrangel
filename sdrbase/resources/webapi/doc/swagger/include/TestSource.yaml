@@ -3,49 +3,82 @@ TestSourceSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     frequencyShift:
       type: integer
+      description: "Frequency shift in Hz."
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     sampleSizeIndex:
       type: integer
+      description: "Selected sample size index."
     amplitudeBits:
       type: integer
+      description: "Amplitude bits setting for Test source."
     autoCorrOptions:
       type: integer
+      description: "Auto corr options setting for Test source."
     modulation:
       type: integer
+      description: "Modulation setting for Test source."
     modulationTone:
       type: integer
+      description: "Modulation tone setting for Test source."
     amModulation:
       type: integer
+      description: "Am modulation setting for Test source."
     fmDeviation:
       type: integer
+      description: "FM frequency deviation in Hz."
     dcFactor:
       type: number
       format: float
+      description: "Dc factor setting for Test source."
     iFactor:
       type: number
       format: float
+      description: "I factor setting for Test source."
     qFactor:
       type: number
       format: float
+      description: "Q factor setting for Test source."
     phaseImbalance:
       type: number
       format: float
+      description: "Phase imbalance setting for Test source."
+    period:
+      type: integer
+      description: "Period of the P1 and P2 patterns in samples."
+      minimum: 1
+    dutyCycle:
+      type: integer
+      description: "Percentage of the period the P2 pattern is high."
+      minimum: 0
+      maximum: 100
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

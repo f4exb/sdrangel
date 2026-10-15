@@ -105,6 +105,7 @@ void DOA2::startSinks()
 
     qDebug("DOA2::startSinks");
     m_thread = new QThread(this);
+    m_thread->setObjectName("DOA2");
     m_basebandSink = new DOA2Baseband(m_fftSize);
     m_basebandSink->setScopeSink(&m_scopeSink);
     m_basebandSink->moveToThread(m_thread);
@@ -201,19 +202,23 @@ void DOA2::applySettings(const QStringList& settingsKeys, const DOA2Settings& se
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DOA2::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -602,7 +607,11 @@ void DOA2::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DOA2"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DOA2";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DOA2"));
+    }
     swgChannelSettings->setDoa2Settings(new SWGSDRangel::SWGDOA2Settings());
     SWGSDRangel::SWGDOA2Settings *swgDOA2Settings = swgChannelSettings->getDoa2Settings();
 
@@ -612,7 +621,11 @@ void DOA2::webapiFormatChannelSettings(
         swgDOA2Settings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDOA2Settings->setTitle(new QString(settings.m_title));
+        if (swgDOA2Settings->getTitle()) {
+            *swgDOA2Settings->getTitle() = settings.m_title;
+        } else {
+            swgDOA2Settings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgDOA2Settings->setLog2Decim(settings.m_log2Decim);
@@ -681,4 +694,9 @@ double DOA2::normalizeAngle(double angle, double max)
     if (angle < 0)   { return max + angle; }
     if (angle > max) { return angle - max; }
     return angle;
+}
+
+int DOA2::getChannelSampleRate() const
+{
+    return static_cast<int>(m_deviceSampleRate / (1 << m_settings.m_log2Decim));
 }

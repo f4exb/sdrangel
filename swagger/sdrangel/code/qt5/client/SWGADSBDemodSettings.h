@@ -56,9 +56,6 @@ public:
     qint32 getSamplesPerBit();
     void setSamplesPerBit(qint32 samples_per_bit);
 
-    qint32 getCorrelateFullPreamble();
-    void setCorrelateFullPreamble(qint32 correlate_full_preamble);
-
     qint32 getDemodModeS();
     void setDemodModeS(qint32 demod_mode_s);
 
@@ -173,9 +170,6 @@ private:
 
     qint32 samples_per_bit;
     bool m_samples_per_bit_isSet;
-
-    qint32 correlate_full_preamble;
-    bool m_correlate_full_preamble_isSet;
 
     qint32 demod_mode_s;
     bool m_demod_mode_s_isSet;

@@ -4,63 +4,91 @@ NFMModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     afBandwidth:
       type: number
       format: float
+      description: "Audio-frequency bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     toneFrequency:
       type: number
       format: float
+      description: "Tone frequency in Hz."
     volumeFactor:
       type: number
       format: float
+      description: "Volume factor setting for Nfm mod."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     playLoop:
       type: integer
+      description: "Loop playback at end of file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     ctcssOn:
       description: >
         Enable CTCSS squelch (takes precedence on DCS)
         * 0 - disabled
         * 1 - enabled
       type: integer
+      minimum: 0
+      maximum: 1
     ctcssIndex:
       type: integer
+      description: "Selected ctcss index."
     dcsOn:
       description: >
         Enable DCS squelch (only if CTCSS is off)
         * 0 - disabled
         * 1 - enabled
       type: integer
+      minimum: 0
+      maximum: 1
     dcsCode:
       type: integer
+      description: "Dcs code setting for Nfm mod."
     dcsPositive:
       description: >
         Modulation direction:
         * 0 - reverse or negative - 1 for 0 and -1 for 1
         * 1 - direct or positive - -1 for 0 and 1 for 1
       type: integer
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     modAFInput:
       type: integer
+      description: "Audio-frequency modulation input selection."
     preEmphasisOn:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Activate pre-emphasis filter:
         * 0 - inactive
         * 1 - active
     bpfOn:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Activate audio highpass filter when no CTCSS nor DCS:
         * 0 - inactive
@@ -71,20 +99,31 @@ NFMModSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     cwKeyer:
       $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      description: "CW keyer configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 NFMModReport:
   description: NFMMod
@@ -95,5 +134,7 @@ NFMModReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

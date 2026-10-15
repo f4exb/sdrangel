@@ -45,9 +45,11 @@ const char * const ChannelPower::m_channelId = "ChannelPower";
 ChannelPower::ChannelPower(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("ChannelPower");
 
     m_basebandSink = new ChannelPowerBaseband();
     m_basebandSink->setChannel(this);
@@ -478,7 +480,11 @@ void ChannelPower::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("ChannelPower"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "ChannelPower";
+    } else {
+        swgChannelSettings->setChannelType(new QString("ChannelPower"));
+    }
     swgChannelSettings->setChannelPowerSettings(new SWGSDRangel::SWGChannelPowerSettings());
     SWGSDRangel::SWGChannelPowerSettings *swgChannelPowerSettings = swgChannelSettings->getChannelPowerSettings();
 
@@ -506,7 +512,11 @@ void ChannelPower::webapiFormatChannelSettings(
         swgChannelPowerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChannelPowerSettings->setTitle(new QString(settings.m_title));
+        if (swgChannelPowerSettings->getTitle()) {
+            *swgChannelPowerSettings->getTitle() = settings.m_title;
+        } else {
+            swgChannelPowerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgChannelPowerSettings->setStreamIndex(settings.m_streamIndex);
@@ -554,3 +564,7 @@ void ChannelPower::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setFifoLabel(fifoLabel);
 }
 
+int ChannelPower::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}

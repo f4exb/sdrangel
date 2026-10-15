@@ -5,6 +5,8 @@ set(demodpager_SOURCES
     pagerdemodsettings.cpp
     pagerdemodbaseband.cpp
     pagerdemodsink.cpp
+    pagerdemodbch.cpp
+    pagerdemodflex.cpp
     pagerdemodplugin.cpp
     pagerdemodwebapiadapter.cpp
 )
@@ -14,6 +16,8 @@ set(demodpager_HEADERS
     pagerdemodsettings.h
     pagerdemodbaseband.h
     pagerdemodsink.h
+    pagerdemodbch.h
+    pagerdemodflex.h
     pagerdemodplugin.h
     pagerdemodwebapiadapter.h
 )

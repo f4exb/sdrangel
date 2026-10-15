@@ -52,6 +52,9 @@ const struct RigCtlServerWorker::ModeDemod RigCtlServerWorker::m_modeMap[] = {
 
 RigCtlServerWorker::RigCtlServerWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state(idle),
+    m_targetFrequency(0.0),
+    m_targetOffset(0.0),
+    m_targetBW(0),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr),
     m_webAPIAdapterInterface(webAPIAdapterInterface),
@@ -92,11 +95,12 @@ void RigCtlServerWorker::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 

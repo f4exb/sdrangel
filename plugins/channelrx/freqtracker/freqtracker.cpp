@@ -130,6 +130,7 @@ void FreqTracker::start()
 
 	qDebug("FreqTracker::start");
     m_thread = new QThread(this);
+    m_thread->setObjectName("FreqTracker");
     m_basebandSink = new FreqTrackerBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setMessageQueueToInput(getInputMessageQueue());
@@ -160,6 +161,7 @@ void FreqTracker::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool FreqTracker::handleMessage(const Message& cmd)
@@ -593,7 +595,11 @@ void FreqTracker::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("FreqTracker"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "FreqTracker";
+    } else {
+        swgChannelSettings->setChannelType(new QString("FreqTracker"));
+    }
     swgChannelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
     SWGSDRangel::SWGFreqTrackerSettings *swgFreqTrackerSettings = swgChannelSettings->getFreqTrackerSettings();
 
@@ -615,7 +621,11 @@ void FreqTracker::webapiFormatChannelSettings(
         swgFreqTrackerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFreqTrackerSettings->setTitle(new QString(settings.m_title));
+        if (swgFreqTrackerSettings->getTitle()) {
+            *swgFreqTrackerSettings->getTitle() = settings.m_title;
+        } else {
+            swgFreqTrackerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgFreqTrackerSettings->setSpanLog2(settings.m_spanLog2);
@@ -699,4 +709,9 @@ void FreqTracker::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int FreqTracker::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

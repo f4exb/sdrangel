@@ -29,9 +29,11 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGAPTDemodSettings.h"
+#include "SWGWefaxDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGBFMModSettings.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChannelPowerSettings.h"
@@ -39,10 +41,14 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
+#include "SWGDVBDemodSettings.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Settings.h"
+#include "SWGDRMDemodSettings.h"
 #include "SWGDSCDemodSettings.h"
+#include "SWGSELCALDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDroneIDDemodSettings.h"
 #include "SWGEndOfTrainDemodSettings.h"
 #include "SWGFT8DemodSettings.h"
 #include "SWGFileSinkSettings.h"
@@ -73,6 +79,7 @@
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
 #include "SWGRTTYDemodSettings.h"
+#include "SWGPSK31DemodSettings.h"
 #include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
@@ -142,6 +149,9 @@ public:
     SWGAPTDemodSettings* getAptDemodSettings();
     void setAptDemodSettings(SWGAPTDemodSettings* apt_demod_settings);
 
+    SWGWefaxDemodSettings* getWefaxDemodSettings();
+    void setWefaxDemodSettings(SWGWefaxDemodSettings* wefax_demod_settings);
+
     SWGATVDemodSettings* getAtvDemodSettings();
     void setAtvDemodSettings(SWGATVDemodSettings* atv_demod_settings);
 
@@ -153,6 +163,9 @@ public:
 
     SWGBFMDemodSettings* getBfmDemodSettings();
     void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
+
+    SWGBFMModSettings* getBfmModSettings();
+    void setBfmModSettings(SWGBFMModSettings* bfm_mod_settings);
 
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
@@ -172,17 +185,28 @@ public:
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
 
+    SWGDVBDemodSettings* getDvbDemodSettings();
+    void setDvbDemodSettings(SWGDVBDemodSettings* dvb_demod_settings);
+
     SWGDABDemodSettings* getDabDemodSettings();
     void setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings);
+
+    SWGDRMDemodSettings* getDrmDemodSettings();
+    void setDrmDemodSettings(SWGDRMDemodSettings* drm_demod_settings);
 
     SWGDOA2Settings* getDoa2Settings();
     void setDoa2Settings(SWGDOA2Settings* doa2_settings);
 
     SWGDSCDemodSettings* getDscDemodSettings();
+    SWGSELCALDemodSettings* getSelcalDemodSettings();
     void setDscDemodSettings(SWGDSCDemodSettings* dsc_demod_settings);
+    void setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
+    SWGDroneIDDemodSettings* getDroneIdDemodSettings();
+    void setDroneIdDemodSettings(SWGDroneIDDemodSettings* drone_id_demod_settings);
 
     SWGEndOfTrainDemodSettings* getEndOfTrainDemodSettings();
     void setEndOfTrainDemodSettings(SWGEndOfTrainDemodSettings* end_of_train_demod_settings);
@@ -292,6 +316,9 @@ public:
     SWGRTTYDemodSettings* getRttyDemodSettings();
     void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
 
+    SWGPSK31DemodSettings* getPSK31DemodSettings();
+    void setPSK31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings);
+
     SWGRTTYModSettings* getRttyModSettings();
     void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
 
@@ -359,6 +386,9 @@ private:
     SWGAPTDemodSettings* apt_demod_settings;
     bool m_apt_demod_settings_isSet;
 
+    SWGWefaxDemodSettings* wefax_demod_settings;
+    bool m_wefax_demod_settings_isSet;
+
     SWGATVDemodSettings* atv_demod_settings;
     bool m_atv_demod_settings_isSet;
 
@@ -370,6 +400,9 @@ private:
 
     SWGBFMDemodSettings* bfm_demod_settings;
     bool m_bfm_demod_settings_isSet;
+
+    SWGBFMModSettings* bfm_mod_settings;
+    bool m_bfm_mod_settings_isSet;
 
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;
@@ -389,17 +422,28 @@ private:
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
 
+    SWGDVBDemodSettings* dvb_demod_settings;
+    bool m_dvb_demod_settings_isSet;
+
     SWGDABDemodSettings* dab_demod_settings;
     bool m_dab_demod_settings_isSet;
+
+    SWGDRMDemodSettings* drm_demod_settings;
+    bool m_drm_demod_settings_isSet;
 
     SWGDOA2Settings* doa2_settings;
     bool m_doa2_settings_isSet;
 
     SWGDSCDemodSettings* dsc_demod_settings;
+    SWGSELCALDemodSettings* selcal_demod_settings;
     bool m_dsc_demod_settings_isSet;
+    bool m_selcal_demod_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
+
+    SWGDroneIDDemodSettings* drone_id_demod_settings;
+    bool m_drone_id_demod_settings_isSet;
 
     SWGEndOfTrainDemodSettings* end_of_train_demod_settings;
     bool m_end_of_train_demod_settings_isSet;
@@ -508,6 +552,9 @@ private:
 
     SWGRTTYDemodSettings* rtty_demod_settings;
     bool m_rtty_demod_settings_isSet;
+
+    SWGPSK31DemodSettings* psk31_demod_settings;
+    bool m_psk31_demod_settings_isSet;
 
     SWGRTTYModSettings* rtty_mod_settings;
     bool m_rtty_mod_settings_isSet;

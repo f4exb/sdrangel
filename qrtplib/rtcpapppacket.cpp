@@ -36,7 +36,8 @@ namespace qrtplib
 {
 
 RTCPAPPPacket::RTCPAPPPacket(uint8_t *data, std::size_t datalength) :
-        RTCPPacket(APP, data, datalength)
+        RTCPPacket(APP, data, datalength),
+        appdatalen(0)
 {
     knownformat = false;
 

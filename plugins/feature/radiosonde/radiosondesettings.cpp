@@ -36,7 +36,8 @@ const QStringList RadiosondeSettings::m_pipeURIs = {
 };
 
 RadiosondeSettings::RadiosondeSettings() :
-    m_rollupState(nullptr)
+    m_rollupState(nullptr),
+    m_workspaceIndex(0)
 {
     resetToDefaults();
 }

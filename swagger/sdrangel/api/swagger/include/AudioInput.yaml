@@ -3,6 +3,7 @@ AudioInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     device:
       description: The name of the audio device
       type: string
@@ -12,11 +13,14 @@ AudioInputSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     log2Decim:
       description: Decimation factor
       type: integer
     iqMapping:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Audio channel to IQ mapping
           * 0 - I=L, Q=0
@@ -25,18 +29,24 @@ AudioInputSettings:
           * 3 - I=R, Q=L
     dcBlock:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Auto DC blocking
           * 0 - Off
           * 1 - On
     iqImbalance:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Auto IQ balance (you need auto DC blocking active)
           * 0 - Off
           * 1 - On
     fcPos:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Decimated bandpass center frequency position
           * 0 - Infradyne
@@ -45,9 +55,16 @@ AudioInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

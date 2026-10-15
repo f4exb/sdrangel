@@ -1,0 +1,77 @@
+name: Packet Demod regression tests
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/channelrx/demodpacket/**'
+      - 'sdrbase/dsp/**'
+      - 'sdrbase/util/**'
+      - '.github/workflows/packet-demod.yml'
+  push:
+    paths:
+      - 'plugins/channelrx/demodpacket/**'
+      - '.github/workflows/packet-demod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dsp:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - qt: 5
+            package: qtbase5-dev
+          - qt: 6
+            package: qt6-base-dev
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build ${{ matrix.package }}
+      - run: >-
+          cmake -S plugins/channelrx/demodpacket/tests -B build-packet-tests -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug -DPACKET_TEST_SANITIZERS=ON
+          -DQT_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt${{ matrix.qt }}
+      - run: cmake --build build-packet-tests --parallel 2
+      - run: ctest --test-dir build-packet-tests --output-on-failure
+        env:
+          UBSAN_OPTIONS: halt_on_error=1
+
+  plugin:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - qt: 5
+            enable_qt6: 'OFF'
+            packages: >-
+              qtbase5-dev qtbase5-private-dev qtmultimedia5-dev
+              libqt5websockets5-dev qtpositioning5-dev libqt5charts5-dev
+              libqt5serialport5-dev
+          - qt: 6
+            enable_qt6: 'ON'
+            packages: >-
+              qt6-base-dev qt6-base-private-dev qt6-multimedia-dev
+              qt6-websockets-dev qt6-positioning-dev qt6-charts-dev
+              qt6-serialport-dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ${{ matrix.packages }} \
+            libfftw3-dev libusb-1.0-0-dev libflac-dev \
+            libboost-dev libopus-dev
+      - name: Configure server plugin and integration test
+        run: >-
+          cmake -S . -B build-packet-server -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DENABLE_QT6=${{ matrix.enable_qt6 }}
+          -DBUILD_GUI=OFF -DBUILD_SERVER=ON -DBUILD_BENCH=OFF
+          -DENABLE_EXTERNAL_LIBRARIES=OFF -DENABLE_LIBUNWIND=OFF
+          -DENABLE_FEATURE=OFF -DENABLE_CHANNELTX=OFF -DENABLE_CHANNELMIMO=OFF
+          -DPACKETDEMOD_BUILD_TESTS=ON -DPACKETDEMOD_TEST_SANITIZERS=ON
+      - run: cmake --build build-packet-server --target demodpacketsrv packetdemod_sink_test --parallel 2
+      - run: ./build-packet-server/packetdemod_sink_test
+        env:
+          UBSAN_OPTIONS: halt_on_error=1

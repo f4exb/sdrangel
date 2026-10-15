@@ -194,6 +194,7 @@ private:
 
     bool openDevice();
     void closeDevice();
+    void handleError(int errorCode);
 
 	bool applySettings(const PlutoSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const PlutoSDRMIMOSettings& settings, bool force);

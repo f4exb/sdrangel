@@ -165,6 +165,7 @@ protected:
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
 
     void getFeatureStateStr(QString& stateStr) const;
+    void setState(FeatureState state);
 
 protected slots:
 	void handleInputMessages();
@@ -179,6 +180,7 @@ private:
 
 signals:
     void indexInFeatureSetChanged(int index);
+    void stateChanged(Feature *feature);
 };
 
 #endif // SDRBASE_FETURE_FEATUREAPI_H_

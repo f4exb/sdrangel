@@ -21,7 +21,14 @@
 
 FFTNRDialog::FFTNRDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::FFTNRDialog)
+    ui(new Ui::FFTNRDialog),
+    m_scheme(static_cast<FFTNoiseReduction::Scheme>(0)),
+    m_aboveAvgFactor(0.0f),
+    m_sigmaFactor(0.0f),
+    m_nbPeaks(0),
+    m_alpha(0.0f),
+    m_flen(0),
+    m_sampleRate(0)
 {
     ui->setupUi(this);
 }

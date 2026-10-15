@@ -63,6 +63,8 @@ public:
     virtual void destroy();
 
     void resetToDefaults();
+    QVariant cellValue(int row, int col) const;
+    QString cellText(int row, int col) const;
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -73,6 +75,7 @@ public:
 
 private:
     Ui::AISGUI* ui;
+    QTimer m_reportTimer;   //!< Pushes the vessel table to the feature for the web API report
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     AISSettings m_settings;
@@ -174,6 +177,7 @@ private slots:
     void vesselsColumnSelectMenu(QPoint pos);
     void vesselsColumnSelectMenuChecked(bool checked = false);
     void removeOldVessels();
+    void sendVesselReport();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

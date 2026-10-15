@@ -54,7 +54,7 @@ MorseDecoder::MorseDecoder(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("MorseDecoder::MorseDecoder: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "MorseDecoder error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -100,6 +100,7 @@ void MorseDecoder::start()
 
 	qDebug("MorseDecoder::start");
     m_thread = new QThread();
+    m_thread->setObjectName("MorseDecoder");
     m_worker = new MorseDecoderWorker();
     m_worker->moveToThread(m_thread);
 
@@ -125,7 +126,7 @@ void MorseDecoder::start()
     m_worker->setScopeVis(&m_scopeVis);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     MorseDecoderWorker::MsgConfigureMorseDecoderWorker *msgConfigure
@@ -173,7 +174,7 @@ void MorseDecoder::stop()
     }
 
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }
@@ -388,7 +389,7 @@ void MorseDecoder::setChannel(ChannelAPI *selectedChannel)
     if (m_selectedChannel)
     {
         ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
-        DataFifo *fifo = qobject_cast<DataFifo*>(pipe->m_element);
+        DataFifo *fifo = pipe ? qobject_cast<DataFifo*>(pipe->m_element) : nullptr;
 
         if ((fifo) && m_running)
         {
@@ -703,6 +704,7 @@ void MorseDecoder::handleDataPipeToBeDeleted(int reason, QObject *object)
         }
 
         m_selectedChannel = nullptr;
+        m_dataPipe = nullptr; // The pipe and its FIFO are freed by the pipes GC.
     }
 }
 

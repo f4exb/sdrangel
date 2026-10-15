@@ -117,6 +117,7 @@ public:
     bool getOutputDeviceInfo(const QString& deviceName, OutputDeviceInfo& deviceInfo) const;
     int getInputSampleRate(int inputDeviceIndex = -1);
     int getOutputSampleRate(int outputDeviceIndex = -1);
+    double getOutputLatency(int outputDeviceIndex = -1); //!< Seconds the device buffers audio, if it's running
     void setInputDeviceInfo(int inputDeviceIndex, const InputDeviceInfo& deviceInfo);
     void setOutputDeviceInfo(int outputDeviceIndex, const OutputDeviceInfo& deviceInfo);
     void unsetInputDeviceInfo(int inputDeviceIndex);

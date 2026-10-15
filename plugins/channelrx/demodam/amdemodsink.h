@@ -38,7 +38,10 @@ class ChannelAPI;
 class AMDemodSink : public ChannelSampleSink {
 public:
     AMDemodSink();
-	~AMDemodSink();
+    ~AMDemodSink();
+    AMDemodSink(const AMDemodSink&) = delete;
+    AMDemodSink& operator=(const AMDemodSink&) = delete;
+
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

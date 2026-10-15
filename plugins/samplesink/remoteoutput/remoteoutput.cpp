@@ -50,6 +50,7 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_remoteOutputWorkerThread.setObjectName("RemoteOutputWrk");
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -461,9 +462,17 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
     response.getRemoteOutputSettings()->setNbTxBytes(settings.m_nbTxBytes);
-    response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    if (response.getRemoteOutputSettings()->getApiAddress()) {
+        *response.getRemoteOutputSettings()->getApiAddress() = settings.m_apiAddress;
+    } else {
+        response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    }
     response.getRemoteOutputSettings()->setApiPort(settings.m_apiPort);
-    response.getRemoteOutputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    if (response.getRemoteOutputSettings()->getDataAddress()) {
+        *response.getRemoteOutputSettings()->getDataAddress() = settings.m_dataAddress;
+    } else {
+        response.getRemoteOutputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    }
     response.getRemoteOutputSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteOutputSettings()->setDeviceIndex(settings.m_deviceIndex);
     response.getRemoteOutputSettings()->setChannelIndex(settings.m_channelIndex);

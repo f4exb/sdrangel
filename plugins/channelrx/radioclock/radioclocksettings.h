@@ -37,13 +37,15 @@ struct RadioClockSettings
     qint32 m_inputFrequencyOffset;
     qint64 m_frequency;
     Real m_rfBandwidth;
-    Real m_threshold;               //!< For MSF and DCF in dB
+    Real m_threshold;               //!< Carrier threshold in dB
     enum Modulation {
         MSF,
         DCF77,
         TDF,
         WWVB,
-        JJY
+        JJY,
+        RBU,
+        PCSK225
     } m_modulation;
     enum DisplayTZ {
         BROADCAST,

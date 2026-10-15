@@ -13,7 +13,7 @@
 /*
  * SWGRTTYModActions_payload.h
  *
- * 
+ * Payload data.
  */
 
 #ifndef SWGRTTYModActions_payload_H_

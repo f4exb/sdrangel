@@ -327,3 +327,89 @@ void PSK31Encoder::addBits(unsigned& bits, unsigned int& bitCount, int data, int
     bits |= data << bitCount;
     bitCount += count;
 }
+
+PSK31Decoder::PSK31Decoder()
+{
+    reset();
+}
+
+void PSK31Decoder::reset()
+{
+    m_code.clear();
+    m_zeroCount = 0;
+    m_discard = false;
+    m_havePreviousSymbol = false;
+    m_previousSymbol = false;
+}
+
+bool PSK31Decoder::decodeSymbol(bool symbol, QChar& character)
+{
+    if (!m_havePreviousSymbol)
+    {
+        m_previousSymbol = symbol;
+        m_havePreviousSymbol = true;
+        return false;
+    }
+
+    const bool bit = symbol == m_previousSymbol;
+    m_previousSymbol = symbol;
+    return decode(bit, character);
+}
+
+bool PSK31Decoder::decode(bool bit, QChar& character)
+{
+    if (bit)
+    {
+        if (m_discard)
+        {
+            m_zeroCount = 0;
+            return false;
+        }
+
+        if ((m_zeroCount == 1) && !m_code.isEmpty()) {
+            m_code.append('0');
+        }
+
+        m_zeroCount = 0;
+        m_code.append('1');
+
+        // No Varicode is longer than 12 bits, so this is not a character, but
+        // e.g. an unmodulated carrier. Its tail could look like a valid code,
+        // so ignore everything up to the next character gap.
+        if (m_code.size() > 12)
+        {
+            m_code.clear();
+            m_discard = true;
+        }
+
+        return false;
+    }
+
+    ++m_zeroCount;
+
+    if (m_zeroCount < 2) {
+        return false;
+    }
+
+    const bool decoded = !m_discard && decodeCode(character);
+    m_code.clear();
+    m_zeroCount = 0;
+    m_discard = false;
+    return decoded;
+}
+
+bool PSK31Decoder::decodeCode(QChar& character) const
+{
+    if (m_code.isEmpty()) {
+        return false;
+    }
+
+    const int index = PSK31Varicode::m_varicode.indexOf(m_code);
+
+    if (index < 0) {
+        return false;
+    }
+
+    character = QChar::fromLatin1(static_cast<char>(index));
+    return true;
+}

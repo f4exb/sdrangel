@@ -54,6 +54,7 @@ const char* const FileSink::m_channelId = "FileSink";
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_basebandSink(nullptr),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
@@ -145,6 +146,7 @@ void FileSink::start()
 
 	qDebug("FileSink::start");
     m_thread = new QThread();
+    m_thread->setObjectName("FileSink");
     m_basebandSink = new FileSinkBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)
@@ -206,6 +208,7 @@ void FileSink::stop()
 
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 
     if (getMessageQueueToGUI())
     {
@@ -726,7 +729,11 @@ void FileSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
     SWGSDRangel::SWGFileSinkSettings *swgFileSinkSettings = swgChannelSettings->getFileSinkSettings();
 
@@ -736,13 +743,21 @@ void FileSink::webapiFormatChannelSettings(
         swgFileSinkSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("fileRecordName")) {
-        swgFileSinkSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+        if (swgFileSinkSettings->getFileRecordName()) {
+            *swgFileSinkSettings->getFileRecordName() = settings.m_fileRecordName;
+        } else {
+            swgFileSinkSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFileSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFileSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgFileSinkSettings->getTitle()) {
+            *swgFileSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgFileSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgFileSinkSettings->setLog2Decim(settings.m_log2Decim);
@@ -820,4 +835,9 @@ void FileSink::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int FileSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

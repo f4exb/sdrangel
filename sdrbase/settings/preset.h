@@ -61,10 +61,10 @@ public:
 
     struct SelectedDevice
     {
-		QString m_deviceId;
-		QString m_deviceSerial;
-		int m_deviceSequence;
-        int m_deviceItemIndex;
+        QString m_deviceId;
+        QString m_deviceSerial;
+        int m_deviceSequence = 0;
+        int m_deviceItemIndex = 0;
 
         SelectedDevice() = default;
         SelectedDevice(const SelectedDevice&) = default;

@@ -22,8 +22,11 @@
 
 DVBS::DVBS() :
     m_prbsPacketCount(0),
+    m_prbsIdx(0),
+    m_codeRate(RATE_1_2),
     m_delayLine(0),
     m_punctureState(0),
+    m_prevIQ(0),
     m_prevIQValid(false)
 {
     // Allocate memory for packet buffer

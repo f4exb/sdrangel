@@ -52,7 +52,11 @@ void DATVDemodWebAPIAdapter::webapiFormatChannelSettings(
         const DATVDemodSettings& settings)
 {
     response.getDatvDemodSettings()->setAllowDrift(settings.m_allowDrift ? 1 : 0);
-    response.getDatvDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    if (response.getDatvDemodSettings()->getAudioDeviceName()) {
+        *response.getDatvDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getDatvDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
     response.getDatvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getDatvDemodSettings()->setAudioVolume(settings.m_audioVolume);
     response.getDatvDemodSettings()->setCenterFrequency(settings.m_centerFrequency);
@@ -68,9 +72,17 @@ void DATVDemodWebAPIAdapter::webapiFormatChannelSettings(
     response.getDatvDemodSettings()->setRollOff(settings.m_rollOff);
     response.getDatvDemodSettings()->setStandard((int) settings.m_standard);
     response.getDatvDemodSettings()->setSymbolRate(settings.m_symbolRate);
-    response.getDatvDemodSettings()->setTitle(new QString(settings.m_title));
+    if (response.getDatvDemodSettings()->getTitle()) {
+        *response.getDatvDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getDatvDemodSettings()->setTitle(new QString(settings.m_title));
+    }
     response.getDatvDemodSettings()->setUdpTs(settings.m_udpTS ? 1 : 0);
-    response.getDatvDemodSettings()->setUdpTsAddress(new QString(settings.m_udpTSAddress));
+    if (response.getDatvDemodSettings()->getUdpTsAddress()) {
+        *response.getDatvDemodSettings()->getUdpTsAddress() = settings.m_udpTSAddress;
+    } else {
+        response.getDatvDemodSettings()->setUdpTsAddress(new QString(settings.m_udpTSAddress));
+    }
     response.getDatvDemodSettings()->setUdpTsPort(settings.m_udpTSPort);
     response.getDatvDemodSettings()->setVideoMute(settings.m_videoMute ? 1 : 0);
     response.getDatvDemodSettings()->setViterbi(settings.m_viterbi ? 1 : 0);

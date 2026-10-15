@@ -40,7 +40,7 @@
 #include "channelgui.h"
 
 ChannelGUI::ChannelGUI(QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_resizer(this),
     m_contextMenuType(ContextMenuType::ContextMenuNone),
     m_deviceType(DeviceType::DeviceRx),
@@ -459,10 +459,12 @@ void ChannelGUI::shrinkWindow()
 void ChannelGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 void ChannelGUI::setTitleColor(const QColor& c)
 {
+    m_indexLabelColor = c;
     m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; color: %2; }")
         .arg(c.name())
         .arg(getTitleColor(c).name())
@@ -505,6 +507,11 @@ void ChannelGUI::setStatusFrequency(qint64 frequency)
 void ChannelGUI::setStatusText(const QString& text)
 {
     m_statusLabel->setText(text);
+}
+
+void ChannelGUI::setStatusToolTip(const QString& toolTip)
+{
+    m_statusLabel->setToolTip(toolTip);
 }
 
 void ChannelGUI::updateIndexLabel()

@@ -3,20 +3,30 @@ MorseDecoderSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Synchronize with reverse API
           * 1 - yes
           * 0 - no
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     udpEnabled:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Send decoded text via UDP
           * 1 - send
@@ -26,36 +36,48 @@ MorseDecoderSettings:
       description: Address to send text via UDP
     udpPort:
       type: integer
+      minimum: 1
+      maximum: 65535
       description: Port to send text via UDP
     logFiledName:
       type: string
       description: File to log the decoded text to
     logEnabled:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Log decoded text to file
           * 1 - log
           * 0 - do not log
     auto:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Auto detect CW pitch and keying speed
           * 1 - auto detect
           * 0 - use last values
     showThreshold:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Show GGMorse decoder threshold on the imaginary part of the scope trace
           * 1 - show
           * 0 - do not show
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     scopeConfig:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 MorseDecoderActions:
   description: "Morse Decoder actions"

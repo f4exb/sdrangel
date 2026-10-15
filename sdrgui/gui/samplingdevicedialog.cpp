@@ -145,6 +145,7 @@ void SamplingDeviceDialog::on_refreshDevices_clicked()
     m_progressDialog->show();
     SamplingDeviceDialogWorker *worker = new SamplingDeviceDialogWorker(m_deviceType);
     QThread *thread = new QThread();
+    thread->setObjectName(QString("Sampling:%1").arg(m_deviceType));
     worker->moveToThread(thread);
     connect(thread, &QThread::started, worker, &SamplingDeviceDialogWorker::enumerateDevices);
     connect(worker, &SamplingDeviceDialogWorker::finishedWork, thread, &QThread::quit);

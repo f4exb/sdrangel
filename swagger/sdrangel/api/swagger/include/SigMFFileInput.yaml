@@ -3,6 +3,7 @@ SigMFFileInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     fileName:
       description: The name (path) of the file being read without extension
       type: string
@@ -18,12 +19,19 @@ SigMFFileInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 SigMFFileInputReport:
   description: SigMFFileInput
@@ -36,24 +44,32 @@ SigMFFileInputReport:
       type: integer
     sampleFormat:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Sample format
         * 0 - integer
         * 1 - float
     sampleSigned:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Sample signed status
           * 0 - unsigned
           * 1 - signed
     sampleSwapIQ:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Sample I/Q swap
           * 0 - I/Q
           * 1 - Q/I
     crcStatus:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         CRC status
           * 0 - no CRC available
@@ -61,12 +77,15 @@ SigMFFileInputReport:
           * 2 - CRC (SHA512) KO
     totalBytesStatus:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Total number of bytes in data file vs meta data
           * 0 - mismatch
           * 1 - match
     captures:
       type: array
+      description: "List of captures."
       items:
         $ref: "#/definitions/Capture"
     trackNumber:
@@ -102,12 +121,16 @@ SigMFFileInputActions:
   properties:
     playTrack:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Play IQ stream action
           * 0 - stop playing
           * 1 - start playing current track
     playRecord:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Play IQ stream action
           * 0 - stop playing

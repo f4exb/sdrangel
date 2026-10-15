@@ -32,7 +32,10 @@
 #include "util/stringlist.h"
 
 FileSinkSink::FileSinkSink() :
+    m_channelSampleRate(0),
+    m_channelFrequencyOffset(0),
     m_sinkSampleRate(0),
+    m_centerFrequency(0),
     m_nbCaptures(0),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
@@ -42,6 +45,7 @@ FileSinkSink::FileSinkSink() :
     m_record(false),
     m_squelchOpen(false),
     m_postSquelchCounter(0),
+    m_deviceUId(0),
     m_msCount(0),
     m_byteCount(0),
     m_bytesPerSample(sizeof(Sample))
@@ -281,18 +285,17 @@ void FileSinkSink::applySettings(const QStringList& settingsKeys, const FileSink
         << "force: " << force;
 
     QString fileRecordName = settings.m_fileRecordName;
+    QFileInfo fileInfo(settings.m_fileRecordName);
+    QString extension = fileInfo.suffix();
+    if (extension.isEmpty()) {
+        fileRecordName.append(".sdriq");
+    } else if ((extension != "sdriq") && (extension != "wav")) {
+        fileRecordName.chop(extension.size());
+        fileRecordName.append("sdriq");
+    }
 
-    if ((settingsKeys.contains("fileRecordName") && (settings.m_fileRecordName != m_settings.m_fileRecordName)) || force)
+    if ((settingsKeys.contains("fileRecordName") || force) && (fileRecordName != m_settings.m_fileRecordName))
     {
-        QFileInfo fileInfo(settings.m_fileRecordName);
-        QString extension = fileInfo.suffix();
-        if (extension.isEmpty()) {
-            fileRecordName.append(".sdriq");
-        } else if ((extension != "sdriq") && (extension != "wav")) {
-            fileRecordName.chop(extension.size());
-            fileRecordName.append("sdriq");
-        }
-
         QString fileBase;
         FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
 
@@ -332,7 +335,9 @@ void FileSinkSink::applySettings(const QStringList& settingsKeys, const FileSink
         m_settings.applySettings(settingsKeys, settings);
     }
 
-    m_settings.m_fileRecordName = fileRecordName;
+    if (settingsKeys.contains("fileRecordName") || force) {
+        m_settings.m_fileRecordName = fileRecordName;
+    }
 }
 
 void FileSinkSink::squelchRecording(bool squelchOpen)

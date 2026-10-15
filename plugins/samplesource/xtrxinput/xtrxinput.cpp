@@ -252,6 +252,10 @@ void XTRXInput::moveThreadToBuddy()
 
 bool XTRXInput::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
     // buddy in the group of source buddies associated with this physical device.
     //
@@ -375,6 +379,10 @@ bool XTRXInput::start()
 
 void XTRXInput::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // This stop method is responsible for managing the thread when the streaming of a Rx channel is stopped
     //
     // If the thread is currently managing only one channel (SI mode). The thread can be just stopped and deleted.
@@ -1304,6 +1312,9 @@ void XTRXInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqOrder")) {
         settings.m_iqOrder = response.getXtrxInputSettings()->getIqOrder() != 0;
     }
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getXtrxInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getXtrxInputSettings()->getLpfBw();
     }
@@ -1375,6 +1386,12 @@ void XTRXInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getXtrxInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getXtrxInputSettings()->setExtClockFreq(settings.m_extClockFreq);
     response.getXtrxInputSettings()->setPwrmode(settings.m_pwrmode);
+
+    if (response.getXtrxInputSettings()->getTitle()) {
+        *response.getXtrxInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getXtrxInputSettings()->setTitle(new QString(settings.m_title));
+    }
 
     response.getXtrxInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

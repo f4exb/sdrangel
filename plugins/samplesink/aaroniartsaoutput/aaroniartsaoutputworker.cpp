@@ -20,11 +20,17 @@
 #include "aaroniartsaoutputworker.h"
 
 AaroniaRTSAOutputWorker::AaroniaRTSAOutputWorker(SampleSourceFifo* sampleFifo, QObject* parent) :
-	QObject(parent),
+    QObject(parent),
     m_running(false),
-	m_sampleFifo(sampleFifo),
+    m_sampleFifo(sampleFifo),
     m_sampleRate(100000),
+    m_status(AaroniaRTSAOutputSettings::ConnectionIdle),
     m_packetsPerSecond(10),
+    m_txFormat(INT16),
+    m_streamStartTime(0),
+    m_sumSamples(0),
+    m_lastPacketEnd(0.0),
+    m_sampleResendTime(0.0),
     m_samplesArrayInt16(nullptr)
 {
     m_samplesPerPacket = m_sampleRate / m_packetsPerSecond;

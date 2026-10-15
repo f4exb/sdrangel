@@ -22,9 +22,11 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -457,13 +459,12 @@ void PlutoSDRMIMOGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
-        } else {
-            qDebug("PlutoSDRMIMOGUI::handleInputMessages: unhandled message: %s", message->getIdentifier());
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -486,8 +487,12 @@ void PlutoSDRMIMOGUI::updateStatus()
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
+                {
+                    QSignalBlocker blocker(ui->startStopRx);
+                    ui->startStopRx->setChecked(false);
+                }
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -510,8 +515,12 @@ void PlutoSDRMIMOGUI::updateStatus()
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
+                {
+                    QSignalBlocker blocker(ui->startStopTx);
+                    ui->startStopTx->setChecked(false);
+                }
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -520,6 +529,10 @@ void PlutoSDRMIMOGUI::updateStatus()
         m_lastTxEngineState = stateTx;
     }
 
+    if (stateTx == DeviceAPI::StError || stateRx == DeviceAPI::StError)
+    {
+        return;
+    }
 
     if (m_statusCounter % 2 == 0) // 1s
     {

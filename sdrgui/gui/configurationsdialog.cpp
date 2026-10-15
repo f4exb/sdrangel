@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QFileDialog>
+#include <QSettings>
 
 #include "gui/addpresetdialog.h"
 #include "maincore.h"
@@ -29,7 +30,8 @@
 
 ConfigurationsDialog::ConfigurationsDialog(bool openOnly, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::ConfigurationsDialog)
+    ui(new Ui::ConfigurationsDialog),
+    m_configurations(nullptr)
 {
     ui->setupUi(this);
     if (openOnly)
@@ -47,6 +49,9 @@ ConfigurationsDialog::ConfigurationsDialog(bool openOnly, QWidget* parent) :
     {
         ui->description->setVisible(false);
     }
+
+    QSettings settings;
+    m_collapsedGroups = settings.value("configurations.collapsed_groups").toStringList();
 }
 
 ConfigurationsDialog::~ConfigurationsDialog()
@@ -63,17 +68,21 @@ void ConfigurationsDialog::populateTree()
     sortConfigurations();
 
     QList<Configuration*>::const_iterator it = m_configurations->begin();
-    int middleIndex = m_configurations->size() / 2;
-    QTreeWidgetItem *treeItem;
+    QList<QTreeWidgetItem*> treeItems;
     ui->configurationsTree->clear();
 
-    for (int i = 0; it != m_configurations->end(); ++it, i++)
+    for (; it != m_configurations->end(); ++it)
     {
-        treeItem = addConfigurationToTree(*it);
+        QTreeWidgetItem *treeItem = addConfigurationToTree(*it);
 
-        if (i == middleIndex) {
-            ui->configurationsTree->setCurrentItem(treeItem);
+        // Only select from expanded groups, so selecting doesn't expand a collapsed group
+        if (treeItem->parent()->isExpanded()) {
+            treeItems.push_back(treeItem);
         }
+    }
+
+    if (treeItems.size() > 0) {
+        ui->configurationsTree->setCurrentItem(treeItems.at(treeItems.size()/2));
     }
 
     updateConfigurationControls();
@@ -98,7 +107,7 @@ QTreeWidgetItem* ConfigurationsDialog::addConfigurationToTree(const Configuratio
 		sl.append(configuration->getGroup());
 		group = new QTreeWidgetItem(ui->configurationsTree, sl, PGroup);
 		group->setFirstColumnSpanned(true);
-		group->setExpanded(true);
+		group->setExpanded(!m_collapsedGroups.contains(configuration->getGroup()));
 		ui->configurationsTree->sortByColumn(0, Qt::AscendingOrder);
 	}
 
@@ -240,6 +249,7 @@ void ConfigurationsDialog::on_configurationEdit_clicked()
 
             if (dlg.exec() == QDialog::Accepted)
             {
+                renameCollapsedGroup(item->text(0), dlg.group());
                 renameConfigurationGroup(item->text(0), dlg.group());
                 newGroupName = dlg.group();
                 change = true;
@@ -320,6 +330,7 @@ void ConfigurationsDialog::on_configurationDelete_clicked()
                 ) == QMessageBox::Yes
             )
             {
+                forgetCollapsedGroup(item->text(0));
                 deleteConfigurationGroup(item->text(0));
 
                 ui->configurationsTree->clear();
@@ -462,6 +473,47 @@ void ConfigurationsDialog::on_configurationsTree_itemActivated(QTreeWidgetItem *
     (void) item;
     (void) column;
 	on_configurationLoad_clicked();
+}
+
+void ConfigurationsDialog::on_configurationsTree_itemCollapsed(QTreeWidgetItem *item)
+{
+    if ((item->type() == PGroup) && !m_collapsedGroups.contains(item->text(0)))
+    {
+        m_collapsedGroups.append(item->text(0));
+        saveCollapsedGroups();
+    }
+}
+
+void ConfigurationsDialog::on_configurationsTree_itemExpanded(QTreeWidgetItem *item)
+{
+    if ((item->type() == PGroup) && (m_collapsedGroups.removeAll(item->text(0)) > 0)) {
+        saveCollapsedGroups();
+    }
+}
+
+void ConfigurationsDialog::saveCollapsedGroups()
+{
+    QSettings settings;
+    settings.setValue("configurations.collapsed_groups", m_collapsedGroups);
+}
+
+void ConfigurationsDialog::renameCollapsedGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    if (m_collapsedGroups.removeAll(oldGroupName) > 0)
+    {
+        if (!m_collapsedGroups.contains(newGroupName)) {
+            m_collapsedGroups.append(newGroupName);
+        }
+
+        saveCollapsedGroups();
+    }
+}
+
+void ConfigurationsDialog::forgetCollapsedGroup(const QString& groupName)
+{
+    if (m_collapsedGroups.removeAll(groupName) > 0) {
+        saveCollapsedGroups();
+    }
 }
 
 Configuration* ConfigurationsDialog::newConfiguration(const QString& group, const QString& description)

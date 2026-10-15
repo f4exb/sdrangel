@@ -419,7 +419,11 @@ EMNR::G::G(
     rate(_rate),
     msize(_msize),
     mask(_mask),
-    y(_y)
+    y(_y),
+    gain_method(0),
+    npe_method(0),
+    ae_run(0),
+    fileb(nullptr)
 {
 
     lambda_y.resize(msize);

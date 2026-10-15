@@ -38,7 +38,8 @@ SDRPlayV3Thread::SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampl
     m_log2Decim(0),
     m_fcPos(0),
     m_iqOrder(true),
-    m_iqCount(0)
+    m_iqCount(0),
+    m_rfChanged(0)
 {
 }
 

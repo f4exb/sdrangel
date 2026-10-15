@@ -18,7 +18,6 @@
 #ifndef INCLUDE_FEATURE_MORSEDECODERGUI_H_
 #define INCLUDE_FEATURE_MORSEDECODERGUI_H_
 
-#include <QTimer>
 #include <QList>
 
 #include "feature/featuregui.h"
@@ -66,8 +65,6 @@ private:
 	MorseDecoder* m_morseDecoder;
     ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
-	QTimer m_statusTimer;
-	int m_lastFeatureState;
 	AvailableChannelOrFeatureList m_availableChannels;
 	ChannelAPI *m_selectedChannel;
 
@@ -96,7 +93,7 @@ private slots:
     void on_clearTable_clicked();
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
-	void updateStatus();
+	void updateFeatureState();
 	void tick();
 
 };

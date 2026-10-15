@@ -26,6 +26,7 @@
 
 HeatMapSink::HeatMapSink() :
         m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(10000),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),

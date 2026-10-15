@@ -3,11 +3,14 @@ MetisMISOSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     nbReceivers:
       type: integer
       description: Number of activated receivers
     txEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable Tx
         * 0 - disabled sends null payload to Metis device
@@ -47,8 +50,11 @@ MetisMISOSettings:
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     rxTransverterMode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Rx transverter activated
         * 0 - disabled
@@ -56,8 +62,11 @@ MetisMISOSettings:
     rxTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Receive frequency translation applied in transverter mode in Hz."
     txTransverterMode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Tx transverter activated
         * 0 - disabled
@@ -65,8 +74,11 @@ MetisMISOSettings:
     txTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Transmit frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         I/Q samples order
         * 0 - I then Q (direct)
@@ -97,43 +109,59 @@ MetisMISOSettings:
       type: integer
     sampleRateIndex:
       type: integer
+      description: "Selected sample rate index."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 3
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     LOppmTenths:
       type: integer
       description: LO correction in tenths of ppm
     preamp:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Preamplifer
         * 0 - disabled
         * 1 - enabled
     random:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         LT2208 Random
         * 0 - disabled
         * 1 - enabled
     dither:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         LT2208 Dither
         * 0 - disabled
         * 1 - enabled
     duplex:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Duplex
         * 0 - disabled
         * 1 - enabled
     dcBlock:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         DC block in software
         * 0 - disabled
         * 1 - enabled
     iqCorrection:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         DC block in software
         * 0 - disabled
@@ -149,25 +177,36 @@ MetisMISOSettings:
       description: The index of the stream that is used as source of the main spectrum
     streamLock:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Ties together the stream selection and spectrum source stream selections
         * 0 - stream unlocked
         * 1 - stream locked
     rxLock:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Ties together all Rx frequencies
         * 0 - Rx frequencies untied
         * 1 - Rx frequencies tied
     useReverseAPI:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Synchronize with reverse API
         * 0 - disabled
         * 1 - enabled
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

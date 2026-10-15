@@ -37,6 +37,7 @@
 DSDDemodSink::DSDDemodSink() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
+    m_channel(nullptr),
     m_ambeFeature(nullptr),
     m_audioSampleRate(48000),
     m_interpolatorDistance(0.0f),
@@ -52,6 +53,7 @@ DSDDemodSink::DSDDemodSink() :
     m_scopeXY(nullptr),
     m_scopeEnabled(true),
     m_dsdDecoder(),
+    m_formatStatusText{},
     m_signalFormat(signalFormatNone)
 {
 	m_audioBuffer.resize(1<<14);

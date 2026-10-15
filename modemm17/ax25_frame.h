@@ -210,6 +210,7 @@ public:
         source_(),
         repeaters_(),
         type_(UNDEFINED),
+        raw_type_(0),
         info_(),
         fcs_(-1),
         crc_(0),

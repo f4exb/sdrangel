@@ -27,17 +27,24 @@
 #include "SWGAISDemodReport.h"
 #include "SWGAISModReport.h"
 #include "SWGAMDemodReport.h"
+#include "SWGWefaxDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
+#include "SWGBFMModReport.h"
 #include "SWGChannelPowerReport.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatModReport.h"
+#include "SWGDABDemodReport.h"
 #include "SWGDATVDemodReport.h"
+#include "SWGDVBDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
+#include "SWGDRMDemodReport.h"
 #include "SWGDSCDemodReport.h"
+#include "SWGSELCALDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGDroneIDDemodReport.h"
 #include "SWGEndOfTrainDemodReport.h"
 #include "SWGFT8DemodReport.h"
 #include "SWGFileSinkReport.h"
@@ -65,6 +72,7 @@
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
 #include "SWGRTTYDemodReport.h"
+#include "SWGPSK31DemodReport.h"
 #include "SWGRTTYModReport.h"
 #include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
@@ -120,6 +128,9 @@ public:
     SWGAMDemodReport* getAmDemodReport();
     void setAmDemodReport(SWGAMDemodReport* am_demod_report);
 
+    SWGWefaxDemodReport* getWefaxDemodReport();
+    void setWefaxDemodReport(SWGWefaxDemodReport* wefax_demod_report);
+
     SWGAMModReport* getAmModReport();
     void setAmModReport(SWGAMModReport* am_mod_report);
 
@@ -128,6 +139,15 @@ public:
 
     SWGBFMDemodReport* getBfmDemodReport();
     void setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report);
+
+    SWGBFMModReport* getBfmModReport();
+    void setBfmModReport(SWGBFMModReport* bfm_mod_report);
+
+    SWGDABDemodReport* getDabDemodReport();
+    void setDabDemodReport(SWGDABDemodReport* dab_demod_report);
+
+    SWGDRMDemodReport* getDrmDemodReport();
+    void setDrmDemodReport(SWGDRMDemodReport* drm_demod_report);
 
     SWGChannelPowerReport* getChannelPowerReport();
     void setChannelPowerReport(SWGChannelPowerReport* channel_power_report);
@@ -141,6 +161,9 @@ public:
     SWGDATVDemodReport* getDatvDemodReport();
     void setDatvDemodReport(SWGDATVDemodReport* datv_demod_report);
 
+    SWGDVBDemodReport* getDvbDemodReport();
+    void setDvbDemodReport(SWGDVBDemodReport* dvb_demod_report);
+
     SWGDATVModReport* getDatvModReport();
     void setDatvModReport(SWGDATVModReport* datv_mod_report);
 
@@ -148,10 +171,15 @@ public:
     void setDoa2Report(SWGDOA2Report* doa2_report);
 
     SWGDSCDemodReport* getDscDemodReport();
+    SWGSELCALDemodReport* getSelcalDemodReport();
     void setDscDemodReport(SWGDSCDemodReport* dsc_demod_report);
+    void setSelcalDemodReport(SWGSELCALDemodReport* selcal_demod_report);
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGDroneIDDemodReport* getDroneIdDemodReport();
+    void setDroneIdDemodReport(SWGDroneIDDemodReport* drone_id_demod_report);
 
     SWGEndOfTrainDemodReport* getEndOfTrainDemodReport();
     void setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report);
@@ -237,6 +265,9 @@ public:
     SWGRTTYDemodReport* getRttyDemodReport();
     void setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report);
 
+    SWGPSK31DemodReport* getPSK31DemodReport();
+    void setPSK31DemodReport(SWGPSK31DemodReport* psk31_demod_report);
+
     SWGRTTYModReport* getRttyModReport();
     void setRttyModReport(SWGRTTYModReport* rtty_mod_report);
 
@@ -301,6 +332,9 @@ private:
     SWGAMDemodReport* am_demod_report;
     bool m_am_demod_report_isSet;
 
+    SWGWefaxDemodReport* wefax_demod_report;
+    bool m_wefax_demod_report_isSet;
+
     SWGAMModReport* am_mod_report;
     bool m_am_mod_report_isSet;
 
@@ -309,6 +343,15 @@ private:
 
     SWGBFMDemodReport* bfm_demod_report;
     bool m_bfm_demod_report_isSet;
+
+    SWGBFMModReport* bfm_mod_report;
+    bool m_bfm_mod_report_isSet;
+
+    SWGDABDemodReport* dab_demod_report;
+    bool m_dab_demod_report_isSet;
+
+    SWGDRMDemodReport* drm_demod_report;
+    bool m_drm_demod_report_isSet;
 
     SWGChannelPowerReport* channel_power_report;
     bool m_channel_power_report_isSet;
@@ -322,6 +365,9 @@ private:
     SWGDATVDemodReport* datv_demod_report;
     bool m_datv_demod_report_isSet;
 
+    SWGDVBDemodReport* dvb_demod_report;
+    bool m_dvb_demod_report_isSet;
+
     SWGDATVModReport* datv_mod_report;
     bool m_datv_mod_report_isSet;
 
@@ -329,10 +375,15 @@ private:
     bool m_doa2_report_isSet;
 
     SWGDSCDemodReport* dsc_demod_report;
+    SWGSELCALDemodReport* selcal_demod_report;
     bool m_dsc_demod_report_isSet;
+    bool m_selcal_demod_report_isSet;
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGDroneIDDemodReport* drone_id_demod_report;
+    bool m_drone_id_demod_report_isSet;
 
     SWGEndOfTrainDemodReport* end_of_train_demod_report;
     bool m_end_of_train_demod_report_isSet;
@@ -417,6 +468,9 @@ private:
 
     SWGRTTYDemodReport* rtty_demod_report;
     bool m_rtty_demod_report_isSet;
+
+    SWGPSK31DemodReport* psk31_demod_report;
+    bool m_psk31_demod_report_isSet;
 
     SWGRTTYModReport* rtty_mod_report;
     bool m_rtty_mod_report_isSet;

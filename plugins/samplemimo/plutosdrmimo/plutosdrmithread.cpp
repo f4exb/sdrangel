@@ -25,8 +25,11 @@ PlutoSDRMIThread::PlutoSDRMIThread(DevicePlutoSDRBox* plutoBox, QObject* parent)
     m_running(false),
     m_plutoBox(plutoBox),
     m_sampleFifo(nullptr),
+    m_log2Decim(0),
+    m_fcPos(0),
     m_iqOrder(true)
 {
+    setObjectName("PlutoSDRMI");
     qDebug("PlutoSDRMIThread::PlutoSDRMIThread");
     m_buf[0] = new qint16[2*m_plutoSDRBlockSizeSamples];
     m_buf[1] = new qint16[2*m_plutoSDRBlockSizeSamples];
@@ -110,6 +113,14 @@ void PlutoSDRMIThread::run()
 
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
+
+        if (nbytes_rx < 0)
+        {
+            qCritical("PlutoSDRMIThread::run: error refilling buffer: %s (%zd)",
+                strerror(-nbytes_rx), nbytes_rx);
+            emit error((int) nbytes_rx);
+            break;
+        }
 
         if (nbytes_rx != m_plutoSDRBlockSizeSamples*p_inc)
         {

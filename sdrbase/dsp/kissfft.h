@@ -114,9 +114,11 @@ public:
 	typedef typename traits_type::scalar_type scalar_type;
 	typedef typename traits_type::cpx_type cpx_type;
 
-	kissfft()
-	{
-	}
+    kissfft() :
+        _nfft(0),
+        _inverse(false)
+    {
+    }
 
 	kissfft(int nfft, bool inverse, const traits_type & traits = traits_type()) :
 		_nfft(nfft), _inverse(inverse), _traits(traits)

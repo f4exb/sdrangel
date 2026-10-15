@@ -42,6 +42,68 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_fps_period_ms_isSet = false;
     display_waterfall = 0;
     m_display_waterfall_isSet = false;
+    display3_d_spectrogram = 0;
+    m_display3_d_spectrogram_isSet = false;
+    spectrogram_style = 0;
+    m_spectrogram_style_isSet = false;
+    truncate_freq_scale = 0;
+    m_truncate_freq_scale_isSet = false;
+    color_map = nullptr;
+    m_color_map_isSet = false;
+    spectrum_style = 0;
+    m_spectrum_style_isSet = false;
+    measurement = 0;
+    m_measurement_isSet = false;
+    measurement_center_frequency_offset = 0;
+    m_measurement_center_frequency_offset_isSet = false;
+    measurement_bandwidth = 0;
+    m_measurement_bandwidth_isSet = false;
+    measurement_ch_spacing = 0;
+    m_measurement_ch_spacing_isSet = false;
+    measurement_adj_ch_bandwidth = 0;
+    m_measurement_adj_ch_bandwidth_isSet = false;
+    measurement_harmonics = 0;
+    m_measurement_harmonics_isSet = false;
+    measurement_peaks = 0;
+    m_measurement_peaks_isSet = false;
+    measurement_highlight = 0;
+    m_measurement_highlight_isSet = false;
+    measurements_position = 0;
+    m_measurements_position_isSet = false;
+    measurement_precision = 0;
+    m_measurement_precision_isSet = false;
+    find_histogram_peaks = 0;
+    m_find_histogram_peaks_isSet = false;
+    show_controls = 0;
+    m_show_controls_isSet = false;
+    frequency_zoom_factor = 0.0f;
+    m_frequency_zoom_factor_isSet = false;
+    frequency_zoom_pos = 0.0f;
+    m_frequency_zoom_pos_isSet = false;
+    waterfall_time_units = 0;
+    m_waterfall_time_units_isSet = false;
+    waterfall_time_format = nullptr;
+    m_waterfall_time_format_isSet = false;
+    scroll_bar = 0;
+    m_scroll_bar_isSet = false;
+    scroll_length = 0;
+    m_scroll_length_isSet = false;
+    math_mode = 0;
+    m_math_mode_isSet = false;
+    math_avg_count = 0;
+    m_math_avg_count_isSet = false;
+    measurement_mem_masks = 0;
+    m_measurement_mem_masks_isSet = false;
+    display_rbw = 0;
+    m_display_rbw_isSet = false;
+    display_cursor_stats = 0;
+    m_display_cursor_stats_isSet = false;
+    display_peak_stats = 0;
+    m_display_peak_stats_isSet = false;
+    spectrum_memory = nullptr;
+    m_spectrum_memory_isSet = false;
+    spectrum_color = 0;
+    m_spectrum_color_isSet = false;
     inverted_waterfall = 0;
     m_inverted_waterfall_isSet = false;
     display_max_hold = 0;
@@ -90,6 +152,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_histogram_markers_isSet = false;
     waterfall_markers = nullptr;
     m_waterfall_markers_isSet = false;
+    annotation_markers_mode = 0;
+    m_annotation_markers_mode_isSet = false;
     annotation_markers = nullptr;
     m_annotation_markers_isSet = false;
     calibration_points = nullptr;
@@ -116,6 +180,68 @@ SWGGLSpectrum::init() {
     m_fps_period_ms_isSet = false;
     display_waterfall = 0;
     m_display_waterfall_isSet = false;
+    display3_d_spectrogram = 0;
+    m_display3_d_spectrogram_isSet = false;
+    spectrogram_style = 0;
+    m_spectrogram_style_isSet = false;
+    truncate_freq_scale = 0;
+    m_truncate_freq_scale_isSet = false;
+    color_map = new QString("");
+    m_color_map_isSet = false;
+    spectrum_style = 0;
+    m_spectrum_style_isSet = false;
+    measurement = 0;
+    m_measurement_isSet = false;
+    measurement_center_frequency_offset = 0;
+    m_measurement_center_frequency_offset_isSet = false;
+    measurement_bandwidth = 0;
+    m_measurement_bandwidth_isSet = false;
+    measurement_ch_spacing = 0;
+    m_measurement_ch_spacing_isSet = false;
+    measurement_adj_ch_bandwidth = 0;
+    m_measurement_adj_ch_bandwidth_isSet = false;
+    measurement_harmonics = 0;
+    m_measurement_harmonics_isSet = false;
+    measurement_peaks = 0;
+    m_measurement_peaks_isSet = false;
+    measurement_highlight = 0;
+    m_measurement_highlight_isSet = false;
+    measurements_position = 0;
+    m_measurements_position_isSet = false;
+    measurement_precision = 0;
+    m_measurement_precision_isSet = false;
+    find_histogram_peaks = 0;
+    m_find_histogram_peaks_isSet = false;
+    show_controls = 0;
+    m_show_controls_isSet = false;
+    frequency_zoom_factor = 0.0f;
+    m_frequency_zoom_factor_isSet = false;
+    frequency_zoom_pos = 0.0f;
+    m_frequency_zoom_pos_isSet = false;
+    waterfall_time_units = 0;
+    m_waterfall_time_units_isSet = false;
+    waterfall_time_format = new QString("");
+    m_waterfall_time_format_isSet = false;
+    scroll_bar = 0;
+    m_scroll_bar_isSet = false;
+    scroll_length = 0;
+    m_scroll_length_isSet = false;
+    math_mode = 0;
+    m_math_mode_isSet = false;
+    math_avg_count = 0;
+    m_math_avg_count_isSet = false;
+    measurement_mem_masks = 0;
+    m_measurement_mem_masks_isSet = false;
+    display_rbw = 0;
+    m_display_rbw_isSet = false;
+    display_cursor_stats = 0;
+    m_display_cursor_stats_isSet = false;
+    display_peak_stats = 0;
+    m_display_peak_stats_isSet = false;
+    spectrum_memory = new QList<SWGSpectrumMemorySettings*>();
+    m_spectrum_memory_isSet = false;
+    spectrum_color = 0;
+    m_spectrum_color_isSet = false;
     inverted_waterfall = 0;
     m_inverted_waterfall_isSet = false;
     display_max_hold = 0;
@@ -164,6 +290,8 @@ SWGGLSpectrum::init() {
     m_histogram_markers_isSet = false;
     waterfall_markers = new QList<SWGSpectrumWaterfallMarker*>();
     m_waterfall_markers_isSet = false;
+    annotation_markers_mode = 0;
+    m_annotation_markers_mode_isSet = false;
     annotation_markers = new QList<SWGSpectrumAnnotationMarker*>();
     m_annotation_markers_isSet = false;
     calibration_points = new QList<SWGSpectrumCalibrationPoint*>();
@@ -178,6 +306,47 @@ SWGGLSpectrum::cleanup() {
 
 
 
+
+
+
+
+    if(color_map != nullptr) { 
+        delete color_map;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(waterfall_time_format != nullptr) { 
+        delete waterfall_time_format;
+    }
+
+
+
+
+
+
+
+
+    if(spectrum_memory != nullptr) { 
+        auto arr = spectrum_memory;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete spectrum_memory;
+    }
 
 
 
@@ -217,6 +386,7 @@ SWGGLSpectrum::cleanup() {
         }
         delete waterfall_markers;
     }
+
     if(annotation_markers != nullptr) { 
         auto arr = annotation_markers;
         for(auto o: *arr) { 
@@ -257,6 +427,68 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fps_period_ms, pJson["fpsPeriodMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_waterfall, pJson["displayWaterfall"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display3_d_spectrogram, pJson["display3DSpectrogram"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&spectrogram_style, pJson["spectrogramStyle"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&truncate_freq_scale, pJson["truncateFreqScale"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&color_map, pJson["colorMap"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&spectrum_style, pJson["spectrumStyle"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement, pJson["measurement"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_center_frequency_offset, pJson["measurementCenterFrequencyOffset"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_bandwidth, pJson["measurementBandwidth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_ch_spacing, pJson["measurementChSpacing"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_adj_ch_bandwidth, pJson["measurementAdjChBandwidth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_harmonics, pJson["measurementHarmonics"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_peaks, pJson["measurementPeaks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_highlight, pJson["measurementHighlight"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurements_position, pJson["measurementsPosition"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_precision, pJson["measurementPrecision"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&find_histogram_peaks, pJson["findHistogramPeaks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&show_controls, pJson["showControls"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&frequency_zoom_factor, pJson["frequencyZoomFactor"], "float", "");
+    
+    ::SWGSDRangel::setValue(&frequency_zoom_pos, pJson["frequencyZoomPos"], "float", "");
+    
+    ::SWGSDRangel::setValue(&waterfall_time_units, pJson["waterfallTimeUnits"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&waterfall_time_format, pJson["waterfallTimeFormat"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&scroll_bar, pJson["scrollBar"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&scroll_length, pJson["scrollLength"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&math_mode, pJson["mathMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&math_avg_count, pJson["mathAvgCount"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&measurement_mem_masks, pJson["measurementMemMasks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_rbw, pJson["displayRBW"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_cursor_stats, pJson["displayCursorStats"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_peak_stats, pJson["displayPeakStats"], "qint32", "");
+    
+    
+    ::SWGSDRangel::setValue(&spectrum_memory, pJson["spectrumMemory"], "QList", "SWGSpectrumMemorySettings");
+    ::SWGSDRangel::setValue(&spectrum_color, pJson["spectrumColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&inverted_waterfall, pJson["invertedWaterfall"], "qint32", "");
     
@@ -306,6 +538,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&histogram_markers, pJson["histogramMarkers"], "QList", "SWGSpectrumHistogramMarker");
     
     ::SWGSDRangel::setValue(&waterfall_markers, pJson["waterfallMarkers"], "QList", "SWGSpectrumWaterfallMarker");
+    ::SWGSDRangel::setValue(&annotation_markers_mode, pJson["annotationMarkersMode"], "qint32", "");
+    
     
     ::SWGSDRangel::setValue(&annotation_markers, pJson["annotationMarkers"], "QList", "SWGSpectrumAnnotationMarker");
     
@@ -346,6 +580,99 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_display_waterfall_isSet){
         obj->insert("displayWaterfall", QJsonValue(display_waterfall));
+    }
+    if(m_display3_d_spectrogram_isSet){
+        obj->insert("display3DSpectrogram", QJsonValue(display3_d_spectrogram));
+    }
+    if(m_spectrogram_style_isSet){
+        obj->insert("spectrogramStyle", QJsonValue(spectrogram_style));
+    }
+    if(m_truncate_freq_scale_isSet){
+        obj->insert("truncateFreqScale", QJsonValue(truncate_freq_scale));
+    }
+    if(color_map != nullptr && *color_map != QString("")){
+        toJsonValue(QString("colorMap"), color_map, obj, QString("QString"));
+    }
+    if(m_spectrum_style_isSet){
+        obj->insert("spectrumStyle", QJsonValue(spectrum_style));
+    }
+    if(m_measurement_isSet){
+        obj->insert("measurement", QJsonValue(measurement));
+    }
+    if(m_measurement_center_frequency_offset_isSet){
+        obj->insert("measurementCenterFrequencyOffset", QJsonValue(measurement_center_frequency_offset));
+    }
+    if(m_measurement_bandwidth_isSet){
+        obj->insert("measurementBandwidth", QJsonValue(measurement_bandwidth));
+    }
+    if(m_measurement_ch_spacing_isSet){
+        obj->insert("measurementChSpacing", QJsonValue(measurement_ch_spacing));
+    }
+    if(m_measurement_adj_ch_bandwidth_isSet){
+        obj->insert("measurementAdjChBandwidth", QJsonValue(measurement_adj_ch_bandwidth));
+    }
+    if(m_measurement_harmonics_isSet){
+        obj->insert("measurementHarmonics", QJsonValue(measurement_harmonics));
+    }
+    if(m_measurement_peaks_isSet){
+        obj->insert("measurementPeaks", QJsonValue(measurement_peaks));
+    }
+    if(m_measurement_highlight_isSet){
+        obj->insert("measurementHighlight", QJsonValue(measurement_highlight));
+    }
+    if(m_measurements_position_isSet){
+        obj->insert("measurementsPosition", QJsonValue(measurements_position));
+    }
+    if(m_measurement_precision_isSet){
+        obj->insert("measurementPrecision", QJsonValue(measurement_precision));
+    }
+    if(m_find_histogram_peaks_isSet){
+        obj->insert("findHistogramPeaks", QJsonValue(find_histogram_peaks));
+    }
+    if(m_show_controls_isSet){
+        obj->insert("showControls", QJsonValue(show_controls));
+    }
+    if(m_frequency_zoom_factor_isSet){
+        obj->insert("frequencyZoomFactor", QJsonValue(frequency_zoom_factor));
+    }
+    if(m_frequency_zoom_pos_isSet){
+        obj->insert("frequencyZoomPos", QJsonValue(frequency_zoom_pos));
+    }
+    if(m_waterfall_time_units_isSet){
+        obj->insert("waterfallTimeUnits", QJsonValue(waterfall_time_units));
+    }
+    if(waterfall_time_format != nullptr && *waterfall_time_format != QString("")){
+        toJsonValue(QString("waterfallTimeFormat"), waterfall_time_format, obj, QString("QString"));
+    }
+    if(m_scroll_bar_isSet){
+        obj->insert("scrollBar", QJsonValue(scroll_bar));
+    }
+    if(m_scroll_length_isSet){
+        obj->insert("scrollLength", QJsonValue(scroll_length));
+    }
+    if(m_math_mode_isSet){
+        obj->insert("mathMode", QJsonValue(math_mode));
+    }
+    if(m_math_avg_count_isSet){
+        obj->insert("mathAvgCount", QJsonValue(math_avg_count));
+    }
+    if(m_measurement_mem_masks_isSet){
+        obj->insert("measurementMemMasks", QJsonValue(measurement_mem_masks));
+    }
+    if(m_display_rbw_isSet){
+        obj->insert("displayRBW", QJsonValue(display_rbw));
+    }
+    if(m_display_cursor_stats_isSet){
+        obj->insert("displayCursorStats", QJsonValue(display_cursor_stats));
+    }
+    if(m_display_peak_stats_isSet){
+        obj->insert("displayPeakStats", QJsonValue(display_peak_stats));
+    }
+    if(spectrum_memory && spectrum_memory->size() > 0){
+        toJsonArray((QList<void*>*)spectrum_memory, obj, "spectrumMemory", "SWGSpectrumMemorySettings");
+    }
+    if(m_spectrum_color_isSet){
+        obj->insert("spectrumColor", QJsonValue(spectrum_color));
     }
     if(m_inverted_waterfall_isSet){
         obj->insert("invertedWaterfall", QJsonValue(inverted_waterfall));
@@ -418,6 +745,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(waterfall_markers && waterfall_markers->size() > 0){
         toJsonArray((QList<void*>*)waterfall_markers, obj, "waterfallMarkers", "SWGSpectrumWaterfallMarker");
+    }
+    if(m_annotation_markers_mode_isSet){
+        obj->insert("annotationMarkersMode", QJsonValue(annotation_markers_mode));
     }
     if(annotation_markers && annotation_markers->size() > 0){
         toJsonArray((QList<void*>*)annotation_markers, obj, "annotationMarkers", "SWGSpectrumAnnotationMarker");
@@ -497,6 +827,316 @@ void
 SWGGLSpectrum::setDisplayWaterfall(qint32 display_waterfall) {
     this->display_waterfall = display_waterfall;
     this->m_display_waterfall_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getDisplay3DSpectrogram() {
+    return display3_d_spectrogram;
+}
+void
+SWGGLSpectrum::setDisplay3DSpectrogram(qint32 display3_d_spectrogram) {
+    this->display3_d_spectrogram = display3_d_spectrogram;
+    this->m_display3_d_spectrogram_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getSpectrogramStyle() {
+    return spectrogram_style;
+}
+void
+SWGGLSpectrum::setSpectrogramStyle(qint32 spectrogram_style) {
+    this->spectrogram_style = spectrogram_style;
+    this->m_spectrogram_style_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getTruncateFreqScale() {
+    return truncate_freq_scale;
+}
+void
+SWGGLSpectrum::setTruncateFreqScale(qint32 truncate_freq_scale) {
+    this->truncate_freq_scale = truncate_freq_scale;
+    this->m_truncate_freq_scale_isSet = true;
+}
+
+QString*
+SWGGLSpectrum::getColorMap() {
+    return color_map;
+}
+void
+SWGGLSpectrum::setColorMap(QString* color_map) {
+    this->color_map = color_map;
+    this->m_color_map_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getSpectrumStyle() {
+    return spectrum_style;
+}
+void
+SWGGLSpectrum::setSpectrumStyle(qint32 spectrum_style) {
+    this->spectrum_style = spectrum_style;
+    this->m_spectrum_style_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurement() {
+    return measurement;
+}
+void
+SWGGLSpectrum::setMeasurement(qint32 measurement) {
+    this->measurement = measurement;
+    this->m_measurement_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementCenterFrequencyOffset() {
+    return measurement_center_frequency_offset;
+}
+void
+SWGGLSpectrum::setMeasurementCenterFrequencyOffset(qint32 measurement_center_frequency_offset) {
+    this->measurement_center_frequency_offset = measurement_center_frequency_offset;
+    this->m_measurement_center_frequency_offset_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementBandwidth() {
+    return measurement_bandwidth;
+}
+void
+SWGGLSpectrum::setMeasurementBandwidth(qint32 measurement_bandwidth) {
+    this->measurement_bandwidth = measurement_bandwidth;
+    this->m_measurement_bandwidth_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementChSpacing() {
+    return measurement_ch_spacing;
+}
+void
+SWGGLSpectrum::setMeasurementChSpacing(qint32 measurement_ch_spacing) {
+    this->measurement_ch_spacing = measurement_ch_spacing;
+    this->m_measurement_ch_spacing_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementAdjChBandwidth() {
+    return measurement_adj_ch_bandwidth;
+}
+void
+SWGGLSpectrum::setMeasurementAdjChBandwidth(qint32 measurement_adj_ch_bandwidth) {
+    this->measurement_adj_ch_bandwidth = measurement_adj_ch_bandwidth;
+    this->m_measurement_adj_ch_bandwidth_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementHarmonics() {
+    return measurement_harmonics;
+}
+void
+SWGGLSpectrum::setMeasurementHarmonics(qint32 measurement_harmonics) {
+    this->measurement_harmonics = measurement_harmonics;
+    this->m_measurement_harmonics_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementPeaks() {
+    return measurement_peaks;
+}
+void
+SWGGLSpectrum::setMeasurementPeaks(qint32 measurement_peaks) {
+    this->measurement_peaks = measurement_peaks;
+    this->m_measurement_peaks_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementHighlight() {
+    return measurement_highlight;
+}
+void
+SWGGLSpectrum::setMeasurementHighlight(qint32 measurement_highlight) {
+    this->measurement_highlight = measurement_highlight;
+    this->m_measurement_highlight_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementsPosition() {
+    return measurements_position;
+}
+void
+SWGGLSpectrum::setMeasurementsPosition(qint32 measurements_position) {
+    this->measurements_position = measurements_position;
+    this->m_measurements_position_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementPrecision() {
+    return measurement_precision;
+}
+void
+SWGGLSpectrum::setMeasurementPrecision(qint32 measurement_precision) {
+    this->measurement_precision = measurement_precision;
+    this->m_measurement_precision_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getFindHistogramPeaks() {
+    return find_histogram_peaks;
+}
+void
+SWGGLSpectrum::setFindHistogramPeaks(qint32 find_histogram_peaks) {
+    this->find_histogram_peaks = find_histogram_peaks;
+    this->m_find_histogram_peaks_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getShowControls() {
+    return show_controls;
+}
+void
+SWGGLSpectrum::setShowControls(qint32 show_controls) {
+    this->show_controls = show_controls;
+    this->m_show_controls_isSet = true;
+}
+
+float
+SWGGLSpectrum::getFrequencyZoomFactor() {
+    return frequency_zoom_factor;
+}
+void
+SWGGLSpectrum::setFrequencyZoomFactor(float frequency_zoom_factor) {
+    this->frequency_zoom_factor = frequency_zoom_factor;
+    this->m_frequency_zoom_factor_isSet = true;
+}
+
+float
+SWGGLSpectrum::getFrequencyZoomPos() {
+    return frequency_zoom_pos;
+}
+void
+SWGGLSpectrum::setFrequencyZoomPos(float frequency_zoom_pos) {
+    this->frequency_zoom_pos = frequency_zoom_pos;
+    this->m_frequency_zoom_pos_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getWaterfallTimeUnits() {
+    return waterfall_time_units;
+}
+void
+SWGGLSpectrum::setWaterfallTimeUnits(qint32 waterfall_time_units) {
+    this->waterfall_time_units = waterfall_time_units;
+    this->m_waterfall_time_units_isSet = true;
+}
+
+QString*
+SWGGLSpectrum::getWaterfallTimeFormat() {
+    return waterfall_time_format;
+}
+void
+SWGGLSpectrum::setWaterfallTimeFormat(QString* waterfall_time_format) {
+    this->waterfall_time_format = waterfall_time_format;
+    this->m_waterfall_time_format_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getScrollBar() {
+    return scroll_bar;
+}
+void
+SWGGLSpectrum::setScrollBar(qint32 scroll_bar) {
+    this->scroll_bar = scroll_bar;
+    this->m_scroll_bar_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getScrollLength() {
+    return scroll_length;
+}
+void
+SWGGLSpectrum::setScrollLength(qint32 scroll_length) {
+    this->scroll_length = scroll_length;
+    this->m_scroll_length_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMathMode() {
+    return math_mode;
+}
+void
+SWGGLSpectrum::setMathMode(qint32 math_mode) {
+    this->math_mode = math_mode;
+    this->m_math_mode_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMathAvgCount() {
+    return math_avg_count;
+}
+void
+SWGGLSpectrum::setMathAvgCount(qint32 math_avg_count) {
+    this->math_avg_count = math_avg_count;
+    this->m_math_avg_count_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getMeasurementMemMasks() {
+    return measurement_mem_masks;
+}
+void
+SWGGLSpectrum::setMeasurementMemMasks(qint32 measurement_mem_masks) {
+    this->measurement_mem_masks = measurement_mem_masks;
+    this->m_measurement_mem_masks_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getDisplayRbw() {
+    return display_rbw;
+}
+void
+SWGGLSpectrum::setDisplayRbw(qint32 display_rbw) {
+    this->display_rbw = display_rbw;
+    this->m_display_rbw_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getDisplayCursorStats() {
+    return display_cursor_stats;
+}
+void
+SWGGLSpectrum::setDisplayCursorStats(qint32 display_cursor_stats) {
+    this->display_cursor_stats = display_cursor_stats;
+    this->m_display_cursor_stats_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getDisplayPeakStats() {
+    return display_peak_stats;
+}
+void
+SWGGLSpectrum::setDisplayPeakStats(qint32 display_peak_stats) {
+    this->display_peak_stats = display_peak_stats;
+    this->m_display_peak_stats_isSet = true;
+}
+
+QList<SWGSpectrumMemorySettings*>*
+SWGGLSpectrum::getSpectrumMemory() {
+    return spectrum_memory;
+}
+void
+SWGGLSpectrum::setSpectrumMemory(QList<SWGSpectrumMemorySettings*>* spectrum_memory) {
+    this->spectrum_memory = spectrum_memory;
+    this->m_spectrum_memory_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getSpectrumColor() {
+    return spectrum_color;
+}
+void
+SWGGLSpectrum::setSpectrumColor(qint32 spectrum_color) {
+    this->spectrum_color = spectrum_color;
+    this->m_spectrum_color_isSet = true;
 }
 
 qint32
@@ -739,6 +1379,16 @@ SWGGLSpectrum::setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall
     this->m_waterfall_markers_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getAnnotationMarkersMode() {
+    return annotation_markers_mode;
+}
+void
+SWGGLSpectrum::setAnnotationMarkersMode(qint32 annotation_markers_mode) {
+    this->annotation_markers_mode = annotation_markers_mode;
+    this->m_annotation_markers_mode_isSet = true;
+}
+
 QList<SWGSpectrumAnnotationMarker*>*
 SWGGLSpectrum::getAnnotationMarkers() {
     return annotation_markers;
@@ -783,6 +1433,99 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_display_waterfall_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display3_d_spectrogram_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_spectrogram_style_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_truncate_freq_scale_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(color_map && *color_map != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_spectrum_style_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_center_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_ch_spacing_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_adj_ch_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_harmonics_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_peaks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_highlight_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurements_position_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_precision_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_find_histogram_peaks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_show_controls_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_zoom_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_zoom_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_waterfall_time_units_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(waterfall_time_format && *waterfall_time_format != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_scroll_bar_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_scroll_length_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_math_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_math_avg_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_measurement_mem_masks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_rbw_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_cursor_stats_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_peak_stats_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(spectrum_memory && (spectrum_memory->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_spectrum_color_isSet){
             isObjectUpdated = true; break;
         }
         if(m_inverted_waterfall_isSet){
@@ -855,6 +1598,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(waterfall_markers && (waterfall_markers->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_annotation_markers_mode_isSet){
             isObjectUpdated = true; break;
         }
         if(annotation_markers && (annotation_markers->size() > 0)){

@@ -41,7 +41,9 @@ class Feature;
 class DSDDemodSink : public ChannelSampleSink {
 public:
     DSDDemodSink();
-	~DSDDemodSink();
+    ~DSDDemodSink();
+    DSDDemodSink(const DSDDemodSink&) = delete;
+    DSDDemodSink& operator=(const DSDDemodSink&) = delete;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

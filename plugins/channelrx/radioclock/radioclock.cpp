@@ -47,9 +47,11 @@ const char * const RadioClock::m_channelId = "RadioClock";
 RadioClock::RadioClock(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RadioClockBB");
 
     m_basebandSink = new RadioClockBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
@@ -469,8 +471,16 @@ void RadioClock::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
 
     response.getRadioClockReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getRadioClockReport()->setChannelSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
-    response.getRadioClockReport()->setDate(new QString(m_dateTime.date().toString()));
-    response.getRadioClockReport()->setTime(new QString(m_dateTime.time().toString()));
+    if (response.getRadioClockReport()->getDate()) {
+        *response.getRadioClockReport()->getDate() = m_dateTime.date().toString();
+    } else {
+        response.getRadioClockReport()->setDate(new QString(m_dateTime.date().toString()));
+    }
+    if (response.getRadioClockReport()->getTime()) {
+        *response.getRadioClockReport()->getTime() = m_dateTime.time().toString();
+    } else {
+        response.getRadioClockReport()->setTime(new QString(m_dateTime.time().toString()));
+    }
 }
 
 void RadioClock::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RadioClockSettings& settings, bool force)
@@ -519,7 +529,11 @@ void RadioClock::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("RadioClock"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "RadioClock";
+    } else {
+        swgChannelSettings->setChannelType(new QString("RadioClock"));
+    }
     swgChannelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
     SWGSDRangel::SWGRadioClockSettings *swgRadioClockSettings = swgChannelSettings->getRadioClockSettings();
 
@@ -550,7 +564,11 @@ void RadioClock::webapiFormatChannelSettings(
         swgRadioClockSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRadioClockSettings->setTitle(new QString(settings.m_title));
+        if (swgRadioClockSettings->getTitle()) {
+            *swgRadioClockSettings->getTitle() = settings.m_title;
+        } else {
+            swgRadioClockSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRadioClockSettings->setStreamIndex(settings.m_streamIndex);
@@ -610,4 +628,9 @@ void RadioClock::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int RadioClock::getChannelSampleRate() const
+{
+    return RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
 }

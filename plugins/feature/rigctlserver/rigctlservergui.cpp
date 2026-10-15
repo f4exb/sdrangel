@@ -109,9 +109,10 @@ void RigCtlServerGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
@@ -128,8 +129,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 	ui(new Ui::RigCtlServerGUI),
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
-	m_doApplySettings(true),
-    m_lastFeatureState(0)
+	m_doApplySettings(true)
 {
     m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -147,8 +147,8 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	connect(m_rigCtlServer, &Feature::stateChanged, this, &RigCtlServerGUI::updateFeatureState);
+	updateFeatureState();
 
     updateDeviceSetList();
     displaySettings();
@@ -385,33 +385,9 @@ void RigCtlServerGUI::on_maxFrequencyOffset_valueChanged(int value)
     applySettings();
 }
 
-void RigCtlServerGUI::updateStatus()
+void RigCtlServerGUI::updateFeatureState()
 {
-    int state = m_rigCtlServer->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_rigCtlServer->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void RigCtlServerGUI::applySettings(bool force)

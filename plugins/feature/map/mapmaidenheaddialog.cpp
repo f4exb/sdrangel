@@ -103,7 +103,13 @@ void MapMaidenheadDialog::geoReply()
 {
     QGeoCodeReply *pQGeoCode = dynamic_cast<QGeoCodeReply*>(sender());
 
-    if ((pQGeoCode != nullptr) && (pQGeoCode->error() == QGeoCodeReply::NoError))
+    if (!pQGeoCode)
+    {
+        qWarning() << "MapMaidenheadDialog::geoReply: Invalid sender";
+        return;
+    }
+
+    if (pQGeoCode->error() == QGeoCodeReply::NoError)
     {
         QList<QGeoLocation> qGeoLocs = pQGeoCode->locations();
         if (qGeoLocs.size() == 0)

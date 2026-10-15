@@ -3,44 +3,63 @@ RigCtlServerSettings:
   properties:
     enabled:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable RigCtl server
           * 1 - enabled
           * 0 - disabled
     rigCtlPort:
       type: integer
+      description: "Rig ctl port."
     maxFrequencyOffset:
       type: integer
+      description: "Max frequency offset in Hz."
     deviceIndex:
       type: integer
+      description: "Selected device index."
     channelIndex:
       type: integer
+      description: "Selected channel index."
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Synchronize with reverse API
           * 1 - yes
           * 0 - no
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 RigCtlServerReport:
   description: RigCtl server report
   properties:
     runningState:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Running state
           * 0 - not started
@@ -53,6 +72,8 @@ RigCtlServerActions:
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle

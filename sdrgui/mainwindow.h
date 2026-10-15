@@ -32,6 +32,7 @@
 #include <QFinalState>
 #include <QSignalTransition>
 #include <QProgressDialog>
+#include <QPointer>
 
 #include "settings/mainsettings.h"
 #include "util/message.h"
@@ -58,6 +59,7 @@ class ChannelMarker;
 class PluginManager;
 class DeviceAPI;
 class DeviceUISet;
+class Feature;
 class FeatureUISet;
 class PluginInterface;
 class QWidget;
@@ -74,6 +76,8 @@ class SerializableInterface;
 class SDRangelSplash;
 
 class QMenuBar;
+class QMenu;
+class QMdiSubWindow;
 class Workspace;
 class MainWindow;
 
@@ -231,7 +235,11 @@ public:
 private:
 
     const Configuration *m_configuration;
-    QProgressDialog *m_waitBox;
+    bool m_overlayEnabledBeforeLoad;
+    // The dialog is created with WA_DeleteOnClose and this FSM outlives it,
+    // so a bare pointer can dangle between states. QPointer makes the null
+    // checks in the state handlers mean what they are written to mean.
+    QPointer<QProgressDialog> m_waitBox;
 
     RemoveAllWorkspacesFSM *m_removeAllWorkspacesFSM;
 
@@ -325,6 +333,8 @@ private:
 	PluginManager* m_pluginManager;
 
 	QTimer m_statusTimer;
+    QTimer m_connectionOverlayRefreshTimer;
+    bool m_connectionOverlayEnabled;
 	int m_lastEngineState;
 
     QMenuBar *m_menuBar;
@@ -346,6 +356,7 @@ private:
 #endif
 
     bool m_settingsSaved;               // Records if settings have already been saved in response to a QCloseEvent
+    QPointer<LoadConfigurationFSM> m_configurationLoadFSM; // In-flight load started by loadConfiguration(), if any
     const MainParser& m_parser;
 
 	void loadSettings();
@@ -353,6 +364,10 @@ private:
 	void saveDeviceSetPresetSettings(Preset* preset, int deviceSetIndex);
 	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
+	FeatureGUI *getMCPServerGUI(Feature **feature = nullptr) const;
+	void updateMCPServerButton();
+    void setConnectionOverlayEnabled(bool enabled);
+    void updateConnectionOverlays();
 
 	QString openGLVersion() const;
     void createMenuBar(QToolButton *button) const;
@@ -448,6 +463,13 @@ private slots:
     void viewAllWorkspaces() const;
     void removeEmptyWorkspaces();
     void openConfigurationDialog(bool openOnly);
+    //!< Rebuilds the Window > Show submenu from the windows that are currently hidden
+    void populateShowMenu(QMenu *menu) const;
+    //!< Brings one hidden window back, along with its workspace if that is hidden too
+    void showWindow(QMdiSubWindow *window, int workspaceIndex) const;
+    void showAllHiddenWindows() const;
+    //!< Workspace the Window menu's arrangement items act on: the one last worked in
+    Workspace *currentWorkspace() const;
     void loadDefaultConfigurations() const;
 	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
     void saveConfiguration(Configuration *configuration);
@@ -460,6 +482,11 @@ private slots:
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void deviceStateChanged(DeviceAPI *deviceAPI);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void startMCPServer();
+    void showMCPServer();
+    void mcpServerFeatureAdded(int featureSetIndex, Feature *feature);
+    void mcpServerFeatureRemoved(int featureSetIndex, Feature *feature);
+    static bool isMCPServerFeature(const Feature* feature);
     void startRemoteTCPSink();
     void startAllAfterDelay();
     void startAll();

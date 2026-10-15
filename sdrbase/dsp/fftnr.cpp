@@ -25,7 +25,9 @@
 #include "fftnr.h"
 
 FFTNoiseReduction::FFTNoiseReduction(int len) :
-    m_flen(len)
+    m_flen(len),
+    m_magAvg(0.0f),
+    m_magThr(0.0f)
 {
     m_scheme = SchemeAverage;
     m_mags = new float[m_flen];
@@ -107,7 +109,8 @@ void FFTNoiseReduction::setScheme(Scheme scheme)
     m_scheme = scheme;
 }
 
-FFTNoiseReduction::ExponentialFilter::ExponentialFilter()
+FFTNoiseReduction::ExponentialFilter::ExponentialFilter() :
+    m_prev(0.0f)
 {
     m_alpha = 1.0;
     m_init = true;

@@ -44,6 +44,7 @@ SWGMeshcoreModActions::init() {
 
 void
 SWGMeshcoreModActions::cleanup() {
+
 }
 
 SWGMeshcoreModActions*
@@ -58,7 +59,7 @@ SWGMeshcoreModActions::fromJson(QString &json) {
 void
 SWGMeshcoreModActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&send_now, pJson["sendNow"], "qint32", "");
-
+    
 }
 
 QString

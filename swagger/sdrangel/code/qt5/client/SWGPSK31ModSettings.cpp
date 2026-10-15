@@ -52,10 +52,6 @@ SWGPSK31ModSettings::SWGPSK31ModSettings() {
     m_beta_isSet = false;
     symbol_span = 0;
     m_symbol_span_isSet = false;
-    prefix_crlf = 0;
-    m_prefix_crlf_isSet = false;
-    postfix_crlf = 0;
-    m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = nullptr;
@@ -114,10 +110,6 @@ SWGPSK31ModSettings::init() {
     m_beta_isSet = false;
     symbol_span = 0;
     m_symbol_span_isSet = false;
-    prefix_crlf = 0;
-    m_prefix_crlf_isSet = false;
-    postfix_crlf = 0;
-    m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = new QString("");
@@ -224,10 +216,6 @@ SWGPSK31ModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&symbol_span, pJson["symbolSpan"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&prefix_crlf, pJson["prefixCRLF"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&postfix_crlf, pJson["postfixCRLF"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
@@ -305,12 +293,6 @@ SWGPSK31ModSettings::asJsonObject() {
     }
     if(m_symbol_span_isSet){
         obj->insert("symbolSpan", QJsonValue(symbol_span));
-    }
-    if(m_prefix_crlf_isSet){
-        obj->insert("prefixCRLF", QJsonValue(prefix_crlf));
-    }
-    if(m_postfix_crlf_isSet){
-        obj->insert("postfixCRLF", QJsonValue(postfix_crlf));
     }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
@@ -473,26 +455,6 @@ void
 SWGPSK31ModSettings::setSymbolSpan(qint32 symbol_span) {
     this->symbol_span = symbol_span;
     this->m_symbol_span_isSet = true;
-}
-
-qint32
-SWGPSK31ModSettings::getPrefixCrlf() {
-    return prefix_crlf;
-}
-void
-SWGPSK31ModSettings::setPrefixCrlf(qint32 prefix_crlf) {
-    this->prefix_crlf = prefix_crlf;
-    this->m_prefix_crlf_isSet = true;
-}
-
-qint32
-SWGPSK31ModSettings::getPostfixCrlf() {
-    return postfix_crlf;
-}
-void
-SWGPSK31ModSettings::setPostfixCrlf(qint32 postfix_crlf) {
-    this->postfix_crlf = postfix_crlf;
-    this->m_postfix_crlf_isSet = true;
 }
 
 qint32
@@ -666,12 +628,6 @@ SWGPSK31ModSettings::isSet(){
         if(m_symbol_span_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_prefix_crlf_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_postfix_crlf_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_udp_enabled_isSet){
             isObjectUpdated = true; break;
         }
@@ -715,4 +671,3 @@ SWGPSK31ModSettings::isSet(){
     return isObjectUpdated;
 }
 }
-

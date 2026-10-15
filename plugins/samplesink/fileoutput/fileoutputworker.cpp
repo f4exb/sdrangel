@@ -25,18 +25,19 @@
 #include "fileoutputworker.h"
 
 FileOutputWorker::FileOutputWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
-	QObject(parent),
-	m_running(false),
-	m_ofstream(samplesStream),
-	m_bufsize(0),
-	m_samplesChunkSize(0),
-	m_sampleFifo(sampleFifo),
-	m_samplesCount(0),
+    QObject(parent),
+    m_running(false),
+    m_ofstream(samplesStream),
+    m_bufsize(0),
+    m_samplesChunkSize(0),
+    m_sampleFifo(sampleFifo),
+    m_samplesCount(0),
     m_samplerate(0),
     m_log2Interpolation(0),
     m_throttlems(FILEOUTPUT_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false),
+    m_spectrumSink(nullptr),
     m_buf(nullptr)
 {
 }

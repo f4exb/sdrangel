@@ -30,6 +30,7 @@ XTRXMIThread::XTRXMIThread(struct xtrx_dev *dev, QObject* parent) :
     m_sampleFifo(nullptr),
     m_iqOrder(true)
 {
+    setObjectName("XTRXMI");
     qDebug("XTRXMIThread::XTRXMIThread");
 
     for (unsigned int i = 0; i < 2; i++) {

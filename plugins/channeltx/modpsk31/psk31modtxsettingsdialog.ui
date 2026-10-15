@@ -26,24 +26,14 @@
       <string>Text</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0" colspan="2">
-       <widget class="QCheckBox" name="prefixCRLF">
-        <property name="toolTip">
-         <string>Prefix text with carriage returns and line feed</string>
-        </property>
-        <property name="text">
-         <string>Prefix CR+CR+LF</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
+      <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Predefined text</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="2" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QToolButton" name="add">
@@ -107,17 +97,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="postfixCRLF">
-        <property name="toolTip">
-         <string>Postfix text with carriage returns and line feeds</string>
-        </property>
-        <property name="text">
-         <string>Postfix CR+CR+LF</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
+      <item row="1" column="0" colspan="2">
        <widget class="QListWidget" name="predefinedText">
         <property name="toolTip">
          <string>Predefined text messages

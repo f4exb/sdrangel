@@ -125,6 +125,7 @@ bool FOBOSInput::start()
     }
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("FOBOSInput");
     m_worker = new FOBOSWorker(&m_sampleFifo);
     m_worker->moveToThread(m_workerThread);
 
@@ -660,7 +661,7 @@ void FOBOSInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("autoCorrOptions")) {
         int autoCorrOptions = response.getTestSourceSettings()->getAutoCorrOptions();
         autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= FOBOSSettings::AutoCorrLast ? FOBOSSettings::AutoCorrLast-1 : autoCorrOptions;
-        settings.m_sampleSizeIndex = (FOBOSSettings::AutoCorrOptions) autoCorrOptions;
+        settings.m_autoCorrOptions = (FOBOSSettings::AutoCorrOptions) autoCorrOptions;
     }
     if (deviceSettingsKeys.contains("modulation")) {
         int modulation = response.getTestSourceSettings()->getModulation();
@@ -775,7 +776,7 @@ void FOBOSInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
         SWGTestSourceSettings->setAmplitudeBits(settings.m_amplitudeBits);
     }
     if (deviceSettingsKeys.contains("autoCorrOptions") || force) {
-        SWGTestSourceSettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
+        SWGTestSourceSettings->setAutoCorrOptions((int) settings.m_autoCorrOptions);
     }
     if (deviceSettingsKeys.contains("modulation") || force) {
         SWGTestSourceSettings->setModulation((int) settings.m_modulation);

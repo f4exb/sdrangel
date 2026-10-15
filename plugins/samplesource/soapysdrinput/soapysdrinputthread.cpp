@@ -36,6 +36,7 @@ SoapySDRInputThread::SoapySDRInputThread(SoapySDR::Device* dev, unsigned int nbR
     m_decimatorType(DecimatorFloat),
     m_iqOrder(true)
 {
+    setObjectName("SoapySDRInput");
     qDebug("SoapySDRInputThread::SoapySDRInputThread");
     m_channels = new Channel[nbRxChannels];
 }

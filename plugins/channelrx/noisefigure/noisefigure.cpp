@@ -31,9 +31,11 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 #include "settings/serializable.h"
 #include "util/interpolation.h"
@@ -58,9 +60,17 @@ NoiseFigure::NoiseFigure(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_basebandSampleRate(0),
-        m_state(IDLE)
+        m_centerFrequency(0),
+        m_state(IDLE),
+        m_sweepValue(0.0),
+        m_step(0),
+        m_steps(0),
+        m_onPower(0.0),
+        m_offPower(0.0),
+        m_session(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("NoiseFigureBB");
 
     m_basebandSink = new NoiseFigureBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
@@ -555,7 +565,11 @@ void NoiseFigure::applySettings(const QStringList& settingsKeys, const NoiseFigu
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray NoiseFigure::serialize() const
@@ -598,6 +612,27 @@ int NoiseFigure::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int NoiseFigure::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setNoiseFigureReport(new SWGSDRangel::SWGNoiseFigureReport());
+    response.getNoiseFigureReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void NoiseFigure::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getNoiseFigureReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getNoiseFigureReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int NoiseFigure::webapiSettingsPutPatch(
@@ -795,7 +830,11 @@ void NoiseFigure::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("NoiseFigure"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "NoiseFigure";
+    } else {
+        swgChannelSettings->setChannelType(new QString("NoiseFigure"));
+    }
     swgChannelSettings->setNoiseFigureSettings(new SWGSDRangel::SWGNoiseFigureSettings());
     SWGSDRangel::SWGNoiseFigureSettings *swgNoiseFigureSettings = swgChannelSettings->getNoiseFigureSettings();
 
@@ -826,25 +865,53 @@ void NoiseFigure::webapiFormatChannelSettings(
         swgNoiseFigureSettings->setStep(settings.m_step);
     }
     if (channelSettingsKeys.contains("list") || force) {
-        swgNoiseFigureSettings->setList(new QString(settings.m_sweepList));
+        if (swgNoiseFigureSettings->getList()) {
+            *swgNoiseFigureSettings->getList() = settings.m_sweepList;
+        } else {
+            swgNoiseFigureSettings->setList(new QString(settings.m_sweepList));
+        }
     }
     if (channelSettingsKeys.contains("setting") || force) {
-        swgNoiseFigureSettings->setSetting(new QString(settings.m_setting));
+        if (swgNoiseFigureSettings->getSetting()) {
+            *swgNoiseFigureSettings->getSetting() = settings.m_setting;
+        } else {
+            swgNoiseFigureSettings->setSetting(new QString(settings.m_setting));
+        }
     }
     if (channelSettingsKeys.contains("visaDevice") || force) {
-        swgNoiseFigureSettings->setVisaDevice(new QString(settings.m_visaDevice));
+        if (swgNoiseFigureSettings->getVisaDevice()) {
+            *swgNoiseFigureSettings->getVisaDevice() = settings.m_visaDevice;
+        } else {
+            swgNoiseFigureSettings->setVisaDevice(new QString(settings.m_visaDevice));
+        }
     }
     if (channelSettingsKeys.contains("powerOnSCPI") || force) {
-        swgNoiseFigureSettings->setPowerOnScpi(new QString(settings.m_powerOnSCPI));
+        if (swgNoiseFigureSettings->getPowerOnScpi()) {
+            *swgNoiseFigureSettings->getPowerOnScpi() = settings.m_powerOnSCPI;
+        } else {
+            swgNoiseFigureSettings->setPowerOnScpi(new QString(settings.m_powerOnSCPI));
+        }
     }
     if (channelSettingsKeys.contains("powerOffSCPI") || force) {
-        swgNoiseFigureSettings->setPowerOffScpi(new QString(settings.m_powerOffSCPI));
+        if (swgNoiseFigureSettings->getPowerOffScpi()) {
+            *swgNoiseFigureSettings->getPowerOffScpi() = settings.m_powerOffSCPI;
+        } else {
+            swgNoiseFigureSettings->setPowerOffScpi(new QString(settings.m_powerOffSCPI));
+        }
     }
     if (channelSettingsKeys.contains("powerOnCommand") || force) {
-        swgNoiseFigureSettings->setPowerOnCommand(new QString(settings.m_powerOnCommand));
+        if (swgNoiseFigureSettings->getPowerOnCommand()) {
+            *swgNoiseFigureSettings->getPowerOnCommand() = settings.m_powerOnCommand;
+        } else {
+            swgNoiseFigureSettings->setPowerOnCommand(new QString(settings.m_powerOnCommand));
+        }
     }
     if (channelSettingsKeys.contains("powerOffCommand") || force) {
-        swgNoiseFigureSettings->setPowerOffCommand(new QString(settings.m_powerOffCommand));
+        if (swgNoiseFigureSettings->getPowerOffCommand()) {
+            *swgNoiseFigureSettings->getPowerOffCommand() = settings.m_powerOffCommand;
+        } else {
+            swgNoiseFigureSettings->setPowerOffCommand(new QString(settings.m_powerOffCommand));
+        }
     }
     if (channelSettingsKeys.contains("powerDelay") || force) {
         swgNoiseFigureSettings->setPowerDelay(settings.m_powerDelay);
@@ -853,7 +920,11 @@ void NoiseFigure::webapiFormatChannelSettings(
         swgNoiseFigureSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgNoiseFigureSettings->setTitle(new QString(settings.m_title));
+        if (swgNoiseFigureSettings->getTitle()) {
+            *swgNoiseFigureSettings->getTitle() = settings.m_title;
+        } else {
+            swgNoiseFigureSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNoiseFigureSettings->setStreamIndex(settings.m_streamIndex);
@@ -906,4 +977,9 @@ void NoiseFigure::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int NoiseFigure::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

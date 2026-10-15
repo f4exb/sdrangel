@@ -118,7 +118,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+    int getAudioSampleRate() const override { return m_basebandSink->getAudioSampleRate(); }
     double getMagSq() const { return m_basebandSink->getMagSq(); }
     bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
 

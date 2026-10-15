@@ -27,6 +27,7 @@ PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlut
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
+    setObjectName("PlutoSDROutput");
     m_buf = new qint16[blocksizeSamples*2];
 }
 
@@ -98,6 +99,14 @@ void PlutoSDROutputThread::run()
 
         // Schedule TX buffer for sending
         nbytes_tx = m_plutoBox->txBufferPush();
+
+        if (nbytes_tx < 0)
+        {
+            qCritical("PlutoSDROutputThread::run: error pushing buffer: %s (%zd)",
+                strerror(-nbytes_tx), nbytes_tx);
+            emit error((int) nbytes_tx);
+            break;
+        }
 
         if (nbytes_tx != 4*m_blockSizeSamples)
         {

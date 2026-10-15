@@ -17,7 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
@@ -31,8 +30,6 @@
 #include "SWGChannelReport.h"
 #include "SWGNFMModReport.h"
 
-#include <stdio.h>
-#include <complex.h>
 #include <algorithm>
 
 #include "dsp/dspcommands.h"
@@ -56,7 +53,10 @@ const char* const NFMMod::m_channelId = "NFMMod";
 
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-	m_deviceAPI(deviceAPI),
+        m_deviceAPI(deviceAPI),
+    m_thread(nullptr),
+    m_running(false),
+    m_basebandSource(nullptr),
     m_basebandSampleRate(0),
     m_centerFrequency(0)
 {
@@ -110,6 +110,7 @@ void NFMMod::start()
 
 	qDebug("NFMMod::start");
     m_thread = new QThread(this);
+    m_thread->setObjectName("NFMMod");
     m_basebandSource = new NFMModBaseband();
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);
@@ -155,6 +156,7 @@ void NFMMod::stop()
     m_running = false;
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSource = nullptr; // Freed by deleteLater when the thread finished
 }
 
 void NFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
@@ -377,7 +379,11 @@ void NFMMod::applySettings(const QStringList& settingsKeys, const NFMModSettings
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray NFMMod::serialize() const
@@ -762,7 +768,11 @@ void NFMMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     SWGSDRangel::SWGNFMModSettings *swgNFMModSettings = swgChannelSettings->getNfmModSettings();
 
@@ -778,7 +788,11 @@ void NFMMod::webapiFormatChannelSettings(
         swgNFMModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgNFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgNFMModSettings->getAudioDeviceName()) {
+            *swgNFMModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgNFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgNFMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
@@ -796,7 +810,11 @@ void NFMMod::webapiFormatChannelSettings(
         swgNFMModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgNFMModSettings->setTitle(new QString(settings.m_title));
+        if (swgNFMModSettings->getTitle()) {
+            *swgNFMModSettings->getTitle() = settings.m_title;
+        } else {
+            swgNFMModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgNFMModSettings->setToneFrequency(settings.m_toneFrequency);
@@ -903,4 +921,9 @@ int NFMMod::getFeedbackAudioSampleRate() const
     }
 
     return 0;
+}
+
+int NFMMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
 }

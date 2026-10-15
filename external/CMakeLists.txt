@@ -27,7 +27,7 @@ set(MIRISDR_TAG "v2.0.0")
 set(LIBSIGMF_TAG "new-namespaces")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
-set(RTLSDR_TAG "v2.0.1")
+set(RTLSDR_TAG "v2.0.3")
 set(RTLSDR_UDEV OFF)
 set(SOAPYSDR_TAG "1667b4e6301d7ad47b340dcdcd6e9969bf57d843")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
@@ -39,6 +39,7 @@ set(LIBXML2_TAG "v2.10.4")
 set(UHD_TAG "v4.9.0.1")
 set(BOOST_TAG "1.86.0")
 set(BOOST_TAG2 "1_86_0")
+set(FDKAAC_TAG "v2.0.3")
 
 # For some external project macros
 include(ExternalProject)
@@ -110,21 +111,21 @@ if (LINUX)
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy folder
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy file
     macro(makeCopyFile src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 else ()
@@ -132,7 +133,7 @@ else ()
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -140,7 +141,7 @@ else ()
     macro(makeCopyDir src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -148,10 +149,23 @@ else ()
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 endif (LINUX)
+
+set(COPY_HEADERS_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/copy_headers.cmake")
+
+# macro that mirrors the headers of a directory into another one, for the libraries whose sources
+# include them by a subdirectory name that is not in the library's own tree. Unlike makeCopyDir this
+# is safe when the destination is inside the source, and it runs on every build rather than only
+# when the destination is missing at configure time: an external project that re-clones wipes the
+# copy, and a configure time check would leave it gone until the next configure
+macro(makeCopyHeaders src dest target)
+    add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -DSRC=${src} -DDEST=${dest} -P ${COPY_HEADERS_SCRIPT}
+            COMMENT "copy headers ${src} -> ${dest}")
+endmacro()
 
 if (WIN32)
     if (VS2015)
@@ -319,10 +333,13 @@ if (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
     set(FAAD_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
     if (WIN32)
         set(FAAD_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/libfaad.lib" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/libfaad_drm.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(FAAD_LIBRARY "${install_dir}/lib${LIB_SUFFIX}/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${install_dir}/lib${LIB_SUFFIX}/libfaad_drm${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     elseif (APPLE)
         set(FAAD_LIBRARY "${install_dir}/lib/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(FAAD_DRM_LIBRARY "${install_dir}/lib/libfaad_drm${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
 endif (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
@@ -357,6 +374,7 @@ endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 include(FetchContent)
 FetchContent_Declare(boost
     URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_TAG}/boost_${BOOST_TAG2}.tar.gz/download"
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 find_package(Boost QUIET)
@@ -544,6 +562,8 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
     set(AVUTIL_LIBRARIES "${install_dir}/lib/libavutil${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     set(SWRESAMPLE_LIBRARIES "${install_dir}/lib/libswresample${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     set(SWSCALE_LIBRARIES "${install_dir}/lib/libswscale${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(AVFILTER_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(AVFILTER_LIBRARIES "${install_dir}/lib/libavfilter${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     if (APPLE)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
@@ -731,7 +751,7 @@ if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
     set(LIBSERIALDV_EXTERNAL ON CACHE INTERNAL "")
     set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
     if (WIN32)
-        makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
+        makeCopyHeaders("${source_dir}" "${source_dir}/dsp" serialdv)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (LINUX)
         # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
@@ -843,7 +863,8 @@ endif ()
 
 # For Satellite Tracker feature and APT demod
 if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
-    # No tags for this in github - but doesn't change often
+    # No tags for this in github. Pin the commit to keep builds reproducible.
+    set(SGP4_TAG 1c0d4ee99404538572037fabfdcbc7133917eae8)
     # Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
     if (WIN32)
         set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
@@ -854,6 +875,8 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif()
     ExternalProject_Add(sgp4
             GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
+            GIT_TAG ${SGP4_TAG}
+            UPDATE_DISCONNECTED TRUE
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS}
             -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
@@ -879,14 +902,24 @@ if(ENABLE_FEATURE_STARTRACKER)
     if (WIN32)
         set(CSPICE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cspice.lib" CACHE INTERNAL "")
     elseif (LINUX)
-        # We need a shared library on Linux, as the static library has non PIC code, and we need to link it into a shared library
-        # ExternalProject cspice currently outputs libcspice.so under
-        #   ${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so
-        # so point CSPICE_LIBRARIES there.
-        set(CSPICE_LIBRARIES
-            "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so"
-            CACHE INTERNAL ""
-        )
+        # We need a shared library on Linux, as the static library has non PIC code,
+        # and we need to link it into a shared library
+        if (CMAKE_BUILD_TYPE STREQUAL "None")
+            # ExternalProject cspice currently outputs libcspice.so under
+            #   ${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so
+            # so point CSPICE_LIBRARIES there.
+            set(CSPICE_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so"
+                CACHE INTERNAL ""
+            )
+        else()
+            # Release, Debug, and RelWithDebInfo have configuration-specific output
+            # directories supplied by SDRangel.
+            set(CSPICE_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcspice.so"
+                CACHE INTERNAL ""
+            )
+        endif()
         # Disable -Werror=format-security for cspice only: distro hardening flags (e.g. Ubuntu Noble)
         # inject -Werror=format-security which fails cspice sources that lack -Wformat.
         set(CSPICE_ARGS "-DCSPICE_BUILD_STATIC_LIBRARY=OFF"
@@ -1062,15 +1095,54 @@ if(ENABLE_CHANNELRX_DEMODACARS AND (NOT LIBACARS_FOUND))
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif ()
 endif()
+# For DRM demodulator AAC/xHE-AAC audio
+# Built as a static library that only modemdrm links, so
+# not clash with the libfdk-aac that FFmpeg may load
+if (ENABLE_CHANNELRX AND ENABLE_CHANNELRX_DEMODDRM AND (NOT FDKAAC_FOUND OR FDKAAC_EXTERNAL))
+    set(FDKAAC_PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fdkaac")
+    if (MSVC)
+        set(FDKAAC_LIBRARY "${FDKAAC_PREFIX}/lib/fdk-aac.lib" CACHE INTERNAL "")
+    else ()
+        set(FDKAAC_LIBRARY "${FDKAAC_PREFIX}/lib/libfdk-aac.a" CACHE INTERNAL "")
+    endif ()
+    set(FDKAAC_CMAKE_ARGS ${COMMON_CMAKE_ARGS})
+    list(FILTER FDKAAC_CMAKE_ARGS EXCLUDE REGEX "^-DCMAKE_(RUNTIME|ARCHIVE|LIBRARY)_OUTPUT_DIRECTORY")
+    ExternalProject_Add(fdkaac
+        GIT_REPOSITORY https://github.com/mstorsjo/fdk-aac.git
+        GIT_TAG ${FDKAAC_TAG}
+        PREFIX "${FDKAAC_PREFIX}"
+        CMAKE_ARGS ${FDKAAC_CMAKE_ARGS}
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        -DBUILD_PROGRAMS=OFF
+        -DFDK_AAC_INSTALL_CMAKE_CONFIG_MODULE=OFF
+        -DFDK_AAC_INSTALL_PKGCONFIG_MODULE=OFF
+        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_INSTALL_LIBDIR=lib
+        BUILD_BYPRODUCTS "${FDKAAC_LIBRARY}"
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(fdkaac source_dir install_dir)
+    set_global(FDKAAC_DEPENDS fdkaac)
+    set_global_cache(FDKAAC_FOUND ON)
+    set(FDKAAC_EXTERNAL ON CACHE INTERNAL "")
+    set(FDKAAC_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
+    # Its licence has to be distributed with the binaries
+    install(FILES "${source_dir}/NOTICE" DESTINATION "${INSTALL_DOC_DIR}/fdk-aac")
+endif ()
 
 # For denoiser feature
-if((LINUX OR APPLE) AND ENABLE_FEATURE_DENOISER)
+if(ENABLE_FEATURE_DENOISER)
     if (WIN32)
         set(RNNOISE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rnnoise.lib" CACHE INTERNAL "")
         set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=OFF")
     elseif (LINUX)
         set(RNNOISE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/librnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-        set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=ON")
+        if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
+            set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=ON")
+        else()
+            set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=OFF")
+        endif()
     elseif (APPLE)
         set(RNNOISE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/rnnoise/src/rnnoise-build/librnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=OFF")
@@ -1203,6 +1275,11 @@ else()
 endif()
 
 # Device interface libraries.
+set(LIMESUITE_SIMD_ARGS)
+if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
+    set(LIMESUITE_SIMD_ARGS "-DENABLE_SIMD_FLAGS=SSE3")
+endif()
+
 if (LINUX)
     # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.
     # needs pkgconfig and libusb
@@ -1224,7 +1301,7 @@ if (LINUX)
                   -DENABLE_QUICKTEST=OFF
                   -DENABLE_EXAMPLES=OFF
                   -DENABLE_LIME_UTIL=OFF
-                  -DENABLE_SIMD_FLAGS=SSE3
+                  ${LIMESUITE_SIMD_ARGS}
                 BUILD_BYPRODUCTS "${LIMESUITE_LIBRARY}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -1238,8 +1315,27 @@ if (LINUX)
     if (ENABLE_BLADERF AND (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL))
         set_global_cache(LIBBLADERF_FOUND ON)
         set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
-        set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
-        set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2" CACHE INTERNAL "")
+        set(LIBBLADERF_INCLUDE_DIRS
+            "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include"
+            CACHE INTERNAL ""
+        )
+        if (CMAKE_BUILD_TYPE STREQUAL "None")
+            # ExternalProject bladerf currently outputs libbladeRF.so.2 under
+            #   ${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2
+            # so point LIBBLADERF_LIBRARIES there.
+            set(LIBBLADERF_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2"
+                CACHE INTERNAL ""
+            )
+        else()
+            # Release, Debug, and RelWithDebInfo have configuration-specific output
+            # directories supplied by SDRangel.
+            set(LIBBLADERF_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libbladeRF.so.2"
+                CACHE INTERNAL ""
+            )
+        endif()
+
         ExternalProject_Add(bladerf
                 GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
                 GIT_TAG ${BLADERF_TAG}
@@ -1417,7 +1513,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_QUICKTEST=OFF
                 -DENABLE_EXAMPLES=OFF
                 -DENABLE_LIME_UTIL=ON
-                -DENABLE_SIMD_FLAGS=SSE3
+                ${LIMESUITE_SIMD_ARGS}
                 -DENABLE_FX3=ON
                 -DFX3_SDK_PATH=${FX3SDK_DIR}
                 -DLIBUSB_1_LIBRARY=${LIBUSB_LIBRARIES}
@@ -1506,7 +1602,7 @@ if (WIN32 OR APPLE)
         set(LIBAIRSPY_EXTERNAL ON CACHE INTERNAL "")
         set(LIBAIRSPY_INCLUDE_DIR "${source_dir}/libairspy/src" CACHE INTERNAL "")
         if (WIN32)
-            makeCopyDir("${source_dir}/libairspy/src" "${source_dir}/libairspy/src/libairspy" airspy)
+            makeCopyHeaders("${source_dir}/libairspy/src" "${source_dir}/libairspy/src/libairspy" airspy)
             makeCopy("${binary_dir}/../airspy-tools/src/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" airspy)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
@@ -1548,7 +1644,7 @@ if (WIN32 OR APPLE)
         set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/libairspyhf/src" CACHE INTERNAL "")
         if (WIN32)
-            makeCopyDir("${source_dir}/libairspyhf/src" "${source_dir}/libairspyhf/src/libairspyhf" airspyhf)
+            makeCopyHeaders("${source_dir}/libairspyhf/src" "${source_dir}/libairspyhf/src/libairspyhf" airspyhf)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/airspyhf${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(LIBAIRSPYHF_LIBRARIES "${binary_dir}/libairspyhf/src/libairspyhf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
@@ -1594,7 +1690,7 @@ if (WIN32 OR APPLE)
         set(LIBHACKRF_INCLUDE_DIR "${source_dir}/host/libhackrf" CACHE INTERNAL "")
         if (WIN32)
             # include "libhackrf/hackrf.h"
-            makeCopyDir("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
+            makeCopyHeaders("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/hackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(LIBHACKRF_LIBRARIES "${binary_dir}/src/libhackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")

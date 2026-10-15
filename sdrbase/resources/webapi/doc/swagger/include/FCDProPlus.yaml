@@ -3,13 +3,17 @@ FCDProPlusSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     rangeLow:
       description: Range select (1 if low else 0)
       type: integer
@@ -22,25 +26,43 @@ FCDProPlusSettings:
     biasT:
       description: Bias tee select (1 if selected else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     ifGain:
       type: integer
+      description: "Intermediate-frequency gain setting."
     ifFilterIndex:
       type: integer
+      description: "Selected if filter index."
     rfFilterIndex:
       type: integer
+      description: "Selected rf filter index."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqImbalance:
       type: integer
+      description: "Enable DSP I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -48,9 +70,16 @@ FCDProPlusSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."

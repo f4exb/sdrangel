@@ -26,6 +26,7 @@ BladeRF2InputThread::BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxC
     m_nbChannels(nbRxChannels),
     m_iqOrder(true)
 {
+    setObjectName("BladeRF2Input");
     qDebug("BladeRF2InputThread::BladeRF2InputThread");
     m_channels = new Channel[nbRxChannels];
 

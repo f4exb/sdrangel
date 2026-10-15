@@ -21,6 +21,7 @@
 #include <QMessageBox>
 
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -281,7 +282,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     {
         const RemoteTCPSink::MsgError& msg = (const RemoteTCPSink::MsgError&) message;
         QString error = msg.getError();
-        QMessageBox::warning(this, "RemoteTCPSink", error, QMessageBox::Ok);
+        MessageDialog::warning(this, "RemoteTCPSink", error, QMessageBox::Ok);
         return true;
     }
     else

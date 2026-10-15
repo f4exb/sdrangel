@@ -4,68 +4,105 @@ SSBModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     bandwidth:
       type: number
       format: float
+      description: "Bandwidth in Hz."
     lowCutoff:
       type: number
       format: float
+      description: "Lower filter cutoff frequency in Hz."
     usb:
       type: integer
+      description: "USB setting for Ssb mod."
     toneFrequency:
       type: number
       format: float
+      description: "Tone frequency in Hz."
     volumeFactor:
       type: number
       format: float
+      description: "Volume factor setting for Ssb mod."
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     audioBinaural:
       type: integer
+      description: "Audio binaural setting for Ssb mod."
     audioFlipChannels:
       type: integer
+      description: "Audio flip channels setting for Ssb mod."
     dsb:
       type: integer
+      description: "Dsb setting for Ssb mod."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     playLoop:
       type: integer
+      description: "Loop playback at end of file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     agc:
       type: integer
+      description: "Enable automatic gain control (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     cmpPreGainDB:
       type: integer
+      description: "Cmp pre gain dB in dB."
     cmpThresholdDB:
       type: integer
+      description: "Cmp threshold dB in dB."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     modAFInput:
       type: integer
+      description: "Audio-frequency modulation input selection."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     cwKeyer:
       $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      description: "CW keyer configuration."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 SSBModReport:
   description: SSBMod
@@ -76,5 +113,7 @@ SSBModReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

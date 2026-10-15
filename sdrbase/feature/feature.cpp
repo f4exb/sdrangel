@@ -29,10 +29,13 @@
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_guiMessageQueue(nullptr),
-	m_webAPIAdapterInterface(webAPIAdapterInterface),
+    m_state(StNotStarted),
+    m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_name(uri),
-	m_uri(uri),
-    m_uid(UidCalculator::getNewObjectId())
+    m_uri(uri),
+    m_uid(UidCalculator::getNewObjectId()),
+    m_indexInFeatureSet(0),
+    m_workspaceIndex(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
@@ -43,9 +46,10 @@ void Feature::handleInputMessages()
 
 	while ((message = m_inputMessageQueue.pop()))
 	{
-		if (handleMessage(*message)) {
-			delete message;
+		if (!handleMessage(*message)) {
+			qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
 		}
+		delete message;
 	}
 }
 
@@ -90,4 +94,13 @@ void Feature::getFeatureStateStr(QString& stateStr) const
 		stateStr = "notStarted";
 		break;
 	}
+}
+
+void Feature::setState(FeatureState state)
+{
+    if (m_state != state)
+    {
+        m_state = state;
+        emit stateChanged(this);
+    }
 }

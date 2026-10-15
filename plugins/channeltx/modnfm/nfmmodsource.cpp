@@ -364,7 +364,6 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     qDebug("NFMModSource::applyAudioSampleRate: %d", sampleRate);
 
     m_interpolatorDistanceRemain = 0;
-    m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) sampleRate / (Real) m_channelSampleRate;
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
     m_lowpass.create(301, sampleRate, m_settings.m_afBandwidth);
@@ -409,11 +408,12 @@ void NFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
 
     qDebug("NFMModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
 
+    // Resample from the audio input rate to the feedback device rate. The distance is
+    // input samples per output sample and the filter is designed at the input rate.
     m_feedbackInterpolatorDistanceRemain = 0;
-    m_feedbackInterpolatorConsumed = false;
-    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    m_feedbackInterpolatorDistance = (Real) m_audioSampleRate / (Real) sampleRate;
     Real cutoff = (float) std::min(sampleRate, m_audioSampleRate) / 2.2f;
-    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+    m_feedbackInterpolator.create(48, m_audioSampleRate, cutoff, 3.0);
     m_feedbackAudioSampleRate = sampleRate;
 }
 
@@ -474,7 +474,6 @@ void NFMModSource::applyChannelSettings(int channelSampleRate, int channelFreque
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_audioSampleRate / (Real) channelSampleRate;
         m_interpolator.create(48, m_audioSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
     }

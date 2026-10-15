@@ -25,6 +25,7 @@
 #include "vorlocalizersettings.h"
 
 VORLocalizerSettings::VORLocalizerSettings() :
+    m_forceRRAveraging(false),
     m_rollupState(nullptr)
 {
     resetToDefaults();

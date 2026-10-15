@@ -35,6 +35,8 @@ public:
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
+        QMutexLocker locker(&m_magsqMutex);
+
         if (m_magsqCount > 0)
         {
             m_magsq = m_magsqSum / m_magsqCount;
@@ -106,6 +108,8 @@ private:
     double m_magsqPeak;
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
+
+    QMutex m_magsqMutex;
 
     MessageQueue *m_messageQueueToGUI;
     MessageQueue *m_messageQueueToWorker;

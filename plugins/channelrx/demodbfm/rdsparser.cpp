@@ -18,6 +18,7 @@
 
 #include "rdsparser.h"
 #include "rdstmc.h"
+#include "util/rds.h"
 
 #include <QDebug>
 #include <string.h>
@@ -32,42 +33,6 @@ const unsigned int RDSParser::offset_pos[5] = {0,1,2,3,2};
 const unsigned int RDSParser::offset_word[5] = {252,408,360,436,848};
 const unsigned int RDSParser::syndrome[5] = {383,14,303,663,748};
 const char * const RDSParser::offset_name[] = {"A","B","C","D","C'"};
-
-/* page 77, Annex F in the standard */
-const std::string RDSParser::pty_table[32] = {
-	"None",
-	"News",
-	"Current Affairs",
-	"Information",
-	"Sport",
-	"Education",
-	"Drama",
-	"Cultures",
-	"Science",
-	"Varied Speech",
-	"Pop Music",
-	"Rock Music",
-	"Easy Listening",
-	"Light Classics M",
-	"Serious Classics",
-	"Other Music",
-	"Weather & Metr",
-	"Finance",
-	"Children’s Progs",
-	"Social Affairs",
-	"Religion",
-	"Phone In",
-	"Travel & Touring",
-	"Leisure & Hobby",
-	"Jazz Music",
-	"Country Music",
-	"National Music",
-	"Oldies Music",
-	"Folk Music",
-	"Documentary",
-	"Alarm Test",
-	"Alarm-Alarm!"
-};
 
 /* page 71, Annex D, table D.1 in the standard */
 const std::string RDSParser::pi_country_codes[15][5] = {
@@ -283,6 +248,8 @@ void RDSParser::clearAllFields()
 	m_g0_count = 0;
 	std::memset(m_g0_program_service_name, ' ', sizeof(m_g0_program_service_name));
 	m_g0_program_service_name[sizeof(m_g0_program_service_name) - 1] = '\0';
+	std::memset(m_g0_program_service_name_complete, ' ', sizeof(m_g0_program_service_name_complete));
+	m_g0_program_service_name_complete[sizeof(m_g0_program_service_name_complete) - 1] = '\0';
 	m_g0_psn_bitmap = 0;
 	m_g0_traffic_announcement = false;
 	m_g0_music_speech = false;
@@ -395,7 +362,7 @@ void RDSParser::parseGroup(unsigned int *group)
 
 	qDebug() << "RDSParser::parseGroup:"
 			<< " PI:" << pistring.c_str()
-			<< " - " << "PTY:" << pty_table[m_pi_program_type].c_str()
+			<< " - " << "PTY:" << RDS::m_programmeTypes[m_pi_program_type]
 			<< " (country:" << (pi_country_codes[m_pi_country_identification - 1][0]).c_str()
 			<< "/" << (pi_country_codes[m_pi_country_identification - 1][1]).c_str()
 			<< "/" << (pi_country_codes[m_pi_country_identification - 1][2]).c_str()
@@ -491,6 +458,10 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 	m_g0_program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
 	m_g0_program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
 	m_g0_psn_bitmap |= 1<<segment_address;
+
+	if (m_g0_psn_bitmap == 0b1111) {
+		std::memcpy(m_g0_program_service_name_complete, m_g0_program_service_name, sizeof(m_g0_program_service_name_complete));
+	}
 
 	/* see page 41, table 9 of the standard */
 	switch (segment_address)
@@ -698,8 +669,8 @@ void RDSParser::decode_type2(unsigned int *group, bool B)
 	m_g2_count++;
 	bool radiotext_AB_flag = ((group[1] >> 4) & 0x01);
 
-	// when the flag goes from B to A (false -> true), flush your current radiotext
-	if (!m_radiotext_AB_flag && radiotext_AB_flag)
+	// A change in either direction marks a new RadioText message.
+	if (m_radiotext_AB_flag != radiotext_AB_flag)
 	{
 		// qDebug("RDSParser::decode_type2: ---------");
 		std::memset(m_g2_radiotext, ' ', sizeof(m_g2_radiotext));
@@ -1156,7 +1127,7 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 			case 13: // PTY(ON), TA(ON)
 			{
 				ta_on = information & 0x01;
-				//qDebug() << "RDSParser::decode_type14: PTY(ON):" << pty_table[int(pty_on)].c_str();
+				//qDebug() << "RDSParser::decode_type14: PTY(ON):" << RDS::m_programmeTypes[int(pty_on)];
 				if(ta_on) {
 					qDebug() << "RDSParser::decode_type14:  - TA";
 				}
@@ -1197,4 +1168,3 @@ void RDSParser::decode_type15(unsigned int *group, bool B)
 	m_g15_updated = true;
 	m_g15_count++;
 }
-

@@ -49,7 +49,7 @@ PERTester::PERTester(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("PERTester::PERTester: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "PERTester error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -77,6 +77,7 @@ void PERTester::start()
     qDebug("PERTester::start");
 
     m_thread = new QThread();
+    m_thread->setObjectName("PERTester");
     m_worker = new PERTesterWorker();
     m_worker->moveToThread(m_thread);
 
@@ -90,12 +91,12 @@ void PERTester::start()
     if (m_settings.m_start == PERTesterSettings::START_IMMEDIATELY)
     {
         m_thread->start();
-        m_state = StRunning;
+        setState(StRunning);
     }
     else
     {
         // Wait for AOS
-        m_state = StIdle;
+        setState(StIdle);
     }
     m_thread->start();
 }
@@ -103,7 +104,7 @@ void PERTester::start()
 void PERTester::stop()
 {
     qDebug("PERTester::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -152,8 +153,8 @@ bool PERTester::handleMessage(const Message& cmd)
         }
         else
         {
-            m_state = StError;
             m_errorMessage = report.getMessage();
+            setState(StError);
         }
         return true;
     }
@@ -206,7 +207,11 @@ void PERTester::applySettings(const PERTesterSettings& settings, const QList<QSt
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int PERTester::webapiRun(bool run,
@@ -283,12 +288,24 @@ void PERTester::webapiFormatFeatureSettings(
     response.getPerTesterSettings()->setInterval(settings.m_interval);
     response.getPerTesterSettings()->setStart((int)settings.m_start);
     response.getPerTesterSettings()->setSatellites(convertStringListToPtrs(settings.m_satellites));
-    response.getPerTesterSettings()->setPacket(new QString(settings.m_packet));
+    if (response.getPerTesterSettings()->getPacket()) {
+        *response.getPerTesterSettings()->getPacket() = settings.m_packet;
+    } else {
+        response.getPerTesterSettings()->setPacket(new QString(settings.m_packet));
+    }
     response.getPerTesterSettings()->setIgnoreLeadingBytes(settings.m_ignoreLeadingBytes);
     response.getPerTesterSettings()->setIgnoreTrailingBytes(settings.m_ignoreTrailingBytes);
-    response.getPerTesterSettings()->setTxUdpAddress(new QString(settings.m_txUDPAddress));
+    if (response.getPerTesterSettings()->getTxUdpAddress()) {
+        *response.getPerTesterSettings()->getTxUdpAddress() = settings.m_txUDPAddress;
+    } else {
+        response.getPerTesterSettings()->setTxUdpAddress(new QString(settings.m_txUDPAddress));
+    }
     response.getPerTesterSettings()->setTxUdpPort(settings.m_txUDPPort);
-    response.getPerTesterSettings()->setRxUdpAddress(new QString(settings.m_rxUDPAddress));
+    if (response.getPerTesterSettings()->getRxUdpAddress()) {
+        *response.getPerTesterSettings()->getRxUdpAddress() = settings.m_rxUDPAddress;
+    } else {
+        response.getPerTesterSettings()->setRxUdpAddress(new QString(settings.m_rxUDPAddress));
+    }
     response.getPerTesterSettings()->setRxUdpPort(settings.m_rxUDPPort);
 
     if (response.getPerTesterSettings()->getTitle()) {
@@ -356,7 +373,7 @@ void PERTester::webapiUpdateFeatureSettings(
         settings.m_txUDPPort = response.getPerTesterSettings()->getTxUdpPort();
     }
     if (featureSettingsKeys.contains("rxUDPAddress")) {
-        settings.m_txUDPAddress = *response.getPerTesterSettings()->getRxUdpAddress();
+        settings.m_rxUDPAddress = *response.getPerTesterSettings()->getRxUdpAddress();
     }
     if (featureSettingsKeys.contains("rxUDPPort")) {
         settings.m_rxUDPPort = response.getPerTesterSettings()->getRxUdpPort();
@@ -501,7 +518,7 @@ int PERTester::webapiActionsPost(
                     if (m_settings.m_start == PERTesterSettings::START_ON_AOS)
                     {
                         m_thread->start();
-                        m_state = StRunning;
+                        setState(StRunning);
                     }
                     else if (m_settings.m_start == PERTesterSettings::START_ON_MID_PASS)
                     {
@@ -512,7 +529,7 @@ int PERTester::webapiActionsPost(
                         qint64 msecs = aosTime.msecsTo(losTime) / 2;
                         QTimer::singleShot(msecs, [this] {
                             m_thread->start();
-                            m_state = StRunning;
+                            setState(StRunning);
                         });
                     }
                 }

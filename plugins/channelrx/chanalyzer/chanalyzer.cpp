@@ -48,11 +48,13 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_spectrumVis(SDR_RX_SCALEF),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);
-    getChannelSampleRate();
+    m_thread.setObjectName("Channelyzer");
+    getBasebandSampleRate();
     m_basebandSink = new ChannelAnalyzerBaseband();
     m_basebandSink->moveToThread(&m_thread);
 
@@ -115,7 +117,7 @@ uint32_t ChannelAnalyzer::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSourceStreams();
 }
 
-int ChannelAnalyzer::getChannelSampleRate()
+int ChannelAnalyzer::getBasebandSampleRate()
 {
     DeviceSampleSource *source = m_deviceAPI->getSampleSource();
 
@@ -278,13 +280,29 @@ int ChannelAnalyzer::webapiSettingsPutPatch(
     ChannelAnalyzerSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureChannelAnalyzer *msg = MsgConfigureChannelAnalyzer::create(settings, channelSettingsKeys, force);
+    // Map API names to setting names
+    QStringList settingsKeys = channelSettingsKeys;
+    static const QList<QPair<QString, QString>> renamed = {
+        {"frequency", "inputFrequencyOffset"},
+        {"spanLog2", "log2Decim"},
+        {"downSample", "rationalDownSample"},
+        {"downSamplerRate", "rationalDownSamplerRate"}
+    };
+
+    for (const auto& pair : renamed)
+    {
+        if (settingsKeys.contains(pair.first) && !settingsKeys.contains(pair.second)) {
+            settingsKeys.append(pair.second);
+        }
+    }
+
+    MsgConfigureChannelAnalyzer *msg = MsgConfigureChannelAnalyzer::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("ChannelAnalyzer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureChannelAnalyzer *msgToGUI = MsgConfigureChannelAnalyzer::create(settings, channelSettingsKeys, force);
+        MsgConfigureChannelAnalyzer *msgToGUI = MsgConfigureChannelAnalyzer::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -298,13 +316,13 @@ void ChannelAnalyzer::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || channelSettingsKeys.contains("frequency")) {
         settings.m_inputFrequencyOffset = response.getChannelAnalyzerSettings()->getFrequency();
     }
-    if (channelSettingsKeys.contains("rationalDownSample ")) {
+    if (channelSettingsKeys.contains("rationalDownSample") || channelSettingsKeys.contains("downSample")) {
         settings.m_rationalDownSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
     }
-    if (channelSettingsKeys.contains("rationalDownSamplerRate")) {
+    if (channelSettingsKeys.contains("rationalDownSamplerRate") || channelSettingsKeys.contains("downSamplerRate")) {
         settings.m_rationalDownSamplerRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
     }
     if (channelSettingsKeys.contains("bandwidth")) {
@@ -551,7 +569,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     SWGSDRangel::SWGChannelAnalyzerSettings *swgChannelAnalyzerSettings = swgChannelSettings->getChannelAnalyzerSettings();
 
@@ -612,7 +634,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         swgChannelAnalyzerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChannelAnalyzerSettings->setTitle(new QString(settings.m_title));
+        if (swgChannelAnalyzerSettings->getTitle()) {
+            *swgChannelAnalyzerSettings->getTitle() = settings.m_title;
+        } else {
+            swgChannelAnalyzerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         swgChannelAnalyzerSettings->setStreamIndex(settings.m_streamIndex);
@@ -621,7 +647,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         swgChannelAnalyzerSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        swgChannelAnalyzerSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        if (swgChannelAnalyzerSettings->getReverseApiAddress()) {
+            *swgChannelAnalyzerSettings->getReverseApiAddress() = settings.m_reverseAPIAddress;
+        } else {
+            swgChannelAnalyzerSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        }
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         swgChannelAnalyzerSettings->setReverseApiPort(settings.m_reverseAPIPort);
@@ -694,4 +724,9 @@ void ChannelAnalyzer::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int ChannelAnalyzer::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

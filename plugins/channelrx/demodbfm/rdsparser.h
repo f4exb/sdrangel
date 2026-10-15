@@ -56,6 +56,7 @@ public:
 	bool           m_g0_af_updated;
 	unsigned int   m_g0_count;
 	char           m_g0_program_service_name[8+1];
+	char           m_g0_program_service_name_complete[8+1]; //!< Last name for which all four segments were received
 	unsigned char  m_g0_psn_bitmap;
 	bool           m_g0_traffic_announcement;
 	bool           m_g0_music_speech;
@@ -160,7 +161,6 @@ public:
 	static const unsigned int offset_word[5];
 	static const unsigned int syndrome[5];
 	static const char * const offset_name[];
-	static const std::string pty_table[32];
 	static const std::string pi_country_codes[15][5];
 	static const std::string coverage_area_codes[16];
 	static const std::string rds_group_acronyms[16];

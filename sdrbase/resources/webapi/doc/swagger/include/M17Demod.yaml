@@ -4,66 +4,99 @@ M17DemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     demodGain:
       type: number
       format: float
+      description: "Demod gain setting for M17 demod."
     baudRate:
       type: integer
+      description: "Serial-port baud rate in bits per second."
     squelchGate:
       type: integer
+      description: "Squelch gate duration."
     squelch:
       type: number
       format: float
+      description: "Squelch threshold in dB."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     syncOrConstellation:
       type: integer
+      description: "Sync or constellation setting for M17 demod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     highPassFilter:
       type: integer
+      description: "High pass filter setting for M17 demod."
     traceLengthMutliplier:
       description: multiply by 50ms
       type: integer
     traceStroke:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     traceDecay:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     statusLogEnabled:
       type: integer
+      description: "Enable status log (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 M17DemodReport:
   description: M17Demod
@@ -74,8 +107,10 @@ M17DemodReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     squelch:
       description: squelch status (1 if open else 0)
       type: integer

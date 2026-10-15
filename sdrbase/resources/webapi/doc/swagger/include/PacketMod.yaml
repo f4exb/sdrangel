@@ -4,8 +4,11 @@ PacketModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     modulation:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Modulation mode
           * 0 - AFSK
@@ -16,103 +19,149 @@ PacketModSettings:
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     gain:
       type: number
       format: float
+      description: "Gain setting; units and available values depend on the device or plugin."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     repeat:
       type: integer
+      description: "Repeat transmission or playback (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     repeatDelay:
       type: number
       format: float
+      description: "Delay between repetitions."
     repeatCount:
       type: integer
+      description: "Number of repetitions."
     rampUpBits:
       type: integer
+      description: "Ramp up bits setting for Packet mod."
     rampDownBits:
       type: integer
+      description: "Ramp down bits setting for Packet mod."
     rampRange:
       type: integer
+      description: "Ramp range setting for Packet mod."
     modulateWhileRamping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     markFrequency:
       type: integer
+      description: "Mark frequency in Hz."
     spaceFrequency:
       type: integer
+      description: "Space frequency in Hz."
     ax25PreFlags:
       type: integer
+      description: "Ax25 pre flags setting for Packet mod."
     ax25PostFlags:
       type: integer
+      description: "Ax25 post flags setting for Packet mod."
     ax25Control:
       type: integer
+      description: "Ax25 control setting for Packet mod."
     ax25PID:
       type: integer
+      description: "Ax25 pid setting for Packet mod."
     preEmphasis:
       type: integer
+      description: "Pre emphasis setting for Packet mod."
     preEmphasisTau:
       type: number
       format: float
+      description: "Pre emphasis tau setting for Packet mod."
     preEmphasisHighFreq:
       type: number
       format: float
+      description: "Pre emphasis high freq setting for Packet mod."
     lpfTaps:
       type: integer
+      description: "Number of low-pass FIR filter taps."
     bbNoise:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     rfNoise:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     writeToFile:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     spectrumRate:
       type: integer
+      description: "Spectrum rate setting for Packet mod."
     callsign:
       type: string
+      description: "Radio callsign."
     to:
       type: string
+      description: "To setting for Packet mod."
     via:
       type: string
+      description: "Via setting for Packet mod."
     data:
       type: string
+      description: "Payload data."
     bpf:
       type: integer
+      description: "Bpf setting for Packet mod."
     bpfLowCutoff:
       type: number
       format: float
+      description: "Bpf low cutoff setting for Packet mod."
     bpfHighCutoff:
       type: number
       format: float
+      description: "Bpf high cutoff setting for Packet mod."
     bpfTaps:
       type: integer
+      description: "Bpf taps setting for Packet mod."
     scramble:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     polynomial:
       type: integer
+      description: "Polynomial setting for Packet mod."
     pulseShaping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
@@ -120,39 +169,57 @@ PacketModSettings:
     beta:
       type: number
       format: float
+      description: "Beta setting for Packet mod."
     symbolSpan:
       type: integer
+      description: "Symbol span setting for Packet mod."
     udpEnabled:
       description: "Whether to receive packets to transmit on specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to receive packets to transmit via"
       type: string
     udpPort:
       description: "UDP port to receive packets to transmit via"
       type: integer
+      minimum: 1
+      maximum: 65535
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 PacketModReport:
   description: PacketMod
@@ -163,26 +230,35 @@ PacketModReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 
 PacketModActions:
   description: PacketMod
   properties:
     tx:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Transmit with current data
           * 0 - Do nothing
           * 1 - Transmit
     payload:
       type: object
+      description: "Payload data."
       properties:
         callsign:
           type: string
+          description: "Radio callsign."
         to:
           type: string
+          description: "To action parameter."
         via:
           type: string
+          description: "Via action parameter."
         data:
           type: string
+          description: "Payload data."

@@ -24,7 +24,8 @@
 CourseDeviationIndicator::CourseDeviationIndicator(QWidget *parent) :
     QWidget(parent),
     m_localizerDDM(0.0f),
-    m_glideSlopeDDM(0.0f)
+    m_glideSlopeDDM(0.0f),
+    m_mode(LOC)
 {
 }
 
