@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <functional>
+#include <utility>
 
 #include <QDebug>
 #include "deviceusrpparam.h"
@@ -132,7 +133,7 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                         } catch (...) {
                         }
                     }
-                } restoreAutoTickRate{properties, autoTickRatePath};
+                } restoreAutoTickRate{std::move(properties), autoTickRatePath};
 
                 // Find max and min sample rate, for max and min master clock rates
                 m_dev->set_master_clock_rate(clockRange.start());
