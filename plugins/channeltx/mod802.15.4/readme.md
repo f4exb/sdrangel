@@ -2,8 +2,8 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to transmit IEEE 802.15.4 frames. 
-The 802.15.4 PHY & RF layers are used by networking layers such as ZigBee, 6LoWPAN and others. 
+This plugin can be used to transmit IEEE 802.15.4 frames.
+The 802.15.4 PHY & RF layers are used by networking layers such as ZigBee, 6LoWPAN and others.
 Frames can be received with the [802.15.4 demodulator](../../channelrx/demod802.15.4/readme.md).
 
 <h2>Interface</h2>
