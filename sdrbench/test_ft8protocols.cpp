@@ -275,6 +275,9 @@ void TestFT8Protocols::testOnesZeroes(const QStringList& argElements)
     }
 
     qInfo("TestFT8Protocols::testOnesZeroes: (%d,%d) index: zeroes, ones:\n%s", nbBits, bitIndex, qPrintable(s));
+
+    delete[] zeroes;
+    delete[] ones;
 }
 
 void TestFT8Protocols::testSoftDecode(const QStringList& argElements)

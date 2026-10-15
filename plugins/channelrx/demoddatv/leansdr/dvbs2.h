@@ -3712,6 +3712,8 @@ struct s2_fecdec_helper : runnable
     ~s2_fecdec_helper()
     {
         killall(); // also deletes pools[mc][sf].procs if necessary
+        delete bitcount;
+        delete errcount;
     }
 
     void run()
