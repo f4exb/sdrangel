@@ -1371,22 +1371,9 @@ if (WIN32 OR APPLE)
         #  - Use -DLIBUSB_INCLUDE_DIR instead of -DLIBUSB_INCLUDE_DIRS
         #  - Build target is rtl_sdr rather than rtlsdr
         #  - Use tag development otherwise it will not build with MSVC
-        # The patch enables WinUSB RAW_IO, so that a late DPC does not leave the bulk endpoint
-        # unpolled and lose samples
-        option(ENABLE_RTLSDR_WINUSB_RAW_IO "Patch librtlsdr to use WinUSB RAW_IO" ON)
-        if (ENABLE_RTLSDR_WINUSB_RAW_IO)
-            set(RTLSDR_PATCH_COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=<SOURCE_DIR>
-                -DPATCH=${CMAKE_CURRENT_SOURCE_DIR}/patches/rtlsdr-winusb-raw-io.patch
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/patches/apply_patch.cmake)
-        else ()
-            set(RTLSDR_PATCH_COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=<SOURCE_DIR>
-                -DPATCH=${CMAKE_CURRENT_SOURCE_DIR}/patches/rtlsdr-winusb-raw-io.patch -DREVERSE=ON
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/patches/apply_patch.cmake)
-        endif ()
         ExternalProject_Add(rtlsdr
                 GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
                 GIT_TAG ${RTLSDR_TAG}
-                PATCH_COMMAND ${RTLSDR_PATCH_COMMAND}
                 DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
