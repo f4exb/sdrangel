@@ -129,6 +129,8 @@ ChannelSettings:
     InterferometerSettings:
       $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
       description: "Interferometer settings configuration for Channel."
+    IEEE_802_15_4_DemodSettings:
+      $ref: "/doc/swagger/include/IEEE_802_15_4_Demod.yaml#/IEEE_802_15_4_DemodSettings"
     IEEE_802_15_4_ModSettings:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModSettings"
       description: "Ieee 802 15 4 mod settings configuration for Channel."

@@ -72,6 +72,7 @@
         <file>webapi/doc/swagger/include/GS232Controller.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/HeatMap.yaml</file>
+        <file>webapi/doc/swagger/include/IEEE_802_15_4_Demod.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
         <file>webapi/doc/swagger/include/ILSDemod.yaml</file>
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
