@@ -347,6 +347,7 @@ void WefaxDemodSink::processOneSample(const Complex& sample)
 
 void WefaxDemodSink::processAcquisitionSample(float video, float frequencyHz, double magnitudeSquared)
 {
+    Q_UNUSED(frequencyHz);
     const WefaxDecoder::State state = m_decoder.state();
 
     ++m_acquisitionSampleCount;

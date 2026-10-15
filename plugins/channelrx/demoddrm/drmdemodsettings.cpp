@@ -106,7 +106,7 @@ void DRMDemodSettings::sanitize()
 
     m_volume = std::clamp(m_volume, 0.0f, 10.0f);
     m_streamIndex = std::max(m_streamIndex, 0);
-    if (m_reverseAPIPort <= 1023 || m_reverseAPIPort > 65535) {
+    if (m_reverseAPIPort <= 1023) {
         m_reverseAPIPort = 8888;
     }
 
@@ -261,7 +261,7 @@ void DRMDemodSettings::applySettings(const QStringList& settingsKeys, const DRMD
     }
     if (settingsKeys.contains("reverseAPIPort"))
     {
-        m_reverseAPIPort = settings.m_reverseAPIPort > 1023 && settings.m_reverseAPIPort < 65536
+        m_reverseAPIPort = settings.m_reverseAPIPort > 1023
             ? settings.m_reverseAPIPort : 8888;
     }
     if (settingsKeys.contains("reverseAPIDeviceIndex")) {
