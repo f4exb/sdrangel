@@ -224,6 +224,7 @@ parts:
             - qt6-location-plugins
             - libfaad-dev
             - libflac-dev
+            - libfdk-aac-dev
             - zlib1g-dev
             - libboost-all-dev
             - libasound2-dev
