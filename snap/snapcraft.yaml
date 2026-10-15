@@ -169,7 +169,7 @@ parts:
         override-pull: |
             craftctl default
             craftctl set version="$(git describe --tags --abbrev=0 | sed 's/v//')"
-        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, cm265cc, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
@@ -198,6 +198,7 @@ parts:
             - -DCSPICE_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DINMARSATC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DLIBSIGMF_DIR=$CRAFT_STAGE/opt/install/sdrangel
+            - -DFDKAAC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DARCH_OPT=nehalem
         build-packages:
             - libfftw3-dev
@@ -224,7 +225,6 @@ parts:
             - qt6-location-plugins
             - libfaad-dev
             - libflac-dev
-            - libfdk-aac-dev
             - zlib1g-dev
             - libboost-all-dev
             - libasound2-dev
@@ -510,6 +510,20 @@ parts:
         source-tag: v1.1.2
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    fdkaac:
+        plugin: cmake
+        source: https://github.com/mstorsjo/fdk-aac.git
+        source-type: git
+        source-tag: v2.0.3
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DBUILD_SHARED_LIBS=OFF
+            - -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            - -DBUILD_PROGRAMS=OFF
+        override-build: |
+            craftctl default
+            install -Dm644 $CRAFT_PART_SRC/NOTICE $CRAFT_PART_INSTALL/opt/install/sdrangel/share/licenses/fdk-aac/NOTICE
 
 #    libsigmf:
 #        plugin: cmake
