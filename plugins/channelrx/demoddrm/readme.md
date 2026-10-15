@@ -56,10 +56,10 @@ If you right click on it, it will open a dialog to select the audio output devic
 
 <h3>6: Service</h3>
 
-Selects the service to decode. Services are listed by label and 24-bit service ID as they are announced. 
-Automatic decodes the first audio service the receiver can play, or, when the multiplex has no audio service, the first data service with a slideshow or a website. 
-A data service plays no audio: its slideshow or website is shown in its tab. 
-The selection is saved by service ID, so it survives label changes; a saved service that is not on air is listed as unavailable. 
+Selects the service to decode. Services are listed by label and 24-bit service ID as they are announced.
+Automatic decodes the first audio service the receiver can play, or, when the multiplex has no audio service, the first data service with a slideshow or a website.
+A data service plays no audio: its slideshow or website is shown in its tab.
+The selection is saved by service ID, so it survives label changes; a saved service that is not on air is listed as unavailable.
 Changing service keeps synchronization.
 
 <h3>7: Reacquire</h3>
@@ -100,27 +100,27 @@ The DRM spectrum occupancy code to search for (0 to 5). Auto tries every occupan
   
 <h4>12: Slideshow</h4>
 
-When the selected service has a MOT slideshow, the latest image it has sent is shown here with its name; otherwise the tab says `No slideshow`, or `Waiting for a slide` until the first image arrives. 
-A station repeats each image at a few kilobytes per second, so the first can take a minute or so. 
+When the selected service has a MOT slideshow, the latest image it has sent is shown here with its name; otherwise the tab says `No slideshow`, or `Waiting for a slide` until the first image arrives.
+A station repeats each image at a few kilobytes per second, so the first can take a minute or so.
 The image is kept while the receiver regains a lost signal; changing service or retuning clears it.
 
 ![DRM Slideshow](../../../doc/img/DRMDemod_slideshow.png)
 
 <h4>13: Journaline</h4>
 
-Journaline is a news service of menus and pages, which a station repeats in a carousel. 
-The tab opens the service's main menu; click an entry to open it, and use **Back** and **Home** to return. 
-Entries that have not arrived yet are grey and become links when they do: the whole service can take a few minutes. 
-When several Journaline services are on air, choose one in the list (it starts on the selected service's own, if it has one). 
+Journaline is a news service of menus and pages, which a station repeats in a carousel.
+The tab opens the service's main menu; click an entry to open it, and use **Back** and **Home** to return.
+Entries that have not arrived yet are grey and become links when they do: the whole service can take a few minutes.
+When several Journaline services are on air, choose one in the list (it starts on the selected service's own, if it has one).
 The pages are kept while the receiver regains a lost signal, and cleared on retuning.
 
 ![DRM Journaline](../../../doc/img/DRMDemod_journaline.png)
 
 <h4>14: Website</h4>
 
-When the selected service has a MOT Broadcast Website, its pages are shown here as the files arrive: the station repeats the website's files in a carousel, which can take several minutes for a large website. 
-The label shows how many of the files listed in the website's directory have arrived. 
-The tab opens the website's start page; follow links to open other pages, and use **Back** and **Home** to return. 
+When the selected service has a MOT Broadcast Website, its pages are shown here as the files arrive: the station repeats the website's files in a carousel, which can take several minutes for a large website.
+The label shows how many of the files listed in the website's directory have arrived.
+The tab opens the website's start page; follow links to open other pages, and use **Back** and **Home** to return.
 The files are kept while the receiver regains a lost signal; changing service or retuning clears them.
 
 ![DRM Website](../../../doc/img/DRMDemod_website.png)
@@ -128,13 +128,13 @@ The files are kept while the receiver regains a lost signal; changing service or
 <h4>15: Programme Guide</h4>
 
 When the multiplex sends Service and Programme Information (SPI, ETSI TS 102 818 and TS 102 371), the selected service's description and schedule are shown here, with the programme on now in bold. Times are local. 
-The SPI is a data service of the multiplex, decoded whatever service is selected; at DRM's low bit rates the station information and schedules can take several minutes to arrive. Few stations send one. 
+The SPI is a data service of the multiplex, decoded whatever service is selected; at DRM's low bit rates the station information and schedules can take several minutes to arrive. Few stations send one.
 The guide is kept while the receiver regains a lost signal, and cleared on retuning.
 
 <h4>16: Messages</h4>
 
-The text box shows the station's text message, or the reason audio is unavailable. 
-The table lists the alternative-frequency information the station sends: frequencies of other DRM transmissions of this multiplex (with restrictions by service, region or schedule) and related schedule, region, other-service and linking entries. 
+The text box shows the station's text message, or the reason audio is unavailable.
+The table lists the alternative-frequency information the station sends: frequencies of other DRM transmissions of this multiplex (with restrictions by service, region or schedule) and related schedule, region, other-service and linking entries.
 
 ![DRM Messages](../../../doc/img/DRMDemod_messages.png)
 
