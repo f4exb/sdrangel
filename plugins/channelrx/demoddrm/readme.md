@@ -127,7 +127,7 @@ The files are kept while the receiver regains a lost signal; changing service or
 
 <h4>15: Programme Guide</h4>
 
-When the multiplex sends Service and Programme Information (SPI, ETSI TS 102 818 and TS 102 371), the selected service's description and schedule are shown here, with the programme on now in bold. Times are local. 
+When the multiplex sends Service and Programme Information (SPI, ETSI TS 102 818 and TS 102 371), the selected service's description and schedule are shown here, with the programme on now in bold. Times are local.
 The SPI is a data service of the multiplex, decoded whatever service is selected; at DRM's low bit rates the station information and schedules can take several minutes to arrive. Few stations send one.
 The guide is kept while the receiver regains a lost signal, and cleared on retuning.
 
