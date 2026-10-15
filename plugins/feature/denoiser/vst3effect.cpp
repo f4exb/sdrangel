@@ -568,7 +568,7 @@ struct Vst3Effect::Impl
 {
     Module module;
     QByteArray classId;
-    ComponentHandler handler = {{&handlerVtbl}, {}};
+    ComponentHandler handler = {{&handlerVtbl}, {}, {}};
     std::function<void()> detachEditor;
     Steinberg_Vst_IComponent *component = nullptr;
     Steinberg_Vst_IAudioProcessor *processor = nullptr;
