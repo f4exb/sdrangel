@@ -125,8 +125,8 @@ To set the gain, step it while watching MSC BER, and keep the setting where it i
 
 <h4>Transmitter</h4>
 
-The TII (Transmitter Identification Information) main and sub IDs of the strongest transmitter, in hexadecimal. 
-TII is optional: "None" shows when the ensemble has been received for a few seconds without any. 
+The TII (Transmitter Identification Information) main and sub IDs of the strongest transmitter, in hexadecimal.
+TII is optional: "None" shows when the ensemble has been received for a few seconds without any.
 
 Pressing the "Find Transmitter on Map" button will attempt to locate the transmitter with the same IDs and Ensemble name on the [Map](../../feature/map/readme.md) feature.
 
