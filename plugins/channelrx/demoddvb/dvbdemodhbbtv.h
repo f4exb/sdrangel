@@ -112,6 +112,8 @@ public:
     //! What's being waited for, after the user's pressed red or a key the application has: the application starting,
     //! or loading (with how much of its carousel's been received). Empty when there's nothing to say
     QString getStatus() const;
+    //! The page's showing the status itself (over the application): it needn't be shown over the video
+    bool isStatusInPage() const { return !m_pageStatus.isEmpty(); }
     bool isVisible() const { return m_visible; }
     int getKeyset() const { return m_keyset; }
     QString getAppUrl() const { return m_appUrl; }
@@ -163,6 +165,8 @@ private:
     void showView();
     void loadFinished(bool ok);
     void updateScript();
+    void showStatus();                  //!< getStatus() in the page, over what the application shows
+    void updateProxy();
     QJsonObject configuration() const;
     QJsonObject channelJson(const Channel& channel) const;
     QString appUrl(const DTVApps::App& app) const;
@@ -202,6 +206,10 @@ private:
     QElapsedTimer m_failed;             //!< Since an application last failed to load
     int m_appCarouselPid;               //!< The carousel the running application's loaded from, -1 if none
     int m_loadsStarted;                 //!< Qt 5: page loads started, to tell a failed load from one replaced by another
+    QElapsedTimer m_loadedAt;           //!< Since the running application's page loaded
+    bool m_keysetSinceLoad;             //!< It's set its keyset since: it's ready
+    QString m_pageStatus;               //!< Status last shown in the page
+    QElapsedTimer m_redDelivered;       //!< Since red was last given to the application
     QElapsedTimer m_pendingRedTimer;
 };
 

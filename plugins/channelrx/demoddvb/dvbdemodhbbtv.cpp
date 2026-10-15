@@ -54,7 +54,7 @@ namespace {
 
 const QString m_messagePrefix = QStringLiteral("\u0001sdrangel:");
 const QString m_scriptName = QStringLiteral("sdrangel-oipf");
-constexpr int m_checkMs = 500;
+constexpr int m_checkMs = 250;
 constexpr int m_retryMs = 30000;        //!< Before a failed AUTOSTART application's tried again
 constexpr int m_applicationTypeHbbTV = 0x10;
 constexpr int m_autostart = 1;
@@ -174,7 +174,8 @@ DVBDemodHbbTV::DVBDemodHbbTV(DTVApps *apps, QObject *parent) :
     m_pendingRed(false),
     m_mediaId(0),
     m_appCarouselPid(-1),
-    m_loadsStarted(0)
+    m_loadsStarted(0),
+    m_keysetSinceLoad(false)
 {
     m_server->start();
     connect(m_server, &DTVCarouselServer::served, this, [this](const QString& path, int status) {
@@ -459,6 +460,7 @@ void DVBDemodHbbTV::setUserAgent(const QString& userAgent)
     {
         m_profile->setHttpUserAgent(userAgent);
         emit log(QString("User agent: %1").arg(userAgent));
+        updateProxy();
         return;
     }
 
@@ -466,6 +468,7 @@ void DVBDemodHbbTV::setUserAgent(const QString& userAgent)
     QWebEngineProfile defaultProfile;
     m_profile->setHttpUserAgent(defaultProfile.httpUserAgent()
         + QString(" HbbTV/1.5.1 (; SDRangel; DVBDemod; %1; ; SDRangel; )").arg(QCoreApplication::applicationVersion()));
+    updateProxy();
 }
 
 QString DVBDemodHbbTV::getUserAgent() const
@@ -476,6 +479,16 @@ QString DVBDemodHbbTV::getUserAgent() const
 void DVBDemodHbbTV::setNetworkAllowed(bool allowed)
 {
     m_interceptor->m_networkAllowed = allowed;
+    updateProxy();
+}
+
+// Qt 5's WebEngine sends the page's origin whatever the interceptor says, which broadcasters' servers refuse: a
+// carousel's application's requests to other sites go by the carousel server, which makes them with its TV origin
+void DVBDemodHbbTV::updateProxy()
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    m_server->setProxy(m_interceptor->m_networkAllowed, m_profile->httpUserAgent());
+#endif
 }
 
 bool DVBDemodHbbTV::keyCode(int qtKey, int& code, int& keysetBit)
@@ -531,6 +544,11 @@ bool DVBDemodHbbTV::keyPress(QKeyEvent *event)
     }
 
     m_userRequest.start();
+
+    if (bit == m_keysetRed) {
+        m_redDelivered.start();
+    }
+
     m_page->runJavaScript(QString("window.__sdrangelHbbTV && window.__sdrangelHbbTV.key(%1, true)").arg(code));
     return true;
 }
@@ -554,6 +572,7 @@ bool DVBDemodHbbTV::pressRed()
     if (isRunning() && m_loaded && (m_keyset & m_keysetRed))
     {
         m_page->runJavaScript("window.__sdrangelHbbTV && (window.__sdrangelHbbTV.key(403, true), window.__sdrangelHbbTV.key(403, false))");
+        m_redDelivered.start();
         return true;
     }
 
@@ -593,7 +612,15 @@ QString DVBDemodHbbTV::getStatus() const
         return m_pendingRed && (m_userRequest.elapsed() < 30000) ? QString("Red button: starting...") : QString();
     }
 
-    if (m_loaded) {
+    if (m_loaded)
+    {
+        // Loaded, but getting what it shows (as from the internet) until it's asked for keys; and just after red's
+        // given to it, before it starts what it's for
+        if ((!m_keysetSinceLoad && m_loadedAt.isValid() && (m_loadedAt.elapsed() < 8000) && m_visible)
+            || (m_redDelivered.isValid() && (m_redDelivered.elapsed() < 1500))) {
+            return "Red button: loading...";
+        }
+
         return QString();
     }
 
@@ -699,8 +726,23 @@ void DVBDemodHbbTV::stop()
 }
 
 // The service's AUTOSTART application started when there's none running; one the AIT kills, stopped
+void DVBDemodHbbTV::showStatus()
+{
+    const QString status = isRunning() && m_loaded ? getStatus() : QString();
+
+    if (status != m_pageStatus)
+    {
+        m_pageStatus = status;
+        QString quoted = status;
+        quoted.replace('\\', "\\\\").replace('\'', "\\'");
+        m_page->runJavaScript(QString("window.__sdrangelHbbTV && window.__sdrangelHbbTV.status('%1')").arg(quoted));
+    }
+}
+
 void DVBDemodHbbTV::check()
 {
+    showStatus();
+
     if (m_channel.m_serviceId == 0) {
         return;
     }
@@ -802,6 +844,8 @@ void DVBDemodHbbTV::navigate(const QString& url, const QString& name, uint32_t o
     m_appCarouselPid = -1;
     m_keyset = 0;
     m_loaded = false;
+    m_keysetSinceLoad = false;
+    m_pageStatus.clear();
 
     if (m_mediaId != 0)
     {
@@ -846,6 +890,7 @@ void DVBDemodHbbTV::loadFinished(bool ok)
     }
 
     m_loaded = true;
+    m_loadedAt.start();
     makeTransparent();
     showView();
 }
@@ -920,6 +965,11 @@ void DVBDemodHbbTV::message(const QJsonObject& message)
     if (type == "keyset")
     {
         m_keyset = message.value("v").toInt();
+
+        if (m_loaded) {
+            m_keysetSinceLoad = true;
+        }
+
         emit log(QString("Keyset 0x%1").arg(m_keyset, 0, 16));
 
         // Red pressed to start it: given now it's asked for, if that's soon after
@@ -1174,6 +1224,9 @@ QJsonObject DVBDemodHbbTV::configuration() const
     config.insert("country", "GBR");
     config.insert("version", QCoreApplication::applicationVersion());
     config.insert("serverPort", m_server->getPort());
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    config.insert("proxy", m_server->getProxyPath());
+#endif
     return config;
 }
 

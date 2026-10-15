@@ -523,17 +523,39 @@
         return new URL(path, location.href).href;
     }
 
+    // A carousel's page's request to another site, by SDRangel's proxy where it has one (with Qt 5), which makes it with
+    // the page's TV origin: of the page's own origin, so not cross-origin
+    function proxyUrl(url) {
+        if (!config.proxy || !/\.localhost$/.test(location.hostname)) {
+            return url;
+        }
+
+        var target;
+
+        try {
+            target = new URL(url, location.href);
+        } catch (e) {
+            return url;
+        }
+
+        if (!/^https?:$/.test(target.protocol) || (target.origin === location.origin) || /\.localhost$/.test(target.hostname)) {
+            return url;
+        }
+
+        return location.origin + config.proxy + '?url=' + encodeURIComponent(target.href);
+    }
+
     var xhrOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
         var args = Array.prototype.slice.call(arguments);
-        args[1] = mapUrl(String(url));
+        args[1] = proxyUrl(mapUrl(String(url)));
         return xhrOpen.apply(this, args);
     };
 
     if (window.fetch) {
         var fetchOriginal = window.fetch;
         window.fetch = function (input, init) {
-            return fetchOriginal.call(window, typeof input === 'string' ? mapUrl(input) : input, init);
+            return fetchOriginal.call(window, typeof input === 'string' ? proxyUrl(mapUrl(input)) : input, init);
         };
     }
 
@@ -847,7 +869,31 @@
     window.confirm = function (text) { console.log('confirm: ' + text); return false; };
     window.prompt = function (text) { console.log('prompt: ' + text); return null; };
 
+    // SDRangel's status (as the red button loading), over everything the application shows
+    var statusElement = null;
+
+    function showStatus(text) {
+        if (!text) {
+            if (statusElement && statusElement.parentNode) {
+                statusElement.parentNode.removeChild(statusElement);
+            }
+            statusElement = null;
+            return;
+        }
+
+        if (!statusElement || !statusElement.isConnected) {
+            statusElement = document.createElement('div');
+            statusElement.setAttribute('style', 'position: fixed; right: 64px; bottom: 48px; z-index: 2147483647; ' +
+                'padding: 8px 16px; border-radius: 8px; background: rgba(16, 16, 16, 0.8); color: #f1efe8; ' +
+                'font: 24px sans-serif; pointer-events: none');
+            (document.body || document.documentElement).appendChild(statusElement);
+        }
+
+        statusElement.textContent = text;
+    }
+
     window.__sdrangelHbbTV = {
+        status: showStatus,
         // A key in the application's keyset, down or up
         key: function (code, down) {
             if (down) {

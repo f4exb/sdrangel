@@ -2158,7 +2158,7 @@ void DVBDemodGUI::tick()
         m_hbbtv->setSuppressed(m_guideOverlay->isShown());
 
         // What the red button's waiting for, at the bottom right of the video, until there's nothing to wait for
-        const QString status = m_hbbtv->getStatus();
+        const QString status = m_hbbtv->isStatusInPage() ? QString() : m_hbbtv->getStatus();
 
         if (status != m_hbbtvStatus)
         {

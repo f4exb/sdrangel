@@ -19,6 +19,11 @@
 #include <memory>
 
 #include <QHostAddress>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QRandomGenerator>
+#include <QUrlQuery>
 #include <QStringList>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -31,6 +36,8 @@
 namespace {
 
 constexpr int m_maxHeader = 16384;
+constexpr int m_maxBody = 1024 * 1024;      //!< Of a request proxied
+constexpr int m_proxyTimeoutMs = 30000;
 constexpr int m_retryMs = 250;
 const QString m_hostPrefix = "dvb-";
 const QString m_hostSuffix = ".localhost";
@@ -40,8 +47,12 @@ const QString m_hostSuffix = ".localhost";
 DTVCarouselServer::DTVCarouselServer(DTVApps *apps, QObject *parent) :
     QObject(parent),
     m_apps(apps),
-    m_server(new QTcpServer(this))
+    m_server(new QTcpServer(this)),
+    m_network(new QNetworkAccessManager(this)),
+    m_proxyEnabled(false)
 {
+    m_proxyToken = QByteArray::number(QRandomGenerator::global()->generate64(), 16) + QByteArray::number(QRandomGenerator::global()->generate64(), 16);
+
     connect(m_server, &QTcpServer::newConnection, this, &DTVCarouselServer::newConnection);
 }
 
@@ -62,6 +73,17 @@ bool DTVCarouselServer::start()
     }
 
     return true;
+}
+
+void DTVCarouselServer::setProxy(bool enabled, const QString& userAgent)
+{
+    m_proxyEnabled = enabled;
+    m_userAgent = userAgent;
+}
+
+QString DTVCarouselServer::getProxyPath() const
+{
+    return "/__sdrangel_proxy/" + QString::fromLatin1(m_proxyToken);
 }
 
 int DTVCarouselServer::getPort() const
@@ -217,14 +239,13 @@ void DTVCarouselServer::newConnection()
 void DTVCarouselServer::readRequest(QTcpSocket *socket)
 {
     QByteArray header = socket->property("header").toByteArray() + socket->readAll();
+    const int end = header.indexOf("\r\n\r\n");
 
-    if (header.size() > m_maxHeader)
+    if (((end < 0) && (header.size() > m_maxHeader)) || (end > m_maxHeader))
     {
         reply(socket, 431, "Request Header Fields Too Large", "text/plain", QByteArray(), false);
         return;
     }
-
-    const int end = header.indexOf("\r\n\r\n");
 
     if (end < 0)
     {
@@ -232,12 +253,63 @@ void DTVCarouselServer::readRequest(QTcpSocket *socket)
         return;
     }
 
-    // One request a connection: it's closed after the reply
-    disconnect(socket, &QTcpSocket::readyRead, this, nullptr);
     const QList<QByteArray> lines = header.left(end).split('\n');
     const QList<QByteArray> requestLine = lines[0].trimmed().split(' ');
+    int contentLength = 0;
 
-    if ((requestLine.size() < 2) || ((requestLine[0] != "GET") && (requestLine[0] != "HEAD")))
+    for (int i = 1; i < lines.size(); i++)
+    {
+        const QByteArray line = lines[i].trimmed();
+
+        if (line.toLower().startsWith("content-length:")) {
+            contentLength = line.mid(15).trimmed().toInt();
+        }
+    }
+
+    if ((contentLength < 0) || (contentLength > m_maxBody))
+    {
+        reply(socket, 413, "Payload Too Large", "text/plain", QByteArray(), false);
+        return;
+    }
+
+    // The body, all of it
+    QByteArray body = header.mid(end + 4);
+
+    if (body.size() < contentLength)
+    {
+        socket->setProperty("header", header);
+        return;
+    }
+
+    body.truncate(contentLength);
+
+    // One request a connection: it's closed after the reply
+    disconnect(socket, &QTcpSocket::readyRead, this, nullptr);
+
+    if (requestLine.size() < 2)
+    {
+        reply(socket, 400, "Bad Request", "text/plain", QByteArray(), false);
+        return;
+    }
+
+    if (m_proxyEnabled && requestLine[1].startsWith(getProxyPath().toLatin1() + "?"))
+    {
+        QString proxyHost;
+
+        for (int i = 1; i < lines.size(); i++)
+        {
+            const QByteArray line = lines[i].trimmed();
+
+            if (line.toLower().startsWith("host:")) {
+                proxyHost = QString::fromLatin1(line.mid(5).trimmed());
+            }
+        }
+
+        proxy(socket, requestLine[0], requestLine[1], lines, body, proxyHost);
+        return;
+    }
+
+    if ((requestLine[0] != "GET") && (requestLine[0] != "HEAD"))
     {
         reply(socket, 405, "Method Not Allowed", "text/plain", QByteArray(), false);
         return;
@@ -323,6 +395,92 @@ void DTVCarouselServer::respond(Request *request)
     {
         socket->setProperty("pending", true);
     }
+}
+
+// A request of a carousel's application to another site, made for it with its TV origin and the browser's user agent
+void DTVCarouselServer::proxy(QTcpSocket *socket, const QByteArray& method, const QByteArray& target, const QList<QByteArray>& lines,
+    const QByteArray& body, const QString& host)
+{
+    int serviceId, componentTag;
+
+    if (!parseHost(host, serviceId, componentTag))
+    {
+        reply(socket, 403, "Forbidden", "text/plain", QByteArray(), false);
+        return;
+    }
+
+    const QUrlQuery query(QUrl("http://proxy" + QString::fromLatin1(target)));
+    const QUrl url(query.queryItemValue("url", QUrl::FullyDecoded));
+
+    if (!url.isValid() || ((url.scheme() != "http") && (url.scheme() != "https")))
+    {
+        reply(socket, 400, "Bad Request", "text/plain", QByteArray(), false);
+        return;
+    }
+
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    request.setTransferTimeout(m_proxyTimeoutMs);
+#endif
+
+    if (!m_userAgent.isEmpty()) {
+        request.setRawHeader("User-Agent", m_userAgent.toUtf8());
+    }
+
+    // dvb://onid.tsid.sid, from the carousel's host (dvb-onid-tsid-sid-ctag.localhost)
+    QString name = host.toLower();
+    name = name.left(name.indexOf(':') >= 0 ? name.indexOf(':') : name.size());
+    const QStringList parts = name.mid(4, name.size() - 4 - 10).split('-');
+
+    if ((parts.size() == 4) && (parts[0] != "x") && (parts[1] != "x")) {
+        request.setRawHeader("Origin", QString("dvb://%1.%2.%3").arg(parts[0]).arg(parts[1]).arg(parts[2]).toLatin1());
+    }
+
+    // What the request says of its content, and what it accepts
+    for (int i = 1; i < lines.size(); i++)
+    {
+        const QByteArray line = lines[i].trimmed();
+        const int colon = line.indexOf(':');
+
+        if (colon <= 0) {
+            continue;
+        }
+
+        const QByteArray name = line.left(colon).trimmed();
+        const QByteArray lower = name.toLower();
+
+        if ((lower == "content-type") || (lower == "accept") || (lower == "accept-language") || (lower == "authorization")) {
+            request.setRawHeader(name, line.mid(colon + 1).trimmed());
+        }
+    }
+
+    QPointer<QTcpSocket> client(socket);
+    QNetworkReply *networkReply = m_network->sendCustomRequest(request, method, body);
+    const bool head = method == "HEAD";
+
+    connect(networkReply, &QNetworkReply::finished, this, [this, networkReply, client, url, head]() {
+        networkReply->deleteLater();
+
+        if (!client) {
+            return;
+        }
+
+        int status = networkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        QByteArray reason = networkReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toByteArray();
+
+        if (status == 0)
+        {
+            qDebug("DTVCarouselServer::proxy: %s: %s", qPrintable(url.toString()), qPrintable(networkReply->errorString()));
+            status = 502;
+            reason = "Bad Gateway";
+        }
+
+        const QByteArray type = networkReply->header(QNetworkRequest::ContentTypeHeader).toByteArray();
+        reply(client, status, reason.isEmpty() ? QByteArray("OK") : reason, type.isEmpty() ? QByteArray("application/octet-stream") : type,
+            networkReply->readAll(), head);
+        emit served(QString("proxy %1").arg(url.toString()), status);
+    });
 }
 
 void DTVCarouselServer::reply(QTcpSocket *socket, int status, const QByteArray& reason, const QByteArray& type, const QByteArray& body, bool head)

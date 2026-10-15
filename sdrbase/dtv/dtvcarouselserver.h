@@ -28,6 +28,7 @@
 #include "export.h"
 
 class DTVApps;
+class QNetworkAccessManager;
 class QTcpServer;
 class QTcpSocket;
 
@@ -53,6 +54,12 @@ public:
     //! Whether a URL's of the server
     bool isServerUrl(const QString& url) const;
     static QString contentType(const QString& path);
+    //! Requests a carousel's application makes to other sites, made for it with the origin a TV gives it, its
+    //! service's dvb: URL (dvb://onid.tsid.sid), which a browser can't always be made to (as Qt 5's WebEngine): to
+    //! getProxyPath()?url=..., of the carousel's own origin, so they aren't cross-origin. Off until enabled
+    void setProxy(bool enabled, const QString& userAgent);
+    //! As /__sdrangel_proxy/token: the token's random, so the proxy's only of pages given it
+    QString getProxyPath() const;
 
     static constexpr int m_waitMs = 20000;      //!< For a file not received yet
 
@@ -76,10 +83,16 @@ private:
     void readRequest(QTcpSocket *socket);
     void respond(Request *request);
     void reply(QTcpSocket *socket, int status, const QByteArray& reason, const QByteArray& type, const QByteArray& body, bool head);
+    void proxy(QTcpSocket *socket, const QByteArray& method, const QByteArray& target, const QList<QByteArray>& lines,
+        const QByteArray& body, const QString& host);
     static bool parseHost(const QString& host, int& serviceId, int& componentTag);
 
     DTVApps *m_apps;
     QTcpServer *m_server;
+    QNetworkAccessManager *m_network;
+    QByteArray m_proxyToken;
+    bool m_proxyEnabled;
+    QString m_userAgent;
 };
 
 #endif // INCLUDE_DTVCAROUSELSERVER_H
