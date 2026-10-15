@@ -1,7 +1,7 @@
 # modemdab
 
 A native DAB/DAB+ receiver (ETSI EN 300 401, transmission mode I), used by the
-DAB Demodulator plugin. 
+DAB Demodulator plugin.
 
 ## What it does
 
