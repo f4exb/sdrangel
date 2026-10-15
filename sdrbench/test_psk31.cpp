@@ -338,7 +338,7 @@ QString runChannelTrial(
     }
 
     constexpr int blockSize = 1000;
-    for (int i = 0; i < samples.size(); i += blockSize) {
+    for (std::size_t i = 0; i < samples.size(); i += blockSize) {
         demod.feed(samples.begin() + i, samples.begin() + std::min<int>(i + blockSize, samples.size()));
     }
 
