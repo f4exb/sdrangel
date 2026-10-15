@@ -283,7 +283,7 @@ bool DeviceUSRP::setMasterClockRateForSampleRate(uhd::usrp::multi_usrp::sptr usr
     return true;
 }
 
-void DeviceUSRP::enableAutoMasterClockRate(uhd::usrp::multi_usrp::sptr usrp)
+void DeviceUSRP::enableAutoMasterClockRate(const uhd::usrp::multi_usrp::sptr& usrp)
 {
     usrp->get_device()->get_tree()->access<bool>("/mboards/0/auto_tick_rate").set(true);
 }

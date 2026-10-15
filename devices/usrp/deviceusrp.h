@@ -56,7 +56,7 @@ public:
      * Returns true if automatic selection should be re-enabled with enableAutoMasterClockRate() once the sample rates have been set.
      */
     static bool setMasterClockRateForSampleRate(uhd::usrp::multi_usrp::sptr usrp, double sampleRate, size_t nbChannels);
-    static void enableAutoMasterClockRate(uhd::usrp::multi_usrp::sptr usrp);
+    static void enableAutoMasterClockRate(const uhd::usrp::multi_usrp::sptr& usrp);
 
     /**
      * Set sample rate of a single channel. If it can't be achieved with a master clock rate UHD chooses automatically
