@@ -1374,7 +1374,8 @@ bool DRMReceiver::decodeMSC(
     CarrierNoiseHistory* carrierNoise,
     DRMSlideshowDecoder* slideshowDecoder,
     DRMJournalineDecoder* journalineDecoder,
-    DRMWebsiteDecoder* websiteDecoder
+    DRMWebsiteDecoder* websiteDecoder,
+    DRMSPIDecoder* spiDecoder
 )
 {
     report = ReceiverMSCReport();
@@ -1975,6 +1976,10 @@ bool DRMReceiver::decodeMSC(
                     journalineDecoder->frameLost();
                 }
 
+                if (spiDecoder) {
+                    spiDecoder->frameLost();
+                }
+
                 if (slideshowDecoder) {
                     slideshowDecoder->frameLost();
                 }
@@ -2054,6 +2059,10 @@ bool DRMReceiver::decodeMSC(
 
             if (journalineDecoder && journalineDecoder->push(sdc, streams)) {
                 report.journalineUpdated = true;
+            }
+
+            if (spiDecoder && spiDecoder->push(sdc, streams)) {
+                report.spiUpdated = true;
             }
 
             if (slideshow)

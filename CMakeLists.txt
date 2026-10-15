@@ -475,11 +475,6 @@ elseif (WIN32)
   set(UHD_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/uhd/lib/uhd.lib" CACHE INTERNAL "")
   set(UHD_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/uhd/bin" CACHE INTERNAL "")
 
-  set(DAB_FOUND ON CACHE INTERNAL "")
-  set(DAB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/dab" CACHE INTERNAL "")
-  set(DAB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/dab/dab_lib.lib" CACHE INTERNAL "")
-  set(DAB_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/dab" CACHE INTERNAL "")
-
   set(OPENSSL_FOUND ON CACHE INTERNAL "")
   set(OPENSSL_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/openssl" CACHE INTERNAL "")
 
@@ -579,10 +574,6 @@ elseif(ANDROID)
   set(FAAD_FOUND ON CACHE INTERNAL "")
   set(FAAD_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/include" CACHE INTERNAL "")
   set(FAAD_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/lib/liblibfaadstatic.a" CACHE INTERNAL "")
-
-  set(DAB_FOUND ON CACHE INTERNAL "")
-  set(DAB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libdab/include/dab_lib" CACHE INTERNAL "")
-  set(DAB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libdab/lib/libdab_lib.so" CACHE INTERNAL "")
 
   set(LIBMBE_FOUND ON CACHE INTERNAL "")
   set(LIBMBE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/mbelib/include/" CACHE INTERNAL "")
@@ -694,7 +685,6 @@ elseif(ANDROID)
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswresample.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswscale.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libc++_shared.so
-      ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libdab/lib/libdab_lib.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libunrooted_android.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libusb1.0.so
@@ -773,7 +763,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libdab/lib/libdab_lib.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libusb1.0.so
@@ -786,7 +775,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libdab/lib/libdab_lib.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libusb1.0.so
@@ -1018,7 +1006,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
     endif()
     find_package(LibSigMF) # SigMF recording files support
-    find_package(ZLIB) # For DAB
+    find_package(ZLIB)
     find_package(FAAD) # For DAB
     find_package(Codec2)
     find_package(CM256cc)
@@ -1028,7 +1016,6 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(Sgp4)
     find_package(CSPICE)
     find_package(AptDec)
-    find_package(LibDAB)
     find_package(HIDAPI)
     find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
     find_package(GGMorse)
@@ -1112,8 +1099,12 @@ add_subdirectory(modemm17)
 add_subdirectory(modemmeshtastic)
 add_subdirectory(modemmeshcore)
 add_subdirectory(modemdvb)
+add_subdirectory(modemdr)
 if (ENABLE_CHANNELRX AND ENABLE_CHANNELRX_DEMODDRM)
     add_subdirectory(modemdrm)
+endif()
+if (ENABLE_CHANNELRX AND ENABLE_CHANNELRX_DEMODDAB)
+    add_subdirectory(modemdab)
 endif()
 
 if (FFTW3F_FOUND)

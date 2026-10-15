@@ -19,6 +19,7 @@ set(modemdrm_SOURCES
     drmreceiver.cpp
     drmresampler.cpp
     drmsdc.cpp
+    drmspi.cpp
     drmsyncstatemachine.cpp
 )
 
@@ -41,6 +42,7 @@ set(modemdrm_HEADERS
     drmreceiver.h
     drmresampler.h
     drmsdc.h
+    drmspi.h
     drmsyncstatemachine.h
 )
 
@@ -51,6 +53,9 @@ target_include_directories(modemdrm
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/exports
 )
+
+# MOT, Journaline, SPI and the Viterbi decoder are shared with DAB
+target_link_libraries(modemdrm PUBLIC modemdr)
 
 # DRM AAC/xHE-AAC audio uses the FDK AAC decoder
 if(FDKAAC_FOUND)

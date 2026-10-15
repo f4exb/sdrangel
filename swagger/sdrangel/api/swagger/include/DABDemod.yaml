@@ -33,6 +33,14 @@ DABDemodSettings:
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
+    coherent:
+      type: integer
+      description: "Detection: 1 coherent (decoder aided; about 1 dB more sensitive, using about twice the CPU and with 0.4 s more delay), 0 three-symbol differential."
+      minimum: 0
+      maximum: 1
+    announcementTypes:
+      type: integer
+      description: "Announcement types the audio switches to while they last, one bit per type (TS 101 756 table 14): 1 road traffic, 2 transport, 3 warning, 4 news, 5 weather, 6 event, 7 special event, 8 programme information, 9 sport, 10 financial. Alarms (bit 0) are always followed. 0 for none."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -136,17 +144,17 @@ DABDemodReport:
       type: integer
       minimum: 0
       maximum: 100
-      description: "Audio frame decode quality as a percentage."
+      description: "Percentage of valid audio frames over the last status interval: for DAB+, superframes whose Fire code checks; for DAB, frames whose CRC checks."
     reedSolomonQuality:
       type: integer
-      minimum: 0
+      minimum: -1
       maximum: 100
-      description: "Reed-Solomon decode quality as a percentage."
+      description: "For DAB+, percentage of Reed-Solomon codewords corrected over the last status interval. -1 for DAB."
     aacQuality:
       type: integer
-      minimum: 0
+      minimum: -1
       maximum: 100
-      description: "AAC decode quality as a percentage."
+      description: "For DAB+, percentage of AAC access units whose CRC checks over the last status interval. -1 for DAB."
     fibQuality:
       type: integer
       minimum: 0
@@ -154,7 +162,59 @@ DABDemodReport:
       description: "Fast Information Block decode quality as a percentage."
     tii:
       type: integer
-      description: "Decoded Transmitter Identification Information value."
+      description: "Transmitter Identification Information of the strongest transmitter: main ID << 8 | sub ID. -1 when none has been found: not yet, or (after a few seconds synchronized) the ensemble sends none."
     data:
       type: string
       description: "Latest dynamic text/data associated with the selected programme."
+    cn:
+      type: number
+      format: float
+      description: "Carrier to noise ratio in dB, from the null symbol (median carrier)."
+    nullDepth:
+      type: number
+      format: float
+      description: "Null symbol power relative to the other symbols in dB."
+    mscBER:
+      type: number
+      format: float
+      description: "Channel bit error rate of the selected service before error correction (re-encoded Viterbi output). Errors start at about 0.1."
+    ficBER:
+      type: number
+      format: float
+      description: "Channel bit error rate of the FIC before error correction."
+    rsCorrectedRate:
+      type: number
+      format: float
+      description: "DAB+ Reed-Solomon corrected bytes per second."
+    framesLost:
+      type: integer
+      description: "Transmission frames lost since tuning."
+    reacquisitions:
+      type: integer
+      description: "Times synchronization was lost and acquired again since tuning."
+    inputLevel:
+      type: number
+      format: float
+      description: "Mean power of the channel input in dB relative to full scale."
+    clipping:
+      type: number
+      format: float
+      description: "Percentage of input samples at or near full scale."
+    gainStatus:
+      type: integer
+      description: "Gain advice: 0 OK, 1 increase gain, 2 reduce gain, 3 check (MER well below C/N: overload, or multipath or interference), -1 unknown."
+    gainAdvice:
+      type: string
+      description: "Gain advice as text."
+    announcement:
+      type: string
+      description: "The announcement in progress for the program (Road traffic, News, Alarm...), empty for none."
+    nowPlayingArtist:
+      type: string
+      description: "Artist of the item playing, from the DL Plus tags of the dynamic label."
+    nowPlayingTitle:
+      type: string
+      description: "Title of the item playing, from the DL Plus tags of the dynamic label."
+    programmeNow:
+      type: string
+      description: "The programme on now, from the Service and Programme Information (SPI)."

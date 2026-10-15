@@ -255,18 +255,6 @@ modules:
         url: https://sourceforge.net/projects/faac/files/faad2-src/faad2-2.8.0/faad2-2.8.8.tar.gz
         sha256: 985c3fadb9789d2815e50f4ff714511c79c2710ac27a4aaaf5c0c2662141426d
 
-  - name: libdab
-    subdir: library
-    buildsystem: cmake-ninja
-    builddir: true
-    config-opts:
-      - -Wno-dev
-    sources:
-      - type: git
-        url: https://github.com/srcejon/dab-cmdline.git
-        # branch: msvc
-        commit: 4c7ab58857a1de71f585728ffcbc4916db9b56c7
-
   - name: hidapi
     buildsystem: cmake-ninja
     sources:
@@ -565,6 +553,5 @@ modules:
       - type: shell
         commands:
           - sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindSerialDV.cmake
-          - sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindLibDAB.cmake
           - sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindSgp4.cmake
           - sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindAptDec.cmake

@@ -29,7 +29,7 @@
 class Serializable;
 
 // Number of columns in the table
-#define DABDEMOD_COLUMNS 3
+#define DABDEMOD_COLUMNS 4
 
 struct DABDemodSettings
 {
@@ -54,6 +54,8 @@ struct DABDemodSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
+    bool m_coherent;            //!< Coherent (decoder aided) detection, else three-symbol differential
+    int m_announcementTypes;    //!< Announcement types to switch to (a bit per type, TS 101 756 table 14); alarms always
 
     int m_columnIndexes[DABDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[DABDEMOD_COLUMNS];  //!< Size of the columns in the table

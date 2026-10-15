@@ -169,7 +169,7 @@ parts:
         override-pull: |
             craftctl default
             craftctl set version="$(git describe --tags --abbrev=0 | sed 's/v//')"
-        after: [apt, libdab, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, cm265cc, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, cm265cc, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
@@ -198,7 +198,6 @@ parts:
             - -DCSPICE_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DINMARSATC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DLIBSIGMF_DIR=$CRAFT_STAGE/opt/install/sdrangel
-            - -DDAB_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DARCH_OPT=nehalem
         build-packages:
             - libfftw3-dev
@@ -433,15 +432,6 @@ parts:
         source: https://github.com/srcejon/aptdec.git
         source-type: git
         source-branch: libaptdec
-        cmake-parameters:
-            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
-
-    libdab:
-        plugin: cmake
-        source: https://github.com/srcejon/dab-cmdline
-        source-type: git
-        source-branch: msvc
-        source-subdir: library
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 

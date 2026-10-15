@@ -165,6 +165,10 @@ struct DRMDemodStatus
     using JournalineObjects = std::map<int, modemdrm::JournalineObject>;
     std::map<int, std::shared_ptr<const JournalineObjects>> journaline;
     quint64 journalineUpdates = 0;
+    // The multiplex's programme guide (SPI): a shared snapshot, replaced when
+    // it changes; spiUpdates counts the changes.
+    std::shared_ptr<const modemdr::SPIData> spi;
+    quint64 spiUpdates = 0;
     QString broadcastTimeUTC;
     bool localTimeOffsetPresent = false;
     int localTimeOffsetMinutes = 0;
@@ -328,6 +332,7 @@ private:
     bool m_stationCheck = false;
     modemdrm::DRMWebsiteDecoder m_websiteDecoder;
     modemdrm::DRMJournalineDecoder m_journalineDecoder;
+    modemdrm::DRMSPIDecoder m_spiDecoder;
     // The published Journaline objects of each component, by stream and packet Id
     struct JournalineSnapshot
     {
@@ -357,6 +362,7 @@ private:
     static QString imageMimeType(int contentSubtype);
     void publishJournaline();
     void clearJournaline();
+    void clearSPI();
     void clearServiceData();
     void clearServiceDataStatus();
     void observeStation(std::uint32_t serviceIdentifier, int serviceCount);

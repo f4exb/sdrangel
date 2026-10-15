@@ -139,8 +139,9 @@ private:
     void updateServices(const DRMDemodStatus& status);
     void updateJournaline(const DRMDemodStatus& status);
     void updateWebsite(const DRMDemodStatus& status);
-    void showJournaline();
-    static QString journalineHtml(const DRMDemodStatus::JournalineObjects& objects, int objectId);
+    void updateProgrammeGuide(const DRMDemodStatus& status);
+    void showJournaline(bool anotherService = false);
+    void updateJournalineButtons();
     void updateAlternativeFrequencies(const DRMDemodStatus& status);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -175,12 +176,10 @@ private:
     quint64 m_displayedJournalineUpdates = ~0ULL;
     std::vector<int> m_journalineServices;  // the selector's entries, a short Id each
     int m_journalineShortId = -1;
-    int m_journalineObject = 0;
-    std::vector<int> m_journalineHistory;
     QStringList m_journalineNames;    // the selector's labels
     QStringList m_journalineLabels;   // each Journaline service's label
-    QString m_journalineShownHtml;    // the page shown
     quint64 m_displayedWebsiteUpdates = ~0ULL;
+    quint64 m_displayedSPIUpdates = ~0ULL;
     QStringList m_displayedAlternativeFrequencies;
 };
 

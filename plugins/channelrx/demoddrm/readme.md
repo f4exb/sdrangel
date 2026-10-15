@@ -14,8 +14,9 @@ It supports:
   - MOT Broadcast Websites of the selected service.
   - Data services without audio: their slideshow or website.
   - Journaline news (menus and pages of text) from any service in the multiplex.
+  - The programme guide (Service and Programme Information, SPI) of the multiplex.
 
-Not supported: other data services (such as EPG), conditional access, multichannel audio (MPEG Surround is decoded as its stereo core) and automatic alternative-frequency switching.
+Not supported: other data services, conditional access, multichannel audio (MPEG Surround is decoded as its stereo core) and automatic alternative-frequency switching.
 
 The channel accepts any device sample rate. It is resampled to 192 kHz, or to 48 kHz when the channel is narrower than 192 kHz, in which case only modes A-D can be received. Set the device sample rate to at least 192 kHz for mode E.
 
@@ -124,7 +125,13 @@ The files are kept while the receiver regains a lost signal; changing service or
 
 ![DRM Website](../../../doc/img/DRMDemod_website.png)
 
-<h4>15: Messages</h4>
+<h4>15: Programme Guide</h4>
+
+When the multiplex sends Service and Programme Information (SPI, ETSI TS 102 818 and TS 102 371), the selected service's description and schedule are shown here, with the programme on now in bold. Times are local. 
+The SPI is a data service of the multiplex, decoded whatever service is selected; at DRM's low bit rates the station information and schedules can take several minutes to arrive. Few stations send one. 
+The guide is kept while the receiver regains a lost signal, and cleared on retuning.
+
+<h4>16: Messages</h4>
 
 The text box shows the station's text message, or the reason audio is unavailable. 
 The table lists the alternative-frequency information the station sends: frequencies of other DRM transmissions of this multiplex (with restrictions by service, region or schedule) and related schedule, region, other-service and linking entries. 
