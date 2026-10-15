@@ -2,7 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to transmit IEEE 802.15.4 frames. The 802.15.4 PHY & RF layers are used by networking layers such as ZigBee, 6LoWPAN and others.
+This plugin can be used to transmit IEEE 802.15.4 frames. 
+The 802.15.4 PHY & RF layers are used by networking layers such as ZigBee, 6LoWPAN and others. 
+Frames can be received with the [802.15.4 demodulator](../../channelrx/demod802.15.4/readme.md).
 
 <h2>Interface</h2>
 
@@ -25,24 +27,25 @@ Use this button to toggle mute for this channel.
 <h3>4: PHY</h3>
 
 This specifies the parameters of the PHY (physical layer), including the bit rate and modulation that is used for the frame transmission. Supported PHYs are 20kbps BPSK, 40kbps BPSK, 100kpbs <1GHz O-QPSK, 250kpbs <1GHz O-QPSK and 250kbps 2.4GHz O-QPSK.
-These 802.15.4 PHYs use DSSS (Direct sequence spread spectrum), whereby multiple chips are transmitted per symbol. This means that a high baseband sample rate and large RF bandwidth is required. The baseband sample rate should be set to an integer multiple of the chip rate (at least 4x).
+These 802.15.4 PHYs use DSSS (Direct sequence spread spectrum), whereby multiple chips are transmitted per symbol. This means that a high baseband sample rate and large RF bandwidth is required. The baseband sample rate should be at least the RF bandwidth (6), as given in the Min sample rate column below.
+The waveform is generated at an integer multiple of the chip rate: if the baseband sample rate is 4 to 16 times the chip rate, at the baseband sample rate, otherwise at 8 times the chip rate, and then resampled to the baseband sample rate. So the baseband sample rate doesn't need to be a multiple of the chip rate.
 Each PHY is applicable only for specific frequency bands as detailed below:
 
 Channel Page | Channels | Frequencies (MHz)  | Bit rate (kbps) | Chip rate (kcps) | Modulation | Shaping | Min sample rate (MSa/s)
 -------------|----------|--------------------|-----------------|------------------|------------|---------|------------------------
-0            | 0        | 868.3              | 20              | 300              | BPSK       | RC r=1  | 1.2
-0            | 1-10     | 906, 908... 926    | 40              | 600              | BPSK       | RC r=1  | 2.4
-0            | 11-26    | 2405, 2410... 2480 | 250             | 2000             | O-QPSK     | Sine    | 8
-2            | 0        | 868.3              | 100             | 400              | O-QPSK     | Sine/RC | 2.4
-2            | 1-10     | 906, 908... 926    | 250             | 1000             | O-QPSK     | Sine    | 4
-5            | 0-3      | 780, 782... 786    | 250             | 1000             | O-QPSK     | RC r=.8 | 4
-11           | 0-6      | 2363, 2368... 2393 | 250             | 2000             | O-QPSK     | Sine    | 8
-11           | 7-13     | 2367, 2372... 2397 | 250             | 2000             | O-QPSK     | Sine    | 8
-11           | 14       | 2395               | 250             | 2000             | O-QPSK     | Sine    | 8
+0            | 0        | 868.3              | 20              | 300              | BPSK       | RC r=1  | 0.6
+0            | 1-10     | 906, 908... 926    | 40              | 600              | BPSK       | RC r=1  | 1.2
+0            | 11-26    | 2405, 2410... 2480 | 250             | 2000             | O-QPSK     | Sine    | 4
+2            | 0        | 868.3              | 100             | 400              | O-QPSK     | Sine/RC | 0.8
+2            | 1-10     | 906, 908... 926    | 250             | 1000             | O-QPSK     | Sine    | 2
+5            | 0-3      | 780, 782... 786    | 250             | 1000             | O-QPSK     | RC r=.8 | 2
+11           | 0-6      | 2363, 2368... 2393 | 250             | 2000             | O-QPSK     | Sine    | 4
+11           | 7-13     | 2367, 2372... 2397 | 250             | 2000             | O-QPSK     | Sine    | 4
+11           | 14       | 2395               | 250             | 2000             | O-QPSK     | Sine    | 4
 
 <h3>5: Chip rate</h3>
 
-This is the chip rate. It must be a multiple of the baseband sample rate and the baseband sample rate should be at least twice the chip rate. If one or both of these conditions are not met the background turns to red and the tooltip details the condition.
+This is the chip rate. If the baseband sample rate is lower than the RF bandwidth (6), the background turns to red, as the transmitted signal will be filtered.
 
 <h3>6: RF Bandwidth</h3>
 
