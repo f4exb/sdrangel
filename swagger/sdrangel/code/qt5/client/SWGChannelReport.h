@@ -54,6 +54,7 @@
 #include "SWGFreqTrackerReport.h"
 #include "SWGHeatMapReport.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
+#include "SWGIEEE_802_15_4_DemodReport.h"
 #include "SWGILSDemodReport.h"
 #include "SWGInmarsatDemodReport.h"
 #include "SWGM17DemodReport.h"
@@ -182,6 +183,9 @@ public:
 
     SWGIEEE_802_15_4_ModReport* getIeee802154ModReport();
     void setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report);
+
+    SWGIEEE_802_15_4_DemodReport* getIeee802154DemodReport();
+    void setIeee802154DemodReport(SWGIEEE_802_15_4_DemodReport* ieee_802_15_4_demod_report);
 
     SWGFileSinkReport* getFileSinkReport();
     void setFileSinkReport(SWGFileSinkReport* file_sink_report);
@@ -383,6 +387,9 @@ private:
 
     SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report;
     bool m_ieee_802_15_4_mod_report_isSet;
+
+    SWGIEEE_802_15_4_DemodReport* ieee_802_15_4_demod_report;
+    bool m_ieee_802_15_4_demod_report_isSet;
 
     SWGFileSinkReport* file_sink_report;
     bool m_file_sink_report_isSet;
