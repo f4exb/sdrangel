@@ -946,7 +946,6 @@ void Receiver::decodeFrame(InterleavingFrame& frame, FEC& fec, Turn& turn)
     }
 
     const int ncells = cellsPerFECBlock(plp.m_fecType, plp.m_constellation);
-    const int eta = bitsPerCell(plp.m_constellation);
     const int nblocks = plp.m_numBlocks;
     const bool ti = plp.m_timeIlLength > 0;
     const int nti = ti ? plp.tiBlocks() : nblocks; // Without time interleaving, each FEC block is on its own

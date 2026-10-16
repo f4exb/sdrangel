@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DRMWEBSITEBROWSER_H
-#define INCLUDE_DRMWEBSITEBROWSER_H
+#ifndef SDRGUI_GUI_WEBSITEBROWSER_H_
+#define SDRGUI_GUI_WEBSITEBROWSER_H_
 
 #include <map>
 #include <memory>
@@ -27,40 +27,41 @@
 #include <QTextObjectInterface>
 #include <QUrl>
 
-#include "modemdrm/drmdata.h"
+#include "modemdr/mot.h"
+#include "export.h"
 
 // Draws a website page's images from the document's resources only. Qt's own
 // handler first looks for a high-DPI variant of the image's name as a file,
 // and loads the name as a file when the resource does not decode: a name
 // like //host/share/a.png would reach the network.
-class DRMWebsiteImages : public QObject, public QTextObjectInterface
+class SDRGUI_API WebsiteImages : public QObject, public QTextObjectInterface
 {
     Q_OBJECT
     Q_INTERFACES(QTextObjectInterface)
 
 public:
-    explicit DRMWebsiteImages(QObject *parent = nullptr) : QObject(parent) {}
+    explicit WebsiteImages(QObject *parent = nullptr) : QObject(parent) {}
     QSizeF intrinsicSize(QTextDocument *document, int position, const QTextFormat& format) override;
     void drawObject(QPainter *painter, const QRectF& rect, QTextDocument *document, int position,
         const QTextFormat& format) override;
     static QImage image(QTextDocument *document, const QTextFormat& format);
 };
 
-// Shows a MOT Broadcast Website: pages, images and style sheets come from the
+// Shows a MOT Broadcast Website (ETSI TS 101 498), of DAB or DRM: pages, images and style sheets come from the
 // files received (as bws:/path URLs), and links between them work. Links
 // out of the website are ignored, and nothing is ever read from the local
-// file system or the network: images are drawn by DRMWebsiteImages, and no
+// file system or the network: images are drawn by WebsiteImages, and no
 // text of the page is shown outside it (tooltips, What's This).
-class DRMWebsiteBrowser : public QTextBrowser
+class SDRGUI_API WebsiteBrowser : public QTextBrowser
 {
     Q_OBJECT
 
 public:
-    explicit DRMWebsiteBrowser(QWidget *parent = nullptr);
+    explicit WebsiteBrowser(QWidget *parent = nullptr);
 
     // A new snapshot of the website: shows its start page when no page is
     // shown, else the page shown again if a file it uses arrived or changed.
-    void setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> website);
+    void setWebsite(std::shared_ptr<const modemdr::MOTWebsite> website);
     void showStartPage();
     // The URL of a file of the website.
     static QUrl fileUrl(const std::string& name);
@@ -95,7 +96,7 @@ private:
     static bool local(const QUrl& url);
     // The name, in the website, of the file a URL names (received or listed),
     // else empty.
-    static std::string websiteName(const modemdrm::MOTWebsite& website, const QUrl& url);
+    static std::string websiteName(const modemdr::MOTWebsite& website, const QUrl& url);
     QUrl resolved(const QUrl& url) const;
     // What a URL of the website gives: the file's data, else whether it is listed.
     struct Use
@@ -104,7 +105,7 @@ private:
         bool listed = false;
         bool operator!=(const Use& other) const { return (data != other.data) || (listed != other.listed); }
     };
-    static Use use(const modemdrm::MOTWebsite& website, const QUrl& url);
+    static Use use(const modemdr::MOTWebsite& website, const QUrl& url);
     // HTML text for Qt, decoded here: the character set its BOM or a meta
     // tag in its first 1,024 bytes declares, if Qt has it, else UTF-8 if
     // valid, else Latin-1 (so Qt 5 and Qt 6 show a page alike)
@@ -118,10 +119,10 @@ private:
     // is known even while the tab is hidden
     void pageShown();
 
-    std::shared_ptr<const modemdrm::MOTWebsite> m_website;
-    DRMWebsiteImages *m_images;
+    std::shared_ptr<const modemdr::MOTWebsite> m_website;
+    WebsiteImages *m_images;
     QUrl m_page;
     std::map<QString, Use> m_used; // the shown page's files, by URL
 };
 
-#endif // INCLUDE_DRMWEBSITEBROWSER_H
+#endif // SDRGUI_GUI_WEBSITEBROWSER_H_

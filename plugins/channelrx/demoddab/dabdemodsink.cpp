@@ -17,6 +17,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDateTime>
 #include <QDebug>
 
 #include <complex.h>
@@ -24,267 +25,19 @@
 #include "dsp/datafifo.h"
 #include "maincore.h"
 
+#include "modemdab/dabtables.h"
+
 #include "dabdemod.h"
 #include "dabdemodsink.h"
 
-// Callbacks from DAB library
+using namespace modemdab;
 
-void syncHandler(bool value, void *ctx)
-{
-    (void)value;
-    (void)ctx;
-}
+// Input to the receiver is processed in blocks of 10 ms
+static const std::size_t NativeBlock = DABDEMOD_CHANNEL_SAMPLE_RATE / 100;
+// and its status reported every 0.5 s
+static const int NativeStatusBlocks = 50;
 
-void systemDataHandler(bool sync, int16_t snr, int32_t freqOffset, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->systemData(sync, snr, freqOffset);
-}
-
-void ensembleNameHandler(const char *name, int32_t id, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->ensembleName(QString::fromUtf8(name), id);
-}
-
-void programNameHandler(const char *name, int32_t id, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->programName(QString::fromUtf8(name), id);
-}
-
-void fibQualityHandler(int16_t percent, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->fibQuality(percent);
-}
-
-void audioHandler(int16_t *buffer, int size, int samplerate, bool stereo, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->audio(buffer, size, samplerate, stereo);
-}
-
-void dataHandler(const char *data, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->data(QString::fromUtf8(data));
-}
-
-void byteHandler(uint8_t *data, int16_t a, uint8_t b, void *ctx)
-{
-    (void)data;
-    (void)a;
-    (void)b;
-    (void)ctx;
-}
-
-// Note: North America has different table
-static const char *dabProgramType[] =
-{
-    "No programme type",
-    "News",
-    "Current Affairs",
-    "Information",
-    "Sport",
-    "Education",
-    "Drama",
-    "Culture",
-    "Science",
-    "Varied",
-    "Pop Music",
-    "Rock Music",
-    "Easy Listening Music",
-    "Light Classical",
-    "Serious Classical",
-    "Other Music",
-    "Weather/meteorology",
-    "Finance/Business",
-    "Children's programmes",
-    "Social Affairs",
-    "Religion",
-    "Phone In",
-    "Travel",
-    "Leisure",
-    "Jazz Music",
-    "Country Music",
-    "National Music",
-    "Oldies Music",
-    "Folk Music",
-    "Documentary",
-    "Not used",
-    "Not used",
-};
-
-static const char *dabLanguageCode[] =
-{
-    "Unknown",
-    "Albanian",
-    "Breton",
-    "Catalan",
-    "Croatian",
-    "Welsh",
-    "Czech",
-    "Danish",
-    "German",
-    "English",
-    "Spanish",
-    "Esperanto",
-    "Estonian",
-    "Basque",
-    "Faroese",
-    "French",
-    "Frisian",
-    "Irish",
-    "Gaelic",
-    "Galician",
-    "Icelandic",
-    "Italian",
-    "Sami",
-    "Latin",
-    "Latvian",
-    "Luxembourgian",
-    "Lithuanian",
-    "Hungarian",
-    "Maltese",
-    "Dutch",
-    "Norwegian",
-    "Occitan",
-    "Polish",
-    "Portuguese",
-    "Romanian",
-    "Romansh",
-    "Serbian",
-    "Slovak",
-    "Slovene",
-    "Finnish",
-    "Swedish",
-    "Turkish",
-    "Flemish",
-    "Walloon",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Background sound",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Zulu",
-    "Vietnamese",
-    "Uzbek",
-    "Urdu",
-    "Ukrainian",
-    "Thai",
-    "Telugu",
-    "Tatar",
-    "Tamil",
-    "Tadzhik",
-    "Swahili",
-    "Sranan Tongo",
-    "Somali",
-    "Sinhalese",
-    "Shona",
-    "Serbo-Croat",
-    "Rusyn",
-    "Russian",
-    "Quechua",
-    "Pushtu",
-    "Punjabi",
-    "Persian",
-    "Papiamento",
-    "Oriya",
-    "Nepali",
-    "Ndebele",
-    "Marathi",
-    "Moldavian",
-    "Malaysian",
-    "Malagasay",
-    "Macedonian",
-    "Laotian",
-    "Korean",
-    "Khmer",
-    "Kazakh",
-    "Kannada",
-    "Japanese",
-    "Indonesian",
-    "Hindi",
-    "Hebrew",
-    "Hausa",
-    "Gurani",
-    "Gujurati",
-    "Greek",
-    "Georgian",
-    "Fulani",
-    "Dari",
-    "Chuvash",
-    "Chinese",
-    "Burmese",
-    "Bulgarian",
-    "Bengali",
-    "Belorussian",
-    "Bambora",
-    "Azerbaijani",
-    "Assamese",
-    "Armenian",
-    "Arabic",
-    "Amharic",
-};
-
-void programDataHandler(audiodata *data, void *ctx)
-{
-     QString audio;
-     if (data->ASCTy == 0)
-        audio = "DAB";
-     else if (data->ASCTy == 63)
-        audio = "DAB+";
-     else
-        audio = "Unknown";
-
-     QString language = "";
-     if ((data->language < 0x80) && (data->language >= 0))
-         language = dabLanguageCode[data->language & 0x7f];
-
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->programData(data->bitRate, audio, language, dabProgramType[data->programType & 0x1f]);
-}
-
-void programQualityHandler(int16_t frames, int16_t rs, int16_t aac, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->programQuality(frames, rs, aac);
-}
-
-void motDataHandler(uint8_t *data, int len, const char *filename, int contentsubType, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->motData(data, len, QString::fromUtf8(filename), contentsubType);
-}
-
-void tiiDataHandler(int tii, void *ctx)
-{
-    DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->tii(tii);
-}
-
-void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
+void DABDemodSink::systemData(bool sync, float snr, int32_t freqOffset)
 {
     if (getMessageQueueToChannel())
     {
@@ -327,6 +80,64 @@ void DABDemodSink::fibQuality(int16_t percent)
         DABDemod::MsgDABFIBQuality *msg = DABDemod::MsgDABFIBQuality::create(percent);
         getMessageQueueToChannel()->push(msg);
     }
+}
+
+// Over each status interval. Frames: of DAB+ superframes, those whose Fire code checks; of DAB
+// frames, those whose CRC does. RS: of the DAB+ Reed-Solomon codewords, those corrected. AAC:
+// of the DAB+ access units, those whose CRC checks. RS and AAC are -1 for DAB; a figure
+// stays while no new frames arrive.
+void DABDemodSink::audioQuality(const DABReceiverStatus& status)
+{
+    const AudioCounts counts{true, status.superframes, status.fireCodeErrors, status.rsUncorrectableRows,
+        status.audioFrames, status.audioFrameErrors};
+    const AudioCounts last = m_audioCounts;
+    m_audioCounts = counts;
+
+    // The receiver's counters start again with each service
+    if (!last.valid || (counts.superframes < last.superframes) || (counts.audioFrames < last.audioFrames)
+        || (counts.fireCodeErrors < last.fireCodeErrors) || (counts.rsUncorrectableRows < last.rsUncorrectableRows)
+        || (counts.audioFrameErrors < last.audioFrameErrors)) {
+        return;
+    }
+
+    const auto percent = [](int64_t bad, int64_t total) {
+        return static_cast<int16_t>(std::lround(100.0 * static_cast<double>(std::max<int64_t>(total - bad, 0)) / static_cast<double>(total)));
+    };
+    const int64_t superframes = counts.superframes - last.superframes;
+    const int64_t frames = counts.audioFrames - last.audioFrames;
+
+    if (status.dabPlus)
+    {
+        // A superframe has a Reed-Solomon codeword per 8 kbit/s of the sub-channel
+        const int64_t codewords = superframes * (status.bitrate / 8);
+        if (superframes > 0) {
+            m_frameQuality = percent(counts.fireCodeErrors - last.fireCodeErrors, superframes);
+        }
+        if (codewords > 0) {
+            m_rsQuality = percent(counts.rsUncorrectableRows - last.rsUncorrectableRows, codewords);
+        }
+        if (frames > 0) {
+            m_aacQuality = percent(counts.audioFrameErrors - last.audioFrameErrors, frames);
+        }
+    }
+    else
+    {
+        if (frames > 0) {
+            m_frameQuality = percent(counts.audioFrameErrors - last.audioFrameErrors, frames);
+        }
+        m_rsQuality = -1;
+        m_aacQuality = -1;
+    }
+
+    programQuality(m_frameQuality, m_rsQuality, m_aacQuality);
+}
+
+void DABDemodSink::resetAudioQuality()
+{
+    m_audioCounts = AudioCounts();
+    m_frameQuality = 0;
+    m_rsQuality = 0;
+    m_aacQuality = 0;
 }
 
 void DABDemodSink::programQuality(int16_t frames, int16_t rs, int16_t aac)
@@ -374,19 +185,29 @@ static int16_t scale(Real sample, float factor)
     return (int16_t)prod;
 }
 
+bool DABDemodSink::isAudioActive() const
+{
+    return QDateTime::currentMSecsSinceEpoch() - m_lastAudioMs.load() < 500;
+}
+
 void DABDemodSink::audio(int16_t *buffer, int size, int samplerate, bool stereo)
 {
     (void)stereo;
     (void)samplerate;
 
-    if (samplerate != m_dabAudioSampleRate)
-    {
+    m_lastAudioMs = QDateTime::currentMSecsSinceEpoch();
+
+    const bool rateChanged = samplerate != m_dabAudioSampleRate;
+    if (rateChanged) {
         applyDABAudioSampleRate(samplerate);
-        if (getMessageQueueToChannel())
-        {
-            DABDemod::MsgDABSampleRate *msg = DABDemod::MsgDABSampleRate::create(samplerate);
-            getMessageQueueToChannel()->push(msg);
-        }
+    }
+
+    // Reported again for each program, as the program's other details are
+    if ((rateChanged || !m_dabAudioSampleRateReported) && getMessageQueueToChannel())
+    {
+        DABDemod::MsgDABSampleRate *msg = DABDemod::MsgDABSampleRate::create(samplerate);
+        getMessageQueueToChannel()->push(msg);
+        m_dabAudioSampleRateReported = true;
     }
 
     // buffer is always 2 channels
@@ -421,12 +242,274 @@ void DABDemodSink::audio(int16_t *buffer, int size, int samplerate, bool stereo)
 
 void DABDemodSink::reset()
 {
-    dabReset(m_dab);
+    m_native->reset();
+    m_nativeBuffer.clear();
+    m_nativeVersion = 0;
+    m_nativeEnsembleId = -1;
+    m_nativeEnsembleLabel.clear();
+    m_nativePrograms.clear();
+    m_nativeProgramData.clear();
+    m_nativeTII = -2;
+    m_nativeServiceInfo.clear();
+    m_dabAudioSampleRateReported = false;
+    resetAudioQuality();
+    m_programSet = m_settings.m_program.isEmpty();
+    m_lastRSCorrected = 0;
 }
 
 void DABDemodSink::resetService()
 {
-    dabReset_msc(m_dab);
+    m_native->selectService(0);
+    m_nativeProgramData.clear();
+    m_dabAudioSampleRateReported = false;
+    resetAudioQuality();
+    m_programSet = false;
+    selectNativeProgram();
+}
+
+void DABDemodSink::processNative()
+{
+    m_native->process(m_nativeBuffer.data(), m_nativeBuffer.size());
+    m_nativeBuffer.clear();
+
+    if (++m_nativeStatusBlocks >= NativeStatusBlocks)
+    {
+        m_nativeStatusBlocks = 0;
+        nativeStatus();
+    }
+    else if (m_native->labelUpdated())
+    {
+        nativeLabel();
+    }
+}
+
+// Report the state of the receiver
+void DABDemodSink::nativeStatus()
+{
+    const DABReceiverStatus status = m_native->status();
+    const DABEnsemble& ensemble = m_native->ensemble();
+
+    systemData(status.locked && status.ficLocked, status.snrDB, (int32_t) std::lround(status.frequencyOffsetHz));
+    fibQuality((int16_t) std::lround(status.fibQuality));
+
+    if (ensemble.version() != m_nativeVersion)
+    {
+        m_nativeVersion = ensemble.version();
+        const DABEnsembleInfo& info = ensemble.info();
+
+        if ((info.eid >= 0) && (info.eid != m_nativeEnsembleId))
+        {
+            if (m_nativeEnsembleId >= 0)
+            {
+                // Another ensemble: its services replace those of the previous one
+                m_nativePrograms.clear();
+                m_nativeProgramData.clear();
+                m_nativeTII = -2;
+                m_programSet = m_settings.m_program.isEmpty();
+            }
+            m_nativeEnsembleId = info.eid;
+            m_nativeEnsembleLabel.clear();
+        }
+        if ((info.eid >= 0) && !info.label.empty() && (info.label != m_nativeEnsembleLabel))
+        {
+            m_nativeEnsembleLabel = info.label;
+            ensembleName(QString::fromStdString(info.label), info.eid);
+        }
+
+        // Services with audio, once they have a label
+        for (const DABService& service : ensemble.services())
+        {
+            const DABServiceComponent *primary = service.primaryComponent();
+            if (!primary || !primary->isAudio() || service.label.empty()) {
+                continue;
+            }
+            auto it = m_nativePrograms.find(service.sid);
+            if ((it == m_nativePrograms.end()) || (it->second != service.label))
+            {
+                m_nativePrograms[service.sid] = service.label;
+                programName(QString::fromStdString(service.label), (int) service.sid);
+            }
+        }
+        selectNativeProgram();
+    }
+
+    // The selected service
+    if (status.serviceFound)
+    {
+        DABService service;
+        if (ensemble.service(status.sid, service))
+        {
+            const DABServiceComponent *primary = service.primaryComponent();
+            const QString audio = status.dabPlus ? "DAB+" : "DAB";
+            const QString language = primary && (primary->language >= 0)
+                ? QString::fromStdString(DABTables::languageName(primary->language)) : QString();
+            const QString programType = service.pty >= 0
+                ? QString::fromStdString(DABTables::programmeTypeName(service.pty, ensemble.northAmericanPTy())) : QString();
+            const std::string summary = std::to_string(status.bitrate) + audio.toStdString() + language.toStdString() + programType.toStdString();
+            if (summary != m_nativeProgramData)
+            {
+                m_nativeProgramData = summary;
+                programData(status.bitrate, audio, language, programType);
+            }
+        }
+        audioQuality(status);
+    }
+
+    if (m_native->labelUpdated()) {
+        nativeLabel();
+    }
+    if (m_native->journalineUpdated() && getMessageQueueToChannel())
+    {
+        auto objects = std::make_shared<const DABDemod::JournalineObjects>(m_native->journaline());
+        getMessageQueueToChannel()->push(DABDemod::MsgDABJournaline::create(objects));
+    }
+    if (m_native->websiteUpdated() && getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(DABDemod::MsgDABWebsite::create(m_native->website(), status.website));
+    }
+    if (m_native->spiUpdated())
+    {
+        m_nativeSPI = m_native->spi();
+        if (getMessageQueueToChannel()) {
+            getMessageQueueToChannel()->push(DABDemod::MsgDABSPI::create(m_nativeSPI, m_nativeEnsembleId));
+        }
+    }
+    nativeServiceInfo(status);
+
+    const auto transmitters = m_native->tii();
+    if (!transmitters.empty())
+    {
+        const int value = (transmitters[0].mainId << 8) | transmitters[0].subId;
+        if (value != m_nativeTII)
+        {
+            m_nativeTII = value;
+            tii(value);
+        }
+    }
+    else if (m_native->tiiAnalysed() && (m_nativeTII != DABDemod::TIINone))
+    {
+        // Synchronized for a few seconds with no TII: the ensemble sends none
+        m_nativeTII = DABDemod::TIINone;
+        tii(DABDemod::TIINone);
+    }
+}
+
+// The selected service's announcement, programme on now and links, when they change
+void DABDemodSink::nativeServiceInfo(const DABReceiverStatus& status)
+{
+    DABDemod::ServiceInfo info;
+    info.sid = status.serviceFound ? status.sid : 0;
+    if (status.announcementType >= 0)
+    {
+        info.announcement = QString::fromStdString(DABTables::announcementTypeName(status.announcementType));
+        info.announcementService = QString::fromStdString(status.announcementService);
+        info.announcementSwitched = status.announcementSwitched;
+    }
+    if (m_nativeSPI && info.sid)
+    {
+        const modemdr::SPIProgramme *programme = m_nativeSPI->programmeAt(info.sid, QDateTime::currentSecsSinceEpoch());
+        if (programme)
+        {
+            info.programmeNow = QString::fromStdString(programme->text.name());
+            info.programmeNowDescription = QString::fromStdString(programme->text.description());
+        }
+    }
+    if (info.sid) {
+        info.links = m_native->serviceLinks();
+    }
+
+    // Changes only
+    QString summary = QString("%1|%2|%3|%4|%5|%6").arg(info.sid).arg(info.announcement).arg(info.announcementService)
+        .arg(info.announcementSwitched).arg(info.programmeNow).arg(info.programmeNowDescription);
+    for (const DABServiceLink& link : info.links)
+    {
+        summary += QString("|%1 %2 %3 %4 %5 %6").arg(link.kind).arg(link.id).arg(link.hard).arg(link.active)
+            .arg(QString::fromStdString(link.label)).arg(link.eids.size());
+        for (int64_t f : link.frequencies) {
+            summary += QString(" %1").arg(f);
+        }
+    }
+    if (summary == m_nativeServiceInfo) {
+        return;
+    }
+    m_nativeServiceInfo = summary;
+    if (getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(DABDemod::MsgDABServiceInfo::create(info));
+    }
+}
+
+// SPI files of the ensemble kept from before
+void DABDemodSink::setSPICache(const std::vector<modemdr::MOTFile>& files)
+{
+    m_native->setSPICache(files);
+}
+
+// The dynamic label and its DL Plus tags
+void DABDemodSink::nativeLabel()
+{
+    const DABDynamicLabel label = m_native->dynamicLabel();
+    data(QString::fromStdString(label.text));
+
+    QList<QPair<QString, QString>> tags;
+    for (const DABDLPlusObject& object : label.objects) {
+        tags.append({QString::fromStdString(DABDLPlusObject::contentTypeName(object.contentType)), QString::fromStdString(object.text)});
+    }
+    if (getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(DABDemod::MsgDABDLPlus::create(tags, label.itemRunning));
+    }
+}
+
+// Input level and clipping, and the receiver's statistics, twice a second
+void DABDemodSink::signalQuality()
+{
+    DABDemod::SignalQuality quality;
+    const double seconds = (double) m_inputSamples / m_channelSampleRate;
+    const double meanPower = m_inputPower / (m_inputSamples * (double) SDR_RX_SCALEF * SDR_RX_SCALEF);
+    quality.inputLevel = meanPower > 0.0 ? (float) (10.0 * std::log10(meanPower)) : -100.0f;
+    quality.clipping = (float) (100.0 * m_inputClipped / m_inputSamples);
+    m_inputPower = 0.0;
+    m_inputSamples = 0;
+    m_inputClipped = 0;
+
+    std::vector<float> carrierCN;
+    const DABReceiverStatus status = m_native->status();
+    quality.measured = true;
+    quality.cn = status.cnDB;
+    quality.nullDepth = status.nullDepthDB;
+    quality.mscBER = status.mscBER;
+    quality.ficBER = status.ficBER;
+    quality.rsCorrectedRate = (float) (std::max<int64_t>(0, status.rsCorrectedBytes - m_lastRSCorrected) / seconds);
+    m_lastRSCorrected = status.rsCorrectedBytes;
+    quality.framesLost = (int) status.framesLost;
+    quality.reacquisitions = std::max(0, status.locks - 1);
+    if (status.locked) {
+        carrierCN = m_native->carrierCN();
+    }
+    if (getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(DABDemod::MsgDABCarrierCN::create(carrierCN, status.cnDB));
+    }
+    if (getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(DABDemod::MsgDABSignalQuality::create(quality));
+    }
+}
+
+// Select the service named in the settings, once it is in the ensemble
+void DABDemodSink::selectNativeProgram()
+{
+    if (m_programSet || m_settings.m_program.isEmpty()) {
+        return;
+    }
+    const QString wanted = m_settings.m_program.trimmed();
+
+    for (const auto& program : m_nativePrograms)
+    {
+        if (QString::fromStdString(program.second).trimmed() == wanted)
+        {
+            m_native->selectService(program.first);
+            m_nativeProgramData.clear();
+            m_programSet = true;
+            break;
+        }
+    }
 }
 
 void DABDemodSink::processOneAudioSample(Complex &ci)
@@ -483,9 +566,18 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
 DABDemodSink::DABDemodSink() :
         m_audioSampleRate(48000),
         m_dabAudioSampleRate(10000), // Unused value to begin with
+        m_dabAudioSampleRateReported(false),
         m_channelSampleRate(DABDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_programSet(false),
+        m_nativeVersion(0),
+        m_nativeEnsembleId(-1),
+        m_nativeTII(-2),
+        m_nativeStatusBlocks(0),
+        m_inputPower(0.0),
+        m_inputSamples(0),
+        m_inputClipped(0),
+        m_lastRSCorrected(0),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
@@ -500,43 +592,42 @@ DABDemodSink::DABDemodSink() :
     m_demodBuffer.resize(1<<13);
     m_demodBufferFill = 0;
 
+    m_native.reset(new DABReceiver());
+    // Decode in a thread of its own, so the baseband thread only synchronizes and demodulates
+    m_native->setThreaded(true);
+    m_native->setAudioCallback([this](const int16_t *samples, int frames, int sampleRate) {
+        audio(const_cast<int16_t *>(samples), 2 * frames, sampleRate, true);
+    });
+    m_native->setSlideCallback([this](const modemdr::MOTObject& slide) {
+        motData(slide.body.data(), (int) slide.body.size(), QString::fromStdString(slide.name), slide.contentSubtype);
+    });
+    m_nativeBuffer.reserve(NativeBlock);
+
     applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-
-    m_api.dabMode = 1; // Latest DAB spec only has mode 1
-    m_api.syncsignal_Handler = syncHandler;
-    m_api.systemdata_Handler = systemDataHandler;
-    m_api.ensemblename_Handler = ensembleNameHandler;
-    m_api.programname_Handler = programNameHandler;
-    m_api.fib_quality_Handler = fibQualityHandler;
-    m_api.audioOut_Handler = audioHandler;
-    m_api.dataOut_Handler = dataHandler;
-    m_api.bytesOut_Handler = byteHandler;
-    m_api.programdata_Handler = programDataHandler;
-    m_api.program_quality_Handler = programQualityHandler;
-    m_api.motdata_Handler = motDataHandler;
-    m_api.tii_data_Handler = tiiDataHandler;
-    m_api.timeHandler = nullptr;
-    m_dab = dabInit(&m_device,
-                &m_api,
-                nullptr,
-                nullptr,
-                this);
-    dabStartProcessing(m_dab);
 }
 
 DABDemodSink::~DABDemodSink()
 {
-    dabExit(m_dab);
 }
 
 void DABDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     Complex ci;
 
+    // Samples at or near full scale (an 8-bit ADC's extremes)
+    const Real clipLevel = 0.98f * SDR_RX_SCALEF;
+
     for (SampleVector::const_iterator it = begin; it != end; ++it)
     {
         Complex c(it->real(), it->imag());
+        m_inputPower += (double) c.real() * c.real() + (double) c.imag() * c.imag();
+        if ((std::abs(c.real()) >= clipLevel) || (std::abs(c.imag()) >= clipLevel)) {
+            m_inputClipped++;
+        }
+        if (++m_inputSamples >= m_channelSampleRate / 2) {
+            signalQuality();
+        }
         c *= m_nco.nextIQ();
 
         if (m_interpolatorDistance == 1.0f)
@@ -576,11 +667,14 @@ void DABDemodSink::processOneSample(Complex &ci)
     }
     m_magsqCount++;
 
-    // Send sample to DAB library
     std::complex<float> c;
     c.real(ci.real()/SDR_RX_SCALED);
     c.imag(ci.imag()/SDR_RX_SCALED);
-    m_device.putSample(c);
+
+    m_nativeBuffer.push_back(c);
+    if (m_nativeBuffer.size() >= NativeBlock) {
+        processNative();
+    }
 }
 
 void DABDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -617,53 +711,45 @@ void DABDemodSink::applySettings(const QStringList& settingsKeys, const DABDemod
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settingsKeys.contains("program") && (settings.m_program != m_settings.m_program)) || force)
-    {
-        if (!settings.m_program.isEmpty()) {
-            setProgram(settings.m_program);
-        } else {
-            m_programSet = true;
-        }
-    }
+    const bool programChanged = (settingsKeys.contains("program") && (settings.m_program != m_settings.m_program)) || force;
+    const bool coherentChanged = (settingsKeys.contains("coherent") && (settings.m_coherent != m_settings.m_coherent)) || force;
+    const bool announcementsChanged = (settingsKeys.contains("announcementTypes") && (settings.m_announcementTypes != m_settings.m_announcementTypes)) || force;
 
     if (force) {
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
-}
 
-// Can't call setProgram directly from callback, so we get here via a message
-void DABDemodSink::programAvailable(const QString& programName)
-{
-    if (!m_programSet && (programName == m_settings.m_program)) {
-        setProgram(m_settings.m_program);
+    if (coherentChanged)
+    {
+        // Applied by the receiver's decoding thread; the audio restarts
+        m_native->setDetection(m_settings.m_coherent ? DABReceiver::Detection::Coherent : DABReceiver::Detection::ThreeSymbol);
     }
-}
 
-void DABDemodSink::setProgram(const QString& name)
-{
-    m_programSet = false;
-    QByteArray ba = name.toUtf8();
-    const char *program = ba.data();
-    if (!is_audioService (m_dab, program))
-    {
-        qWarning() << name << " is not an audio service";
+    if (announcementsChanged) {
+        m_native->setAnnouncementTypes(static_cast<uint16_t>(m_settings.m_announcementTypes));
     }
-    else
+
+    if (programChanged)
     {
-        dataforAudioService(m_dab, program, &m_ad, 0);
-        if (!m_ad.defined)
-        {
-            qWarning() << name << " audio data is not defined";
-        }
-        else
-        {
-            dabReset_msc(m_dab);
-            set_audioChannel(m_dab, &m_ad);
+        if (!m_settings.m_program.isEmpty()) {
+            setProgram();
+        } else {
             m_programSet = true;
         }
     }
+}
+
+// Select the program in the settings, once it is in the ensemble
+void DABDemodSink::setProgram()
+{
+    m_programSet = false;
+    m_native->selectService(0);
+    m_nativeProgramData.clear();
+    m_dabAudioSampleRateReported = false;
+    resetAudioQuality();
+    selectNativeProgram();
 }
 
 // Called when audio device sample rate changes

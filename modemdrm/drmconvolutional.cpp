@@ -18,6 +18,8 @@
 
 #include "drmconvolutional.h"
 
+#include "modemdr/viterbi.h"
+
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -273,39 +275,6 @@ const std::array<std::uint8_t, 128>& outputWords()
     return words;
 }
 
-// For butterfly j, the sign of each branch's soft value in the metric of the
-// path from state 2j + odd with the given input: +1 for a transmitted zero.
-struct BranchSigns
-{
-    alignas(32) float sign[2][2][6][32];
-};
-
-const BranchSigns& branchSigns()
-{
-    static const BranchSigns signs = [] {
-        BranchSigns table {};
-        const std::array<std::uint8_t, 128>& words = outputWords();
-        for (unsigned int odd = 0; odd < 2U; ++odd)
-        {
-            for (unsigned int input = 0; input < 2U; ++input)
-            {
-                for (unsigned int branch = 0; branch < 6U; ++branch)
-                {
-                    for (unsigned int j = 0; j < 32U; ++j)
-                    {
-                        const unsigned int state = 2U * j + odd;
-                        const bool one = ((words[2U * state + input] >> branch) & 1U) != 0U;
-                        table.sign[odd][input][branch][j] = one ? -1.0f : 1.0f;
-                    }
-                }
-            }
-        }
-
-        return table;
-    }();
-    return signs;
-}
-
 } // namespace
 
 std::vector<std::uint8_t> ConvolutionalCode::encodeMother(
@@ -471,117 +440,26 @@ bool decodeUEPImpl(
         return false;
     }
 
-    constexpr int StateCount = 1 << (ConvolutionalCode::ConstraintLength - 1);
-    const BranchSigns& signs = branchSigns();
-    constexpr float negativeInfinity = -std::numeric_limits<float>::infinity();
-    std::array<float, StateCount> current;
-    std::array<float, StateCount> next;
-    current.fill(negativeInfinity);
-    current[0] = 0.0f;
-    // Each next state has two possible predecessors, differing only in their
-    // least-significant bit; that bit is all the traceback needs, one bit per
-    // state in a word per step.
-    static_assert(StateCount == 64, "one survivor word per step");
-    std::vector<std::uint64_t> survivorBits(stepCount, 0U);
+    // The mother codeword, with zeros (erasures) where bits were punctured, for the forward
+    // pass shared with DAB
+    std::vector<float> mother(stepCount * 6U, 0.0f);
     const float* soft = softBits.data();
-
     for (std::size_t step = 0; step < stepCount; ++step)
     {
-        // The transmitted branches of this step and their soft values.
-        const unsigned int mask = sentMasks[step];
-        std::array<unsigned int, 6> branches {};
-        std::array<float, 6> values {};
-        int sent = 0;
         for (unsigned int branch = 0; branch < 6U; ++branch)
         {
-            if (mask & (1U << branch))
-            {
-                branches[static_cast<std::size_t>(sent)] = branch;
-                values[static_cast<std::size_t>(sent)] = *soft++;
-                ++sent;
-            }
-        }
-
-        // States 2j and 2j + 1 both lead to j (input 0) and j + 32 (input 1).
-        // Each path metric adds the branch values one at a time from the
-        // previous metric, as a branch-by-branch decoder does (the +-1 signs
-        // are exact), so decisions are unchanged; the loops over j vectorize.
-        // An unreachable state's -infinity stays -infinity and never survives.
-        alignas(32) float metrics[2][2][32]; // [odd predecessor][input][j]
-        for (unsigned int odd = 0; odd < 2U; ++odd)
-        {
-            for (unsigned int input = 0; input < 2U; ++input)
-            {
-                float* metric = metrics[odd][input];
-                for (unsigned int j = 0; j < 32U; ++j) {
-                    metric[j] = current[2U * j + odd];
-                }
-
-                for (int i = 0; i < sent; ++i)
-                {
-                    const float value = values[static_cast<std::size_t>(i)];
-                    const float* sign = signs.sign[odd][input][branches[static_cast<std::size_t>(i)]];
-                    for (unsigned int j = 0; j < 32U; ++j) {
-                        metric[j] += sign[j] * value;
-                    }
-                }
-            }
-        }
-
-        // On a tie the even state, considered first, survives.
-        alignas(32) std::uint8_t survivors[StateCount];
-        for (unsigned int j = 0; j < 32U; ++j)
-        {
-            const bool zeroOdd = metrics[1][0][j] > metrics[0][0][j];
-            next[j] = zeroOdd ? metrics[1][0][j] : metrics[0][0][j];
-            survivors[j] = static_cast<std::uint8_t>(zeroOdd);
-            const bool oneOdd = metrics[1][1][j] > metrics[0][1][j];
-            next[j + 32U] = oneOdd ? metrics[1][1][j] : metrics[0][1][j];
-            survivors[j + 32U] = static_cast<std::uint8_t>(oneOdd);
-        }
-
-        std::uint64_t word = 0U;
-        for (unsigned int j = 0; j < 64U; ++j) {
-            word |= static_cast<std::uint64_t>(survivors[j]) << j;
-        }
-
-        survivorBits[step] = word;
-        current = next;
-        // Path metrics only grow (to about 1e5 over a 64-QAM MSC block), where
-        // float spacing would swallow the small soft values of faded cells.
-        // Subtracting the same value from every state changes no decision in
-        // exact arithmetic; in float it can only move a near tie.
-        if ((step & 15U) == 15U)
-        {
-            float best = negativeInfinity;
-            for (const float metric : current) {
-                best = std::max(best, metric);
-            }
-
-            if (best != negativeInfinity)
-            {
-                for (float& metric : current) {
-                    metric -= best;
-                }
+            if (sentMasks[step] & (1U << branch)) {
+                mother[step * 6U + branch] = *soft++;
             }
         }
     }
 
-    if (current[0] == negativeInfinity) {
-        return false;
-    }
-
+    static const modemdr::Viterbi viterbi(modemdr::Viterbi::drmGenerators());
+    std::vector<std::uint64_t> decisions(stepCount);
+    viterbi.forward(mother.data(), static_cast<int>(stepCount), decisions.data());
     informationBits.assign(informationBitCount, 0U);
-    unsigned int state = 0;
-    for (std::size_t step = stepCount; step-- > 0;)
-    {
-        if (step < informationBitCount) {
-            informationBits[step] = static_cast<std::uint8_t>(state >> 5U);
-        }
-
-        state = ((state & 31U) << 1U) | static_cast<unsigned int>((survivorBits[step] >> state) & 1U);
-    }
-
+    modemdr::Viterbi::traceback(decisions.data(), static_cast<int>(stepCount), static_cast<int>(informationBitCount),
+        informationBits.data());
     return true;
 }
 

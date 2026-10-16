@@ -81,10 +81,48 @@ private:
     DABDemod* m_dabDemod;
     int m_basebandSampleRate;
     uint32_t m_tickCount;
+    bool m_audioPlaying;                // The mute button shows it green
     MessageQueue m_inputMessageQueue;
     double m_channelFreq;
 
     QMenu *menu;                        // Column select context menu
+
+    // Rows of the Current Program, Statistics and Transmitter tables
+    enum InfoField
+    {
+        InfoProgram,
+        InfoEnsemble,
+        InfoProgramType,
+        InfoLanguage,
+        InfoAudio,
+        InfoBitrate,
+        InfoSampleRate,
+        InfoAnnouncement,
+        InfoNowPlaying,
+        InfoOnNow,
+        InfoSync,
+        InfoFrequencyOffset,
+        InfoSNR,
+        InfoCN,
+        InfoNullDepth,
+        InfoClipping,
+        InfoFIB,
+        InfoFICBER,
+        InfoFrames,
+        InfoMSCBER,
+        InfoRS,
+        InfoRSCorrected,
+        InfoAAC,
+        InfoLost,
+        InfoGain,
+        InfoTIIMainId,
+        InfoTIISubId,
+        InfoFieldCount
+    };
+
+    // Data from the receiver
+    DABDemod::ServiceInfo m_serviceInfo;
+    std::shared_ptr<const modemdr::SPIData> m_spi;
 
     explicit DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~DABDemodGUI();
@@ -102,7 +140,21 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
     void resetService();
+    void clearSignalQuality();
     void clearProgram();
+    void setupInfoTables();
+    QTableWidgetItem *infoItem(InfoField field, int column = 1) const;
+    void setInfo(InfoField field, const QString& value);
+    QString info(InfoField field) const;
+    void setInfoToolTip(InfoField field, const QString& toolTip);
+    void setInfoColor(InfoField field, const QColor& color);    // An invalid colour for the default
+    void setInfoBold(InfoField field, bool bold);
+    void showDLPlus(const DABDemod::MsgDABDLPlus& report);
+    void showServiceInfo();
+    void showLinks();
+    void showSPI();
+    void updateProgramLogos();
+    void updateJournalineButtons();
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
 
@@ -112,6 +164,10 @@ private slots:
     void on_audioMute_toggled(bool checked);
     void on_volume_valueChanged(int value);
     void on_rfBW_valueChanged(int index);
+    void on_coherent_toggled(bool checked);
+    void on_announcements_toggled(bool checked);
+    void announcementsMenu(const QPoint& p);
+    void on_links_cellDoubleClicked(int row, int column);
     void on_filter_editingFinished();
     void on_clearTable_clicked();
     void on_programs_cellDoubleClicked(int row, int column);
