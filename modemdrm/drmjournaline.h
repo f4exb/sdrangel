@@ -28,6 +28,8 @@
 #include <vector>
 
 #include "export.h"
+#include "modemdr/inflate.h"
+#include "modemdr/journaline.h"
 #include "drmdata.h"
 #include "drmmsc.h"
 #include "drmsdc.h"
@@ -35,63 +37,10 @@
 namespace modemdrm
 {
 
-// One Journaline (ETSI TS 102 979) news object: a menu linking to other
-// objects, a page of text, a title or a list.
-struct MODEMDRM_API JournalineObject
-{
-    enum Type
-    {
-        Menu = 1,
-        PlainText = 2,
-        TitleOnly = 3,
-        List = 4
-    };
-
-    struct Item
-    {
-        std::string text;     // UTF-8, line breaks as '\n'
-        int linkId = -1;      // menu items: the object linked to
-        bool newRow = true;   // list items: a new row rather than another column
-    };
-
-    int objectId = -1;        // 0 is the root menu
-    int type = PlainText;
-    bool staticObject = false;
-    int revision = 0;
-    std::string title;
-    std::vector<Item> items;  // menu entries, the text (one item) or list cells
-};
-
-// Inflates raw DEFLATE data (RFC 1951) into output, up to maximumOutput bytes.
-// Returns false for invalid or oversized data.
-MODEMDRM_API bool inflateRaw(const std::uint8_t* data, std::size_t size,
-    std::vector<std::uint8_t>& output, std::size_t maximumOutput);
-
-// The objects of one Journaline service, from its data units: each an MSC data
-// group (EN 300 401 clause 5.3.3) carrying one NML object, which may be
-// compressed. The latest revision of each object is kept.
-class MODEMDRM_API JournalineDecoder
-{
-public:
-    void reset();
-    // One data unit; true when it added or changed an object.
-    bool push(const std::vector<std::uint8_t>& dataUnit);
-    // Parses one NML object, without its transport.
-    static bool parseObject(const std::uint8_t* data, std::size_t size, JournalineObject& object);
-
-    const std::map<int, JournalineObject>& objects() const { return m_objects; }
-    int invalidDataUnits() const { return m_invalidDataUnits; }
-
-    static constexpr std::size_t MaximumObjects = 1024U; // the root menu is always kept
-    static constexpr std::size_t MaximumObjectBytes = 4096U; // NML objects are at most 4 kB
-
-private:
-
-    std::map<int, JournalineObject> m_objects;
-    std::map<int, std::uint64_t> m_received; // reception order, for eviction
-    std::uint64_t m_clock = 0;
-    int m_invalidDataUnits = 0;
-};
+// Journaline is shared with DAB
+using modemdr::JournalineObject;
+using modemdr::JournalineDecoder;
+using modemdr::inflateRaw;
 
 // The Journaline services of a multiplex: every data component with user
 // application 0x44a (DAB domain, packet mode with data units), decoded from

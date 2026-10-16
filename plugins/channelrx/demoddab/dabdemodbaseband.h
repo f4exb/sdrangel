@@ -73,6 +73,7 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_sink.getMagSqLevels(avg, peak, nbSamples);
     }
+    bool isAudioActive() const { return m_sink.isAudioActive(); }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
     void setChannel(ChannelAPI *channel);

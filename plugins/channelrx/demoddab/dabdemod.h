@@ -19,16 +19,27 @@
 #ifndef INCLUDE_DABDEMOD_H
 #define INCLUDE_DABDEMOD_H
 
+#include <map>
+#include <memory>
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QHash>
+#include <QList>
 #include <QMap>
+#include <QPair>
+#include <QSet>
 #include <QMutex>
 #include <QThread>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+
+#include "modemdab/dabensemble.h"
+#include "modemdr/journaline.h"
+#include "modemdr/mot.h"
+#include "modemdr/spi.h"
 
 #include "dabdemodbaseband.h"
 #include "dabdemodsettings.h"
@@ -147,20 +158,20 @@ public:
 
     public:
         bool getSync() const { return m_sync; }
-        int16_t getSNR() const { return m_snr; }
+        float getSNR() const { return m_snr; }
         int32_t getFrequencyOffset() const { return m_frequencyOffset; }
 
-        static MsgDABSystemData* create(bool sync, int16_t snr, int32_t frequencyOffset)
+        static MsgDABSystemData* create(bool sync, float snr, int32_t frequencyOffset)
         {
             return new MsgDABSystemData(sync, snr, frequencyOffset);
         }
 
     private:
         bool m_sync;
-        int16_t m_snr;
+        float m_snr;
         int32_t m_frequencyOffset;
 
-        MsgDABSystemData(bool sync, int16_t snr, int32_t frequencyOffset) :
+        MsgDABSystemData(bool sync, float snr, int32_t frequencyOffset) :
             Message(),
             m_sync(sync),
             m_snr(snr),
@@ -280,6 +291,156 @@ public:
         { }
     };
 
+    // DL Plus tags of the selected service's dynamic label: content type name and text
+    class MsgDABDLPlus : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QList<QPair<QString, QString>>& getTags() const { return m_tags; }
+        bool getItemRunning() const { return m_itemRunning; }
+
+        static MsgDABDLPlus* create(const QList<QPair<QString, QString>>& tags, bool itemRunning)
+        {
+            return new MsgDABDLPlus(tags, itemRunning);
+        }
+
+    private:
+        QList<QPair<QString, QString>> m_tags;
+        bool m_itemRunning;
+
+        MsgDABDLPlus(const QList<QPair<QString, QString>>& tags, bool itemRunning) :
+            Message(),
+            m_tags(tags),
+            m_itemRunning(itemRunning)
+        { }
+    };
+
+    using JournalineObjects = std::map<int, modemdr::JournalineObject>;
+
+    // The Journaline objects of the selected service
+    class MsgDABJournaline : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        std::shared_ptr<const JournalineObjects> getObjects() const { return m_objects; }
+
+        static MsgDABJournaline* create(std::shared_ptr<const JournalineObjects> objects)
+        {
+            return new MsgDABJournaline(objects);
+        }
+
+    private:
+        std::shared_ptr<const JournalineObjects> m_objects;
+
+        MsgDABJournaline(std::shared_ptr<const JournalineObjects> objects) :
+            Message(),
+            m_objects(objects)
+        { }
+    };
+
+    // The selected service's announcement, programme on now and where else it can be received
+    struct ServiceInfo
+    {
+        quint32 sid = 0;
+        QString announcement;               //!< Type of the announcement in progress, empty for none
+        QString announcementService;        //!< The service it comes from
+        bool announcementSwitched = false;  //!< The audio is the announcement's
+        QString programmeNow;               //!< From the SPI
+        QString programmeNowDescription;
+        std::vector<modemdab::DABServiceLink> links;
+    };
+
+    class MsgDABServiceInfo : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const ServiceInfo& getInfo() const { return m_info; }
+
+        static MsgDABServiceInfo* create(const ServiceInfo& info)
+        {
+            return new MsgDABServiceInfo(info);
+        }
+
+    private:
+        ServiceInfo m_info;
+
+        MsgDABServiceInfo(const ServiceInfo& info) :
+            Message(),
+            m_info(info)
+        { }
+    };
+
+    // The ensemble's Service and Programme Information
+    class MsgDABSPI : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        std::shared_ptr<const modemdr::SPIData> getData() const { return m_data; }
+        int getEnsembleId() const { return m_ensembleId; }
+
+        static MsgDABSPI* create(std::shared_ptr<const modemdr::SPIData> data, int ensembleId)
+        {
+            return new MsgDABSPI(data, ensembleId);
+        }
+
+    private:
+        std::shared_ptr<const modemdr::SPIData> m_data;
+        int m_ensembleId;       //!< -1 if not known
+
+        MsgDABSPI(std::shared_ptr<const modemdr::SPIData> data, int ensembleId) :
+            Message(),
+            m_data(data),
+            m_ensembleId(ensembleId)
+        { }
+    };
+
+    // The program's MOT Broadcast Website: the files received so far
+    class MsgDABWebsite : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        std::shared_ptr<const modemdr::MOTWebsite> getWebsite() const { return m_website; }
+        bool getPresent() const { return m_present; }
+
+        static MsgDABWebsite* create(std::shared_ptr<const modemdr::MOTWebsite> website, bool present)
+        {
+            return new MsgDABWebsite(website, present);
+        }
+
+    private:
+        std::shared_ptr<const modemdr::MOTWebsite> m_website;
+        bool m_present;         //!< The program has a Broadcast Website
+
+        MsgDABWebsite(std::shared_ptr<const modemdr::MOTWebsite> website, bool present) :
+            Message(),
+            m_website(website),
+            m_present(present)
+        { }
+    };
+
+    // SPI files of the ensemble kept from before, for the receiver
+    class MsgDABSPICache : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const std::vector<modemdr::MOTFile>& getFiles() const { return m_files; }
+
+        static MsgDABSPICache* create(const std::vector<modemdr::MOTFile>& files)
+        {
+            return new MsgDABSPICache(files);
+        }
+
+    private:
+        std::vector<modemdr::MOTFile> m_files;
+
+        MsgDABSPICache(const std::vector<modemdr::MOTFile>& files) :
+            Message(),
+            m_files(files)
+        { }
+    };
+
+    static const int TIINone = -1;      //!< TII value when the ensemble sends none (or none is found yet)
+
     class MsgDABTII : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -297,6 +458,74 @@ public:
         MsgDABTII(int tii) :
             Message(),
             m_tii(tii)
+        { }
+    };
+
+    // Measurements of the signal, for its quality and the gain setting
+    struct SignalQuality
+    {
+        bool measured = false;          // The receiver's statistics are set (not in a default SignalQuality)
+        float cn = 0.0f;                // dB, from the null symbol
+        float nullDepth = 0.0f;         // dB
+        float mscBER = 0.0f;            // Before error correction
+        float ficBER = 0.0f;
+        float rsCorrectedRate = 0.0f;   // Bytes per second
+        int framesLost = 0;
+        int reacquisitions = 0;
+        float inputLevel = -100.0f;     // dBFS, mean power
+        float clipping = 0.0f;          // % of samples
+        int gainStatus = -1;            // GainStatus
+        QString gainAdvice;
+    };
+
+    enum GainStatus {
+        GainUnknown = -1,
+        GainOK = 0,
+        GainIncrease = 1,
+        GainReduce = 2,
+        GainCheck = 3       //!< MER well below C/N: overload, or multipath or interference
+    };
+
+    class MsgDABSignalQuality : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SignalQuality& getQuality() const { return m_quality; }
+
+        static MsgDABSignalQuality* create(const SignalQuality& quality)
+        {
+            return new MsgDABSignalQuality(quality);
+        }
+
+    private:
+        SignalQuality m_quality;
+
+        MsgDABSignalQuality(const SignalQuality& quality) :
+            Message(),
+            m_quality(quality)
+        { }
+    };
+
+    class MsgDABCarrierCN : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const std::vector<float>& getCarrierCN() const { return m_carrierCN; }
+        float getMedian() const { return m_median; }
+
+        static MsgDABCarrierCN* create(const std::vector<float>& carrierCN, float median)
+        {
+            return new MsgDABCarrierCN(carrierCN, median);
+        }
+
+    private:
+        std::vector<float> m_carrierCN;
+        float m_median;
+
+        MsgDABCarrierCN(const std::vector<float>& carrierCN, float median) :
+            Message(),
+            m_carrierCN(carrierCN),
+            m_median(median)
         { }
     };
 
@@ -402,9 +631,14 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
+    bool isAudioActive() const { return m_basebandSink->isAudioActive(); }
 
     uint32_t getNumberOfDeviceStreams() const;
     int getAudioSampleRate() const override { return m_basebandSink->getAudioSampleRate(); }
+
+    // Advice on the receiver gain from the input level, clipping, and the MER (snr) against
+    // the C/N. Returns a GainStatus, and sets the text.
+    static int gainAdvice(const SignalQuality& quality, bool sync, float snr, QString& advice);
 
     static const char * const m_channelIdURI;
     static const char * const m_channelId;
@@ -419,7 +653,7 @@ private:
 
     mutable QMutex m_reportMutex;
     bool m_reportSync;
-    int m_reportSNR;
+    float m_reportSNR;
     int m_reportFrequencyOffset;
     QString m_reportEnsembleName;
     int m_reportEnsembleId;
@@ -435,6 +669,10 @@ private:
     int m_reportFIBQuality;
     int m_reportTII;
     QString m_reportData;
+    SignalQuality m_reportQuality;
+    QList<QPair<QString, QString>> m_reportDLPlus;
+    QString m_reportAnnouncement;
+    QString m_reportProgrammeNow;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -443,7 +681,17 @@ private:
     void applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void clearReport();
+    void resetReceiver();
     void clearProgramReport();
+
+    // The SPI (logos, station information and schedules) of each ensemble, kept between runs
+    static constexpr int SPICacheDays = 14;     //!< Files not received again in this time are removed
+    int m_spiCacheEnsemble;                     //!< Whose cache the receiver has, -1 for none
+    QHash<QString, const void*> m_spiSaved;     //!< The data of each file saved, by name
+    QSet<const void*> m_spiLoaded;              //!< The data loaded from the cache
+    static QString spiCacheDirectory(int ensembleId);
+    void loadSPICache(int ensembleId);
+    void saveSPICache(const modemdr::SPIData& data, int ensembleId);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(

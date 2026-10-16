@@ -29,22 +29,18 @@
 #include <vector>
 
 #include "export.h"
+#include "modemdr/mot.h"
 #include "drmsdc.h"
 
 namespace modemdrm
 {
 
-// A complete MOT object (ETSI EN 301 234): the body and what its header says
-// about it.
-struct MODEMDRM_API MOTObject
-{
-    int transportId = -1;
-    int contentType = -1;    // 2 image (EN 301 234 annex A)
-    int contentSubtype = -1; // image: 0 GIF, 1 JFIF, 2 BMP, 3 PNG
-    std::string name;        // ContentName, without its character set byte
-    std::string mimeType;
-    std::vector<std::uint8_t> body;
-};
+// MOT is shared with DAB
+using modemdr::MOTObject;
+using modemdr::MOTDecoder;
+using modemdr::MOTFile;
+using modemdr::MOTWebsite;
+using modemdr::MOTDirectoryDecoder;
 
 // Packet mode (ES 201 980 clause 6.6.4): fixed-length packets, each a header
 // byte, a data field and a CRC, fill the stream's bytes of a multiplex frame.
@@ -80,147 +76,6 @@ private:
     std::array<int, 4> m_lostPackets {{0, 0, 0, 0}};
     int m_validPackets = 0;
     int m_invalidPackets = 0;
-};
-
-// MOT in header mode, as the slideshow uses (ETSI TS 101 499): MSC data
-// groups (ETSI EN 300 401 clause 5.3.3) of type 3 carry an object's header
-// and of type 4 its body, each segmented and identified by transport Id.
-class MODEMDRM_API MOTDecoder
-{
-public:
-    void reset();
-    // One MSC data group; appends the objects it completes.
-    void push(const std::vector<std::uint8_t>& dataGroup, std::vector<MOTObject>& completed);
-    int invalidDataGroups() const { return m_invalidDataGroups; }
-
-private:
-    struct Segments
-    {
-        std::map<int, std::vector<std::uint8_t>> parts;
-        int last = -1;      // number of the last segment, once seen
-        std::size_t bytes = 0;
-        bool complete() const;
-        std::vector<std::uint8_t> join() const;
-    };
-
-    struct Pending
-    {
-        Segments header;
-        Segments body;
-        std::uint64_t lastUse = 0;
-    };
-
-    static constexpr std::size_t MaximumObjects = 8U;
-    static constexpr std::size_t MaximumObjectBytes = 1048576U;
-    static constexpr std::size_t DeliveredMemory = 1U;
-
-    static bool parseHeader(const std::vector<std::uint8_t>& header, MOTObject& object);
-    void complete(int transportId, std::vector<MOTObject>& completed);
-
-    std::map<int, Pending> m_pending;
-    // The object delivered last (transport Id and body size): its repetitions
-    // are dropped, but a carousel cycling its slides shows each again.
-    std::deque<std::pair<int, std::size_t>> m_delivered;
-    std::uint64_t m_clock = 0;
-    int m_invalidDataGroups = 0;
-};
-
-// A file of a MOT Broadcast Website. The data is shared, so that copies of a
-// website are cheap.
-struct MODEMDRM_API MOTWebsiteFile
-{
-    std::string mimeType;
-    std::shared_ptr<const std::vector<std::uint8_t>> data;
-};
-
-// The files of a MOT Broadcast Website (ETSI TS 101 498) received so far.
-struct MODEMDRM_API MOTWebsite
-{
-    std::map<std::string, MOTWebsiteFile> files; // by ContentName, a path without a leading "/"
-    std::set<std::string> listed; // the names the current directory lists, received or not
-    std::string startPage;    // the root's DirectoryIndex, else index.html or the first page
-    std::string indexName;    // the DirectoryIndex, the file a directory URL gives (TS 101 498-1 A.1.1)
-    int directoryObjects = 0; // objects the current directory describes
-    // Changes when the decoder starts again (another service, component or
-    // station): a viewer of the website shown before starts again too
-    std::uint64_t generation = 0;
-};
-
-// MOT in directory mode (ETSI EN 301 234 clause 7.2), as the Broadcast
-// Website uses: an MOT directory (data group type 6, or 7 compressed) holds
-// every object's header, and bodies (type 4) are matched to it by transport
-// Id. A new directory replaces the old one: files it no longer lists are
-// removed.
-class MODEMDRM_API MOTDirectoryDecoder
-{
-public:
-    void reset();
-    // The DirectoryIndex profile to prefer (TS 101 498-1 clause 5.5.1).
-    void setProfiles(const std::vector<std::uint8_t>& profiles) { m_profiles = profiles; }
-    // One MSC data group; true when a file arrived or the directory changed.
-    bool push(const std::vector<std::uint8_t>& dataGroup);
-    const MOTWebsite& website() const { return m_website; }
-    int invalidDataGroups() const { return m_invalidDataGroups; }
-
-    // Body compression (EN 301 234 clause 6.2.2.1.3, TS 101 756 table 18).
-    static bool gunzip(const std::uint8_t* data, std::size_t size, std::vector<std::uint8_t>& output,
-        std::size_t maximumOutput);
-
-    // The memory limits: broadcast data is untrusted
-    static constexpr std::size_t MaximumObjects = 4096U;
-    static constexpr std::size_t MaximumPendingEntities = 1024U;
-    static constexpr std::size_t SegmentOverhead = 64U; // counted for each segment held
-    static constexpr std::size_t MaximumObjectBytes = 4194304U;
-    static constexpr std::size_t MaximumPendingBytes = 8388608U;
-    static constexpr std::size_t MaximumWebsiteBytes = 16777216U;
-
-private:
-    struct Entry
-    {
-        std::string name;
-        std::string mimeType;
-        int compression = 0; // CompressionType, 0 for none
-        bool scrambled = false;
-        std::size_t bodySize = 0;
-    };
-
-    struct Segments
-    {
-        std::map<int, std::vector<std::uint8_t>> parts;
-        int last = -1;
-        std::size_t bytes = 0;
-        std::uint64_t lastUse = 0;
-        bool complete() const;
-        std::vector<std::uint8_t> join() const;
-    };
-
-
-    bool applyDirectory(int transportId, const std::vector<std::uint8_t>& directory);
-    bool addFile(int transportId, const std::vector<std::uint8_t>& body);
-    void chooseStartPage();
-    void release(const Segments& segments);
-    void dropUnlisted();
-
-    std::vector<std::uint8_t> m_profiles;
-    std::map<int, Segments> m_directorySegments; // by transport Id
-    int m_directoryTransportId = -1;
-    std::map<int, Entry> m_entries;              // the directory, by transport Id
-    std::vector<std::pair<int, std::string>> m_directoryIndex; // profile, name
-    std::map<int, Segments> m_bodies;            // bodies being received
-    struct Unlisted
-    {
-        std::vector<std::uint8_t> data;
-        std::uint64_t lastUse = 0;
-    };
-    std::map<int, Unlisted> m_unlisted;          // complete bodies the directory does not list (yet)
-    std::size_t m_pendingBytes = 0;              // held segments and bodies, with their overhead
-    std::map<std::string, int> m_fileTransportIds;
-    std::set<int> m_failed;                      // bodies that could not be decoded
-    MOTWebsite m_website;
-    std::size_t m_websiteBytes = 0;
-    std::uint64_t m_generation = 0;              // the website's, counted up at each reset
-    std::uint64_t m_clock = 0;
-    int m_invalidDataGroups = 0;
 };
 
 // The MOT slideshow data component of a service (SDC entity 5, user

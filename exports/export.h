@@ -179,6 +179,30 @@
 #  define MODEMDRM_API
 #endif
 
+/* the 'MODEMDR_API' controls the import/export of 'modemdr' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef modemdr_EXPORTS
+#    define MODEMDR_API __SDR_EXPORT
+#  else
+#    define MODEMDR_API __SDR_IMPORT
+#  endif
+#else
+#  define MODEMDR_API
+#endif
+
+/* the 'MODEMDAB_API' controls the import/export of 'modemdab' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef modemdab_EXPORTS
+#    define MODEMDAB_API __SDR_EXPORT
+#  else
+#    define MODEMDAB_API __SDR_IMPORT
+#  endif
+#else
+#  define MODEMDAB_API
+#endif
+
   /* the 'MODEMDVB_API' controls the import/export of 'modemdvb' symbols
  */
 #if !defined(sdrangel_STATIC)
