@@ -640,7 +640,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTextBrowser" name="journaline">
+         <widget class="JournalineBrowser" name="journaline">
           <property name="toolTip">
            <string>Journaline news: follow a menu entry to open it</string>
           </property>
@@ -718,9 +718,35 @@
          </layout>
         </item>
         <item>
-         <widget class="DRMWebsiteBrowser" name="website">
+         <widget class="WebsiteBrowser" name="website">
           <property name="toolTip">
            <string>MOT Broadcast Website of the selected service: follow a link to open its page</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="programmeGuideTab">
+       <attribute name="title">
+        <string>Programme Guide</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="programmeGuideLayout">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="ProgrammeGuide" name="programmeGuide" native="true">
+          <property name="toolTip">
+           <string>The selected service's programme guide, from the multiplex's Service and Programme Information (SPI)</string>
           </property>
          </widget>
         </item>
@@ -832,6 +858,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>JournalineBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header>gui/journalinebrowser.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
@@ -850,9 +881,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>DRMWebsiteBrowser</class>
+   <class>ProgrammeGuide</class>
+   <extends>QWidget</extends>
+   <header>gui/programmeguide.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WebsiteBrowser</class>
    <extends>QTextBrowser</extends>
-   <header>drmwebsitebrowser.h</header>
+   <header>gui/websitebrowser.h</header>
   </customwidget>
  </customwidgets>
  <resources>

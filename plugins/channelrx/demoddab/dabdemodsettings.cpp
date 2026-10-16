@@ -51,6 +51,8 @@ void DABDemodSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_coherent = false;
+    m_announcementTypes = 0;
 
     for (int i = 0; i < DABDEMOD_COLUMNS; i++)
     {
@@ -89,6 +91,9 @@ QByteArray DABDemodSettings::serialize() const
     s.writeS32(17, m_workspaceIndex);
     s.writeBlob(18, m_geometryBytes);
     s.writeBool(19, m_hidden);
+    s.writeString(21, m_program);
+    s.writeBool(22, m_coherent);
+    s.writeS32(23, m_announcementTypes);
 
     for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -157,6 +162,9 @@ bool DABDemodSettings::deserialize(const QByteArray& data)
         d.readS32(17, &m_workspaceIndex, 0);
         d.readBlob(18, &m_geometryBytes);
         d.readBool(19, &m_hidden, false);
+        d.readString(21, &m_program, "");
+        d.readBool(22, &m_coherent, false);
+        d.readS32(23, &m_announcementTypes, 0);
 
         for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
@@ -228,6 +236,12 @@ void DABDemodSettings::applySettings(const QStringList& settingsKeys, const DABD
     if (settingsKeys.contains("hidden")) {
         m_hidden = settings.m_hidden;
     }
+    if (settingsKeys.contains("coherent")) {
+        m_coherent = settings.m_coherent;
+    }
+    if (settingsKeys.contains("announcementTypes")) {
+        m_announcementTypes = settings.m_announcementTypes;
+    }
 }
 
 QString DABDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -284,6 +298,12 @@ QString DABDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("hidden") || force) {
         ostr << " m_hidden: " << m_hidden;
+    }
+    if (settingsKeys.contains("coherent") || force) {
+        ostr << " m_coherent: " << m_coherent;
+    }
+    if (settingsKeys.contains("announcementTypes") || force) {
+        ostr << " m_announcementTypes: " << m_announcementTypes;
     }
 
     return QString(ostr.str().c_str());

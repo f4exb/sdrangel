@@ -36,6 +36,7 @@ set(sdrgui_SOURCES
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dialogpositioner.cpp
+    gui/journalinebrowser.cpp
     gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
@@ -87,6 +88,7 @@ set(sdrgui_SOURCES
     gui/pluginpresetsdialog.cpp
     gui/presetitem.cpp
     gui/profiledialog.cpp
+    gui/programmeguide.cpp
     gui/rollupcontents.cpp
     gui/samplingdevicedialog.cpp
     gui/scaleengine.cpp
@@ -108,6 +110,7 @@ set(sdrgui_SOURCES
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/websitebrowser.cpp
     gui/welcomedialog.cpp
     gui/workspace.cpp
     gui/connectionoverlay.cpp
@@ -182,6 +185,7 @@ set(sdrgui_HEADERS
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dialogpositioner.h
+    gui/journalinebrowser.h
     gui/messagedialog.h
     gui/dialpopup.h
     gui/dmsspinbox.h
@@ -234,6 +238,7 @@ set(sdrgui_HEADERS
     gui/presetitem.h
     gui/presets/dialog.h
     gui/profiledialog.h
+    gui/programmeguide.h
     gui/qtcompatibility.h
     gui/rollupcontents.h
     gui/samplingdevicedialog.h
@@ -256,6 +261,7 @@ set(sdrgui_HEADERS
     gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/websitebrowser.h
     gui/welcomedialog.h
     gui/workspace.h
     gui/workspaceselectiondialog.h
@@ -422,6 +428,7 @@ target_link_libraries(sdrgui
   ${sdrgui_LIMERFE_LIB}
   sdrbase
   logging
+  modemdr
   )
 if (Qt6_FOUND)
   target_link_libraries(sdrgui

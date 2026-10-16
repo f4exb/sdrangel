@@ -30,6 +30,7 @@
 #include "drmaudiodecoder.h"
 #include "drmdata.h"
 #include "drmjournaline.h"
+#include "drmspi.h"
 #include "drmfacacquisition.h"
 #include "drmsdc.h"
 
@@ -86,6 +87,8 @@ struct MODEMDRM_API ReceiverMSCReport
     bool textMessageReset = false;
     // A Journaline object of the multiplex changed (journalineDecoder given).
     bool journalineUpdated = false;
+    // The multiplex's programme guide changed (spiDecoder given).
+    bool spiUpdated = false;
     double sampleClockErrorPPM = 0.0;
     std::size_t consumedSamples = 0;
 };
@@ -191,7 +194,10 @@ public:
         DRMJournalineDecoder* journalineDecoder = nullptr,
         // Caller-owned decoder for the selected service's MOT Broadcast
         // Website, carried between calls; reset it when the service changes.
-        DRMWebsiteDecoder* websiteDecoder = nullptr
+        DRMWebsiteDecoder* websiteDecoder = nullptr,
+        // Caller-owned decoder for the multiplex's programme guide (SPI),
+        // carried between calls; reset it with the RF epoch.
+        DRMSPIDecoder* spiDecoder = nullptr
     );
 };
 

@@ -30,11 +30,15 @@
 #include "audio/audiofifo.h"
 
 #include "dabdemodsettings.h"
-#include "dabdemoddevice.h"
 
+#include <atomic>
+#include <complex>
+#include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
-#include <dab-api.h>
+#include "modemdab/dabreceiver.h"
 
 #define DABDEMOD_CHANNEL_SAMPLE_RATE 2048000
 
@@ -62,6 +66,8 @@ public:
 
     double getMagSq() const { return m_magsq; }
 
+    // Decoded audio arrived in the last half second (muted or not)
+    bool isAudioActive() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
         if (m_magsqCount > 0)
@@ -82,10 +88,10 @@ public:
 
     void reset();
     void resetService();
-    void programAvailable(const QString& programName);
+    void setSPICache(const std::vector<modemdr::MOTFile>& files);
 
-    // Callbacks
-    void systemData(bool sync, int16_t snr, int32_t freqOffset);
+    // Reports, as messages to the channel
+    void systemData(bool sync, float snr, int32_t freqOffset);
     void ensembleName(const QString& name, int id);
     void programName(const QString& name, int id);
     void programData(int bitrate, const QString& audio, const QString& language, const QString& programType);
@@ -112,14 +118,44 @@ private:
 
     int m_audioSampleRate;      // Output device sample rate
     int m_dabAudioSampleRate;
+    bool m_dabAudioSampleRateReported;  // To the GUI, which clears it when the program changes
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
 
-    void *m_dab;
-    DABDemodDevice m_device;
-    audiodata m_ad;
-    API_struct m_api;
     bool m_programSet;
+
+    // The receiver (modemdab)
+    std::unique_ptr<modemdab::DABReceiver> m_native;
+    std::vector<std::complex<float>> m_nativeBuffer;
+    uint32_t m_nativeVersion;
+    int m_nativeEnsembleId;
+    std::string m_nativeEnsembleLabel;
+    std::map<uint32_t, std::string> m_nativePrograms;
+    std::string m_nativeProgramData;
+    // The receiver's audio counters at the last quality report, and the figures reported
+    struct AudioCounts
+    {
+        bool valid = false;
+        int64_t superframes = 0;
+        int64_t fireCodeErrors = 0;
+        int64_t rsUncorrectableRows = 0;
+        int64_t audioFrames = 0;
+        int64_t audioFrameErrors = 0;
+    };
+    AudioCounts m_audioCounts;
+    int16_t m_frameQuality = 0;
+    int16_t m_rsQuality = 0;
+    int16_t m_aacQuality = 0;
+    int m_nativeTII;                    // Last reported: -2 none yet, DABDemod::TIINone none sent
+    QString m_nativeServiceInfo;        // Last reported, summarized
+    std::shared_ptr<const modemdr::SPIData> m_nativeSPI;
+    int m_nativeStatusBlocks;
+
+    // Input level and clipping, accumulated between signal quality reports
+    double m_inputPower;
+    int64_t m_inputSamples;
+    int64_t m_inputClipped;
+    int64_t m_lastRSCorrected;
 
     NCO m_nco;
     Interpolator m_interpolator;
@@ -130,6 +166,7 @@ private:
     double m_magsqSum;
     double m_magsqPeak;
     int  m_magsqCount;
+    std::atomic<qint64> m_lastAudioMs{0};  // When decoded audio last arrived, for the GUI's thread
     MagSqLevelsStore m_magSqLevelStore;
 
     MessageQueue *m_messageQueueToChannel;
@@ -147,9 +184,17 @@ private:
     int m_demodBufferFill;
 
     void processOneSample(Complex &ci);
+    void processNative();
+    void nativeStatus();
+    void audioQuality(const modemdab::DABReceiverStatus& status);
+    void resetAudioQuality();
+    void nativeLabel();
+    void nativeServiceInfo(const modemdab::DABReceiverStatus& status);
+    void signalQuality();
+    void selectNativeProgram();
     void processOneAudioSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
-    void setProgram(const QString& name);
+    void setProgram();
 };
 
 #endif // INCLUDE_DABDEMODSINK_H

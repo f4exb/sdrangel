@@ -26,11 +26,9 @@ if(NOT SERVER_MODE)
     list(APPEND demoddrm_SOURCES
         drmdemodgui.cpp
         drmdemodgui.ui
-        drmwebsitebrowser.cpp
     )
     list(APPEND demoddrm_HEADERS
         drmdemodgui.h
-        drmwebsitebrowser.h
     )
     set(TARGET_NAME ${PLUGINS_PREFIX}demoddrm)
     set(TARGET_LIB Qt::Widgets)

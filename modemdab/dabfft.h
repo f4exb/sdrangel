@@ -1,8 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,24 +16,38 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DABDEMODDEVICE_H
-#define INCLUDE_DABDEMODDEVICE_H
+#ifndef MODEMDAB_DABFFT_H_
+#define MODEMDAB_DABFFT_H_
 
-#include <dab-api.h>
+#include <complex>
+#include <memory>
 
-class DABDemodDevice : public deviceHandler {
+#include "export.h"
 
+namespace modemdab
+{
+
+// A complex FFT of fixed size: FFTW when it is built in, kissfft otherwise. Unnormalized in
+// both directions.
+class MODEMDAB_API DABFFT
+{
 public:
+    DABFFT(int size, bool inverse);
+    ~DABFFT();
+    DABFFT(const DABFFT&) = delete;
+    DABFFT& operator=(const DABFFT&) = delete;
 
-    DABDemodDevice();
-    void putSample(std::complex<float> s);
-    int32_t getSamples(std::complex<float> *buf, int32_t size) override;
-    int32_t Samples(void) override;
-    void resetBuffer(void) override;
+    void transform(const std::complex<float> *in, std::complex<float> *out);
+    int size() const { return m_size; }
+    static const char *backend();
 
 private:
-    RingBuffer<std::complex<float>> m_iqBuffer;
+    struct Implementation;
 
+    int m_size;
+    std::unique_ptr<Implementation> m_implementation;
 };
 
-#endif // INCLUDE_DABDEMODDEVICE_H
+} // namespace modemdab
+
+#endif // MODEMDAB_DABFFT_H_
