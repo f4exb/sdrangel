@@ -19,6 +19,7 @@ set(modemdrm_SOURCES
     drmreceiver.cpp
     drmresampler.cpp
     drmsdc.cpp
+    drmspi.cpp
     drmsyncstatemachine.cpp
 )
 
@@ -41,6 +42,7 @@ set(modemdrm_HEADERS
     drmreceiver.h
     drmresampler.h
     drmsdc.h
+    drmspi.h
     drmsyncstatemachine.h
 )
 
@@ -52,6 +54,9 @@ target_include_directories(modemdrm
         ${CMAKE_SOURCE_DIR}/exports
 )
 
+# MOT, Journaline, SPI and the Viterbi decoder are shared with DAB
+target_link_libraries(modemdrm PUBLIC modemdr)
+
 # DRM AAC/xHE-AAC audio uses the FDK AAC decoder
 if(FDKAAC_FOUND)
     message(STATUS "modemdrm: DRM AAC/xHE-AAC audio via FDK AAC")
@@ -61,10 +66,11 @@ if(FDKAAC_FOUND)
     if(DEFINED FDKAAC_DEPENDS)
         add_dependencies(modemdrm ${FDKAAC_DEPENDS})
     endif()
-    # The external FDK is private to modemdrm. Do not re-export its aacDecoder_*
-    # symbols from a shared modemdrm, so they cannot interpose on (or be
-    # interposed by) the libfdk-aac that FFmpeg loads in the same process.
-    if(FDKAAC_EXTERNAL AND BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
+    # A static FDK (the external one, or one built for a package) is private to
+    # modemdrm. Do not re-export its aacDecoder_* symbols from a shared
+    # modemdrm, so they cannot interpose on (or be interposed by) the
+    # libfdk-aac that FFmpeg loads in the same process.
+    if((FDKAAC_EXTERNAL OR FDKAAC_LIBRARY MATCHES "\\.a$") AND BUILD_SHARED_LIBS AND UNIX AND NOT APPLE)
         target_link_options(modemdrm PRIVATE "LINKER:--exclude-libs,libfdk-aac.a")
     endif()
 endif()

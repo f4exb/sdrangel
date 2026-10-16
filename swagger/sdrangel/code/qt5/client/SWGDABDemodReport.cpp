@@ -70,6 +70,36 @@ SWGDABDemodReport::SWGDABDemodReport() {
     m_tii_isSet = false;
     data = nullptr;
     m_data_isSet = false;
+    cn = 0.0f;
+    m_cn_isSet = false;
+    null_depth = 0.0f;
+    m_null_depth_isSet = false;
+    msc_ber = 0.0f;
+    m_msc_ber_isSet = false;
+    fic_ber = 0.0f;
+    m_fic_ber_isSet = false;
+    rs_corrected_rate = 0.0f;
+    m_rs_corrected_rate_isSet = false;
+    frames_lost = 0;
+    m_frames_lost_isSet = false;
+    reacquisitions = 0;
+    m_reacquisitions_isSet = false;
+    input_level = 0.0f;
+    m_input_level_isSet = false;
+    clipping = 0.0f;
+    m_clipping_isSet = false;
+    gain_status = 0;
+    m_gain_status_isSet = false;
+    gain_advice = nullptr;
+    announcement = nullptr;
+    now_playing_artist = nullptr;
+    now_playing_title = nullptr;
+    programme_now = nullptr;
+    m_gain_advice_isSet = false;
+    m_announcement_isSet = false;
+    m_now_playing_artist_isSet = false;
+    m_now_playing_title_isSet = false;
+    m_programme_now_isSet = false;
 }
 
 SWGDABDemodReport::~SWGDABDemodReport() {
@@ -120,6 +150,36 @@ SWGDABDemodReport::init() {
     m_tii_isSet = false;
     data = new QString("");
     m_data_isSet = false;
+    cn = 0.0f;
+    m_cn_isSet = false;
+    null_depth = 0.0f;
+    m_null_depth_isSet = false;
+    msc_ber = 0.0f;
+    m_msc_ber_isSet = false;
+    fic_ber = 0.0f;
+    m_fic_ber_isSet = false;
+    rs_corrected_rate = 0.0f;
+    m_rs_corrected_rate_isSet = false;
+    frames_lost = 0;
+    m_frames_lost_isSet = false;
+    reacquisitions = 0;
+    m_reacquisitions_isSet = false;
+    input_level = 0.0f;
+    m_input_level_isSet = false;
+    clipping = 0.0f;
+    m_clipping_isSet = false;
+    gain_status = 0;
+    m_gain_status_isSet = false;
+    gain_advice = new QString("");
+    announcement = new QString("");
+    now_playing_artist = new QString("");
+    now_playing_title = new QString("");
+    programme_now = new QString("");
+    m_gain_advice_isSet = false;
+    m_announcement_isSet = false;
+    m_now_playing_artist_isSet = false;
+    m_now_playing_title_isSet = false;
+    m_programme_now_isSet = false;
 }
 
 void
@@ -162,6 +222,21 @@ SWGDABDemodReport::cleanup() {
 
     if(data != nullptr) { 
         delete data;
+    }
+    if(gain_advice != nullptr) {
+        delete gain_advice;
+    }
+    if(announcement != nullptr) {
+        delete announcement;
+    }
+    if(now_playing_artist != nullptr) {
+        delete now_playing_artist;
+    }
+    if(now_playing_title != nullptr) {
+        delete now_playing_title;
+    }
+    if(programme_now != nullptr) {
+        delete programme_now;
     }
 }
 
@@ -217,6 +292,32 @@ SWGDABDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tii, pJson["tii"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&cn, pJson["cn"], "float", "");
+    
+    ::SWGSDRangel::setValue(&null_depth, pJson["nullDepth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&msc_ber, pJson["mscBER"], "float", "");
+    
+    ::SWGSDRangel::setValue(&fic_ber, pJson["ficBER"], "float", "");
+    
+    ::SWGSDRangel::setValue(&rs_corrected_rate, pJson["rsCorrectedRate"], "float", "");
+    
+    ::SWGSDRangel::setValue(&frames_lost, pJson["framesLost"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reacquisitions, pJson["reacquisitions"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&input_level, pJson["inputLevel"], "float", "");
+    
+    ::SWGSDRangel::setValue(&clipping, pJson["clipping"], "float", "");
+    
+    ::SWGSDRangel::setValue(&gain_status, pJson["gainStatus"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gain_advice, pJson["gainAdvice"], "QString", "QString");
+    ::SWGSDRangel::setValue(&announcement, pJson["announcement"], "QString", "QString");
+    ::SWGSDRangel::setValue(&now_playing_artist, pJson["nowPlayingArtist"], "QString", "QString");
+    ::SWGSDRangel::setValue(&now_playing_title, pJson["nowPlayingTitle"], "QString", "QString");
+    ::SWGSDRangel::setValue(&programme_now, pJson["programmeNow"], "QString", "QString");
     
 }
 
@@ -296,6 +397,51 @@ SWGDABDemodReport::asJsonObject() {
     }
     if(data != nullptr && *data != QString("")){
         toJsonValue(QString("data"), data, obj, QString("QString"));
+    }
+    if(m_cn_isSet){
+        obj->insert("cn", QJsonValue(cn));
+    }
+    if(m_null_depth_isSet){
+        obj->insert("nullDepth", QJsonValue(null_depth));
+    }
+    if(m_msc_ber_isSet){
+        obj->insert("mscBER", QJsonValue(msc_ber));
+    }
+    if(m_fic_ber_isSet){
+        obj->insert("ficBER", QJsonValue(fic_ber));
+    }
+    if(m_rs_corrected_rate_isSet){
+        obj->insert("rsCorrectedRate", QJsonValue(rs_corrected_rate));
+    }
+    if(m_frames_lost_isSet){
+        obj->insert("framesLost", QJsonValue(frames_lost));
+    }
+    if(m_reacquisitions_isSet){
+        obj->insert("reacquisitions", QJsonValue(reacquisitions));
+    }
+    if(m_input_level_isSet){
+        obj->insert("inputLevel", QJsonValue(input_level));
+    }
+    if(m_clipping_isSet){
+        obj->insert("clipping", QJsonValue(clipping));
+    }
+    if(m_gain_status_isSet){
+        obj->insert("gainStatus", QJsonValue(gain_status));
+    }
+    if(gain_advice != nullptr && *gain_advice != QString("")){
+        toJsonValue(QString("gainAdvice"), gain_advice, obj, QString("QString"));
+    }
+    if(announcement != nullptr && *announcement != QString("")){
+        toJsonValue(QString("announcement"), announcement, obj, QString("QString"));
+    }
+    if(now_playing_artist != nullptr && *now_playing_artist != QString("")){
+        toJsonValue(QString("nowPlayingArtist"), now_playing_artist, obj, QString("QString"));
+    }
+    if(now_playing_title != nullptr && *now_playing_title != QString("")){
+        toJsonValue(QString("nowPlayingTitle"), now_playing_title, obj, QString("QString"));
+    }
+    if(programme_now != nullptr && *programme_now != QString("")){
+        toJsonValue(QString("programmeNow"), programme_now, obj, QString("QString"));
     }
 
     return obj;
@@ -511,6 +657,152 @@ SWGDABDemodReport::setData(QString* data) {
     this->m_data_isSet = true;
 }
 
+float
+SWGDABDemodReport::getCn() {
+    return cn;
+}
+void
+SWGDABDemodReport::setCn(float cn) {
+    this->cn = cn;
+    this->m_cn_isSet = true;
+}
+
+float
+SWGDABDemodReport::getNullDepth() {
+    return null_depth;
+}
+void
+SWGDABDemodReport::setNullDepth(float null_depth) {
+    this->null_depth = null_depth;
+    this->m_null_depth_isSet = true;
+}
+
+float
+SWGDABDemodReport::getMscBer() {
+    return msc_ber;
+}
+void
+SWGDABDemodReport::setMscBer(float msc_ber) {
+    this->msc_ber = msc_ber;
+    this->m_msc_ber_isSet = true;
+}
+
+float
+SWGDABDemodReport::getFicBer() {
+    return fic_ber;
+}
+void
+SWGDABDemodReport::setFicBer(float fic_ber) {
+    this->fic_ber = fic_ber;
+    this->m_fic_ber_isSet = true;
+}
+
+float
+SWGDABDemodReport::getRsCorrectedRate() {
+    return rs_corrected_rate;
+}
+void
+SWGDABDemodReport::setRsCorrectedRate(float rs_corrected_rate) {
+    this->rs_corrected_rate = rs_corrected_rate;
+    this->m_rs_corrected_rate_isSet = true;
+}
+
+qint32
+SWGDABDemodReport::getFramesLost() {
+    return frames_lost;
+}
+void
+SWGDABDemodReport::setFramesLost(qint32 frames_lost) {
+    this->frames_lost = frames_lost;
+    this->m_frames_lost_isSet = true;
+}
+
+qint32
+SWGDABDemodReport::getReacquisitions() {
+    return reacquisitions;
+}
+void
+SWGDABDemodReport::setReacquisitions(qint32 reacquisitions) {
+    this->reacquisitions = reacquisitions;
+    this->m_reacquisitions_isSet = true;
+}
+
+float
+SWGDABDemodReport::getInputLevel() {
+    return input_level;
+}
+void
+SWGDABDemodReport::setInputLevel(float input_level) {
+    this->input_level = input_level;
+    this->m_input_level_isSet = true;
+}
+
+float
+SWGDABDemodReport::getClipping() {
+    return clipping;
+}
+void
+SWGDABDemodReport::setClipping(float clipping) {
+    this->clipping = clipping;
+    this->m_clipping_isSet = true;
+}
+
+qint32
+SWGDABDemodReport::getGainStatus() {
+    return gain_status;
+}
+void
+SWGDABDemodReport::setGainStatus(qint32 gain_status) {
+    this->gain_status = gain_status;
+    this->m_gain_status_isSet = true;
+}
+
+QString*
+SWGDABDemodReport::getGainAdvice() {
+    return gain_advice;
+}
+QString*
+SWGDABDemodReport::getAnnouncement() {
+    return announcement;
+}
+QString*
+SWGDABDemodReport::getNowPlayingArtist() {
+    return now_playing_artist;
+}
+QString*
+SWGDABDemodReport::getNowPlayingTitle() {
+    return now_playing_title;
+}
+QString*
+SWGDABDemodReport::getProgrammeNow() {
+    return programme_now;
+}
+void
+SWGDABDemodReport::setGainAdvice(QString* gain_advice) {
+    this->gain_advice = gain_advice;
+    this->m_gain_advice_isSet = true;
+}
+void
+SWGDABDemodReport::setAnnouncement(QString* announcement) {
+    this->announcement = announcement;
+    this->m_announcement_isSet = true;
+}
+void
+SWGDABDemodReport::setNowPlayingArtist(QString* now_playing_artist) {
+    this->now_playing_artist = now_playing_artist;
+    this->m_now_playing_artist_isSet = true;
+}
+void
+SWGDABDemodReport::setNowPlayingTitle(QString* now_playing_title) {
+    this->now_playing_title = now_playing_title;
+    this->m_now_playing_title_isSet = true;
+}
+void
+SWGDABDemodReport::setProgrammeNow(QString* programme_now) {
+    this->programme_now = programme_now;
+    this->m_programme_now_isSet = true;
+}
+
 
 bool
 SWGDABDemodReport::isSet(){
@@ -577,6 +869,51 @@ SWGDABDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(data && *data != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_cn_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_null_depth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_msc_ber_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fic_ber_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rs_corrected_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frames_lost_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reacquisitions_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_input_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_clipping_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gain_status_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(gain_advice && *gain_advice != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(announcement && *announcement != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(now_playing_artist && *now_playing_artist != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(now_playing_title && *now_playing_title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(programme_now && *programme_now != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

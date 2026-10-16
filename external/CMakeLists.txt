@@ -1211,69 +1211,6 @@ if (WIN32)
     install(FILES "${source_dir}/pthreadVC2${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
 endif (WIN32)
 
-# For DAB demodulator
-if (ZLIB_FOUND AND FAAD_FOUND AND ENABLE_CHANNELRX_DEMODDAB)
-    if (WIN32)
-        set(DAB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dab_lib.lib" CACHE INTERNAL "")
-    elseif (LINUX)
-        set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    elseif (APPLE)
-        set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/dab/src/dab-build/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    endif()
-    if (WIN32)
-        ExternalProject_Add(dab
-                GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
-                GIT_TAG msvc
-                DEPENDS ${PTHREADS4W_DEPENDS}
-                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
-                SOURCE_SUBDIR "library"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-                        -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
-                        -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
-                        -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
-                        -DFAAD_LIBRARY=${FAAD_LIBRARY}
-                        -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
-                        -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
-                        -DPTHREADS=${PTHREADS4W_LIBRARIES}
-                BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
-                INSTALL_COMMAND ""
-                TEST_COMMAND ""
-                )
-    else(WIN32)
-        ExternalProject_Add(dab
-                GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
-                GIT_TAG msvc
-                DEPENDS ${ZLIB_DEPENDS} ${FAAD_DEPENDS} ${FFTW3F_DEPENDS}
-                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
-                SOURCE_SUBDIR "library"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-                        -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
-                        -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
-                        -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
-                        -DFAAD_LIBRARY=${FAAD_LIBRARY}
-                        -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
-                        -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
-                BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
-                INSTALL_COMMAND ""
-                TEST_COMMAND ""
-                )
-    endif(WIN32)
-    ExternalProject_Get_Property(dab source_dir binary_dir)
-    set_global(DAB_DEPENDS dab)
-    set_global_cache(DAB_FOUND ON)
-    set(DAB_EXTERNAL ON CACHE INTERNAL "")
-    set(DAB_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dab/src/dab" CACHE INTERNAL "")
-    if (WIN32)
-        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    elseif (APPLE)
-        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-                FILES_MATCHING PATTERN "libdab_lib*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
-    endif ()
-else()
-    message(STATUS "Can't build DAB library as missing zlib (${ZLIB_FOUND}) or faad (${FAAD_FOUND})")
-endif()
-
 # Device interface libraries.
 set(LIMESUITE_SIMD_ARGS)
 if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)

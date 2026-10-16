@@ -123,6 +123,7 @@ struct MODEMDRM_API SDCDataApplication
     // DAB-domain user application types (ETSI TS 101 756 table 16).
     static constexpr int MOTSlideshow = 0x002;
     static constexpr int BroadcastWebsite = 0x003;
+    static constexpr int SPI = 0x007;
     static constexpr int Journaline = 0x44a;
 
     int shortId = 0;

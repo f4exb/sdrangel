@@ -38,6 +38,7 @@
         <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DABDemod.yaml</file>
+        <file>webapi/doc/swagger/include/DRMDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DVBDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>

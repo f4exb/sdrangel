@@ -896,13 +896,15 @@ void DRMDemodSink::dataFramesLost()
     m_journalineDecoder.frameLost();
     m_slideshowDecoder.frameLost();
     m_websiteDecoder.frameLost();
+    m_spiDecoder.frameLost();
 }
 
-// The station's data (Journaline, and the service's slideshow and website)
-// is forgotten when the receiver forgets the station.
+// The station's data (Journaline, the programme guide, and the service's
+// slideshow and website) is forgotten when the receiver forgets the station.
 void DRMDemodSink::clearStationData()
 {
     clearJournaline();
+    clearSPI();
     clearServiceData();
     m_stationServices.clear();
     m_relockServices.clear();
@@ -1235,7 +1237,7 @@ std::size_t DRMDemodSink::processCapture()
                 &error, &m_textMessageDecoder, m_audioDecoder.get(),
                 m_mscCellDeinterleaver.get(), &m_modeEAudioAssembler, nullptr,
                 &m_xheAudioParser, true, &m_facServiceCache, &m_sampleClock, &m_carrierNoise,
-                &m_slideshowDecoder, &m_journalineDecoder, &m_websiteDecoder))
+                &m_slideshowDecoder, &m_journalineDecoder, &m_websiteDecoder, &m_spiDecoder))
             {
                 accumulateMSCReport(report);
                 m_mscSuperframeSequence = m_superframeSequence;
@@ -1661,7 +1663,7 @@ std::size_t DRMDemodSink::processCapture()
         &error, &m_textMessageDecoder, m_audioDecoder.get(),
         m_mscCellDeinterleaver.get(), &m_modeEAudioAssembler, nullptr,
         &m_xheAudioParser, false, &m_facServiceCache, &m_sampleClock, &m_carrierNoise,
-        &m_slideshowDecoder, &m_journalineDecoder, &m_websiteDecoder
+        &m_slideshowDecoder, &m_journalineDecoder, &m_websiteDecoder, &m_spiDecoder
     );
     m_status.mscReady = processed && report.mscReady;
     accumulateMSCReport(report, processed);
@@ -1760,6 +1762,12 @@ void DRMDemodSink::accumulateMSCReport(const modemdrm::ReceiverMSCReport& report
         publishJournaline();
     }
 
+    if (report.spiUpdated)
+    {
+        m_status.spi = m_spiDecoder.data();
+        ++m_status.spiUpdates;
+    }
+
     // The slideshow shows images (MOT content type 2); the latest replaces
     // the one before.
     for (const modemdrm::MOTObject& object : report.slideshowObjects)
@@ -1786,6 +1794,14 @@ void DRMDemodSink::clearJournaline()
     m_journalineSnapshots.clear();
     m_status.journaline.clear();
     ++m_status.journalineUpdates;
+}
+
+// The programme guide too belongs to the station
+void DRMDemodSink::clearSPI()
+{
+    m_spiDecoder.reset();
+    m_status.spi.reset();
+    ++m_status.spiUpdates;
 }
 
 void DRMDemodSink::publishJournaline()

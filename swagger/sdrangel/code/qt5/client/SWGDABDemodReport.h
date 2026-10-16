@@ -107,6 +107,47 @@ public:
     QString* getData();
     void setData(QString* data);
 
+    float getCn();
+    void setCn(float cn);
+
+    float getNullDepth();
+    void setNullDepth(float null_depth);
+
+    float getMscBer();
+    void setMscBer(float msc_ber);
+
+    float getFicBer();
+    void setFicBer(float fic_ber);
+
+    float getRsCorrectedRate();
+    void setRsCorrectedRate(float rs_corrected_rate);
+
+    qint32 getFramesLost();
+    void setFramesLost(qint32 frames_lost);
+
+    qint32 getReacquisitions();
+    void setReacquisitions(qint32 reacquisitions);
+
+    float getInputLevel();
+    void setInputLevel(float input_level);
+
+    float getClipping();
+    void setClipping(float clipping);
+
+    qint32 getGainStatus();
+    void setGainStatus(qint32 gain_status);
+
+    QString* getGainAdvice();
+    QString* getAnnouncement();
+    QString* getNowPlayingArtist();
+    QString* getNowPlayingTitle();
+    QString* getProgrammeNow();
+    void setGainAdvice(QString* gain_advice);
+    void setAnnouncement(QString* announcement);
+    void setNowPlayingArtist(QString* now_playing_artist);
+    void setNowPlayingTitle(QString* now_playing_title);
+    void setProgrammeNow(QString* programme_now);
+
 
     virtual bool isSet() override;
 
@@ -173,6 +214,47 @@ private:
 
     QString* data;
     bool m_data_isSet;
+
+    float cn;
+    bool m_cn_isSet;
+
+    float null_depth;
+    bool m_null_depth_isSet;
+
+    float msc_ber;
+    bool m_msc_ber_isSet;
+
+    float fic_ber;
+    bool m_fic_ber_isSet;
+
+    float rs_corrected_rate;
+    bool m_rs_corrected_rate_isSet;
+
+    qint32 frames_lost;
+    bool m_frames_lost_isSet;
+
+    qint32 reacquisitions;
+    bool m_reacquisitions_isSet;
+
+    float input_level;
+    bool m_input_level_isSet;
+
+    float clipping;
+    bool m_clipping_isSet;
+
+    qint32 gain_status;
+    bool m_gain_status_isSet;
+
+    QString* gain_advice;
+    QString* announcement;
+    QString* now_playing_artist;
+    QString* now_playing_title;
+    QString* programme_now;
+    bool m_gain_advice_isSet;
+    bool m_announcement_isSet;
+    bool m_now_playing_artist_isSet;
+    bool m_now_playing_title_isSet;
+    bool m_programme_now_isSet;
 
 };
 
