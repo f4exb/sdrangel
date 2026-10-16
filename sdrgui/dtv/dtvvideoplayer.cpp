@@ -23,6 +23,12 @@
 #include <thread>
 
 #include <QDebug>
+#include <QCoreApplication>
+#include <QFont>
+#include <QGuiApplication>
+#include <QFontMetrics>
+#include <QImage>
+#include <QPainter>
 
 // C++ headers FFmpeg's hardware contexts include, which can't be in extern "C"
 #if defined(_WIN32)
@@ -57,7 +63,7 @@ typedef struct CUstream_st *CUstream;
 #include <libavutil/pixdesc.h>
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
@@ -67,15 +73,15 @@ typedef struct CUstream_st *CUstream;
 // FFmpeg's APIs that differ between the versions built with (4.4 on). AVChannelLayout from FFmpeg 5.1 (the channel
 // masks deprecated then, and gone in 7)
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100)
-#define DVBDEMOD_CH_LAYOUT
+#define DTV_CH_LAYOUT
 #endif
 // AVFrame's interlacing flags from 6.1 (its fields deprecated then)
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(58, 7, 100)
-#define DVBDEMOD_FRAME_FLAGS
+#define DTV_FRAME_FLAGS
 #endif
 // Threaded conversion with sws_scale_frame(), used from 7 (it's in 5, but its threads were new)
 #if LIBSWSCALE_VERSION_INT >= AV_VERSION_INT(8, 0, 100)
-#define DVBDEMOD_SWS_THREADS
+#define DTV_SWS_THREADS
 #endif
 
 #include "audio/audiofifo.h"
@@ -86,16 +92,16 @@ typedef struct CUstream_st *CUstream;
 #include <timeapi.h>
 #endif
 
-#include "dvbdemodtsfifo.h"
-#include "dvbdemodvideoplayer.h"
+#include "dtv/dtvtsfifo.h"
+#include "dtv/dtvvideoplayer.h"
 
-std::chrono::steady_clock::duration DVBDemodVideoPlayer::seconds(double s)
+std::chrono::steady_clock::duration DTVVideoPlayer::seconds(double s)
 {
     return std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(s));
 }
 
 // A PES header's PTS (33 bits, 90 kHz), from its 5 bytes
-int64_t DVBDemodVideoPlayer::pesPTS(const uint8_t *h)
+int64_t DTVVideoPlayer::pesPTS(const uint8_t *h)
 {
     return ((int64_t) ((h[0] >> 1) & 7) << 30) | ((int64_t) h[1] << 22) | ((int64_t) (h[2] >> 1) << 15)
         | ((int64_t) h[3] << 7) | (h[4] >> 1);
@@ -104,7 +110,7 @@ int64_t DVBDemodVideoPlayer::pesPTS(const uint8_t *h)
 // Whether TS packets of a PID were lost before this one: the continuity counter of a good packet isn't one more than
 // the last good one's, allowing for those with errors between (whose counters can't be trusted), nor the same (a
 // duplicate), without a discontinuity signalled. Updates the last good counter, and the count of those with errors
-bool DVBDemodVideoPlayer::continuityLost(const uint8_t *p, bool discontinuity, int& lastCC, int& errorPackets)
+bool DTVVideoPlayer::continuityLost(const uint8_t *p, bool discontinuity, int& lastCC, int& errorPackets)
 {
     const bool error = (p[1] & 0x80) != 0;
     const int cc = p[3] & 0x0f;
@@ -123,7 +129,7 @@ bool DVBDemodVideoPlayer::continuityLost(const uint8_t *p, bool discontinuity, i
     return lost;
 }
 
-DVBDemodVideoPlayer::DVBDemodVideoPlayer(DVBDemodTSFifo *tsFifo, AudioFifo *audioFifo, QObject *parent) :
+DTVVideoPlayer::DTVVideoPlayer(DTVTSFifo *tsFifo, AudioFifo *audioFifo, QObject *parent) :
     QThread(parent),
     m_tsFifo(tsFifo),
     m_audioFifo(audioFifo),
@@ -215,10 +221,10 @@ DVBDemodVideoPlayer::DVBDemodVideoPlayer(DVBDemodTSFifo *tsFifo, AudioFifo *audi
     m_avOffset(0.0),
     m_info{0, "", "", "", 0, 0, 0, 0, 0, 0, false, 0, 0, false, 0, 0, 0}
 {
-    setObjectName("DVBDemodVideoPlayer");
-    qRegisterMetaType<DVBDemodVideoPlayer::Service>();
-    qRegisterMetaType<QList<DVBDemodVideoPlayer::Service>>();
-    qRegisterMetaType<DVBDemodVideoPlayer::Tracks>();
+    setObjectName("DTVVideoPlayer");
+    qRegisterMetaType<DTVVideoPlayer::Service>();
+    qRegisterMetaType<QList<DTVVideoPlayer::Service>>();
+    qRegisterMetaType<DTVVideoPlayer::Tracks>();
 
     // FFmpeg's log level is the process's: set once. Received streams have errors, which the decoders would log for
     // each damaged picture or packet, flooding the log
@@ -226,18 +232,27 @@ DVBDemodVideoPlayer::DVBDemodVideoPlayer(DVBDemodTSFifo *tsFifo, AudioFifo *audi
     std::call_once(logLevel, []() { av_log_set_level(AV_LOG_FATAL); });
 }
 
-DVBDemodVideoPlayer::~DVBDemodVideoPlayer()
+bool DTVVideoPlayer::canDeinterlace()
+{
+#ifdef DTV_DEINTERLACE
+    return true;
+#else
+    return false;
+#endif
+}
+
+DTVVideoPlayer::~DTVVideoPlayer()
 {
     stopPlayer();
 }
 
-void DVBDemodVideoPlayer::stopPlayer()
+void DTVVideoPlayer::stopPlayer()
 {
     m_stop = true;
     wait();
 }
 
-void DVBDemodVideoPlayer::setAudioOutput(int sampleRate, double latency)
+void DTVVideoPlayer::setAudioOutput(int sampleRate, double latency)
 {
     if (sampleRate > 0) {
         m_audioSampleRate = sampleRate;
@@ -246,14 +261,14 @@ void DVBDemodVideoPlayer::setAudioOutput(int sampleRate, double latency)
     m_audioLatency = std::max(0.0, std::min(1.0, latency));
 }
 
-void DVBDemodVideoPlayer::setAudioVolume(int volume)
+void DTVVideoPlayer::setAudioVolume(int volume)
 {
     volume = std::max(0, std::min(100, volume));
     // 0.01 to 1, logarithmic, and 0 silent
     m_audioGain = volume == 0 ? 0.0f : (float) std::pow(10.0, volume * 0.02 - 2.0);
 }
 
-void DVBDemodVideoPlayer::setTrackPreferences(const QString& audioLanguage, Track::Type audioType, bool subtitles,
+void DTVVideoPlayer::setTrackPreferences(const QString& audioLanguage, Track::Type audioType, bool subtitles,
     const QString& subtitleLanguage, Track::Type subtitleType)
 {
     QMutexLocker locker(&m_tracksMutex);
@@ -270,13 +285,13 @@ void DVBDemodVideoPlayer::setTrackPreferences(const QString& audioLanguage, Trac
     }
 }
 
-DVBDemodVideoPlayer::Info DVBDemodVideoPlayer::getInfo()
+DTVVideoPlayer::Info DTVVideoPlayer::getInfo()
 {
     QMutexLocker locker(&m_infoMutex);
     return m_info;
 }
 
-void DVBDemodVideoPlayer::run()
+void DTVVideoPlayer::run()
 {
     m_frame = av_frame_alloc();
     m_videoFrame = av_frame_alloc();
@@ -310,9 +325,9 @@ void DVBDemodVideoPlayer::run()
 }
 
 // FFmpeg reads the transport stream from the FIFO, waiting for the demodulator as needed
-int DVBDemodVideoPlayer::readPacket(void *opaque, uint8_t *buf, int size)
+int DTVVideoPlayer::readPacket(void *opaque, uint8_t *buf, int size)
 {
-    DVBDemodVideoPlayer *player = static_cast<DVBDemodVideoPlayer *>(opaque);
+    DTVVideoPlayer *player = static_cast<DTVVideoPlayer *>(opaque);
 
     while (!player->m_stop)
     {
@@ -326,7 +341,7 @@ int DVBDemodVideoPlayer::readPacket(void *opaque, uint8_t *buf, int size)
 
         PROFILER_START()
         int n = player->m_tsFifo->read(buf, size, 100);
-        PROFILER_STOP("DVBDemod video waiting for TS")
+        PROFILER_STOP("DTV video waiting for TS")
 
         if (n > 0)
         {
@@ -347,7 +362,7 @@ int DVBDemodVideoPlayer::readPacket(void *opaque, uint8_t *buf, int size)
     return AVERROR_EOF;
 }
 
-bool DVBDemodVideoPlayer::open()
+bool DTVVideoPlayer::open()
 {
     m_formatCtx = avformat_alloc_context();
     m_psi.reset();
@@ -357,7 +372,7 @@ bool DVBDemodVideoPlayer::open()
     m_transportStreamId = -1;
     m_timestampRefValid = false;
     uint8_t *ioBuffer = (uint8_t *) av_malloc(m_ioBufferSize);
-    m_ioCtx = avio_alloc_context(ioBuffer, m_ioBufferSize, 0, this, &DVBDemodVideoPlayer::readPacket, nullptr, nullptr);
+    m_ioCtx = avio_alloc_context(ioBuffer, m_ioBufferSize, 0, this, &DTVVideoPlayer::readPacket, nullptr, nullptr);
     m_formatCtx->pb = m_ioCtx;
     m_formatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
 
@@ -371,7 +386,7 @@ bool DVBDemodVideoPlayer::open()
 
     if (ret < 0)
     {
-        qDebug() << "DVBDemodVideoPlayer::open: avformat_open_input failed:" << ret;
+        qDebug() << "DTVVideoPlayer::open: avformat_open_input failed:" << ret;
         close();
         return false;
     }
@@ -387,12 +402,12 @@ bool DVBDemodVideoPlayer::open()
         // Reading goes on from where probing stopped
         m_ioCtx->eof_reached = 0;
         m_ioCtx->error = 0;
-        qDebug("DVBDemodVideoPlayer::open: probing stopped after %.0f s of data: some streams gave no packets (scrambled?)", maxProbeSeconds);
+        qDebug("DTVVideoPlayer::open: probing stopped after %.0f s of data: some streams gave no packets (scrambled?)", maxProbeSeconds);
     }
 
     if ((ret < 0) && !m_probeStopped)
     {
-        qDebug() << "DVBDemodVideoPlayer::open: avformat_find_stream_info failed";
+        qDebug() << "DTVVideoPlayer::open: avformat_find_stream_info failed";
         close();
         return false;
     }
@@ -401,7 +416,7 @@ bool DVBDemodVideoPlayer::open()
     m_transportStreamId = m_psi.getTransportStreamId();
     m_services = getServices();
     m_servicesChecked = std::chrono::steady_clock::now();
-    qDebug() << "DVBDemodVideoPlayer::open:" << m_services.size() << "services";
+    qDebug() << "DTVVideoPlayer::open:" << m_services.size() << "services";
     emit servicesChanged(m_services);
     m_selectedRequest = -1;
 
@@ -409,7 +424,7 @@ bool DVBDemodVideoPlayer::open()
 }
 
 // The services of the multiplex, named from the SDT if it's been received
-QList<DVBDemodVideoPlayer::Service> DVBDemodVideoPlayer::getServices() const
+QList<DTVVideoPlayer::Service> DTVVideoPlayer::getServices() const
 {
     QList<Service> services;
 
@@ -439,7 +454,7 @@ QList<DVBDemodVideoPlayer::Service> DVBDemodVideoPlayer::getServices() const
     return services;
 }
 
-void DVBDemodVideoPlayer::updateServices()
+void DTVVideoPlayer::updateServices()
 {
     QList<Service> services = getServices();
     bool changed = services.size() != m_services.size();
@@ -536,7 +551,7 @@ void DVBDemodVideoPlayer::updateServices()
 }
 
 // What decides a stream's track and decoder, copied (FFmpeg changes the stream in place)
-std::vector<std::string> DVBDemodVideoPlayer::signaturesOf(const std::vector<int>& streams) const
+std::vector<std::string> DTVVideoPlayer::signaturesOf(const std::vector<int>& streams) const
 {
     std::vector<std::string> signatures;
 
@@ -558,7 +573,7 @@ std::vector<std::string> DVBDemodVideoPlayer::signaturesOf(const std::vector<int
     return signatures;
 }
 
-void DVBDemodVideoPlayer::close()
+void DTVVideoPlayer::close()
 {
     closeDecoders();
 
@@ -587,7 +602,7 @@ void DVBDemodVideoPlayer::close()
     }
 }
 
-void DVBDemodVideoPlayer::closeDecoders()
+void DTVVideoPlayer::closeDecoders()
 {
     stopVideoThread();
     closeDeinterlacer();
@@ -614,6 +629,9 @@ void DVBDemodVideoPlayer::closeDecoders()
     m_videoAwaitPackets = 0;
     m_gpuDeinterlaceFailed = false;
     closeTrackDecoders();
+    closeCaptions();    // The video thread's stopped
+    m_captionsSeen = false;
+    m_captionsListed = false;
     m_videoStream = -1;
     m_videoPid = -1;
     m_programIndex = -1;
@@ -625,7 +643,7 @@ void DVBDemodVideoPlayer::closeDecoders()
     m_info.m_height = 0;
 }
 
-AVCodecContext *DVBDemodVideoPlayer::openDecoder(AVStream *stream)
+AVCodecContext *DTVVideoPlayer::openDecoder(AVStream *stream)
 {
     const AVCodec *codec = avcodec_find_decoder(stream->codecpar->codec_id);
 
@@ -647,7 +665,7 @@ AVCodecContext *DVBDemodVideoPlayer::openDecoder(AVStream *stream)
     return ctx;
 }
 
-void DVBDemodVideoPlayer::setHardwareDecoding(bool hardware)
+void DTVVideoPlayer::setHardwareDecoding(bool hardware)
 {
     if (hardware != m_hardwareDecoding)
     {
@@ -683,7 +701,7 @@ static AVPixelFormat getHardwareFormat(AVCodecContext *ctx, const AVPixelFormat 
 }
 
 // Hardware decoding with the platform's usual API, if FFmpeg was built with it and the codec supports it
-bool DVBDemodVideoPlayer::setupHardwareDecoding(const AVCodec *codec, AVCodecContext *ctx)
+bool DTVVideoPlayer::setupHardwareDecoding(const AVCodec *codec, AVCodecContext *ctx)
 {
     // NVDEC first, as its frames can be deinterlaced with bwdif, as in software
     static const AVHWDeviceType types[] = {
@@ -696,8 +714,14 @@ bool DVBDemodVideoPlayer::setupHardwareDecoding(const AVCodec *codec, AVCodecCon
 #endif
     };
 
-    // DVBDEMOD_HWDEVICE in the environment chooses one (e.g. cuda, d3d11va, vaapi), as for testing
-    const QByteArray forced = qgetenv("DVBDEMOD_HWDEVICE");
+    // DTV_HWDEVICE (or, as before, DVBDEMOD_HWDEVICE) in the environment chooses one (e.g. cuda, d3d11va, vaapi), as
+    // for testing
+    QByteArray forced = qgetenv("DTV_HWDEVICE");
+
+    if (forced.isEmpty()) {
+        forced = qgetenv("DVBDEMOD_HWDEVICE");
+    }
+
     const AVHWDeviceType forcedType = forced.isEmpty() ? AV_HWDEVICE_TYPE_NONE : av_hwdevice_find_type_by_name(forced.constData());
 
     for (AVHWDeviceType type : types)
@@ -743,7 +767,7 @@ bool DVBDemodVideoPlayer::setupHardwareDecoding(const AVCodec *codec, AVCodecCon
     return false;
 }
 
-AVCodecContext *DVBDemodVideoPlayer::openVideoDecoder(AVStream *stream)
+AVCodecContext *DTVVideoPlayer::openVideoDecoder(AVStream *stream)
 {
     const AVCodec *codec = avcodec_find_decoder(stream->codecpar->codec_id);
 
@@ -774,7 +798,7 @@ AVCodecContext *DVBDemodVideoPlayer::openVideoDecoder(AVStream *stream)
 }
 
 // Choose the requested service, or the first with video, its first video stream, and its audio and subtitles
-void DVBDemodVideoPlayer::selectService(bool reselect)
+void DTVVideoPlayer::selectService(bool reselect)
 {
     int requested = m_requestedService;
     m_selectedRequest = requested;
@@ -898,7 +922,7 @@ void DVBDemodVideoPlayer::selectService(bool reselect)
     }
 
     m_selectedSignatures = signaturesOf(m_selectedStreams);
-    qDebug() << "DVBDemodVideoPlayer::selectService: requested" << requested << "selected" << id
+    qDebug() << "DTVVideoPlayer::selectService: requested" << requested << "selected" << id
         << "video stream" << m_videoStream << "audio stream" << m_audioStream;
 
     {
@@ -913,7 +937,7 @@ void DVBDemodVideoPlayer::selectService(bool reselect)
     emit serviceSelected(id, m_videoCtx != nullptr, m_audioCtx != nullptr);
 }
 
-bool DVBDemodVideoPlayer::readAndDecode()
+bool DTVVideoPlayer::readAndDecode()
 {
     const bool reselect = m_reselect.exchange(false);
 
@@ -921,6 +945,8 @@ bool DVBDemodVideoPlayer::readAndDecode()
         selectService(reselect);
     } else if (m_tracksChanged.exchange(false)) {
         selectTracks();
+    } else if (m_captionsSeen && !m_captionsListed && (m_programIndex >= 0)) {
+        addCaptionTrack();
     }
 
     PROFILER_START()
@@ -943,7 +969,7 @@ bool DVBDemodVideoPlayer::readAndDecode()
         }
         else if ((transportStreamId >= 0) && (transportStreamId != m_transportStreamId))
         {
-            qDebug("DVBDemodVideoPlayer::readAndDecode: transport stream id changed from %d to %d: reopening",
+            qDebug("DTVVideoPlayer::readAndDecode: transport stream id changed from %d to %d: reopening",
                 m_transportStreamId, transportStreamId);
             av_packet_unref(m_packet);
             return false;
@@ -953,7 +979,7 @@ bool DVBDemodVideoPlayer::readAndDecode()
         m_servicesChecked = now;
     }
 
-    PROFILER_STOP("DVBDemod video demux (including waiting for TS)")
+    PROFILER_STOP("DTV video demux (including waiting for TS)")
 
     if ((m_packet->stream_index == m_videoStream) || (m_packet->stream_index == m_audioStream)
         || (m_packet->stream_index == m_adStream) || (m_packet->stream_index == m_subtitleStream))
@@ -966,15 +992,15 @@ bool DVBDemodVideoPlayer::readAndDecode()
     } else if ((m_packet->stream_index == m_audioStream) && m_audioCtx) {
         PROFILER_RESTART()
         decodeAudio();
-        PROFILER_STOP("DVBDemod audio decode and output")
+        PROFILER_STOP("DTV audio decode and output")
     } else if (m_packet->stream_index == m_adStream) {
         PROFILER_RESTART()
         decodeAudioDescription();
-        PROFILER_STOP("DVBDemod audio description decode")
+        PROFILER_STOP("DTV audio description decode")
     } else if ((m_packet->stream_index == m_subtitleStream) && m_subtitleCtx) {
         PROFILER_RESTART()
         decodeSubtitle();
-        PROFILER_STOP("DVBDemod subtitle decode")
+        PROFILER_STOP("DTV subtitle decode")
     }
 
     av_packet_unref(m_packet);
@@ -987,7 +1013,7 @@ bool DVBDemodVideoPlayer::readAndDecode()
 // between them (as on Sky's, each programme with its own PTS base) can change for another's streams mid-stream: the
 // video's timestamps fell 2^33 (26.5 hours) behind the audio's, so every frame restarted the clock. What FFmpeg added
 // doesn't matter here
-void DVBDemodVideoPlayer::unwrapTimestamps(AVPacket *packet)
+void DTVVideoPlayer::unwrapTimestamps(AVPacket *packet)
 {
     const AVRational timeBase = m_formatCtx->streams[packet->stream_index]->time_base;
 
@@ -1029,7 +1055,7 @@ void DVBDemodVideoPlayer::unwrapTimestamps(AVPacket *packet)
 // Pass a video packet to the video thread. If it has fallen far behind, rather than wait for it (which would hold up
 // the audio, and the TS, which would overflow), the video waiting is dropped, and what follows up to a keyframe, where
 // the video thread decodes from again
-void DVBDemodVideoPlayer::queueVideoPacket()
+void DTVVideoPlayer::queueVideoPacket()
 {
     if (videoFrameDamaged(m_packet)) {
         m_packet->flags |= AV_PKT_FLAG_CORRUPT;
@@ -1053,7 +1079,7 @@ void DVBDemodVideoPlayer::queueVideoPacket()
             m_videoBytes = 0;
             m_videoPackets.push_back(nullptr); // The discontinuity, for the video thread
             m_videoResync = true;
-            qDebug("DVBDemodVideoPlayer::queueVideoPacket: video fell behind: %llu packets dropped", (unsigned long long) dropped);
+            qDebug("DTVVideoPlayer::queueVideoPacket: video fell behind: %llu packets dropped", (unsigned long long) dropped);
         }
 
         if (m_videoResync && !key)
@@ -1079,17 +1105,17 @@ void DVBDemodVideoPlayer::queueVideoPacket()
     }
 }
 
-void DVBDemodVideoPlayer::startVideoThread()
+void DTVVideoPlayer::startVideoThread()
 {
     if (!m_videoCtx) {
         return;
     }
 
     m_videoStop = false;
-    m_videoThread = std::thread(&DVBDemodVideoPlayer::videoThread, this);
+    m_videoThread = std::thread(&DTVVideoPlayer::videoThread, this);
 }
 
-void DVBDemodVideoPlayer::stopVideoThread()
+void DTVVideoPlayer::stopVideoThread()
 {
     if (m_videoThread.joinable())
     {
@@ -1113,7 +1139,7 @@ void DVBDemodVideoPlayer::stopVideoThread()
     m_videoResync = false;
 }
 
-void DVBDemodVideoPlayer::videoThread()
+void DTVVideoPlayer::videoThread()
 {
 #ifdef _WIN32
     // Frames are timed by sleeping, which by default is in 15.6 ms steps on Windows: uneven at 25 or 50 frames/s.
@@ -1152,20 +1178,20 @@ void DVBDemodVideoPlayer::videoThread()
     }
 }
 
-const AVHWFramesContext *DVBDemodVideoPlayer::framesContext(const AVFrame *frame)
+const AVHWFramesContext *DTVVideoPlayer::framesContext(const AVFrame *frame)
 {
     return frame->hw_frames_ctx ? reinterpret_cast<const AVHWFramesContext *>(frame->hw_frames_ctx->data) : nullptr;
 }
 
 // If FFmpeg has a filter to deinterlace GPU frames of the format, without copying them to memory (setupDeinterlacer)
-#ifdef DVBDEMOD_DEINTERLACE
-bool DVBDemodVideoPlayer::hasGPUDeinterlacer(int format)
+#ifdef DTV_DEINTERLACE
+bool DTVVideoPlayer::hasGPUDeinterlacer(int format)
 {
     return (format == AV_PIX_FMT_CUDA) || (format == AV_PIX_FMT_VAAPI) || (format == AV_PIX_FMT_VIDEOTOOLBOX);
 }
 #endif
 
-void DVBDemodVideoPlayer::decodeVideo(AVPacket *packet)
+void DTVVideoPlayer::decodeVideo(AVPacket *packet)
 {
     // GPU decoders aren't as robust against damaged data as FFmpeg's own: NVDEC read thousands of bytes beyond a
     // corrupt slice's data, and crashed (also in an MPEG-2 keyframe FFmpeg hadn't flagged). So packets flagged with
@@ -1270,7 +1296,7 @@ void DVBDemodVideoPlayer::decodeVideo(AVPacket *packet)
         return;
     }
 
-    PROFILER_STOP("DVBDemod video decode")
+    PROFILER_STOP("DTV video decode")
 
     // Kept from the keyframe on, for software decoding to replay if the GOP's damaged
     if (gpuDecoding && m_videoSoftwareCtx)
@@ -1301,7 +1327,7 @@ void DVBDemodVideoPlayer::decodeVideo(AVPacket *packet)
     }
 }
 
-void DVBDemodVideoPlayer::clearGOP()
+void DTVVideoPlayer::clearGOP()
 {
     for (AVPacket *packet : m_gopPackets) {
         av_packet_free(&packet);
@@ -1314,7 +1340,7 @@ void DVBDemodVideoPlayer::clearGOP()
 
 // Damage, with the GPU decoding: FFmpeg decodes in software from the GOP's keyframe, those frames the GPU had shown
 // replayed without being shown again, those it hadn't put out not lost. Counted
-void DVBDemodVideoPlayer::startSoftwareGOP()
+void DTVVideoPlayer::startSoftwareGOP()
 {
     avcodec_flush_buffers(m_videoSoftwareCtx);
     avcodec_flush_buffers(m_videoCtx);
@@ -1333,9 +1359,9 @@ void DVBDemodVideoPlayer::startSoftwareGOP()
 // FFmpeg fell back to software in the GPU's context: m_videoSoftwareCtx decodes from now on, from the GOP's keyframe
 // (as for damage), the frames already shown not again. The GPU's context isn't used again for the service, so if a
 // later sequence could be decoded by the GPU, it isn't (the service selected again would)
-void DVBDemodVideoPlayer::startSoftwareFallback()
+void DTVVideoPlayer::startSoftwareFallback()
 {
-    qDebug("DVBDemodVideoPlayer::startSoftwareFallback: FFmpeg decodes in software: its decoder with threads takes over");
+    qDebug("DTVVideoPlayer::startSoftwareFallback: FFmpeg decodes in software: its decoder with threads takes over");
     avcodec_flush_buffers(m_videoSoftwareCtx);
     avcodec_flush_buffers(m_videoCtx); // Its frames let go of
     m_videoFallback = true;
@@ -1349,7 +1375,7 @@ void DVBDemodVideoPlayer::startSoftwareFallback()
 
 // The GOP's packets kept, from its keyframe, into the software decoder. The pictures already shown that nothing refers
 // to aren't decoded (AVDISCARD_NONREF), so it catches up sooner, rather than the picture freezing then rushing on
-void DVBDemodVideoPlayer::replayGOP()
+void DTVVideoPlayer::replayGOP()
 {
     std::vector<AVPacket*> packets;
     packets.swap(m_gopPackets);
@@ -1372,7 +1398,7 @@ void DVBDemodVideoPlayer::replayGOP()
 
 // The video before was dropped, as the video thread fell far behind: the next packet is a keyframe, which a GPU's
 // decoder waits for (as after damage), and the GOP kept for software decoding no longer leads to it
-void DVBDemodVideoPlayer::videoDiscontinuity()
+void DTVVideoPlayer::videoDiscontinuity()
 {
     if (!m_videoCtx) {
         return;
@@ -1386,9 +1412,9 @@ void DVBDemodVideoPlayer::videoDiscontinuity()
 }
 
 // The decoders skip pictures nothing refers to (AVDISCARD_NONREF), or not (AVDISCARD_DEFAULT)
-void DVBDemodVideoPlayer::setVideoDiscard(int discard)
+void DTVVideoPlayer::setVideoDiscard(int discard)
 {
-    qDebug("DVBDemodVideoPlayer::setVideoDiscard: %s", discard == AVDISCARD_DEFAULT ? "decoding every picture again"
+    qDebug("DTVVideoPlayer::setVideoDiscard: %s", discard == AVDISCARD_DEFAULT ? "decoding every picture again"
         : "frames late: skipping pictures nothing refers to");
     m_videoDiscard = discard;
     m_videoCtx->skip_frame = (AVDiscard) discard;
@@ -1401,7 +1427,7 @@ void DVBDemodVideoPlayer::setVideoDiscard(int discard)
 // Shed decoding work while frames are consistently late (the decoder can't keep up), rather than decode pictures to
 // drop them, until they've been on time for some seconds. A late frame now and then, as when the timestamps jump,
 // doesn't
-void DVBDemodVideoPlayer::updateShedding(bool late)
+void DTVVideoPlayer::updateShedding(bool late)
 {
     m_lateScore = m_lateScore * m_lateScoreDecay + (late ? 1.0 : 0.0);
     m_onTimeFrames = late ? 0 : m_onTimeFrames + 1;
@@ -1413,7 +1439,7 @@ void DVBDemodVideoPlayer::updateShedding(bool late)
     }
 }
 
-void DVBDemodVideoPlayer::decodeVideoSoftware(AVPacket *packet)
+void DTVVideoPlayer::decodeVideoSoftware(AVPacket *packet)
 {
     PROFILER_START()
 
@@ -1424,12 +1450,12 @@ void DVBDemodVideoPlayer::decodeVideoSoftware(AVPacket *packet)
         return;
     }
 
-    PROFILER_STOP("DVBDemod video software decode")
+    PROFILER_STOP("DTV video software decode")
     receiveVideoFrames(m_videoSoftwareCtx);
 }
 
 // After the handover to the GPU: the software decoder's last frames (those before the keyframe), then the GPU's
-void DVBDemodVideoPlayer::endSoftwareGOP()
+void DTVVideoPlayer::endSoftwareGOP()
 {
     avcodec_send_packet(m_videoSoftwareCtx, nullptr);
     receiveVideoFrames(m_videoSoftwareCtx);
@@ -1439,7 +1465,7 @@ void DVBDemodVideoPlayer::endSoftwareGOP()
 }
 
 // The frames a decoder has ready, deinterlaced and shown
-void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
+void DTVVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
 {
     PROFILER_START()
 
@@ -1451,7 +1477,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
             break;
         }
 
-        PROFILER_STOP("DVBDemod video decode")
+        PROFILER_STOP("DTV video decode")
 
         // Those already shown, as when a GOP's replayed for software decoding, not again
         const int64_t timestamp = m_videoFrame->best_effort_timestamp != AV_NOPTS_VALUE ? m_videoFrame->best_effort_timestamp : m_videoFrame->pts;
@@ -1481,6 +1507,21 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
             m_lastVideoPts = pts;
         }
 
+        // Closed captions (A/53), from the picture's user data: the frames come in presentation order, as the
+        // captions are sent. Before deinterlacing, which can make two frames of one
+        if (const AVFrameSideData *captions = av_frame_get_side_data(m_videoFrame, AV_FRAME_DATA_A53_CC))
+        {
+            m_captionsSeen = true;
+
+            if (m_captionsEnabled && (timestamp != AV_NOPTS_VALUE)) {
+                decodeCaptions(captions, timestamp);
+            }
+        }
+
+        if (!m_captionsEnabled && m_captionCtx) {
+            closeCaptions();
+        }
+
         // GPU frames the display can show stay there, else are copied to memory
         const bool gpu = (m_hwPixelFormat != AV_PIX_FMT_NONE) && (m_videoFrame->format == m_hwPixelFormat);
         const int type = gpu ? gpuFrameType(m_videoFrame) : -1;
@@ -1494,7 +1535,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
             m_info.m_videoDecoder = gpu ? m_hwName : QString();
         }
 
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
         // Without the GPU's deinterlacer, frames are deinterlaced in memory
         if (keepOnGPU && m_deinterlace && m_gpuDeinterlaceFailed && (m_videoFrame->format != AV_PIX_FMT_D3D11)) {
             keepOnGPU = false;
@@ -1511,7 +1552,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
             continue;
         }
 
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
         // D3D11 frames are deinterlaced by the display
         if (m_deinterlace && !(keepOnGPU && (m_videoFrame->format == AV_PIX_FMT_D3D11)))
         {
@@ -1544,7 +1585,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
                 {
                     while (av_buffersink_get_frame(m_bufferSink, m_filtered) >= 0)
                     {
-                        PROFILER_STOP("DVBDemod video deinterlace")
+                        PROFILER_STOP("DTV video deinterlace")
 
                         if (!copyAfter || !m_filtered->hw_frames_ctx || transferFromGPU(m_filtered)) {
                             renderFrame(m_filtered);
@@ -1555,7 +1596,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
                     }
                 }
 
-                PROFILER_STOP("DVBDemod video deinterlace")
+                PROFILER_STOP("DTV video deinterlace")
 
                 av_frame_unref(m_videoFrame);
                 continue;
@@ -1576,7 +1617,7 @@ void DVBDemodVideoPlayer::receiveVideoFrames(AVCodecContext *ctx)
     }
 }
 
-bool DVBDemodVideoPlayer::getPooledBuffer(FramePool& pool, AVFrame *frame)
+bool DTVVideoPlayer::getPooledBuffer(FramePool& pool, AVFrame *frame)
 {
     if (!pool.m_pool || (frame->format != pool.m_format) || (frame->width != pool.m_width) || (frame->height != pool.m_height))
     {
@@ -1637,7 +1678,7 @@ bool DVBDemodVideoPlayer::getPooledBuffer(FramePool& pool, AVFrame *frame)
     return true;
 }
 
-void DVBDemodVideoPlayer::freePool(FramePool& pool)
+void DTVVideoPlayer::freePool(FramePool& pool)
 {
     av_buffer_pool_uninit(&pool.m_pool);
     pool.m_format = -1;
@@ -1647,7 +1688,7 @@ void DVBDemodVideoPlayer::freePool(FramePool& pool)
 
 // Copy a GPU frame to memory, in its place, into a buffer from m_transferPool. False, with the frame released, if it
 // couldn't be
-bool DVBDemodVideoPlayer::transferFromGPU(AVFrame *frame)
+bool DTVVideoPlayer::transferFromGPU(AVFrame *frame)
 {
     PROFILER_START()
     av_frame_unref(m_transferFrame);
@@ -1684,15 +1725,15 @@ bool DVBDemodVideoPlayer::transferFromGPU(AVFrame *frame)
     m_transferFrame->height = frame->height;
     av_frame_unref(frame);
     av_frame_move_ref(frame, m_transferFrame);
-    PROFILER_STOP("DVBDemod video transfer from GPU")
+    PROFILER_STOP("DTV video transfer from GPU")
     return true;
 }
 
 // bwdif only processes frames that are marked as interlaced, outputting a frame for each frame
-bool DVBDemodVideoPlayer::setupDeinterlacer(const AVFrame *frame)
+bool DTVVideoPlayer::setupDeinterlacer(const AVFrame *frame)
 {
     closeDeinterlacer();
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
     AVRational timeBase = AVRational{m_videoTimeBaseNum, m_videoTimeBaseDen};
     AVRational sar = frame->sample_aspect_ratio;
 
@@ -1757,7 +1798,7 @@ bool DVBDemodVideoPlayer::setupDeinterlacer(const AVFrame *frame)
 
     if (!ok)
     {
-        qWarning() << "DVBDemodVideoPlayer::setupDeinterlacer: failed:" << filter << args;
+        qWarning() << "DTVVideoPlayer::setupDeinterlacer: failed:" << filter << args;
         avfilter_graph_free(&m_filterGraph);
         m_bufferSrc = nullptr;
         m_bufferSink = nullptr;
@@ -1774,9 +1815,9 @@ bool DVBDemodVideoPlayer::setupDeinterlacer(const AVFrame *frame)
 // The deinterlacer's last frame (bwdif holds one until the next comes), shown rather than lost, before it's set up
 // again for frames of another format or size: as each time software decodes a damaged GOP in place of the GPU, and
 // the GPU takes over again
-void DVBDemodVideoPlayer::flushDeinterlacer()
+void DTVVideoPlayer::flushDeinterlacer()
 {
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
     if (!m_filterGraph || (av_buffersrc_add_frame_flags(m_bufferSrc, nullptr, 0) < 0)) {
         return;
     }
@@ -1796,9 +1837,9 @@ void DVBDemodVideoPlayer::flushDeinterlacer()
 #endif
 }
 
-void DVBDemodVideoPlayer::closeDeinterlacer()
+void DTVVideoPlayer::closeDeinterlacer()
 {
-#ifdef DVBDEMOD_DEINTERLACE
+#ifdef DTV_DEINTERLACE
     avfilter_graph_free(&m_filterGraph);
 #endif
     m_filterGraph = nullptr;
@@ -1810,7 +1851,7 @@ void DVBDemodVideoPlayer::closeDeinterlacer()
 
 // The timestamp of the audio being played: of the end of the last audio written, less what is still queued. Muted
 // audio is written too (silent), so the clock runs on
-bool DVBDemodVideoPlayer::getAudioClock(double& clock)
+bool DTVVideoPlayer::getAudioClock(double& clock)
 {
     std::lock_guard<std::mutex> lock(m_audioClockMutex);
 
@@ -1831,7 +1872,7 @@ bool DVBDemodVideoPlayer::getAudioClock(double& clock)
 // Give up waiting if the timestamps jump, as when the receiver reacquires.
 // Returns false for a frame too late to show, as showing the frames that have fallen behind in quick succession
 // looks worse than skipping them. late: it was too late, or so late the clock restarted (for shedding decoding work)
-bool DVBDemodVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
+bool DTVVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
 {
     late = false;
 
@@ -1878,7 +1919,7 @@ bool DVBDemodVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
     {
         late = wait < 0.0;
         m_clockValid = false; // Restart the clock from the next frame
-        PROFILER_ADD("DVBDemod video clock restart (count)", 0)
+        PROFILER_ADD("DTV video clock restart (count)", 0)
         QMutexLocker locker(&m_infoMutex);
         m_info.m_clockRestarts++;
         return true;
@@ -1886,7 +1927,7 @@ bool DVBDemodVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
 
     if (wait < 0.0)
     {
-        PROFILER_ADD("DVBDemod video frame late (by)", (qint64) (-wait * 1e9))
+        PROFILER_ADD("DTV video frame late (by)", (qint64) (-wait * 1e9))
         late = wait <= -maxLateness;
 
         // Without audio to keep to, frames late are the clock's fault (the stream came late, or slower than real time):
@@ -1896,7 +1937,7 @@ bool DVBDemodVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
         {
             m_clockPts = pts;
             m_clockTime = now + seconds(m_latency);
-            PROFILER_ADD("DVBDemod video clock restart (count)", 0)
+            PROFILER_ADD("DTV video clock restart (count)", 0)
             QMutexLocker locker(&m_infoMutex);
             m_info.m_clockRestarts++;
             return true;
@@ -1923,7 +1964,7 @@ bool DVBDemodVideoPlayer::waitForPresentation(const AVFrame *frame, bool& late)
             if ((wait > maxWait) || (wait < -m_maxVideoLag))
             {
                 m_clockValid = false;
-                PROFILER_ADD("DVBDemod video clock restart (count)", 0)
+                PROFILER_ADD("DTV video clock restart (count)", 0)
                 QMutexLocker locker(&m_infoMutex);
                 m_info.m_clockRestarts++;
                 return true;
@@ -1959,7 +2000,7 @@ public:
 } // namespace
 
 // The GLVideoFrame type of a GPU frame the display might show (NV12 only), -1 if none
-int DVBDemodVideoPlayer::gpuFrameType(const AVFrame *frame) const
+int DTVVideoPlayer::gpuFrameType(const AVFrame *frame) const
 {
     const AVHWFramesContext *frames = framesContext(frame);
 
@@ -1980,12 +2021,12 @@ int DVBDemodVideoPlayer::gpuFrameType(const AVFrame *frame) const
 // A converter from frames of the format to YUV 4:2:0 of the same size. As it doesn't scale, a 4:2:0 format (10 bits,
 // or semi-planar) needs nothing but the nearest sample, which is exact and fastest; 4:2:2's chroma is halved vertically,
 // by a bilinear filter. With threads where FFmpeg has them for sws_scale_frame()
-SwsContext *DVBDemodVideoPlayer::createConverter(int width, int height, int format)
+SwsContext *DTVVideoPlayer::createConverter(int width, int height, int format)
 {
     const AVPixFmtDescriptor *descriptor = av_pix_fmt_desc_get((AVPixelFormat) format);
     const bool is420 = descriptor && (descriptor->log2_chroma_w == 1) && (descriptor->log2_chroma_h == 1);
     const int flags = is420 ? SWS_POINT : SWS_FAST_BILINEAR;
-#ifdef DVBDEMOD_SWS_THREADS
+#ifdef DTV_SWS_THREADS
     SwsContext *ctx = sws_alloc_context();
 
     if (ctx)
@@ -2010,7 +2051,7 @@ SwsContext *DVBDemodVideoPlayer::createConverter(int width, int height, int form
 }
 
 // The frame as the display takes it: YUV 4:2:0 in memory (converted if in another format), or a GPU frame's handles
-GLVideoFramePtr DVBDemodVideoPlayer::makeFrame(AVFrame *frame)
+GLVideoFramePtr DTVVideoPlayer::makeFrame(AVFrame *frame)
 {
     std::shared_ptr<FFmpegVideoFrame> out;
     const int format = frame->format;
@@ -2140,7 +2181,7 @@ GLVideoFramePtr DVBDemodVideoPlayer::makeFrame(AVFrame *frame)
         }
 
         PROFILER_START()
-#ifdef DVBDEMOD_SWS_THREADS
+#ifdef DTV_SWS_THREADS
         // With the converter's threads
         if (sws_scale_frame(m_swsCtx, converted, frame) < 0)
         {
@@ -2150,7 +2191,7 @@ GLVideoFramePtr DVBDemodVideoPlayer::makeFrame(AVFrame *frame)
 #else
         sws_scale(m_swsCtx, frame->data, frame->linesize, 0, frame->height, converted->data, converted->linesize);
 #endif
-        PROFILER_STOP("DVBDemod video format conversion")
+        PROFILER_STOP("DTV video format conversion")
         av_frame_copy_props(converted, frame);
         out = std::make_shared<FFmpegVideoFrame>(converted);
         av_frame_free(&converted);
@@ -2193,7 +2234,7 @@ GLVideoFramePtr DVBDemodVideoPlayer::makeFrame(AVFrame *frame)
         : frame->chroma_location == AVCHROMA_LOC_TOPLEFT ? GLVideoFrame::ChromaTopLeft : GLVideoFrame::ChromaLeft;
 
     out->m_fullRange = (frame->color_range == AVCOL_RANGE_JPEG) || (format == AV_PIX_FMT_YUVJ420P);
-#ifdef DVBDEMOD_FRAME_FLAGS
+#ifdef DTV_FRAME_FLAGS
     out->m_interlaced = (frame->flags & AV_FRAME_FLAG_INTERLACED) != 0;
     out->m_topFieldFirst = (frame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) != 0;
 #else
@@ -2205,12 +2246,12 @@ GLVideoFramePtr DVBDemodVideoPlayer::makeFrame(AVFrame *frame)
     return out;
 }
 
-void DVBDemodVideoPlayer::renderFrame(AVFrame *frame)
+void DTVVideoPlayer::renderFrame(AVFrame *frame)
 {
     PROFILER_START()
     bool late;
     bool show = waitForPresentation(frame, late);
-    PROFILER_STOP("DVBDemod video waiting to present")
+    PROFILER_STOP("DTV video waiting to present")
     updateShedding(late);
 
     if (!show)
@@ -2231,7 +2272,7 @@ void DVBDemodVideoPlayer::renderFrame(AVFrame *frame)
 
     PROFILER_RESTART()
     GLVideoFramePtr out = makeFrame(frame);
-    PROFILER_STOP("DVBDemod video frame for display")
+    PROFILER_STOP("DTV video frame for display")
 
     if (!out) {
         return;
@@ -2245,14 +2286,14 @@ void DVBDemodVideoPlayer::renderFrame(AVFrame *frame)
         m_frameCallback(out);
     }
 
-    PROFILER_STOP("DVBDemod video display callback")
+    PROFILER_STOP("DTV video display callback")
 
 #ifdef ENABLE_PROFILER
     // Even intervals between frames mean smooth video: the maximum shows the worst stall
     auto shown = std::chrono::steady_clock::now();
 
     if (m_profileLastFrame.time_since_epoch().count() != 0) {
-        PROFILER_ADD("DVBDemod video interval between frames", (qint64) std::chrono::duration_cast<std::chrono::nanoseconds>(shown - m_profileLastFrame).count())
+        PROFILER_ADD("DTV video interval between frames", (qint64) std::chrono::duration_cast<std::chrono::nanoseconds>(shown - m_profileLastFrame).count())
     }
 
     m_profileLastFrame = shown;
@@ -2296,10 +2337,10 @@ void DVBDemodVideoPlayer::renderFrame(AVFrame *frame)
 }
 
 // A resampler from a decoded frame's format to 16-bit samples at rate, stereo or mono
-SwrContext *DVBDemodVideoPlayer::createResampler(const AVFrame *frame, int rate, bool mono)
+SwrContext *DTVVideoPlayer::createResampler(const AVFrame *frame, int rate, bool mono)
 {
     SwrContext *swr = swr_alloc();
-#ifndef DVBDEMOD_CH_LAYOUT
+#ifndef DTV_CH_LAYOUT
     av_opt_set_int(swr, "in_channel_layout", frame->channel_layout ? frame->channel_layout : av_get_default_channel_layout(frame->channels), 0);
     av_opt_set_int(swr, "out_channel_layout", mono ? AV_CH_LAYOUT_MONO : AV_CH_LAYOUT_STEREO, 0);
 #else
@@ -2320,12 +2361,12 @@ SwrContext *DVBDemodVideoPlayer::createResampler(const AVFrame *frame, int rate,
     return swr;
 }
 
-SwrContext *DVBDemodVideoPlayer::resamplerFor(SwrContext *&swr, ResamplerInput& input, int rate, bool mono, bool damaged)
+SwrContext *DTVVideoPlayer::resamplerFor(SwrContext *&swr, ResamplerInput& input, int rate, bool mono, bool damaged)
 {
     ResamplerInput frameInput;
     frameInput.m_format = m_frame->format;
     frameInput.m_rate = m_frame->sample_rate;
-#ifndef DVBDEMOD_CH_LAYOUT
+#ifndef DTV_CH_LAYOUT
     frameInput.m_channels = m_frame->channels;
     frameInput.m_layout = m_frame->channel_layout;
 #else
@@ -2362,13 +2403,13 @@ SwrContext *DVBDemodVideoPlayer::resamplerFor(SwrContext *&swr, ResamplerInput& 
 }
 
 // Resample to stereo at the audio device's rate, from the next frame's format
-void DVBDemodVideoPlayer::setupResampler()
+void DTVVideoPlayer::setupResampler()
 {
     swr_free(&m_swrCtx);
     m_swrRate = m_audioSampleRate;
 }
 
-void DVBDemodVideoPlayer::decodeAudio()
+void DTVVideoPlayer::decodeAudio()
 {
     if (m_audioCtx && (m_swrRate != m_audioSampleRate)) {
         setupResampler();
@@ -2482,7 +2523,7 @@ void DVBDemodVideoPlayer::decodeAudio()
 
 // The audio description is decoded as it arrives, and kept until the main audio of the same time is decoded. Its
 // codec isn't known until FFmpeg has seen some of its packets, which only come while a programme has a description
-void DVBDemodVideoPlayer::decodeAudioDescription()
+void DTVVideoPlayer::decodeAudioDescription()
 {
     if (!m_adCtx)
     {
@@ -2498,7 +2539,7 @@ void DVBDemodVideoPlayer::decodeAudioDescription()
             return;
         }
 
-        qDebug() << "DVBDemodVideoPlayer::decodeAudioDescription:" << m_adCtx->codec->long_name;
+        qDebug() << "DTVVideoPlayer::decodeAudioDescription:" << m_adCtx->codec->long_name;
     }
 
     if (m_swrRate <= 0) {
@@ -2571,7 +2612,7 @@ void DVBDemodVideoPlayer::decodeAudioDescription()
 // Applies the volume (gain) to a block of stereo samples, starting at pts seconds, mixing in the audio description
 // of the same time, if there is one, faded and panned as its descriptors say. The fade is ramped across the block.
 // If mute, the block fades out in a millisecond, as it may be corrupt; after a muted block, the audio fades in
-void DVBDemodVideoPlayer::mixAudioDescription(int16_t *samples, int count, double pts, float gain, bool mute)
+void DTVVideoPlayer::mixAudioDescription(int16_t *samples, int count, double pts, float gain, bool mute)
 {
     const bool active = (m_adStream >= 0) && !std::isnan(pts) && (m_adSwrRate == m_swrRate)
         && (std::chrono::steady_clock::now() - m_adTime < seconds(m_audioClockStale));
@@ -2671,14 +2712,14 @@ void DVBDemodVideoPlayer::mixAudioDescription(int16_t *samples, int count, doubl
 
 // A good packet's adaptation field's discontinuity_indicator: its continuity counter may jump (ISO/IEC 13818-1
 // 2.4.3.5), so a jump there isn't packets lost. Not trusted in a packet with errors
-bool DVBDemodVideoPlayer::signalledDiscontinuity(const uint8_t *p)
+bool DTVVideoPlayer::signalledDiscontinuity(const uint8_t *p)
 {
     return !(p[1] & 0x80) && (p[3] & 0x20) && (p[4] > 0) && (p[5] & 0x80);
 }
 
 // Note the PES of the main audio, and which of their payload bytes came in TS packets with errors
 // (transport_error_indicator), or were lost (the continuity counter jumped, without a discontinuity signalled)
-void DVBDemodVideoPlayer::trackAudioPES(const uint8_t *buf, int size)
+void DTVVideoPlayer::trackAudioPES(const uint8_t *buf, int size)
 {
     if (m_audioPid < 0) {
         return;
@@ -2761,7 +2802,7 @@ void DVBDemodVideoPlayer::trackAudioPES(const uint8_t *buf, int size)
 
 // Whether each video PES had TS packets with errors, or lost packets (pictures are a PES each in broadcasts), for
 // every PID found carrying video (a PES of stream id 0xE0 to 0xEF), from the stream's opening
-void DVBDemodVideoPlayer::trackVideoPES(const uint8_t *buf, int size)
+void DTVVideoPlayer::trackVideoPES(const uint8_t *buf, int size)
 {
     for (int i = 0; i + 188 <= size; i += 188)
     {
@@ -2840,7 +2881,7 @@ void DVBDemodVideoPlayer::trackVideoPES(const uint8_t *buf, int size)
 // If a picture's PES (that with its PTS) was damaged. Its whole PES has been read by the time the demuxer returns it.
 // A picture whose PTS isn't found, when a PES whose header had errors (so whose PTS isn't known) came after the last
 // matched, is that one's: damaged (the parser's own flag would be on the next picture)
-bool DVBDemodVideoPlayer::videoFrameDamaged(const AVPacket *packet)
+bool DTVVideoPlayer::videoFrameDamaged(const AVPacket *packet)
 {
     auto track = m_videoTracks.find(m_videoPid);
 
@@ -2878,7 +2919,7 @@ bool DVBDemodVideoPlayer::videoFrameDamaged(const AVPacket *packet)
 }
 
 // The TS as read, for what's parsed from it besides FFmpeg: whole packets
-void DVBDemodVideoPlayer::parseTS(const uint8_t *buf, int size)
+void DTVVideoPlayer::parseTS(const uint8_t *buf, int size)
 {
     const uint8_t *data = buf;
     int length = size;
@@ -2900,7 +2941,7 @@ void DVBDemodVideoPlayer::parseTS(const uint8_t *buf, int size)
 
 // Whether the service's video (or its audio, if it has none) is scrambled, from its packets' transport_scrambling_control:
 // then it's encrypted (pay TV), can't be decoded, and the display says so, rather than that none is being received
-void DVBDemodVideoPlayer::trackScrambling(const uint8_t *buf, int size)
+void DTVVideoPlayer::trackScrambling(const uint8_t *buf, int size)
 {
     const int pid = m_videoPid >= 0 ? m_videoPid : m_audioPid;
 
@@ -2929,7 +2970,7 @@ void DVBDemodVideoPlayer::trackScrambling(const uint8_t *buf, int size)
     }
 }
 
-uint32_t DVBDemodVideoPlayer::writeAudio(const int16_t *samples, int nbSamples)
+uint32_t DTVVideoPlayer::writeAudio(const int16_t *samples, int nbSamples)
 {
     // The oldest dropped rather than the newest lost: after an open, the audio FFmpeg read probing comes all at once,
     // and DVB-T2's in a frame's burst. Writing past the FIFO's end lost the newest, mid frame, and left the clock
@@ -2959,7 +3000,7 @@ uint32_t DVBDemodVideoPlayer::writeAudio(const int16_t *samples, int nbSamples)
 // If an audio frame was in a damaged part of its PES, or of the next where it ran on into that (frames needn't be
 // aligned to PES), or ran on past a PES header with errors. If where it was can't be told, as when its PES header had
 // errors, it was damaged if the demuxer flagged it
-bool DVBDemodVideoPlayer::audioFrameDamaged(const AVPacket *packet, bool flagged)
+bool DTVVideoPlayer::audioFrameDamaged(const AVPacket *packet, bool flagged)
 {
     if (packet->pts == AV_NOPTS_VALUE) {
         return flagged;
@@ -3051,7 +3092,7 @@ bool DVBDemodVideoPlayer::audioFrameDamaged(const AVPacket *packet, bool flagged
 // The fade of the main audio and pan of the description, from the PES headers of an MPEG audio description: the
 // AD_descriptor in the PES private data (ETSI TS 101 154 E.1). Read from the TS, as FFmpeg skips PES private data,
 // for any PID that has them
-void DVBDemodVideoPlayer::parseADDescriptors(const uint8_t *buf, int size)
+void DTVVideoPlayer::parseADDescriptors(const uint8_t *buf, int size)
 {
     for (int i = 0; i + 188 <= size; i += 188)
     {
@@ -3105,7 +3146,7 @@ void DVBDemodVideoPlayer::parseADDescriptors(const uint8_t *buf, int size)
 }
 
 // All the bitmaps of a page in one image, on the decoder's display (720x576 unless a display definition says)
-GLVideoSubtitlePtr DVBDemodVideoPlayer::makeSubtitle(const AVSubtitle& sub, int canvasWidth, int canvasHeight)
+GLVideoSubtitlePtr DTVVideoPlayer::makeSubtitle(const AVSubtitle& sub, int canvasWidth, int canvasHeight)
 {
     int x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
 
@@ -3166,7 +3207,7 @@ GLVideoSubtitlePtr DVBDemodVideoPlayer::makeSubtitle(const AVSubtitle& sub, int 
 }
 
 // A page replaces the last, until its time out. An empty page clears the screen
-void DVBDemodVideoPlayer::decodeSubtitle()
+void DTVVideoPlayer::decodeSubtitle()
 {
     AVSubtitle sub;
     int got = 0;
@@ -3195,8 +3236,205 @@ void DVBDemodVideoPlayer::decodeSubtitle()
     m_info.m_subtitlePages++;
 }
 
+// FFmpeg's CEA-608 decoder, in real time mode (each change to the screen given as it's made, as roll-up captions are
+// shown): a page shown from the frame's time until the next. Only CEA-608 (in CEA-708's cc_data, as US broadcasters
+// send both): CEA-708's own services aren't decoded
+void DTVVideoPlayer::decodeCaptions(const AVFrameSideData *captions, int64_t timestamp)
+{
+    if (!m_captionCtx)
+    {
+        const AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_EIA_608);
+
+        if (!codec) {
+            return;
+        }
+
+        m_captionCtx = avcodec_alloc_context3(codec);
+        m_captionCtx->pkt_timebase = AVRational{m_videoTimeBaseNum, m_videoTimeBaseDen};
+        AVDictionary *options = nullptr;
+        av_dict_set(&options, "real_time", "1", 0);
+        const int opened = avcodec_open2(m_captionCtx, codec, &options);
+        av_dict_free(&options);
+
+        if (opened < 0)
+        {
+            qWarning("DTVVideoPlayer::decodeCaptions: FFmpeg's CEA-608 decoder couldn't be opened");
+            avcodec_free_context(&m_captionCtx);
+            m_captionsEnabled = false;
+            return;
+        }
+    }
+
+    AVPacket *packet = av_packet_alloc();
+
+    if (!packet || (av_new_packet(packet, (int) captions->size) < 0))
+    {
+        av_packet_free(&packet);
+        return;
+    }
+
+    memcpy(packet->data, captions->data, captions->size);
+    packet->pts = timestamp;
+    AVSubtitle sub;
+    int got = 0;
+
+    if ((avcodec_decode_subtitle2(m_captionCtx, &sub, &got, packet) >= 0) && got)
+    {
+        QString text;
+
+        for (unsigned int i = 0; i < sub.num_rects; i++)
+        {
+            if ((sub.rects[i]->type == SUBTITLE_ASS) && sub.rects[i]->ass) {
+                text += assText(sub.rects[i]->ass);
+            }
+        }
+
+        SubtitlePage page;
+        page.m_start = timestamp * av_q2d(AVRational{m_videoTimeBaseNum, m_videoTimeBaseDen});
+        page.m_end = INFINITY;
+        page.m_subtitle = text.trimmed().isEmpty() ? nullptr : makeCaptions(text);
+
+        {
+            std::lock_guard<std::mutex> lock(m_subtitleMutex);
+            m_subtitlePages.push_back(page);
+
+            if (m_subtitlePages.size() > 100) {
+                m_subtitlePages.pop_front();
+            }
+        }
+
+        avsubtitle_free(&sub);
+        QMutexLocker locker(&m_infoMutex);
+        m_info.m_subtitlePages++;
+    }
+
+    av_packet_free(&packet);
+}
+
+void DTVVideoPlayer::closeCaptions()
+{
+    avcodec_free_context(&m_captionCtx);
+}
+
+// "ReadOrder,Layer,Style,Name,MarginL,MarginR,MarginV,Effect,Text": the text, without override codes ({...}), its
+// line breaks (\N) as newlines and hard spaces (\h) as spaces
+QString DTVVideoPlayer::assText(const char *ass)
+{
+    QString event = QString::fromUtf8(ass);
+    int commas = 0, start = 0;
+
+    for (int i = 0; (i < event.size()) && (commas < 8); i++)
+    {
+        if (event[i] == ',')
+        {
+            commas++;
+            start = i + 1;
+        }
+    }
+
+    QString text = commas == 8 ? event.mid(start) : event;
+    QString out;
+    bool code = false;
+
+    for (int i = 0; i < text.size(); i++)
+    {
+        const QChar c = text[i];
+
+        if (c == '{') {
+            code = true;
+        } else if (c == '}') {
+            code = false;
+        } else if (code) {
+            continue;
+        } else if ((c == '\\') && (i + 1 < text.size()) && ((text[i + 1] == 'N') || (text[i + 1] == 'n'))) {
+            out += '\n';
+            i++;
+        } else if ((c == '\\') && (i + 1 < text.size()) && (text[i + 1] == 'h')) {
+            out += ' ';
+            i++;
+        } else {
+            out += c;
+        }
+    }
+
+    return out;
+}
+
+// As TVs show CEA-608: white monospaced text on black boxes, the lines left aligned in a block centred at the bottom
+// of a 4:3 safe area (the decoder's rows and columns aren't kept, so roll-up and pop-on captions are both there)
+GLVideoSubtitlePtr DTVVideoPlayer::makeCaptions(const QString& text)
+{
+    static constexpr int canvasWidth = 640;
+    static constexpr int canvasHeight = 480;
+    QStringList lines = text.split('\n', Qt::SkipEmptyParts);
+
+    for (QString& line : lines) {
+        line = line.trimmed();
+    }
+
+    lines.removeAll(QString());
+
+    if (lines.isEmpty()) {
+        return nullptr;
+    }
+
+    // Fonts need a GUI application: without one (as in a test), just the boxes, at a monospaced font's size
+    const bool fonts = qobject_cast<QGuiApplication*>(QCoreApplication::instance()) != nullptr;
+    QFont font("Consolas");
+    font.setStyleHint(QFont::Monospace);
+    font.setPixelSize(22);
+    auto lineWidth = [&](const QString& line) {
+        return (fonts ? QFontMetrics(font).horizontalAdvance(line) : 12 * (int) line.size()) + 16;
+    };
+    const int lineHeight = (fonts ? QFontMetrics(font).height() : 26) + 4;
+    int width = 0;
+
+    for (const QString& line : lines) {
+        width = std::max(width, lineWidth(line));
+    }
+
+    width = std::min(width, canvasWidth);
+    const int height = lineHeight * (int) lines.size();
+    QImage image(width, height, QImage::Format_RGBA8888_Premultiplied);
+    image.fill(Qt::transparent);
+    QPainter painter(&image);
+
+    if (fonts) {
+        painter.setFont(font);
+    }
+
+    for (int i = 0; i < (int) lines.size(); i++)
+    {
+        const int w = std::min(width, lineWidth(lines[i]));
+        const QRect box(0, i * lineHeight, w, lineHeight);   // Left aligned, as the rows of a caption are
+        painter.fillRect(box, QColor(0, 0, 0, 220));
+
+        if (fonts)
+        {
+            painter.setPen(Qt::white);
+            painter.drawText(box, Qt::AlignCenter, lines[i]);
+        }
+    }
+
+    painter.end();
+    auto subtitle = std::make_shared<GLVideoSubtitle>();
+    subtitle->m_canvasWidth = canvasWidth;
+    subtitle->m_canvasHeight = canvasHeight;
+    subtitle->m_width = width;
+    subtitle->m_height = height;
+    subtitle->m_x = (canvasWidth - width) / 2;
+    subtitle->m_y = canvasHeight - 32 - height;
+    subtitle->m_rgba.resize((size_t) width * height * 4);
+
+    for (int y = 0; y < height; y++) {
+        memcpy(subtitle->m_rgba.data() + (size_t) y * width * 4, image.constScanLine(y), (size_t) width * 4);
+    }
+
+    return subtitle;
+}
+
 // The subtitle due with a video frame (pts seconds), in the video thread
-GLVideoSubtitlePtr DVBDemodVideoPlayer::currentSubtitle(double pts)
+GLVideoSubtitlePtr DTVVideoPlayer::currentSubtitle(double pts)
 {
     std::lock_guard<std::mutex> lock(m_subtitleMutex);
 
@@ -3222,7 +3460,7 @@ GLVideoSubtitlePtr DVBDemodVideoPlayer::currentSubtitle(double pts)
     return m_subtitleShown.m_subtitle;
 }
 
-void DVBDemodVideoPlayer::closeTrackDecoders()
+void DTVVideoPlayer::closeTrackDecoders()
 {
     avcodec_free_context(&m_audioCtx);
     avcodec_free_context(&m_adCtx);
@@ -3232,6 +3470,7 @@ void DVBDemodVideoPlayer::closeTrackDecoders()
     m_audioStream = -1;
     m_adStream = -1;
     m_subtitleStream = -1;
+    m_captionsEnabled = false;
     m_adPid = -1;
     m_adSamples.clear();
     m_adControl = ADControl{0.0, 0, 0};
@@ -3260,7 +3499,7 @@ void DVBDemodVideoPlayer::closeTrackDecoders()
 }
 
 // The track a stream is, if it's audio or subtitles that can be shown
-bool DVBDemodVideoPlayer::getTrack(const AVStream *stream, DVBDemodVideoPlayer::Track& track)
+bool DTVVideoPlayer::getTrack(const AVStream *stream, DTVVideoPlayer::Track& track)
 {
     const int disposition = stream->disposition;
     const AVMediaType type = stream->codecpar->codec_type;
@@ -3274,8 +3513,8 @@ bool DVBDemodVideoPlayer::getTrack(const AVStream *stream, DVBDemodVideoPlayer::
             return false; // Teletext, which isn't used for subtitles in the UK
         }
 
-        track.m_type = (disposition & AV_DISPOSITION_HEARING_IMPAIRED) ? DVBDemodVideoPlayer::Track::SubtitlesHardOfHearing
-            : DVBDemodVideoPlayer::Track::Subtitles;
+        track.m_type = (disposition & AV_DISPOSITION_HEARING_IMPAIRED) ? DTVVideoPlayer::Track::SubtitlesHardOfHearing
+            : DTVVideoPlayer::Track::Subtitles;
         return true;
     }
 
@@ -3290,19 +3529,19 @@ bool DVBDemodVideoPlayer::getTrack(const AVStream *stream, DVBDemodVideoPlayer::
     }
 
     if (description) {
-        track.m_type = (disposition & AV_DISPOSITION_DEPENDENT) ? DVBDemodVideoPlayer::Track::AudioDescription
-            : DVBDemodVideoPlayer::Track::AudioDescriptionMixed;
+        track.m_type = (disposition & AV_DISPOSITION_DEPENDENT) ? DTVVideoPlayer::Track::AudioDescription
+            : DTVVideoPlayer::Track::AudioDescriptionMixed;
     } else if (disposition & AV_DISPOSITION_HEARING_IMPAIRED) {
-        track.m_type = DVBDemodVideoPlayer::Track::CleanAudio;
+        track.m_type = DTVVideoPlayer::Track::CleanAudio;
     } else {
-        track.m_type = DVBDemodVideoPlayer::Track::Main;
+        track.m_type = DTVVideoPlayer::Track::Main;
     }
 
     return true;
 }
 
 // The first track of one of the types, in the language if there is one
-int DVBDemodVideoPlayer::findTrack(const QList<DVBDemodVideoPlayer::Track>& tracks, std::initializer_list<DVBDemodVideoPlayer::Track::Type> types,
+int DTVVideoPlayer::findTrack(const QList<DTVVideoPlayer::Track>& tracks, std::initializer_list<DTVVideoPlayer::Track::Type> types,
     const QString& language)
 {
     for (int pass = 0; pass < 2; pass++)
@@ -3320,7 +3559,7 @@ int DVBDemodVideoPlayer::findTrack(const QList<DVBDemodVideoPlayer::Track>& trac
 }
 
 // The first track of the type in the language (any language if it's empty), -1 if none
-int DVBDemodVideoPlayer::findTrackInLanguage(const QList<DVBDemodVideoPlayer::Track>& tracks, DVBDemodVideoPlayer::Track::Type type,
+int DTVVideoPlayer::findTrackInLanguage(const QList<DTVVideoPlayer::Track>& tracks, DTVVideoPlayer::Track::Type type,
     const QString& language)
 {
     for (int i = 0; i < tracks.size(); i++)
@@ -3337,7 +3576,7 @@ int DVBDemodVideoPlayer::findTrackInLanguage(const QList<DVBDemodVideoPlayer::Tr
 // another service may not have it). With audio description, one to mix in, or else audio with it mixed (the other way
 // round, if the broadcaster's mix is preferred). Subtitles of the type in the language, else the other type's, else
 // any of the language's, else the first
-void DVBDemodVideoPlayer::chooseTracks(const Tracks& tracks, const QString& audioLanguage, Track::Type audioType, bool subtitles,
+void DTVVideoPlayer::chooseTracks(const Tracks& tracks, const QString& audioLanguage, Track::Type audioType, bool subtitles,
     const QString& subtitleLanguage, Track::Type subtitleType, int& audio, int& description, int& subtitle)
 {
     audio = findTrack(tracks.m_audio, {Track::Main}, audioLanguage);
@@ -3380,7 +3619,7 @@ void DVBDemodVideoPlayer::chooseTracks(const Tracks& tracks, const QString& audi
 }
 
 // Choose the service's audio, audio description and subtitles, as preferred, and open their decoders
-void DVBDemodVideoPlayer::selectTracks()
+void DTVVideoPlayer::selectTracks()
 {
     closeTrackDecoders();
     QString audioLanguage, subtitleLanguage;
@@ -3417,6 +3656,15 @@ void DVBDemodVideoPlayer::selectTracks()
         }
     }
 
+    // Closed captions in the video, if they've been seen: a track without a stream
+    m_captionsListed = m_captionsSeen;
+
+    if (m_captionsListed)
+    {
+        tracks.m_subtitles.append(Track{m_captionPid, QString(), Track::Subtitles});
+        subtitleStreams.push_back(-1);
+    }
+
     int audio, description, subtitle;
     chooseTracks(tracks, audioLanguage, audioType, subtitles, subtitleLanguage, subtitleType, audio, description, subtitle);
 
@@ -3436,22 +3684,60 @@ void DVBDemodVideoPlayer::selectTracks()
         tracks.m_adPid = m_adPid;
     }
 
-    if (subtitle >= 0)
+    if ((subtitle >= 0) && (subtitleStreams[subtitle] < 0))
+    {
+        m_captionsEnabled = true;
+        tracks.m_subtitlePid = m_captionPid;
+    }
+    else if (subtitle >= 0)
     {
         m_subtitleStream = subtitleStreams[subtitle];
         m_subtitleCtx = openDecoder(m_formatCtx->streams[m_subtitleStream]);
         tracks.m_subtitlePid = tracks.m_subtitles[subtitle].m_pid;
     }
 
-    qDebug() << "DVBDemodVideoPlayer::selectTracks:" << tracks.m_audio.size() << "audio tracks," << tracks.m_subtitles.size()
+    qDebug() << "DTVVideoPlayer::selectTracks:" << tracks.m_audio.size() << "audio tracks," << tracks.m_subtitles.size()
         << "subtitle tracks. Playing audio" << tracks.m_audioPid << "description" << tracks.m_adPid << "subtitles" << tracks.m_subtitlePid;
 
     {
         QMutexLocker locker(&m_infoMutex);
         m_info.m_audioCodec = m_audioCtx ? QString(m_audioCtx->codec->long_name) : QString();
         m_info.m_audioDescription = m_adStream >= 0;
-        m_info.m_subtitles = m_subtitleCtx != nullptr;
+        m_info.m_subtitles = (m_subtitleCtx != nullptr) || m_captionsEnabled;
     }
 
+    m_tracks = tracks;
     emit tracksChanged(tracks);
+}
+
+// Captions found in the video after the tracks were chosen: listed, and played if preferred (and no subtitles are)
+void DTVVideoPlayer::addCaptionTrack()
+{
+    m_captionsListed = true;
+    m_tracks.m_subtitles.append(Track{m_captionPid, QString(), Track::Subtitles});
+    QString audioLanguage, subtitleLanguage;
+    Track::Type audioType, subtitleType;
+    bool subtitles;
+
+    {
+        QMutexLocker locker(&m_tracksMutex);
+        audioLanguage = m_audioLanguage;
+        audioType = m_audioType;
+        subtitles = m_subtitles;
+        subtitleLanguage = m_subtitleLanguage;
+        subtitleType = m_subtitleType;
+    }
+
+    int audio, description, subtitle;
+    chooseTracks(m_tracks, audioLanguage, audioType, subtitles, subtitleLanguage, subtitleType, audio, description, subtitle);
+
+    if ((subtitle >= 0) && (m_tracks.m_subtitles[subtitle].m_pid == m_captionPid) && !m_subtitleCtx)
+    {
+        m_captionsEnabled = true;
+        m_tracks.m_subtitlePid = m_captionPid;
+        QMutexLocker locker(&m_infoMutex);
+        m_info.m_subtitles = true;
+    }
+
+    emit tracksChanged(m_tracks);
 }

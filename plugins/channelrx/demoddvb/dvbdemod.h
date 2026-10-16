@@ -47,7 +47,7 @@ class DeviceAPI;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class DVBDemod : public BasebandSampleSink, public ChannelAPI {
+class DVBDemod : public BasebandSampleSink, public ChannelAPI, public DTVRecordingSchedule {
 public:
     class MsgConfigureDVBDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -148,11 +148,13 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     void getStatus(DVBDemodSink::Status& status) { m_basebandSink->getStatus(status); }
-    DVBDemodTSFifo *getTSFifo() { return m_basebandSink->getTSFifo(); }
+    DTVTSFifo *getTSFifo() { return m_basebandSink->getTSFifo(); }
     AudioFifo *getAudioFifo() { return m_basebandSink->getAudioFifo(); }
     void getAudioOutput(int& sampleRate, double& latency) const { m_basebandSink->getAudioOutput(sampleRate, latency); }
     //! The programme guide, from the transport stream, shared by every DVB demodulator through a cache file
     DVBDemodEPG *getEPG() { return m_basebandSink->getEPG(); }
+    //! The services' interactive applications, and the carousels of the one played
+    DTVApps *getApps() { return m_basebandSink->getApps(); }
 
     // Recording, to .ts files in the settings' directory. Manual recordings are of the multiplex or the service
     // selected, as the settings say. Scheduled recordings are of programmes in the guide
@@ -161,21 +163,21 @@ public:
     bool isRecording() const { return m_manualRecording >= 0; }
     std::vector<DVBDemodSink::Recording> getRecordings() { return m_basebandSink->getRecordings(); }
     //! A programme from the guide to record. False if it's already scheduled
-    bool scheduleRecording(int networkId, int serviceId, int eventId);
-    void cancelScheduledRecording(int networkId, int serviceId, int eventId);
-    bool isScheduled(int networkId, int serviceId, int eventId) const;
-    QList<DVBDemodSettings::ScheduledRecording> getScheduledRecordings() const { return m_settings.m_scheduledRecordings; }
+    bool scheduleRecording(int networkId, int serviceId, int eventId) override;
+    void cancelScheduledRecording(int networkId, int serviceId, int eventId) override;
+    bool isScheduled(int networkId, int serviceId, int eventId) const override;
+    QList<DTVScheduledRecording> getScheduledRecordings() const override { return m_settings.m_scheduledRecordings; }
     //! Record a programme's series: every programme of its service with its series CRID, each once (not repeats).
     //! False if it has no series CRID, or it's recorded already
-    bool scheduleSeries(int networkId, int serviceId, int eventId);
+    bool scheduleSeries(int networkId, int serviceId, int eventId) override;
     //! Stop recording a programme's series (the programmes scheduled from it stay scheduled)
-    void cancelSeries(int networkId, int serviceId, int eventId);
-    void cancelSeries(int networkId, int serviceId, const QString& seriesCrid);
+    void cancelSeries(int networkId, int serviceId, int eventId) override;
+    void cancelSeries(int networkId, int serviceId, const QString& seriesCrid) override;
     //! Scheduled recordings may retune to their service's multiplex
-    bool recordRetune() const { return m_settings.m_recordRetune; }
+    bool recordRetune() const override { return m_settings.m_recordRetune; }
     //! The programme's series is being recorded
-    bool isSeriesScheduled(int networkId, int serviceId, int eventId) const;
-    QList<DVBDemodSettings::SeriesRecording> getSeriesRecordings() const { return m_settings.m_seriesRecordings; }
+    bool isSeriesScheduled(int networkId, int serviceId, int eventId) const override;
+    QList<DTVSeriesRecording> getSeriesRecordings() const override { return m_settings.m_seriesRecordings; }
     //! The service selected, or if automatic, the one the player's playing (it chose it), else (no player, as headless)
     //! the first TV service of the multiplex by channel number. 0 if none known. Recording and the reports take this,
     //! so they're of what's watched
@@ -430,6 +432,7 @@ private:
     void webapiFormatSatelliteReport(const DVBDemodSink::Status& status, SWGSDRangel::SWGDVBDemodReport *report);
     void webapiFormatEPGReport(SWGSDRangel::SWGDVBDemodReport *report);
     void webapiFormatEPGLists(SWGSDRangel::SWGDVBDemodReport *report, std::vector<DVBDemodEPG::Service> services, int serviceId);
+    void webapiFormatAppsReport(SWGSDRangel::SWGDVBDemodReport *report);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DVBDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         const QList<QString>& channelSettingsKeys,

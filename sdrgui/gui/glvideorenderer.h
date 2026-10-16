@@ -56,7 +56,8 @@ public:
     bool canShow(GLVideoFrame::Type type) const;
     //! Draw the frame into the current framebuffer (width x height pixels), letterboxed to its aspect ratio if
     //! keepAspect, deinterlacing GPU frames that need it if deinterlace. False if it couldn't be shown
-    bool drawFrame(const GLVideoFramePtr& frame, int width, int height, bool keepAspect, bool deinterlace);
+    //! area: where in the width by height viewport the picture's drawn (its aspect kept within it), null for all of it
+    bool drawFrame(const GLVideoFramePtr& frame, int width, int height, bool keepAspect, bool deinterlace, const QRect& area = QRect());
     //! Draw an image, blended, at rect (pixels from the top left) of the framebuffer of width x height pixels
     void drawImage(const QImage& image, const QRect& rect, int width, int height);
     //! Where the frame is drawn

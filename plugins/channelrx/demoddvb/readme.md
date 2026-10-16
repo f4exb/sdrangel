@@ -34,7 +34,7 @@ DVB-T2 (the T2-base and T2-Lite profiles):
 The FFT size comes from the P1 symbol, the guard interval from the correlation of the following symbols, and the rest from the L1 signalling.
 The FFT window is placed from the channel's measured impulse response, so echoes up to the length of the guard interval can be received, from the first
 frame after acquisition (the response is measured from the first P2 symbol). With long echoes, the channel is estimated from the pilots of several symbols.
-MISO is supported (both groups of transmitters, or either alone). Time-frequency slicing and recombining data PLPs with their common PLP aren't supported. 
+MISO is supported (both groups of transmitters, or either alone). Time-frequency slicing and recombining data PLPs with their common PLP aren't supported.
 In the UK, the HD multiplexes (e.g. PSB3) use 32K extended carriers, GI 1/128, PP7 and one PLP of rotated 256-QAM 2/3 with 64K LDPC,
 which is supported.
 
@@ -80,10 +80,10 @@ Video and audio are decoded with FFmpeg, so the plugin can play any codec FFmpeg
 <h2>Sample rate</h2>
 
 DVB-T is defined in terms of an elementary period of 7/64 us for 8 MHz channels, so the receiver works at 64/7 MS/s (9,142,857 S/s).
-For 7 and 6 MHz channels it is 8 MS/s and 48/7 MS/s respectively. 
+For 7 and 6 MHz channels it is 8 MS/s and 48/7 MS/s respectively.
 It's best to set the device sample rate to this, or to it multiplied by a power of 2, with decimation enabled.
 
-Other channel sample rates from 0.875 to 2.2 times this (8.0 to 20.1 MS/s for 8 MHz channels) are resampled, which takes more CPU. 
+Other channel sample rates from 0.875 to 2.2 times this (8.0 to 20.1 MS/s for 8 MHz channels) are resampled, which takes more CPU.
 The lowest still holds the 7.61 MHz occupied by an 8 MHz channel (7.77 MHz for DVB-T2 in extended carrier mode).
 The receiver also measures the sample clock offset between the device and the transmitter, and resamples to correct it when it is more than 3 ppm (1 ppm for DVB-T2, whose 32K symbols are longer).
 Smaller offsets are followed by moving the FFT window. A DVB-T2 32K signal may not be decoded until the offset has been corrected, a frame or two after the receiver finds it, if it's more than a few ppm.
@@ -92,10 +92,10 @@ Devices that can run at 9,142,857 S/s include the USRP B210, SDRplay RSPduo, Lim
 An RTL-SDR can't run fast enough.
 
 For DVB-S and DVB-S2, the device's sample rate should be at least 1.2 times the symbol rate: the signal
-is 1 + roll-off times it wide, and losing a little of its edges (at roll-off 0.25 and 0.35) costs under 0.3 dB. 
-Higher is better if the device can keep up, leaving room for the signal being off centre and for the device's own filter. 
-For example, 33 MS/s or more for 27.5 MS/s (which needs a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s, 
-and 1 MS/s or more for the 333 kS/s and 500 kS/s amateur signals on QO-100. 
+is 1 + roll-off times it wide, and losing a little of its edges (at roll-off 0.25 and 0.35) costs under 0.3 dB.
+Higher is better if the device can keep up, leaving room for the signal being off centre and for the device's own filter.
+For example, 33 MS/s or more for 27.5 MS/s (which needs a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s,
+and 1 MS/s or more for the 333 kS/s and 500 kS/s amateur signals on QO-100.
 
 <h2>Satellite reception</h2>
 
@@ -148,12 +148,12 @@ DVB-S and S2 symbol rate, in symbols a second. Type it, or choose a common one: 
 (Astra 2's HD multiplexes are 23 MS/s DVB-S2 8PSK, and its SD ones 22 or 27.5 MS/s DVB-S), and 25,000 to 2,000,000 for amateur DATV (QO-100's wideband transponder).
 The channel's sample rate is from 2 to 4 times this, but the device sample rate needs to be only 1.2 times this (see Sample rate above).
 
-Auto (the default) measures the symbol rate of the strongest signal in the channel. 
+Auto (the default) measures the symbol rate of the strongest signal in the channel.
 
 <h3>5: RO - Roll-off</h3>
 
 DVB-S2 roll-off of the root raised cosine pulse: 0.35, 0.25, 0.20, DVB-S2X's 0.15, 0.10, 0.05, or Auto, which follows the BBHEADER (starting at 0.35). DVB-S's is always 0.35.
-A matched filter with the wrong roll-off costs a few tenths of a dB. 
+A matched filter with the wrong roll-off costs a few tenths of a dB.
 
 <h3>6: Rate - Code rate</h3>
 
@@ -190,7 +190,7 @@ Average power of the signal in the channel, in dB.
 
 <h3>12: UDP</h3>
 
-When checked, the transport stream is sent as UDP datagrams to the given address (an IP address, or a host name) and port. 
+When checked, the transport stream is sent as UDP datagrams to the given address (an IP address, or a host name) and port.
 It can be played with, for example:
 
     vlc udp://@:5004
@@ -218,7 +218,7 @@ rather than acquiring again, which takes a few tenths of a second.
 
 <h3>Signal and Video</h3>
 
-The signal area is above the video area. Drag the bar between them to share the height out differently: 
+The signal area is above the video area. Drag the bar between them to share the height out differently:
 dragging it to the top or bottom hides one area.
 The sizes are saved with the settings.
 
@@ -341,7 +341,7 @@ Decode and display the selected service. Click to play; click again to stop.
 Service to play. The list comes from the Service Description Table in the transport stream, which is repeated every few seconds,
 so services are shown with their numbers until it has been received. Automatic plays the first service with video.
 Data services, such as the Red Button, have no video or audio to play. Scrambled (encrypted, pay TV) services, such as most of Sky's,
-can't be played: the video shows "Scrambled". 
+can't be played: the video shows "Scrambled".
 
 <h4>3: HD</h4>
 
@@ -350,7 +350,7 @@ When the programme playing is also available in HD, click the button to switch t
 <h4>4: Deinterlace</h4>
 
 Deinterlace the video, with FFmpeg's bwdif filter, which interpolates motion. SD services in the UK are interlaced, so without it, moving objects have combing artifacts.
-Needs FFmpeg's libavfilter, without which the button is disabled. 
+Needs FFmpeg's libavfilter, without which the button is disabled.
 
 <h4>5: Hardware decoding</h4>
 
@@ -378,7 +378,7 @@ The button mutes the audio, and is green while audio is playing. Right click it 
 <h4>9: Audio service</h4>
 
 The audio list has each language, and audio description where the service supports it. In the UK, audio description is a separate
-narration that is mixed with the main audio: the main audio is faded down while the narrator speaks. 
+narration that is mixed with the main audio: the main audio is faded down while the narrator speaks.
 A description that is broadcast already mixed is listed as "(audio description)", and audio for the hard of hearing as "(clean audio)".
 The choice is kept for other services: the same kind of track in the same language where they have it, else the language's main audio.
 
@@ -427,9 +427,9 @@ or the other cable of a Sky Q LNB. Right click the EPG button to set a command t
 It's run before retuning, with %p in it replaced by H, V, L or R (horizontal, vertical, left or right hand circular), or that added as its last argument
 if there's no %p, and should exit with 0 once switched; if it fails (or doesn't finish within 20 s), the device isn't retuned, and why is shown.
 Without a command, a message box says which polarisation the multiplex needs: Continue to switch the LNB yourself and retune, or Cancel to stay on
-the multiplex received. 
+the multiplex received.
 
-The services are listed by channel number. Those in italics are on other multiplexes: playing one retunes the device to its multiplex. 
+The services are listed by channel number. Those in italics are on other multiplexes: playing one retunes the device to its multiplex.
 The guide gives the frequencies of DVB-T multiplexes, but in the UK
 not of DVB-T2 ones (PSB3, with the HD services), so the frequency of each multiplex received is remembered. Playing a service on a multiplex whose
 frequency isn't known yet searches the UHF channels (21 to 48, then 49 to 69) for it, which takes a few seconds a channel; the progress is shown over
@@ -452,6 +452,23 @@ An on-screen guide is also available by right-clicking on the video.
 
 ![On screen EPG](../../../doc/img/DVBDemod_onscreen_epg.png)
 
+<h4>Apps</h4>
+
+The Apps button opens a list of the interactive (red button) applications:
+
+* Applications: from the service's application information table (AIT): HbbTV's (and DVB-J and DVB-HTML ones, should any be signalled), with
+  their names, ids, and whether they start with the service (AUTOSTART) or are started by the user, from the red button (PRESENT), and where
+  they start from: an HTTP URL, or a file in one of the service's carousels, as a dvb: URL.
+* Carousels: the files of the service's MHEG-5 and HbbTV applications, sent round and round in
+  the transport stream, and how much of each has been received. A large carousel takes a minute or so, and is
+  received again as the broadcaster updates it.
+
+Right click the Apps button to run the HbbTV applications.
+
+Keys for the red, green, yellow and blue buttons are R, G, Y and B (or F1 to F4), Back is Backspace, and the arrows, Enter and digits are themselves.
+
+Some broadcasters (such as the BBC) only serve their online applications to TVs they've certified, so videos may not play.
+
 <h4>Scan</h4>
 
 With a satellite standard, the Scan button scans a range of frequencies for transponders. The range is asked for when the scan starts, as From and To
@@ -468,13 +485,13 @@ reception), these are downlink frequencies. The last scan's range is offered, or
 The range can be wider than the device's sample rate: it's scanned in steps.
 
 Transponders with a transport stream are added to the programme guide, with their frequency, symbol rate and standard, and their network's services and other
-multiplexes come from their NIT and SDT. 
+multiplexes come from their NIT and SDT.
 The signals the sweep found, each one tried and what it was, and the transponders found
 are written to the log. The progress, and the transponders found when it's done,
-are shown in the status and over the video; afterwards the device returns to where it was. 
+are shown in the status and over the video; afterwards the device returns to where it was.
 
-While it scans, the button shows Stop, which stops it. 
-    
+While it scans, the button shows Stop, which stops it.
+
 <h4>Video</h4>
 
 Displays the selected service, scaled to square pixels, so 16:9 anamorphic SD services are displayed with the right aspect ratio.
@@ -538,6 +555,9 @@ they're left out unless asked for. For example, to get BBC One's schedule:
 
 The play and recordEvent actions take a networkId too, from epgServiceList, for a service id used on more than one network.
 
+The hbbtv setting (1 or 0) runs HbbTV applications, in the GUI. The report also gives the interactive applications of the service selected (interactiveApps: each one's id, type, control code, name and the URL it
+starts from), and its object carousels (carousels: each one's PID, kind, and the modules, bytes and files of it received).
+
 To receive DVB-S2 at 23 MS/s, with the roll-off from the BBHEADER, or with the standard and symbol rate found automatically:
 
     curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/settings" -d '{"channelType": "DVBDemod", "direction": 0, "DVBDemodSettings": {"standard": 6, "symbolRate": 23000000, "rollOff": 0}}'
@@ -549,79 +569,3 @@ numbers (0 for the default region's).
 The standard is 0 for automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2, 3 DVB-T2-Lite, 4 automatic (DVB-S or S2), 5 DVB-S and 6 DVB-S2. The DVB-S and S2
 report adds the symbol rate set and measured, the roll-off, and, for DVB-S2, the MODCOD, pilots, frame size, input stream, Es/N0, and frame, dummy frame
 and header miss counts.
-
-<h2>Testing with recordings</h2>
-
-Signals can be recorded to a .wav IQ file at 9 142 857 S/s from the device's recording control, then played back with the File Input device.
-
-sdrangelbench can decode a recording to a transport stream file, printing the receiver state:
-
-    sdrangelbench -t dvbtfile -f recording.wav -a out=recording.ts
-
-With analyse=1, it also counts clipped samples and prints the MER across the channel and of the carriers either side of the centre, which shows interference and LO leakage:
-
-    sdrangelbench -t dvbtfile -f recording.wav -a seconds=10,analyse=1
-
-A transport stream can be played without a display, which prints the services and the codecs:
-
-    sdrangelbench -t dvbtplay -f recording.ts -a seconds=10
-
-With subs=1 and ad=1, it prints the audio and subtitle tracks and when subtitles change, and wav= saves the audio played:
-
-    sdrangelbench -t dvbtplay -f recording.ts -a seconds=20,subs=1,ad=1,wav=audio.wav
-
-The programme guide in a transport stream, with the multiplexes the NIT gives, can be printed, and the grid drawn to an image:
-
-    sdrangelbench -t dvbtepg -f recording.ts -a all=1,grid=grid.png
-
-It can also create a recording from a transport stream file, for testing (the stream's bit rate must match the mode, which it prints):
-
-    sdrangelbench -t dvbtmod -a in=stream.ts,out=dvbt_490MHz,centre=490000000
-
-and test the receiver with a simulated signal (by default with an echo of 0.3 at 40 samples: echo=0 for a Gaussian channel):
-
-    sdrangelbench -t dvbt -a snr=20,cfo=10000,ppm=2
-    sdrangelbench -t dvbt -a mod=qpsk,rate=1/2,snr=3,echo=0
-    sdrangelbench -t dvbt -a snr=22,cw=-10,cwfreq=1234567
-    sdrangelbench -t dvbt -a hier=2,mod=64qam,rate=1/2,lprate=3/4,stream=lp
-
-For DVB-T2, the equivalents are dvbt2file (with plp=id to choose the PLP), dvbt2mod and dvbt2. dvbt2mod adds null packets to make up the rate of the
-T2 mode, if tsrate gives the rate of the input stream. The mode is given by fft, ext, gi, pp, mod, rate, rot, fec (16k or 64k), ti (TI-blocks, 0 for none),
-l1mod, tr and hem, and defaults to the UK HD multiplexes:
-
-    sdrangelbench -t dvbt2file -f recording.wav -a out=recording.ts
-    sdrangelbench -t dvbt2mod -a in=stream.ts,out=dvbt2_545MHz,centre=545833000,tsrate=24128342
-    sdrangelbench -t dvbt2 -a loop,snr=20,frames=3
-    sdrangelbench -t dvbt2
-
-The last runs self tests of the tables and the FEC. With fectest, it tests the FEC alone in a Gaussian channel.
-
-For DVB-S, the equivalents are dvbsfile (sr gives the symbol rate, and rate the code rate, auto by default), dvbsmod and dvbs, and for DVB-S2 dvbs2file,
-dvbs2mod and dvbs2. A recording should be at 1.2 to 64 times the symbol rate. dvbs2mod's and dvbs2's mode is given by modcod (a number, 1 to 28, or e.g. 8psk2/3),
-short, nopilots, ro (0.35 to 0.05), n (the scrambling code), vcm, mis, generic (a generic stream) and tsn (time slicing, each stream's time slice
-number, as tsn=17/33 with mis=1). A VL-SNR MODCOD is vl and its VL-SNR header's index, 0 to 5 or 9 to 11 (as vl4 for BPSK-S 1/5), as the
-modcod or in vcm, and vldummy=n sends n VL-SNR dummy frames first. dvbs2 simulates a channel given by snr (Es/N0 in dB, or offset from the
-MODCOD's threshold), cfo, ppm, pn (phase noise), drift and conj=1 (the spectrum inverted), and lowsnr (the Es/N0 after the first quarter of the
-signal, to test following a signal that fades), and by default first runs self tests of the tables and the FEC. It fails if any packet's lost
-after the first frames, unless gaps allows a few runs of them (as a VL-SNR lock's first frames may be). dvbs2file takes isi (an input
-stream, or a time slice), rxro (the matched filter's roll-off, else from the BBHEADER) and conj=1:
-
-    sdrangelbench -t dvbs2file -f recording.wav -a sr=23000000,out=recording.ts
-    sdrangelbench -t dvbs2mod -a in=stream.ts,out=dvbs2_qo100,sr=333000,modcod=qpsk3/4,centre=10491500000
-    sdrangelbench -t dvbs2 -a modcod=8psk2/3,sr=1000000,offset=0.5,cfo=20000,ppm=30
-    sdrangelbench -t dvbs2 -a noself=1,modcod=qpsk1/4,tsn=17/33,mis=1,ro=0.05,conj=1
-    sdrangelbench -t dvbs2 -a noself=1,modcod=vl4,offset=1,gaps=2
-    sdrangelbench -t dvbs2 -a fectest
-    sdrangelbench -t dvbs -a rate=7/8,ebn0=6
-
-dvbsref and dvbs2ref check that signals generated by the DATV modulator's DVB-S and DVB-S2 encoders are decoded.
-
-datvcmp compares these receivers with the [DATV demodulator](../demoddatv/readme.md)'s on the same simulated signal: the packets each decodes
-against Es/N0, and the time and CPU each takes. std is s or s2, the mode as for dvbs and dvbs2, and snrs the Es/N0s, from:to:step:
-
-    sdrangelbench -t datvcmp -a std=s,rate=3/4,snrs=4:9:0.5
-    sdrangelbench -t datvcmp -a std=s2,modcod=8psk2/3,snrs=6:11:0.5
-
-In a Gaussian channel, these receivers decode DVB-S 2.5 to 3.5 dB lower than the DATV demodulator with its best settings (soft Viterbi),
-and DVB-S2 1 to 2.5 dB lower with pilots (its soft LDPC) and about 4 dB lower without, locking sooner, with a tenth or less of the CPU.
-The DATV demodulator can't keep up with DVB-S above about 1.6 MS/s with soft Viterbi.

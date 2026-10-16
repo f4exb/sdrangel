@@ -3,5 +3,6 @@
     <file>images/angeltv.png</file>
     <file>icons/deinterlace.png</file>
     <file>icons/gpu.png</file>
+    <file>hbbtv/oipf.js</file>
   </qresource>
 </RCC>

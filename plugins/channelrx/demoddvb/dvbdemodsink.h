@@ -40,10 +40,11 @@
 #include "modemdvb/dvbs2receiver.h"
 
 #include "dvbdemodepg.h"
-#include "dvbdemodrecorder.h"
+#include "dtv/dtvapps.h"
+#include "dtv/dtvrecorder.h"
 #include "dvbdemodsettings.h"
-#include "dvbdemodtsfifo.h"
-#include "dvbdemodudp.h"
+#include "dtv/dtvtsfifo.h"
+#include "dtv/dtvudp.h"
 
 class DVBDemodSink : public ChannelSampleSink {
 public:
@@ -124,19 +125,20 @@ public:
     //! Where the device's centre, and so its LO leakage, is in the channel, if it is
     void configureDCRemoval();
     void getStatus(Status& status);
-    DVBDemodTSFifo *getTSFifo() { return &m_tsFifo; }
+    DTVTSFifo *getTSFifo() { return &m_tsFifo; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     DVBDemodEPG *getEPG() { return &m_epg; }
+    DTVApps *getApps() { return &m_apps; }
 
     struct Recording
     {
         int m_id;
-        DVBDemodRecorder::Status m_status;
+        DTVRecorder::Status m_status;
     };
 
     //! Records the multiplex, or a service, to a .ts file. Returns its id, or -1 with the error
-    int startRecording(const QString& fileName, DVBDemodRecorder::Mode mode, int serviceId, QString& error);
+    int startRecording(const QString& fileName, DTVRecorder::Mode mode, int serviceId, QString& error);
     //! What's queued is written, and the file closed, in a thread of its own (up to 64 MB to a slow disk would hold
     //! up the caller): this returns at once. Those still finishing are waited for when this is deleted
     void stopRecording(int id);
@@ -249,11 +251,12 @@ private:
     std::deque<std::pair<uint64_t, uint64_t>> m_rateHistory;
     double m_tsBitRate;
 
-    DVBDemodUDP m_udp;
-    DVBDemodTSFifo m_tsFifo;
+    DTVUDP m_udp;
+    DTVTSFifo m_tsFifo;
     DVBDemodEPG m_epg;          //!< Fed whether or not video is enabled, so it's also there in server builds
+    DTVApps m_apps;             //!< As the EPG
     QMutex m_recordersMutex;    //!< For the following, as recordings are started and stopped from other threads
-    std::vector<std::pair<int, std::unique_ptr<DVBDemodRecorder>>> m_recorders;
+    std::vector<std::pair<int, std::unique_ptr<DTVRecorder>>> m_recorders;
     int m_nextRecordingId;
     std::vector<std::future<void>> m_stoppingRecorders;   //!< Stopped, finishing their files
     std::vector<uint8_t> m_packetBlock;     //!< Packets delivered, not flushed yet

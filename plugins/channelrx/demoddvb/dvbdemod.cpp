@@ -33,6 +33,8 @@
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGDVBDemodActions.h"
+#include "SWGDVBDemodApp.h"
+#include "SWGDVBDemodCarousel.h"
 #include "SWGDVBDemodEPGEvent.h"
 #include "SWGDVBDemodEPGService.h"
 
@@ -337,6 +339,7 @@ void DVBDemod::retuned()
 {
     m_playingServiceId = 0; // The player chooses again from the new multiplex's
     getEPG()->retuned();
+    getApps()->reset();
     m_sinceRetune.start();
     m_retuneSettled = false;
 }
@@ -1142,7 +1145,7 @@ bool DVBDemod::startRecording(QString& error)
     const QString name = service ? serviceName(serviceId)
         : QString("DVB %1 MHz").arg((m_centerFrequency + m_settings.m_inputFrequencyOffset) / 1e6, 0, 'f', 3);
     const int id = m_basebandSink->startRecording(recordingFileName(name, t),
-        service ? DVBDemodRecorder::Service : DVBDemodRecorder::Multiplex, serviceId, error);
+        service ? DTVRecorder::Service : DTVRecorder::Multiplex, serviceId, error);
 
     if (id < 0) {
         return false;
@@ -1449,6 +1452,9 @@ void DVBDemod::setSchedule(const QList<DVBDemodSettings::ScheduledRecording>& sc
 // follow changes to the programmes' times in the guide. A recording that's missed is dropped
 void DVBDemod::checkSchedule()
 {
+    // The carousels of the service played (or that would be) are received
+    getApps()->setCarouselService(currentServiceId());
+
     if (m_settings.m_scheduledRecordings.isEmpty() && m_scheduledRecordingIds.empty() && m_settings.m_seriesRecordings.isEmpty()
         && !m_recordingRetune.m_active) {
         return;
@@ -1526,7 +1532,7 @@ void DVBDemod::checkSchedule()
         {
             QString error;
             const int id = m_basebandSink->startRecording(recordingFileName(QString("%1 - %2").arg(r.m_serviceName).arg(r.m_title), r.m_start),
-                DVBDemodRecorder::Service, r.m_serviceId, error);
+                DTVRecorder::Service, r.m_serviceId, error);
 
             if (id >= 0)
             {
@@ -2141,6 +2147,9 @@ void DVBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("deinterlace")) {
         settings.m_deinterlace = swgSettings->getDeinterlace() != 0;
     }
+    if (channelSettingsKeys.contains("hbbtv")) {
+        settings.m_hbbtv = swgSettings->getHbbtv() != 0;
+    }
     if (channelSettingsKeys.contains("avOffset")) {
         settings.m_avOffset = swgSettings->getAvOffset();
     }
@@ -2264,6 +2273,7 @@ void DVBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     swgSettings->setVideoEnabled(settings.m_videoEnabled ? 1 : 0);
     swgSettings->setServiceId(settings.m_serviceId);
     swgSettings->setDeinterlace(settings.m_deinterlace ? 1 : 0);
+    swgSettings->setHbbtv(settings.m_hbbtv ? 1 : 0);
     swgSettings->setAvOffset(settings.m_avOffset);
     swgSettings->setHardwareDecoding(settings.m_hardwareDecoding ? 1 : 0);
     setString(swgSettings->getAudioLanguage(), [=](QString *s) { swgSettings->setAudioLanguage(s); }, settings.m_audioLanguage);
@@ -2368,6 +2378,48 @@ void DVBDemod::webapiFormatEPGReport(SWGSDRangel::SWGDVBDemodReport *report)
         *report->getEpgNextTitle() = next.m_title;
         *report->getEpgNextStart() = iso(next.m_start);
         report->setEpgNextDuration(next.m_duration);
+    }
+}
+
+// The interactive applications and carousels of the service the report's of
+void DVBDemod::webapiFormatAppsReport(SWGSDRangel::SWGDVBDemodReport *report)
+{
+    const int serviceId = currentServiceId();
+    const DTVApps *apps = getApps();
+
+    if (serviceId == 0) {
+        return;
+    }
+
+    const int transportStreamId = apps->getTransportStreamId();
+    const int networkId = apps->getOriginalNetworkId();
+
+    for (const DTVApps::App& app : apps->getApps(serviceId))
+    {
+        SWGSDRangel::SWGDVBDemodApp *swgApp = new SWGSDRangel::SWGDVBDemodApp();
+        swgApp->setApplicationId(new QString(app.idText()));
+        swgApp->setType(new QString(app.typeName()));
+        swgApp->setControlCode(new QString(app.controlCodeName()));
+        swgApp->setName(new QString(app.m_name));
+        swgApp->setUrl(new QString(app.url(networkId, transportStreamId)));
+        swgApp->setCarouselPid(app.m_carouselPid);
+        report->getInteractiveApps()->append(swgApp);
+    }
+
+    for (const DTVApps::Carousel& carousel : apps->getCarousels(serviceId))
+    {
+        SWGSDRangel::SWGDVBDemodCarousel *swgCarousel = new SWGSDRangel::SWGDVBDemodCarousel();
+        swgCarousel->setPid(carousel.m_pid);
+        swgCarousel->setComponentTag(carousel.m_componentTag);
+        swgCarousel->setCarouselId(carousel.m_carouselId);
+        swgCarousel->setKind(new QString(carousel.kindName()));
+        swgCarousel->setReceived(carousel.m_received ? 1 : 0);
+        swgCarousel->setModules(carousel.m_progress.m_modules);
+        swgCarousel->setModulesComplete(carousel.m_progress.m_modulesComplete);
+        swgCarousel->setBytes(carousel.m_progress.m_bytes);
+        swgCarousel->setBytesComplete(carousel.m_progress.m_bytesComplete);
+        swgCarousel->setFiles(carousel.m_files);
+        report->getCarousels()->append(swgCarousel);
     }
 }
 
@@ -2729,6 +2781,7 @@ void DVBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     *report->getSearchText() = getSearchText();
     report->setScanTransponders(getScanTransponders());
     webapiFormatEPGReport(report);
+    webapiFormatAppsReport(report);
 
     if (status.m_standard == S::StandardDVBT2)
     {
@@ -3033,6 +3086,9 @@ void DVBDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("deinterlace") || force) {
         swgSettings->setDeinterlace(settings.m_deinterlace ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("hbbtv") || force) {
+        swgSettings->setHbbtv(settings.m_hbbtv ? 1 : 0);
     }
     if (channelSettingsKeys.contains("avOffset") || force) {
         swgSettings->setAvOffset(settings.m_avOffset);

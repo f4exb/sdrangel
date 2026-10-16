@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODTSFIFO_H
-#define INCLUDE_DVBDEMODTSFIFO_H
+#ifndef INCLUDE_DTVTSFIFO_H
+#define INCLUDE_DTVTSFIFO_H
 
 #include <atomic>
 #include <cstdint>
@@ -26,16 +26,17 @@
 #include <QElapsedTimer>
 #include <QMutex>
 #include <QWaitCondition>
+#include "export.h"
 
-// Transport stream bytes from the demodulator to the video player, which may run in different threads.
+// Transport stream bytes from a demodulator (DVB, ATSC) to the video player, which may run in different threads.
 // Data that doesn't fit is dropped, as the demodulator must never wait
 // With needsReader, as the demodulator's is (in a server build nothing reads it), nothing's kept, and the buffer isn't
 // allocated, until a reader attaches (attachReader(), or its first read()); it's detached by detachReader(), or when
 // nothing's been read for a long while (a reader gone without detaching)
-class DVBDemodTSFifo
+class SDRBASE_API DTVTSFifo
 {
 public:
-    explicit DVBDemodTSFifo(int size = 8 * 1024 * 1024, bool needsReader = false);
+    explicit DTVTSFifo(int size = 8 * 1024 * 1024, bool needsReader = false);
 
     void write(const uint8_t *data, int length);
     //! Whole 188-byte packets: as many as fit, the rest dropped
@@ -73,4 +74,4 @@ private:
     QElapsedTimer m_sinceRead;  //!< With needsReader: since the reader last read
 };
 
-#endif // INCLUDE_DVBDEMODTSFIFO_H
+#endif // INCLUDE_DTVTSFIFO_H

@@ -16,20 +16,21 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODEPGGRID_H
-#define INCLUDE_DVBDEMODEPGGRID_H
+#ifndef INCLUDE_DTVEPGGRID_H
+#define INCLUDE_DTVEPGGRID_H
 
 #include <functional>
 #include <vector>
 
 #include <QAbstractScrollArea>
 
-#include "dvbdemodepg.h"
+#include "dtv/dtvguide.h"
+#include "export.h"
 
 // The programme guide as a grid of channels by time: a row per service, with its programmes as boxes along the time
 // axis. The channel names on the left and the times along the top stay in place while scrolling. Clicking selects a
 // programme, double-clicking or Enter activates it (to play its service), and right-clicking asks for a menu
-class DVBDemodEPGGrid : public QAbstractScrollArea
+class SDRGUI_API DTVEPGGrid : public QAbstractScrollArea
 {
     Q_OBJECT
 
@@ -39,13 +40,13 @@ public:
         int m_networkId = 0;
         int m_serviceId = 0;
         QString m_name;
-        int m_channel = -1;
+        QString m_channel;          //!< Number, as "4" or "7.1", empty if none
         bool m_actual = false;      //!< In the transport stream being received
         bool m_tunable = false;     //!< Can be played: received, or its multiplex is in the area
-        std::vector<DVBDemodEPG::Event> m_events;   //!< In time order
+        std::vector<DTVGuide::Event> m_events;   //!< In time order
     };
 
-    explicit DVBDemodEPGGrid(QWidget *parent = nullptr);
+    explicit DTVEPGGrid(QWidget *parent = nullptr);
     //! The grid starts at start (UTC), with a line at now. The selection is kept if its programme is still there
     void setRows(const std::vector<Row>& rows, qint64 start, qint64 now);
     //! Move the line at now (UTC), as time passes, drawing again if it's moved by a pixel or more
@@ -96,4 +97,4 @@ private:
     static constexpr double m_pixelsPerHour = 240.0;
 };
 
-#endif // INCLUDE_DVBDEMODEPGGRID_H
+#endif // INCLUDE_DTVEPGGRID_H

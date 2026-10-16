@@ -21,9 +21,9 @@
 #include <QDebug>
 #include <QHostInfo>
 
-#include "dvbdemodudp.h"
+#include "dtv/dtvudp.h"
 
-DVBDemodUDP::DVBDemodUDP() :
+DTVUDP::DTVUDP() :
     m_port(5004),
     m_datagramFill(0),
     m_datagrams(0),
@@ -34,7 +34,7 @@ DVBDemodUDP::DVBDemodUDP() :
 {
 }
 
-DVBDemodUDP::~DVBDemodUDP()
+DTVUDP::~DTVUDP()
 {
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -48,7 +48,7 @@ DVBDemodUDP::~DVBDemodUDP()
     }
 }
 
-void DVBDemodUDP::setDestination(const QString& address, uint16_t port)
+void DTVUDP::setDestination(const QString& address, uint16_t port)
 {
     if ((address == m_name) && (port == m_port)) {
         return; // As forced settings set it again
@@ -79,13 +79,13 @@ void DVBDemodUDP::setDestination(const QString& address, uint16_t port)
     m_lookupGeneration = m_generation;
 
     if (!m_lookupThread.joinable()) {
-        m_lookupThread = std::thread(&DVBDemodUDP::lookup, this);
+        m_lookupThread = std::thread(&DTVUDP::lookup, this);
     } else {
         m_lookupWake.notify_one();
     }
 }
 
-void DVBDemodUDP::lookup()
+void DTVUDP::lookup()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
@@ -106,7 +106,7 @@ void DVBDemodUDP::lookup()
         const QHostAddress found = info.addresses().isEmpty() ? QHostAddress() : info.addresses().first();
 
         if (found.isNull()) {
-            qWarning() << "DVBDemodUDP::lookup: can't find" << name;
+            qWarning() << "DTVUDP::lookup: can't find" << name;
         }
 
         lock.lock();
@@ -117,12 +117,12 @@ void DVBDemodUDP::lookup()
     }
 }
 
-void DVBDemodUDP::write(const uint8_t *packet)
+void DTVUDP::write(const uint8_t *packet)
 {
     writePackets(packet, 1);
 }
 
-void DVBDemodUDP::writePackets(const uint8_t *packets, int count)
+void DTVUDP::writePackets(const uint8_t *packets, int count)
 {
     for (int i = 0; i < count; i++)
     {
@@ -135,7 +135,7 @@ void DVBDemodUDP::writePackets(const uint8_t *packets, int count)
     }
 }
 
-void DVBDemodUDP::send()
+void DTVUDP::send()
 {
     m_datagramFill = 0;
 

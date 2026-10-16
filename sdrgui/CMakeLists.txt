@@ -123,6 +123,12 @@ set(sdrgui_SOURCES
 
     dsp/scopevisxy.cpp
 
+    dtv/dtvappsdialog.cpp
+    dtv/dtvepgdialog.cpp
+    dtv/dtvepggrid.cpp
+    dtv/dtvguideoverlay.cpp
+    dtv/dtvscope.cpp
+
     device/devicegui.cpp
     device/deviceuiset.cpp
 
@@ -268,6 +274,12 @@ set(sdrgui_HEADERS
 
     dsp/scopevisxy.h
 
+    dtv/dtvappsdialog.h
+    dtv/dtvepgdialog.h
+    dtv/dtvepggrid.h
+    dtv/dtvguideoverlay.h
+    dtv/dtvscope.h
+
     device/devicegui.h
     device/deviceuiset.h
 
@@ -341,6 +353,40 @@ set(sdrgui_FORMS
 
 qt_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
 
+# Digital TV's video player (DVB and ATSC demodulators): FFmpeg demultiplexes and decodes the transport stream
+if(NOT FFMPEG_FOUND)
+    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+endif()
+if(FFMPEG_FOUND)
+    set(sdrgui_SOURCES ${sdrgui_SOURCES} dtv/dtvvideoplayer.cpp dtv/dtvstreamremuxer.cpp dtv/dtvstreamplayback.cpp)
+    set(sdrgui_HEADERS ${sdrgui_HEADERS} dtv/dtvvideoplayer.h dtv/dtvstreamremuxer.h dtv/dtvstreamplayback.h)
+    set(sdrgui_DTV_INCLUDE_DIRS
+        ${AVCODEC_INCLUDE_DIRS}
+        ${AVFORMAT_INCLUDE_DIRS}
+        ${AVUTIL_INCLUDE_DIRS}
+        ${SWSCALE_INCLUDE_DIRS}
+        ${SWRESAMPLE_INCLUDE_DIRS}
+    )
+    set(sdrgui_DTV_LIBRARIES ${AVCODEC_LIBRARIES} ${AVFORMAT_LIBRARIES} ${AVUTIL_LIBRARIES} ${SWSCALE_LIBRARIES} ${SWRESAMPLE_LIBRARIES})
+
+    # Deinterlacing uses libavfilter, if available
+    if(NOT AVFILTER_LIBRARIES)
+        find_library(DTV_AVFILTER_LIBRARY NAMES avfilter)
+        find_path(DTV_AVFILTER_INCLUDE_DIR libavfilter/avfilter.h HINTS ${AVCODEC_INCLUDE_DIRS})
+        if(DTV_AVFILTER_LIBRARY AND DTV_AVFILTER_INCLUDE_DIR)
+            set(AVFILTER_LIBRARIES ${DTV_AVFILTER_LIBRARY})
+            set(AVFILTER_INCLUDE_DIRS ${DTV_AVFILTER_INCLUDE_DIR})
+        endif()
+    endif()
+    if(AVFILTER_LIBRARIES)
+        set(sdrgui_DTV_INCLUDE_DIRS ${sdrgui_DTV_INCLUDE_DIRS} ${AVFILTER_INCLUDE_DIRS})
+        set(sdrgui_DTV_LIBRARIES ${sdrgui_DTV_LIBRARIES} ${AVFILTER_LIBRARIES})
+        set_source_files_properties(dtv/dtvvideoplayer.cpp PROPERTIES COMPILE_DEFINITIONS DTV_DEINTERLACE)
+    else()
+        message(STATUS "sdrgui: libavfilter not found, so no deinterlacing in the digital TV video player")
+    endif()
+endif()
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/exports
   ${CMAKE_SOURCE_DIR}/sdrbase
@@ -357,6 +403,20 @@ add_library(sdrgui
   ${sdrgui_SOURCES}
   ${sdrgui_FORMS_HEADERS}
   )
+
+if(FFMPEG_FOUND)
+  target_include_directories(sdrgui PRIVATE ${sdrgui_DTV_INCLUDE_DIRS})
+  target_link_libraries(sdrgui ${sdrgui_DTV_LIBRARIES})
+  if(DEFINED FFMPEG_DEPENDS)
+    add_dependencies(sdrgui ${FFMPEG_DEPENDS})
+  endif()
+  if(WIN32)
+    target_link_libraries(sdrgui winmm) # The video player sets the timer resolution
+  endif()
+  if(APPLE)
+    target_link_libraries(sdrgui "-framework CoreVideo") # VideoToolbox frames' IOSurfaces
+  endif()
+endif()
 
 target_link_libraries(sdrgui
   Qt::Core

@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,15 +18,15 @@
 
 #include <algorithm>
 
-#include "dvbdemodpsi.h"
-#include "dvbdemodsections.h"
+#include "dtv/dtvpsi.h"
+#include "dtv/dtvsections.h"
 
-DVBDemodPSI::DVBDemodPSI() :
+DTVPSI::DTVPSI() :
     m_transportStreamId(-1)
 {
 }
 
-void DVBDemodPSI::reset()
+void DTVPSI::reset()
 {
     m_partial.clear();
     m_pat.reset();
@@ -34,14 +35,14 @@ void DVBDemodPSI::reset()
     m_channels.clear();
 }
 
-const std::map<int, int>& DVBDemodPSI::getChannels() const
+const std::map<int, int>& DTVPSI::getChannels() const
 {
     static const std::map<int, int> none;
     auto it = m_channels.find(m_transportStreamId);
     return it != m_channels.end() ? it->second : none;
 }
 
-void DVBDemodPSI::feed(const uint8_t *data, int length)
+void DTVPSI::feed(const uint8_t *data, int length)
 {
     // Complete a packet split between feeds
     if (!m_partial.empty())
@@ -83,7 +84,7 @@ void DVBDemodPSI::feed(const uint8_t *data, int length)
     }
 }
 
-void DVBDemodPSI::packet(const uint8_t *p)
+void DTVPSI::packet(const uint8_t *p)
 {
     if (p[1] & 0x80) { // Uncorrectable errors
         return;
@@ -100,7 +101,7 @@ void DVBDemodPSI::packet(const uint8_t *p)
     }
 }
 
-void DVBDemodPSI::section(const uint8_t *s, int length)
+void DTVPSI::section(const uint8_t *s, int length)
 {
     // The long form, with a CRC; current, not a table to apply next
     if ((length < 12) || !(s[1] & 0x80) || !(s[5] & 0x01)) {
@@ -115,14 +116,14 @@ void DVBDemodPSI::section(const uint8_t *s, int length)
 }
 
 // program_association_section (ISO/IEC 13818-1 2.4.4.3): the transport stream id
-void DVBDemodPSI::pat(const uint8_t *s, int length)
+void DTVPSI::pat(const uint8_t *s, int length)
 {
     (void) length;
     m_transportStreamId = (s[3] << 8) | s[4];
 }
 
 // network_information_section (EN 300 468 5.2.1), with logical_channel_descriptors in the transport stream loop
-void DVBDemodPSI::nit(const uint8_t *s, int length)
+void DTVPSI::nit(const uint8_t *s, int length)
 {
     if (length < 16) {
         return;

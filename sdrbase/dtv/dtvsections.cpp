@@ -18,9 +18,9 @@
 
 #include <cstring>
 
-#include "dvbdemodsections.h"
+#include "dtv/dtvsections.h"
 
-struct DVBDemodSectionCRC::CRCTable
+struct DTVSectionCRC::CRCTable
 {
     uint32_t m_table[256];
 
@@ -39,20 +39,20 @@ struct DVBDemodSectionCRC::CRCTable
     }
 };
 
-const DVBDemodSectionCRC::CRCTable DVBDemodSectionCRC::m_crcTable; // Built before use from any thread
+const DTVSectionCRC::CRCTable DTVSectionCRC::m_crcTable; // Built before use from any thread
 
-uint32_t dvbSectionCRC(const uint8_t *data, int length)
+uint32_t dtvSectionCRC(const uint8_t *data, int length)
 {
     uint32_t crc = 0xFFFFFFFF;
 
     for (int i = 0; i < length; i++) {
-        crc = (crc << 8) ^ DVBDemodSectionCRC::m_crcTable.m_table[((crc >> 24) ^ data[i]) & 0xFF];
+        crc = (crc << 8) ^ DTVSectionCRC::m_crcTable.m_table[((crc >> 24) ^ data[i]) & 0xFF];
     }
 
     return crc;
 }
 
-void DVBDemodSectionAssembler::reset()
+void DTVSectionAssembler::reset()
 {
     m_data.clear();
     m_inSection = false;
@@ -62,17 +62,17 @@ void DVBDemodSectionAssembler::reset()
 // A complete section, if there's enough data: passed on if its CRC is correct. Sections with the long form
 // (section_syntax_indicator 1) have a CRC, and of the short form only the TOT (0x73): the TDT (0x70), RST, ST and DIT
 // don't (EN 300 468 5.2.5)
-void DVBDemodSectionAssembler::complete(const SectionCallback& callback)
+void DTVSectionAssembler::complete(const SectionCallback& callback)
 {
     const int length = 3 + (((m_data[1] & 0x0F) << 8) | m_data[2]);
     const bool hasCRC = (m_data[1] & 0x80) || (m_data[0] == 0x73);
 
-    if ((length >= 7) && (!hasCRC || (dvbSectionCRC(m_data.data(), length) == 0))) {
+    if ((length >= 7) && (!hasCRC || (dtvSectionCRC(m_data.data(), length) == 0))) {
         callback(m_data.data(), length);
     }
 }
 
-void DVBDemodSectionAssembler::packet(const uint8_t *p, const SectionCallback& callback)
+void DTVSectionAssembler::packet(const uint8_t *p, const SectionCallback& callback)
 {
     const bool start = (p[1] & 0x40) != 0;
     const int adaptation = (p[3] >> 4) & 3;

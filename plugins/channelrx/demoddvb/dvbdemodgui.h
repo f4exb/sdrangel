@@ -36,15 +36,18 @@
 
 #include "dvbdemodsettings.h"
 #include "dvbdemodsink.h"
-#include "dvbdemodvideoplayer.h"
-#include "dvbdemodepgdialog.h"
-#include "dvbdemodguideoverlay.h"
+#include "dtv/dtvvideoplayer.h"
+#include "dtv/dtvappsdialog.h"
+#include "dtv/dtvepgdialog.h"
+#include "dtv/dtvguideoverlay.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class DVBDemod;
 class GLVideoWidget;
+class DVBDemodHbbTV;
+class DTVStreamPlayback;
 
 namespace Ui {
     class DVBDemodGUI;
@@ -101,7 +104,7 @@ private:
     bool m_doApplySettings;
 
     DVBDemod* m_dvbDemod;
-    DVBDemodVideoPlayer *m_player;
+    DTVVideoPlayer *m_player;
     uint32_t m_tickCount;
     bool m_videoFullScreen;
     GLVideoWidget *m_fullScreenTV;               //!< Window for full screen video, made when first needed
@@ -109,17 +112,26 @@ private:
     //! The polarisation command the user's typed or agreed to run, this session: one that came with a preset or
     //! configuration (perhaps someone else's) is shown and confirmed before it's first run
     QString m_polarisationCommandConfirmed;
-    DVBDemodGuideOverlay *m_guideOverlay;        //!< Programme guide over full screen video
+    DTVGuideOverlay *m_guideOverlay;        //!< Programme guide over full screen video
     QTimer m_pointerTimer;                       //!< Hides the mouse pointer over full screen video when it stops
     QTimer m_splitterTimer;                      //!< Saves the splitter's sizes once it stops moving
     std::atomic<GLVideoWidget*> m_videoScreen;   //!< Where the player shows video
     // A message is shown in place of the video when there is none
     QString m_videoMessage;
     bool m_serviceHasVideo;
-    QList<DVBDemodVideoPlayer::Service> m_services;
+    QList<DTVVideoPlayer::Service> m_services;
     int m_playingService;                   //!< Id of the service selected by the player, 0 for none yet
     QString m_overlayText;                  //!< Last shown, to show it again if the service's name or number changes
-    QPointer<DVBDemodEPGDialog> m_epgDialog;
+    QPointer<DTVEPGDialog> m_epgDialog;
+    QPointer<DTVAppsDialog> m_appsDialog;
+    DVBDemodHbbTV *m_hbbtv = nullptr;       //!< Runs the service's HbbTV applications, when they're enabled
+    QRectF m_hbbtvVideoArea;                //!< Where the application wants the video, of its page, null for all
+    int m_hbbtvChannelRequest = 0;          //!< A service the application's asked to play, 0 if none
+    QString m_hbbtvServiceState;            //!< What it was last told of the service and multiplex
+    QString m_hbbtvStatus;                  //!< Shown over the video
+    DTVStreamPlayback *m_streamPlayback = nullptr;  //!< Plays an application's media (as iPlayer's), from the internet
+    int m_mediaId = 0;                      //!< The application's media being played, 0 if none
+    bool m_streamPlaying = false;           //!< Its stream's playing, in place of the broadcast (whose player's stopped)
     QString m_nowTitle;                     //!< On the service playing, to show the overlay when it changes
     bool m_serviceHasAudio;
     uint64_t m_lastFrames;                  //!< Video or audio frames, to see if any are arriving
@@ -178,7 +190,7 @@ private:
     void setStatWarning(Stat row, bool warning);
     void displayStatus();
     void displayPlayerInfo(uint64_t tsOverflows);
-    void displayAVStats(const DVBDemodVideoPlayer::Info& info, uint64_t tsOverflows);
+    void displayAVStats(const DTVVideoPlayer::Info& info, uint64_t tsOverflows);
     void displayT2Status(const DVBDemodSink::Status& status);
     void displayScopeExtras(const DVBDemodSink::Status& status, double mer, double iterations, uint64_t errors);
     void displayPLPs(const dvbt2::Receiver::Status& status);
@@ -229,6 +241,19 @@ private slots:
     void on_service_currentIndexChanged(int index);
     void on_deinterlace_toggled(bool checked);
     void on_epg_clicked();
+    void on_apps_clicked();
+    void updateAppsDialog();
+    void appsMenu(const QPoint& position);
+    void updateHbbTV();                     //!< Running HbbTV applications or not, as the settings and player are
+    void updateHbbTVService();
+    void updateHbbTVGeometry();
+    QRect hbbtvPageRect(const QWidget *screen) const;
+    void hbbtvVideoArea(const QRectF& area);
+    void hbbtvChannelChange(int networkId, int transportStreamId, int serviceId);
+    void hbbtvRed();                        //!< The red button clicked
+    void hbbtvMedia(const QString& command, int id, const QString& url, const QMap<QString, QString>& options, double position);
+    void stopStreamPlayback();              //!< The application's media stopped, and the broadcast played again
+    void displayRedButton();
     void on_scan_clicked();
     void on_simulcast_clicked();
     void on_record_toggled(bool checked);
@@ -239,12 +264,12 @@ private slots:
     void on_hardwareDecoding_toggled(bool checked);
     void on_audioTrack_currentIndexChanged(int index);
     void on_subtitleTrack_currentIndexChanged(int index);
-    void tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks);
+    void tracksChanged(const DTVVideoPlayer::Tracks& tracks);
     void on_avOffset_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
     void on_audioVolume_valueChanged(int value);
     void audioSelect(const QPoint& p);
-    void servicesChanged(const QList<DVBDemodVideoPlayer::Service>& services);
+    void servicesChanged(const QList<DTVVideoPlayer::Service>& services);
     void serviceSelected(int id, bool hasVideo, bool hasAudio);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onSplitterMoved(int pos, int index);

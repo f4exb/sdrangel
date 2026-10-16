@@ -34,14 +34,13 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-#include "dvbdemod.h"
-#include "dvbdemodepggrid.h"
-#include "dvbdemodepgdialog.h"
+#include "dtv/dtvepggrid.h"
+#include "dtv/dtvepgdialog.h"
 
-DVBDemodEPGDialog::DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent) :
+DTVEPGDialog::DTVEPGDialog(DTVGuide *guide, DTVRecordingSchedule *schedule, QWidget *parent) :
     QDialog(parent),
-    m_demod(demod),
-    m_epg(demod->getEPG()),
+    m_schedule(schedule),
+    m_epg(guide),
     m_currentService(0)
 {
     setWindowTitle("Programme Guide");
@@ -63,7 +62,7 @@ DVBDemodEPGDialog::DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent) :
     m_scheduled->setToolTip("Programmes to record. Select one to cancel its recording");
     m_scheduled->setPopupMode(QToolButton::InstantPopup);
     m_scheduled->setMenu(new QMenu(m_scheduled));
-    connect(m_scheduled->menu(), &QMenu::aboutToShow, this, &DVBDemodEPGDialog::scheduledMenu);
+    connect(m_scheduled->menu(), &QMenu::aboutToShow, this, &DTVEPGDialog::scheduledMenu);
 
     m_events = new QTableWidget(0, 4);
     m_events->setHorizontalHeaderLabels({"Time", "Title", "Genre", "Info"});
@@ -78,14 +77,14 @@ DVBDemodEPGDialog::DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent) :
     m_events->setToolTip("Info: REC to be recorded, HD, S subtitles, AD audio description, and the minimum age from the parental rating.\n"
         "Double-click to play the service. Right-click to record");
     m_events->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_events, &QTableWidget::customContextMenuRequested, this, &DVBDemodEPGDialog::eventMenu);
+    connect(m_events, &QTableWidget::customContextMenuRequested, this, &DTVEPGDialog::eventMenu);
 
     m_description = new QTextBrowser();
     m_description->setMaximumHeight(160);
 
-    m_grid = new DVBDemodEPGGrid();
+    m_grid = new DTVEPGGrid();
     m_grid->setToolTip("");
-    m_grid->setScheduled([this](int networkId, int serviceId, int eventId) { return m_demod->isScheduled(networkId, serviceId, eventId); });
+    m_grid->setScheduled([this](int networkId, int serviceId, int eventId) { return m_schedule->isScheduled(networkId, serviceId, eventId); });
 
     QHBoxLayout *controls = new QHBoxLayout();
     controls->addWidget(m_day);
@@ -147,17 +146,17 @@ DVBDemodEPGDialog::DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent) :
             showDescription();
         }
     });
-    connect(m_grid, &DVBDemodEPGGrid::eventSelected, this, [this](int row, int event) {
+    connect(m_grid, &DTVEPGGrid::eventSelected, this, [this](int row, int event) {
         m_description->setHtml(describe(m_grid->row(row).m_events[event], m_grid->row(row).m_networkId));
     });
-    connect(m_grid, &DVBDemodEPGGrid::eventActivated, this, [this](int row, int) {
+    connect(m_grid, &DTVEPGGrid::eventActivated, this, [this](int row, int) {
         ListedService service;
 
         if (gridService(row, service)) {
             play(service);
         }
     });
-    connect(m_grid, &DVBDemodEPGGrid::eventMenuRequested, this, [this](int row, int event, const QPoint& globalPosition) {
+    connect(m_grid, &DTVEPGGrid::eventMenuRequested, this, [this](int row, int event, const QPoint& globalPosition) {
         ListedService service;
 
         // The event's copied: the menu's event loop may rebuild the grid
@@ -165,19 +164,19 @@ DVBDemodEPGDialog::DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent) :
             showEventMenu(service, m_grid->row(row).m_events[event], globalPosition);
         }
     });
-    connect(&m_timer, &QTimer::timeout, this, &DVBDemodEPGDialog::refresh);
+    connect(&m_timer, &QTimer::timeout, this, &DTVEPGDialog::refresh);
     m_timer.start(10000); // The guide arrives over minutes
 
     refresh();
 }
 
-qint64 DVBDemodEPGDialog::now() const
+qint64 DTVEPGDialog::now() const
 {
     const qint64 t = m_epg->getTime();
     return t > 0 ? t : QDateTime::currentSecsSinceEpoch();
 }
 
-void DVBDemodEPGDialog::setCurrentService(int serviceId)
+void DTVEPGDialog::setCurrentService(int serviceId)
 {
     m_currentService = serviceId;
 
@@ -191,21 +190,21 @@ void DVBDemodEPGDialog::setCurrentService(int serviceId)
     }
 }
 
-const DVBDemodEPGDialog::ListedService *DVBDemodEPGDialog::currentService() const
+const DTVEPGDialog::ListedService *DTVEPGDialog::currentService() const
 {
     const int row = m_services->currentRow();
     return (row >= 0) && (row < (int) m_listed.size()) ? &m_listed[row] : nullptr;
 }
 
 // A row of the grid's service, from the services it was built from. False if they've changed since
-bool DVBDemodEPGDialog::gridService(int row, ListedService& service) const
+bool DTVEPGDialog::gridService(int row, ListedService& service) const
 {
     if ((row < 0) || (row >= m_grid->rowCount()) || (row >= (int) m_gridServices.size())) {
         return false;
     }
 
-    const DVBDemodEPGGrid::Row& r = m_grid->row(row);
-    const DVBDemodEPG::Service& s = m_gridServices[row];
+    const DTVEPGGrid::Row& r = m_grid->row(row);
+    const DTVGuide::Service& s = m_gridServices[row];
 
     if ((r.m_networkId != s.m_networkId) || (r.m_serviceId != s.m_serviceId)) {
         return false;
@@ -215,14 +214,14 @@ bool DVBDemodEPGDialog::gridService(int row, ListedService& service) const
     return true;
 }
 
-void DVBDemodEPGDialog::refresh()
+void DTVEPGDialog::refresh()
 {
     refreshDays();
     refreshServices();
 }
 
 // Today and the next 7 days, local time
-void DVBDemodEPGDialog::refreshDays()
+void DTVEPGDialog::refreshDays()
 {
     const QDate today = QDateTime::fromSecsSinceEpoch(now()).toLocalTime().date();
 
@@ -244,7 +243,7 @@ void DVBDemodEPGDialog::refreshDays()
     m_day->blockSignals(false);
 }
 
-void DVBDemodEPGDialog::refreshServices()
+void DTVEPGDialog::refreshServices()
 {
     const quint64 revision = m_epg->getRevision();
     const bool others = m_otherMultiplexes->isChecked();
@@ -258,20 +257,23 @@ void DVBDemodEPGDialog::refreshServices()
 
     m_servicesRevision = revision;
     m_servicesOthers = others;
-    std::vector<DVBDemodEPG::Service> services = m_epg->getServices();
+    std::vector<DTVGuide::Service> services = m_epg->getServices();
 
-    services.erase(std::remove_if(services.begin(), services.end(), [others](const DVBDemodEPG::Service& s) {
+    services.erase(std::remove_if(services.begin(), services.end(), [others](const DTVGuide::Service& s) {
         return s.m_name.isEmpty() || !s.m_visible || (!others && !s.m_actual);
     }), services.end());
-    std::sort(services.begin(), services.end(), [](const DVBDemodEPG::Service& a, const DVBDemodEPG::Service& b) {
-        const int ca = a.m_channel >= 0 ? a.m_channel : 0x7FFFFFFF, cb = b.m_channel >= 0 ? b.m_channel : 0x7FFFFFFF;
-        return ca != cb ? ca < cb : a.m_name < b.m_name;
+    std::sort(services.begin(), services.end(), [](const DTVGuide::Service& a, const DTVGuide::Service& b) {
+        if ((a.m_channel != b.m_channel) || (a.m_minorChannel != b.m_minorChannel)) {
+            return a.channelBefore(b);
+        }
+
+        return a.m_name < b.m_name;
     });
 
     QString key = QString::number(others);
 
     for (const auto& s : services) {
-        key += QString("|%1/%2/%3/%4/%5/%6/%7").arg(s.m_networkId).arg(s.m_serviceId).arg(s.m_channel).arg(s.m_actual).arg(s.m_name)
+        key += QString("|%1/%2/%3/%4/%5/%6/%7").arg(s.m_networkId).arg(s.m_serviceId).arg(s.channelText()).arg(s.m_actual).arg(s.m_name)
             .arg(s.m_frequency).arg(s.m_multiplexKnown);
     }
 
@@ -300,7 +302,7 @@ void DVBDemodEPGDialog::refreshServices()
 
     for (const auto& s : services)
     {
-        QListWidgetItem *item = new QListWidgetItem(s.m_channel >= 0 ? QString("%1  %2").arg(s.m_channel).arg(s.m_name) : s.m_name);
+        QListWidgetItem *item = new QListWidgetItem(s.m_channel >= 0 ? QString("%1  %2").arg(s.channelText()).arg(s.m_name) : s.m_name);
 
         if (!s.m_actual)
         {
@@ -341,7 +343,7 @@ void DVBDemodEPGDialog::refreshServices()
 }
 
 // Every listed service's programmes, if the grid is shown, rebuilt if they've changed
-void DVBDemodEPGDialog::refreshGrid()
+void DTVEPGDialog::refreshGrid()
 {
     if (m_views->currentIndex() != 1) {
         return;
@@ -386,18 +388,18 @@ void DVBDemodEPGDialog::refreshGrid()
         return;
     }
 
-    std::vector<std::vector<DVBDemodEPG::Event>> events = m_epg->getEvents(ids);
-    std::vector<DVBDemodEPGGrid::Row> rows;
+    std::vector<std::vector<DTVGuide::Event>> events = m_epg->getEvents(ids);
+    std::vector<DTVEPGGrid::Row> rows;
     rows.reserve(m_gridServices.size());
 
     for (size_t i = 0; i < m_gridServices.size(); i++)
     {
-        const DVBDemodEPG::Service& s = m_gridServices[i];
-        DVBDemodEPGGrid::Row row;
+        const DTVGuide::Service& s = m_gridServices[i];
+        DTVEPGGrid::Row row;
         row.m_networkId = s.m_networkId;
         row.m_serviceId = s.m_serviceId;
         row.m_name = s.m_name;
-        row.m_channel = s.m_channel;
+        row.m_channel = s.channelText();
         row.m_actual = s.m_actual;
         row.m_tunable = s.m_actual || (s.m_frequency > 0) || s.m_multiplexKnown;
         row.m_events = std::move(events[i]);
@@ -421,7 +423,7 @@ void DVBDemodEPGDialog::refreshGrid()
 }
 
 // The grid goes to the start of the day chosen, or now for today
-void DVBDemodEPGDialog::showDay()
+void DTVEPGDialog::showDay()
 {
     if (m_views->currentIndex() != 1) {
         return;
@@ -433,14 +435,14 @@ void DVBDemodEPGDialog::showDay()
     m_grid->scrollToTime(m_day->currentIndex() == 0 ? t - 1800 : dayStart);
 }
 
-void DVBDemodEPGDialog::play(ListedService service)
+void DTVEPGDialog::play(ListedService service)
 {
     if (service.tunable()) {
         emit serviceSelected(service.m_networkId, service.m_serviceId);
     }
 }
 
-void DVBDemodEPGDialog::refreshEvents()
+void DTVEPGDialog::refreshEvents()
 {
     const ListedService *service = currentService();
 
@@ -457,8 +459,8 @@ void DVBDemodEPGDialog::refreshEvents()
     const qint64 dayStart = QDateTime(date, QTime(0, 0)).toSecsSinceEpoch();
     const qint64 dayEnd = QDateTime(date.addDays(1), QTime(0, 0)).toSecsSinceEpoch();
     const qint64 t = now();
-    std::vector<DVBDemodEPG::Event> events = m_epg->getEvents(service->m_networkId, service->m_serviceId);
-    events.erase(std::remove_if(events.begin(), events.end(), [dayStart, dayEnd](const DVBDemodEPG::Event& e) {
+    std::vector<DTVGuide::Event> events = m_epg->getEvents(service->m_networkId, service->m_serviceId);
+    events.erase(std::remove_if(events.begin(), events.end(), [dayStart, dayEnd](const DTVGuide::Event& e) {
         return (e.m_start >= dayEnd) || (e.end() <= dayStart);
     }), events.end());
 
@@ -467,7 +469,7 @@ void DVBDemodEPGDialog::refreshEvents()
 
     for (const auto& e : events) {
         key += QString("|%1/%2/%3/%4/%5").arg(e.m_eventId).arg(e.m_start).arg((e.m_start <= t) && (t < e.end())).arg(e.m_title)
-            .arg(m_demod->isScheduled(service->m_networkId, service->m_serviceId, e.m_eventId));
+            .arg(m_schedule->isScheduled(service->m_networkId, service->m_serviceId, e.m_eventId));
     }
 
     if (key == m_eventsKey) {
@@ -491,7 +493,7 @@ void DVBDemodEPGDialog::refreshEvents()
         const QDateTime start = QDateTime::fromSecsSinceEpoch(e.m_start).toLocalTime();
         const QDateTime end = QDateTime::fromSecsSinceEpoch(e.end()).toLocalTime();
         QStringList info;
-        const bool scheduled = m_demod->isScheduled(service->m_networkId, service->m_serviceId, e.m_eventId);
+        const bool scheduled = m_schedule->isScheduled(service->m_networkId, service->m_serviceId, e.m_eventId);
 
         if (scheduled) {
             info.append("REC");
@@ -516,7 +518,7 @@ void DVBDemodEPGDialog::refreshEvents()
         QTableWidgetItem *items[4] = {
             new QTableWidgetItem(QString("%1 - %2").arg(start.toString("hh:mm")).arg(end.toString("hh:mm"))),
             new QTableWidgetItem(e.m_title),
-            new QTableWidgetItem(DVBDemodEPG::genreText(e.m_genre, service->m_networkId)),
+            new QTableWidgetItem(m_epg->genreName(e.m_genre, service->m_networkId)),
             new QTableWidgetItem(info.join(' '))
         };
         const bool onNow = (e.m_start <= t) && (t < e.end());
@@ -559,7 +561,7 @@ void DVBDemodEPGDialog::refreshEvents()
     showDescription();
 }
 
-QString DVBDemodEPGDialog::describe(const DVBDemodEPG::Event& e, int networkId) const
+QString DTVEPGDialog::describe(const DTVGuide::Event& e, int networkId) const
 {
     const QDateTime start = QDateTime::fromSecsSinceEpoch(e.m_start).toLocalTime();
     const QDateTime end = QDateTime::fromSecsSinceEpoch(e.end()).toLocalTime();
@@ -569,7 +571,7 @@ QString DVBDemodEPGDialog::describe(const DVBDemodEPG::Event& e, int networkId) 
         .arg(start.toString("hh:mm"))
         .arg(end.toString("hh:mm"))
         .arg(e.m_duration / 60);
-    const QString genre = DVBDemodEPG::genreText(e.m_genre, networkId);
+    const QString genre = m_epg->genreName(e.m_genre, networkId);
 
     if (!genre.isEmpty()) {
         html += "&nbsp;&nbsp;" + genre.toHtmlEscaped();
@@ -579,7 +581,7 @@ QString DVBDemodEPGDialog::describe(const DVBDemodEPG::Event& e, int networkId) 
         html += "<br><i>" + e.m_guidance.toHtmlEscaped() + "</i>";
     }
 
-    DVBDemodEPG::Service linked;
+    DTVGuide::Service linked;
 
     if (linkedService(e, linked)) {
         html += "<br>Also on " + linked.m_name.toHtmlEscaped();
@@ -592,25 +594,25 @@ QString DVBDemodEPGDialog::describe(const DVBDemodEPG::Event& e, int networkId) 
     return html;
 }
 
-bool DVBDemodEPGDialog::linkedService(const DVBDemodEPG::Event& event, DVBDemodEPG::Service& service) const
+bool DTVEPGDialog::linkedService(const DTVGuide::Event& event, DTVGuide::Service& service) const
 {
     return (event.m_linkServiceId >= 0) && m_epg->getService(event.m_linkNetworkId, event.m_linkServiceId, service)
         && !service.m_name.isEmpty() && (service.m_actual || service.m_multiplexKnown);
 }
 
 // The programmes to be recorded, which the grid marks
-QString DVBDemodEPGDialog::scheduleSignature() const
+QString DTVEPGDialog::scheduleSignature() const
 {
     QString signature;
 
-    for (const auto& r : m_demod->getScheduledRecordings()) {
+    for (const auto& r : m_schedule->getScheduledRecordings()) {
         signature += QString("%1/%2/%3|").arg(r.m_networkId).arg(r.m_serviceId).arg(r.m_eventId);
     }
 
     return signature;
 }
 
-void DVBDemodEPGDialog::showDescription()
+void DTVEPGDialog::showDescription()
 {
     if (m_views->currentIndex() != 0) {
         return; // The grid shows its selection's
@@ -626,7 +628,7 @@ void DVBDemodEPGDialog::showDescription()
     }
 }
 
-void DVBDemodEPGDialog::eventMenu(const QPoint& position)
+void DTVEPGDialog::eventMenu(const QPoint& position)
 {
     const int row = m_events->rowAt(position.y());
     const ListedService *service = currentService();
@@ -642,9 +644,9 @@ void DVBDemodEPGDialog::eventMenu(const QPoint& position)
 // service the programme is also on, as in HD. Record a programme, or cancel its recording: only those of services that
 // can be received, that haven't ended. The service and event are copies, as what they're from (the list, the table
 // and the grid) can be rebuilt while the menu's open
-void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event event, const QPoint& globalPosition)
+void DTVEPGDialog::showEventMenu(ListedService service, DTVGuide::Event event, const QPoint& globalPosition)
 {
-    const bool scheduled = m_demod->isScheduled(service.m_networkId, service.m_serviceId, event.m_eventId);
+    const bool scheduled = m_schedule->isScheduled(service.m_networkId, service.m_serviceId, event.m_eventId);
     QMenu menu(this);
     menu.setToolTipsVisible(true);
     QAction *playAction = menu.addAction(service.m_actual ? QString("Play")
@@ -652,7 +654,7 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
         : service.m_multiplexKnown ? QString("Search for its multiplex and play")
         : QString("Play (on another region's multiplex)"));
     playAction->setEnabled(service.tunable());
-    DVBDemodEPG::Service linked;
+    DTVGuide::Service linked;
     QAction *linkedAction = nullptr;
 
     if (linkedService(event, linked))
@@ -664,7 +666,7 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
 
     QAction *recordAction = menu.addAction(scheduled ? "Cancel recording" : "Record");
     // A service on another multiplex: recordable if scheduled recordings may retune to it
-    const bool reachable = service.m_actual || (m_demod->recordRetune() && service.tunable());
+    const bool reachable = service.m_actual || (m_schedule->recordRetune() && service.tunable());
 
     if (!scheduled && !reachable)
     {
@@ -678,7 +680,7 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
 
     // Its series, by its series CRID
     QAction *seriesAction = nullptr;
-    const bool series = !event.m_seriesCrid.isEmpty() && m_demod->isSeriesScheduled(service.m_networkId, service.m_serviceId, event.m_eventId);
+    const bool series = !event.m_seriesCrid.isEmpty() && m_schedule->isSeriesScheduled(service.m_networkId, service.m_serviceId, event.m_eventId);
 
     if (!event.m_seriesCrid.isEmpty())
     {
@@ -698,9 +700,9 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
     if (seriesAction && (chosen == seriesAction))
     {
         if (series) {
-            m_demod->cancelSeries(service.m_networkId, service.m_serviceId, event.m_eventId);
+            m_schedule->cancelSeries(service.m_networkId, service.m_serviceId, event.m_eventId);
         } else {
-            m_demod->scheduleSeries(service.m_networkId, service.m_serviceId, event.m_eventId);
+            m_schedule->scheduleSeries(service.m_networkId, service.m_serviceId, event.m_eventId);
         }
 
         m_eventsKey.clear();
@@ -726,9 +728,9 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
     }
 
     if (scheduled) {
-        m_demod->cancelScheduledRecording(service.m_networkId, service.m_serviceId, event.m_eventId);
+        m_schedule->cancelScheduledRecording(service.m_networkId, service.m_serviceId, event.m_eventId);
     } else {
-        m_demod->scheduleRecording(service.m_networkId, service.m_serviceId, event.m_eventId);
+        m_schedule->scheduleRecording(service.m_networkId, service.m_serviceId, event.m_eventId);
     }
 
     m_eventsKey.clear();
@@ -737,15 +739,15 @@ void DVBDemodEPGDialog::showEventMenu(ListedService service, DVBDemodEPG::Event 
 }
 
 // The programmes to record, in time order: selecting one cancels it
-void DVBDemodEPGDialog::scheduledMenu()
+void DTVEPGDialog::scheduledMenu()
 {
     QMenu *menu = m_scheduled->menu();
     menu->clear();
-    QList<DVBDemodSettings::ScheduledRecording> schedule = m_demod->getScheduledRecordings();
-    std::sort(schedule.begin(), schedule.end(), [](const DVBDemodSettings::ScheduledRecording& a, const DVBDemodSettings::ScheduledRecording& b) {
+    QList<DTVScheduledRecording> schedule = m_schedule->getScheduledRecordings();
+    std::sort(schedule.begin(), schedule.end(), [](const DTVScheduledRecording& a, const DTVScheduledRecording& b) {
         return a.m_start < b.m_start;
     });
-    const QList<DVBDemodSettings::SeriesRecording> series = m_demod->getSeriesRecordings();
+    const QList<DTVSeriesRecording> series = m_schedule->getSeriesRecordings();
 
     if (schedule.isEmpty() && series.isEmpty())
     {
@@ -760,7 +762,7 @@ void DVBDemodEPGDialog::scheduledMenu()
         const int networkId = s.m_networkId, serviceId = s.m_serviceId;
         const QString crid = s.m_seriesCrid;
         connect(action, &QAction::triggered, this, [this, networkId, serviceId, crid]() {
-            m_demod->cancelSeries(networkId, serviceId, crid);
+            m_schedule->cancelSeries(networkId, serviceId, crid);
             m_eventsKey.clear();
             refreshEvents();
             refreshGrid();
@@ -778,7 +780,7 @@ void DVBDemodEPGDialog::scheduledMenu()
             .arg(QDateTime::fromSecsSinceEpoch(r.end()).toLocalTime().toString("hh:mm")).arg(r.m_serviceName).arg(r.m_title));
         const int networkId = r.m_networkId, serviceId = r.m_serviceId, eventId = r.m_eventId;
         connect(action, &QAction::triggered, this, [this, networkId, serviceId, eventId]() {
-            m_demod->cancelScheduledRecording(networkId, serviceId, eventId);
+            m_schedule->cancelScheduledRecording(networkId, serviceId, eventId);
             m_eventsKey.clear();
             refreshEvents();
             refreshGrid();

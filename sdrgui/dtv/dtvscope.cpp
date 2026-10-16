@@ -26,17 +26,17 @@
 #include <QPainter>
 #include <QPainterPath>
 
-#include "dvbdemodscope.h"
+#include "dtv/dtvscope.h"
 
-const QColor DVBDemodScope::m_gridColour(255, 255, 255, 64);
-const QColor DVBDemodScope::m_zeroColour(255, 255, 255, 128);
-const QColor DVBDemodScope::m_labelColour(200, 200, 200);
+const QColor DTVScope::m_gridColour(255, 255, 255, 64);
+const QColor DTVScope::m_zeroColour(255, 255, 255, 128);
+const QColor DTVScope::m_labelColour(200, 200, 200);
 
-const QColor DVBDemodScope::m_merColour(0, 220, 255);
-const QColor DVBDemodScope::m_iterationsColour(255, 200, 0);
-const QColor DVBDemodScope::m_errorsColour(255, 60, 60);
+const QColor DTVScope::m_merColour(0, 220, 255);
+const QColor DTVScope::m_iterationsColour(255, 200, 0);
+const QColor DTVScope::m_errorsColour(255, 60, 60);
 
-DVBDemodScope::DVBDemodScope(QWidget *parent) :
+DTVScope::DTVScope(QWidget *parent) :
     QWidget(parent),
     m_view(Response),
     m_constellationSize(0),
@@ -53,7 +53,7 @@ DVBDemodScope::DVBDemodScope(QWidget *parent) :
     setView(Response);
 }
 
-void DVBDemodScope::setView(View view)
+void DTVScope::setView(View view)
 {
     static const char *const tips[] = {
         "the channel's frequency response across the carriers, relative to its mean: echoes give ripples, and interference or LO leakage dips",
@@ -70,7 +70,7 @@ void DVBDemodScope::setView(View view)
     update();
 }
 
-void DVBDemodScope::setData(const std::vector<std::complex<float>>& cells, const std::vector<float>& responseDb, int constellationSize, int alpha)
+void DTVScope::setData(const std::vector<std::complex<float>>& cells, const std::vector<float>& responseDb, int constellationSize, int alpha)
 {
     if (!responseDb.empty() && (responseDb != m_responseDb)) {
         addWaterfallRow(responseDb);
@@ -83,12 +83,12 @@ void DVBDemodScope::setData(const std::vector<std::complex<float>>& cells, const
     update();
 }
 
-void DVBDemodScope::setPoints(const std::vector<std::complex<float>>& points)
+void DTVScope::setPoints(const std::vector<std::complex<float>>& points)
 {
     m_points = points;
 }
 
-void DVBDemodScope::setSpectrum(bool spectrum)
+void DTVScope::setSpectrum(bool spectrum)
 {
     if (spectrum != m_spectrum)
     {
@@ -98,7 +98,7 @@ void DVBDemodScope::setSpectrum(bool spectrum)
     }
 }
 
-void DVBDemodScope::setImpulseResponse(const std::vector<float>& powerDb, double resolution, int guard, double sampleRate)
+void DTVScope::setImpulseResponse(const std::vector<float>& powerDb, double resolution, int guard, double sampleRate)
 {
     m_impulseDb = powerDb;
     m_impulseResolution = resolution;
@@ -110,7 +110,7 @@ void DVBDemodScope::setImpulseResponse(const std::vector<float>& powerDb, double
     }
 }
 
-void DVBDemodScope::addHistory(double mer, double iterations, int errors, double interval)
+void DTVScope::addHistory(double mer, double iterations, int errors, double interval)
 {
     m_history.push_back({(float) mer, (float) iterations, errors});
     m_historyInterval = interval;
@@ -124,14 +124,14 @@ void DVBDemodScope::addHistory(double mer, double iterations, int errors, double
     }
 }
 
-void DVBDemodScope::clearHistory()
+void DTVScope::clearHistory()
 {
     m_history.clear();
     m_waterfallRows = 0;
     update();
 }
 
-void DVBDemodScope::contextMenuEvent(QContextMenuEvent *event)
+void DTVScope::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
     const char *const names[] = {"Frequency response", "Response waterfall", "Impulse response", "History"};
@@ -151,7 +151,7 @@ void DVBDemodScope::contextMenuEvent(QContextMenuEvent *event)
     }
 }
 
-void DVBDemodScope::paintEvent(QPaintEvent *event)
+void DTVScope::paintEvent(QPaintEvent *event)
 {
     (void) event;
     QPainter painter(this);
@@ -183,7 +183,7 @@ void DVBDemodScope::paintEvent(QPaintEvent *event)
 }
 
 // Which view, at the top right, as a reminder that right-clicking chooses another
-void DVBDemodScope::paintTitle(QPainter& painter, const QRect& rect, const QString& title)
+void DTVScope::paintTitle(QPainter& painter, const QRect& rect, const QString& title)
 {
     const QString text = title + " " + QChar(0x25BE);
     const QFontMetrics metrics(painter.font());
@@ -193,7 +193,7 @@ void DVBDemodScope::paintTitle(QPainter& painter, const QRect& rect, const QStri
     painter.drawText(box, Qt::AlignCenter, text);
 }
 
-void DVBDemodScope::paintConstellation(QPainter& painter, const QRect& rect)
+void DTVScope::paintConstellation(QPainter& painter, const QRect& rect)
 {
     const float range = 1.5f; // Of the unit power constellation, edge to centre
     const float scale = rect.width() / (2.0f * range);
@@ -266,7 +266,7 @@ void DVBDemodScope::paintConstellation(QPainter& painter, const QRect& rect)
     painter.restore();
 }
 
-void DVBDemodScope::paintResponse(QPainter& painter, const QRect& rect)
+void DTVScope::paintResponse(QPainter& painter, const QRect& rect)
 {
     const float top = 10.0f, bottom = -30.0f; // dB, relative to the mean
     auto y = [&](float db) {
@@ -312,7 +312,7 @@ void DVBDemodScope::paintResponse(QPainter& painter, const QRect& rect)
 }
 
 // dB relative to the mean, -30 to +10, from black through blue, cyan and yellow to red
-QRgb DVBDemodScope::waterfallColour(float db)
+QRgb DTVScope::waterfallColour(float db)
 {
     static const int stops[5][3] = {{0, 0, 0}, {0, 0, 255}, {0, 255, 255}, {255, 255, 0}, {255, 0, 0}};
     const float t = std::max(0.0f, std::min(1.0f, (db + 30.0f) / 40.0f)) * 4.0f;
@@ -322,7 +322,7 @@ QRgb DVBDemodScope::waterfallColour(float db)
         (int) (stops[i][2] + f * (stops[i + 1][2] - stops[i][2])));
 }
 
-void DVBDemodScope::addWaterfallRow(const std::vector<float>& responseDb)
+void DTVScope::addWaterfallRow(const std::vector<float>& responseDb)
 {
     const int width = (int) responseDb.size();
 
@@ -356,7 +356,7 @@ void DVBDemodScope::addWaterfallRow(const std::vector<float>& responseDb)
     m_waterfallRows = std::min(m_waterfallRows + 1, m_waterfall.height());
 }
 
-void DVBDemodScope::paintWaterfall(QPainter& painter, const QRect& rect)
+void DTVScope::paintWaterfall(QPainter& painter, const QRect& rect)
 {
     if (m_waterfallRows > 0)
     {
@@ -391,7 +391,7 @@ void DVBDemodScope::paintWaterfall(QPainter& painter, const QRect& rect)
     }
 }
 
-void DVBDemodScope::paintImpulseResponse(QPainter& painter, const QRect& rect)
+void DTVScope::paintImpulseResponse(QPainter& painter, const QRect& rect)
 {
     const int bins = (int) m_impulseDb.size();
 
@@ -465,7 +465,7 @@ void DVBDemodScope::paintImpulseResponse(QPainter& painter, const QRect& rect)
     painter.drawPath(path);
 }
 
-void DVBDemodScope::paintHistory(QPainter& painter, const QRect& rect)
+void DTVScope::paintHistory(QPainter& painter, const QRect& rect)
 {
     const float merTop = 40.0f, iterationsTop = 50.0f;
     const double dx = (double) rect.width() / (m_historyLength - 1);

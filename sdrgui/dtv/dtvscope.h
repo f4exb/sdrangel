@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODSCOPE_H
-#define INCLUDE_DVBDEMODSCOPE_H
+#ifndef INCLUDE_DTVSCOPE_H
+#define INCLUDE_DTVSCOPE_H
 
 #include <complex>
 #include <deque>
@@ -27,17 +27,19 @@
 #include <QImage>
 #include <QWidget>
 
+#include "export.h"
+
 // Constellation of the equalised data cells at the left, and at the right, chosen by right-clicking: the channel
 // frequency response across the carriers, the response over time as a waterfall, the impulse response, or a history
 // of MER, LDPC iterations and uncorrected errors
-class DVBDemodScope : public QWidget
+class SDRGUI_API DTVScope : public QWidget
 {
     Q_OBJECT
 
 public:
     enum View { Response, Waterfall, ImpulseResponse, History };
 
-    explicit DVBDemodScope(QWidget *parent = nullptr);
+    explicit DTVScope(QWidget *parent = nullptr);
 
     //! cells have unit average power. constellationSize is 4, 16, 64 or 256, or 0 if not known. alpha is of DVB-T's
     //! hierarchical modes: the points nearest the axes are alpha - 1 further from them than in a uniform constellation.
@@ -112,4 +114,4 @@ private:
     static const QColor m_errorsColour;
 };
 
-#endif // INCLUDE_DVBDEMODSCOPE_H
+#endif // INCLUDE_DTVSCOPE_H
