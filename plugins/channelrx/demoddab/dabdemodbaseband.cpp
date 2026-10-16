@@ -153,20 +153,30 @@ bool DABDemodBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        // The output device's sample rate changed (its queue is registered with the audio device manager)
+        QMutexLocker mutexLocker(&m_mutex);
+        const DSPConfigureAudio& configure = (const DSPConfigureAudio&) cmd;
+        if (configure.getAudioType() == DSPConfigureAudio::AudioOutput) {
+            m_sink.applyAudioSampleRate(configure.getSampleRate());
+        }
+        return true;
+    }
     else if (DABDemod::MsgDABReset::match(cmd))
     {
         m_sink.reset();
         return true;
     }
+    else if (DABDemod::MsgDABSPICache::match(cmd))
+    {
+        DABDemod::MsgDABSPICache& report = (DABDemod::MsgDABSPICache&) cmd;
+        m_sink.setSPICache(report.getFiles());
+        return true;
+    }
     else if (DABDemod::MsgDABResetService::match(cmd))
     {
         m_sink.resetService();
-        return true;
-    }
-    else if (DABDemod::MsgDABProgramName::match(cmd))
-    {
-        DABDemod::MsgDABProgramName& report = (DABDemod::MsgDABProgramName&) cmd;
-        m_sink.programAvailable(report.getName());
         return true;
     }
     else

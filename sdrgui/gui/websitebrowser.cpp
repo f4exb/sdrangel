@@ -34,9 +34,9 @@
 #include <QTextCodec>
 #endif
 
-#include "drmwebsitebrowser.h"
+#include "websitebrowser.h"
 
-QImage DRMWebsiteImages::image(QTextDocument *document, const QTextFormat& format)
+QImage WebsiteImages::image(QTextDocument *document, const QTextFormat& format)
 {
     const QVariant data = document->resource(QTextDocument::ImageResource, QUrl(format.toImageFormat().name()));
 
@@ -55,7 +55,7 @@ QImage DRMWebsiteImages::image(QTextDocument *document, const QTextFormat& forma
     return QImage();
 }
 
-QSizeF DRMWebsiteImages::intrinsicSize(QTextDocument *document, int position, const QTextFormat& format)
+QSizeF WebsiteImages::intrinsicSize(QTextDocument *document, int position, const QTextFormat& format)
 {
     (void) position;
     const QTextImageFormat imageFormat = format.toImageFormat();
@@ -81,7 +81,7 @@ QSizeF DRMWebsiteImages::intrinsicSize(QTextDocument *document, int position, co
     return natural;
 }
 
-void DRMWebsiteImages::drawObject(QPainter *painter, const QRectF& rect, QTextDocument *document, int position,
+void WebsiteImages::drawObject(QPainter *painter, const QRectF& rect, QTextDocument *document, int position,
     const QTextFormat& format)
 {
     (void) position;
@@ -92,9 +92,9 @@ void DRMWebsiteImages::drawObject(QPainter *painter, const QRectF& rect, QTextDo
     }
 }
 
-DRMWebsiteBrowser::DRMWebsiteBrowser(QWidget *parent) :
+WebsiteBrowser::WebsiteBrowser(QWidget *parent) :
     QTextBrowser(parent),
-    m_images(new DRMWebsiteImages(this))
+    m_images(new WebsiteImages(this))
 {
     setOpenExternalLinks(false);
     useImageHandler();
@@ -110,7 +110,7 @@ DRMWebsiteBrowser::DRMWebsiteBrowser(QWidget *parent) :
     setHtml(tr("<p><i>No Broadcast Website</i></p>"));
 }
 
-QUrl DRMWebsiteBrowser::fileUrl(const std::string& name)
+QUrl WebsiteBrowser::fileUrl(const std::string& name)
 {
     QUrl url;
     url.setScheme(QStringLiteral("bws"));
@@ -118,7 +118,7 @@ QUrl DRMWebsiteBrowser::fileUrl(const std::string& name)
     return url;
 }
 
-void DRMWebsiteBrowser::setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> website)
+void WebsiteBrowser::setWebsite(std::shared_ptr<const modemdr::MOTWebsite> website)
 {
     // Another generation is another website (a service change the GUI did
     // not see the website cleared for): its pages and history start again
@@ -129,13 +129,10 @@ void DRMWebsiteBrowser::setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> w
     {
         m_page = QUrl();
         m_used.clear();
-        clearHistory();
     }
 
     if (!m_website)
     {
-        m_page = QUrl();
-        m_used.clear();
         clearHistory();
         setHtml(tr("<p><i>No Broadcast Website</i></p>"));
         return;
@@ -143,7 +140,25 @@ void DRMWebsiteBrowser::setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> w
 
     if (m_page.isEmpty())
     {
+        // Qt does not load a source it already shows: the old website's page
+        // of the same name would stay
+        const QUrl previous = source();
         showStartPage();
+
+        if (another && !m_website->startPage.empty() && !previous.isEmpty() && (source() == previous))
+        {
+            reload();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            pageShown(); // Qt 5's reload does not reach setSource(const QUrl&)
+#endif
+        }
+
+        // Qt keeps the page shown when clearing its history, so the history
+        // goes once the start page is shown: Back cannot reach the old website
+        if (another) {
+            clearHistory();
+        }
+
         return;
     }
 
@@ -164,7 +179,7 @@ void DRMWebsiteBrowser::setWebsite(std::shared_ptr<const modemdrm::MOTWebsite> w
     }
 }
 
-void DRMWebsiteBrowser::showStartPage()
+void WebsiteBrowser::showStartPage()
 {
     if (!m_website) {
         setHtml(tr("<p><i>No Broadcast Website</i></p>"));
@@ -175,12 +190,12 @@ void DRMWebsiteBrowser::showStartPage()
     }
 }
 
-void DRMWebsiteBrowser::home()
+void WebsiteBrowser::home()
 {
     showStartPage();
 }
 
-void DRMWebsiteBrowser::backward()
+void WebsiteBrowser::backward()
 {
     // The history is restored without doSetSource
     m_used.clear();
@@ -188,19 +203,19 @@ void DRMWebsiteBrowser::backward()
     pageShown();
 }
 
-void DRMWebsiteBrowser::forward()
+void WebsiteBrowser::forward()
 {
     m_used.clear();
     QTextBrowser::forward();
     pageShown();
 }
 
-QUrl DRMWebsiteBrowser::resolved(const QUrl& url) const
+QUrl WebsiteBrowser::resolved(const QUrl& url) const
 {
     return url.isRelative() ? (m_page.isEmpty() ? fileUrl(std::string()) : m_page).resolved(url) : url;
 }
 
-bool DRMWebsiteBrowser::local(const QUrl& url)
+bool WebsiteBrowser::local(const QUrl& url)
 {
     // bws: URLs, and pages written for a receiver's own web server
     const QString host = url.host().toLower();
@@ -209,7 +224,7 @@ bool DRMWebsiteBrowser::local(const QUrl& url)
             && ((host == QLatin1String("127.0.0.1")) || (host == QLatin1String("localhost"))));
 }
 
-std::string DRMWebsiteBrowser::websiteName(const modemdrm::MOTWebsite& website, const QUrl& url)
+std::string WebsiteBrowser::websiteName(const modemdr::MOTWebsite& website, const QUrl& url)
 {
     if (!local(url)) {
         return std::string();
@@ -267,7 +282,7 @@ std::string DRMWebsiteBrowser::websiteName(const modemdrm::MOTWebsite& website, 
     return std::string();
 }
 
-DRMWebsiteBrowser::Use DRMWebsiteBrowser::use(const modemdrm::MOTWebsite& website, const QUrl& url)
+WebsiteBrowser::Use WebsiteBrowser::use(const modemdr::MOTWebsite& website, const QUrl& url)
 {
     Use result;
     const std::string found = websiteName(website, url);
@@ -282,7 +297,7 @@ DRMWebsiteBrowser::Use DRMWebsiteBrowser::use(const modemdrm::MOTWebsite& websit
     return result;
 }
 
-QByteArray DRMWebsiteBrowser::fixColours(const QByteArray& html)
+QByteArray WebsiteBrowser::fixColours(const QByteArray& html)
 {
     // As Latin-1, which keeps every byte whatever the page's character set
     static const QRegularExpression tag(QStringLiteral("<[^<>]*>"));
@@ -309,7 +324,7 @@ QByteArray DRMWebsiteBrowser::fixColours(const QByteArray& html)
     return fixed.toLatin1();
 }
 
-QString DRMWebsiteBrowser::htmlText(const QByteArray& html)
+QString WebsiteBrowser::htmlText(const QByteArray& html)
 {
     // A page that starts with a <qt type=detail> tag would be shown in a
     // What's This window, outside the browser: a comment comes first
@@ -361,7 +376,7 @@ QString DRMWebsiteBrowser::htmlText(const QByteArray& html)
     return start + (utf8.toUtf8() == html ? utf8 : QString::fromLatin1(html));
 }
 
-QVariant DRMWebsiteBrowser::loadResource(int type, const QUrl& name)
+QVariant WebsiteBrowser::loadResource(int type, const QUrl& name)
 {
     const QUrl url = resolved(name);
 
@@ -430,18 +445,18 @@ QVariant DRMWebsiteBrowser::loadResource(int type, const QUrl& name)
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-void DRMWebsiteBrowser::doSetSource(const QUrl& name, QTextDocument::ResourceType type)
+void WebsiteBrowser::doSetSource(const QUrl& name, QTextDocument::ResourceType type)
 {
     showSource(name, type);
 }
 #else
-void DRMWebsiteBrowser::setSource(const QUrl& name)
+void WebsiteBrowser::setSource(const QUrl& name)
 {
     showSource(name, QTextDocument::UnknownResource);
 }
 #endif
 
-void DRMWebsiteBrowser::showSource(const QUrl& name, QTextDocument::ResourceType type)
+void WebsiteBrowser::showSource(const QUrl& name, QTextDocument::ResourceType type)
 {
     const QUrl url = resolved(name);
 
@@ -469,7 +484,7 @@ void DRMWebsiteBrowser::showSource(const QUrl& name, QTextDocument::ResourceType
     pageShown();
 }
 
-bool DRMWebsiteBrowser::event(QEvent *event)
+bool WebsiteBrowser::event(QEvent *event)
 {
     if ((event->type() == QEvent::ToolTip) || (event->type() == QEvent::WhatsThis))
     {
@@ -480,7 +495,7 @@ bool DRMWebsiteBrowser::event(QEvent *event)
     return QTextBrowser::event(event);
 }
 
-bool DRMWebsiteBrowser::viewportEvent(QEvent *event)
+bool WebsiteBrowser::viewportEvent(QEvent *event)
 {
     if ((event->type() == QEvent::ToolTip) || (event->type() == QEvent::WhatsThis))
     {
@@ -491,12 +506,12 @@ bool DRMWebsiteBrowser::viewportEvent(QEvent *event)
     return QTextBrowser::viewportEvent(event);
 }
 
-void DRMWebsiteBrowser::useImageHandler()
+void WebsiteBrowser::useImageHandler()
 {
     document()->documentLayout()->registerHandler(QTextFormat::ImageObject, m_images);
 }
 
-void DRMWebsiteBrowser::pageShown()
+void WebsiteBrowser::pageShown()
 {
     if (source().isValid()) {
         m_page = source();

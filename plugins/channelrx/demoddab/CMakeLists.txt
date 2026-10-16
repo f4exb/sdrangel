@@ -1,7 +1,5 @@
 project(demoddab)
 
-add_definitions(-DDABLIN_AAC_FAAD2)
-
 set(demoddab_SOURCES
     dabdemod.cpp
     dabdemodsettings.cpp
@@ -9,7 +7,6 @@ set(demoddab_SOURCES
     dabdemodsink.cpp
     dabdemodplugin.cpp
     dabdemodwebapiadapter.cpp
-    dabdemoddevice.cpp
 )
 
 set(demoddab_HEADERS
@@ -19,12 +16,10 @@ set(demoddab_HEADERS
     dabdemodsink.h
     dabdemodplugin.h
     dabdemodwebapiadapter.h
-    dabdemoddevice.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${DAB_INCLUDE_DIR}
 )
 
 if(NOT SERVER_MODE)
@@ -32,10 +27,12 @@ if(NOT SERVER_MODE)
         ${demoddab_SOURCES}
         dabdemodgui.cpp
         dabdemodgui.ui
+        dabcarrierplot.cpp
     )
     set(demoddab_HEADERS
         ${demoddab_HEADERS}
         dabdemodgui.h
+        dabcarrierplot.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demoddab)
@@ -65,7 +62,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}
-    ${DAB_LIBRARIES}
+    modemdab
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

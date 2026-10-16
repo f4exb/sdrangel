@@ -83,6 +83,7 @@ Minimum device sample rates:
 | DAB | `DABDemod` | Band III | Fixed 2.048 MS/s |
 | DVB-T and DVB-T2 television | `DVBDemod` | UHF channels 21 to 48 (470 to 694 MHz in Europe) | Channel n is centred on 474 + 8 (n - 21) MHz; a channel shown with a minus (e.g. 30-) is 166.667 kHz lower. Set the channel's `bandwidth` (8000000 in most of Europe; also 10000000, 7000000, 6000000, 5000000 and 1700000, of which 10 and 1.7 MHz are DVB-T2 only). `standard` 0 finds either (3 for the T2-Lite profile); `lowPriority` 1 decodes a hierarchical DVB-T multiplex's low priority stream. Needs a device that runs at 9.142857 MS/s |
 | DVB-S and DVB-S2 satellite television | `DVBDemod` | Ku band 10.7 to 12.75 GHz, received through an LNB at 950 to 2150 MHz (Sky Q wideband LNB: 290 to 2340 MHz) | Turn on the device's transverter mode with the delta set to the LNB's local oscillator (9750000000 universal low band, 10600000000 high band, 10410000000 Sky Q) so the centre frequency is the downlink's. The LNB needs 13 V (vertical) or 18 V (horizontal), and a 22 kHz tone for a universal LNB's high band, from a power inserter; SDRangel can't supply or switch them. `standard` 4 finds either (5 DVB-S, 6 DVB-S2), with `symbolRate` set (or 0 to measure it from the strongest signal in the channel, which then takes the whole baseband: keep the device rate within 64 times the symbol rate): Astra 2 (28.2 E) HD multiplexes are 23000000 DVB-S2 8PSK, SD ones 22000000 or 27500000 DVB-S. QO-100's wideband transponder (10491 to 10499 MHz) carries amateur DVB-S2 at 333000 or 500000 (also 125000 to 2000000) |
+| DRM (Digital Radio Mondiale) | `DRMDemod` | LW, MW and SW broadcast bands; mode E (DRM+) in VHF bands I and II | Tune to the nominal channel frequency, as broadcast schedules list it. The robustness mode and occupancy are detected. On HF the signal is 4.5 to 20 kHz wide, in mode E 100 kHz. `listen` with mode `drm` puts the channel clear of the device's DC spike |
 | AM broadcast | `AMDemod` | LW, MW, SW bands | |
 
 ### Checking DAB reception quality
@@ -91,13 +92,22 @@ After starting the device and selecting a programme, wait briefly and call
 `get_channel_report` again. Do not treat `sync: 1`, a populated programme list or
 `audioActive: 1` alone as proof of clean reception: DAB audio can still be distorted.
 
-Check `snr` in `DABDemodReport`. If it is 0 dB or less while synchronized audio is active,
-receiver overload is a likely cause. With an RTL-SDR, read its supported gain values from
-`get_device_report`, reduce `gain` by one supported step with `set_device_settings`, wait
-briefly, and re-read the channel report. Repeat while SNR improves, and use the gain that
-gives the best positive SNR rather than the highest available gain. If lower gain makes
-synchronization or SNR worse, restore the better setting and investigate frequency,
-antenna and local interference instead.
+`DABDemodReport` has:
+
+- **Margin:** `mscBER`, the bit error rate before error correction. About 0.06 is a clean
+  signal; audio errors start at about 0.1.
+- **Noise and impairments:** `cn`, the carrier to noise ratio from the null symbol, which
+  sees noise and interference. `snr` comes from the demodulated symbols. An `snr` well below
+  `cn` means overload of the receiver, multipath or interference.
+- **Gain advice:** `gainStatus` (0 OK, 1 increase, 2 reduce, 3 check) with `gainAdvice`. It
+  comes from `inputLevel` (dBFS), `clipping` (% of samples) and `snr` against `cn`.
+
+To set an RTL-SDR's gain, read its supported values from `get_device_report`. Step `gain` with
+`set_device_settings` in the direction `gainStatus` says, waiting a few seconds after each
+change. Keep the setting with the lowest `mscBER`, which is usually near -25 dBFS input. Do not
+use the highest gain: the tuner compresses above about -15 dBFS and clips near -8 dBFS. If
+no gain gives a usable `mscBER`, investigate frequency, antenna and local interference.
+
 ### Checking DRM reception
 
 `DRMDemodReport.syncState` goes from `searching` and `acquiring` to `locked` within a few
@@ -213,7 +223,7 @@ looks like an empty band.
 |------|---------------------|--------------|
 | Voice: `nfm`, `am`, `ssb`, `bfm`, `wfm`, `dsd` | Audio on the default output | `capture_audio` records a few seconds and reports the peak level, which tells silence (squelch closed, or nothing there) from speech |
 | Broadcast FM | Channel report | `BFMDemodReport.rdsReport`: station name, programme type, radio text, once RDS has locked |
-| DAB | Channel report | `DABDemodReport`: `sync`, `snr`, `ensembleName`, `programs`; select a programme with `set_channel_settings` and read `audioActive` |
+| DAB | Channel report | `DABDemodReport`: `sync`, `snr`, `cn`, `mscBER`, `gainAdvice`, `ensembleName`, `programs`; select a programme with `set_channel_settings` and read `audioActive` (see Checking DAB reception quality) |
 | DVB-T and DVB-T2 (and DVB-S and S2) | Channel report | `DVBDemodReport`: `state` (Locked when the transport stream is being decoded), `standard`, `mode`, `constellation`, `codeRate`, `mer`, and `postViterbiBER` for DVB-T and DVB-S (below 2e-4 is error free) or `ldpcIterations` and `bchFailures` for DVB-T2 and DVB-S2; for DVB-S2 also `modcod`, `esN0` (dB, compare with the MODCOD's threshold), `plFrames` and `plHeaderMisses`, and `measuredSymbolRate` for both satellite standards. What's on: `epgNowTitle`, `epgNowStart` (UTC), `epgNowDuration` (s), `epgNowDescription` and `epgNextTitle`, `epgNextStart` of `epgServiceId` (the `serviceId` setting, or the first TV service); the guide takes a minute or so to arrive, and is cached. Recording to .ts files in `recordDirectory`: channel_action `{"record": 1}` (or 0 to stop) records the service selected, or with `recordMode` 0 the whole multiplex; `{"recordEvent": 1, "serviceId": id, "eventId": id}` records a programme from the guide (0 cancels), starting `recordStartPadding` s early and ending `recordEndPadding` s late; the report has `recording`, `recordingFile`, `recordingSize` and `scheduledRecordings`. channel_action `{"play": 1, "serviceId": id}` plays a service from the guide, retuning the device to its multiplex if it's on another. Audio and subtitles: `audioLanguage` and `subtitleLanguage` (ISO 639-2, e.g. eng), `audioDescription` 1 to mix in audio description and `subtitles` 1 to show subtitles, where the service has them. Video, the service list and the full guide are in the GUI; with `udpEnabled` the transport stream goes to `udpAddress`:`udpPort` for VLC |
 | DRM | Channel report | `DRMDemodReport`: `syncState`, `mscMERDB`, `services`, `audioActive`, `textMessage`, `error`; select a service with `set_channel_settings` (see Checking DRM reception) |
 | ADS-B | Map items | `get_map_items` lists the aircraft with position, altitude, heading and callsign; the channel report only has counts and the tracked target |

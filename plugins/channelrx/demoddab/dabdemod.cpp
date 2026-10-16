@@ -26,10 +26,19 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QCryptographicHash>
+#include <QDateTime>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QStandardPaths>
 #include <QThread>
 
 #include <stdio.h>
 #include <complex.h>
+#include <cmath>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -55,6 +64,14 @@ MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABData, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABMOTData, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABTII, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABDLPlus, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABJournaline, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABServiceInfo, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSPI, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSPICache, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABWebsite, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSignalQuality, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABCarrierCN, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABReset, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABResetService, Message)
 
@@ -76,7 +93,8 @@ DABDemod::DABDemod(DeviceAPI *deviceAPI) :
         m_reportReedSolomonQuality(0),
         m_reportAACQuality(0),
         m_reportFIBQuality(0),
-        m_reportTII(0)
+        m_reportTII(TIINone),
+        m_spiCacheEnsemble(-1)
 {
     setObjectName(m_channelId);
     m_thread.setObjectName("DABDemodBB");
@@ -153,10 +171,9 @@ void DABDemod::start()
 {
     qDebug("DABDemod::start");
 
-    clearReport();
-
     m_basebandSink->reset();
     m_basebandSink->startWork();
+    resetReceiver();
     m_thread.start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
@@ -189,7 +206,7 @@ bool DABDemod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         if ((m_basebandSampleRate != notif.getSampleRate()) || (m_centerFrequency != notif.getCenterFrequency())) {
-            clearReport();
+            resetReceiver();
         }
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
@@ -231,10 +248,38 @@ bool DABDemod::handleMessage(const Message& cmd)
             m_reportFrameQuality = report.getFrames();
             m_reportReedSolomonQuality = report.getRS();
             m_reportAACQuality = report.getAAC();
+            // Audio is decoding again after a loss of sync (the programme data is not resent)
+            if (m_reportSync && (report.getAAC() > 0)) {
+                m_reportAudioActive = true;
+            }
         }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABProgramQuality(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABSignalQuality::match(cmd))
+    {
+        MsgDABSignalQuality& report = (MsgDABSignalQuality&)cmd;
+        SignalQuality quality = report.getQuality();
+        {
+            QMutexLocker locker(&m_reportMutex);
+            quality.gainStatus = gainAdvice(quality, m_reportSync, (float) m_reportSNR, quality.gainAdvice);
+            m_reportQuality = quality;
+        }
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(MsgDABSignalQuality::create(quality));
+        }
+
+        return true;
+    }
+    else if (MsgDABCarrierCN::match(cmd))
+    {
+        MsgDABCarrierCN& report = (MsgDABCarrierCN&)cmd;
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABCarrierCN(report));
         }
 
         return true;
@@ -275,6 +320,10 @@ bool DABDemod::handleMessage(const Message& cmd)
             m_reportEnsembleName = report.getName();
             m_reportEnsembleId = report.getId();
         }
+        // The SPI kept from before for this ensemble, until its carousel sends it again
+        if ((report.getId() >= 0) && (report.getId() != m_spiCacheEnsemble)) {
+            loadSPICache(report.getId());
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABEnsembleName(report));
@@ -293,7 +342,6 @@ bool DABDemod::handleMessage(const Message& cmd)
         {
             getMessageQueueToGUI()->push(new MsgDABProgramName(report));
         }
-        m_basebandSink->getInputMessageQueue()->push(new MsgDABProgramName(report));
 
         return true;
     }
@@ -335,6 +383,63 @@ bool DABDemod::handleMessage(const Message& cmd)
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABMOTData(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABDLPlus::match(cmd))
+    {
+        MsgDABDLPlus& report = (MsgDABDLPlus&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportDLPlus = report.getTags();
+        }
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABDLPlus(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABServiceInfo::match(cmd))
+    {
+        MsgDABServiceInfo& report = (MsgDABServiceInfo&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportAnnouncement = report.getInfo().announcement;
+            m_reportProgrammeNow = report.getInfo().programmeNow;
+        }
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABServiceInfo(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABSPI::match(cmd))
+    {
+        MsgDABSPI& report = (MsgDABSPI&)cmd;
+        if (report.getData() && (report.getEnsembleId() >= 0)) {
+            saveSPICache(*report.getData(), report.getEnsembleId());
+        }
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABSPI(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABWebsite::match(cmd))
+    {
+        MsgDABWebsite& report = (MsgDABWebsite&)cmd;
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABWebsite(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABJournaline::match(cmd))
+    {
+        MsgDABJournaline& report = (MsgDABJournaline&)cmd;
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgDABJournaline(report));
         }
 
         return true;
@@ -400,7 +505,7 @@ void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSett
     qDebug() << "DABDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        clearReport();
+        resetReceiver();
     } else if (settings.m_program != m_settings.m_program) {
         clearProgramReport();
     }
@@ -438,6 +543,12 @@ void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSett
         }
 
         reverseAPIKeys.append("streamIndex");
+    }
+    if (settingsKeys.contains("coherent") && (settings.m_coherent != m_settings.m_coherent)) {
+        reverseAPIKeys.append("coherent");
+    }
+    if (settingsKeys.contains("announcementTypes") && (settings.m_announcementTypes != m_settings.m_announcementTypes)) {
+        reverseAPIKeys.append("announcementTypes");
     }
 
     DABDemodBaseband::MsgConfigureDABDemodBaseband *msg = DABDemodBaseband::MsgConfigureDABDemodBaseband::create(settingsKeys, settings, force);
@@ -541,7 +652,7 @@ void DABDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
 
     QMutexLocker locker(&m_reportMutex);
     report->setSync(m_reportSync ? 1 : 0);
-    report->setSnr(m_reportSNR);
+    report->setSnr((int) std::lround(m_reportSNR));
     report->setFrequencyOffset(m_reportFrequencyOffset);
     // DAB labels are a fixed 16 characters, space padded
     if (report->getEnsembleName()) {
@@ -586,11 +697,50 @@ void DABDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     report->setAacQuality(m_reportAACQuality);
     report->setFibQuality(m_reportFIBQuality);
     report->setTii(m_reportTII);
+    if (m_reportQuality.measured)
+    {
+        report->setCn(m_reportQuality.cn);
+        report->setNullDepth(m_reportQuality.nullDepth);
+        report->setMscBer(m_reportQuality.mscBER);
+        report->setFicBer(m_reportQuality.ficBER);
+        report->setRsCorrectedRate(m_reportQuality.rsCorrectedRate);
+        report->setFramesLost(m_reportQuality.framesLost);
+        report->setReacquisitions(m_reportQuality.reacquisitions);
+    }
+    report->setInputLevel(m_reportQuality.inputLevel);
+    report->setClipping(m_reportQuality.clipping);
+    report->setGainStatus(m_reportQuality.gainStatus);
+    if (report->getGainAdvice()) {
+        *report->getGainAdvice() = m_reportQuality.gainAdvice;
+    } else {
+        report->setGainAdvice(new QString(m_reportQuality.gainAdvice));
+    }
     if (report->getData()) {
         *report->getData() = m_reportData.trimmed();
     } else {
         report->setData(new QString(m_reportData.trimmed()));
     }
+    QString artist;
+    QString title;
+    for (const auto& tag : m_reportDLPlus)
+    {
+        if (tag.first == "ITEM.ARTIST") {
+            artist = tag.second;
+        } else if (tag.first == "ITEM.TITLE") {
+            title = tag.second;
+        }
+    }
+    const auto setString = [](QString *existing, const QString& value, auto setter) {
+        if (existing) {
+            *existing = value;
+        } else {
+            setter(new QString(value));
+        }
+    };
+    setString(report->getNowPlayingArtist(), artist, [report](QString *s) { report->setNowPlayingArtist(s); });
+    setString(report->getNowPlayingTitle(), title, [report](QString *s) { report->setNowPlayingTitle(s); });
+    setString(report->getAnnouncement(), m_reportAnnouncement, [report](QString *s) { report->setAnnouncement(s); });
+    setString(report->getProgrammeNow(), m_reportProgrammeNow, [report](QString *s) { report->setProgrammeNow(s); });
 }
 
 void DABDemod::clearProgramReport()
@@ -605,6 +755,17 @@ void DABDemod::clearProgramReport()
     m_reportReedSolomonQuality = 0;
     m_reportAACQuality = 0;
     m_reportData.clear();
+    m_reportDLPlus.clear();
+    m_reportAnnouncement.clear();
+    m_reportProgrammeNow.clear();
+}
+
+// The report and the receiver start again together: the sink sends the ensemble, programs,
+// TII and SPI only when they change, so a report cleared on its own would stay empty
+void DABDemod::resetReceiver()
+{
+    clearReport();
+    m_basebandSink->getInputMessageQueue()->push(MsgDABReset::create());
 }
 
 void DABDemod::clearReport()
@@ -625,8 +786,64 @@ void DABDemod::clearReport()
     m_reportReedSolomonQuality = 0;
     m_reportAACQuality = 0;
     m_reportFIBQuality = 0;
-    m_reportTII = 0;
+    m_reportTII = TIINone;
     m_reportData.clear();
+    m_reportDLPlus.clear();
+    m_reportAnnouncement.clear();
+    m_reportProgrammeNow.clear();
+    m_reportQuality = SignalQuality();
+    // The receiver starts again: its SPI cache too
+    m_spiCacheEnsemble = -1;
+}
+
+int DABDemod::gainAdvice(const SignalQuality& quality, bool sync, float snr, QString& advice)
+{
+    // Clipping, of an 8-bit ADC especially, spreads distortion over every carrier. OFDM
+    // peaks are 10 dB or more above the mean, so a mean above -12 dBFS clips; an RTL-SDR's
+    // tuner already compresses above about -15 dBFS.
+    const float clippingLimit = 0.1f;      // % of samples
+    const float levelHigh = -15.0f;        // dBFS
+    const float levelLow = -45.0f;         // dBFS: near an 8-bit ADC's quantization
+    const float levelModerate = -30.0f;    // dBFS
+    const float cnPoor = 10.0f;            // dB
+    // The MER from the symbols sees overload of the receiver by the ensemble, which the
+    // null symbol does not; but also multipath, Doppler and interference
+    const float merGap = 8.0f;             // dB
+    const float merCheckCN = 15.0f;        // dB
+
+    if (quality.clipping >= clippingLimit)
+    {
+        advice = QString("Reduce gain or add an attenuator: %1% of samples clip").arg(quality.clipping, 0, 'f', 2);
+        return GainReduce;
+    }
+    if (quality.inputLevel > levelHigh)
+    {
+        advice = "Reduce gain or add an attenuator: input level high";
+        return GainReduce;
+    }
+    if (quality.inputLevel < levelLow)
+    {
+        advice = "Increase gain: input level low";
+        return GainIncrease;
+    }
+    // A low level with a poor signal: the receiver's own noise may be limiting it
+    if ((quality.inputLevel < levelModerate) && (!sync || (quality.measured && (quality.cn < cnPoor))))
+    {
+        advice = "Increase gain: input level low for the C/N";
+        return GainIncrease;
+    }
+    if (!sync)
+    {
+        advice = "Level OK, no signal";
+        return GainOK;
+    }
+    if (quality.measured && (quality.cn >= merCheckCN) && (quality.cn - snr >= merGap))
+    {
+        advice = "Check: SNR well below C/N. Try less gain (overload), else multipath or interference";
+        return GainCheck;
+    }
+    advice = "Gain OK";
+    return GainOK;
 }
 
 int DABDemod::webapiWorkspaceGet(
@@ -695,6 +912,12 @@ void DABDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getDabDemodSettings()->getStreamIndex();
     }
+    if (channelSettingsKeys.contains("coherent")) {
+        settings.m_coherent = response.getDabDemodSettings()->getCoherent() != 0;
+    }
+    if (channelSettingsKeys.contains("announcementTypes")) {
+        settings.m_announcementTypes = response.getDabDemodSettings()->getAnnouncementTypes();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getDabDemodSettings()->getUseReverseApi() != 0;
     }
@@ -743,6 +966,8 @@ void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 
     response.getDabDemodSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getDabDemodSettings()->setCoherent(settings.m_coherent ? 1 : 0);
+    response.getDabDemodSettings()->setAnnouncementTypes(settings.m_announcementTypes);
     response.getDabDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getDabDemodSettings()->getReverseApiAddress()) {
@@ -868,6 +1093,12 @@ void DABDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDABDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
+    if (channelSettingsKeys.contains("coherent") || force) {
+        swgDABDemodSettings->setCoherent(settings.m_coherent ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("announcementTypes") || force) {
+        swgDABDemodSettings->setAnnouncementTypes(settings.m_announcementTypes);
+    }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
@@ -922,4 +1153,158 @@ void DABDemod::handleIndexInDeviceSetChanged(int index)
 int DABDemod::getChannelSampleRate() const
 {
     return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+// A directory for each ensemble, with an index of its files: their names (which can be paths
+// or URLs) are hashed for the files' own names
+QString DABDemod::spiCacheDirectory(int ensembleId)
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+        + QString("/dabdemod_spi/%1").arg(ensembleId, 4, 16, QLatin1Char('0')).toUpper();
+}
+
+static QString spiCacheFileName(const QString& name)
+{
+    return QString(QCryptographicHash::hash(name.toUtf8(), QCryptographicHash::Sha1).toHex()) + ".bin";
+}
+
+void DABDemod::loadSPICache(int ensembleId)
+{
+    m_spiCacheEnsemble = ensembleId;
+    m_spiSaved.clear();
+    m_spiLoaded.clear();
+
+    const QDir dir(spiCacheDirectory(ensembleId));
+    QFile indexFile(dir.filePath("index.json"));
+    if (!indexFile.open(QIODevice::ReadOnly))
+    {
+        // Nothing cached: the receiver must not keep another ensemble's files
+        m_basebandSink->getInputMessageQueue()->push(MsgDABSPICache::create({}));
+        return;
+    }
+    const QJsonArray entries = QJsonDocument::fromJson(indexFile.readAll()).object().value("files").toArray();
+    const QDateTime oldest = QDateTime::currentDateTimeUtc().addDays(-SPICacheDays);
+    std::vector<modemdr::MOTFile> files;
+
+    for (const QJsonValue& value : entries)
+    {
+        const QJsonObject entry = value.toObject();
+        const QString name = entry.value("name").toString();
+        const QString fileName = spiCacheFileName(name);
+
+        // Gone from the carousel a while ago
+        if (QDateTime::fromString(entry.value("saved").toString(), Qt::ISODate) < oldest)
+        {
+            QFile::remove(dir.filePath(fileName));
+            continue;
+        }
+        QFile file(dir.filePath(fileName));
+        if (name.isEmpty() || !file.open(QIODevice::ReadOnly)) {
+            continue;
+        }
+        const QByteArray bytes = file.readAll();
+
+        modemdr::MOTFile motFile;
+        motFile.name = name.toStdString();
+        motFile.contentType = entry.value("contentType").toInt(-1);
+        motFile.contentSubtype = entry.value("contentSubtype").toInt(-1);
+        motFile.mimeType = entry.value("mimeType").toString().toStdString();
+        const QJsonObject parameters = entry.value("parameters").toObject();
+        for (auto it = parameters.begin(); it != parameters.end(); ++it)
+        {
+            const QByteArray parameter = QByteArray::fromHex(it.value().toString().toLatin1());
+            motFile.parameters[it.key().toInt()].assign(parameter.begin(), parameter.end());
+        }
+        auto data = std::make_shared<std::vector<uint8_t>>(bytes.begin(), bytes.end());
+        motFile.data = data;
+        m_spiSaved.insert(name, data.get());
+        m_spiLoaded.insert(data.get());
+        files.push_back(motFile);
+    }
+
+    qDebug() << "DABDemod::loadSPICache:" << files.size() << "files for ensemble" << QString::number(ensembleId, 16);
+    m_basebandSink->getInputMessageQueue()->push(MsgDABSPICache::create(files));
+}
+
+// New and changed files, as they arrive
+void DABDemod::saveSPICache(const modemdr::SPIData& data, int ensembleId)
+{
+    if (ensembleId != m_spiCacheEnsemble) {
+        return;     // Before the cache was loaded for the ensemble: the index would lose its files
+    }
+
+    const QDir dir(spiCacheDirectory(ensembleId));
+    bool changed = false;
+
+    for (const auto *files : {&data.images, &data.objects})
+    {
+        for (const auto& entry : *files)
+        {
+            const modemdr::MOTFile& motFile = entry.second;
+            const QString name = QString::fromStdString(motFile.name);
+            if (!motFile.data || (m_spiSaved.value(name) == motFile.data.get())) {
+                continue;
+            }
+            if (!dir.exists() && !QDir().mkpath(dir.path())) {
+                return;
+            }
+            QFile file(dir.filePath(spiCacheFileName(name)));
+            if (file.open(QIODevice::WriteOnly))
+            {
+                file.write(reinterpret_cast<const char *>(motFile.data->data()), (qint64) motFile.data->size());
+                m_spiSaved.insert(name, motFile.data.get());
+                changed = true;
+            }
+        }
+    }
+    if (!changed) {
+        return;
+    }
+
+    // The index: the files of the data, and those of the cache it does not have
+    QJsonObject index;
+    QFile indexFile(dir.filePath("index.json"));
+    if (indexFile.open(QIODevice::ReadOnly))
+    {
+        index = QJsonDocument::fromJson(indexFile.readAll()).object();
+        indexFile.close();
+    }
+    QMap<QString, QJsonObject> entries;
+    for (const QJsonValue& value : index.value("files").toArray()) {
+        entries.insert(value.toObject().value("name").toString(), value.toObject());
+    }
+    const QString now = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+    for (const auto *files : {&data.images, &data.objects})
+    {
+        for (const auto& entry : *files)
+        {
+            const modemdr::MOTFile& motFile = entry.second;
+            // A file from the cache, not received again: as it was
+            if (m_spiLoaded.contains(motFile.data.get()) && entries.contains(QString::fromStdString(motFile.name))) {
+                continue;
+            }
+            QJsonObject object;
+            object.insert("name", QString::fromStdString(motFile.name));
+            object.insert("contentType", motFile.contentType);
+            object.insert("contentSubtype", motFile.contentSubtype);
+            object.insert("mimeType", QString::fromStdString(motFile.mimeType));
+            QJsonObject parameters;
+            for (const auto& parameter : motFile.parameters)
+            {
+                parameters.insert(QString::number(parameter.first),
+                    QString(QByteArray(reinterpret_cast<const char *>(parameter.second.data()), (int) parameter.second.size()).toHex()));
+            }
+            object.insert("parameters", parameters);
+            object.insert("saved", now);
+            entries.insert(QString::fromStdString(motFile.name), object);
+        }
+    }
+    QJsonArray array;
+    for (const QJsonObject& object : entries) {
+        array.append(object);
+    }
+    index.insert("files", array);
+    if (indexFile.open(QIODevice::WriteOnly)) {
+        indexFile.write(QJsonDocument(index).toJson(QJsonDocument::Compact));
+    }
 }

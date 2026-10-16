@@ -47,7 +47,8 @@
 #include "ui_drmdemodgui.h"
 
 #include "drmdemodgui.h"
-#include "drmwebsitebrowser.h"
+#include "gui/journalinebrowser.h"
+#include "gui/websitebrowser.h"
 
 
 // SDC entity 9 coding (ES 201 980 clause 6.4.3.10) as a short description.
@@ -603,6 +604,20 @@ void DRMDemodGUI::displayStatus(const DRMDemodStatus& status)
     updateSlideshow(status);
     updateJournaline(status);
     updateWebsite(status);
+    updateProgrammeGuide(status);
+}
+
+// The guide is the multiplex's: it shows the selected service's schedule
+void DRMDemodGUI::updateProgrammeGuide(const DRMDemodStatus& status)
+{
+    if (status.spiUpdates != m_displayedSPIUpdates)
+    {
+        m_displayedSPIUpdates = status.spiUpdates;
+        ui->programmeGuide->setData(status.spi);
+    }
+
+    ui->programmeGuide->setService(status.selectedServiceIdentifier >= 0
+        ? static_cast<quint32>(status.selectedServiceIdentifier) : 0U);
 }
 
 void DRMDemodGUI::updateWebsite(const DRMDemodStatus& status)
@@ -675,6 +690,7 @@ void DRMDemodGUI::updateJournaline(const DRMDemodStatus& status)
 
     // Keep the component shown; otherwise the selected service's, else the first.
     int shortId = m_journalineShortId;
+    bool anotherService = false;
 
     if (m_journaline.count(shortId) == 0)
     {
@@ -683,11 +699,7 @@ void DRMDemodGUI::updateJournaline(const DRMDemodStatus& status)
         shortId = selected != status.services.end() && m_journaline.count(selected->shortIdentifier)
             ? selected->shortIdentifier : (services.empty() ? -1 : services.front());
 
-        if (shortId != m_journalineShortId)
-        {
-            m_journalineObject = 0;
-            m_journalineHistory.clear();
-        }
+        anotherService = shortId != m_journalineShortId;
     }
 
     m_journalineShortId = shortId;
@@ -718,120 +730,34 @@ void DRMDemodGUI::updateJournaline(const DRMDemodStatus& status)
         ui->journalineService->setEnabled(m_journalineServices.size() > 1U);
     }
 
-    showJournaline();
+    showJournaline(anotherService);
 }
 
-QString DRMDemodGUI::journalineHtml(const DRMDemodStatus::JournalineObjects& objects, int objectId)
-{
-    const auto found = objects.find(objectId);
-
-    if (found == objects.end()) {
-        return tr("<p><i>Waiting for this page...</i></p>");
-    }
-
-    const modemdrm::JournalineObject& object = found->second;
-    const auto text = [](const std::string& utf8) {
-        return QString::fromUtf8(utf8.data(), static_cast<int>(utf8.size())).toHtmlEscaped().replace('\n', QStringLiteral("<br>"));
-    };
-    QString html = QStringLiteral("<h3>%1</h3>").arg(text(object.title));
-
-    if (object.type == modemdrm::JournalineObject::Menu)
-    {
-        html += QStringLiteral("<ul>");
-
-        for (const auto& item : object.items)
-        {
-            // A link once the object it opens has arrived.
-            if (objects.count(item.linkId)) {
-                html += QStringLiteral("<li><a href=\"jml:%1\">%2</a></li>").arg(QString::number(item.linkId), text(item.text));
-            } else {
-                html += QStringLiteral("<li><font color=\"gray\">%1</font></li>").arg(text(item.text));
-            }
-        }
-
-        html += QStringLiteral("</ul>");
-    }
-    else if (object.type == modemdrm::JournalineObject::List)
-    {
-        html += QStringLiteral("<table cellpadding=\"2\">");
-        bool open = false;
-
-        for (const auto& item : object.items)
-        {
-            if (item.newRow || !open)
-            {
-                html += open ? QStringLiteral("</tr><tr>") : QStringLiteral("<tr>");
-                open = true;
-            }
-
-            html += QStringLiteral("<td>%1</td>").arg(text(item.text));
-        }
-
-        html += open ? QStringLiteral("</tr></table>") : QStringLiteral("</table>");
-    }
-    else
-    {
-        for (const auto& item : object.items) {
-            html += QStringLiteral("<p>%1</p>").arg(text(item.text));
-        }
-    }
-
-    return html;
-}
-
-void DRMDemodGUI::showJournaline()
+void DRMDemodGUI::showJournaline(bool anotherService)
 {
     const auto service = m_journaline.find(m_journalineShortId);
-    const QString html = (service == m_journaline.end() || !service->second)
-        ? tr("<p><i>No Journaline service</i></p>") : journalineHtml(*service->second, m_journalineObject);
+    ui->journaline->setObjects(service == m_journaline.end() ? nullptr : service->second, anotherService);
+}
 
-    // Updates arrive every few seconds: redraw only a page that changed,
-    // keeping the reader's place (and selection)
-    if (html != m_journalineShownHtml)
-    {
-        const int scroll = ui->journaline->verticalScrollBar()->value();
-        ui->journaline->setHtml(html);
-        ui->journaline->verticalScrollBar()->setValue(scroll);
-        m_journalineShownHtml = html;
-    }
-
-    ui->journalineBack->setEnabled(!m_journalineHistory.empty());
-    ui->journalineHome->setEnabled(m_journalineObject != 0);
+void DRMDemodGUI::updateJournalineButtons()
+{
+    ui->journalineBack->setEnabled(ui->journaline->canGoBack());
+    ui->journalineHome->setEnabled(!ui->journaline->atHome());
 }
 
 void DRMDemodGUI::journalineLinkClicked(const QUrl& link)
 {
-    bool ok = false;
-    const int objectId = link.path().toInt(&ok);
-
-    if (link.scheme() != QLatin1String("jml") || !ok) {
-        return;
-    }
-
-    m_journalineHistory.push_back(m_journalineObject);
-    m_journalineObject = objectId;
-    showJournaline();
-    ui->journaline->verticalScrollBar()->setValue(0);
+    ui->journaline->openLink(link);
 }
 
 void DRMDemodGUI::journalineHome()
 {
-    if (m_journalineObject != 0)
-    {
-        m_journalineHistory.push_back(m_journalineObject);
-        m_journalineObject = 0;
-        showJournaline();
-    }
+    ui->journaline->goHome();
 }
 
 void DRMDemodGUI::journalineBack()
 {
-    if (!m_journalineHistory.empty())
-    {
-        m_journalineObject = m_journalineHistory.back();
-        m_journalineHistory.pop_back();
-        showJournaline();
-    }
+    ui->journaline->goBack();
 }
 
 void DRMDemodGUI::journalineServiceChanged(int index)
@@ -841,9 +767,7 @@ void DRMDemodGUI::journalineServiceChanged(int index)
     }
 
     m_journalineShortId = m_journalineServices[static_cast<std::size_t>(index)];
-    m_journalineObject = 0;
-    m_journalineHistory.clear();
-    showJournaline();
+    showJournaline(true);
 }
 
 void DRMDemodGUI::updateSlideshow(const DRMDemodStatus& status)
@@ -1105,11 +1029,12 @@ void DRMDemodGUI::makeUIConnections()
     ui->slideshowName->setTextFormat(Qt::PlainText);
     ui->slideshow->setTextFormat(Qt::PlainText);
     ui->slideshow->setMinimumSize(1, 1);
-    connect(ui->journaline, &QTextBrowser::anchorClicked, this, &DRMDemodGUI::journalineLinkClicked);
+    connect(ui->journaline, &JournalineBrowser::navigationChanged, this, &DRMDemodGUI::updateJournalineButtons);
+    updateJournalineButtons();
     connect(ui->journalineHome, &QToolButton::clicked, this, &DRMDemodGUI::journalineHome);
-    connect(ui->websiteHome, &QToolButton::clicked, ui->website, &DRMWebsiteBrowser::showStartPage);
-    connect(ui->websiteBack, &QToolButton::clicked, ui->website, &DRMWebsiteBrowser::backward);
-    connect(ui->website, &DRMWebsiteBrowser::backwardAvailable, ui->websiteBack, &QToolButton::setEnabled);
+    connect(ui->websiteHome, &QToolButton::clicked, ui->website, &WebsiteBrowser::showStartPage);
+    connect(ui->websiteBack, &QToolButton::clicked, ui->website, &WebsiteBrowser::backward);
+    connect(ui->website, &WebsiteBrowser::backwardAvailable, ui->websiteBack, &QToolButton::setEnabled);
     ui->websiteBack->setEnabled(false);
     connect(ui->journalineBack, &QToolButton::clicked, this, &DRMDemodGUI::journalineBack);
     connect(ui->journalineService, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DRMDemodGUI::journalineServiceChanged);
