@@ -223,7 +223,9 @@
 #include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
+#include "SWGIEEE_802_15_4_DemodReport.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
+#include "SWGIEEE_802_15_4_DemodSettings.h"
 #include "SWGILSDemodReport.h"
 #include "SWGILSDemodSettings.h"
 #include "SWGInmarsatDemodReport.h"
@@ -1506,8 +1508,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGIEEE_802_15_4_DemodReport").compare(type) == 0) {
+      SWGIEEE_802_15_4_DemodReport *obj = new SWGIEEE_802_15_4_DemodReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGIEEE_802_15_4_ModSettings").compare(type) == 0) {
       SWGIEEE_802_15_4_ModSettings *obj = new SWGIEEE_802_15_4_ModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGIEEE_802_15_4_DemodSettings").compare(type) == 0) {
+      SWGIEEE_802_15_4_DemodSettings *obj = new SWGIEEE_802_15_4_DemodSettings();
       obj->init();
       return obj;
     }

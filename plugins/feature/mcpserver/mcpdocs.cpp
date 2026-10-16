@@ -404,6 +404,7 @@ const MCPDocs::Readme *MCPDocs::match(const QStringList& groups, const QString& 
     // Plugins whose directory, id and title all differ
     static const QMap<QString, QString> overrides = {
         {"ChannelAnalyzer", "chanalyzer"},
+        {"IEEE_802_15_4_Demod", "demod802.15.4"},
         {"IEEE_802_15_4_Mod", "mod802.15.4"},
     };
 

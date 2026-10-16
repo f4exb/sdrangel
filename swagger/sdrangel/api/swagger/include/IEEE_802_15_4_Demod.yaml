@@ -1,0 +1,120 @@
+IEEE_802_15_4_DemodSettings:
+  description: IEEE_802_15_4_Demod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "Frequency offset of the channel from the device center frequency in Hz."
+    phy:
+      type: string
+      description: >
+        PHY. One of: "20kbps BPSK", "40kbps BPSK", "100kbps <1GHz O-QPSK",
+        "250kbps <1GHz O-QPSK (Sine)", "250kbps <1GHz O-QPSK (RC)", "250kbps >2GHz O-QPSK"
+    rfBandwidth:
+      type: number
+      format: float
+      description: "RF bandwidth of the channel filter in Hz."
+    samplesPerChip:
+      type: integer
+      minimum: 2
+      maximum: 16
+      description: "Samples per chip. The channel sample rate is this multiplied by the chip rate."
+    maxFrequencyOffset:
+      type: number
+      format: float
+      description: "Maximum carrier frequency offset to search for during acquisition in Hz."
+    threshold:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 1
+      description: "Preamble detection threshold."
+    showBadFCS:
+      type: integer
+      description: "Show frames with invalid FCS (1 for yes, 0 for no)."
+    filterFrameType:
+      type: integer
+      minimum: 0
+      maximum: 5
+      description: "Frame type filter for the GUI table: 0 - All, 1 - Beacon, 2 - Data, 3 - Ack, 4 - Command, 5 - Other."
+    filterPANID:
+      type: string
+      description: "Regular expression to filter frames by PAN ID in the GUI table."
+    filterAddress:
+      type: string
+      description: "Regular expression to filter frames by source or destination address in the GUI table."
+    udpEnabled:
+      type: integer
+      description: "Whether to forward received frames to specified UDP port (1 for yes, 0 for no)."
+    udpAddress:
+      type: string
+      description: "UDP address to forward received frames to."
+    udpPort:
+      type: integer
+      minimum: 1024
+      maximum: 65535
+      description: "UDP port to forward received frames to."
+    udpFormat:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Format of frames forwarded via UDP: 0 - ZEP (ZigBee Encapsulation Protocol v2), 1 - Raw MAC frame."
+    logFilename:
+      type: string
+      description: "Log filename. Use .pcap extension for PCAP format, otherwise CSV format is used."
+    logEnabled:
+      type: integer
+      description: "Whether to log received frames to a file (1 for yes, 0 for no)."
+    useFileTime:
+      type: integer
+      description: "Use date and time from file input device rather than the system clock (1 for yes, 0 for no)."
+    rgbColor:
+      type: integer
+      description: "Channel-marker colour as an ARGB integer."
+    title:
+      type: string
+      description: "Channel title shown in the GUI."
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+      description: "Address of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "Port of the reverse API peer."
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    scopeConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display settings."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+IEEE_802_15_4_DemodReport:
+  description: IEEE_802_15_4_Demod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
+    framesOK:
+      type: integer
+      description: "Number of frames received with a valid FCS."
+    framesBadFCS:
+      type: integer
+      description: "Number of frames received with an invalid FCS."

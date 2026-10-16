@@ -150,20 +150,15 @@ void IEEE_802_15_4_ModGUI::handleSourceMessages()
     }
 }
 
-// Check sample rate is good enough and if not, display a warning in title
+// Check sample rate is good enough and if not, display a warning in title.
+// The waveform is resampled to the baseband sample rate, so it doesn't need to be a
+// multiple of the chip rate, but should be at least the RF bandwidth.
 void IEEE_802_15_4_ModGUI::checkSampleRate()
 {
-    int cr = m_settings.getChipRate();
-
-    if ((m_basebandSampleRate % cr) != 0)
+    if (m_basebandSampleRate < m_settings.m_rfBandwidth)
     {
         ui->chipRateText->setStyleSheet("QLabel { background:rgb(200,50,50); }");
-        ui->chipRateText->setToolTip(QString("Baseband sample rate %1 S/s is not an integer multiple of chip rate %2 S/s").arg(m_basebandSampleRate).arg(cr));
-    }
-    else if ((m_basebandSampleRate / cr) <= 2)
-    {
-        ui->chipRateText->setStyleSheet("QLabel { background:rgb(200,50,50); }");
-        ui->chipRateText->setToolTip(QString("Baseband sample rate %1 S/s is too low for chip rate %2 S/s").arg(m_basebandSampleRate).arg(cr));
+        ui->chipRateText->setToolTip(QString("Baseband sample rate %1 S/s is lower than the RF bandwidth %2 Hz, so the transmitted signal will be filtered").arg(m_basebandSampleRate).arg(m_settings.m_rfBandwidth));
     }
     else
     {
@@ -196,7 +191,17 @@ void IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged(int value)
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate);
     displayChipRate(m_settings);
     checkSampleRate();
-    applySettings(QStringList("phy"));
+    // There is no "phy" setting, so apply each of the settings setPHY() sets
+    applySettings(QStringList({
+        "bitRate",
+        "subGHzBand",
+        "modulation",
+        "pulseShaping",
+        "beta",
+        "symbolSpan",
+        "rfBandwidth",
+        "spectrumRate"
+    }));
 
     // Remove custom PHY when deselected, as we no longer know how to set it
     if (value < 6)
@@ -209,6 +214,7 @@ void IEEE_802_15_4_ModGUI::on_rfBW_valueChanged(int value)
     displayRFBandwidth(bw);
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
+    checkSampleRate();
     applySettings(QStringList("rfBandwidth"));
 }
 
