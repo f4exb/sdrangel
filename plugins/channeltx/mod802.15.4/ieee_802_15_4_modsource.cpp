@@ -26,6 +26,7 @@
 #include "dsp/scopevis.h"
 #include "ieee_802_15_4_modsource.h"
 #include "util/crc.h"
+#include "util/ieee_802_15_4.h"
 
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_ModSource::MsgCloseUDP, Message)
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_ModSource::MsgOpenUDP, Message)
@@ -45,18 +46,21 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
     m_sampleIdx(0),
+    m_samplesPerChip(10),
+    m_modulationSampleRate(3000000),
+    m_resample(false),
+    m_resamplerDistance(1.0f),
+    m_resamplerDistanceRemain(0.0f),
     m_chipsPerSymbol(15),
     m_bitsPerSymbol(1),
     m_chipRate(300000),
     m_state(idle),
+    m_lpfFlushCount(0),
     m_byteIdx(0),
     m_bitIdx(0),
     m_bitCount(0),
     m_udpSocket(nullptr)
 {
-    m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
-    m_pulseShapeI.create(1, 6, m_channelSampleRate/300000, true);
-    m_pulseShapeQ.create(1, 6, m_channelSampleRate/300000, true);
     m_specSampleBuffer.resize(m_specSampleBufferSize);
     m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
     applySettings(QStringList(), m_settings, true);
@@ -90,11 +94,39 @@ void IEEE_802_15_4_ModSource::pullOne(Sample& sample)
         return;
     }
 
-    // Calculate next sample
-    modulateSample();
+    Complex ci;
+
+    // The waveform is generated at m_modulationSampleRate, which is an integer multiple
+    // of the chip rate, then resampled to the channel sample rate if that isn't
+    if (!m_resample)
+    {
+        modulateSample();
+        ci = m_modSample;
+    }
+    else if (m_resamplerDistance > 1.0f) // decimate
+    {
+        modulateSample();
+
+        while (!m_resampler.decimate(&m_resamplerDistanceRemain, m_modSample, &ci)) {
+            modulateSample();
+        }
+
+        m_resamplerDistanceRemain += m_resamplerDistance;
+    }
+    else // interpolate
+    {
+        if (m_resampler.interpolate(&m_resamplerDistanceRemain, m_modSample, &ci)) {
+            modulateSample();
+        }
+
+        m_resamplerDistanceRemain += m_resamplerDistance;
+    }
+
+    // Display transmitted baseband signal in spectrum analyser and scope
+    sampleToSpectrum(ci);
+    sampleToScope(ci);
 
     // Shift to carrier frequency
-    Complex ci = m_modSample;
     ci *= m_carrierNco.nextIQ();
 
     // Calculate power
@@ -160,9 +192,14 @@ void IEEE_802_15_4_ModSource::modulateSample()
         Real audioMod = 0.0f;
         m_modSample.real(audioMod);
         m_modSample.imag(0);
+        // Flush the RF bandwidth filter at the end of a frame, otherwise the last
+        // lpfTaps/2 samples of the frame (which can be more than the padding) are lost
+        if (m_lpfFlushCount > 0)
+        {
+            m_modSample = m_lowpass.filter(m_modSample);
+            m_lpfFlushCount--;
+        }
         calculateLevel(audioMod);
-        sampleToSpectrum(m_modSample);
-        sampleToScope(m_modSample);
         if (m_state == wait)
         {
             m_waitCounter--;
@@ -242,10 +279,6 @@ void IEEE_802_15_4_ModSource::modulateSample()
         m_modSample.real(m_linearGain * linearRampGain * i);
         m_modSample.imag(m_linearGain * linearRampGain * q);
 
-        // Display baseband audio in spectrum analyser
-        sampleToSpectrum(m_modSample);
-        sampleToScope(m_modSample);
-
         // Apply low pass filter to limit RF BW
         m_modSample = m_lowpass.filter(m_modSample);
 
@@ -265,6 +298,7 @@ void IEEE_802_15_4_ModSource::modulateSample()
                                                ))
             {
                 m_state = idle;
+                m_lpfFlushCount = m_settings.m_lpfTaps;
                 // Do we need to retransmit the frame?
                 if (m_settings.m_repeat)
                 {
@@ -276,7 +310,7 @@ void IEEE_802_15_4_ModSource::modulateSample()
                         {
                             // Wait before retransmitting
                             m_state = wait;
-                            m_waitCounter = m_settings.m_repeatDelay * m_channelSampleRate;
+                            m_waitCounter = m_settings.m_repeatDelay * m_modulationSampleRate;
                         }
                         else
                         {
@@ -313,71 +347,16 @@ void IEEE_802_15_4_ModSource::calculateLevel(Real& sample)
 
 void IEEE_802_15_4_ModSource::applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
 {
-    // Only recreate filters if settings have changed
-    if ((settingsKeys.contains("lpfTaps") && (settings.m_lpfTaps != m_settings.m_lpfTaps)) ||
-        (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
-    {
-        qDebug() << "IEEE_802_15_4_ModSource::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
-        m_lowpass.create(settings.m_lpfTaps, m_channelSampleRate, settings.m_rfBandwidth / 2.0);
-    }
-    if ((settingsKeys.contains("spectrumRate") && (settings.m_spectrumRate != m_settings.m_spectrumRate)) || force)
-    {
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) settings.m_spectrumRate;
-        m_interpolator.create(48, settings.m_spectrumRate, settings.m_spectrumRate / 2.2, 3.0);
-    }
-
-    if (settings.m_modulation == IEEE_802_15_4_ModSettings::BPSK)
-    {
-        m_chipsPerSymbol = 15;
-        m_bitsPerSymbol = 1;
-    }
-    else
-    {
-        m_bitsPerSymbol = 4;
-        m_chipsPerSymbol = settings.m_subGHzBand ? 16 : 32;
-    }
-
-    m_chipRate = settings.m_bitRate * m_chipsPerSymbol / m_bitsPerSymbol;
-    m_samplesPerChip = m_channelSampleRate / m_chipRate;
-    qDebug() << "m_samplesPerChip: " << m_samplesPerChip;
-
-    if (m_channelSampleRate % m_chipRate != 0) {
-        qCritical("Sample rate is not an integer multiple of the chip rate");
-    }
-
-    if (m_samplesPerChip <= 2) {
-        qCritical("Sample rate is not a high enough multiple of the chip rate");
-    }
-
-    if ((settingsKeys.contains("pulseShaping") && (settings.m_pulseShaping != m_settings.m_pulseShaping))
+    bool updateRates = (settingsKeys.contains("lpfTaps") && (settings.m_lpfTaps != m_settings.m_lpfTaps))
+        || (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("pulseShaping") && (settings.m_pulseShaping != m_settings.m_pulseShaping))
         || (settingsKeys.contains("beta") && (settings.m_beta != m_settings.m_beta))
         || (settingsKeys.contains("symbolSpan") && (settings.m_symbolSpan != m_settings.m_symbolSpan))
         || (settingsKeys.contains("bitRate") && (settings.m_bitRate != m_settings.m_bitRate))
         || (settingsKeys.contains("modulation") && (settings.m_modulation != m_settings.m_modulation))
         || (settingsKeys.contains("subGHzBand") && (settings.m_subGHzBand != m_settings.m_subGHzBand))
-        || force)
-    {
-        qDebug() << "IEEE_802_15_4_ModSource::applySettings: Recreating pulse shaping filter: "
-                << " pulseShaping: " << m_settings.m_pulseShaping
-                << " beta: " << settings.m_beta
-                << " symbolSpan: " << settings.m_symbolSpan
-                << " channelSampleRate:" << m_channelSampleRate
-                << " subGHzBand: " << settings.m_subGHzBand
-                << " bitRate:" << settings.m_bitRate
-                << " chipRate:" << m_chipRate;
-
-        if (settings.m_pulseShaping == IEEE_802_15_4_ModSettings::RC)
-        {
-            m_pulseShapeI.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/m_chipRate, true);
-            m_pulseShapeQ.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/m_chipRate, true);
-        }
-        else
-        {
-             createHalfSine(m_channelSampleRate, m_chipRate);
-        }
-    }
+        || force;
+    bool updateSpectrum = (settingsKeys.contains("spectrumRate") && (settings.m_spectrumRate != m_settings.m_spectrumRate)) || force;
 
     if ((settingsKeys.contains("polynomial") && (settings.m_polynomial != m_settings.m_polynomial)) || force) {
         m_scrambler.setPolynomial(settings.m_polynomial);
@@ -387,6 +366,14 @@ void IEEE_802_15_4_ModSource::applySettings(const QStringList& settingsKeys, con
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (updateRates) {
+        updateSampleRates();
+    }
+
+    if (updateSpectrum) {
+        updateSpectrumInterpolator();
     }
 
     // Precalculate linear gain to save doing it in the loop
@@ -407,54 +394,114 @@ void IEEE_802_15_4_ModSource::applyChannelSettings(int channelSampleRate, int ch
         m_carrierNco.setFreq(channelFrequencyOffset, channelSampleRate);
     }
 
-    if ((m_channelSampleRate != channelSampleRate) || force)
-    {
-        qDebug() << "IEEE_802_15_4_ModSource::applyChannelSettings: Recreating filters";
-        m_lowpass.create(m_settings.m_lpfTaps, channelSampleRate, m_settings.m_rfBandwidth / 2.0);
-        qDebug() << "IEEE_802_15_4_ModSource::applyChannelSettings: Recreating pulse shaping filter: "
-                << " pulseShaping: " << m_settings.m_pulseShaping
-                << " beta: " << m_settings.m_beta
-                << " symbolSpan: " << m_settings.m_symbolSpan
-                << " channelSampleRate:" << channelSampleRate
-                << " subGHzBand: " << m_settings.m_subGHzBand
-                << " bitRate:" << m_settings.m_bitRate
-                << " chipRate:" << m_chipRate;
-        if (m_settings.m_pulseShaping == IEEE_802_15_4_ModSettings::RC)
-        {
-            m_pulseShapeI.create(m_settings.m_beta, m_settings.m_symbolSpan, channelSampleRate/m_chipRate, true);
-            m_pulseShapeQ.create(m_settings.m_beta, m_settings.m_symbolSpan, channelSampleRate/m_chipRate, true);
-        }
-        else
-            createHalfSine(channelSampleRate, m_chipRate);
-    }
-
-    if ((m_channelSampleRate != channelSampleRate) || (m_spectrumRate != m_settings.m_spectrumRate) || force)
-    {
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_settings.m_spectrumRate;
-        m_interpolator.create(48, m_settings.m_spectrumRate, m_settings.m_spectrumRate / 2.2, 3.0);
-    }
+    bool rateChanged = (m_channelSampleRate != channelSampleRate) || force;
+    bool spectrumChanged = rateChanged || (m_spectrumRate != m_settings.m_spectrumRate);
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
+
+    if (rateChanged) {
+        updateSampleRates();
+    }
+
+    if (spectrumChanged) {
+        updateSpectrumInterpolator();
+    }
+}
+
+// Choose the sample rate the waveform is generated at, and create the filters that depend on it.
+// Pulse shaping requires an integer number of samples per chip. If the channel sample rate
+// is a suitable integer multiple of the chip rate, the waveform is generated at that rate.
+// Otherwise it is generated at m_resampleSamplesPerChip samples per chip, and resampled to
+// the channel sample rate. This also limits CPU usage when the channel sample rate is much
+// higher than the chip rate.
+void IEEE_802_15_4_ModSource::updateSampleRates()
+{
+    if (m_settings.m_modulation == IEEE_802_15_4_ModSettings::BPSK)
+    {
+        m_chipsPerSymbol = 15;
+        m_bitsPerSymbol = 1;
+    }
+    else
+    {
+        m_bitsPerSymbol = 4;
+        m_chipsPerSymbol = m_settings.m_subGHzBand ? 16 : 32;
+    }
+
+    m_chipRate = m_settings.m_bitRate * m_chipsPerSymbol / m_bitsPerSymbol;
+
+    if ((m_chipRate <= 0) || (m_channelSampleRate <= 0)) {
+        return;
+    }
+
+    int ratio = m_channelSampleRate / m_chipRate;
+
+    if (((m_channelSampleRate % m_chipRate) == 0) && (ratio >= m_minSamplesPerChip) && (ratio <= m_maxSamplesPerChip))
+    {
+        m_samplesPerChip = ratio;
+        m_resample = false;
+    }
+    else
+    {
+        m_samplesPerChip = m_resampleSamplesPerChip;
+        m_resample = true;
+    }
+
+    m_modulationSampleRate = m_samplesPerChip * m_chipRate;
+    m_sampleIdx = 0;
+
+    // RF bandwidth filter can't be wider than the sample rate
+    float rfBandwidth = std::min(m_settings.m_rfBandwidth, 0.9f * m_modulationSampleRate);
+    m_lowpass.create(m_settings.m_lpfTaps, m_modulationSampleRate, rfBandwidth / 2.0);
+
+    if (m_settings.m_pulseShaping == IEEE_802_15_4_ModSettings::RC)
+    {
+        m_pulseShapeI.create(m_settings.m_beta, m_settings.m_symbolSpan, m_samplesPerChip, true);
+        m_pulseShapeQ.create(m_settings.m_beta, m_settings.m_symbolSpan, m_samplesPerChip, true);
+    }
+    else
+    {
+        createHalfSine(m_samplesPerChip);
+    }
+
+    if (m_resample)
+    {
+        // Filter to the RF bandwidth, which also has to be within the Nyquist bandwidth of the
+        // lower of the two sample rates, to avoid aliasing
+        double cutoff = std::min((double) rfBandwidth / 2.0, 0.45 * std::min(m_modulationSampleRate, m_channelSampleRate));
+        m_resamplerDistance = (Real) m_modulationSampleRate / (Real) m_channelSampleRate;
+        m_resamplerDistanceRemain = 0.0f;
+        m_resampler.create(48, m_modulationSampleRate, cutoff, m_resamplerTapsPerPhase);
+    }
+
+    qDebug() << "IEEE_802_15_4_ModSource::updateSampleRates:"
+        << " channelSampleRate: " << m_channelSampleRate
+        << " chipRate: " << m_chipRate
+        << " samplesPerChip: " << m_samplesPerChip
+        << " modulationSampleRate: " << m_modulationSampleRate
+        << " resample: " << m_resample;
+}
+
+void IEEE_802_15_4_ModSource::updateSpectrumInterpolator()
+{
+    if (m_settings.m_spectrumRate > 0)
+    {
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_settings.m_spectrumRate;
+        m_interpolator.create(48, m_settings.m_spectrumRate, m_settings.m_spectrumRate / 2.2, 3.0);
+    }
+
     m_spectrumRate = m_settings.m_spectrumRate;
-    m_samplesPerChip = m_channelSampleRate / m_chipRate;
-    qDebug() << "m_samplesPerChip: " << m_samplesPerChip;
 }
 
 // Half-sine pulse shaping for O-QPSK
-void IEEE_802_15_4_ModSource::createHalfSine(int sampleRate, int chipRate)
+void IEEE_802_15_4_ModSource::createHalfSine(int samplesPerChip)
 {
-    int samplesPerChip = sampleRate / chipRate;
-    double tc = 1.0 / chipRate;
-
     delete[] m_sinLUT;
     m_sinLUT = new double[2*samplesPerChip];
-    for (int i = 0; i < 2*samplesPerChip; i++)
-    {
-        double t=i/(double)sampleRate;
-        m_sinLUT[i] = sin(M_PI*t/(2.0*tc));
+    for (int i = 0; i < 2*samplesPerChip; i++) {
+        m_sinLUT[i] = sin(M_PI*i/(2.0*samplesPerChip));
     }
 }
 
@@ -471,57 +518,12 @@ int IEEE_802_15_4_ModSource::getChip()
     if (m_chipIdx == 0)
         m_symbol = getSymbol();
 
-    if (m_settings.m_bitRate <= 40000)
-    {
-        static const int chipsBpsk[2][15] = {
-            {1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0},
-            {0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1}
-        };
-        chip = chipsBpsk[m_symbol][m_chipIdx];
-    }
-    else if (m_settings.m_subGHzBand)
-    {
-        static const int chipsSubGHzOqpsk[16][16] = {
-            {0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1},
-            {0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1},
-            {0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0},
-            {1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0},
-            {0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0},
-            {1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1},
-            {1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1},
-            {1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
-            {0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0},
-            {0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0},
-            {0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1},
-            {1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1},
-            {0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1},
-            {1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0},
-            {1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0},
-            {1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1},
-        };
-        chip = chipsSubGHzOqpsk[m_symbol][m_chipIdx];
-    }
-    else
-    {
-        static const int chipsOqpsk[16][32] = {
-            {1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0},
-            {1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0},
-            {0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0},
-            {0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1},
-            {0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1},
-            {0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0},
-            {1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1},
-            {1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1},
-            {1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1},
-            {1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1},
-            {0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1},
-            {0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0},
-            {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0},
-            {1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0}
-        };
-        chip = chipsOqpsk[m_symbol][m_chipIdx];
+    if (m_settings.m_bitRate <= 40000) {
+        chip = IEEE_802_15_4_PHY::m_chipsBPSK[m_symbol][m_chipIdx];
+    } else if (m_settings.m_subGHzBand) {
+        chip = IEEE_802_15_4_PHY::m_chipsSubGHzOQPSK[m_symbol][m_chipIdx];
+    } else {
+        chip = IEEE_802_15_4_PHY::m_chips2450OQPSK[m_symbol][m_chipIdx];
     }
 
     m_chipIdx++;
