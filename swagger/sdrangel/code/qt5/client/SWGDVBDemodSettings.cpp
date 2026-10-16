@@ -38,6 +38,24 @@ SWGDVBDemodSettings::SWGDVBDemodSettings() {
     m_plp_id_isSet = false;
     low_priority = 0;
     m_low_priority_isSet = false;
+    symbol_rate = 0;
+    m_symbol_rate_isSet = false;
+    roll_off = 0;
+    m_roll_off_isSet = false;
+    code_rate = 0;
+    m_code_rate_isSet = false;
+    isi = 0;
+    m_isi_isSet = false;
+    pl_scrambling_code = 0;
+    m_pl_scrambling_code_isSet = false;
+    equaliser = 0;
+    m_equaliser_isSet = false;
+    freesat_region = 0;
+    m_freesat_region_isSet = false;
+    record_retune = 0;
+    m_record_retune_isSet = false;
+    record_follow_running = 0;
+    m_record_follow_running_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = nullptr;
@@ -50,6 +68,8 @@ SWGDVBDemodSettings::SWGDVBDemodSettings() {
     m_service_id_isSet = false;
     deinterlace = 0;
     m_deinterlace_isSet = false;
+    hbbtv = 0;
+    m_hbbtv_isSet = false;
     av_offset = 0;
     m_av_offset_isSet = false;
     hardware_decoding = 0;
@@ -58,6 +78,12 @@ SWGDVBDemodSettings::SWGDVBDemodSettings() {
     m_audio_language_isSet = false;
     audio_description = 0;
     m_audio_description_isSet = false;
+    audio_description_mixed = 0;
+    m_audio_description_mixed_isSet = false;
+    clean_audio = 0;
+    m_clean_audio_isSet = false;
+    subtitles_hard_of_hearing = 0;
+    m_subtitles_hard_of_hearing_isSet = false;
     subtitles = 0;
     m_subtitles_isSet = false;
     subtitle_language = nullptr;
@@ -102,30 +128,6 @@ SWGDVBDemodSettings::SWGDVBDemodSettings() {
     m_channel_marker_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
-    symbol_rate = 0;
-    m_symbol_rate_isSet = false;
-    roll_off = 0;
-    m_roll_off_isSet = false;
-    code_rate = 0;
-    m_code_rate_isSet = false;
-    isi = 0;
-    m_isi_isSet = false;
-    pl_scrambling_code = 0;
-    m_pl_scrambling_code_isSet = false;
-    equaliser = 0;
-    m_equaliser_isSet = false;
-    audio_description_mixed = 0;
-    m_audio_description_mixed_isSet = false;
-    clean_audio = 0;
-    m_clean_audio_isSet = false;
-    subtitles_hard_of_hearing = 0;
-    m_subtitles_hard_of_hearing_isSet = false;
-    record_retune = 0;
-    m_record_retune_isSet = false;
-    record_follow_running = 0;
-    m_record_follow_running_isSet = false;
-    freesat_region = 0;
-    m_freesat_region_isSet = false;
 }
 
 SWGDVBDemodSettings::~SWGDVBDemodSettings() {
@@ -144,6 +146,24 @@ SWGDVBDemodSettings::init() {
     m_plp_id_isSet = false;
     low_priority = 0;
     m_low_priority_isSet = false;
+    symbol_rate = 0;
+    m_symbol_rate_isSet = false;
+    roll_off = 0;
+    m_roll_off_isSet = false;
+    code_rate = 0;
+    m_code_rate_isSet = false;
+    isi = 0;
+    m_isi_isSet = false;
+    pl_scrambling_code = 0;
+    m_pl_scrambling_code_isSet = false;
+    equaliser = 0;
+    m_equaliser_isSet = false;
+    freesat_region = 0;
+    m_freesat_region_isSet = false;
+    record_retune = 0;
+    m_record_retune_isSet = false;
+    record_follow_running = 0;
+    m_record_follow_running_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = new QString("");
@@ -156,6 +176,8 @@ SWGDVBDemodSettings::init() {
     m_service_id_isSet = false;
     deinterlace = 0;
     m_deinterlace_isSet = false;
+    hbbtv = 0;
+    m_hbbtv_isSet = false;
     av_offset = 0;
     m_av_offset_isSet = false;
     hardware_decoding = 0;
@@ -164,6 +186,12 @@ SWGDVBDemodSettings::init() {
     m_audio_language_isSet = false;
     audio_description = 0;
     m_audio_description_isSet = false;
+    audio_description_mixed = 0;
+    m_audio_description_mixed_isSet = false;
+    clean_audio = 0;
+    m_clean_audio_isSet = false;
+    subtitles_hard_of_hearing = 0;
+    m_subtitles_hard_of_hearing_isSet = false;
     subtitles = 0;
     m_subtitles_isSet = false;
     subtitle_language = new QString("");
@@ -208,34 +236,19 @@ SWGDVBDemodSettings::init() {
     m_channel_marker_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
-    symbol_rate = 0;
-    m_symbol_rate_isSet = false;
-    roll_off = 0;
-    m_roll_off_isSet = false;
-    code_rate = 0;
-    m_code_rate_isSet = false;
-    isi = 0;
-    m_isi_isSet = false;
-    pl_scrambling_code = 0;
-    m_pl_scrambling_code_isSet = false;
-    equaliser = 0;
-    m_equaliser_isSet = false;
-    audio_description_mixed = 0;
-    m_audio_description_mixed_isSet = false;
-    clean_audio = 0;
-    m_clean_audio_isSet = false;
-    subtitles_hard_of_hearing = 0;
-    m_subtitles_hard_of_hearing_isSet = false;
-    record_retune = 0;
-    m_record_retune_isSet = false;
-    record_follow_running = 0;
-    m_record_follow_running_isSet = false;
-    freesat_region = 0;
-    m_freesat_region_isSet = false;
 }
 
 void
 SWGDVBDemodSettings::cleanup() {
+
+
+
+
+
+
+
+
+
 
 
 
@@ -251,9 +264,13 @@ SWGDVBDemodSettings::cleanup() {
 
 
 
+
     if(audio_language != nullptr) { 
         delete audio_language;
     }
+
+
+
 
 
     if(subtitle_language != nullptr) { 
@@ -314,6 +331,24 @@ SWGDVBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&low_priority, pJson["lowPriority"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&symbol_rate, pJson["symbolRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&roll_off, pJson["rollOff"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&code_rate, pJson["codeRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&isi, pJson["isi"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&pl_scrambling_code, pJson["plScramblingCode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&equaliser, pJson["equaliser"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&freesat_region, pJson["freesatRegion"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&record_retune, pJson["recordRetune"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&record_follow_running, pJson["recordFollowRunning"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
@@ -326,6 +361,8 @@ SWGDVBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&deinterlace, pJson["deinterlace"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&hbbtv, pJson["hbbtv"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&av_offset, pJson["avOffset"], "qint32", "");
     
     ::SWGSDRangel::setValue(&hardware_decoding, pJson["hardwareDecoding"], "qint32", "");
@@ -333,6 +370,12 @@ SWGDVBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_language, pJson["audioLanguage"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_description, pJson["audioDescription"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_description_mixed, pJson["audioDescriptionMixed"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&clean_audio, pJson["cleanAudio"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&subtitles_hard_of_hearing, pJson["subtitlesHardOfHearing"], "qint32", "");
     
     ::SWGSDRangel::setValue(&subtitles, pJson["subtitles"], "qint32", "");
     
@@ -378,25 +421,6 @@ SWGDVBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
-    ::SWGSDRangel::setValue(&symbol_rate, pJson["symbolRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&roll_off, pJson["rollOff"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&code_rate, pJson["codeRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&isi, pJson["isi"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&pl_scrambling_code, pJson["plScramblingCode"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&equaliser, pJson["equaliser"], "qint32", "");
-    ::SWGSDRangel::setValue(&audio_description_mixed, pJson["audioDescriptionMixed"], "qint32", "");
-    ::SWGSDRangel::setValue(&clean_audio, pJson["cleanAudio"], "qint32", "");
-    ::SWGSDRangel::setValue(&subtitles_hard_of_hearing, pJson["subtitlesHardOfHearing"], "qint32", "");
-    ::SWGSDRangel::setValue(&record_retune, pJson["recordRetune"], "qint32", "");
-    ::SWGSDRangel::setValue(&record_follow_running, pJson["recordFollowRunning"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&freesat_region, pJson["freesatRegion"], "qint32", "");
-    
 }
 
 QString
@@ -428,6 +452,33 @@ SWGDVBDemodSettings::asJsonObject() {
     if(m_low_priority_isSet){
         obj->insert("lowPriority", QJsonValue(low_priority));
     }
+    if(m_symbol_rate_isSet){
+        obj->insert("symbolRate", QJsonValue(symbol_rate));
+    }
+    if(m_roll_off_isSet){
+        obj->insert("rollOff", QJsonValue(roll_off));
+    }
+    if(m_code_rate_isSet){
+        obj->insert("codeRate", QJsonValue(code_rate));
+    }
+    if(m_isi_isSet){
+        obj->insert("isi", QJsonValue(isi));
+    }
+    if(m_pl_scrambling_code_isSet){
+        obj->insert("plScramblingCode", QJsonValue(pl_scrambling_code));
+    }
+    if(m_equaliser_isSet){
+        obj->insert("equaliser", QJsonValue(equaliser));
+    }
+    if(m_freesat_region_isSet){
+        obj->insert("freesatRegion", QJsonValue(freesat_region));
+    }
+    if(m_record_retune_isSet){
+        obj->insert("recordRetune", QJsonValue(record_retune));
+    }
+    if(m_record_follow_running_isSet){
+        obj->insert("recordFollowRunning", QJsonValue(record_follow_running));
+    }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
     }
@@ -446,6 +497,9 @@ SWGDVBDemodSettings::asJsonObject() {
     if(m_deinterlace_isSet){
         obj->insert("deinterlace", QJsonValue(deinterlace));
     }
+    if(m_hbbtv_isSet){
+        obj->insert("hbbtv", QJsonValue(hbbtv));
+    }
     if(m_av_offset_isSet){
         obj->insert("avOffset", QJsonValue(av_offset));
     }
@@ -457,6 +511,15 @@ SWGDVBDemodSettings::asJsonObject() {
     }
     if(m_audio_description_isSet){
         obj->insert("audioDescription", QJsonValue(audio_description));
+    }
+    if(m_audio_description_mixed_isSet){
+        obj->insert("audioDescriptionMixed", QJsonValue(audio_description_mixed));
+    }
+    if(m_clean_audio_isSet){
+        obj->insert("cleanAudio", QJsonValue(clean_audio));
+    }
+    if(m_subtitles_hard_of_hearing_isSet){
+        obj->insert("subtitlesHardOfHearing", QJsonValue(subtitles_hard_of_hearing));
     }
     if(m_subtitles_isSet){
         obj->insert("subtitles", QJsonValue(subtitles));
@@ -525,48 +588,6 @@ SWGDVBDemodSettings::asJsonObject() {
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
-    if(m_symbol_rate_isSet){
-        obj->insert("symbolRate", QJsonValue(symbol_rate));
-    }
-
-    if(m_roll_off_isSet){
-        obj->insert("rollOff", QJsonValue(roll_off));
-    }
-
-    if(m_code_rate_isSet){
-        obj->insert("codeRate", QJsonValue(code_rate));
-    }
-
-    if(m_isi_isSet){
-        obj->insert("isi", QJsonValue(isi));
-    }
-
-    if(m_pl_scrambling_code_isSet){
-        obj->insert("plScramblingCode", QJsonValue(pl_scrambling_code));
-    }
-    if(m_equaliser_isSet){
-        obj->insert("equaliser", QJsonValue(equaliser));
-    }
-    if(m_audio_description_mixed_isSet){
-        obj->insert("audioDescriptionMixed", QJsonValue(audio_description_mixed));
-    }
-    if(m_clean_audio_isSet){
-        obj->insert("cleanAudio", QJsonValue(clean_audio));
-    }
-    if(m_subtitles_hard_of_hearing_isSet){
-        obj->insert("subtitlesHardOfHearing", QJsonValue(subtitles_hard_of_hearing));
-    }
-    if(m_record_retune_isSet){
-        obj->insert("recordRetune", QJsonValue(record_retune));
-    }
-    if(m_record_follow_running_isSet){
-        obj->insert("recordFollowRunning", QJsonValue(record_follow_running));
-    }
-
-    if(m_freesat_region_isSet){
-        obj->insert("freesatRegion", QJsonValue(freesat_region));
-    }
-
     return obj;
 }
 
@@ -618,6 +639,96 @@ void
 SWGDVBDemodSettings::setLowPriority(qint32 low_priority) {
     this->low_priority = low_priority;
     this->m_low_priority_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getSymbolRate() {
+    return symbol_rate;
+}
+void
+SWGDVBDemodSettings::setSymbolRate(qint32 symbol_rate) {
+    this->symbol_rate = symbol_rate;
+    this->m_symbol_rate_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getRollOff() {
+    return roll_off;
+}
+void
+SWGDVBDemodSettings::setRollOff(qint32 roll_off) {
+    this->roll_off = roll_off;
+    this->m_roll_off_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getCodeRate() {
+    return code_rate;
+}
+void
+SWGDVBDemodSettings::setCodeRate(qint32 code_rate) {
+    this->code_rate = code_rate;
+    this->m_code_rate_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getIsi() {
+    return isi;
+}
+void
+SWGDVBDemodSettings::setIsi(qint32 isi) {
+    this->isi = isi;
+    this->m_isi_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getPlScramblingCode() {
+    return pl_scrambling_code;
+}
+void
+SWGDVBDemodSettings::setPlScramblingCode(qint32 pl_scrambling_code) {
+    this->pl_scrambling_code = pl_scrambling_code;
+    this->m_pl_scrambling_code_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getEqualiser() {
+    return equaliser;
+}
+void
+SWGDVBDemodSettings::setEqualiser(qint32 equaliser) {
+    this->equaliser = equaliser;
+    this->m_equaliser_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getFreesatRegion() {
+    return freesat_region;
+}
+void
+SWGDVBDemodSettings::setFreesatRegion(qint32 freesat_region) {
+    this->freesat_region = freesat_region;
+    this->m_freesat_region_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getRecordRetune() {
+    return record_retune;
+}
+void
+SWGDVBDemodSettings::setRecordRetune(qint32 record_retune) {
+    this->record_retune = record_retune;
+    this->m_record_retune_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getRecordFollowRunning() {
+    return record_follow_running;
+}
+void
+SWGDVBDemodSettings::setRecordFollowRunning(qint32 record_follow_running) {
+    this->record_follow_running = record_follow_running;
+    this->m_record_follow_running_isSet = true;
 }
 
 qint32
@@ -681,6 +792,16 @@ SWGDVBDemodSettings::setDeinterlace(qint32 deinterlace) {
 }
 
 qint32
+SWGDVBDemodSettings::getHbbtv() {
+    return hbbtv;
+}
+void
+SWGDVBDemodSettings::setHbbtv(qint32 hbbtv) {
+    this->hbbtv = hbbtv;
+    this->m_hbbtv_isSet = true;
+}
+
+qint32
 SWGDVBDemodSettings::getAvOffset() {
     return av_offset;
 }
@@ -718,6 +839,36 @@ void
 SWGDVBDemodSettings::setAudioDescription(qint32 audio_description) {
     this->audio_description = audio_description;
     this->m_audio_description_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getAudioDescriptionMixed() {
+    return audio_description_mixed;
+}
+void
+SWGDVBDemodSettings::setAudioDescriptionMixed(qint32 audio_description_mixed) {
+    this->audio_description_mixed = audio_description_mixed;
+    this->m_audio_description_mixed_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getCleanAudio() {
+    return clean_audio;
+}
+void
+SWGDVBDemodSettings::setCleanAudio(qint32 clean_audio) {
+    this->clean_audio = clean_audio;
+    this->m_clean_audio_isSet = true;
+}
+
+qint32
+SWGDVBDemodSettings::getSubtitlesHardOfHearing() {
+    return subtitles_hard_of_hearing;
+}
+void
+SWGDVBDemodSettings::setSubtitlesHardOfHearing(qint32 subtitles_hard_of_hearing) {
+    this->subtitles_hard_of_hearing = subtitles_hard_of_hearing;
+    this->m_subtitles_hard_of_hearing_isSet = true;
 }
 
 qint32
@@ -941,126 +1092,6 @@ SWGDVBDemodSettings::setRollupState(SWGRollupState* rollup_state) {
 }
 
 
-qint32
-SWGDVBDemodSettings::getSymbolRate() {
-    return symbol_rate;
-}
-void
-SWGDVBDemodSettings::setSymbolRate(qint32 symbol_rate) {
-    this->symbol_rate = symbol_rate;
-    this->m_symbol_rate_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getRollOff() {
-    return roll_off;
-}
-void
-SWGDVBDemodSettings::setRollOff(qint32 roll_off) {
-    this->roll_off = roll_off;
-    this->m_roll_off_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getCodeRate() {
-    return code_rate;
-}
-void
-SWGDVBDemodSettings::setCodeRate(qint32 code_rate) {
-    this->code_rate = code_rate;
-    this->m_code_rate_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getIsi() {
-    return isi;
-}
-void
-SWGDVBDemodSettings::setIsi(qint32 isi) {
-    this->isi = isi;
-    this->m_isi_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getPlScramblingCode() {
-    return pl_scrambling_code;
-}
-void
-SWGDVBDemodSettings::setPlScramblingCode(qint32 pl_scrambling_code) {
-    this->pl_scrambling_code = pl_scrambling_code;
-    this->m_pl_scrambling_code_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getEqualiser() {
-    return equaliser;
-}
-void
-SWGDVBDemodSettings::setEqualiser(qint32 equaliser) {
-    this->equaliser = equaliser;
-    this->m_equaliser_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getAudioDescriptionMixed() {
-    return audio_description_mixed;
-}
-void
-SWGDVBDemodSettings::setAudioDescriptionMixed(qint32 audio_description_mixed) {
-    this->audio_description_mixed = audio_description_mixed;
-    this->m_audio_description_mixed_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getCleanAudio() {
-    return clean_audio;
-}
-void
-SWGDVBDemodSettings::setCleanAudio(qint32 clean_audio) {
-    this->clean_audio = clean_audio;
-    this->m_clean_audio_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getSubtitlesHardOfHearing() {
-    return subtitles_hard_of_hearing;
-}
-void
-SWGDVBDemodSettings::setSubtitlesHardOfHearing(qint32 subtitles_hard_of_hearing) {
-    this->subtitles_hard_of_hearing = subtitles_hard_of_hearing;
-    this->m_subtitles_hard_of_hearing_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getRecordRetune() {
-    return record_retune;
-}
-void
-SWGDVBDemodSettings::setRecordRetune(qint32 record_retune) {
-    this->record_retune = record_retune;
-    this->m_record_retune_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getRecordFollowRunning() {
-    return record_follow_running;
-}
-void
-SWGDVBDemodSettings::setRecordFollowRunning(qint32 record_follow_running) {
-    this->record_follow_running = record_follow_running;
-    this->m_record_follow_running_isSet = true;
-}
-
-qint32
-SWGDVBDemodSettings::getFreesatRegion() {
-    return freesat_region;
-}
-void
-SWGDVBDemodSettings::setFreesatRegion(qint32 freesat_region) {
-    this->freesat_region = freesat_region;
-    this->m_freesat_region_isSet = true;
-}
-
 bool
 SWGDVBDemodSettings::isSet(){
     bool isObjectUpdated = false;
@@ -1078,6 +1109,33 @@ SWGDVBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_low_priority_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_symbol_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_roll_off_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_code_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_isi_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pl_scrambling_code_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_equaliser_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_freesat_region_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_record_retune_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_record_follow_running_isSet){
             isObjectUpdated = true; break;
         }
         if(m_udp_enabled_isSet){
@@ -1098,6 +1156,9 @@ SWGDVBDemodSettings::isSet(){
         if(m_deinterlace_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_hbbtv_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_av_offset_isSet){
             isObjectUpdated = true; break;
         }
@@ -1108,6 +1169,15 @@ SWGDVBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_audio_description_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_description_mixed_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_clean_audio_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_subtitles_hard_of_hearing_isSet){
             isObjectUpdated = true; break;
         }
         if(m_subtitles_isSet){
@@ -1174,42 +1244,6 @@ SWGDVBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
-            isObjectUpdated = true; break;
-        }
-        if(m_symbol_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_roll_off_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_code_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_isi_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_pl_scrambling_code_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_equaliser_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_audio_description_mixed_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_clean_audio_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_subtitles_hard_of_hearing_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_record_retune_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_record_follow_running_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_freesat_region_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

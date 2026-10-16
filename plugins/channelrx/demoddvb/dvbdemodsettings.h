@@ -24,6 +24,8 @@
 #include <QString>
 #include <QStringList>
 
+#include "dtv/dtvguide.h"
+
 class Serializable;
 
 struct DVBDemodSettings
@@ -40,40 +42,9 @@ struct DVBDemodSettings
         StandardDVBS2 = 6
     };
 
-    //! A programme to record, from the programme guide
-    struct ScheduledRecording
-    {
-        int m_networkId = 0;
-        int m_serviceId = 0;
-        int m_eventId = 0;
-        qint64 m_start = 0;         //!< UTC, seconds since 1970. Updated if the guide changes
-        int m_duration = 0;         //!< Seconds
-        QString m_title;
-        QString m_serviceName;
-
-        qint64 end() const { return m_start + m_duration; }
-        bool operator==(const ScheduledRecording& other) const {
-            return (m_networkId == other.m_networkId) && (m_serviceId == other.m_serviceId) && (m_eventId == other.m_eventId)
-                && (m_start == other.m_start) && (m_duration == other.m_duration) && (m_title == other.m_title);
-        }
-    };
-
-    //! A series to record, from the programme guide: each programme of a service with its series CRID, once (a
-    //! repeat, by its programme CRID, isn't recorded again)
-    struct SeriesRecording
-    {
-        int m_networkId = 0;
-        int m_serviceId = 0;
-        QString m_seriesCrid;       //!< Lower case, as the guide has it
-        QString m_title;            //!< Of the programme it was set from
-        QString m_serviceName;
-        QStringList m_scheduled;    //!< Programme CRIDs (or "event:" ids, without one) scheduled already, the latest last
-
-        bool operator==(const SeriesRecording& other) const {
-            return (m_networkId == other.m_networkId) && (m_serviceId == other.m_serviceId) && (m_seriesCrid == other.m_seriesCrid)
-                && (m_title == other.m_title) && (m_scheduled == other.m_scheduled);
-        }
-    };
+    //! A programme to record, from the programme guide, and a series
+    typedef DTVScheduledRecording ScheduledRecording;
+    typedef DTVSeriesRecording SeriesRecording;
 
     qint64 m_inputFrequencyOffset;
     int m_bandwidth;                //!< Channel bandwidth in Hz: 8, 7 or 6 MHz
@@ -96,6 +67,7 @@ struct DVBDemodSettings
     bool m_videoEnabled;            //!< Decode and display the selected service
     int m_serviceId;                //!< MPEG program number of the service to play, 0 for the first with video
     bool m_deinterlace;
+    bool m_hbbtv;                   //!< Run the service's HbbTV applications (red button), over the video
     bool m_hardwareDecoding;        //!< Decode video with the GPU, where possible
     QString m_audioLanguage;        //!< ISO 639-2 code of the audio to play, or empty for the first
     bool m_audioDescription;        //!< Play audio description, where a service has it

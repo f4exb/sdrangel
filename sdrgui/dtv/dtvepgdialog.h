@@ -16,17 +16,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODEPGDIALOG_H
-#define INCLUDE_DVBDEMODEPGDIALOG_H
+#ifndef INCLUDE_DTVEPGDIALOG_H
+#define INCLUDE_DTVEPGDIALOG_H
 
 #include <vector>
 
 #include <QDialog>
 #include <QTimer>
 
-#include "dvbdemodepg.h"
+#include "dtv/dtvguide.h"
+#include "export.h"
 
-class DVBDemod;
 class QCheckBox;
 class QToolButton;
 class QComboBox;
@@ -35,18 +35,19 @@ class QListWidget;
 class QTabWidget;
 class QTableWidget;
 class QTextBrowser;
-class DVBDemodEPGGrid;
+class DTVEPGGrid;
 
 // The programme guide: the services of the network, by channel number, with either the schedule of the one selected a
 // day at a time, or a grid of every service's programmes by time. Services in other transport streams (multiplexes)
 // are shown in italics, and played by retuning to them, where the NIT gives their frequency, else greyed.
 // Double-clicking a service, or one of its programmes, plays it. Right-click a programme to record it
-class DVBDemodEPGDialog : public QDialog
+class SDRGUI_API DTVEPGDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    DVBDemodEPGDialog(DVBDemod *demod, QWidget *parent = nullptr);
+    //! schedule: null if programmes can't be recorded
+    DTVEPGDialog(DTVGuide *guide, DTVRecordingSchedule *schedule, QWidget *parent = nullptr);
     //! Select the service in the list, as when it's playing
     void setCurrentService(int serviceId);
 
@@ -72,20 +73,20 @@ private:
     void showDay();
     //! Copies: what they're from may be rebuilt meanwhile
     void play(ListedService service);
-    void showEventMenu(ListedService service, DVBDemodEPG::Event event, const QPoint& globalPosition);
+    void showEventMenu(ListedService service, DTVGuide::Event event, const QPoint& globalPosition);
     void showDescription();
     qint64 now() const;
-    QString describe(const DVBDemodEPG::Event& event, int networkId) const;
+    QString describe(const DTVGuide::Event& event, int networkId) const;
     //! The service an event is also on (as in HD), if it can be played. False if none
-    bool linkedService(const DVBDemodEPG::Event& event, DVBDemodEPG::Service& service) const;
+    bool linkedService(const DTVGuide::Event& event, DTVGuide::Service& service) const;
     QString scheduleSignature() const;
     const ListedService *currentService() const;
     bool gridService(int row, ListedService& service) const;
     void eventMenu(const QPoint& position);
     void scheduledMenu();
 
-    DVBDemod *m_demod;
-    DVBDemodEPG *m_epg;
+    DTVRecordingSchedule *m_schedule;
+    DTVGuide *m_epg;
     QToolButton *m_scheduled;
     QListWidget *m_services;
     QComboBox *m_day;
@@ -93,14 +94,14 @@ private:
     QLabel *m_status;
     QTableWidget *m_events;
     QTabWidget *m_views;
-    DVBDemodEPGGrid *m_grid;
-    std::vector<DVBDemodEPG::Service> m_gridServices;   //!< Rows of the grid
+    DTVEPGGrid *m_grid;
+    std::vector<DTVGuide::Service> m_gridServices;   //!< Rows of the grid
     QString m_gridKey;                                  //!< The grid's rows and start
     std::vector<quint64> m_gridServiceRevisions;        //!< Their services' revisions
     QTextBrowser *m_description;
     QTimer m_timer;
     std::vector<ListedService> m_listed;
-    std::vector<DVBDemodEPG::Event> m_shown;    //!< Events in the table, in its order
+    std::vector<DTVGuide::Event> m_shown;    //!< Events in the table, in its order
     int m_currentService;                       //!< Service id to select, when listed
     // What the list and grid were built from: when the guide, the services shown, the time window and the schedule
     // are as they were, nothing is rebuilt, as making the keys below goes through every programme
@@ -114,4 +115,4 @@ private:
     QString m_eventsKey;                        //!< which would lose the scroll position
 };
 
-#endif // INCLUDE_DVBDEMODEPGDIALOG_H
+#endif // INCLUDE_DTVEPGDIALOG_H

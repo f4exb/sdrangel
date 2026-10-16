@@ -21,9 +21,9 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "dvbdemodrecorder.h"
+#include "dtv/dtvrecorder.h"
 
-DVBDemodRecorder::DVBDemodRecorder() :
+DTVRecorder::DTVRecorder() :
     m_mode(Multiplex),
     m_serviceId(0),
     m_started(false),
@@ -41,14 +41,15 @@ DVBDemodRecorder::DVBDemodRecorder() :
     m_dropped(0),
     m_running(false)
 {
+    setSystemPids({0x0011, 0x0014});    // DVB's SDT, and TDT and TOT
 }
 
-DVBDemodRecorder::~DVBDemodRecorder()
+DTVRecorder::~DTVRecorder()
 {
     stop();
 }
 
-bool DVBDemodRecorder::start(const QString& fileName, Mode mode, int serviceId, QString& error)
+bool DTVRecorder::start(const QString& fileName, Mode mode, int serviceId, QString& error)
 {
     stop();
     QDir().mkpath(QFileInfo(fileName).absolutePath());
@@ -84,11 +85,11 @@ bool DVBDemodRecorder::start(const QString& fileName, Mode mode, int serviceId, 
     m_error.clear();
     m_timer.start();
     m_running = true;
-    m_thread = std::thread(&DVBDemodRecorder::writer, this);
+    m_thread = std::thread(&DTVRecorder::writer, this);
     return true;
 }
 
-void DVBDemodRecorder::stop()
+void DTVRecorder::stop()
 {
     if (!m_running) {
         return;
@@ -113,7 +114,7 @@ void DVBDemodRecorder::stop()
     m_running = false;
 }
 
-DVBDemodRecorder::Status DVBDemodRecorder::getStatus() const
+DTVRecorder::Status DTVRecorder::getStatus() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     Status status;
@@ -127,7 +128,7 @@ DVBDemodRecorder::Status DVBDemodRecorder::getStatus() const
 }
 
 // Writes queued blocks until stopped, then what's left
-void DVBDemodRecorder::writer()
+void DTVRecorder::writer()
 {
     while (true)
     {
@@ -159,7 +160,7 @@ void DVBDemodRecorder::writer()
 }
 
 // A packet to record, queued a block at a time
-void DVBDemodRecorder::write(const uint8_t *packet)
+void DTVRecorder::write(const uint8_t *packet)
 {
     m_block.insert(m_block.end(), packet, packet + 188);
 
@@ -186,7 +187,7 @@ void DVBDemodRecorder::write(const uint8_t *packet)
     m_available.notify_one();
 }
 
-void DVBDemodRecorder::feed(const uint8_t *p)
+void DTVRecorder::feed(const uint8_t *p)
 {
     if (!m_running || (p[0] != 0x47)) {
         return;
@@ -229,7 +230,7 @@ void DVBDemodRecorder::feed(const uint8_t *p)
         return;
     }
 
-    if (m_started && (m_pids.test(pid) || (pid == m_sdtPid) || (pid == m_timePid))) {
+    if (m_started && (m_pids.test(pid) || m_systemPids.test(pid))) {
         write(p);
     }
 }
@@ -237,7 +238,16 @@ void DVBDemodRecorder::feed(const uint8_t *p)
 // program_association_section (ISO/IEC 13818-1 2.4.4.3): the service's PMT PID. In another transport stream (the
 // device retuned while recording), the service's PMT PID and version can be the same as before but its streams not:
 // its state's forgotten, so its PMT there is read, and if it's not there, nothing more of it is recorded
-void DVBDemodRecorder::pat(const uint8_t *s, int length)
+void DTVRecorder::setSystemPids(const std::vector<int>& pids)
+{
+    m_systemPids.reset();
+
+    for (int pid : pids) {
+        m_systemPids.set(pid & 0x1FFF);
+    }
+}
+
+void DTVRecorder::pat(const uint8_t *s, int length)
 {
     // With section_syntax_indicator set, so its CRC was checked; current, not one to apply next
     if ((s[0] != 0x00) || !(s[1] & 0x80) || !(s[5] & 0x01) || (length < 12)) {
@@ -302,7 +312,7 @@ void DVBDemodRecorder::pat(const uint8_t *s, int length)
     }
 }
 
-void DVBDemodRecorder::forgetService()
+void DTVRecorder::forgetService()
 {
     m_pids.reset();
     m_pmtPid = -1;
@@ -312,7 +322,7 @@ void DVBDemodRecorder::forgetService()
 }
 
 // TS_program_map_section (2.4.4.8): the PCR PID and elementary stream PIDs
-void DVBDemodRecorder::pmt(const uint8_t *s, int length)
+void DTVRecorder::pmt(const uint8_t *s, int length)
 {
     // Current, not one to apply next: its streams aren't sent yet
     if ((s[0] != 0x02) || !(s[1] & 0x80) || !(s[5] & 0x01) || (length < 16) || ((((s[3] << 8) | s[4])) != m_serviceId)) {
@@ -353,7 +363,7 @@ void DVBDemodRecorder::pmt(const uint8_t *s, int length)
 }
 
 // A PAT with just the service (and its CRC), in one packet
-void DVBDemodRecorder::writePAT()
+void DTVRecorder::writePAT()
 {
     uint8_t packet[188];
     std::fill(packet, packet + 188, 0xFF);
@@ -378,7 +388,7 @@ void DVBDemodRecorder::writePAT()
     s[9] = m_serviceId & 0xFF;
     s[10] = 0xE0 | ((m_pmtPid >> 8) & 0x1F);
     s[11] = m_pmtPid & 0xFF;
-    const uint32_t crc = dvbSectionCRC(s, 12);
+    const uint32_t crc = dtvSectionCRC(s, 12);
     s[12] = (crc >> 24) & 0xFF;
     s[13] = (crc >> 16) & 0xFF;
     s[14] = (crc >> 8) & 0xFF;

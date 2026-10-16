@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DVBDEMODRECORDER_H
-#define INCLUDE_DVBDEMODRECORDER_H
+#ifndef INCLUDE_DTVRECORDER_H
+#define INCLUDE_DTVRECORDER_H
 
 #include <atomic>
 #include <bitset>
@@ -32,14 +32,16 @@
 #include <QFile>
 #include <QString>
 
-#include "dvbdemodsections.h"
+#include "export.h"
+#include "dtv/dtvsections.h"
 
 // Records the transport stream to a .ts file: the whole multiplex, or one service. A service's recording has its
-// PMT, elementary streams (video, every audio track, subtitles, teletext, but not interactive data) and PCR, the SDT and time tables, and a
+// PMT, elementary streams (video, every audio track, subtitles, teletext, but not interactive data) and PCR, the system's
+// tables (setSystemPids(): DVB's SDT and time tables by default), and a
 // PAT rewritten to list only it, so players don't offer services that aren't there. It starts at a PAT (once the
 // service's PMT is known), so the file can be played from its start. Fed with packets in the demodulator's thread;
 // the file is written in a thread of its own, so a slow disk never holds up demodulation (data is dropped instead)
-class DVBDemodRecorder
+class SDRBASE_API DTVRecorder
 {
 public:
     enum Mode { Multiplex = 0, Service = 1 };
@@ -54,9 +56,12 @@ public:
         QString m_error;
     };
 
-    DVBDemodRecorder();
-    ~DVBDemodRecorder();    //!< Stops, if recording
+    DTVRecorder();
+    ~DTVRecorder();    //!< Stops, if recording
 
+    //! The PIDs of the system's tables recorded with a service: DVB's SDT and TDT (0x11, 0x14) unless set (ATSC's
+    //! PSIP base PID, 0x1FFB). Before start()
+    void setSystemPids(const std::vector<int>& pids);
     //! False with the error if the file can't be created
     bool start(const QString& fileName, Mode mode, int serviceId, QString& error);
     void stop();
@@ -65,8 +70,6 @@ public:
 
 private:
     static constexpr int m_patPid = 0x0000;
-    static constexpr int m_sdtPid = 0x0011;
-    static constexpr int m_timePid = 0x0014;
     static constexpr size_t m_blockSize = 188 * 512;         // Packets are queued for the writer this many bytes at a time
     static constexpr size_t m_maxQueued = 64 * 1024 * 1024;  // Beyond which data is dropped, rather than wait for the disk
 
@@ -80,12 +83,13 @@ private:
     Mode m_mode;
     int m_serviceId;
     bool m_started;             //!< Writing: from the first PAT, once the PMT is known
-    DVBDemodSectionAssembler m_patSections;
-    DVBDemodSectionAssembler m_pmtSections;
+    DTVSectionAssembler m_patSections;
+    DTVSectionAssembler m_pmtSections;
     int m_transportStreamId;
     int m_pmtPid;               //!< Of the service, -1 until known
     int m_pmtVersion;
     std::bitset<8192> m_pids;   //!< Recorded
+    std::bitset<8192> m_systemPids; //!< Also recorded, with a service
     int m_patContinuity;
     int m_patVersion;           //!< Of the PAT written
     // The PAT received's current version, as its sections come: once all have, whether the service is in it
@@ -113,4 +117,4 @@ private:
     bool m_running;
 };
 
-#endif // INCLUDE_DVBDEMODRECORDER_H
+#endif // INCLUDE_DTVRECORDER_H

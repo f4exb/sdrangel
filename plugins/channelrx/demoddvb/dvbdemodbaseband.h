@@ -112,7 +112,7 @@ public:
     void reapplyRateSearchBand();
     int getChannelSampleRate() const;
     void getStatus(DVBDemodSink::Status& status) { m_sink.getStatus(status); }
-    DVBDemodTSFifo *getTSFifo() { return m_sink.getTSFifo(); }
+    DTVTSFifo *getTSFifo() { return m_sink.getTSFifo(); }
     AudioFifo *getAudioFifo() { return m_sink.getAudioFifo(); }
     bool isRunning() const { return m_running; }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
@@ -120,7 +120,8 @@ public:
     //! The audio output's sample rate, and how long it buffers audio
     void getAudioOutput(int& sampleRate, double& latency) const;
     DVBDemodEPG *getEPG() { return m_sink.getEPG(); }
-    int startRecording(const QString& fileName, DVBDemodRecorder::Mode mode, int serviceId, QString& error) {
+    DTVApps *getApps() { return m_sink.getApps(); }
+    int startRecording(const QString& fileName, DTVRecorder::Mode mode, int serviceId, QString& error) {
         return m_sink.startRecording(fileName, mode, serviceId, error);
     }
     void stopRecording(int id) { m_sink.stopRecording(id); }

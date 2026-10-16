@@ -62,6 +62,11 @@
 #include "gui/buttonswitch.h"
 #include "gui/glvideowidget.h"
 #include "dvbdemodgui.h"
+#ifdef DVBDEMOD_HBBTV
+#include <QJsonObject>
+#include "dtv/dtvstreamplayback.h"
+#include "dvbdemodhbbtv.h"
+#endif
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -356,9 +361,14 @@ void DVBDemodGUI::on_videoEnabled_toggled(bool checked)
     m_settings.m_videoEnabled = checked;
     applySetting("videoEnabled");
 
-    if (checked) {
+    if (checked)
+    {
         startPlayer();
-    } else {
+    }
+    else
+    {
+        m_streamPlaying = false;    // An application's media, and the broadcast, stopped
+        stopStreamPlayback();
         stopPlayer();
     }
 }
@@ -534,7 +544,7 @@ void DVBDemodGUI::displayRecordings()
 
     for (const auto& recording : recordings)
     {
-        const DVBDemodRecorder::Status& s = recording.m_status;
+        const DTVRecorder::Status& s = recording.m_status;
         bytes += s.m_bytes;
         seconds = std::max(seconds, s.m_seconds);
         QString line = QString("%1 (%2 MB)").arg(s.m_fileName).arg(s.m_bytes / 1e6, 0, 'f', 1);
@@ -678,9 +688,9 @@ void DVBDemodGUI::on_epg_clicked()
 {
     if (!m_epgDialog)
     {
-        m_epgDialog = new DVBDemodEPGDialog(m_dvbDemod, this);
+        m_epgDialog = new DTVEPGDialog(m_dvbDemod->getEPG(), m_dvbDemod, this);
         m_epgDialog->setAttribute(Qt::WA_DeleteOnClose);
-        connect(m_epgDialog, &DVBDemodEPGDialog::serviceSelected, this, &DVBDemodGUI::epgServiceSelected);
+        connect(m_epgDialog, &DTVEPGDialog::serviceSelected, this, &DVBDemodGUI::epgServiceSelected);
     }
 
     m_epgDialog->setCurrentService(m_playingService != 0 ? m_playingService : m_settings.m_serviceId);
@@ -689,10 +699,384 @@ void DVBDemodGUI::on_epg_clicked()
     m_epgDialog->activateWindow();
 }
 
+void DVBDemodGUI::on_apps_clicked()
+{
+    if (!m_appsDialog)
+    {
+        m_appsDialog = new DTVAppsDialog(m_dvbDemod->getApps(), this);
+        m_appsDialog->setAttribute(Qt::WA_DeleteOnClose);
+    }
+
+    updateAppsDialog();
+    m_appsDialog->show();
+    m_appsDialog->raise();
+    m_appsDialog->activateWindow();
+}
+
+// Whether the service's HbbTV applications are run (over the video)
+void DVBDemodGUI::appsMenu(const QPoint& position)
+{
+    QMenu menu(this);
+    menu.setToolTipsVisible(true);
+    QAction *run = menu.addAction("Run HbbTV applications (red button)");
+    run->setCheckable(true);
+    run->setChecked(m_settings.m_hbbtv);
+    run->setToolTip("Run the AUTOSTART application of the service played, and those it starts (as when the red button's pressed): from its "
+        "carousels or the internet. The coloured buttons are R, G, Y and B (or F1 to F4), and Back is Backspace");
+#ifndef DVBDEMOD_HBBTV
+    run->setEnabled(false);
+    run->setToolTip("Not built: Qt WebEngine is needed");
+#endif
+
+    QAction *clear = menu.addAction("Forget HbbTV sign-ins (cookies and cache)");
+    clear->setToolTip("Applications' cookies (as iPlayer's sign-in) and cache are kept from one run to the next: forget them");
+#ifndef DVBDEMOD_HBBTV
+    clear->setEnabled(false);
+#endif
+    QAction *chosen = menu.exec(ui->apps->mapToGlobal(position));
+
+    if (chosen == run)
+    {
+        m_settings.m_hbbtv = run->isChecked();
+        applySetting("hbbtv");
+        updateHbbTV();
+    }
+#ifdef DVBDEMOD_HBBTV
+    else if (chosen == clear)
+    {
+        DVBDemodHbbTV::clearData();
+    }
+#endif
+}
+
+void DVBDemodGUI::updateHbbTV()
+{
+#ifdef DVBDEMOD_HBBTV
+    const bool run = m_settings.m_hbbtv && (m_player || m_streamPlaying);
+
+    if (run && !m_hbbtv)
+    {
+        m_hbbtv = new DVBDemodHbbTV(m_dvbDemod->getApps(), this);
+        m_hbbtv->createView(m_videoScreen.load());
+        connect(m_hbbtv, &DVBDemodHbbTV::videoAreaChanged, this, &DVBDemodGUI::hbbtvVideoArea);
+        connect(m_hbbtv, &DVBDemodHbbTV::channelChangeRequested, this, &DVBDemodGUI::hbbtvChannelChange);
+        connect(m_hbbtv, &DVBDemodHbbTV::mediaRequest, this, &DVBDemodGUI::hbbtvMedia);
+        connect(m_hbbtv, &DVBDemodHbbTV::channelStepRequested, this, [this](int direction) {
+            QKeyEvent key(QEvent::KeyPress, direction > 0 ? Qt::Key_ChannelUp : Qt::Key_ChannelDown, Qt::NoModifier);
+            m_guideOverlay->handleKey(&key);
+        });
+        connect(m_hbbtv, &DVBDemodHbbTV::log, this, [](const QString& message) {
+            qDebug("DVBDemodGUI: HbbTV: %s", qPrintable(message));
+        });
+        qDebug("DVBDemodGUI: HbbTV: user agent %s", qPrintable(m_hbbtv->getUserAgent()));
+        m_hbbtvServiceState.clear();
+        updateHbbTVGeometry();
+        updateHbbTVService();
+    }
+    else if (!run && m_hbbtv)
+    {
+        delete m_hbbtv;
+        m_hbbtv = nullptr;
+        hbbtvVideoArea(QRectF());
+        m_hbbtvChannelRequest = 0;
+        stopStreamPlayback();
+    }
+#endif
+}
+
+// The service played, the multiplex's others, and what's on: given to the application when they change
+void DVBDemodGUI::updateHbbTVService()
+{
+#ifdef DVBDEMOD_HBBTV
+    if (!m_hbbtv) {
+        return;
+    }
+
+    const int serviceId = m_playingService != 0 ? m_playingService : m_dvbDemod->currentServiceId();
+    DVBDemodHbbTV::Channel channel;
+    std::vector<DVBDemodHbbTV::Channel> channels;
+    std::vector<DVBDemodHbbTV::Programme> programmes;
+    QString state = QString::number(serviceId);
+
+    for (const DVBDemodEPG::Service& service : m_dvbDemod->getEPG()->getServices())
+    {
+        if (!service.m_actual) {
+            continue;
+        }
+
+        DVBDemodHbbTV::Channel c;
+        c.m_networkId = service.m_networkId;
+        c.m_transportStreamId = service.m_transportStreamId;
+        c.m_serviceId = service.m_serviceId;
+        c.m_lcn = service.m_channel;
+        c.m_name = service.m_name;
+        c.m_radio = (service.m_type == 0x02) || (service.m_type == 0x07) || (service.m_type == 0x0A);
+        c.m_hd = (service.m_type == 0x11) || ((service.m_type >= 0x19) && (service.m_type <= 0x1F));
+        channels.push_back(c);
+        state += QString(";%1.%2.%3:%4:%5").arg(c.m_networkId).arg(c.m_transportStreamId).arg(c.m_serviceId).arg(c.m_lcn).arg(c.m_name);
+
+        if (c.m_serviceId == serviceId) {
+            channel = c;
+        }
+    }
+
+    // Before the guide has the service, it's known by its id, of the multiplex received
+    if ((channel.m_serviceId == 0) && (serviceId != 0)) {
+        channel.m_serviceId = serviceId;
+    }
+
+    DVBDemodEPG::Event now, next;
+
+    if ((serviceId != 0) && m_dvbDemod->getEPG()->getNowNext(serviceId, now, next))
+    {
+        for (const DVBDemodEPG::Event& event : {now, next})
+        {
+            if (event.isValid())
+            {
+                programmes.push_back(DVBDemodHbbTV::Programme{event.m_eventId, event.m_title, event.m_text, event.m_start, event.m_duration});
+                state += QString(";%1").arg(event.m_eventId);
+            }
+        }
+    }
+
+    if (state == m_hbbtvServiceState) {
+        return;
+    }
+
+    m_hbbtvServiceState = state;
+    const int standard = m_settings.m_standard;
+    m_hbbtv->setIdType(standard == DVBDemodSettings::StandardDVBS ? 11 : standard == DVBDemodSettings::StandardDVBS2 ? 15 : standard == DVBDemodSettings::StandardAutoSatellite ? 15
+        : (standard == DVBDemodSettings::StandardDVBT2) || (standard == DVBDemodSettings::StandardDVBT2Lite) ? 16 : 12);
+    m_hbbtv->setService(channel, channels, programmes);
+#endif
+}
+
+// Applications are laid out for a 16:9 page, of 1280 by 720 pixels: the largest that fits on the screen, centred, as
+// the picture is
+QRect DVBDemodGUI::hbbtvPageRect(const QWidget *screen) const
+{
+    const int width = screen->width();
+    const int height = screen->height();
+    int w = width, h = (width * 9) / 16;
+
+    if (h > height)
+    {
+        h = height;
+        w = (height * 16) / 9;
+    }
+
+    return QRect((width - w) / 2, (height - h) / 2, w, h);
+}
+
+void DVBDemodGUI::updateHbbTVGeometry()
+{
+#ifdef DVBDEMOD_HBBTV
+    if (!m_hbbtv) {
+        return;
+    }
+
+    GLVideoWidget *screen = m_videoScreen.load();
+    m_hbbtv->setViewParent(screen);
+    m_hbbtv->setViewGeometry(hbbtvPageRect(screen));
+    hbbtvVideoArea(m_hbbtvVideoArea);
+#endif
+}
+
+// The video in the application's window: its area of the page, as an area of the screen
+void DVBDemodGUI::hbbtvVideoArea(const QRectF& area)
+{
+    m_hbbtvVideoArea = area;
+    GLVideoWidget *screen = m_videoScreen.load();
+    GLVideoWidget *other = screen == ui->screenTV ? m_fullScreenTV : ui->screenTV;
+
+    if (other) {
+        other->setVideoArea(QRectF());
+    }
+
+    if (area.isNull() || (screen->width() <= 0) || (screen->height() <= 0))
+    {
+        screen->setVideoArea(QRectF());
+        return;
+    }
+
+    const QRect page = hbbtvPageRect(screen);
+    screen->setVideoArea(QRectF((page.x() + area.x() * page.width()) / screen->width(), (page.y() + area.y() * page.height()) / screen->height(),
+        area.width() * page.width() / screen->width(), area.height() * page.height() / screen->height()));
+}
+
+// The application's video/broadcast setChannel(): a service of this multiplex, or another the guide knows of
+void DVBDemodGUI::hbbtvChannelChange(int networkId, int transportStreamId, int serviceId)
+{
+#ifdef DVBDEMOD_HBBTV
+    (void) transportStreamId;
+
+    if (serviceId == m_playingService)
+    {
+        m_hbbtv->channelChangeResult(true);
+        return;
+    }
+
+    m_hbbtvChannelRequest = serviceId;
+    selectService(networkId, serviceId, this, [this](const QString& error) {
+        qDebug("DVBDemodGUI::hbbtvChannelChange: %s", qPrintable(error));
+        m_hbbtvChannelRequest = 0;
+
+        if (m_hbbtv) {
+            m_hbbtv->channelChangeResult(false);
+        }
+    });
+#else
+    (void) networkId;
+    (void) transportStreamId;
+    (void) serviceId;
+#endif
+}
+
+// The red button: given to the application, or the service's started again for it. The video gets the keys after
+void DVBDemodGUI::hbbtvRed()
+{
+#ifdef DVBDEMOD_HBBTV
+    if (m_hbbtv)
+    {
+        m_hbbtv->pressRed();
+        m_hbbtv->takeFocus();
+    }
+#endif
+}
+
+// Red buttons, on the ribbon, guide and here, while the service played has an HbbTV application to run
+void DVBDemodGUI::displayRedButton()
+{
+    bool shown = false;
+#ifdef DVBDEMOD_HBBTV
+    shown = m_hbbtv && m_hbbtv->hasAutostartApp();
+#endif
+    m_guideOverlay->setRedButton(shown);
+    ui->redButton->setVisible(shown);
+}
+
+// The application's media, as iPlayer's: played by a player of its own, in place of the broadcast's (stopped while
+// it plays, and started again after), in the application's video window
+void DVBDemodGUI::hbbtvMedia(const QString& command, int id, const QString& url, const QMap<QString, QString>& options, double position)
+{
+#ifdef DVBDEMOD_HBBTV
+    if (command == "load")
+    {
+        if (!m_streamPlayback)
+        {
+            m_streamPlayback = new DTVStreamPlayback(m_dvbDemod->getAudioFifo(),
+                [this](GLVideoFramePtr frame) { m_videoScreen.load()->setFrame(frame); },
+                [this](int type) { return m_videoScreen.load()->canShow((GLVideoFrame::Type) type); },
+                [this](DTVVideoPlayer *player) {
+                    player->setAudioMute(m_settings.m_audioMute);
+                    player->setAudioVolume(m_settings.m_audioVolume);
+                    player->setDeinterlace(m_settings.m_deinterlace);
+                    player->setHardwareDecoding(m_settings.m_hardwareDecoding);
+                    player->setAVOffset(m_settings.m_avOffset);
+                },
+                this);
+            connect(m_streamPlayback, &DTVStreamPlayback::metadata, this, [this](double duration, int width, int height) {
+                if (m_hbbtv)
+                {
+                    QJsonObject data;
+                    data.insert("duration", std::isfinite(duration) ? QJsonValue(duration) : QJsonValue());
+                    data.insert("width", width);
+                    data.insert("height", height);
+                    m_hbbtv->mediaEvent(m_mediaId, "metadata", data);
+                }
+            });
+            connect(m_streamPlayback, &DTVStreamPlayback::playing, this, [this]() {
+                if (m_hbbtv) {
+                    m_hbbtv->mediaEvent(m_mediaId, "playing");
+                }
+            });
+            connect(m_streamPlayback, &DTVStreamPlayback::ended, this, [this]() {
+                if (m_hbbtv) {
+                    m_hbbtv->mediaEvent(m_mediaId, "ended");
+                }
+            });
+            connect(m_streamPlayback, &DTVStreamPlayback::error, this, [this](const QString& message) {
+                qDebug("DVBDemodGUI: HbbTV: media error: %s", qPrintable(message));
+
+                if (m_hbbtv)
+                {
+                    QJsonObject data;
+                    data.insert("code", 2);     // MEDIA_ERR_NETWORK
+                    data.insert("message", message);
+                    m_hbbtv->mediaEvent(m_mediaId, "error", data);
+                }
+            });
+        }
+
+        m_mediaId = id;
+
+        if (!m_streamPlaying)
+        {
+            m_streamPlaying = true;
+            stopPlayer();
+            showVideoMessage("");
+        }
+
+        m_streamPlayback->load(url, options);
+    }
+    else if (m_streamPlayback && (id == m_mediaId))
+    {
+        if (command == "play") {
+            m_streamPlayback->play();
+        } else if (command == "pause") {
+            m_streamPlayback->pause();
+        } else if (command == "seek") {
+            m_streamPlayback->seek(position);
+        } else if (command == "stop") {
+            stopStreamPlayback();
+        }
+    }
+#else
+    (void) command;
+    (void) id;
+    (void) url;
+    (void) options;
+    (void) position;
+#endif
+}
+
+void DVBDemodGUI::stopStreamPlayback()
+{
+#ifdef DVBDEMOD_HBBTV
+    if (m_streamPlayback) {
+        m_streamPlayback->stop();
+    }
+
+    m_mediaId = 0;
+
+    if (m_streamPlaying)
+    {
+        m_streamPlaying = false;
+        m_videoScreen.load()->clear();
+
+        if (m_settings.m_videoEnabled) {
+            startPlayer();
+        }
+    }
+#endif
+}
+
+// The applications dialog shows the service whose carousels are received: the one played
+void DVBDemodGUI::updateAppsDialog()
+{
+    if (!m_appsDialog) {
+        return;
+    }
+
+    const int serviceId = m_playingService != 0 ? m_playingService : m_dvbDemod->currentServiceId();
+    const int index = ui->service->findData(serviceId);
+    m_appsDialog->setService(serviceId, (serviceId != 0) && (index >= 0) ? ui->service->itemText(index) : QString());
+}
+
 // Play a service chosen in the programme guide, retuning to its multiplex if it's on another
 void DVBDemodGUI::epgServiceSelected(int networkId, int serviceId)
 {
-    QPointer<DVBDemodEPGDialog> dialog = m_epgDialog;
+    QPointer<DTVEPGDialog> dialog = m_epgDialog;
 
     selectService(networkId, serviceId, m_epgDialog, [this, dialog](const QString& error) {
         QMessageBox::warning(dialog ? (QWidget *) dialog : (QWidget *) this, "Programme guide", QString("Can't play the service: %1").arg(error));
@@ -1047,7 +1431,7 @@ QString DVBDemodGUI::languageName(const QString& code)
 // language and kind (main or clean audio, audio description and its mix, normal or hard of hearing subtitles) and
 // whether to show subtitles, which the player applies to later services too (the language alone where the kind's not
 // there)
-void DVBDemodGUI::tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks)
+void DVBDemodGUI::tracksChanged(const DTVVideoPlayer::Tracks& tracks)
 {
     if (!fromPlayer()) {
         return;
@@ -1062,7 +1446,7 @@ void DVBDemodGUI::tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks)
 
     for (const auto& track : tracks.m_audio)
     {
-        if ((track.m_pid == tracks.m_audioPid) && (track.m_type == DVBDemodVideoPlayer::Track::AudioDescriptionMixed)) {
+        if ((track.m_pid == tracks.m_audioPid) && (track.m_type == DTVVideoPlayer::Track::AudioDescriptionMixed)) {
             playingDescription = true;
         }
     }
@@ -1075,15 +1459,15 @@ void DVBDemodGUI::tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks)
 
         switch (track.m_type)
         {
-        case DVBDemodVideoPlayer::Track::AudioDescription:
+        case DTVVideoPlayer::Track::AudioDescription:
             text = name + " + audio description";
             description = true;
             break;
-        case DVBDemodVideoPlayer::Track::AudioDescriptionMixed:
+        case DTVVideoPlayer::Track::AudioDescriptionMixed:
             text = name + " (audio description)";
             description = true;
             break;
-        case DVBDemodVideoPlayer::Track::CleanAudio:
+        case DTVVideoPlayer::Track::CleanAudio:
             text = name + " (clean audio)";
             break;
         default:
@@ -1116,7 +1500,7 @@ void DVBDemodGUI::tracksChanged(const DVBDemodVideoPlayer::Tracks& tracks)
     {
         QString text = "Subtitles: " + languageName(track.m_language);
 
-        if (track.m_type == DVBDemodVideoPlayer::Track::SubtitlesHardOfHearing) {
+        if (track.m_type == DTVVideoPlayer::Track::SubtitlesHardOfHearing) {
             text += " (hard of hearing)";
         }
 
@@ -1149,7 +1533,7 @@ void DVBDemodGUI::setTrackPreferences()
 {
     if (m_player)
     {
-        typedef DVBDemodVideoPlayer::Track Track;
+        typedef DTVVideoPlayer::Track Track;
         const Track::Type audioType = m_settings.m_audioDescription
             ? (m_settings.m_audioDescriptionMixed ? Track::AudioDescriptionMixed : Track::AudioDescription)
             : m_settings.m_cleanAudio ? Track::CleanAudio : Track::Main;
@@ -1165,7 +1549,7 @@ void DVBDemodGUI::on_audioTrack_currentIndexChanged(int index)
         return;
     }
 
-    typedef DVBDemodVideoPlayer::Track Track;
+    typedef DTVVideoPlayer::Track Track;
     const int type = ui->audioTrack->itemData(index, Qt::UserRole + 2).toInt();
     m_settings.m_audioLanguage = ui->audioTrack->itemData(index, Qt::UserRole).toString();
     m_settings.m_audioDescription = ui->audioTrack->itemData(index, Qt::UserRole + 1).toBool();
@@ -1187,7 +1571,7 @@ void DVBDemodGUI::on_subtitleTrack_currentIndexChanged(int index)
     {
         m_settings.m_subtitleLanguage = ui->subtitleTrack->itemData(index, Qt::UserRole).toString();
         m_settings.m_subtitlesHardOfHearing = ui->subtitleTrack->itemData(index, Qt::UserRole + 2).toInt()
-            == DVBDemodVideoPlayer::Track::SubtitlesHardOfHearing;
+            == DTVVideoPlayer::Track::SubtitlesHardOfHearing;
     }
 
     setTrackPreferences();
@@ -1248,7 +1632,7 @@ bool DVBDemodGUI::fromPlayer() const
     return m_player && (sender() == m_player);
 }
 
-void DVBDemodGUI::servicesChanged(const QList<DVBDemodVideoPlayer::Service>& services)
+void DVBDemodGUI::servicesChanged(const QList<DTVVideoPlayer::Service>& services)
 {
     if (!fromPlayer()) {
         return;
@@ -1364,6 +1748,16 @@ void DVBDemodGUI::serviceSelected(int id, bool hasVideo, bool hasAudio)
     m_serviceHasAudio = hasAudio;
     m_playingService = id;
     m_dvbDemod->setPlayingService(id);  // So recording and the reports, in Automatic, are of this one
+    m_dvbDemod->getApps()->setCarouselService(m_dvbDemod->currentServiceId());   // Its carousels received straight away
+    updateAppsDialog();
+    updateHbbTVService();
+#ifdef DVBDEMOD_HBBTV
+    if (m_hbbtv && (m_hbbtvChannelRequest != 0))
+    {
+        m_hbbtv->channelChangeResult(id == m_hbbtvChannelRequest);
+        m_hbbtvChannelRequest = 0;
+    }
+#endif
     m_lastFrames = 0;
     m_framesTimer.start();
     showServiceOverlay();
@@ -1489,7 +1883,8 @@ DVBDemodGUI::DVBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_dvbDemod = reinterpret_cast<DVBDemod*>(rxChannel);
     m_dvbDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_guideOverlay = new DVBDemodGuideOverlay(m_dvbDemod->getEPG(), this);
+    m_guideOverlay = new DTVGuideOverlay(m_dvbDemod->getEPG(), this);
+    m_guideOverlay->setLogo(QImage(":/demoddvb/images/angeltv.png"));
     m_splitterTimer.setSingleShot(true);
     connect(&m_splitterTimer, &QTimer::timeout, this, [this]() {
         m_settings.m_splitterSizes = ui->splitter->sizes();
@@ -1510,7 +1905,9 @@ DVBDemodGUI::DVBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
                 m_dvbDemod->scheduleRecording(networkId, serviceId, eventId);
             }
         });
-    connect(m_guideOverlay, &DVBDemodGuideOverlay::playService, this, &DVBDemodGUI::guideServiceSelected);
+    connect(m_guideOverlay, &DTVGuideOverlay::playService, this, &DVBDemodGUI::guideServiceSelected);
+    connect(m_guideOverlay, &DTVGuideOverlay::redButton, this, &DVBDemodGUI::hbbtvRed);
+    ui->redButton->setVisible(false);
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -1548,10 +1945,11 @@ DVBDemodGUI::DVBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-#ifndef DVBDEMOD_DEINTERLACE
-    ui->deinterlace->setEnabled(false);
-    ui->deinterlace->setToolTip("Deinterlacing needs FFmpeg's libavfilter, which this build doesn't have");
-#endif
+    if (!DTVVideoPlayer::canDeinterlace())
+    {
+        ui->deinterlace->setEnabled(false);
+        ui->deinterlace->setToolTip("Deinterlacing needs FFmpeg's libavfilter, which this build doesn't have");
+    }
 
     displaySettings();
     makeUIConnections();
@@ -1571,18 +1969,25 @@ DVBDemodGUI::~DVBDemodGUI()
     m_dvbDemod->setMessageQueueToGUI(nullptr);
     disconnect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
     stopPlayer();
+#ifdef DVBDEMOD_HBBTV
+    delete m_streamPlayback;
+    m_streamPlayback = nullptr;
+    m_streamPlaying = false;
+    delete m_hbbtv;
+    m_hbbtv = nullptr;
+#endif
     delete m_fullScreenTV;
     delete ui;
 }
 
 void DVBDemodGUI::startPlayer()
 {
-    if (m_player) {
+    if (m_player || m_streamPlaying) {
         return;
     }
 
     m_dvbDemod->getTSFifo()->attachReader();
-    m_player = new DVBDemodVideoPlayer(m_dvbDemod->getTSFifo(), m_dvbDemod->getAudioFifo());
+    m_player = new DTVVideoPlayer(m_dvbDemod->getTSFifo(), m_dvbDemod->getAudioFifo());
     // From the player's video thread
     m_player->setFrameCallback([this](GLVideoFramePtr frame) {
         m_videoScreen.load()->setFrame(frame);
@@ -1597,10 +2002,11 @@ void DVBDemodGUI::startPlayer()
     m_player->setHardwareDecoding(m_settings.m_hardwareDecoding);
     m_player->setAVOffset(m_settings.m_avOffset);
     setTrackPreferences();
-    connect(m_player, &DVBDemodVideoPlayer::servicesChanged, this, &DVBDemodGUI::servicesChanged, Qt::QueuedConnection);
-    connect(m_player, &DVBDemodVideoPlayer::serviceSelected, this, &DVBDemodGUI::serviceSelected, Qt::QueuedConnection);
-    connect(m_player, &DVBDemodVideoPlayer::tracksChanged, this, &DVBDemodGUI::tracksChanged, Qt::QueuedConnection);
+    connect(m_player, &DTVVideoPlayer::servicesChanged, this, &DVBDemodGUI::servicesChanged, Qt::QueuedConnection);
+    connect(m_player, &DTVVideoPlayer::serviceSelected, this, &DVBDemodGUI::serviceSelected, Qt::QueuedConnection);
+    connect(m_player, &DTVVideoPlayer::tracksChanged, this, &DVBDemodGUI::tracksChanged, Qt::QueuedConnection);
     m_player->start();
+    updateHbbTV();
 }
 
 void DVBDemodGUI::stopPlayer()
@@ -1612,6 +2018,7 @@ void DVBDemodGUI::stopPlayer()
         m_player->stopPlayer();
         delete m_player;
         m_player = nullptr;
+        updateHbbTV();
         m_dvbDemod->getTSFifo()->detachReader(); // After the player's stopped, as its reads would attach it again
         ui->screenTV->clear();
         clearTracks();
@@ -1717,6 +2124,7 @@ void DVBDemodGUI::displaySettings()
     }
 
     updateAbsoluteCenterFrequency();
+    updateHbbTV();
     blockApplySettings(false);
 }
 
@@ -1740,7 +2148,25 @@ void DVBDemodGUI::tick()
         displayRecordings();
         displaySimulcast();
         m_guideOverlay->refresh();
+        updateHbbTVService();
+        displayRedButton();
     }
+
+#ifdef DVBDEMOD_HBBTV
+    if (m_hbbtv)
+    {
+        m_hbbtv->setSuppressed(m_guideOverlay->isShown());
+
+        // What the red button's waiting for, at the bottom right of the video, until there's nothing to wait for
+        const QString status = m_hbbtv->isStatusInPage() ? QString() : m_hbbtv->getStatus();
+
+        if (status != m_hbbtvStatus)
+        {
+            m_videoScreen.load()->setOverlay(status, status.isEmpty() ? 0.0 : 60.0);
+            m_hbbtvStatus = status;
+        }
+    }
+#endif
 
     if (++m_tickCount % 4 == 0) // 200 ms
     {
@@ -1755,6 +2181,23 @@ void DVBDemodGUI::tick()
             m_dvbDemod->getAudioOutput(sampleRate, latency);
             m_player->setAudioOutput(sampleRate, latency);
         }
+
+#ifdef DVBDEMOD_HBBTV
+        if (m_streamPlayback && m_streamPlaying)
+        {
+            int sampleRate;
+            double latency;
+            m_dvbDemod->getAudioOutput(sampleRate, latency);
+            m_streamPlayback->setAudioOutput(sampleRate, latency);
+
+            if (m_hbbtv && m_streamPlayback->isPlaying())
+            {
+                QJsonObject data;
+                data.insert("position", m_streamPlayback->getPosition());
+                m_hbbtv->mediaEvent(m_mediaId, "time", data);
+            }
+        }
+#endif
     }
 }
 
@@ -1781,7 +2224,7 @@ void DVBDemodGUI::checkVideoReceived()
         return;
     }
 
-    DVBDemodVideoPlayer::Info info = m_player->getInfo();
+    DTVVideoPlayer::Info info = m_player->getInfo();
     uint64_t frames = m_serviceHasVideo ? info.m_videoFrames : info.m_audioFrames;
 
     if (frames != m_lastFrames)
@@ -1834,6 +2277,18 @@ bool DVBDemodGUI::eventFilter(QObject *obj, QEvent *event)
                 m_pointerTimer.start(3000);
             }
 
+#ifdef DVBDEMOD_HBBTV
+            // With an application showing, a click gives the video the keys (for the application), rather than
+            // opening the ribbon, which would hide it. Double-clicking still goes full screen, and right-clicking
+            // opens the guide
+            if (m_hbbtv && m_hbbtv->isRunning() && m_hbbtv->isVisible() && !m_guideOverlay->isShown() && (type == QEvent::MouseButtonPress)
+                && (static_cast<QMouseEvent*>(event)->button() == Qt::LeftButton))
+            {
+                m_hbbtv->takeFocus();
+                return true;
+            }
+#endif
+
             if (((type == QEvent::MouseMove) || (type == QEvent::MouseButtonPress) || (type == QEvent::MouseButtonDblClick))
                 && m_guideOverlay->handleMouse(static_cast<QMouseEvent*>(event))) {
                 return true;
@@ -1843,12 +2298,27 @@ bool DVBDemodGUI::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
+#ifdef DVBDEMOD_HBBTV
+            if (m_hbbtv && !m_guideOverlay->isShown())
+            {
+                if ((type == QEvent::KeyPress) && m_hbbtv->keyPress(static_cast<QKeyEvent*>(event))) {
+                    return true;
+                }
+
+                if ((type == QEvent::KeyRelease) && m_hbbtv->keyRelease(static_cast<QKeyEvent*>(event))) {
+                    return true;
+                }
+            }
+#endif
+
             if ((type == QEvent::KeyPress) && m_guideOverlay->handleKey(static_cast<QKeyEvent*>(event))) {
                 return true;
             }
 
-            if (type == QEvent::Resize) {
+            if (type == QEvent::Resize)
+            {
                 m_guideOverlay->refresh(true);
+                updateHbbTVGeometry();
             }
         }
 
@@ -1923,6 +2393,7 @@ void DVBDemodGUI::setVideoFullScreen(bool fullScreen)
 #endif
         m_fullScreenTV->activateWindow();
         m_fullScreenTV->setFocus();
+        updateHbbTVGeometry();
 
         if (!m_videoMessage.isEmpty()) {
             showVideoMessage(m_videoMessage);
@@ -1932,6 +2403,7 @@ void DVBDemodGUI::setVideoFullScreen(bool fullScreen)
     {
         m_videoScreen = ui->screenTV;
         m_guideOverlay->setWidget(ui->screenTV);
+        updateHbbTVGeometry();
         m_fullScreenTV->hide();
 
         // Its frames may hold the decoder's GPU surfaces. Cleared now, and again a little later, as the video thread
@@ -1981,7 +2453,7 @@ void DVBDemodGUI::setupStats()
 // The player's A/V problems in the last 10 s (what's happening now, rather than since it started), from its counts then and
 // now: frames late or with errors, the frame rate and stalls, A/V sync and the clock resynchronising, audio muted or
 // missing, the audio FIFO running dry or overflowing, and TS the player didn't take. Orange while there are any
-void DVBDemodGUI::displayAVStats(const DVBDemodVideoPlayer::Info& info, uint64_t tsOverflows)
+void DVBDemodGUI::displayAVStats(const DTVVideoPlayer::Info& info, uint64_t tsOverflows)
 {
     const bool video = m_player && !info.m_videoCodec.isEmpty();
     const bool audio = m_player && !info.m_audioCodec.isEmpty();
@@ -2277,7 +2749,7 @@ QString DVBDemodGUI::shortCodecName(const QString& name)
 // The codecs and picture size in the table, the A/V problems, and the mute button green while audio is playing
 void DVBDemodGUI::displayPlayerInfo(uint64_t tsOverflows)
 {
-    DVBDemodVideoPlayer::Info info;
+    DTVVideoPlayer::Info info;
 
     if (m_player) {
         info = m_player->getInfo();
@@ -2563,6 +3035,10 @@ void DVBDemodGUI::makeUIConnections()
     QObject::connect(ui->videoEnabled, &ButtonSwitch::toggled, this, &DVBDemodGUI::on_videoEnabled_toggled);
     QObject::connect(ui->service, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DVBDemodGUI::on_service_currentIndexChanged);
     QObject::connect(ui->epg, &QToolButton::clicked, this, &DVBDemodGUI::on_epg_clicked);
+    QObject::connect(ui->apps, &QToolButton::clicked, this, &DVBDemodGUI::on_apps_clicked);
+    QObject::connect(ui->redButton, &QToolButton::clicked, this, &DVBDemodGUI::hbbtvRed);
+    ui->apps->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(ui->apps, &QToolButton::customContextMenuRequested, this, &DVBDemodGUI::appsMenu);
     ui->epg->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->epg, &QToolButton::customContextMenuRequested, this, &DVBDemodGUI::epgMenu);
     QObject::connect(ui->scan, &QToolButton::clicked, this, &DVBDemodGUI::on_scan_clicked);

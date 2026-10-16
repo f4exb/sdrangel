@@ -22,6 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGDVBDemodApp.h"
+#include "SWGDVBDemodCarousel.h"
 #include "SWGDVBDemodEPGEvent.h"
 #include "SWGDVBDemodEPGService.h"
 #include <QList>
@@ -101,6 +103,9 @@ public:
 
     qint64 getTsPackets();
     void setTsPackets(qint64 ts_packets);
+
+    QString* getSearchText();
+    void setSearchText(QString* search_text);
 
     qint32 getScanTransponders();
     void setScanTransponders(qint32 scan_transponders);
@@ -186,6 +191,12 @@ public:
     QList<SWGDVBDemodEPGEvent*>* getEpgSchedule();
     void setEpgSchedule(QList<SWGDVBDemodEPGEvent*>* epg_schedule);
 
+    QList<SWGDVBDemodApp*>* getInteractiveApps();
+    void setInteractiveApps(QList<SWGDVBDemodApp*>* interactive_apps);
+
+    QList<SWGDVBDemodCarousel*>* getCarousels();
+    void setCarousels(QList<SWGDVBDemodCarousel*>* carousels);
+
     qint32 getRecording();
     void setRecording(qint32 recording);
 
@@ -197,7 +208,6 @@ public:
 
     qint32 getScheduledRecordings();
     void setScheduledRecordings(qint32 scheduled_recordings);
-
 
     qint32 getSymbolRate();
     void setSymbolRate(qint32 symbol_rate);
@@ -213,9 +223,6 @@ public:
 
     QString* getStreamType();
     void setStreamType(QString* stream_type);
-
-    QString* getSearchText();
-    void setSearchText(QString* search_text);
 
     qint32 getPilots();
     void setPilots(qint32 pilots);
@@ -243,6 +250,7 @@ public:
 
     qint64 getReacquisitions();
     void setReacquisitions(qint64 reacquisitions);
+
 
     virtual bool isSet() override;
 
@@ -303,6 +311,9 @@ private:
 
     qint64 ts_packets;
     bool m_ts_packets_isSet;
+
+    QString* search_text;
+    bool m_search_text_isSet;
 
     qint32 scan_transponders;
     bool m_scan_transponders_isSet;
@@ -388,6 +399,12 @@ private:
     QList<SWGDVBDemodEPGEvent*>* epg_schedule;
     bool m_epg_schedule_isSet;
 
+    QList<SWGDVBDemodApp*>* interactive_apps;
+    bool m_interactive_apps_isSet;
+
+    QList<SWGDVBDemodCarousel*>* carousels;
+    bool m_carousels_isSet;
+
     qint32 recording;
     bool m_recording_isSet;
 
@@ -414,9 +431,6 @@ private:
 
     QString* stream_type;
     bool m_stream_type_isSet;
-
-    QString* search_text;
-    bool m_search_text_isSet;
 
     qint32 pilots;
     bool m_pilots_isSet;

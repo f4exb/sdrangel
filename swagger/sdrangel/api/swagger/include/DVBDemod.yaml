@@ -74,6 +74,11 @@ DVBDemodSettings:
       type: integer
       minimum: 0
       maximum: 1
+    hbbtv:
+      description: "Run the service's HbbTV applications (the red button) over the video, in the GUI (1 for yes, 0 for no)."
+      type: integer
+      minimum: 0
+      maximum: 1
     avOffset:
       description: "Milliseconds to delay the picture relative to the sound, for lip sync. Negative to show it earlier."
       type: integer
@@ -364,6 +369,16 @@ DVBDemodReport:
       description: "A service's schedule, in order, from an hour ago, when epgReport is 2."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodEPGEvent"
+    interactiveApps:
+      type: array
+      description: "The interactive applications (HbbTV's and others, from the AIT) of the service the report's of."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodApp"
+    carousels:
+      type: array
+      description: "The object carousels (MHEG-5's and HbbTV's) of the service the report's of, and how much of each has been received."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/DVBDemod.yaml#/DVBDemodCarousel"
     recording:
       type: integer
       description: Number of recordings in progress
@@ -483,6 +498,57 @@ DVBDemodActions:
       type: integer
       format: int64
       description: "Downlink frequency, Hz, the scan ends at."
+
+DVBDemodApp:
+  description: An interactive application of a service, from its application information table (AIT)
+  properties:
+    applicationId:
+      type: string
+      description: "organisation_id.application_id, in hex."
+    type:
+      type: string
+      description: "HbbTV, DVB-J, DVB-HTML, or the application_type in hex."
+    controlCode:
+      type: string
+      description: "AUTOSTART (started with the service), PRESENT (started by the user, as from the red button), KILL..."
+    name:
+      type: string
+    url:
+      type: string
+      description: "Where it starts: an HTTP URL, or a dvb: URL of a file in an object carousel."
+    carouselPid:
+      type: integer
+      description: "PID of the object carousel it's in, -1 if it isn't in one of this service's."
+
+DVBDemodCarousel:
+  description: An object carousel of a service
+  properties:
+    pid:
+      type: integer
+    componentTag:
+      type: integer
+    carouselId:
+      type: integer
+      format: int64
+    kind:
+      type: string
+      description: "MHEG-5, HbbTV (or both, as a broadcaster may send them in one carousel), or DSM-CC."
+    received:
+      type: integer
+      description: "1 if its DSI has been received, so it's being received."
+    modules:
+      type: integer
+    modulesComplete:
+      type: integer
+    bytes:
+      type: integer
+      format: int64
+    bytesComplete:
+      type: integer
+      format: int64
+    files:
+      type: integer
+      description: "Files received."
 
 DVBDemodEPGService:
   description: A service in the DVB programme guide

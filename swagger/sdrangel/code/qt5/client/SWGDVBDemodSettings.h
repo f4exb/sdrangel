@@ -59,6 +59,33 @@ public:
     qint32 getLowPriority();
     void setLowPriority(qint32 low_priority);
 
+    qint32 getSymbolRate();
+    void setSymbolRate(qint32 symbol_rate);
+
+    qint32 getRollOff();
+    void setRollOff(qint32 roll_off);
+
+    qint32 getCodeRate();
+    void setCodeRate(qint32 code_rate);
+
+    qint32 getIsi();
+    void setIsi(qint32 isi);
+
+    qint32 getPlScramblingCode();
+    void setPlScramblingCode(qint32 pl_scrambling_code);
+
+    qint32 getEqualiser();
+    void setEqualiser(qint32 equaliser);
+
+    qint32 getFreesatRegion();
+    void setFreesatRegion(qint32 freesat_region);
+
+    qint32 getRecordRetune();
+    void setRecordRetune(qint32 record_retune);
+
+    qint32 getRecordFollowRunning();
+    void setRecordFollowRunning(qint32 record_follow_running);
+
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
 
@@ -77,6 +104,9 @@ public:
     qint32 getDeinterlace();
     void setDeinterlace(qint32 deinterlace);
 
+    qint32 getHbbtv();
+    void setHbbtv(qint32 hbbtv);
+
     qint32 getAvOffset();
     void setAvOffset(qint32 av_offset);
 
@@ -88,6 +118,15 @@ public:
 
     qint32 getAudioDescription();
     void setAudioDescription(qint32 audio_description);
+
+    qint32 getAudioDescriptionMixed();
+    void setAudioDescriptionMixed(qint32 audio_description_mixed);
+
+    qint32 getCleanAudio();
+    void setCleanAudio(qint32 clean_audio);
+
+    qint32 getSubtitlesHardOfHearing();
+    void setSubtitlesHardOfHearing(qint32 subtitles_hard_of_hearing);
 
     qint32 getSubtitles();
     void setSubtitles(qint32 subtitles);
@@ -156,42 +195,6 @@ public:
     void setRollupState(SWGRollupState* rollup_state);
 
 
-    qint32 getSymbolRate();
-    void setSymbolRate(qint32 symbol_rate);
-
-    qint32 getRollOff();
-    void setRollOff(qint32 roll_off);
-
-    qint32 getCodeRate();
-    void setCodeRate(qint32 code_rate);
-
-    qint32 getIsi();
-    void setIsi(qint32 isi);
-
-    qint32 getPlScramblingCode();
-    void setPlScramblingCode(qint32 pl_scrambling_code);
-
-    qint32 getEqualiser();
-    void setEqualiser(qint32 equaliser);
-
-    qint32 getAudioDescriptionMixed();
-    void setAudioDescriptionMixed(qint32 audio_description_mixed);
-
-    qint32 getCleanAudio();
-    void setCleanAudio(qint32 clean_audio);
-
-    qint32 getSubtitlesHardOfHearing();
-    void setSubtitlesHardOfHearing(qint32 subtitles_hard_of_hearing);
-
-    qint32 getRecordRetune();
-    void setRecordRetune(qint32 record_retune);
-
-    qint32 getRecordFollowRunning();
-    void setRecordFollowRunning(qint32 record_follow_running);
-
-    qint32 getFreesatRegion();
-    void setFreesatRegion(qint32 freesat_region);
-
     virtual bool isSet() override;
 
 private:
@@ -209,6 +212,33 @@ private:
 
     qint32 low_priority;
     bool m_low_priority_isSet;
+
+    qint32 symbol_rate;
+    bool m_symbol_rate_isSet;
+
+    qint32 roll_off;
+    bool m_roll_off_isSet;
+
+    qint32 code_rate;
+    bool m_code_rate_isSet;
+
+    qint32 isi;
+    bool m_isi_isSet;
+
+    qint32 pl_scrambling_code;
+    bool m_pl_scrambling_code_isSet;
+
+    qint32 equaliser;
+    bool m_equaliser_isSet;
+
+    qint32 freesat_region;
+    bool m_freesat_region_isSet;
+
+    qint32 record_retune;
+    bool m_record_retune_isSet;
+
+    qint32 record_follow_running;
+    bool m_record_follow_running_isSet;
 
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;
@@ -228,6 +258,9 @@ private:
     qint32 deinterlace;
     bool m_deinterlace_isSet;
 
+    qint32 hbbtv;
+    bool m_hbbtv_isSet;
+
     qint32 av_offset;
     bool m_av_offset_isSet;
 
@@ -239,6 +272,15 @@ private:
 
     qint32 audio_description;
     bool m_audio_description_isSet;
+
+    qint32 audio_description_mixed;
+    bool m_audio_description_mixed_isSet;
+
+    qint32 clean_audio;
+    bool m_clean_audio_isSet;
+
+    qint32 subtitles_hard_of_hearing;
+    bool m_subtitles_hard_of_hearing_isSet;
 
     qint32 subtitles;
     bool m_subtitles_isSet;
@@ -305,42 +347,6 @@ private:
 
     SWGRollupState* rollup_state;
     bool m_rollup_state_isSet;
-
-    qint32 symbol_rate;
-    bool m_symbol_rate_isSet;
-
-    qint32 roll_off;
-    bool m_roll_off_isSet;
-
-    qint32 code_rate;
-    bool m_code_rate_isSet;
-
-    qint32 isi;
-    bool m_isi_isSet;
-
-    qint32 pl_scrambling_code;
-    bool m_pl_scrambling_code_isSet;
-
-    qint32 equaliser;
-    bool m_equaliser_isSet;
-
-    qint32 audio_description_mixed;
-    bool m_audio_description_mixed_isSet;
-
-    qint32 clean_audio;
-    bool m_clean_audio_isSet;
-
-    qint32 subtitles_hard_of_hearing;
-    bool m_subtitles_hard_of_hearing_isSet;
-
-    qint32 record_retune;
-    bool m_record_retune_isSet;
-
-    qint32 record_follow_running;
-    bool m_record_follow_running_isSet;
-
-    qint32 freesat_region;
-    bool m_freesat_region_isSet;
 
 };
 

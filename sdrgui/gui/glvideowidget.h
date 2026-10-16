@@ -54,6 +54,9 @@ public:
     QSize pixelSize() const;                        //!< Of the widget, in device pixels
     void setKeepAspectRatio(bool keep);
     void setDeinterlace(bool deinterlace);          //!< Of GPU frames the renderer deinterlaces (D3D11)
+    //! Where the picture's drawn, as fractions of the widget (its aspect kept within it), as an application's video
+    //! window: null for all of the widget
+    void setVideoArea(const QRectF& area);
     QSize getFrameSize() const;                     //!< Of the last frame, empty if none
 
 protected:
@@ -81,6 +84,7 @@ private:
     QImage m_guide;
     bool m_keepAspect;
     bool m_deinterlace;
+    QRectF m_videoArea;
     QSize m_frameSize;
 };
 
