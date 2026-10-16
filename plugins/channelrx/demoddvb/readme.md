@@ -34,7 +34,7 @@ DVB-T2 (the T2-base and T2-Lite profiles):
 The FFT size comes from the P1 symbol, the guard interval from the correlation of the following symbols, and the rest from the L1 signalling.
 The FFT window is placed from the channel's measured impulse response, so echoes up to the length of the guard interval can be received, from the first
 frame after acquisition (the response is measured from the first P2 symbol). With long echoes, the channel is estimated from the pilots of several symbols.
-MISO is supported (both groups of transmitters, or either alone). Time-frequency slicing and recombining data PLPs with their common PLP aren't supported. 
+MISO is supported (both groups of transmitters, or either alone). Time-frequency slicing and recombining data PLPs with their common PLP aren't supported.
 In the UK, the HD multiplexes (e.g. PSB3) use 32K extended carriers, GI 1/128, PP7 and one PLP of rotated 256-QAM 2/3 with 64K LDPC,
 which is supported.
 
@@ -80,10 +80,10 @@ Video and audio are decoded with FFmpeg, so the plugin can play any codec FFmpeg
 <h2>Sample rate</h2>
 
 DVB-T is defined in terms of an elementary period of 7/64 us for 8 MHz channels, so the receiver works at 64/7 MS/s (9,142,857 S/s).
-For 7 and 6 MHz channels it is 8 MS/s and 48/7 MS/s respectively. 
+For 7 and 6 MHz channels it is 8 MS/s and 48/7 MS/s respectively.
 It's best to set the device sample rate to this, or to it multiplied by a power of 2, with decimation enabled.
 
-Other channel sample rates from 0.875 to 2.2 times this (8.0 to 20.1 MS/s for 8 MHz channels) are resampled, which takes more CPU. 
+Other channel sample rates from 0.875 to 2.2 times this (8.0 to 20.1 MS/s for 8 MHz channels) are resampled, which takes more CPU.
 The lowest still holds the 7.61 MHz occupied by an 8 MHz channel (7.77 MHz for DVB-T2 in extended carrier mode).
 The receiver also measures the sample clock offset between the device and the transmitter, and resamples to correct it when it is more than 3 ppm (1 ppm for DVB-T2, whose 32K symbols are longer).
 Smaller offsets are followed by moving the FFT window. A DVB-T2 32K signal may not be decoded until the offset has been corrected, a frame or two after the receiver finds it, if it's more than a few ppm.
@@ -92,10 +92,10 @@ Devices that can run at 9,142,857 S/s include the USRP B210, SDRplay RSPduo, Lim
 An RTL-SDR can't run fast enough.
 
 For DVB-S and DVB-S2, the device's sample rate should be at least 1.2 times the symbol rate: the signal
-is 1 + roll-off times it wide, and losing a little of its edges (at roll-off 0.25 and 0.35) costs under 0.3 dB. 
-Higher is better if the device can keep up, leaving room for the signal being off centre and for the device's own filter. 
-For example, 33 MS/s or more for 27.5 MS/s (which needs a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s, 
-and 1 MS/s or more for the 333 kS/s and 500 kS/s amateur signals on QO-100. 
+is 1 + roll-off times it wide, and losing a little of its edges (at roll-off 0.25 and 0.35) costs under 0.3 dB.
+Higher is better if the device can keep up, leaving room for the signal being off centre and for the device's own filter.
+For example, 33 MS/s or more for 27.5 MS/s (which needs a USRP B210 or similar), 27.6 MS/s or more for 23 MS/s,
+and 1 MS/s or more for the 333 kS/s and 500 kS/s amateur signals on QO-100.
 
 <h2>Satellite reception</h2>
 
@@ -148,12 +148,12 @@ DVB-S and S2 symbol rate, in symbols a second. Type it, or choose a common one: 
 (Astra 2's HD multiplexes are 23 MS/s DVB-S2 8PSK, and its SD ones 22 or 27.5 MS/s DVB-S), and 25,000 to 2,000,000 for amateur DATV (QO-100's wideband transponder).
 The channel's sample rate is from 2 to 4 times this, but the device sample rate needs to be only 1.2 times this (see Sample rate above).
 
-Auto (the default) measures the symbol rate of the strongest signal in the channel. 
+Auto (the default) measures the symbol rate of the strongest signal in the channel.
 
 <h3>5: RO - Roll-off</h3>
 
 DVB-S2 roll-off of the root raised cosine pulse: 0.35, 0.25, 0.20, DVB-S2X's 0.15, 0.10, 0.05, or Auto, which follows the BBHEADER (starting at 0.35). DVB-S's is always 0.35.
-A matched filter with the wrong roll-off costs a few tenths of a dB. 
+A matched filter with the wrong roll-off costs a few tenths of a dB.
 
 <h3>6: Rate - Code rate</h3>
 
@@ -190,7 +190,7 @@ Average power of the signal in the channel, in dB.
 
 <h3>12: UDP</h3>
 
-When checked, the transport stream is sent as UDP datagrams to the given address (an IP address, or a host name) and port. 
+When checked, the transport stream is sent as UDP datagrams to the given address (an IP address, or a host name) and port.
 It can be played with, for example:
 
     vlc udp://@:5004
@@ -218,7 +218,7 @@ rather than acquiring again, which takes a few tenths of a second.
 
 <h3>Signal and Video</h3>
 
-The signal area is above the video area. Drag the bar between them to share the height out differently: 
+The signal area is above the video area. Drag the bar between them to share the height out differently:
 dragging it to the top or bottom hides one area.
 The sizes are saved with the settings.
 
@@ -341,7 +341,7 @@ Decode and display the selected service. Click to play; click again to stop.
 Service to play. The list comes from the Service Description Table in the transport stream, which is repeated every few seconds,
 so services are shown with their numbers until it has been received. Automatic plays the first service with video.
 Data services, such as the Red Button, have no video or audio to play. Scrambled (encrypted, pay TV) services, such as most of Sky's,
-can't be played: the video shows "Scrambled". 
+can't be played: the video shows "Scrambled".
 
 <h4>3: HD</h4>
 
@@ -350,7 +350,7 @@ When the programme playing is also available in HD, click the button to switch t
 <h4>4: Deinterlace</h4>
 
 Deinterlace the video, with FFmpeg's bwdif filter, which interpolates motion. SD services in the UK are interlaced, so without it, moving objects have combing artifacts.
-Needs FFmpeg's libavfilter, without which the button is disabled. 
+Needs FFmpeg's libavfilter, without which the button is disabled.
 
 <h4>5: Hardware decoding</h4>
 
@@ -378,7 +378,7 @@ The button mutes the audio, and is green while audio is playing. Right click it 
 <h4>9: Audio service</h4>
 
 The audio list has each language, and audio description where the service supports it. In the UK, audio description is a separate
-narration that is mixed with the main audio: the main audio is faded down while the narrator speaks. 
+narration that is mixed with the main audio: the main audio is faded down while the narrator speaks.
 A description that is broadcast already mixed is listed as "(audio description)", and audio for the hard of hearing as "(clean audio)".
 The choice is kept for other services: the same kind of track in the same language where they have it, else the language's main audio.
 
@@ -427,9 +427,9 @@ or the other cable of a Sky Q LNB. Right click the EPG button to set a command t
 It's run before retuning, with %p in it replaced by H, V, L or R (horizontal, vertical, left or right hand circular), or that added as its last argument
 if there's no %p, and should exit with 0 once switched; if it fails (or doesn't finish within 20 s), the device isn't retuned, and why is shown.
 Without a command, a message box says which polarisation the multiplex needs: Continue to switch the LNB yourself and retune, or Cancel to stay on
-the multiplex received. 
+the multiplex received.
 
-The services are listed by channel number. Those in italics are on other multiplexes: playing one retunes the device to its multiplex. 
+The services are listed by channel number. Those in italics are on other multiplexes: playing one retunes the device to its multiplex.
 The guide gives the frequencies of DVB-T multiplexes, but in the UK
 not of DVB-T2 ones (PSB3, with the HD services), so the frequency of each multiplex received is remembered. Playing a service on a multiplex whose
 frequency isn't known yet searches the UHF channels (21 to 48, then 49 to 69) for it, which takes a few seconds a channel; the progress is shown over
@@ -458,14 +458,14 @@ The Apps button opens a list of the interactive (red button) applications:
 
 * Applications: from the service's application information table (AIT): HbbTV's (and DVB-J and DVB-HTML ones, should any be signalled), with
   their names, ids, and whether they start with the service (AUTOSTART) or are started by the user, from the red button (PRESENT), and where
-  they start from: an HTTP URL, or a file in one of the service's carousels, as a dvb: URL. 
+  they start from: an HTTP URL, or a file in one of the service's carousels, as a dvb: URL.
 * Carousels: the files of the service's MHEG-5 and HbbTV applications, sent round and round in
   the transport stream, and how much of each has been received. A large carousel takes a minute or so, and is
   received again as the broadcaster updates it.
 
 Right click the Apps button to run the HbbTV applications.
 
-Keys for the red, green, yellow and blue buttons are R, G, Y and B (or F1 to F4), Back is Backspace, and the arrows, Enter and digits are themselves. 
+Keys for the red, green, yellow and blue buttons are R, G, Y and B (or F1 to F4), Back is Backspace, and the arrows, Enter and digits are themselves.
 
 Some broadcasters (such as the BBC) only serve their online applications to TVs they've certified, so videos may not play.
 
@@ -485,13 +485,13 @@ reception), these are downlink frequencies. The last scan's range is offered, or
 The range can be wider than the device's sample rate: it's scanned in steps.
 
 Transponders with a transport stream are added to the programme guide, with their frequency, symbol rate and standard, and their network's services and other
-multiplexes come from their NIT and SDT. 
+multiplexes come from their NIT and SDT.
 The signals the sweep found, each one tried and what it was, and the transponders found
 are written to the log. The progress, and the transponders found when it's done,
-are shown in the status and over the video; afterwards the device returns to where it was. 
+are shown in the status and over the video; afterwards the device returns to where it was.
 
-While it scans, the button shows Stop, which stops it. 
-    
+While it scans, the button shows Stop, which stops it.
+
 <h4>Video</h4>
 
 Displays the selected service, scaled to square pixels, so 16:9 anamorphic SD services are displayed with the right aspect ratio.
