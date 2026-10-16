@@ -78,6 +78,8 @@ ChannelReport:
     EndOfTrainDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodReport"
       description: "End of train demod report data for Channel."
+    IEEE_802_15_4_DemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Demod.yaml#/IEEE_802_15_4_DemodReport"
     IEEE_802_15_4_ModReport:
       $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModReport"
       description: "Ieee 802 15 4 mod report data for Channel."

@@ -253,6 +253,7 @@ set(sdrbase_SOURCES
     util/golay2312.cpp
     util/grb.cpp
     util/httpdownloadmanager.cpp
+    util/ieee_802_15_4.cpp
     util/interpolation.cpp
     util/jplhorizons.cpp
     util/kiwisdrlist.cpp
@@ -534,6 +535,7 @@ set(sdrbase_HEADERS
     util/golay2312.h
     util/grb.h
     util/httpdownloadmanager.h
+    util/ieee_802_15_4.h
     util/incrementalarray.h
     util/incrementalvector.h
     util/interpolation.h

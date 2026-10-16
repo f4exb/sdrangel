@@ -5062,6 +5062,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getHeatMapSettings()->init();
             channelSettings->getHeatMapSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "IEEE_802_15_4_DemodSettings")
+        {
+            channelSettings->setIeee802154DemodSettings(new SWGSDRangel::SWGIEEE_802_15_4_DemodSettings());
+            channelSettings->getIeee802154DemodSettings()->init();
+            channelSettings->getIeee802154DemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "IEEE_802_15_4_ModSettings")
         {
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());

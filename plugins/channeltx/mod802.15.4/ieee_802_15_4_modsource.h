@@ -19,6 +19,7 @@
 #ifndef INCLUDE_IEEE_802_15_4_MODSOURCE_H
 #define INCLUDE_IEEE_802_15_4_MODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 #include <QDebug>
 
@@ -33,6 +34,7 @@
 #include "util/lfsr.h"
 #include "util/movingaverage.h"
 #include "util/message.h"
+#include "util/messagequeue.h"
 
 #include "ieee_802_15_4_modsettings.h"
 
@@ -150,6 +152,15 @@ private:
 
     int m_sampleIdx;                    // Sample index in to chip
     int m_samplesPerChip;               // Number of samples per chip
+    int m_modulationSampleRate;         // Sample rate waveform is generated at (m_samplesPerChip * m_chipRate)
+    bool m_resample;                    // Whether to resample from m_modulationSampleRate to m_channelSampleRate
+    Interpolator m_resampler;
+    Real m_resamplerDistance;
+    Real m_resamplerDistanceRemain;
+    static const int m_minSamplesPerChip = 4;       // Range of samples per chip for which we don't resample
+    static const int m_maxSamplesPerChip = 16;
+    static const int m_resampleSamplesPerChip = 8;  // Samples per chip used when resampling
+    static constexpr double m_resamplerTapsPerPhase = 8.0;
     int m_chipsPerSymbol;               // Number of chips per symbol
     int m_bitsPerSymbol;                // Number of bits per symbol
     int m_chipRate;
@@ -164,6 +175,7 @@ private:
     } m_state;                          // States for sample modulation
     int m_frameRepeatCount;
     uint64_t m_waitCounter;             // Samples to wait before retransmission
+    int m_lpfFlushCount;                // Samples to flush through m_lowpass after a frame
 
     uint8_t m_bits[4+1+1+127];          // Bits to transmit (preamble, SFD, length, payload)
     int m_byteIdx;                      // Index in to m_bits
@@ -181,7 +193,9 @@ private:
     void initTX();
     void openUDP(const QString& udpAddress, uint16_t udpPort);
     void closeUDP();
-    void createHalfSine(int sampleRate, int chipRate);
+    void createHalfSine(int samplesPerChip);
+    void updateSampleRates();
+    void updateSpectrumInterpolator();
 
     void calculateLevel(Real& sample);
     void modulateSample();
