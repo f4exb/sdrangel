@@ -918,14 +918,17 @@
                 }
 
                 var channel = makeChannel(config.channel);
+                var requested = videoState(object).pendingChannel;
                 videoState(object).pendingChannel = null;
 
                 if (ok) {
                     setPlayState(object, PLAYSTATE_PRESENTING);
                     fire(object, 'ChannelChangeSucceeded', { channel: channel }, [channel]);
                 } else {
+                    // The channel asked for (OIPF DAE 7.13.1.3), not the one still playing
+                    var failed = requested || channel;
                     setPlayState(object, PLAYSTATE_UNREALIZED, error);
-                    fire(object, 'ChannelChangeError', { channel: channel, errorState: error }, [channel, error]);
+                    fire(object, 'ChannelChangeError', { channel: failed, errorState: error }, [failed, error]);
                 }
             });
         }

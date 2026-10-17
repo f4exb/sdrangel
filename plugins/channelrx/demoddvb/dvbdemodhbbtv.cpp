@@ -39,6 +39,7 @@
 #endif
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
+#include <QRegularExpression>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
@@ -291,13 +292,24 @@ void DVBDemodHbbTV::releaseProfile()
     }
 }
 
+// The profile's kept until its cache is cleared: deleted while that's in progress (as when no application's running, so
+// this is its only user), it corrupts the heap
 void DVBDemodHbbTV::clearData()
 {
     QWebEngineProfile *profile = acquireProfile();
     profile->cookieStore()->deleteAllCookies();
-    profile->clearHttpCache();
     profile->clearAllVisitedLinks();
-    releaseProfile();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    QObject::connect(profile, &QWebEngineProfile::clearHttpCacheCompleted, profile, []() {
+        // Not in the profile's own signal, as it may be deleted
+        QTimer::singleShot(0, []() { releaseProfile(); });
+    }, Qt::SingleShotConnection);
+    profile->clearHttpCache();
+#else
+    // No signal when it's done: a while later
+    profile->clearHttpCache();
+    QTimer::singleShot(10000, []() { releaseProfile(); });
+#endif
 }
 
 QWebEngineView *DVBDemodHbbTV::createView(QWidget *parent)
@@ -1154,11 +1166,15 @@ void DVBDemodHbbTV::createApplication(const QString& uri)
     }
 }
 
-// An HbbTV application served as application/vnd.hbbtv.xhtml+xml, which the browser would download rather than show:
-// fetched, and given to it as HTML
+// A page of the running application served as application/vnd.hbbtv.xhtml+xml, which the browser would download rather
+// than show: fetched, and given to it as HTML. Its first page, or one it goes to, or one it's redirected to (as
+// index.php to index.html)
 void DVBDemodHbbTV::downloadRequested(const QUrl& url, const QString& mimeType)
 {
-    if (!isRunning() || (url != QUrl(m_appUrl)) || !(mimeType.contains("hbbtv") || mimeType.contains("xhtml") || mimeType.contains("cehtml")))
+    // Fetched without the interceptor, so the internet's only used if allowed
+    const bool allowed = m_interceptor->m_networkAllowed || m_server->isServerUrl(url.toString());
+
+    if (!isRunning() || !allowed || !(mimeType.contains("hbbtv") || mimeType.contains("xhtml") || mimeType.contains("cehtml")))
     {
         emit log(QString("Download of %1 (%2) refused").arg(url.toString()).arg(mimeType));
         return;
@@ -1166,18 +1182,23 @@ void DVBDemodHbbTV::downloadRequested(const QUrl& url, const QString& mimeType)
 
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::UserAgentHeader, m_profile->httpUserAgent());
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy); // Qt 5's default is not to follow them
     QNetworkReply *reply = m_network->get(request);
+    const QString appUrl = m_appUrl;
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, url]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, url, appUrl]() {
         reply->deleteLater();
 
-        if ((reply->error() != QNetworkReply::NoError) || !isRunning() || (QUrl(m_appUrl) != url))
+        if ((reply->error() != QNetworkReply::NoError) || !isRunning() || (m_appUrl != appUrl))
         {
             emit log(QString("Can't load %1: %2").arg(url.toString()).arg(reply->errorString()));
             return;
         }
 
-        m_page->setContent(reply->readAll(), "text/html", url);
+
+        // With oipf.js in it as well: given so, a page's scripts aren't always injected (Qt WebEngine doesn't inject
+        // them in one given after another, as when the service changes from one application served so to another)
+        m_page->setContent(withScript(reply->readAll(), scriptSource()), "text/html", url);
     });
 }
 
@@ -1230,6 +1251,51 @@ QJsonObject DVBDemodHbbTV::configuration() const
     return config;
 }
 
+// oipf.js, with the TV's state, as a script: escaped to ASCII (as a page's encoding may not be UTF-8), and without
+// </ (so it can be in a page's <script> element)
+QString DVBDemodHbbTV::scriptSource() const
+{
+    // Not by arg(): the script has %s of its own
+    const QString source = "window.__sdrangelHbbTVConfig = " + QString::fromUtf8(QJsonDocument(configuration()).toJson(QJsonDocument::Compact))
+        + ";\n" + m_oipfScript;
+    QString ascii;
+    ascii.reserve(source.size());
+
+    for (const QChar c : source)
+    {
+        if (c.unicode() > 0x7e) {
+            ascii += QString("\\u%1").arg((uint) c.unicode(), 4, 16, QChar('0'));
+        } else {
+            ascii += c;
+        }
+    }
+
+    return ascii.replace("</", "<\\/");
+}
+
+// A page with a script as its first: in its head, or after its html element or doctype if it has none
+QByteArray DVBDemodHbbTV::withScript(const QByteArray& page, const QString& script)
+{
+    const QByteArray element = "<script>" + script.toLatin1() + "</script>";
+    const QString text = QString::fromLatin1(page); // Only to find the tags, which are ASCII
+    int at = -1;
+
+    for (const QString& tag : {QString("<head"), QString("<html"), QString("<!doctype")})
+    {
+        const QRegularExpressionMatch match = QRegularExpression(tag + "(\\s[^>]*)?>", QRegularExpression::CaseInsensitiveOption).match(text);
+
+        if (match.hasMatch())
+        {
+            at = match.capturedEnd();
+            break;
+        }
+    }
+
+    QByteArray result = page;
+    result.insert(std::max(0, at), element);
+    return result;
+}
+
 // oipf.js, with the TV's state, in each page before its scripts
 void DVBDemodHbbTV::updateScript()
 {
@@ -1250,8 +1316,6 @@ void DVBDemodHbbTV::updateScript()
     script.setInjectionPoint(QWebEngineScript::DocumentCreation);
     script.setWorldId(QWebEngineScript::MainWorld);
     script.setRunsOnSubFrames(true);
-    // Not by arg(): the script has %s of its own
-    script.setSourceCode("window.__sdrangelHbbTVConfig = " + QString::fromUtf8(QJsonDocument(configuration()).toJson(QJsonDocument::Compact))
-        + ";\n" + m_oipfScript);
+    script.setSourceCode(scriptSource());
     scripts.insert(script);
 }
