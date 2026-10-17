@@ -152,8 +152,8 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(ffmpeg_dll)
 
-  # modatv.dll
-  file(GLOB OPENCV_DLLS "${OpenCV_LIBS_BIN_DIR}/opencv_world*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  # modatv.dll and moddatv.dll: opencv DLLs
+  file(GLOB OPENCV_DLLS "${OpenCV_LIBS_BIN_DIR}/opencv_*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(opencv_dll ${OPENCV_DLLS})
     get_filename_component(opencv_dll_name "${opencv_dll}"  NAME)
     add_custom_target(copy_ffmpeg_${opencv_dll_name} ALL
@@ -298,9 +298,9 @@ elseif(WIN32 OR MINGW)
     # demoddatv.dll
     install(DIRECTORY "${FFMPEG_LIBRARIES}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    # modatv.dll
+    # modatv.dll and moddatv.dll
     install(DIRECTORY "${OpenCV_LIBS_BIN_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
-      FILES_MATCHING PATTERN "opencv_world*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      FILES_MATCHING PATTERN "opencv_*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # libusb
     get_filename_component(GFN_LIBUSB_DIR "${LIBUSB_LIBRARIES}" DIRECTORY)
     install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
