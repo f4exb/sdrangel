@@ -961,6 +961,9 @@ endif()
 if(WIN32)
   find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 
+  if(OpenCV_LIBS)
+    list(REMOVE_DUPLICATES OpenCV_LIBS)
+  endif()
   set(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" CACHE INTERNAL "")
   set(OpenCV_LIBS "${OpenCV_LIBS}" CACHE INTERNAL "")
 
