@@ -908,8 +908,6 @@ void DVBDemodGUI::hbbtvVideoArea(const QRectF& area)
 void DVBDemodGUI::hbbtvChannelChange(int networkId, int transportStreamId, int serviceId)
 {
 #ifdef DVBDEMOD_HBBTV
-    (void) transportStreamId;
-
     if (serviceId == m_playingService)
     {
         m_hbbtv->channelChangeResult(true);
@@ -917,9 +915,16 @@ void DVBDemodGUI::hbbtvChannelChange(int networkId, int transportStreamId, int s
     }
 
     m_hbbtvChannelRequest = serviceId;
-    selectService(networkId, serviceId, this, [this](const QString& error) {
-        qDebug("DVBDemodGUI::hbbtvChannelChange: %s", qPrintable(error));
+    selectService(networkId, serviceId, this, [this, networkId, transportStreamId, serviceId](const QString& error) {
+        qDebug("DVBDemodGUI::hbbtvChannelChange: %d.%d.%d: %s", networkId, transportStreamId, serviceId, qPrintable(error));
         m_hbbtvChannelRequest = 0;
+        // Said over the video for a while, rather than in a message box, which would take the keys from the application
+        // (as the user's chosen the channel in it) and be hidden by full screen video
+        const QString text = QString("Can't play the channel the application chose: %1").arg(error);
+        setStatusText(text);
+        setStatusToolTip(text);
+        m_statusMessageTimer.start();
+        m_videoScreen.load()->setOverlay(text, 5.0);
 
         if (m_hbbtv) {
             m_hbbtv->channelChangeResult(false);

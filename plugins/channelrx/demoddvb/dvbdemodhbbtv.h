@@ -165,6 +165,8 @@ private:
     void showView();
     void loadFinished(bool ok);
     void updateScript();
+    QString scriptSource() const;
+    static QByteArray withScript(const QByteArray& page, const QString& script);
     void showStatus();                  //!< getStatus() in the page, over what the application shows
     void updateProxy();
     QJsonObject configuration() const;

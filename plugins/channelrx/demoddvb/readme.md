@@ -569,3 +569,9 @@ numbers (0 for the default region's).
 The standard is 0 for automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2, 3 DVB-T2-Lite, 4 automatic (DVB-S or S2), 5 DVB-S and 6 DVB-S2. The DVB-S and S2
 report adds the symbol rate set and measured, the roll-off, and, for DVB-S2, the MODCOD, pilots, frame size, input stream, Es/N0, and frame, dummy frame
 and header miss counts.
+
+<h2>Attribution</h2>
+
+The Freesat and Freeview Huffman tables, which decode compressed programme guide text, were generated from freesat_huffman.c of
+[tvheadend](https://github.com/tvheadend/tvheadend) (GNU GPL version 3 or later), code originally written for tv_grab_dvb_plus and
+integrated into tvheadend by Adam Sutton.
