@@ -80,7 +80,31 @@ static const struct iio_attr *findAttrByFilename(const struct iio_device *dev, c
 
     return nullptr;
 }
+
+// Number of DMA blocks kept in flight by an iio_stream (libiio recommends 4)
+static const size_t nbStreamBlocks = 4;
 #endif
+
+// In libiio 1.x channels are enabled in a mask that is applied when the stream is created
+static void enableChannel(struct iio_channel *chn, struct iio_channels_mask *mask)
+{
+#ifdef LIBIIO_V1
+    iio_channel_enable(chn, mask);
+#else
+    (void) mask;
+    iio_channel_enable(chn);
+#endif
+}
+
+static void disableChannel(struct iio_channel *chn, struct iio_channels_mask *mask)
+{
+#ifdef LIBIIO_V1
+    iio_channel_disable(chn, mask);
+#else
+    (void) mask;
+    iio_channel_disable(chn);
+#endif
+}
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_devSampleRate(0),
@@ -96,6 +120,9 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_devTx(nullptr),
         m_rxBuf(nullptr),
         m_txBuf(nullptr),
+        m_rxMask(nullptr),
+        m_rxStream(nullptr),
+        m_rxBlock(nullptr),
         m_xoInitial(0),
         m_temp(0.0f),
         m_rxSampleBytes(0),
@@ -122,7 +149,15 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         qCritical("DevicePlutoSDRBox::DevicePlutoSDRBox: cannot create context for uri: %s", uri.c_str());
     }
 
+#ifdef LIBIIO_V1
+    if (m_ctx && m_devRx) {
+        m_rxMask = iio_create_channels_mask(iio_device_get_channels_count(m_devRx));
+    }
+
+    m_valid = m_ctx && m_devPhy && m_devRx && m_devTx && m_rxMask;
+#else
     m_valid = m_ctx && m_devPhy && m_devRx && m_devTx;
+#endif
 
     if (m_valid)
     {
@@ -169,6 +204,9 @@ DevicePlutoSDRBox::~DevicePlutoSDRBox()
     deleteTxBuffer();
     closeRx();
     closeTx();
+#ifdef LIBIIO_V1
+    if (m_rxMask) { iio_channels_mask_destroy(m_rxMask); }
+#endif
     if (m_ctx) { iio_context_destroy(m_ctx); }
 }
 
@@ -393,7 +431,7 @@ bool DevicePlutoSDRBox::openRx()
 
     if (m_rxChannels.size() > 0)
     {
-        iio_channel_enable(m_rxChannels.at(0));
+        enableChannel(m_rxChannels.at(0), m_rxMask);
 
         const struct iio_data_format *df = iio_channel_get_data_format(m_rxChannels.at(0));
         qDebug("DevicePlutoSDRBox::openRx channel I: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
@@ -415,7 +453,7 @@ bool DevicePlutoSDRBox::openRx()
 
     if (m_rxChannels.size() > 1)
     {
-        iio_channel_enable(m_rxChannels.at(1));
+        enableChannel(m_rxChannels.at(1), m_rxMask);
 
         const struct iio_data_format* df = iio_channel_get_data_format(m_rxChannels.at(1));
         qDebug("DevicePlutoSDRBox::openRx channel Q: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
@@ -442,7 +480,7 @@ bool DevicePlutoSDRBox::openSecondRx()
 
     if (m_rxChannels.size() > 2)
     {
-        iio_channel_enable(m_rxChannels.at(2));
+        enableChannel(m_rxChannels.at(2), m_rxMask);
 
         const struct iio_data_format *df = iio_channel_get_data_format(m_rxChannels.at(2));
         qDebug("DevicePlutoSDRBox::openSecondRx channel I: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
@@ -464,7 +502,7 @@ bool DevicePlutoSDRBox::openSecondRx()
 
     if (m_rxChannels.size() > 3)
     {
-        iio_channel_enable(m_rxChannels.at(3));
+        enableChannel(m_rxChannels.at(3), m_rxMask);
 
         const struct iio_data_format* df = iio_channel_get_data_format(m_rxChannels.at(3));
         qDebug("DevicePlutoSDRBox::openSecondRx channel Q: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
@@ -581,14 +619,16 @@ bool DevicePlutoSDRBox::openSecondTx()
 
 void DevicePlutoSDRBox::closeRx()
 {
-    if (m_rxChannels.size() > 0) { iio_channel_disable(m_rxChannels.at(0)); }
-    if (m_rxChannels.size() > 1) { iio_channel_disable(m_rxChannels.at(1)); }
+    if (!m_valid) { return; }
+    if (m_rxChannels.size() > 0) { disableChannel(m_rxChannels.at(0), m_rxMask); }
+    if (m_rxChannels.size() > 1) { disableChannel(m_rxChannels.at(1), m_rxMask); }
 }
 
 void DevicePlutoSDRBox::closeSecondRx()
 {
-    if (m_rxChannels.size() > 2) { iio_channel_disable(m_rxChannels.at(2)); }
-    if (m_rxChannels.size() > 3) { iio_channel_disable(m_rxChannels.at(3)); }
+    if (!m_valid) { return; }
+    if (m_rxChannels.size() > 2) { disableChannel(m_rxChannels.at(2), m_rxMask); }
+    if (m_rxChannels.size() > 3) { disableChannel(m_rxChannels.at(3), m_rxMask); }
 }
 
 void DevicePlutoSDRBox::closeTx()
@@ -605,11 +645,38 @@ void DevicePlutoSDRBox::closeSecondTx()
 
 struct iio_buffer *DevicePlutoSDRBox::createRxBuffer(unsigned int size, bool cyclic)
 {
+#ifdef LIBIIO_V1
+    (void) cyclic; // cyclic mode only exists for output buffers in libiio 1.x
+    m_rxBuf = nullptr;
+    m_rxBlock = nullptr;
+
+    if (m_valid)
+    {
+        struct iio_buffer *buf = iio_device_get_buffer(m_devRx, 0);
+
+        if (buf)
+        {
+            m_rxStream = iio_buffer_create_stream(buf, nbStreamBlocks, size, m_rxMask);
+            int err = iio_err(m_rxStream);
+
+            if (err)
+            {
+                qCritical("DevicePlutoSDRBox::createRxBuffer: cannot create stream: %s (%d)", strerror(-err), err);
+                m_rxStream = nullptr;
+            }
+            else
+            {
+                m_rxBuf = buf;
+            }
+        }
+    }
+#else
     if (m_devRx) {
         m_rxBuf = iio_device_create_buffer(m_devRx, size, cyclic ? '\1' : '\0');
     } else {
         m_rxBuf = nullptr;
     }
+#endif
 
     return m_rxBuf;
 }
@@ -627,11 +694,23 @@ struct iio_buffer *DevicePlutoSDRBox::createTxBuffer(unsigned int size, bool cyc
 
 void DevicePlutoSDRBox::deleteRxBuffer()
 {
+#ifdef LIBIIO_V1
+    // The iio_buffer itself belongs to the device: only the stream is destroyed
+    if (m_rxStream)
+    {
+        iio_stream_destroy(m_rxStream);
+        m_rxStream = nullptr;
+    }
+
+    m_rxBlock = nullptr;
+    m_rxBuf = nullptr;
+#else
     if (m_rxBuf)
     {
         iio_buffer_destroy(m_rxBuf);
         m_rxBuf = nullptr;
     }
+#endif
 }
 
 void DevicePlutoSDRBox::deleteTxBuffer()
@@ -645,9 +724,15 @@ void DevicePlutoSDRBox::deleteTxBuffer()
 
 ssize_t DevicePlutoSDRBox::getRxSampleSize()
 {
+#ifdef LIBIIO_V1
+    if (m_devRx && m_rxMask) {
+        return iio_device_get_sample_size(m_devRx, m_rxMask);
+    } else {
+#else
     if (m_devRx) {
         return iio_device_get_sample_size(m_devRx);
     } else {
+#endif
         return 0;
     }
 }
@@ -663,11 +748,30 @@ ssize_t DevicePlutoSDRBox::getTxSampleSize()
 
 ssize_t DevicePlutoSDRBox::rxBufferRefill()
 {
+#ifdef LIBIIO_V1
+    if (!m_rxStream) {
+        return 0;
+    }
+
+    // Hands the previous block back to the hardware and waits for the next filled one
+    const struct iio_block *block = iio_stream_get_next_block(m_rxStream);
+    int err = iio_err(block);
+
+    if (err)
+    {
+        m_rxBlock = nullptr;
+        return err;
+    }
+
+    m_rxBlock = block;
+    return (char *) iio_block_end(block) - (char *) iio_block_start(block);
+#else
     if (m_rxBuf) {
         return iio_buffer_refill(m_rxBuf);
     } else {
         return 0;
     }
+#endif
 }
 
 ssize_t DevicePlutoSDRBox::txBufferPush()
@@ -681,29 +785,53 @@ ssize_t DevicePlutoSDRBox::txBufferPush()
 
 std::ptrdiff_t DevicePlutoSDRBox::rxBufferStep()
 {
+#ifdef LIBIIO_V1
+    if (m_rxStream) {
+        return iio_device_get_sample_size(m_devRx, m_rxMask);
+    } else {
+        return 0;
+    }
+#else
     if (m_rxBuf) {
         return iio_buffer_step(m_rxBuf);
     } else {
         return 0;
     }
+#endif
 }
 
 char* DevicePlutoSDRBox::rxBufferEnd()
 {
+#ifdef LIBIIO_V1
+    if (m_rxBlock) {
+        return (char *) iio_block_end(m_rxBlock);
+    } else {
+        return nullptr;
+    }
+#else
     if (m_rxBuf) {
         return (char *) iio_buffer_end(m_rxBuf);
     } else {
         return nullptr;
     }
+#endif
 }
 
 char* DevicePlutoSDRBox::rxBufferFirst()
 {
+#ifdef LIBIIO_V1
+    if (m_rxBlock) {
+        return (char *) iio_block_first(m_rxBlock, m_rxChannels.at(0));
+    } else {
+        return nullptr;
+    }
+#else
     if (m_rxBuf) {
         return (char *) iio_buffer_first(m_rxBuf, m_rxChannels.at(0));
     } else {
         return nullptr;
     }
+#endif
 }
 
 std::ptrdiff_t DevicePlutoSDRBox::txBufferStep()

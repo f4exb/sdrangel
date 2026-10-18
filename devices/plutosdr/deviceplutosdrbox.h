@@ -36,6 +36,9 @@ typedef SSIZE_T ssize_t;
 #endif
 
 struct iio_channel;
+struct iio_channels_mask; // libiio 1.x
+struct iio_stream;        // libiio 1.x
+struct iio_block;         // libiio 1.x
 
 class DEVICES_API DevicePlutoSDRBox
 {
@@ -135,6 +138,9 @@ private:
     struct iio_device  *m_devTx;
     struct iio_buffer  *m_rxBuf;
     struct iio_buffer  *m_txBuf;
+    struct iio_channels_mask *m_rxMask; //!< libiio 1.x: Rx channels enabled for streaming
+    struct iio_stream  *m_rxStream;     //!< libiio 1.x: Rx block stream
+    const struct iio_block *m_rxBlock;  //!< libiio 1.x: last Rx block received
     bool m_valid;
     int64_t m_xoInitial;
     float m_temp;
