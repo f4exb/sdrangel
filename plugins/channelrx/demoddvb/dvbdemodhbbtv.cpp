@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <atomic>
+#include <cmath>
+#include <iterator>
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -56,6 +58,10 @@ namespace {
 const QString m_messagePrefix = QStringLiteral("\u0001sdrangel:");
 const QString m_scriptName = QStringLiteral("sdrangel-oipf");
 constexpr int m_checkMs = 250;
+constexpr qint64 m_repeatMs = 60000;   //!< A message like one logged (its numbers aside) held back for this long
+constexpr int m_retransparentMax = 3;   //!< Times the view's made transparent again, for a video area
+// setContent()'s content is percent-encoded to go to the renderer, which takes 2 MB less 30 bytes of it
+constexpr int m_setContentLimit = 2 * 1024 * 1024 - 30;
 constexpr int m_retryMs = 30000;        //!< Before a failed AUTOSTART application's tried again
 constexpr int m_applicationTypeHbbTV = 0x10;
 constexpr int m_autostart = 1;
@@ -180,7 +186,7 @@ DVBDemodHbbTV::DVBDemodHbbTV(DTVApps *apps, QObject *parent) :
 {
     m_server->start();
     connect(m_server, &DTVCarouselServer::served, this, [this](const QString& path, int status) {
-        emit log(QString("Carousel: %1 %2").arg(path).arg(status));
+        logLimited(QString("Carousel: %1 %2").arg(path).arg(status), QString());
     });
 
     QFile script(":/demoddvb/hbbtv/oipf.js");
@@ -357,6 +363,45 @@ void DVBDemodHbbTV::makeTransparent()
     }
 }
 
+// While the video's shown in the page, the view's kept transparent. Qt makes it opaque (its QQuickWidget's clear colour,
+// and not stacked on top, so composited without blending: black over the video) when Chromium reports the page's
+// background opaque, as TVP VOD's black, while it's browsed. When it's cleared for the video, Chromium doesn't always
+// report it's transparent again (until the view's resized, as for full screen): it does once the background SDRangel
+// gives the page changes, so it's made black then transparent again
+void DVBDemodHbbTV::keepTransparent()
+{
+    if (!m_view || m_videoArea.isNull() || m_retransparent || (m_retransparentCount >= m_retransparentMax)) {
+        return;
+    }
+
+    bool opaque = false;
+
+    for (QQuickWidget *widget : m_view->findChildren<QQuickWidget*>()) {
+        opaque = opaque || !widget->testAttribute(Qt::WA_AlwaysStackOnTop);
+    }
+
+    if (!opaque) {
+        return;
+    }
+
+    // Not over and over (each time the page's drawn again, perhaps a flash): if it's still opaque, it's as the page is
+    // (its background opaque, as an image the video's area can't be cut from), until the video's area changes
+    if (++m_retransparentCount >= m_retransparentMax) {
+        qDebug("DVBDemodHbbTV::keepTransparent: the page's drawn opaque over its video: made transparent again, not again");
+    } else {
+        qDebug("DVBDemodHbbTV::keepTransparent: the page's drawn opaque over its video: made transparent again");
+    }
+
+    m_retransparent = true;
+    m_page->setBackgroundColor(Qt::black);
+    QTimer::singleShot(0, this, [this]() {
+        m_page->setBackgroundColor(Qt::transparent);
+        makeTransparent();
+        // Not again until Chromium's had a while to say what the page's background is
+        QTimer::singleShot(1000, this, [this]() { m_retransparent = false; });
+    });
+}
+
 void DVBDemodHbbTV::takeFocus()
 {
     if (!m_view) {
@@ -379,6 +424,19 @@ void DVBDemodHbbTV::takeFocus()
 bool DVBDemodHbbTV::eventFilter(QObject *object, QEvent *event)
 {
     const QEvent::Type type = event->type();
+
+    // A widget the view's made, as WebEngine does for a page's drawing when the view's moved to another window (full
+    // screen video's): made transparent, and not taking the mouse, as the first were, else it hides the video
+    if ((type == QEvent::ChildAdded) && (object == m_view.data()))
+    {
+        QObject *child = static_cast<QChildEvent*>(event)->child();
+
+        if (child && child->isWidgetType())
+        {
+            qDebug("DVBDemodHbbTV::eventFilter: view widget added: %s", child->metaObject()->className());
+            QTimer::singleShot(0, this, &DVBDemodHbbTV::makeTransparent);
+        }
+    }
 
     if ((type == QEvent::KeyPress) || (type == QEvent::KeyRelease) || (type == QEvent::ShortcutOverride))
     {
@@ -412,8 +470,25 @@ void DVBDemodHbbTV::setViewGeometry(const QRect& geometry)
     }
 
     m_view->setGeometry(geometry);
-    // Applications are laid out for 1280 by 720 pixels
-    m_page->setZoomFactor(std::max(0.25, std::min(5.0, geometry.width() / 1280.0)));
+    m_viewWidth = geometry.width();
+    applyZoom();
+}
+
+// Applications are laid out for 1280 by 720 pixels, or some for 1920 by 1080: zoomed to fill the view. The view's
+// device pixels rounded up, so the page's no wider than that (with display scaling the view's a fraction of a device
+// pixel wider, which would make it 1281: an application choosing its layout by media queries would take a wider one)
+void DVBDemodHbbTV::applyZoom()
+{
+    if (m_viewWidth > 0)
+    {
+        const double ratio = m_view ? m_view->devicePixelRatioF() : 1.0;
+        const double devicePixels = std::ceil(m_viewWidth * ratio);
+        const double zoom = devicePixels / (ratio * m_layoutWidth) * (1.0 + 1e-6);
+
+        m_page->setZoomFactor(std::max(0.25, std::min(5.0, zoom)));
+        qDebug("DVBDemodHbbTV::applyZoom: view %d wide, device pixel ratio %.3f, laid out for %d: zoom %.5f",
+            m_viewWidth, ratio, m_layoutWidth, zoom);
+    }
 }
 
 void DVBDemodHbbTV::setViewParent(QWidget *parent)
@@ -492,6 +567,7 @@ void DVBDemodHbbTV::setNetworkAllowed(bool allowed)
 {
     m_interceptor->m_networkAllowed = allowed;
     updateProxy();
+    updateScript();     // Its configuration has the proxy if it's allowed (Qt 5)
 }
 
 // Qt 5's WebEngine sends the page's origin whatever the interceptor says, which broadcasters' servers refuse: a
@@ -561,6 +637,11 @@ bool DVBDemodHbbTV::keyPress(QKeyEvent *event)
         m_redDelivered.start();
     }
 
+    // Which keys the application's given, for the log (as what it does may follow from one)
+    if (!event->isAutoRepeat()) {
+        qDebug("DVBDemodHbbTV::keyPress: key %d given to the application", code);
+    }
+
     m_page->runJavaScript(QString("window.__sdrangelHbbTV && window.__sdrangelHbbTV.key(%1, true)").arg(code));
     return true;
 }
@@ -583,6 +664,7 @@ bool DVBDemodHbbTV::pressRed()
 
     if (isRunning() && m_loaded && (m_keyset & m_keysetRed))
     {
+        qDebug("DVBDemodHbbTV::pressRed: red given to the application");
         m_page->runJavaScript("window.__sdrangelHbbTV && (window.__sdrangelHbbTV.key(403, true), window.__sdrangelHbbTV.key(403, false))");
         m_redDelivered.start();
         return true;
@@ -612,6 +694,12 @@ bool DVBDemodHbbTV::pressRed()
 
 QString DVBDemodHbbTV::getStatus() const
 {
+    // The application's asked for a DRM licence for its video, which can't be played: for a while, over what it shows
+    // (as it may only say it's loading, or that something went wrong)
+    if (m_drmRequest.isValid() && (m_drmRequest.elapsed() < 8000)) {
+        return QString("Protected by %1 DRM: can't be played").arg(m_drmSystem);
+    }
+
     if (!m_userRequest.isValid() || (m_userRequest.elapsed() > 60000)) {
         return QString();
     }
@@ -754,6 +842,7 @@ void DVBDemodHbbTV::showStatus()
 void DVBDemodHbbTV::check()
 {
     showStatus();
+    keepTransparent();
 
     if (m_channel.m_serviceId == 0) {
         return;
@@ -858,6 +947,12 @@ void DVBDemodHbbTV::navigate(const QString& url, const QString& name, uint32_t o
     m_loaded = false;
     m_keysetSinceLoad = false;
     m_pageStatus.clear();
+
+    if (m_layoutWidth != m_defaultLayoutWidth)
+    {
+        m_layoutWidth = m_defaultLayoutWidth;
+        applyZoom();
+    }
 
     if (m_mediaId != 0)
     {
@@ -966,7 +1061,43 @@ void DVBDemodHbbTV::consoleMessage(int level, const QString& message, int line, 
         return;
     }
 
-    emit log(QString("Console%1: %2 (%3:%4)").arg(level >= 2 ? " error" : "").arg(message).arg(source).arg(line));
+    logLimited(QString("Console%1: %2 (%3:%4)").arg(level >= 2 ? " error" : "").arg(message).arg(source).arg(line), source);
+}
+
+// Logged, unless one like it was a short while ago: applications log what they do often (as a player its position, a few
+// times a second) or poll (as a carousel's file, every few seconds), which would fill the log. Like it: the same but
+// for its numbers, from the same script. The next logged says how many weren't
+void DVBDemodHbbTV::logLimited(const QString& text, const QString& from)
+{
+    if (!m_logLimited)
+    {
+        emit log(text);
+        return;
+    }
+
+    static const QRegularExpression numbers("\\d+(\\.\\d+)?");
+    const QString key = from + '\n' + QString(text).replace(numbers, "#");
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    auto it = m_repeated.find(key);
+
+    if ((it != m_repeated.end()) && (now - it->m_loggedAt < m_repeatMs))
+    {
+        it->m_held++;
+        return;
+    }
+
+    const int held = it != m_repeated.end() ? it->m_held : 0;
+    emit log(held > 0 ? QString("%1 (and %2 like it in the last minute, not logged)").arg(text).arg(held) : text);
+
+    // The old forgotten, now and then
+    if (m_repeated.size() > 500)
+    {
+        for (auto old = m_repeated.begin(); old != m_repeated.end();) {
+            old = now - old->m_loggedAt >= m_repeatMs ? m_repeated.erase(old) : std::next(old);
+        }
+    }
+
+    m_repeated.insert(key, Repeated{now, 0});
 }
 
 // From oipf.js
@@ -1025,9 +1156,41 @@ void DVBDemodHbbTV::message(const QJsonObject& message)
         emit log(QString("setChannel %1.%2.%3").arg(message.value("onid").toInt()).arg(message.value("tsid").toInt()).arg(message.value("sid").toInt()));
         emit channelChangeRequested(message.value("onid").toInt(-1), message.value("tsid").toInt(-1), message.value("sid").toInt());
     }
+    else if (type == "drm")
+    {
+        // DRM system ids (DVB CA system ids, as urn:dvb:casystemid:19219): the ones applications use, by name
+        static const QMap<QString, QString> names = {
+            {"19219", "PlayReady"}, {"19156", "Widevine"}, {"19188", "Marlin"}};
+        const QString id = message.value("system").toString();
+        const QString number = id.section(':', -1);
+        const QString system = names.value(number, id.isEmpty() ? QString("DRM") : id);
+        emit log(QString("DRM message (%1) for %2: no DRM system, so protected video can't be played").arg(message.value("type").toString(), system));
+        m_drmSystem = system;
+        m_drmRequest.start();
+        showStatus();
+        emit drmRequested(system);
+    }
     else if (type == "step")
     {
         emit channelStepRequested(message.value("d").toInt());
+    }
+    else if (type == "layout")
+    {
+        // Its html or body 1920 pixels wide: made for a 1920 by 1080 browser. Only as laid out in the viewport it's
+        // zoomed to: while the view's resized it's briefly wider or narrower, and an application choosing its layout
+        // by media queries (as TVP VOD's) would take the wider one, then keep it if it were zoomed for that
+        const int width = message.value("w").toInt();
+        const int viewport = message.value("vw").toInt();
+        const int layoutWidth = (width >= 1900) && (width <= 1940) ? 1920 : m_defaultLayoutWidth;
+
+        qDebug("DVBDemodHbbTV::message: layout %d in a viewport %d wide, zoomed for %d", width, viewport, m_layoutWidth);
+
+        if ((viewport <= m_layoutWidth) && (viewport >= m_layoutWidth - 2) && (layoutWidth != m_layoutWidth))
+        {
+            m_layoutWidth = layoutWidth;
+            applyZoom();
+            emit log(QString("Laid out for %1 pixels wide: zoomed to fit").arg(layoutWidth));
+        }
     }
     else if (type == "video")
     {
@@ -1042,6 +1205,12 @@ void DVBDemodHbbTV::message(const QJsonObject& message)
         if (area != m_videoArea)
         {
             m_videoArea = area;
+            m_retransparentCount = 0;
+            // Once the page's cleared its backgrounds over it, and Chromium's said what that makes the page's
+            QTimer::singleShot(300, this, &DVBDemodHbbTV::keepTransparent);
+            qDebug("DVBDemodHbbTV::message: video %s: %s", qPrintable(message.value("what").toString()),
+                message.value("full").toBool() ? "full screen" : message.value("hidden").toBool() ? "hidden (full screen)"
+                : qPrintable(QString("%1,%2 %3x%4").arg(area.x(), 0, 'f', 3).arg(area.y(), 0, 'f', 3).arg(area.width(), 0, 'f', 3).arg(area.height(), 0, 'f', 3)));
             emit videoAreaChanged(area);
         }
     }
@@ -1054,6 +1223,26 @@ void DVBDemodHbbTV::message(const QJsonObject& message)
 
         if (command == "load")
         {
+            // Only by HTTP. SDRangel's player (FFmpeg) fetches it, not the browser, so the interceptor doesn't see it:
+            // refused here as the browser's requests are when the internet's not allowed (but a carousel's file), and
+            // other protocols (as file:, concat:) never, as the page could ask for anything
+            const QUrl requested(url);
+            const bool http = (requested.scheme() == "http") || (requested.scheme() == "https");
+            const bool allowed = http && (m_interceptor->m_networkAllowed || m_server->isServerUrl(url));
+
+            if (!allowed)
+            {
+                emit log(QString("Media %1 refused: %2").arg(id).arg(url));
+                QJsonObject data;
+                data.insert("code", http ? 2 : 4);     // MEDIA_ERR_NETWORK, MEDIA_ERR_SRC_NOT_SUPPORTED
+                data.insert("message", http ? "The internet isn't allowed" : "Not an HTTP URL");
+                mediaEvent(id, "error", data);
+                return;
+            }
+
+            // And the protocols its demuxers open (as a manifest's segments) only those of HTTP
+            options["protocol_whitelist"] = "http,https,tcp,tls,crypto,httpproxy";
+
             // FFmpeg fetches it as the page would: with its user agent, and a carousel's file from the server by the
             // loopback address (FFmpeg's resolver doesn't know *.localhost), its host given in the header
             options["user_agent"] = m_profile->httpUserAgent();
@@ -1198,7 +1387,19 @@ void DVBDemodHbbTV::downloadRequested(const QUrl& url, const QString& mimeType)
 
         // With oipf.js in it as well: given so, a page's scripts aren't always injected (Qt WebEngine doesn't inject
         // them in one given after another, as when the service changes from one application served so to another)
-        m_page->setContent(withScript(reply->readAll(), scriptSource()), "text/html", url);
+        const QByteArray page = withScript(reply->readAll(), scriptSource());
+
+        if (page.toPercentEncoding().size() < m_setContentLimit)
+        {
+            m_page->setContent(page, "text/html", url);
+            return;
+        }
+
+        // Too large to be given: a page that loads it (from where it is, so of its origin) and writes it into itself
+        const QString contentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+        const QRegularExpressionMatch charset = QRegularExpression("charset\\s*=\\s*\"?([^\";\\s]+)", QRegularExpression::CaseInsensitiveOption).match(contentType);
+        emit log(QString("%1 is too large to be given to the page (%2 bytes): loaded by a script").arg(url.toString()).arg(page.size()));
+        m_page->setContent(loaderPage(url, charset.hasMatch() ? charset.captured(1) : QString("utf-8")), "text/html", url);
     });
 }
 
@@ -1246,7 +1447,10 @@ QJsonObject DVBDemodHbbTV::configuration() const
     config.insert("version", QCoreApplication::applicationVersion());
     config.insert("serverPort", m_server->getPort());
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    config.insert("proxy", m_server->getProxyPath());
+    // Only if the internet's allowed: else requests to it fail as the browser's own do (not as the proxy's 404)
+    if (m_interceptor->m_networkAllowed) {
+        config.insert("proxy", m_server->getProxyPath());
+    }
 #endif
     return config;
 }
@@ -1255,9 +1459,11 @@ QJsonObject DVBDemodHbbTV::configuration() const
 // </ (so it can be in a page's <script> element)
 QString DVBDemodHbbTV::scriptSource() const
 {
-    // Not by arg(): the script has %s of its own
-    const QString source = "window.__sdrangelHbbTVConfig = " + QString::fromUtf8(QJsonDocument(configuration()).toJson(QJsonDocument::Compact))
-        + ";\n" + m_oipfScript;
+    // Not by arg(): the script has %s of its own. The configuration's < escaped (only in its strings, as JSON has no
+    // other): its programmes' names and descriptions are the broadcaster's, and <!-- with <script in a page's script
+    // element would make the rest of the page part of it
+    const QString config = QString::fromUtf8(QJsonDocument(configuration()).toJson(QJsonDocument::Compact)).replace("<", "\\u003c");
+    const QString source = "window.__sdrangelHbbTVConfig = " + config + ";\n" + m_oipfScript;
     QString ascii;
     ascii.reserve(source.size());
 
@@ -1294,6 +1500,26 @@ QByteArray DVBDemodHbbTV::withScript(const QByteArray& page, const QString& scri
     QByteArray result = page;
     result.insert(std::max(0, at), element);
     return result;
+}
+
+// A page that loads one too large to be given by setContent(): oipf.js, then its own script fetching the page (from
+// where it is, its origin and URL the page's) and writing it into itself, as it would have been
+QByteArray DVBDemodHbbTV::loaderPage(const QUrl& url, const QString& charset) const
+{
+    const QString quotedUrl = QString::fromUtf8(QJsonDocument(QJsonArray{url.toString(QUrl::FullyEncoded)}).toJson(QJsonDocument::Compact)).replace("<", "\\u003c");
+    const QString quotedType = QString::fromUtf8(QJsonDocument(QJsonArray{QString("text/html; charset=%1").arg(charset)}).toJson(QJsonDocument::Compact))
+        .replace("<", "\\u003c");
+    const QString loader = QString(
+        "(function () {"
+        " var x = new XMLHttpRequest();"
+        " x.open('GET', %1[0]);"
+        " x.overrideMimeType(%2[0]);"
+        " x.onload = function () { document.open(); document.write(x.responseText); document.close(); };"
+        " x.onerror = function () { console.log('[sdrangel] the page could not be loaded'); };"
+        " x.send();"
+        " })();").arg(quotedUrl, quotedType);
+    return "<!DOCTYPE html><html><head><script>" + scriptSource().toLatin1() + "</script><script>" + loader.toLatin1()
+        + "</script></head><body></body></html>";
 }
 
 // oipf.js, with the TV's state, in each page before its scripts

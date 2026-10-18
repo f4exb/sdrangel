@@ -62,6 +62,7 @@ public:
     double getDuration() const;         //!< NaN until known, infinite if live
     void setAudioOutput(int sampleRate, double latency);
     DTVVideoPlayer *getPlayer() { return m_player; }
+    int getBuffered();                  //!< Bytes of the stream written, not yet read by the player
 
 signals:
     void metadata(double duration, int width, int height);
@@ -87,6 +88,7 @@ private:
     std::unique_ptr<DTVTSFifo> m_fifo;
     DTVStreamRemuxer *m_remuxer;
     DTVVideoPlayer *m_player;
+    bool m_urlResolved = false;         //!< m_url's the one its redirect gave (or it doesn't redirect)
     std::atomic<double> m_frameTime;    //!< Timestamp of the last picture shown, NaN if none yet
     std::atomic<qint64> m_frameAt;      //!< When, ms since epoch
     std::atomic<bool> m_playingSignalled;

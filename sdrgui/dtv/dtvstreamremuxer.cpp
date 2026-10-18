@@ -17,14 +17,21 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
+#include <deque>
 #include <iterator>
 #include <limits>
+#include <mutex>
+#include <thread>
 
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
 }
+
+#include <QElapsedTimer>
 
 #include "dtv/dtvtsfifo.h"
 #include "dtv/dtvstreamremuxer.h"
@@ -32,13 +39,55 @@ extern "C" {
 namespace {
 
 constexpr int m_fifoHigh = 3 * 1024 * 1024;     //!< Bytes in the FIFO above which writing waits
+// Seconds ahead of real time packets are written: the player decodes what it's given straight away (as a broadcast
+// comes in real time), and keeps its audio FIFO (a second) to 3/4 full by dropping the oldest, so a stream given faster
+// than it's played sounds too fast, and the video, timed by the audio, runs ahead. Enough for the decoders' delays
+constexpr double m_lead = 0.3;
 constexpr int m_ioBufferSize = 188 * 512;
+// Read ahead of what's written, by another thread: reading waits while a segment's fetched (as FFmpeg's DASH and HLS
+// demuxers do), which would otherwise hold up what's due, as the player plays it (video late, then audio dropped as
+// what was held up comes all at once)
+constexpr double m_readAhead = 10.0;                    //!< Seconds of the stream read ahead, at most
+constexpr size_t m_readAheadBytes = 64 * 1024 * 1024;   //!< And bytes
+// What's written late by more than this (the stream's fetched more slowly than it's played, for longer than what's
+// read ahead) is played on from then, rather than what's held up written all at once
+constexpr double m_resync = 1.0;
 
 QString errorText(int error)
 {
     char text[AV_ERROR_MAX_STRING_SIZE] = {0};
     av_strerror(error, text, sizeof(text));
     return QString::fromUtf8(text);
+}
+
+// The URL an HTTP one's redirected to, as FFmpeg's asked for it (its options given): else as it is. A DASH manifest's
+// segments are found relative to where it is, which FFmpeg's demuxer takes to be the URL it's given, not where that
+// redirects to: as TVP's, a token's URL redirected to a cache, whose segments from the first host fail (412)
+QString redirected(const QString& url, const AVDictionary *options, AVIOInterruptCB *interrupt)
+{
+    if (!url.startsWith("http:", Qt::CaseInsensitive) && !url.startsWith("https:", Qt::CaseInsensitive)) {
+        return url;
+    }
+
+    AVDictionary *copy = nullptr;
+    av_dict_copy(&copy, options, 0);
+    AVIOContext *io = nullptr;
+    QString result = url;
+
+    if (avio_open2(&io, url.toUtf8().constData(), AVIO_FLAG_READ, interrupt, &copy) >= 0)
+    {
+        uint8_t *location = nullptr;
+
+        if ((av_opt_get(io, "location", AV_OPT_SEARCH_CHILDREN, &location) >= 0) && location && *location) {
+            result = QString::fromUtf8((const char *) location);
+        }
+
+        av_free(location);
+        avio_closep(&io);
+    }
+
+    av_dict_free(&copy);
+    return result;
 }
 
 } // namespace
@@ -104,7 +153,15 @@ void DTVStreamRemuxer::run()
     }
 
     av_dict_set(&options, "reconnect", "1", 0);
-    int ret = avformat_open_input(&in, m_url.toUtf8().constData(), nullptr, &options);
+    const QString url = m_resolveRedirects ? redirected(m_url, options, &in->interrupt_callback) : m_url;
+
+    if (url != m_url)
+    {
+        qDebug("DTVStreamRemuxer::run: %s redirected to %s", qPrintable(m_url.left(80)), qPrintable(url.left(120)));
+        emit resolved(url);
+    }
+
+    int ret = avformat_open_input(&in, url.toUtf8().constData(), nullptr, &options);
     av_dict_free(&options);
 
     if (ret < 0)
@@ -214,29 +271,115 @@ void DTVStreamRemuxer::run()
     }
     else
     {
+        // Packets read ahead, with their times (seconds, in the stream), and how much
+        std::mutex mutex;
+        std::condition_variable changed;
+        std::deque<std::pair<AVPacket *, double>> queue;
+        size_t queuedBytes = 0;
+        double lastWritten = -1e9;          // Time of the last packet written
+        bool readDone = false;              // The end of the stream (or an error) read
+        bool endOfStream = false;           // The end of the stream
+
+        std::thread reader([&]() {
+            AVPacket *read = av_packet_alloc();
+
+            while (!m_stop)
+            {
+                {
+                    std::unique_lock<std::mutex> lock(mutex);
+                    changed.wait(lock, [&]() {
+                        return m_stop || queue.empty()
+                            || ((queuedBytes < m_readAheadBytes) && (queue.back().second - lastWritten < m_readAhead));
+                    });
+                }
+
+                if (m_stop) {
+                    break;
+                }
+
+                const int result = av_read_frame(in, read);
+
+                if (result < 0)
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    endOfStream = result != AVERROR_EXIT;
+                    break;
+                }
+
+                const int s = read->stream_index;
+
+                if ((s < 0) || (s >= 64) || (outIndex[s] < 0) || ((read->dts == AV_NOPTS_VALUE) && (read->pts == AV_NOPTS_VALUE)))
+                {
+                    av_packet_unref(read);
+                    continue;
+                }
+
+                const int64_t first = read->dts != AV_NOPTS_VALUE ? read->dts : read->pts;
+                const double time = av_rescale_q(first, in->streams[s]->time_base, AVRational{1, AV_TIME_BASE}) / (double) AV_TIME_BASE;
+                std::lock_guard<std::mutex> lock(mutex);
+                queuedBytes += read->size;
+                queue.emplace_back(av_packet_clone(read), time);
+                av_packet_unref(read);
+                changed.notify_all();
+            }
+
+            av_packet_free(&read);
+            std::lock_guard<std::mutex> lock(mutex);
+            readDone = true;
+            changed.notify_all();
+        });
+
         int64_t base = AV_NOPTS_VALUE;      // The first packet's time (in AV_TIME_BASE)
+        // Seconds it's been played since its first packet was written: standing still while it isn't played
+        QElapsedTimer clock;
+        bool clockRunning = false;
+        double played = 0.0;                // Before the clock was last stopped
+        auto now = [&]() {
+            const bool playing = m_playing;
+
+            if (playing && !clockRunning)
+            {
+                clock.start();
+                clockRunning = true;
+            }
+            else if (!playing && clockRunning)
+            {
+                played += clock.nsecsElapsed() * 1e-9;
+                clockRunning = false;
+            }
+
+            return played + (clockRunning ? clock.nsecsElapsed() * 1e-9 : 0.0);
+        };
+        double slip = 0.0;                  // Seconds it's been held up for, beyond what was read ahead
 
         while (!m_stop)
         {
-            ret = av_read_frame(in, packet);
+            AVPacket *next = nullptr;
 
-            if (ret < 0)
             {
-                if (ret != AVERROR_EXIT) {
-                    m_finished = true;
+                std::unique_lock<std::mutex> lock(mutex);
+
+                while (!m_stop && queue.empty() && !readDone) {
+                    changed.wait_for(lock, std::chrono::milliseconds(20));
                 }
 
-                break;
+                if (m_stop || queue.empty())
+                {
+                    // All of it written
+                    m_finished = !m_stop && endOfStream;
+                    break;
+                }
+
+                next = queue.front().first;
+                queuedBytes -= next->size;
+                lastWritten = queue.front().second;
+                queue.pop_front();
+                changed.notify_all();
             }
 
+            av_packet_free(&packet);
+            packet = next;
             const int s = packet->stream_index;
-
-            if ((s < 0) || (s >= 64) || (outIndex[s] < 0) || ((packet->dts == AV_NOPTS_VALUE) && (packet->pts == AV_NOPTS_VALUE)))
-            {
-                av_packet_unref(packet);
-                continue;
-            }
-
             const AVRational inBase = in->streams[s]->time_base;
             const int64_t first = packet->dts != AV_NOPTS_VALUE ? packet->dts : packet->pts;
 
@@ -247,6 +390,21 @@ void DTVStreamRemuxer::run()
                 m_offset = (base - (in->start_time != AV_NOPTS_VALUE ? in->start_time : 0)) / (double) AV_TIME_BASE - m_timestampStart;
                 qDebug("DTVStreamRemuxer::run: start_time %.3f, first packet (stream %d) %.3f, pts %.3f", in->start_time / (double) AV_TIME_BASE, s,
                     base / (double) AV_TIME_BASE, packet->pts != AV_NOPTS_VALUE ? packet->pts * av_q2d(inBase) : -1.0);
+            }
+
+            // Played in real time: a packet's written no sooner than its time, less the lead
+            double due = (av_rescale_q(first, inBase, AVRational{1, AV_TIME_BASE}) - base) / (double) AV_TIME_BASE - m_lead + slip;
+            const double late = now() - due;
+
+            if (late > m_resync)
+            {
+                qDebug("DTVStreamRemuxer::run: %.1f s late (the stream's fetched more slowly than it's played): played on from now", late);
+                slip += late;
+                due += late;
+            }
+
+            while (!m_stop && (now() < due)) {
+                msleep((unsigned long) std::max(1.0, std::min(20.0, (due - now()) * 1000.0)));
             }
 
             // Rebased, to start at m_timestampStart
@@ -269,6 +427,19 @@ void DTVStreamRemuxer::run()
             if ((ret < 0) && (ret != AVERROR_EXIT)) {
                 qDebug("DTVStreamRemuxer::run: write: %s", qPrintable(errorText(ret)));
             }
+        }
+
+        // The reader stopped (the loop only ends early when it's stopped, which interrupts its reading), and what it
+        // read and wasn't written freed
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            changed.notify_all();
+        }
+
+        reader.join();
+
+        for (auto& queued : queue) {
+            av_packet_free(&queued.first);
         }
 
         if (!m_stop) {
