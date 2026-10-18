@@ -22,14 +22,65 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+#include <cerrno>
 #include <regex>
+#ifdef LIBIIO_V1
+#include <iio/iio.h>
+#else
 #include <iio.h>
+#endif
 #include <boost/lexical_cast.hpp>
 #include <QtGlobal>
 
 #include "dsp/wfir.h"
 #include "deviceplutosdr.h"
 #include "deviceplutosdrbox.h"
+
+#ifdef LIBIIO_V1
+// libiio 1.x has no iio_device_identify_filename(): match the sysfs file name against
+// the channel attributes first, then against the device and debug attribute names.
+// type is set to 0 for a channel, 1 for a device and 2 for a debug attribute.
+static const struct iio_attr *findAttrByFilename(const struct iio_device *dev, const char *filename, int& type)
+{
+    unsigned int nbChannels = iio_device_get_channels_count(dev);
+
+    for (unsigned int i = 0; i < nbChannels; i++)
+    {
+        const struct iio_channel *chn = iio_device_get_channel(dev, i);
+        unsigned int nbAttrs = iio_channel_get_attrs_count(chn);
+
+        for (unsigned int j = 0; j < nbAttrs; j++)
+        {
+            const struct iio_attr *attr = iio_channel_get_attr(chn, j);
+            const char *attrFilename = iio_attr_get_filename(attr);
+
+            if (attrFilename && (strcmp(attrFilename, filename) == 0))
+            {
+                type = 0;
+                return attr;
+            }
+        }
+    }
+
+    const struct iio_attr *attr = iio_device_find_attr(dev, filename);
+
+    if (attr)
+    {
+        type = 1;
+        return attr;
+    }
+
+    attr = iio_device_find_debug_attr(dev, filename);
+
+    if (attr)
+    {
+        type = 2;
+        return attr;
+    }
+
+    return nullptr;
+}
+#endif
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_devSampleRate(0),
@@ -50,7 +101,15 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_rxSampleBytes(0),
         m_txSampleBytes(0)
 {
+#ifdef LIBIIO_V1
+    m_ctx = iio_create_context(nullptr, uri.c_str());
+
+    if (iio_err(m_ctx)) {
+        m_ctx = nullptr;
+    }
+#else
     m_ctx = iio_create_context_from_uri(uri.c_str());
+#endif
 
     if (m_ctx)
     {
@@ -118,7 +177,15 @@ bool DevicePlutoSDRBox::probeURI(const std::string& uri)
     bool retVal;
     struct iio_context *ctx;
 
+#ifdef LIBIIO_V1
+    ctx = iio_create_context(nullptr, uri.c_str());
+
+    if (iio_err(ctx)) {
+        ctx = nullptr;
+    }
+#else
     ctx = iio_create_context_from_uri(uri.c_str());
+#endif
     retVal = (ctx != 0);
 
     if (ctx) {
@@ -151,8 +218,10 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
     for (std::vector<std::string>::const_iterator it = params.begin(); it != params.end(); ++it)
     {
+#ifndef LIBIIO_V1
         struct iio_channel *chn = 0;
         const char *attr = 0;
+#endif
         std::size_t pos;
         int ret;
         int type;
@@ -168,6 +237,17 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
         std::string key = it->substr(0, pos);
         std::string val = it->substr(pos + 1, std::string::npos);
 
+#ifdef LIBIIO_V1
+        const struct iio_attr *attr = findAttrByFilename(dev, key.c_str(), type);
+
+        if (!attr)
+        {
+            std::cerr << "DevicePlutoSDRBox::set_params: Parameter not recognized: " << key << std::endl;
+            continue;
+        }
+
+        ret = (int) iio_attr_write_string(attr, val.c_str());
+#else
         ret = iio_device_identify_filename(dev, key.c_str(), &chn, &attr);
 
         if (ret)
@@ -186,6 +266,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
             ret = iio_device_debug_attr_write(dev, attr, val.c_str());
             type = 2;
         }
+#endif
 
         if (ret < 0)
         {
@@ -219,10 +300,12 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
 bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, std::string &value)
 {
+#ifndef LIBIIO_V1
     struct iio_channel *chn = 0;
     const char *attr = 0;
-    char valuestr[256];
     int ret;
+#endif
+    char valuestr[256];
     ssize_t nchars;
     iio_device *dev;
 
@@ -242,6 +325,22 @@ bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, 
         break;
     }
 
+#ifdef LIBIIO_V1
+    int type;
+    const struct iio_attr *attr = findAttrByFilename(dev, param.c_str(), type);
+
+    if (!attr)
+    {
+        std::cerr << "DevicePlutoSDRBox::get_param: Parameter not recognized: " << param << std::endl;
+        return false;
+    }
+
+    nchars = iio_attr_read_raw(attr, valuestr, sizeof(valuestr) - 1);
+
+    if (nchars >= 0) {
+        valuestr[nchars] = '\0';
+    }
+#else
     ret = iio_device_identify_filename(dev, param.c_str(), &chn, &attr);
 
     if (ret)
@@ -257,6 +356,7 @@ bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, 
     } else {
         nchars = iio_device_debug_attr_read(dev, attr, valuestr, 256);
     }
+#endif
 
     if (nchars < 0)
     {
@@ -274,7 +374,12 @@ void DevicePlutoSDRBox::setFilter(const std::string &filterConfigStr)
 {
     int ret;
 
+#ifdef LIBIIO_V1
+    const struct iio_attr *attr = iio_device_find_attr(m_devPhy, "filter_fir_config");
+    ret = attr ? (int) iio_attr_write_raw(attr, filterConfigStr.c_str(), filterConfigStr.size()) : -ENOENT;
+#else
     ret = iio_device_attr_write_raw(m_devPhy, "filter_fir_config", filterConfigStr.c_str(), filterConfigStr.size());
+#endif
 
     if (ret < 0)
     {
