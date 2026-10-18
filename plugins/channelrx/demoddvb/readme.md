@@ -463,11 +463,14 @@ The Apps button opens a list of the interactive (red button) applications:
   the transport stream, and how much of each has been received. A large carousel takes a minute or so, and is
   received again as the broadcaster updates it.
 
-Right click the Apps button to run the HbbTV applications.
+The switch beside it (a play symbol in a screen) runs the HbbTV applications.
 
-Keys for the red, green, yellow and blue buttons are R, G, Y and B (or F1 to F4), Back is Backspace, and the arrows, Enter and digits are themselves.
+The red button shows while the service has an application to run; it and the green, yellow and blue buttons correspond
+to those buttons on a TV remote control. You can also use the keys R, G, Y and B (or F1 to F4). Back is the Backspace kay.
+Use the arrows keys to navigate, and press Enter for OK.
 
 Some broadcasters (such as the BBC) only serve their online applications to TVs they've certified, so videos may not play.
+Other videos requiring DRM will also not play.
 
 <h4>Scan</h4>
 

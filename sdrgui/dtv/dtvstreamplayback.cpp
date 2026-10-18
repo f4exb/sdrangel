@@ -64,6 +64,7 @@ void DTVStreamPlayback::load(const QString& url, const QMap<QString, QString>& o
     m_options = options;
     m_position = 0.0;
     m_duration = std::nan("");
+    m_urlResolved = false;
     startRemuxer(0.0);
     m_timer.start(m_checkMs);
 }
@@ -78,6 +79,8 @@ void DTVStreamPlayback::play()
 
     if (!m_remuxer) {
         startRemuxer(m_position);
+    } else {
+        m_remuxer->setPlaying(true);
     }
 
     startPlayer();
@@ -134,6 +137,11 @@ double DTVStreamPlayback::getPosition() const
     return m_position;
 }
 
+int DTVStreamPlayback::getBuffered()
+{
+    return m_fifo->fill();
+}
+
 double DTVStreamPlayback::getDuration() const
 {
     return m_duration;
@@ -151,6 +159,14 @@ void DTVStreamPlayback::startRemuxer(double position)
     m_fifo->reset();
     m_remuxer = new DTVStreamRemuxer(m_fifo.get(), m_url, m_options, position, this);
     DTVStreamRemuxer *remuxer = m_remuxer;
+    m_remuxer->setPlaying(m_playing);
+    // Its redirect found once: the URL it gives used after (as when it's paused or seeks)
+    m_remuxer->setResolveRedirects(!m_urlResolved);
+    connect(m_remuxer, &DTVStreamRemuxer::resolved, this, [this, remuxer](const QString& url) {
+        if (remuxer == m_remuxer) {
+            m_url = url;
+        }
+    }, Qt::QueuedConnection);
 
     connect(m_remuxer, &DTVStreamRemuxer::opened, this, [this, remuxer](double duration, int width, int height) {
         if (remuxer != m_remuxer) {
@@ -159,6 +175,7 @@ void DTVStreamPlayback::startRemuxer(double position)
 
         const bool first = std::isnan(m_duration);
         m_duration = duration;
+        m_urlResolved = true;
 
         if (first) {
             emit metadata(duration, width, height);
