@@ -653,6 +653,22 @@ void DevicePlutoSDRBox::closeSecondTx()
     if (m_txChannels.size() > 3) { disableChannel(m_txChannels.at(3), m_txMask); }
 }
 
+// Other applications (e.g. SoapyPlutoSDR) may leave an LO powered down, and the Tx LO
+// stays up in FDD mode even with no stream running, so set the LO state explicitly
+void DevicePlutoSDRBox::setRxLOPowerdown(bool powerdown)
+{
+    std::vector<std::string> params;
+    params.push_back(std::string("out_altvoltage0_RX_LO_powerdown=") + (powerdown ? "1" : "0"));
+    set_params(DEVICE_PHY, params);
+}
+
+void DevicePlutoSDRBox::setTxLOPowerdown(bool powerdown)
+{
+    std::vector<std::string> params;
+    params.push_back(std::string("out_altvoltage1_TX_LO_powerdown=") + (powerdown ? "1" : "0"));
+    set_params(DEVICE_PHY, params);
+}
+
 struct iio_buffer *DevicePlutoSDRBox::createRxBuffer(unsigned int size, bool cyclic)
 {
 #ifdef LIBIIO_V1

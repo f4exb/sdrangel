@@ -93,6 +93,8 @@ public:
     void closeTx();       //!< Close first Tx (Tx0)
     void closeSecondRx(); //!< Close second Rx (Rx1)
     void closeSecondTx(); //!< Close second Tx (Tx1)
+    void setRxLOPowerdown(bool powerdown); //!< Power down (true) or up (false) the Rx LO
+    void setTxLOPowerdown(bool powerdown); //!< Power down (true) or up (false) the Tx LO
     int getNbRx() const { return m_rxChannels.size() / 2; }
     int getNbTx() const { return m_txChannels.size() / 2; }
     int getRxSampleBytes() const { return m_rxSampleBytes; }

@@ -124,6 +124,8 @@ bool PlutoSDROutput::start()
         return false;
     }
 
+    m_deviceShared.m_deviceParams->getBox()->setTxLOPowerdown(false);
+
     // start / stop streaming is done in the thread.
 
     m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo);
@@ -172,6 +174,10 @@ void PlutoSDROutput::stop()
         delete m_plutoSDROutputThread;
         m_plutoSDROutputThread = nullptr;
     }
+
+    if (m_deviceShared.m_deviceParams && m_deviceShared.m_deviceParams->getBox()) {
+        m_deviceShared.m_deviceParams->getBox()->setTxLOPowerdown(true);
+    }
 }
 
 void PlutoSDROutput::handleError(int errorCode)
@@ -191,6 +197,10 @@ void PlutoSDROutput::handleError(int errorCode)
         m_plutoSDROutputThread->wait();
         delete m_plutoSDROutputThread;
         m_plutoSDROutputThread = nullptr;
+    }
+
+    if (m_deviceShared.m_deviceParams && m_deviceShared.m_deviceParams->getBox()) {
+        m_deviceShared.m_deviceParams->getBox()->setTxLOPowerdown(true);
     }
 
     const QString errorMessage =
@@ -398,6 +408,7 @@ bool PlutoSDROutput::openDevice()
     }
 
     m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false); // PlutoSDR buffer size is counted in number of (I,Q) samples
+    plutoBox->setTxLOPowerdown(true); // do not radiate LO leakage until started
 
     return true;
 }

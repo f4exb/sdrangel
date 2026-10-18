@@ -124,6 +124,8 @@ bool PlutoSDRInput::start()
         return false;
     }
 
+    m_deviceShared.m_deviceParams->getBox()->setRxLOPowerdown(false);
+
     // start / stop streaming is done in the thread.
 
     m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
@@ -172,6 +174,10 @@ void PlutoSDRInput::stop()
         m_plutoSDRInputThread->wait();
         delete m_plutoSDRInputThread;
         m_plutoSDRInputThread = nullptr;
+    }
+
+    if (m_deviceShared.m_deviceParams && m_deviceShared.m_deviceParams->getBox()) {
+        m_deviceShared.m_deviceParams->getBox()->setRxLOPowerdown(true);
     }
 }
 
