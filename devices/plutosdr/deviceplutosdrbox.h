@@ -141,6 +141,9 @@ private:
     struct iio_channels_mask *m_rxMask; //!< libiio 1.x: Rx channels enabled for streaming
     struct iio_stream  *m_rxStream;     //!< libiio 1.x: Rx block stream
     const struct iio_block *m_rxBlock;  //!< libiio 1.x: last Rx block received
+    struct iio_channels_mask *m_txMask; //!< libiio 1.x: Tx channels enabled for streaming
+    struct iio_stream  *m_txStream;     //!< libiio 1.x: Tx block stream
+    const struct iio_block *m_txBlock;  //!< libiio 1.x: Tx block being filled
     bool m_valid;
     int64_t m_xoInitial;
     float m_temp;
