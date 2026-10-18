@@ -23,7 +23,11 @@
 #include <regex>
 #include <memory>
 #include <string_view>
+#ifdef LIBIIO_V1
+#include <iio/iio.h>
+#else
 #include <iio.h>
+#endif
 #include <utility>
 
 #include <QtGlobal>
@@ -31,9 +35,39 @@
 #include "deviceplutosdrbox.h"
 #include "deviceplutosdrscan.h"
 
+#ifdef LIBIIO_V1
+// libiio 1.x reports network contexts as a bare host name, without the "ip:" prefix
+static std::string withBackendPrefix(const char *uri)
+{
+    static const char *backends[] = {"ip:", "usb:", "local:", "serial:", "xml:"};
+
+    for (const char *backend : backends)
+    {
+        if (std::strncmp(uri, backend, std::strlen(backend)) == 0) {
+            return std::string(uri);
+        }
+    }
+
+    return std::string("ip:") + uri;
+}
+#endif
+
 void DevicePlutoSDRScan::scan()
 {
     int i, num_contexts;
+#ifdef LIBIIO_V1
+    struct iio_scan *scan_ctx;
+
+    scan_ctx = iio_scan(nullptr, nullptr);
+
+    if (iio_err(scan_ctx))
+    {
+        qCritical("PlutoSDRScan::scan: could not scan contexts");
+        return;
+    }
+
+    num_contexts = (int) iio_scan_get_results_count(scan_ctx);
+#else
     struct iio_scan_context *scan_ctx;
     struct iio_context_info **info;
 
@@ -50,8 +84,10 @@ void DevicePlutoSDRScan::scan()
     if (num_contexts < 0)
     {
         qCritical("PlutoSDRScan::scan: could not get contexts");
+        iio_scan_context_destroy(scan_ctx);
         return;
     }
+#endif
 
     m_scans.clear();
     m_scans.reserve(num_contexts);
@@ -59,15 +95,32 @@ void DevicePlutoSDRScan::scan()
 
     for (i = 0; i < num_contexts; i++)
     {
+#ifdef LIBIIO_V1
+        const char *description = iio_scan_get_description(scan_ctx, i);
+        const char *scannedUri = iio_scan_get_uri(scan_ctx, i);
+
+        if (!scannedUri) {
+            continue;
+        }
+
+        const std::string prefixedUri = withBackendPrefix(scannedUri);
+        const char *uri = prefixedUri.c_str();
+#else
         const char *description = iio_context_info_get_description(info[i]);
         const char *uri = iio_context_info_get_uri(info[i]);
+#endif
 
-        if (!DevicePlutoSDRBox::probeURI(std::string(uri)) || !description) {
+        if (!description) {
             continue;
         }
 
         // For uri which are ip:*.local replace with the ip address
         std::string fixedUri = replaceHostnameWithIP(uri, description);
+
+        // Probe the address that will actually be used: the mDNS name may resolve to another interface
+        if (!DevicePlutoSDRBox::probeURI(fixedUri)) {
+            continue;
+        }
 
         qDebug("PlutoSDRScan::scan: %d: %s [%s] [%s]", i, description, uri, fixedUri.c_str());
         const std::string_view descriptionView = std::string_view{description};
@@ -102,8 +155,12 @@ void DevicePlutoSDRScan::scan()
         }
     }
 
+#ifdef LIBIIO_V1
+    iio_scan_destroy(scan_ctx);
+#else
     iio_context_info_list_free(info);
     iio_scan_context_destroy(scan_ctx);
+#endif
 }
 
 const std::string* DevicePlutoSDRScan::getURIAt(unsigned int index) const
