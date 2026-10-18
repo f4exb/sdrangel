@@ -806,10 +806,17 @@ bool DTVGuideOverlay::handleMouse(QMouseEvent *event)
 
     // A double-click's second click comes as MouseButtonDblClick, after its first as a press. If that opened or closed
     // the guide or ribbon (or played a channel), what the second hits is something else: it's ignored, rather than
-    // playing whatever's now under the pointer, or leaving full screen
-    if (type == QEvent::MouseButtonPress) {
+    // playing whatever's now under the pointer, or leaving full screen. Only if that press was the double-click's
+    // first: the widget may have used it rather than give it here (as to give an HbbTV application the keys), leaving
+    // the last press here an earlier one
+    if (type == QEvent::MouseButtonPress)
+    {
         m_pressMode = m_mode;
-    } else if ((type == QEvent::MouseButtonDblClick) && (m_mode != m_pressMode)) {
+        m_pressTime.start();
+    }
+    else if ((type == QEvent::MouseButtonDblClick) && (m_mode != m_pressMode) && m_pressTime.isValid()
+        && (m_pressTime.elapsed() <= QGuiApplication::styleHints()->mouseDoubleClickInterval()))
+    {
         return true;
     }
 

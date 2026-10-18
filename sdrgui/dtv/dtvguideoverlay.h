@@ -25,6 +25,7 @@
 #include <QColor>
 #include <QFont>
 #include <QImage>
+#include <QElapsedTimer>
 #include <QRectF>
 #include <QObject>
 #include <QPointer>
@@ -187,6 +188,7 @@ private:
     QSize m_renderSize;
     QString m_message;          //!< Shown on the ribbon or the guide, as why a channel can't be played
     Mode m_pressMode;           //!< Before the last mouse press, to ignore a double-click after one that opened or closed a view
+    QElapsedTimer m_pressTime;  //!< Since the last mouse press
     std::vector<HitArea> m_hits;
 
     static constexpr int m_windowSeconds = 2 * 3600;

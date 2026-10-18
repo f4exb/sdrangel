@@ -251,6 +251,8 @@ private slots:
     void hbbtvVideoArea(const QRectF& area);
     void hbbtvChannelChange(int networkId, int transportStreamId, int serviceId);
     void hbbtvRed();                        //!< The red button clicked
+    void hbbtvKey(int key);                 //!< A coloured button clicked: its key (G, Y or B) given to the application
+    void on_hbbtv_toggled(bool checked);
     void hbbtvMedia(const QString& command, int id, const QString& url, const QMap<QString, QString>& options, double position);
     void stopStreamPlayback();              //!< The application's media stopped, and the broadcast played again
     void displayRedButton();

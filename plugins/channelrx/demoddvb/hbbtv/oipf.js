@@ -12,6 +12,141 @@
     }
 
     var config = window.__sdrangelHbbTVConfig || {};
+    // The console's own log, for messages to SDRangel and its log: an application may replace it (as BBC's do, with one
+    // that does nothing), which would cut SDRangel off from the page. Taken before the application's scripts run
+    var consoleLog = console.log.bind(console);
+
+    // A page whose root (html) has an opaque background when it's loaded is drawn opaque from then on (Qt WebEngine
+    // keeps that colour behind it): the video under it, though the application later makes the root transparent (or
+    // it's cleared over the video), stays hidden. Its root's held transparent until a while after it's loaded, and its
+    // body's (which is the root's when the root has none). A constructed sheet, as there's no element yet to put a
+    // style in
+    if ((window.top === window) && document.adoptedStyleSheets && window.CSSStyleSheet) {
+        try {
+            var rootHeld = new CSSStyleSheet();
+            rootHeld.replaceSync('html, body { background-color: transparent !important; }');
+            document.adoptedStyleSheets = document.adoptedStyleSheets.concat([rootHeld]);
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    document.adoptedStyleSheets = document.adoptedStyleSheets.filter(function (s) { return s !== rootHeld; });
+                }, 500);
+            });
+        } catch (e) {
+            consoleLog('[sdrangel] root not held transparent: ' + e);
+        }
+    }
+
+    // For SDRangel's log, as applications' own errors seldom say what failed: requests that fail (4xx, 5xx), with what
+    // the server said, and objects logged as errors written out (else "[object Object]")
+    function describeValue(value) {
+        if (!value || (typeof value !== 'object')) {
+            return String(value);
+        }
+
+        var parts = [];
+
+        if (value instanceof Error) {
+            parts.push(value.name + ': ' + value.message);
+        }
+
+        // As an axios error's: its code, the response's status, and the request
+        ['code', 'status'].forEach(function (key) {
+            if ((value[key] !== undefined) && (typeof value[key] !== 'object')) {
+                parts.push(key + ' ' + value[key]);
+            }
+        });
+
+        if (value.response && (value.response.status !== undefined)) {
+            parts.push('response ' + value.response.status);
+        }
+
+        if (value.config && value.config.url) {
+            parts.push((value.config.method || '').toUpperCase() + ' ' + value.config.url);
+        }
+
+        if (!parts.length) {
+            try {
+                parts.push(JSON.stringify(value).slice(0, 300));
+            } catch (e) {
+                parts.push(Object.prototype.toString.call(value));
+            }
+        }
+
+        return parts.join(', ');
+    }
+
+    ['error', 'warn'].forEach(function (level) {
+        var original = console[level];
+
+        console[level] = function () {
+            // As it was if it can't be described (as an object whose properties throw, or another origin's window):
+            // the application's own logging mustn't fail
+            var args = Array.prototype.map.call(arguments, function (a) {
+                if (!a || (typeof a !== 'object')) {
+                    return a;
+                }
+
+                try {
+                    return describeValue(a);
+                } catch (e) {
+                    return a;
+                }
+            });
+            return original.apply(console, args);
+        };
+    });
+
+    function logFailedRequest(request, status, body) {
+        consoleLog('[sdrangel] request failed: ' + request + ': ' + status + (body ? ': ' + String(body).replace(/\s+/g, ' ').slice(0, 300) : ''));
+    }
+
+    var loggedXhrOpen = XMLHttpRequest.prototype.open;
+    var loggedXhrSend = XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.open = function (method, url) {
+        this.__sdrangelRequest = String(method).toUpperCase() + ' ' + String(url);
+        return loggedXhrOpen.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.send = function () {
+        var xhr = this;
+
+        xhr.addEventListener('loadend', function () {
+            if (xhr.status >= 400) {
+                var body = '';
+
+                try {
+                    body = ((xhr.responseType === '') || (xhr.responseType === 'text')) ? xhr.responseText
+                        : (xhr.responseType === 'json') ? JSON.stringify(xhr.response) : '';
+                } catch (e) {
+                    body = '';
+                }
+
+                logFailedRequest(xhr.__sdrangelRequest, xhr.status, body);
+            }
+        });
+
+        return loggedXhrSend.apply(this, arguments);
+    };
+
+    if (window.fetch) {
+        var loggedFetch = window.fetch;
+
+        window.fetch = function (input, init) {
+            var request = ((init && init.method) || (input && input.method) || 'GET').toUpperCase() + ' ' + (input && input.url ? input.url : String(input));
+
+            return loggedFetch.apply(this, arguments).then(function (response) {
+                if (response.status >= 400) {
+                    response.clone().text().then(function (body) { logFailedRequest(request, response.status, body); }, function () {
+                        logFailedRequest(request, response.status, '');
+                    });
+                }
+
+                return response;
+            });
+        };
+    }
+
     var keysetValue = 0;
     var ownerApplication = null;
     var videoObjects = [];          // video/broadcast objects bound to the service, or with a channel set
@@ -19,7 +154,16 @@
     var lastVideo = '';
 
     function send(message) {
-        console.log('\u0001sdrangel:' + JSON.stringify(message));
+        consoleLog('\u0001sdrangel:' + JSON.stringify(message));
+    }
+
+    // The application closing its window (as BBC iPlayer exits, on devices it takes for older ones): on a TV that ends
+    // it, as destroyApplication() does. A browser won't close a window a script didn't open
+    if (window.top === window) {
+        window.close = function () {
+            consoleLog('[sdrangel] window.close(): the application destroyed');
+            send({ t: 'destroy' });
+        };
     }
 
     // Keys (OIPF DAE 7.2.5.2, TS 102 796 Annex A)
@@ -351,6 +495,8 @@
         }
     };
 
+    var nextDrmMessage = 1;
+
     var applicationManager = {
         getOwnerApplication: function (doc) { return application(); },
         getChildApplications: function () { return []; },
@@ -371,8 +517,29 @@
         },
         'video/broadcast': videoBroadcast,
         'application/oipfdrmagent': {
-            sendDRMMessage: function () { return ''; },
-            DRMSystemStatus: function () { return 1; }
+            // There's no DRM system (as PlayReady, an application asking for a licence for its protected video): its
+            // messages answered so (OIPF DAE 7.6.1.1, result 5, unknown DRM system), else it waits for ever. And
+            // SDRangel told, to say why the video won't play
+            sendDRMMessage: function (msgType, msg, DRMSystemID) {
+                var agent = this;
+                var msgID = 'sdrangel-drm-' + (nextDrmMessage++);
+                send({ t: 'drm', system: String(DRMSystemID || ''), type: String(msgType || '') });
+
+                setTimeout(function () {
+                    if (typeof agent.onDRMMessageResult === 'function') {
+                        agent.onDRMMessageResult(msgID, '', 5);
+                    }
+
+                    var event = new Event('DRMMessageResult');
+                    event.msgID = msgID;
+                    event.resultMsg = '';
+                    event.resultCode = 5;
+                    agent.dispatchEvent(event);
+                }, 0);
+
+                return msgID;
+            },
+            DRMSystemStatus: function () { return 1; }     // DRM_UNKNOWN
         },
         'application/oipfparentalcontrolmanager': {
             parentalRatingSchemes: [],
@@ -469,6 +636,12 @@
     // Where the video's shown: in the bound video/broadcast object, as fractions of the page (1280 by 720 pixels), or
     // full screen if there's none, or it's set to full screen
     function reportVideo() {
+        // The application's page's: not a frame's in it (as an advertising SDK's), which would say the video's full
+        // screen, and its layout's width, in place of the page's
+        if (window.top !== window) {
+            return;
+        }
+
         var message = { t: 'video', full: true };
         var width = window.innerWidth || 1280, height = window.innerHeight || 720;
 
@@ -485,13 +658,21 @@
             var style = window.getComputedStyle(object);
             var rect = object.getBoundingClientRect();
 
+            // Which it is, for the log
+            var what = object.tagName.toLowerCase() + (object.id ? '#' + object.id : '') + (object.type ? ' ' + object.type : '');
+
             if ((style.display === 'none') || (style.visibility === 'hidden') || (rect.width <= 0) || (rect.height <= 0)) {
-                message = { t: 'video', full: false, hidden: true };
+                message = { t: 'video', full: false, hidden: true, what: what };
                 continue;
             }
 
-            message = { t: 'video', full: false, x: rect.left / width, y: rect.top / height, w: rect.width / width, h: rect.height / height };
+            message = { t: 'video', full: false, x: rect.left / width, y: rect.top / height, w: rect.width / width, h: rect.height / height, what: what };
+            punch(object, rect);
             break;
+        }
+
+        if (message.full || message.hidden) {
+            unpunch();
         }
 
         var text = JSON.stringify(message);
@@ -499,6 +680,278 @@
         if (text !== lastVideo) {
             lastVideo = text;
             send(message);
+        }
+
+        reportLayout();
+    }
+
+    // The width the page is laid out for: an application made for 1920 by 1080 (its html or body that wide) is zoomed
+    // to fit, as a TV with a 1920 by 1080 browser would show it, rather than shown in part
+    var lastLayout = '';
+
+    function reportLayout() {
+        var layoutWidth = 0;
+
+        [document.documentElement, document.body].forEach(function (element) {
+            if (element) {
+                layoutWidth = Math.max(layoutWidth, parseFloat(window.getComputedStyle(element).width) || 0);
+            }
+        });
+
+        layoutWidth = Math.round(layoutWidth);
+        // With the viewport's width: what it was laid out in (while the view's resized, it's briefly not the width
+        // it's zoomed to, which an application choosing its layout by media queries may follow)
+        var key = layoutWidth + ',' + window.innerWidth;
+
+        if (layoutWidth && (key !== lastLayout)) {
+            lastLayout = key;
+            send({ t: 'layout', w: layoutWidth, vw: window.innerWidth });
+        }
+    }
+
+    // SDRangel draws the video under the page. On a TV it's shown over what's under its element in the page (it's drawn
+    // in the element, or through a hole punched in the graphics to the video plane), so what's under it here mustn't
+    // hide it: its own background, its ancestors' (as an opaque page's, cleared where it is, their colour drawn around
+    // it), and other elements drawn under it (as an application's own player, loading, under an advert's video):
+    // hidden if they're within it, else their backgrounds cleared where it is. Until it's no longer shown
+    var punchProperties = ['background-color', 'background-image', 'background-position', 'background-size', 'background-repeat',
+        'background-origin', 'background-clip', 'visibility'];
+    var punched = [];       // Each element changed, with its own style's values before
+    var punchKey = '';
+    var punchObject = null;
+    var punchRect = null;
+    var punchColors = [];   // Each ancestor left as it was, with its colour then: done again if one changes
+
+    function unpunch() {
+        punched.forEach(function (p) {
+            punchProperties.forEach(function (name) {
+                p.element.style.setProperty(name, p.saved[name].value, p.saved[name].priority);
+            });
+        });
+        punched = [];
+        punchKey = '';
+        punchObject = null;
+        punchRect = null;
+        punchColors = [];
+    }
+
+    function isTransparent(color) {
+        return (color === 'transparent') || /rgba\(.*,\s*0\)$/.test(color);
+    }
+
+    function isPunched(element) {
+        return punched.some(function (p) { return p.element === element; });
+    }
+
+    // Its style saved, to be put back
+    function save(element) {
+        var saved = {};
+
+        punchProperties.forEach(function (name) {
+            saved[name] = { value: element.style.getPropertyValue(name), priority: element.style.getPropertyPriority(name) };
+        });
+
+        punched.push({ element: element, saved: saved });
+    }
+
+    // Where an element's background's drawn: its border box, but the whole page for the root's (and the body's, when
+    // it's given to the root, as the root has none), from the root's box (CSS 2 14.2)
+    function backgroundBox(element) {
+        var root = document.documentElement;
+        var rootStyle = window.getComputedStyle(root);
+        var canvas = (element === root) || ((element === document.body) && isTransparent(rootStyle.backgroundColor)
+            && (rootStyle.backgroundImage === 'none'));
+
+        if (!canvas) {
+            return element.getBoundingClientRect();
+        }
+
+        var r = root.getBoundingClientRect();
+        return { left: r.left, top: r.top, width: Math.max(r.width, root.scrollWidth, window.innerWidth),
+            height: Math.max(r.height, root.scrollHeight, window.innerHeight) };
+    }
+
+    // An element's background cleared where the video is, its colour drawn around it. False if it has none to clear
+    // (transparent), or can't be (an image the video doesn't cover)
+    function cutBackground(element, rect) {
+        var style = window.getComputedStyle(element);
+        var color = style.backgroundColor;
+        var box = backgroundBox(element);
+        // The hole, in the element's background's box
+        var x0 = Math.max(0, rect.left - box.left), y0 = Math.max(0, rect.top - box.top);
+        var x1 = Math.min(box.width, rect.right - box.left), y1 = Math.min(box.height, rect.bottom - box.top);
+        var covers = (x0 <= 0) && (y0 <= 0) && (x1 >= box.width) && (y1 >= box.height);
+
+        if ((isTransparent(color) && (style.backgroundImage === 'none')) || ((style.backgroundImage !== 'none') && !covers)
+            || (x1 <= x0) || (y1 <= y0)) {
+            return false;
+        }
+
+        save(element);
+        var images = [], positions = [], sizes = [];
+        var piece = function (x, y, w, h) {
+            if ((w > 0) && (h > 0) && !isTransparent(color)) {
+                images.push('linear-gradient(' + color + ', ' + color + ')');
+                positions.push(x + 'px ' + y + 'px');
+                sizes.push(w + 'px ' + h + 'px');
+            }
+        };
+
+        piece(0, 0, box.width, y0);                         // Above
+        piece(0, y1, box.width, box.height - y1);           // Below
+        piece(0, y0, x0, y1 - y0);                          // Left
+        piece(x1, y0, box.width - x1, y1 - y0);             // Right
+        element.style.setProperty('background-color', 'transparent', 'important');
+        element.style.setProperty('background-image', images.length ? images.join(', ') : 'none', 'important');
+        element.style.setProperty('background-position', positions.length ? positions.join(', ') : '0 0', 'important');
+        element.style.setProperty('background-size', sizes.length ? sizes.join(', ') : 'auto', 'important');
+        element.style.setProperty('background-repeat', 'no-repeat', 'important');
+        element.style.setProperty('background-origin', 'border-box', 'important');
+        element.style.setProperty('background-clip', 'border-box', 'important');
+        return true;
+    }
+
+    // Elements drawn under the video, other than its ancestors: what's at points across it, after it (in the order
+    // they're drawn, top first), all hit for the while (as an advertising SDK's video, and overlays, ignore the
+    // pointer). Hidden if they're within it, else their backgrounds cut. Only added to, while the same video's
+    // shown: once hidden they aren't hit
+    var lastBeneath = 0;
+
+    // An element, for the log: tag, id, classes, its box and background
+    function describe(element) {
+        var style = window.getComputedStyle(element);
+        var r = element.getBoundingClientRect();
+        var name = element.tagName.toLowerCase() + (element.id ? '#' + element.id : '')
+            + ((typeof element.className === 'string') && element.className.trim() ? '.' + element.className.trim().split(/\s+/).slice(0, 2).join('.') : '');
+        return name + ' [' + Math.round(r.left) + ',' + Math.round(r.top) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height) + ']'
+            + (isTransparent(style.backgroundColor) ? '' : ' bg ' + style.backgroundColor)
+            + (style.backgroundImage !== 'none' ? ' image' : '') + (style.visibility === 'hidden' ? ' hidden' : '')
+            + ((style.opacity !== '1') ? ' opacity ' + style.opacity : '');
+    }
+
+    var lastAboveLog = '';
+
+    function punchBeneath(object, rect) {
+        lastBeneath = Date.now();
+        var hitAll = document.createElement('style');
+        hitAll.textContent = '*, *::before, *::after { pointer-events: auto !important; }';
+        (document.head || document.documentElement).appendChild(hitAll);
+        var beneath = [];
+        var above = [];
+
+        for (var fy = 0.1; fy < 1; fy += 0.2) {
+            for (var fx = 0.1; fx < 1; fx += 0.2) {
+                var list = document.elementsFromPoint(rect.left + fx * rect.width, rect.top + fy * rect.height);
+                var at = list.indexOf(object);
+
+                for (var j = 0; j < at; j++) {
+                    if ((above.indexOf(list[j]) < 0)) {
+                        above.push(list[j]);
+                    }
+                }
+
+                for (var i = at + 1; (at >= 0) && (i < list.length); i++) {
+                    if (!list[i].contains(object) && (beneath.indexOf(list[i]) < 0)) {
+                        beneath.push(list[i]);
+                    }
+                }
+            }
+        }
+
+        hitAll.remove();
+        var changed = [];
+
+        beneath.forEach(function (element) {
+            if (isPunched(element)) {
+                return;
+            }
+
+            var r = element.getBoundingClientRect();
+            var within = (r.left >= rect.left - 2) && (r.top >= rect.top - 2) && (r.right <= rect.right + 2) && (r.bottom <= rect.bottom + 2);
+
+            if (within) {
+                changed.push('hid ' + describe(element));
+                save(element);
+                element.style.setProperty('visibility', 'hidden', 'important');
+            } else if (cutBackground(element, rect)) {
+                changed.push('cut ' + describe(element));
+            }
+        });
+
+        if (changed.length) {
+            consoleLog('[sdrangel] under the video: ' + changed.join('; '));
+        }
+
+        // What's over it, that could hide it: logged when that changes
+        var over = above.filter(function (element) {
+            var style = window.getComputedStyle(element);
+            return (style.visibility !== 'hidden') && (!isTransparent(style.backgroundColor) || (style.backgroundImage !== 'none')
+                || /^(CANVAS|IMG|VIDEO|IFRAME|OBJECT|EMBED)$/.test(element.tagName));
+        }).map(describe).join('; ');
+
+        if (over !== lastAboveLog) {
+            lastAboveLog = over;
+            consoleLog('[sdrangel] over the video: ' + (over || 'nothing drawn'));
+        }
+
+        // What's drawn over the video (as an advert's countdown) kept, though it's in an element hidden as under it
+        above.forEach(function (element) {
+            var inHidden = punched.some(function (p) {
+                return (p.element !== element) && p.element.contains(element) && (p.element.style.getPropertyValue('visibility') === 'hidden');
+            });
+
+            if (inHidden && !isPunched(element)) {
+                save(element);
+                element.style.setProperty('visibility', 'visible', 'important');
+            }
+        });
+    }
+
+    function punch(object, rect) {
+        var key = [Math.round(rect.left), Math.round(rect.top), Math.round(rect.width), Math.round(rect.height)].join(',');
+
+        if ((key === punchKey) && (object === punchObject) && punchColors.every(function (c) {
+            return window.getComputedStyle(c.element).backgroundColor === c.color;
+        })) {
+            // As what's under it may have been added: now and then, as styling every element to find it is slow
+            if ((object instanceof HTMLMediaElement) && (Date.now() - lastBeneath > 2000)) {
+                punchBeneath(object, rect);
+            }
+
+            return;
+        }
+
+        unpunch();
+        punchKey = key;
+        punchObject = object;
+        punchRect = rect;
+
+        // The element itself: on a TV the video's drawn in it, hiding its background, which here would hide the video
+        // under the page (as an advertising SDK's video element, black)
+        var ownStyle = window.getComputedStyle(object);
+
+        if (!isTransparent(ownStyle.backgroundColor) || (ownStyle.backgroundImage !== 'none')) {
+            save(object);
+            object.style.setProperty('background-color', 'transparent', 'important');
+            object.style.setProperty('background-image', 'none', 'important');
+        }
+
+        for (var element = object.parentElement; element; element = element.parentElement) {
+            if (!cutBackground(element, rect)) {
+                punchColors.push({ element: element, color: window.getComputedStyle(element).backgroundColor });
+            }
+        }
+
+        consoleLog('[sdrangel] video ' + describe(object) + ' in ' + window.innerWidth + 'x' + window.innerHeight + ': '
+            + (punched.length ? 'backgrounds cleared: ' + punched.map(function (p) { return describe(p.element); }).join('; ') : 'nothing to clear')
+            + '; html ' + window.getComputedStyle(document.documentElement).backgroundColor
+            + ', body ' + (document.body ? window.getComputedStyle(document.body).backgroundColor : 'none'));
+        lastAboveLog = '';
+
+        // Media SDRangel plays for the application (as an advert, over its own player): not a video/broadcast object,
+        // which applications put over their pages, to say where the broadcast's shown
+        if (object instanceof HTMLMediaElement) {
+            punchBeneath(object, rect);
         }
     }
 
@@ -615,6 +1068,19 @@
             m.ended = false;
             fireMedia(element, 'seeking');
             send({ t: 'media', cmd: 'seek', id: m.id, position: value });
+
+            // Playing, it's done when SDRangel's playing from there. Paused (as an application's seek bar pauses while
+            // it's moved), there's nothing to wait for: SDRangel goes on from there when it's played. An application
+            // waiting for it to be done (as TVP VOD's player, which won't seek again until it is) would wait for ever
+            if (m.paused) {
+                setTimeout(function () {
+                    if (m.seeking && m.paused) {
+                        m.seeking = false;
+                        fireMedia(element, 'timeupdate');
+                        fireMedia(element, 'seeked');
+                    }
+                }, 0);
+            }
         });
         define('duration', function () { return m.duration; });
         define('paused', function () { return m.paused; });
@@ -719,7 +1185,7 @@
         }
 
         var m = mediaState.get(element) || makeProxy(element);
-        console.log('[sdrangel] media ' + m.id + ': ' + url);
+        consoleLog('[sdrangel] media ' + m.id + ': ' + url);
         m.url = url;
         m.paused = true;
         m.ended = false;
@@ -790,7 +1256,7 @@
         var t = String(type).toLowerCase();
         var result = /application\/dash\+xml|mpegurl|video\/mp4|audio\/mp4|video\/mp2t|audio\/mpeg|audio\/aac/.test(t) ? 'probably'
             : canPlayType.call(this, type);
-        console.log('[sdrangel] canPlayType ' + type + ' "' + result + '"');
+        consoleLog('[sdrangel] canPlayType ' + type + ' "' + result + '"');
         return result;
     };
 
@@ -859,15 +1325,15 @@
     if (window.MediaSource) {
         var addSourceBuffer = MediaSource.prototype.addSourceBuffer;
         MediaSource.prototype.addSourceBuffer = function (type) {
-            console.log('[sdrangel] MSE addSourceBuffer ' + type);
+            consoleLog('[sdrangel] MSE addSourceBuffer ' + type);
             return addSourceBuffer.apply(this, arguments);
         };
     }
 
     // Dialogs would block the application
-    window.alert = function (text) { console.log('alert: ' + text); };
-    window.confirm = function (text) { console.log('confirm: ' + text); return false; };
-    window.prompt = function (text) { console.log('prompt: ' + text); return null; };
+    window.alert = function (text) { consoleLog('alert: ' + text); };
+    window.confirm = function (text) { consoleLog('confirm: ' + text); return false; };
+    window.prompt = function (text) { consoleLog('prompt: ' + text); return null; };
 
     // SDRangel's status (as the red button loading), over everything the application shows
     var statusElement = null;
@@ -918,14 +1384,17 @@
                 }
 
                 var channel = makeChannel(config.channel);
+                var requested = videoState(object).pendingChannel;
                 videoState(object).pendingChannel = null;
 
                 if (ok) {
                     setPlayState(object, PLAYSTATE_PRESENTING);
                     fire(object, 'ChannelChangeSucceeded', { channel: channel }, [channel]);
                 } else {
+                    // The channel asked for (OIPF DAE 7.13.1.3), not the one still playing
+                    var failed = requested || channel;
                     setPlayState(object, PLAYSTATE_UNREALIZED, error);
-                    fire(object, 'ChannelChangeError', { channel: channel, errorState: error }, [channel, error]);
+                    fire(object, 'ChannelChangeError', { channel: failed, errorState: error }, [failed, error]);
                 }
             });
         }

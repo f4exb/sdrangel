@@ -737,9 +737,7 @@ void DVBDemodGUI::appsMenu(const QPoint& position)
 
     if (chosen == run)
     {
-        m_settings.m_hbbtv = run->isChecked();
-        applySetting("hbbtv");
-        updateHbbTV();
+        ui->hbbtv->setChecked(run->isChecked());    // As the switch does
     }
 #ifdef DVBDEMOD_HBBTV
     else if (chosen == clear)
@@ -761,6 +759,13 @@ void DVBDemodGUI::updateHbbTV()
         connect(m_hbbtv, &DVBDemodHbbTV::videoAreaChanged, this, &DVBDemodGUI::hbbtvVideoArea);
         connect(m_hbbtv, &DVBDemodHbbTV::channelChangeRequested, this, &DVBDemodGUI::hbbtvChannelChange);
         connect(m_hbbtv, &DVBDemodHbbTV::mediaRequest, this, &DVBDemodGUI::hbbtvMedia);
+        connect(m_hbbtv, &DVBDemodHbbTV::drmRequested, this, [this](const QString& system) {
+            // (Shown over the application's page too, by DVBDemodHbbTV)
+            const QString text = QString("The application's video is protected by %1 DRM, which SDRangel can't play").arg(system);
+            setStatusText(text);
+            setStatusToolTip(text);
+            m_statusMessageTimer.start();
+        });
         connect(m_hbbtv, &DVBDemodHbbTV::channelStepRequested, this, [this](int direction) {
             QKeyEvent key(QEvent::KeyPress, direction > 0 ? Qt::Key_ChannelUp : Qt::Key_ChannelDown, Qt::NoModifier);
             m_guideOverlay->handleKey(&key);
@@ -900,16 +905,18 @@ void DVBDemodGUI::hbbtvVideoArea(const QRectF& area)
     }
 
     const QRect page = hbbtvPageRect(screen);
-    screen->setVideoArea(QRectF((page.x() + area.x() * page.width()) / screen->width(), (page.y() + area.y() * page.height()) / screen->height(),
-        area.width() * page.width() / screen->width(), area.height() * page.height() / screen->height()));
+    const QRectF screenArea((page.x() + area.x() * page.width()) / screen->width(), (page.y() + area.y() * page.height()) / screen->height(),
+        area.width() * page.width() / screen->width(), area.height() * page.height() / screen->height());
+    qDebug("DVBDemodGUI::hbbtvVideoArea: %s screen %dx%d: page %d,%d %dx%d, video %.3f,%.3f %.3fx%.3f of the screen",
+        screen == ui->screenTV ? "window's" : "full", screen->width(), screen->height(), page.x(), page.y(), page.width(), page.height(),
+        screenArea.x(), screenArea.y(), screenArea.width(), screenArea.height());
+    screen->setVideoArea(screenArea);
 }
 
 // The application's video/broadcast setChannel(): a service of this multiplex, or another the guide knows of
 void DVBDemodGUI::hbbtvChannelChange(int networkId, int transportStreamId, int serviceId)
 {
 #ifdef DVBDEMOD_HBBTV
-    (void) transportStreamId;
-
     if (serviceId == m_playingService)
     {
         m_hbbtv->channelChangeResult(true);
@@ -917,9 +924,16 @@ void DVBDemodGUI::hbbtvChannelChange(int networkId, int transportStreamId, int s
     }
 
     m_hbbtvChannelRequest = serviceId;
-    selectService(networkId, serviceId, this, [this](const QString& error) {
-        qDebug("DVBDemodGUI::hbbtvChannelChange: %s", qPrintable(error));
+    selectService(networkId, serviceId, this, [this, networkId, transportStreamId, serviceId](const QString& error) {
+        qDebug("DVBDemodGUI::hbbtvChannelChange: %d.%d.%d: %s", networkId, transportStreamId, serviceId, qPrintable(error));
         m_hbbtvChannelRequest = 0;
+        // Said over the video for a while, rather than in a message box, which would take the keys from the application
+        // (as the user's chosen the channel in it) and be hidden by full screen video
+        const QString text = QString("Can't play the channel the application chose: %1").arg(error);
+        setStatusText(text);
+        setStatusToolTip(text);
+        m_statusMessageTimer.start();
+        m_videoScreen.load()->setOverlay(text, 5.0);
 
         if (m_hbbtv) {
             m_hbbtv->channelChangeResult(false);
@@ -944,15 +958,45 @@ void DVBDemodGUI::hbbtvRed()
 #endif
 }
 
-// Red buttons, on the ribbon, guide and here, while the service played has an HbbTV application to run
+// Red buttons, on the ribbon, guide and here, while the service played has an HbbTV application to run; and here, the
+// green, yellow and blue, while one's running
 void DVBDemodGUI::displayRedButton()
 {
     bool shown = false;
+    bool running = false;
 #ifdef DVBDEMOD_HBBTV
     shown = m_hbbtv && m_hbbtv->hasAutostartApp();
+    running = m_hbbtv && m_hbbtv->isRunning();
 #endif
     m_guideOverlay->setRedButton(shown);
-    ui->redButton->setVisible(shown);
+    ui->redButton->setVisible(shown || running);
+    ui->greenButton->setVisible(running);
+    ui->yellowButton->setVisible(running);
+    ui->blueButton->setVisible(running);
+}
+
+// As the key pressed and released on the video, for the application. The video gets the keys after
+void DVBDemodGUI::hbbtvKey(int key)
+{
+#ifdef DVBDEMOD_HBBTV
+    if (m_hbbtv)
+    {
+        QKeyEvent press(QEvent::KeyPress, key, Qt::NoModifier);
+        QKeyEvent release(QEvent::KeyRelease, key, Qt::NoModifier);
+        m_hbbtv->keyPress(&press);
+        m_hbbtv->keyRelease(&release);
+        m_hbbtv->takeFocus();
+    }
+#else
+    (void) key;
+#endif
+}
+
+void DVBDemodGUI::on_hbbtv_toggled(bool checked)
+{
+    m_settings.m_hbbtv = checked;
+    applySetting("hbbtv");
+    updateHbbTV();
 }
 
 // The application's media, as iPlayer's: played by a player of its own, in place of the broadcast's (stopped while
@@ -1908,6 +1952,13 @@ DVBDemodGUI::DVBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(m_guideOverlay, &DTVGuideOverlay::playService, this, &DVBDemodGUI::guideServiceSelected);
     connect(m_guideOverlay, &DTVGuideOverlay::redButton, this, &DVBDemodGUI::hbbtvRed);
     ui->redButton->setVisible(false);
+    ui->greenButton->setVisible(false);
+    ui->yellowButton->setVisible(false);
+    ui->blueButton->setVisible(false);
+#ifndef DVBDEMOD_HBBTV
+    ui->hbbtv->setEnabled(false);
+    ui->hbbtv->setToolTip("Interactive applications (HbbTV): not built, as Qt WebEngine is needed");
+#endif
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -2076,6 +2127,7 @@ void DVBDemodGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+    ui->hbbtv->setChecked(m_settings.m_hbbtv);
     int bandwidthIndex = 0;
 
     for (int i = 0; i < (int) std::size(m_bandwidths); i++)
@@ -3037,6 +3089,10 @@ void DVBDemodGUI::makeUIConnections()
     QObject::connect(ui->epg, &QToolButton::clicked, this, &DVBDemodGUI::on_epg_clicked);
     QObject::connect(ui->apps, &QToolButton::clicked, this, &DVBDemodGUI::on_apps_clicked);
     QObject::connect(ui->redButton, &QToolButton::clicked, this, &DVBDemodGUI::hbbtvRed);
+    QObject::connect(ui->greenButton, &QToolButton::clicked, this, [this]() { hbbtvKey(Qt::Key_G); });
+    QObject::connect(ui->yellowButton, &QToolButton::clicked, this, [this]() { hbbtvKey(Qt::Key_Y); });
+    QObject::connect(ui->blueButton, &QToolButton::clicked, this, [this]() { hbbtvKey(Qt::Key_B); });
+    QObject::connect(ui->hbbtv, &ButtonSwitch::toggled, this, &DVBDemodGUI::on_hbbtv_toggled);
     ui->apps->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->apps, &QToolButton::customContextMenuRequested, this, &DVBDemodGUI::appsMenu);
     ui->epg->setContextMenuPolicy(Qt::CustomContextMenu);

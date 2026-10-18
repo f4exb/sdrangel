@@ -463,11 +463,14 @@ The Apps button opens a list of the interactive (red button) applications:
   the transport stream, and how much of each has been received. A large carousel takes a minute or so, and is
   received again as the broadcaster updates it.
 
-Right click the Apps button to run the HbbTV applications.
+The switch beside it (a play symbol in a screen) runs the HbbTV applications.
 
-Keys for the red, green, yellow and blue buttons are R, G, Y and B (or F1 to F4), Back is Backspace, and the arrows, Enter and digits are themselves.
+The red button shows while the service has an application to run; it and the green, yellow and blue buttons correspond
+to those buttons on a TV remote control. You can also use the keys R, G, Y and B (or F1 to F4). Back is the Backspace kay.
+Use the arrows keys to navigate, and press Enter for OK.
 
 Some broadcasters (such as the BBC) only serve their online applications to TVs they've certified, so videos may not play.
+Other videos requiring DRM will also not play.
 
 <h4>Scan</h4>
 
@@ -569,3 +572,9 @@ numbers (0 for the default region's).
 The standard is 0 for automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2, 3 DVB-T2-Lite, 4 automatic (DVB-S or S2), 5 DVB-S and 6 DVB-S2. The DVB-S and S2
 report adds the symbol rate set and measured, the roll-off, and, for DVB-S2, the MODCOD, pilots, frame size, input stream, Es/N0, and frame, dummy frame
 and header miss counts.
+
+<h2>Attribution</h2>
+
+The Freesat and Freeview Huffman tables, which decode compressed programme guide text, were generated from freesat_huffman.c of
+[tvheadend](https://github.com/tvheadend/tvheadend) (GNU GPL version 3 or later), code originally written for tv_grab_dvb_plus and
+integrated into tvheadend by Adam Sutton.

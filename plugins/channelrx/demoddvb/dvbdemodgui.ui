@@ -774,7 +774,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Watch the programme in HD, when the programme guide says it's also on another service</string>
+             <string>Watch the programme in HD, if available</string>
             </property>
             <property name="text">
              <string>HD</string>
@@ -784,7 +784,7 @@
           <item>
            <widget class="ButtonSwitch" name="deinterlace">
             <property name="toolTip">
-             <string>Deinterlace video (bwdif, or the GPU's with hardware decoding)</string>
+             <string>Deinterlace video</string>
             </property>
             <property name="text">
              <string/>
@@ -978,7 +978,7 @@
           <item>
            <widget class="QToolButton" name="apps">
             <property name="toolTip">
-             <string>Show the interactive applications (red button) of the service played: HbbTV's and others from its AIT, and its MHEG-5 and HbbTV object carousels, with their files</string>
+             <string>Show the interactive applications (red button) of the current service.</string>
             </property>
             <property name="text">
              <string>Apps</string>
@@ -986,15 +986,60 @@
            </widget>
           </item>
           <item>
+           <widget class="ButtonSwitch" name="hbbtv">
+            <property name="toolTip">
+             <string>Run interactive applications (HbbTV, the red button).</string>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/runapps.png</normaloff>:/demoddvb/icons/runapps.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="redButton">
             <property name="toolTip">
-             <string>The red button: the service's interactive application (HbbTV), as R on the video</string>
+             <string>The red button: the service's interactive application (HbbTV) - or press R on the video</string>
             </property>
-            <property name="styleSheet">
-             <string notr="true">QToolButton { color: #e62928; font-weight: bold; }</string>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/red.png</normaloff>:/demoddvb/icons/red.png</iconset>
             </property>
-            <property name="text">
-             <string>Red</string>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="greenButton">
+            <property name="toolTip">
+             <string>The green button, for the interactive application (HbbTV) - or press G on the video</string>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/green.png</normaloff>:/demoddvb/icons/green.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="yellowButton">
+            <property name="toolTip">
+             <string>The yellow button, for the interactive application (HbbTV) - or press Y on the video</string>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/yellow.png</normaloff>:/demoddvb/icons/yellow.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="blueButton">
+            <property name="toolTip">
+             <string>The blue button, for the interactive application (HbbTV) - or press B on the video</string>
+            </property>
+            <property name="icon">
+             <iconset resource="dvbdemod.qrc">
+              <normaloff>:/demoddvb/icons/blue.png</normaloff>:/demoddvb/icons/blue.png</iconset>
             </property>
            </widget>
           </item>

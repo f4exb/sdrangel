@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <QElapsedTimer>
+#include <QHash>
 #include <QJsonObject>
 #include <QMap>
 #include <QObject>
@@ -86,6 +87,9 @@ public:
     QWebEnginePage *getPage() { return m_page; }
     //! Whether applications may use the internet: if not, only the carousels are loaded from
     void setNetworkAllowed(bool allowed);
+    //! Whether messages like ones logged a short while ago (the application's console's, its carousel's files) are
+    //! held back: on unless every one's wanted (as by a test)
+    void setLogLimited(bool limited) { m_logLimited = limited; }
     //! The user agent sent, for testing as a particular TV: empty for SDRangel's own. The environment variable
     //! DTV_HBBTV_USER_AGENT sets it too
     void setUserAgent(const QString& userAgent);
@@ -135,6 +139,8 @@ signals:
     void videoAreaChanged(const QRectF& area);
     void channelChangeRequested(int networkId, int transportStreamId, int serviceId);
     void channelStepRequested(int direction);
+    //! The application asked for a DRM system's licence, as for protected video (which can't be played): its name
+    void drmRequested(const QString& system);
     void appStarted(const QString& url, const QString& name);
     //! The application's media (as iPlayer's video): command load (url, with FFmpeg's options), play, pause, seek
     //! (position, seconds) or stop. Media's played by the GUI's player, under the page
@@ -159,18 +165,24 @@ private:
     void navigate(const QString& url, const QString& name, uint32_t organisationId, int applicationId, bool autostart);
     void message(const QJsonObject& message);
     void consoleMessage(int level, const QString& message, int line, const QString& source);
+    void logLimited(const QString& text, const QString& from);
     void createApplication(const QString& uri);
     void destroyApplication();
     void setVisible(bool visible);
     void showView();
     void loadFinished(bool ok);
     void updateScript();
+    void applyZoom();
+    QString scriptSource() const;
+    static QByteArray withScript(const QByteArray& page, const QString& script);
+    QByteArray loaderPage(const QUrl& url, const QString& charset) const;
     void showStatus();                  //!< getStatus() in the page, over what the application shows
     void updateProxy();
     QJsonObject configuration() const;
     QJsonObject channelJson(const Channel& channel) const;
     QString appUrl(const DTVApps::App& app) const;
     void makeTransparent();
+    void keepTransparent();
     void downloadRequested(const QUrl& url, const QString& mimeType);
 
     DTVApps *m_apps;
@@ -200,17 +212,32 @@ private:
     bool m_suppressed;
     int m_keyset;
     QRectF m_videoArea;
+    bool m_retransparent = false;       //!< The view's being made transparent again
+    int m_retransparentCount = 0;       //!< Times, for the video's area: not over and over, if the page stays opaque
     bool m_pendingRed;                  //!< Red's to be given to the application started for it, once it asks for it
     int m_mediaId;                      //!< Of the media being played, 0 if none
     QElapsedTimer m_userRequest;        //!< Since the user last pressed red or gave the application a key
     QElapsedTimer m_failed;             //!< Since an application last failed to load
+    QElapsedTimer m_drmRequest;         //!< Since the application asked for a DRM licence (protected video)
+    QString m_drmSystem;                //!< Which DRM system's, by name
     int m_appCarouselPid;               //!< The carousel the running application's loaded from, -1 if none
     int m_loadsStarted;                 //!< Qt 5: page loads started, to tell a failed load from one replaced by another
     QElapsedTimer m_loadedAt;           //!< Since the running application's page loaded
     bool m_keysetSinceLoad;             //!< It's set its keyset since: it's ready
     QString m_pageStatus;               //!< Status last shown in the page
+    struct Repeated
+    {
+        qint64 m_loggedAt;              //!< ms since epoch
+        int m_held;                     //!< Not logged since
+    };
+    QHash<QString, Repeated> m_repeated;    //!< Messages logged, by their shape (their numbers aside) and where from
+    bool m_logLimited = true;
     QElapsedTimer m_redDelivered;       //!< Since red was last given to the application
     QElapsedTimer m_pendingRedTimer;
+    int m_viewWidth = 0;
+    int m_layoutWidth = m_defaultLayoutWidth;   //!< Pixels the application's laid out for: 1280, or 1920 for some
+
+    static constexpr int m_defaultLayoutWidth = 1280;
 };
 
 #endif // INCLUDE_DVBDEMODHBBTV_H

@@ -47,11 +47,18 @@ public:
     double getDuration() const { return m_duration; }   //!< Seconds, NaN until known, infinite if live
     double getTimestampOffset() const { return m_offset; }  //!< NaN until the first packet's written
     bool isFinished() const { return m_finished; }      //!< The end of the stream written
+    //! Whether it's played. Until it is (loaded before it's played, or paused), only what's due as it starts is
+    //! written, so it's not given all at once when it's played; and its time stands still while it isn't
+    void setPlaying(bool playing) { m_playing = playing; }
+    //! Whether the URL's redirect's found first (before it's started): not if it's the URL a redirect gave
+    void setResolveRedirects(bool resolve) { m_resolveRedirects = resolve; }
 
     static constexpr double m_timestampStart = 1.0;
 
 signals:
     void opened(double duration, int width, int height);
+    //! The URL the given one redirects to
+    void resolved(const QString& url);
     void failed(const QString& error);
 
 protected:
@@ -69,6 +76,8 @@ private:
     std::atomic<double> m_duration;
     std::atomic<double> m_offset;
     std::atomic<bool> m_finished;
+    std::atomic<bool> m_playing{false};
+    bool m_resolveRedirects = true;
 };
 
 #endif // INCLUDE_DTVSTREAMREMUXER_H
