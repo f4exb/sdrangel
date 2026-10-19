@@ -490,10 +490,10 @@ void RttyDemod::webapiUpdateChannelSettings(
         settings.m_squelch = response.getRttyDemodSettings()->getSquelch();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getRttyDemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getRttyDemodSettings()->getLogEnabled();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getRttyDemodSettings()->getRgbColor();

@@ -501,7 +501,7 @@ void M17Mod::webapiUpdateChannelSettings(
         settings.m_reverseAPIDeviceIndex = response.getM17ModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getM17ModSettings()->getReverseApiChannelIndex();
     }
     if (channelSettingsKeys.contains("sourceCall")) {
         settings.m_sourceCall = *response.getM17ModSettings()->getSourceCall();
