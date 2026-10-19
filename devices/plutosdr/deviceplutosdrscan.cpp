@@ -37,18 +37,18 @@
 
 #ifdef LIBIIO_V1
 // libiio 1.x reports network contexts as a bare host name, without the "ip:" prefix
-static std::string withBackendPrefix(const char *uri)
+static std::string withBackendPrefix(const std::string& uri)
 {
-    static const char *backends[] = {"ip:", "usb:", "local:", "serial:", "xml:"};
+    static const std::string backends[] = {"ip:", "usb:", "local:", "serial:", "xml:"};
 
-    for (const char *backend : backends)
+    for (const std::string& backend : backends)
     {
-        if (std::strncmp(uri, backend, std::strlen(backend)) == 0) {
-            return std::string(uri);
+        if (uri.rfind(backend, 0) == 0) {
+            return uri;
         }
     }
 
-    return std::string("ip:") + uri;
+    return "ip:" + uri;
 }
 #endif
 
