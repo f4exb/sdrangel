@@ -1033,10 +1033,10 @@ int BladeRF2Output::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QStr
 
 void BladeRF2Output::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2OutputSettings& settings)
 {
-    if (response.getBladeRf1OutputSettings()->getTitle()) {
-        *response.getBladeRf1OutputSettings()->getTitle() = settings.m_title;
+    if (response.getBladeRf2OutputSettings()->getTitle()) {
+        *response.getBladeRf2OutputSettings()->getTitle() = settings.m_title;
     } else {
-        response.getBladeRf1OutputSettings()->setTitle(new QString(settings.m_title));
+        response.getBladeRf2OutputSettings()->setTitle(new QString(settings.m_title));
     }
 
     response.getBladeRf2OutputSettings()->setCenterFrequency(settings.m_centerFrequency);

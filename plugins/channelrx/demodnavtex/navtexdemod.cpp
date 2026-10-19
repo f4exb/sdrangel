@@ -449,10 +449,10 @@ void NavtexDemod::webapiUpdateChannelSettings(
         settings.m_udpPort = response.getNavtexDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getNavtexDemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getNavtexDemodSettings()->getLogEnabled();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getNavtexDemodSettings()->getRgbColor();
