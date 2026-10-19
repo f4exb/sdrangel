@@ -90,6 +90,8 @@ void DevicePlutoSDRScan::scan()
 #endif
 
     m_scans.clear();
+    m_serialMap.clear();
+    m_urilMap.clear();
     m_scans.reserve(num_contexts);
     qDebug("PlutoSDRScan::scan: found %d contexts", num_contexts);
 
@@ -128,7 +130,7 @@ void DevicePlutoSDRScan::scan()
             (descriptionView.find("PlutoSDR") != std::string_view::npos) ||
             (descriptionView.find("AD93") != std::string_view::npos);
 
-        if (isPlutoDescription)
+        if (isPlutoDescription && (m_urilMap.find(fixedUri) == m_urilMap.end())) // skip exact duplicates
         {
             // As device scan is used across multiple vectors it's best to use a
             // managed pointer, as to keep track of when it's safe to delete.
@@ -150,10 +152,11 @@ void DevicePlutoSDRScan::scan()
                 // A device can be discovered through multiple backends (e.g. USB and IP).
                 // Keep the backend in the serial key so each scanned entry remains unique.
                 m_scans.back()->m_serial = desc_match[1].str() + createBackendSuffix(uri);
-                m_serialMap[m_scans.back()->m_serial] = m_scans.back();
             }
         }
     }
+
+    disambiguateSerials();
 
 #ifdef LIBIIO_V1
     iio_scan_destroy(scan_ctx);
@@ -161,6 +164,31 @@ void DevicePlutoSDRScan::scan()
     iio_context_info_list_free(info);
     iio_scan_context_destroy(scan_ctx);
 #endif
+}
+
+void DevicePlutoSDRScan::disambiguateSerials()
+{
+    // The same device can be reachable at several addresses on one backend (e.g. both the
+    // USB gadget network and the LAN). Append the address to the backend part of the key
+    // only when it collides, so a device with a single address keeps its usual key.
+    std::map<std::string, int> keyCounts;
+
+    for (const auto& scan : m_scans) {
+        keyCounts[scan->m_serial]++;
+    }
+
+    for (const auto& scan : m_scans)
+    {
+        if (scan->m_serial == "TBD") { // no serial in the description: not addressable by serial
+            continue;
+        }
+
+        if ((keyCounts[scan->m_serial] > 1) && (scan->m_uri.rfind("ip:", 0) == 0)) {
+            scan->m_serial += ":" + scan->m_uri.substr(3);
+        }
+
+        m_serialMap[scan->m_serial] = scan;
+    }
 }
 
 const std::string* DevicePlutoSDRScan::getURIAt(unsigned int index) const

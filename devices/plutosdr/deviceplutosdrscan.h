@@ -58,6 +58,7 @@ private:
     std::string createBackendSuffix(const char *uri) const;
     QString getBackendLabel(const std::string& serial) const;
     std::string getPhysicalSerial(const std::string& serial) const;
+    void disambiguateSerials();
 
     std::vector<std::shared_ptr<DeviceScan>> m_scans;
     std::map<std::string, std::shared_ptr<DeviceScan>> m_serialMap;
