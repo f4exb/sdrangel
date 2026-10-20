@@ -22,6 +22,7 @@
 #ifndef SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
 #define SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
 
+#include <QMutex>
 #include <QRecursiveMutex>
 #include <QIODevice>
 #include <QAudioFormat>
@@ -114,7 +115,7 @@ public:
 
     void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
-    int getNbFifos() const { return m_audioFifos.size(); }
+    int getNbFifos() const { QMutexLocker mutexLocker(&m_fifosMutex); return m_audioFifos.size(); }
 
 	uint getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
@@ -126,6 +127,7 @@ public:
 
 private:
 	QRecursiveMutex m_mutex;
+	mutable QMutex m_fifosMutex; //!< guards m_audioFifos, which writeData reads on the audio thread
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 	QAudioSource* m_audioInput;
 #else

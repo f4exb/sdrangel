@@ -187,14 +187,14 @@ void AudioInputDevice::stop()
 
 void AudioInputDevice::addFifo(AudioFifo* audioFifo)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_fifosMutex);
 
 	m_audioFifos.push_back(audioFifo);
 }
 
 void AudioInputDevice::removeFifo(AudioFifo* audioFifo)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_fifosMutex);
 
 	m_audioFifos.remove(audioFifo);
 }
@@ -229,6 +229,9 @@ qint64 AudioInputDevice::writeData(const char *data, qint64 len)
     	qCritical("AudioInputDevice::writeData: invalid format not stereo");
     	return 0;
     }
+
+	// FIFOs are added and removed from other threads (e.g. a modulator being started)
+	QMutexLocker mutexLocker(&m_fifosMutex);
 
 	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
