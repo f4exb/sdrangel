@@ -1,0 +1,58 @@
+name: PlutoSDR libiio 1.x build
+
+# The release builds use libiio 0.x. This job builds the PlutoSDR plugins
+# against libiio 1.x (ENABLE_LIBIIO_V1) so that code path is compiled too.
+# libiio-dev (0.x) is deliberately not installed: external/ builds libiio 1.x.
+
+on:
+  pull_request:
+    paths:
+      - 'devices/plutosdr/**'
+      - 'plugins/samplesource/plutosdrinput/**'
+      - 'plugins/samplesink/plutosdroutput/**'
+      - 'plugins/samplemimo/plutosdrmimo/**'
+      - 'cmake/Modules/FindLibIIO.cmake'
+      - 'external/CMakeLists.txt'
+      - '.github/workflows/plutosdr-libiio1.yml'
+  push:
+    paths:
+      - 'devices/plutosdr/**'
+      - 'plugins/samplesource/plutosdrinput/**'
+      - 'plugins/samplesink/plutosdroutput/**'
+      - 'plugins/samplemimo/plutosdrmimo/**'
+      - 'cmake/Modules/FindLibIIO.cmake'
+      - 'external/CMakeLists.txt'
+      - '.github/workflows/plutosdr-libiio1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build \
+            qt6-base-dev qt6-base-private-dev qt6-multimedia-dev \
+            qt6-websockets-dev qt6-positioning-dev qt6-charts-dev \
+            qt6-serialport-dev \
+            libfftw3-dev libusb-1.0-0-dev libflac-dev libboost-dev libopus-dev \
+            libxml2-dev libzstd-dev libavahi-client-dev
+      - name: Configure server build with libiio 1.x
+        run: >-
+          cmake -S . -B build-libiio1 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DENABLE_QT6=ON -DENABLE_LIBIIO_V1=ON
+          -DBUILD_GUI=OFF -DBUILD_SERVER=ON -DBUILD_BENCH=OFF
+          -DENABLE_EXTERNAL_LIBRARIES=AUTO -DENABLE_LIBUNWIND=OFF
+          -DENABLE_FEATURE=OFF -DENABLE_CHANNELRX=OFF -DENABLE_CHANNELTX=OFF
+          -DENABLE_CHANNELMIMO=OFF
+      - name: Check that libiio 1.x is used
+        run: grep -q "^LIBIIO_V1:INTERNAL=TRUE" build-libiio1/CMakeCache.txt
+      - name: Build PlutoSDR device and plugins
+        run: >-
+          cmake --build build-libiio1 --parallel 2 --target
+          plutosdrdevice inputplutosdrsrv outputplutosdrsrv mimoplutosdrsrv
