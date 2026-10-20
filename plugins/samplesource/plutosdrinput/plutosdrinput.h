@@ -26,12 +26,13 @@
 #include <QByteArray>
 #include <QNetworkRequest>
 
-#include "iio.h"
 #include "dsp/devicesamplesource.h"
 #include "util/message.h"
 #include "plutosdr/deviceplutosdrshared.h"
 #include "plutosdr/deviceplutosdrbox.h"
 #include "plutosdrinputsettings.h"
+
+struct iio_buffer;
 
 class QNetworkAccessManager;
 class QNetworkReply;
