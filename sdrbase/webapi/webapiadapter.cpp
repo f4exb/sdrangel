@@ -1134,7 +1134,7 @@ int WebAPIAdapter::instancePresetFilePost(
 
             QFile file(filePath);
 
-            if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
             {
                 QTextStream outstream(&file);
                 outstream << base64Str;
@@ -1495,7 +1495,7 @@ int WebAPIAdapter::instanceConfigurationFilePost(
 
             QFile file(filePath);
 
-            if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
             {
                 QTextStream outstream(&file);
                 outstream << base64Str;
