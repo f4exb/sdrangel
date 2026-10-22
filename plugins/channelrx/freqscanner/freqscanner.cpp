@@ -1223,6 +1223,7 @@ void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);
     if (response.getFreqScannerSettings()->getFrequencies()) {
         *response.getFreqScannerSettings()->getFrequencies() = *frequencies;
+        delete frequencies;
     } else {
         response.getFreqScannerSettings()->setFrequencies(frequencies);
     }
