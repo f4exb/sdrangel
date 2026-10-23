@@ -1167,14 +1167,42 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             m_headerFeedbackWaitSteps = 0U;
             m_demodActive = true;
             m_loRaSTOFrac += m_loRaSFOHat * 4.25f;
-            if (std::abs(m_loRaSTOFrac) > 0.5f) {
-                m_loRaSTOFrac += (m_loRaSTOFrac > 0.0f) ? -1.0f : 1.0f;
+
+            // Guard against NaN/inf from a degenerate STO/SFO estimate: loRaRound()
+            // casts float to int, which is undefined behaviour for non-finite
+            // values (this also protects the stoQuant computation below).
+            if (!std::isfinite(m_loRaSTOFrac))
+            {
+                qWarning("MeshtasticDemodSink::processLoRaFrameSyncStep: non-finite STO (%f), resetting", m_loRaSTOFrac);
+                m_loRaSTOFrac = 0.0f;
             }
+
+            // Fold any whole-chip wrap of the fractional STO into the FIFO advance
+            // instead of dropping it. One chip = m_osFactor samples. A positive
+            // wrap means consume fewer samples (and vice versa), the same sign
+            // convention as the SFO compensation step. loRaRound() rounds half away
+            // from zero, so |sto_frac| >= 0.5 wraps, consistent with stoQuant below.
+            const int stoChips = loRaRound(m_loRaSTOFrac);
+            m_loRaSTOFrac -= static_cast<float>(stoChips);
+            const int stoCarry = -stoChips * static_cast<int>(m_osFactor);
+
             const float stoQuant = static_cast<float>(loRaRound(m_loRaSTOFrac * static_cast<float>(m_osFactor)));
             m_loRaSFOCum = ((m_loRaSTOFrac * static_cast<float>(m_osFactor)) - stoQuant) / static_cast<float>(m_osFactor);
             m_loRaState = LoRaStateSFOCompensation;
             m_loRaSyncState = LoRaSyncNetId1;
-            return std::max(1, static_cast<int>(m_loRaSymbolSpan / 4U + static_cast<int>(m_osFactor) * m_loRaCFOInt));
+
+            const int advance = static_cast<int>(m_loRaSymbolSpan / 4U)
+                + static_cast<int>(m_osFactor) * m_loRaCFOInt
+                + stoCarry;
+
+            if (advance < 1)
+            {
+                // The CFO/STO correction is partly lost when clamped; make it visible.
+                qDebug("MeshtasticDemodSink::processLoRaFrameSyncStep: FIFO advance %d clamped to 1 (cfoInt=%d stoCarry=%d)",
+                    advance, static_cast<int>(m_loRaCFOInt), stoCarry);
+            }
+
+            return std::max(1, advance);
         }
 
         return static_cast<int>(m_loRaSymbolSpan);
