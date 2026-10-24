@@ -29,7 +29,7 @@
 const PluginDescriptor SIDPlugin::m_pluginDescriptor = {
     SIDMain::m_featureId,
     QStringLiteral("SID"),
-    QStringLiteral("7.25.0"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

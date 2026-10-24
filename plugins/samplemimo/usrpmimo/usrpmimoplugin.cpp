@@ -31,7 +31,7 @@
 const PluginDescriptor USRPMIMOPlugin::m_pluginDescriptor = {
     QStringLiteral("USRP"),
     QStringLiteral("USRP MIMO"),
-    QStringLiteral("7.28.0"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

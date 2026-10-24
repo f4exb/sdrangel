@@ -32,7 +32,7 @@
 const PluginDescriptor AudioCATSISOPlugin::m_pluginDescriptor = {
     QStringLiteral("AudioCATSISO"),
 	QStringLiteral("Audio CAT SISO"),
-    QStringLiteral("7.25.0"),
+    QStringLiteral("8.0.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

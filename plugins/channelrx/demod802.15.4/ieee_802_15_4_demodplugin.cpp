@@ -29,7 +29,7 @@
 const PluginDescriptor IEEE_802_15_4_DemodPlugin::m_pluginDescriptor = {
     IEEE_802_15_4_Demod::m_channelId,
     QStringLiteral("802.15.4 Demodulator"),
-    QStringLiteral("7.28.0"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
