@@ -33,8 +33,9 @@ RollupContents::RollupContents(QWidget* parent) :
     QWidget(parent),
     m_streamIndicator("S"),
     // m_channelWidget(true),
-    m_newHeight(0),
-    m_transparentBackground(false)
+    m_transparentBackground(false),
+    m_arranging(false),
+    m_arrangePending(false)
 {
     setMinimumSize(250, 150);
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -98,7 +99,7 @@ bool RollupContents::hasExpandableWidgets()
     {
         QWidget* r = qobject_cast<QWidget*>(children()[i]);
 
-        if (r && isRollupChild(r) && !r->isHidden() && (r->sizePolicy().verticalPolicy() == QSizePolicy::Expanding)) {
+        if (r && isRollupChild(r) && !r->isHidden() && isExpandingChild(r)) {
             return true;
         }
     }
@@ -106,6 +107,36 @@ bool RollupContents::hasExpandableWidgets()
     return false;
 }
 int RollupContents::arrangeRollups()
+{
+    // Resizing a child, or setting our own minimum height, can have Qt deliver a resize
+    // event synchronously, which comes straight back here. Running that nested would
+    // reposition the children from the inner call and then finish the outer one with a
+    // stale cursor. Note it instead and repeat the arrangement, so the sizes the nested
+    // call was reacting to are still taken into account
+    if (m_arranging)
+    {
+        m_arrangePending = true;
+        return m_minimumSizeHint.height();
+    }
+
+    m_arranging = true;
+
+    int pos = 0;
+    int passes = 0;
+
+    do
+    {
+        m_arrangePending = false;
+        pos = arrangeRollupsOnce();
+    }
+    while (m_arrangePending && (++passes < 4));
+
+    m_arranging = false;
+
+    return pos;
+}
+
+int RollupContents::arrangeRollupsOnce()
 {
     QFontMetrics fm(font());
     int pos;
@@ -124,7 +155,7 @@ int RollupContents::arrangeRollups()
             pos += fm.height() + 2;
             if (!r->isHidden())
             {
-                if (r->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) {
+                if (isExpandingChild(r)) {
                     expandingChildren++;
                 }
                 int h = 0;
@@ -169,9 +200,13 @@ int RollupContents::arrangeRollups()
     // In the future, we should probably respect 'Vertical Stretch'
     int extraSpace;
     int firstExtra;
-    if ((expandingChildren > 0) && (m_newHeight > pos))
+    // height() rather than a value cached in resizeEvent: arrangeRollups() is called
+    // from layout requests, from children being shown or hidden and from clicks on the
+    // section headers, and in all of those the cached value is whatever the last resize
+    // happened to be - or zero before the first one
+    if ((expandingChildren > 0) && (height() > pos))
     {
-        int totalExtra = m_newHeight - pos;
+        int totalExtra = height() - pos;
         extraSpace = totalExtra / expandingChildren;
         firstExtra = totalExtra - (extraSpace * expandingChildren);
     }
@@ -199,7 +234,7 @@ int RollupContents::arrangeRollups()
                 } else {
                     h = r->minimumSizeHint().height();
                 }
-                if (r->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag)
+                if (isExpandingChild(r))
                 {
                     h += extraSpace;
                     h += firstExtra;
@@ -373,7 +408,6 @@ int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last
 
 void RollupContents::resizeEvent(QResizeEvent* size)
 {
-    m_newHeight = size->size().height();
     arrangeRollups();
     QWidget::resizeEvent(size);
 }
@@ -471,4 +505,9 @@ bool RollupContents::eventFilter(QObject* object, QEvent* event)
 bool RollupContents::isRollupChild(QWidget *childWidget)
 {
     return (qobject_cast<QDialog*>(childWidget) == nullptr); // exclude Dialogs from rollups
+}
+
+bool RollupContents::isExpandingChild(const QWidget *childWidget)
+{
+    return (childWidget->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) != 0;
 }
