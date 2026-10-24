@@ -54,6 +54,10 @@ SWGMapSettings::SWGMapSettings() {
     m_sun_light_enabled_isSet = false;
     light_intensity = 0.0f;
     m_light_intensity_isSet = false;
+    distant_light_intensity = 0.0f;
+    m_distant_light_intensity_isSet = false;
+    low_detail_models = 0;
+    m_low_detail_models_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
     fxaa = 0;
@@ -70,6 +74,8 @@ SWGMapSettings::SWGMapSettings() {
     m_fog_isSet = false;
     fps = 0;
     m_fps_isSet = false;
+    frame_rate = 0;
+    m_frame_rate_isSet = false;
     display_muf = 0;
     m_display_muf_isSet = false;
     displayfo_f2 = 0;
@@ -156,6 +162,10 @@ SWGMapSettings::init() {
     m_sun_light_enabled_isSet = false;
     light_intensity = 0.0f;
     m_light_intensity_isSet = false;
+    distant_light_intensity = 0.0f;
+    m_distant_light_intensity_isSet = false;
+    low_detail_models = 0;
+    m_low_detail_models_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
     fxaa = 0;
@@ -172,6 +182,8 @@ SWGMapSettings::init() {
     m_fog_isSet = false;
     fps = 0;
     m_fps_isSet = false;
+    frame_rate = 0;
+    m_frame_rate_isSet = false;
     display_muf = 0;
     m_display_muf_isSet = false;
     displayfo_f2 = 0;
@@ -335,6 +347,10 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sun_light_enabled, pJson["sunLightEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "float", "");
+
+    ::SWGSDRangel::setValue(&distant_light_intensity, pJson["distantLightIntensity"], "float", "");
+    
+    ::SWGSDRangel::setValue(&low_detail_models, pJson["lowDetailModels"], "qint32", "");
     
     ::SWGSDRangel::setValue(&eci_camera, pJson["eciCamera"], "qint32", "");
     
@@ -351,6 +367,8 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fog, pJson["fog"], "qint32", "");
     
     ::SWGSDRangel::setValue(&fps, pJson["fps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&frame_rate, pJson["frameRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_muf, pJson["displayMUF"], "qint32", "");
     
@@ -459,6 +477,12 @@ SWGMapSettings::asJsonObject() {
     if(m_light_intensity_isSet){
         obj->insert("lightIntensity", QJsonValue(light_intensity));
     }
+    if(m_distant_light_intensity_isSet){
+        obj->insert("distantLightIntensity", QJsonValue(distant_light_intensity));
+    }
+    if(m_low_detail_models_isSet){
+        obj->insert("lowDetailModels", QJsonValue(low_detail_models));
+    }
     if(m_eci_camera_isSet){
         obj->insert("eciCamera", QJsonValue(eci_camera));
     }
@@ -482,6 +506,9 @@ SWGMapSettings::asJsonObject() {
     }
     if(m_fps_isSet){
         obj->insert("fps", QJsonValue(fps));
+    }
+    if(m_frame_rate_isSet){
+        obj->insert("frameRate", QJsonValue(frame_rate));
     }
     if(m_display_muf_isSet){
         obj->insert("displayMUF", QJsonValue(display_muf));
@@ -725,6 +752,26 @@ SWGMapSettings::setLightIntensity(float light_intensity) {
     this->m_light_intensity_isSet = true;
 }
 
+float
+SWGMapSettings::getDistantLightIntensity() {
+    return distant_light_intensity;
+}
+void
+SWGMapSettings::setDistantLightIntensity(float distant_light_intensity) {
+    this->distant_light_intensity = distant_light_intensity;
+    this->m_distant_light_intensity_isSet = true;
+}
+
+qint32
+SWGMapSettings::getLowDetailModels() {
+    return low_detail_models;
+}
+void
+SWGMapSettings::setLowDetailModels(qint32 low_detail_models) {
+    this->low_detail_models = low_detail_models;
+    this->m_low_detail_models_isSet = true;
+}
+
 qint32
 SWGMapSettings::getEciCamera() {
     return eci_camera;
@@ -803,6 +850,16 @@ void
 SWGMapSettings::setFps(qint32 fps) {
     this->fps = fps;
     this->m_fps_isSet = true;
+}
+
+qint32
+SWGMapSettings::getFrameRate() {
+    return frame_rate;
+}
+void
+SWGMapSettings::setFrameRate(qint32 frame_rate) {
+    this->frame_rate = frame_rate;
+    this->m_frame_rate_isSet = true;
 }
 
 qint32
@@ -1079,6 +1136,12 @@ SWGMapSettings::isSet(){
         if(m_light_intensity_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_distant_light_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_low_detail_models_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_eci_camera_isSet){
             isObjectUpdated = true; break;
         }
@@ -1101,6 +1164,9 @@ SWGMapSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_fps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frame_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_display_muf_isSet){

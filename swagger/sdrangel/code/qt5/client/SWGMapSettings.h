@@ -82,6 +82,12 @@ public:
     float getLightIntensity();
     void setLightIntensity(float light_intensity);
 
+    float getDistantLightIntensity();
+    void setDistantLightIntensity(float distant_light_intensity);
+
+    qint32 getLowDetailModels();
+    void setLowDetailModels(qint32 low_detail_models);
+
     qint32 getEciCamera();
     void setEciCamera(qint32 eci_camera);
 
@@ -105,6 +111,9 @@ public:
 
     qint32 getFps();
     void setFps(qint32 fps);
+
+    qint32 getFrameRate();
+    void setFrameRate(qint32 frame_rate);
 
     qint32 getDisplayMuf();
     void setDisplayMuf(qint32 display_muf);
@@ -227,6 +236,12 @@ private:
     float light_intensity;
     bool m_light_intensity_isSet;
 
+    float distant_light_intensity;
+    bool m_distant_light_intensity_isSet;
+
+    qint32 low_detail_models;
+    bool m_low_detail_models_isSet;
+
     qint32 eci_camera;
     bool m_eci_camera_isSet;
 
@@ -250,6 +265,9 @@ private:
 
     qint32 fps;
     bool m_fps_isSet;
+
+    qint32 frame_rate;
+    bool m_frame_rate_isSet;
 
     qint32 display_muf;
     bool m_display_muf_isSet;

@@ -54,6 +54,16 @@ MapSettings:
       type: number
       format: float
       minimum: 0
+    distantLightIntensity:
+      description: Ambient light added to distant 3D models, so they are not dark silhouettes against a bright sky. 0 disables it.
+      type: number
+      format: float
+      minimum: 0
+    lowDetailModels:
+      description: Draw aircraft that are small on screen with their low detail model, where they have one (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
     eciCamera:
       description: Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).
       type: integer
@@ -91,6 +101,10 @@ MapSettings:
       maximum: 1
     fps:
       description: Display the 3D map frame rate (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+    frameRate:
+      description: Frame rate to render the 3D map at, in frames per second. 0 to use the refresh rate of the display the map is on.
       type: integer
       minimum: 0
       maximum: 1
