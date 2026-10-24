@@ -34,7 +34,7 @@
 const PluginDescriptor Blderf2InputPlugin::m_pluginDescriptor = {
     QStringLiteral("BladeRF2"),
     QStringLiteral("BladeRF2 Input"),
-    QStringLiteral("7.25.0"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

@@ -31,7 +31,7 @@
 const PluginDescriptor InmarsatDemodPlugin::m_pluginDescriptor = {
     InmarsatDemod::m_channelId,
     QStringLiteral("Inmarsat C Demodulator"),
-    QStringLiteral("7.27.2"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

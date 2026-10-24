@@ -29,7 +29,7 @@
 const PluginDescriptor DVBDemodPlugin::m_pluginDescriptor = {
     DVBDemod::m_channelId,
     QStringLiteral("DVB Demodulator"),
-    QStringLiteral("7.28.0"),
+    QStringLiteral("8.0.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
