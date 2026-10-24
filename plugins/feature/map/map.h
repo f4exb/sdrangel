@@ -178,6 +178,7 @@ public:
 
     void setMapDateTime(QDateTime mapDateTime, QDateTime systemDateTime, double multiplier);
     QDateTime getMapDateTime();
+    void getAvailableChannelsReport();
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;

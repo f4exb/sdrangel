@@ -87,6 +87,8 @@ void classifyTemplate(const TemplateUse &use, QHash<QString, MsfsAnimationRole> 
             animation = QStringLiteral("GEAR_Left");
         } else if (name == QStringLiteral("ASOBO_GEAR_RIGHT_TEMPLATE")) {
             animation = QStringLiteral("GEAR_Right");
+        } else if (name == QStringLiteral("ASOBO_GEAR_STEERING_TEMPLATE")) {
+            animation = QStringLiteral("GEAR_Steering");
         }
     }
     if (animation.isEmpty() || roles->contains(animation)) {
@@ -111,6 +113,36 @@ void classifyTemplate(const TemplateUse &use, QHash<QString, MsfsAnimationRole> 
         role.m_kind = MsfsAnimationRole::Engine;
         role.m_engine = indexIn(use.m_parameters.value(QStringLiteral("RPM_VAR")), engineIndex, 1);
         role.m_length = (length > 0.0) ? length : DefaultEngineLength;
+    }
+    else if (name == QStringLiteral("FSLTL_STEERING"))
+    {
+        // Driven by ((yaw rate * LEGACY_PARAM_1) + LEGACY_PARAM_2) * 10 + OFFSET, so with no
+        // turn the keyframe is LEGACY_PARAM_2 * 10 + OFFSET: 500 of 1000 with the defaults,
+        // 50 of 100, 1200 of 2400 - the middle, in every FSLTL model
+        const double length = number(use.m_parameters.value(QStringLiteral("ANIM_LENGTH")), 1000.0);
+        bool ok = false;
+        double param2 = use.m_parameters.value(QStringLiteral("LEGACY_PARAM_2")).trimmed().toDouble(&ok);
+        if (!ok) {
+            param2 = 50.0;
+        }
+        const double offset = use.m_parameters.value(QStringLiteral("OFFSET")).trimmed().toDouble();
+        role.m_kind = MsfsAnimationRole::Steering;
+        role.m_length = length;
+        role.m_neutral = qBound(0.0, (param2 * 10.0 + offset) / length, 1.0);
+    }
+    else if (name == QStringLiteral("FSLTL_ALT_STEERING"))
+    {
+        // A full turn over the animation, straight ahead at STEER_START
+        const double length = number(use.m_parameters.value(QStringLiteral("ANIM_LENGTH")), 100.0);
+        const double start = std::abs(use.m_parameters.value(QStringLiteral("STEER_START")).trimmed().toDouble());
+        role.m_kind = MsfsAnimationRole::Steering;
+        role.m_length = length;
+        role.m_neutral = qBound(0.0, start / length, 1.0);
+    }
+    else if (name == QStringLiteral("ASOBO_GEAR_STEERING_TEMPLATE"))
+    {
+        role.m_kind = MsfsAnimationRole::Steering;
+        role.m_neutral = 0.5;   // Lock to lock
     }
     else if (name == QStringLiteral("ASOBO_ENGINE_PROPELLER_TEMPLATE"))
     {
@@ -303,10 +335,205 @@ void clipKeyframes(QVector<float> *times, QVector<float> *values, int components
     values->append(value);
 }
 
+// Makes the pose some animations give at time `at` the nodes' own, so it is how the model
+// is drawn with nothing playing. Returns how many node properties were set
+int bakePose(QJsonObject *root, const QVector<QByteArray> &buffers, const QJsonArray &animations,
+             const QList<int> &indices, double at)
+{
+    QJsonArray nodes = root->value("nodes").toArray();
+    int baked = 0;
+    for (int index : indices)
+    {
+        const QJsonObject animation = animations.at(index).toObject();
+        const QJsonArray samplers = animation.value("samplers").toArray();
+        for (const QJsonValue &channelValue : animation.value("channels").toArray())
+        {
+            const QJsonObject target = channelValue.toObject().value("target").toObject();
+            const int nodeIndex = target.value("node").toInt(-1);
+            const QString path = target.value("path").toString();
+            if ((nodeIndex < 0) || (nodeIndex >= nodes.size()) || (path == QStringLiteral("weights"))) {
+                continue;
+            }
+            QJsonObject node = nodes.at(nodeIndex).toObject();
+            if (node.contains("matrix")) {
+                continue;   // Can't be animated anyway
+            }
+            const QJsonObject sampler = samplers.at(channelValue.toObject().value("sampler").toInt(-1)).toObject();
+            const QString interpolation = sampler.value("interpolation").toString(QStringLiteral("LINEAR"));
+            QVector<float> times;
+            QVector<float> values;
+            int timeComponents = 0;
+            int components = 0;
+            if ((interpolation == QStringLiteral("CUBICSPLINE"))
+                || !readFloats(*root, buffers, sampler.value("input").toInt(-1), &timeComponents, &times)
+                || !readFloats(*root, buffers, sampler.value("output").toInt(-1), &components, &values)
+                || (timeComponents != 1) || (values.size() != times.size() * components)) {
+                continue;
+            }
+            // Clipping at `at` leaves the value there as the last keyframe
+            clipKeyframes(&times, &values, components, at, interpolation == QStringLiteral("STEP"),
+                          path == QStringLiteral("rotation"));
+            QJsonArray value;
+            for (int c = 0; c < components; c++) {
+                value.append(values[values.size() - components + c]);
+            }
+            node.insert(path, value);
+            nodes[nodeIndex] = node;
+            baked++;
+        }
+    }
+    root->insert("nodes", nodes);
+    return baked;
+}
+
 struct Group {
     MsfsAnimationRole m_role;
     QList<int> m_animations;
 };
+
+// The animations the ADS-B demodulator asks for by name (adsbdemodtrackerdecode.cpp).
+// Anything else in the file can never play, so its keyframes are dead weight: an FSLTL
+// A320 keeps custom_anim_SIM_on_GROUND and a spoiler animation per wing, half of its
+// animations and an eighth of its keyframe values
+bool isPlayedAnimation(const QString &name)
+{
+    static const QStringList played{
+        GearName,
+        FlapsName,
+        SlatsName,
+        QStringLiteral("libxplanemp/gear/tire_vertical_deflection_mtr"),
+        QStringLiteral("Take 001")      // The helicopter's rotor
+    };
+    return played.contains(name)
+        || name.startsWith(QStringLiteral("libxplanemp/engines/engine_rotation_angle_deg"));
+}
+
+// How many keyframe values an animation holds, counting both the times and the poses -
+// which is what Cesium turns into objects
+qint64 keyframeValues(const QJsonArray &accessors, const QJsonObject &animation)
+{
+    qint64 values = 0;
+    for (const QJsonValue &samplerValue : animation.value("samplers").toArray())
+    {
+        const QJsonObject sampler = samplerValue.toObject();
+        for (const QLatin1String key : {QLatin1String("input"), QLatin1String("output")})
+        {
+            const int index = sampler.value(key).toInt(-1);
+            if ((index >= 0) && (index < accessors.size())) {
+                values += static_cast<qint64>(accessors.at(index).toObject().value("count").toDouble());
+            }
+        }
+    }
+    return values;
+}
+
+// The fewest keyframes that still reproduce the sampler to within `tolerance`, by the
+// Ramer-Douglas-Peucker rule: keep the two ends, then keep whichever keyframe the
+// straight line between two kept ones misses by the most, until nothing is missed by
+// more than the tolerance. Returns how many keyframes went
+int decimateSampler(QVector<float> *times, QVector<float> *values, int components,
+                    bool step, bool rotation, double tolerance)
+{
+    const int count = static_cast<int>(times->size());
+    if ((count <= 2) || (values->size() != static_cast<qsizetype>(count) * components)) {
+        return 0;
+    }
+    float *v = values->data();
+    if (rotation)
+    {
+        // q and -q are the same rotation and slerp takes the shorter way round, so the
+        // signs can be made to agree - without which a flip reads as a huge deviation
+        // and every keyframe around it is kept
+        for (int i = 1; i < count; i++)
+        {
+            double dot = 0.0;
+            for (int c = 0; c < components; c++) {
+                dot += static_cast<double>(v[(i - 1) * components + c]) * v[i * components + c];
+            }
+            if (dot < 0.0)
+            {
+                for (int c = 0; c < components; c++) {
+                    v[i * components + c] = -v[i * components + c];
+                }
+            }
+        }
+    }
+
+    QVector<bool> keep(count, false);
+    keep[0] = true;
+    keep[count - 1] = true;
+    if (step)
+    {
+        // A stepped sampler's keyframes are the steps, so only a repeat can go
+        for (int i = 1; i < count - 1; i++)
+        {
+            double change = 0.0;
+            for (int c = 0; c < components; c++)
+            {
+                change = qMax(change, qAbs(static_cast<double>(v[i * components + c])
+                                           - static_cast<double>(v[(i - 1) * components + c])));
+            }
+            keep[i] = change > tolerance;
+        }
+    }
+    else
+    {
+        QVector<QPair<int, int>> todo{{0, count - 1}};
+        while (!todo.isEmpty())
+        {
+            const QPair<int, int> span = todo.takeLast();
+            const int a = span.first;
+            const int b = span.second;
+            if (b <= a + 1) {
+                continue;
+            }
+            const double ta = (*times)[a];
+            const double tb = (*times)[b];
+            int worst = -1;
+            double worstError = 0.0;
+            for (int i = a + 1; i < b; i++)
+            {
+                const double f = (tb > ta) ? (((*times)[i] - ta) / (tb - ta)) : 0.0;
+                double error = 0.0;
+                for (int c = 0; c < components; c++)
+                {
+                    const double from = v[a * components + c];
+                    const double to = v[b * components + c];
+                    error = qMax(error, qAbs(static_cast<double>(v[i * components + c])
+                                             - (from + (to - from) * f)));
+                }
+                if (error > worstError)
+                {
+                    worstError = error;
+                    worst = i;
+                }
+            }
+            if ((worst < 0) || (worstError <= tolerance)) {
+                continue;
+            }
+            keep[worst] = true;
+            todo.append({a, worst});
+            todo.append({worst, b});
+        }
+    }
+
+    QVector<float> keptTimes;
+    QVector<float> keptValues;
+    for (int i = 0; i < count; i++)
+    {
+        if (!keep[i]) {
+            continue;
+        }
+        keptTimes.append((*times)[i]);
+        for (int c = 0; c < components; c++) {
+            keptValues.append(v[i * components + c]);
+        }
+    }
+    const int dropped = count - static_cast<int>(keptTimes.size());
+    *times = keptTimes;
+    *values = keptValues;
+    return dropped;
+}
 
 } // namespace
 
@@ -420,6 +647,7 @@ QStringList mapMsfsAnimations(const QHash<QString, MsfsAnimationRole> &roles, QJ
         case MsfsAnimationRole::Flaps: target = FlapsName; break;
         case MsfsAnimationRole::Slats: target = SlatsName; break;
         case MsfsAnimationRole::Engine: target = EngineName.arg(role->m_engine); break;
+        case MsfsAnimationRole::Steering: target = QStringLiteral("steering"); break;
         }
         Group &group = groups[target];
         if (group.m_animations.isEmpty()) {
@@ -448,10 +676,30 @@ QStringList mapMsfsAnimations(const QHash<QString, MsfsAnimationRole> &roles, QJ
                 end = qMax(end, input.value("max").toArray().at(0).toDouble());
             }
         }
+        // Keyframes are usually the glTF's time, but a third of the FSLTL gear animations
+        // (E190, ATR 72-500/-600, 737-300/-400, 747-400, 787-10, A300, MD-11F) were exported
+        // at 24 a second, so their 200 keyframes end at 8.33 - and the gear would run on
+        // into compression. Told apart by the length the XML gives
+        const double length = role.m_length;
+        const bool seconds = (length > 0.0) && (end <= length / 24.0 * 1.05);
+        const double keyframe = seconds ? 1.0 / 24.0 : 1.0;   // Time per keyframe
+
+        if (role.m_kind == MsfsAnimationRole::Steering)
+        {
+            // Not played, so baked into the rest pose straight ahead, and dropped
+            const double at = (length > 0.0) ? role.m_neutral * length * keyframe : role.m_neutral * end;
+            const int baked = bakePose(root, *buffers, animations, group.m_animations, at);
+            for (int index : group.m_animations) {
+                replaced.insert(index);
+            }
+            made.append(QStringLiteral("nose wheel steering set straight ahead, at %1 of %2 (%3 channels)")
+                .arg(at).arg(end).arg(baked));
+            continue;
+        }
         if (role.m_kind == MsfsAnimationRole::Gear) {
-            end = qMin(end, GearExtended);  // A gear animation shorter than 100 ends extended
+            end = qMin(end, GearExtended * keyframe);   // A gear animation shorter than 100 ends extended
         } else if (role.m_kind == MsfsAnimationRole::Engine) {
-            scale = 360.0 / role.m_length;  // One degree per second, as the demod expects
+            scale = 360.0 / (length * keyframe);    // One degree per second, as the demod expects
         }
         if (role.m_kind != MsfsAnimationRole::Engine)
         {
@@ -535,4 +783,107 @@ QStringList mapMsfsAnimations(const QHash<QString, MsfsAnimationRole> &roles, QJ
     }
     root->insert("animations", result);
     return made;
+}
+
+QString dropUnplayedAnimations(QJsonObject *root)
+{
+    const QJsonArray animations = root->value("animations").toArray();
+    if (animations.isEmpty()) {
+        return QString();
+    }
+    const QJsonArray accessors = root->value("accessors").toArray();
+    QJsonArray kept;
+    QStringList dropped;
+    qint64 values = 0;
+    for (const QJsonValue &animationValue : animations)
+    {
+        const QJsonObject animation = animationValue.toObject();
+        const QString name = animation.value("name").toString();
+        if (isPlayedAnimation(name)) {
+            kept.append(animationValue);
+        }
+        else
+        {
+            dropped.append(name.isEmpty() ? QStringLiteral("(unnamed)") : name);
+            values += keyframeValues(accessors, animation);
+        }
+    }
+    if (dropped.isEmpty()) {
+        return QString();
+    }
+    // An animations array has to have something in it, so an empty one goes altogether
+    if (kept.isEmpty()) {
+        root->remove(QStringLiteral("animations"));
+    } else {
+        root->insert(QStringLiteral("animations"), kept);
+    }
+    return QStringLiteral("dropped %1 of %2 (%3 keyframe values): %4")
+        .arg(dropped.size()).arg(animations.size()).arg(values).arg(dropped.join(QStringLiteral(", ")));
+}
+
+QString decimateAnimations(QJsonObject *root, QVector<QByteArray> *buffers, double tolerance)
+{
+    QJsonArray animations = root->value("animations").toArray();
+    if (animations.isEmpty() || buffers->isEmpty() || (tolerance <= 0.0)) {
+        return QString();
+    }
+    qint64 before = 0;
+    qint64 after = 0;
+    int changed = 0;
+    for (qsizetype a = 0; a < animations.size(); a++)
+    {
+        QJsonObject animation = animations.at(a).toObject();
+        QJsonArray samplers = animation.value("samplers").toArray();
+        // Which property each sampler drives, so a rotation can be told from a translation
+        QHash<int, QString> paths;
+        for (const QJsonValue &channelValue : animation.value("channels").toArray())
+        {
+            const QJsonObject channel = channelValue.toObject();
+            paths.insert(channel.value("sampler").toInt(-1),
+                         channel.value("target").toObject().value("path").toString());
+        }
+        bool animationChanged = false;
+        for (qsizetype s = 0; s < samplers.size(); s++)
+        {
+            QJsonObject sampler = samplers.at(s).toObject();
+            const QString interpolation = sampler.value("interpolation").toString(QStringLiteral("LINEAR"));
+            if (interpolation == QStringLiteral("CUBICSPLINE")) {
+                continue;   // Three values to a keyframe, and the tangents are not ours to resample
+            }
+            QVector<float> times;
+            QVector<float> values;
+            int timeComponents = 0;
+            int components = 0;
+            if (!readFloats(*root, *buffers, sampler.value("input").toInt(-1), &timeComponents, &times)
+                || !readFloats(*root, *buffers, sampler.value("output").toInt(-1), &components, &values)
+                || (timeComponents != 1) || (values.size() != times.size() * components)) {
+                continue;
+            }
+            before += times.size();
+            const int dropped = decimateSampler(&times, &values, components,
+                                                interpolation == QStringLiteral("STEP"),
+                                                paths.value(static_cast<int>(s)) == QStringLiteral("rotation"),
+                                                tolerance);
+            after += times.size();
+            if (dropped <= 0) {
+                continue;
+            }
+            sampler.insert(QStringLiteral("input"), appendFloats(root, buffers, times, 1));
+            sampler.insert(QStringLiteral("output"), appendFloats(root, buffers, values, components));
+            samplers.replace(s, sampler);
+            animationChanged = true;
+        }
+        if (animationChanged)
+        {
+            animation.insert(QStringLiteral("samplers"), samplers);
+            animations.replace(a, animation);
+            changed++;
+        }
+    }
+    if (before == after) {
+        return QString();
+    }
+    root->insert(QStringLiteral("animations"), animations);
+    return QStringLiteral("%1 keyframes to %2 in %3 animation%4")
+        .arg(before).arg(after).arg(changed).arg(changed == 1 ? QString() : QStringLiteral("s"));
 }

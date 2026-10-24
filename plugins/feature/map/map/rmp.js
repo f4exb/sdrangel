@@ -37,9 +37,36 @@ const rmpStandbyX = 400;
 const rmpDisplayW = 220;
 const rmpDisplayH = 75;
 const rmpSwapX = 325;
-function rmpActiveRect(i) { return { x: rmpActiveX, y: rmpRows[i].y, w: rmpDisplayW, h: rmpDisplayH }; }
-function rmpStandbyRect(i) { return { x: rmpStandbyX, y: rmpRows[i].y, w: rmpDisplayW, h: rmpDisplayH }; }
-function rmpSwapRect(i) { return { x: rmpSwapX, y: rmpRows[i].y + 7, w: 60, h: 60 }; }
+// One object per row rather than a new one on every call: the panel redraws four times a
+// second and these are fixed layout, and holding them lets the gradients drawn into them
+// be kept too - see rmpDrawDisplay
+const rmpActiveRects = [];
+const rmpStandbyRects = [];
+const rmpSwapRects = [];
+
+function rmpActiveRect(i) {
+    let r = rmpActiveRects[i];
+    if (r === undefined) {
+        r = rmpActiveRects[i] = { x: rmpActiveX, y: rmpRows[i].y, w: rmpDisplayW, h: rmpDisplayH };
+    }
+    return r;
+}
+
+function rmpStandbyRect(i) {
+    let r = rmpStandbyRects[i];
+    if (r === undefined) {
+        r = rmpStandbyRects[i] = { x: rmpStandbyX, y: rmpRows[i].y, w: rmpDisplayW, h: rmpDisplayH };
+    }
+    return r;
+}
+
+function rmpSwapRect(i) {
+    let r = rmpSwapRects[i];
+    if (r === undefined) {
+        r = rmpSwapRects[i] = { x: rmpSwapX, y: rmpRows[i].y + 7, w: 60, h: 60 };
+    }
+    return r;
+}
 
 const rmpKeys = [];
 (function () {
@@ -104,18 +131,54 @@ function rmpPrepareCanvas() {
     return ctx;
 }
 
-// An LCD style inset frequency display. Amber while a rejected entry is flashed, a
-// cyan frame on the standby the keypad is editing
+// A lit segment display behind glass, sunk into the panel. Amber while a rejected
+// entry is flashed, a cyan bezel on the standby the keypad is editing
 function rmpDrawDisplay(ctx, rect, text, frameColor, textColor) {
-    ctx.fillStyle = "#101014";
-    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    // The bezel it is sunk into
+    ctx.beginPath();
+    pfdRoundRectPath(ctx, rect.x - 4, rect.y - 4, rect.w + 8, rect.h + 8, 5);
+    ctx.fillStyle = "#15151A";
+    ctx.fill();
     ctx.strokeStyle = frameColor;
     ctx.lineWidth = 3;
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.stroke();
+
+    // The glass, darkest at the top where the bezel shades it
+    let glass = rect.glassGradient;
+    if (glass === undefined) {
+        glass = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.h);
+        glass.addColorStop(0, "#05050A");
+        glass.addColorStop(0.5, "#0E0E16");
+        glass.addColorStop(1, "#07070D");
+        rect.glassGradient = glass;
+    }
+    ctx.beginPath();
+    pfdRoundRectPath(ctx, rect.x, rect.y, rect.w, rect.h, 2);
+    ctx.fillStyle = glass;
+    ctx.fill();
+
+    // The segments, which glow on to the glass around them
+    ctx.save();
     ctx.font = "52px monospace";
     ctx.textAlign = "center";
+    ctx.shadowColor = textColor;
+    ctx.shadowBlur = 12;
     ctx.fillStyle = textColor;
     ctx.fillText(text, rect.x + rect.w / 2, rect.y + rect.h / 2 + 19);
+    ctx.restore();
+
+    // A reflection off the glass, across its upper half
+    let sheen = rect.sheenGradient;
+    if (sheen === undefined) {
+        sheen = ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w * 0.6, rect.y + rect.h * 0.7);
+        sheen.addColorStop(0, "rgba(255, 255, 255, 0.10)");
+        sheen.addColorStop(1, "rgba(255, 255, 255, 0)");
+        rect.sheenGradient = sheen;
+    }
+    ctx.beginPath();
+    pfdRoundRectPath(ctx, rect.x, rect.y, rect.w, rect.h * 0.55, 2);
+    ctx.fillStyle = sheen;
+    ctx.fill();
 }
 
 function drawRMP() {
@@ -125,25 +188,15 @@ function drawRMP() {
     const ctx = rmpPrepareCanvas();
     const now = Date.now();
 
-    ctx.fillStyle = "#33333C";
-    ctx.fillRect(0, 0, 1000, 400);
-    ctx.strokeStyle = "#55555F";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, 2, 996, 396);
+    panelBackground(ctx, 1000, 400);
 
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.fillText("ACTIVE", rmpActiveX + rmpDisplayW / 2, 30);
-    ctx.fillText("STBY", rmpStandbyX + rmpDisplayW / 2, 30);
+    panelLegend(ctx, "ACTIVE", rmpActiveX + rmpDisplayW / 2, 30, 20);
+    panelLegend(ctx, "STBY", rmpStandbyX + rmpDisplayW / 2, 30, 20);
 
     for (let i = 0; i < 2; i++) {
         const v = rmpVhf[i];
         const row = rmpRows[i];
-        ctx.font = "24px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "left";
-        ctx.fillText(row.label, 12, row.y + rmpDisplayH / 2 + 9);
+        panelLegend(ctx, row.label, 46, row.y + rmpDisplayH / 2 + 9, 24);
 
         rmpDrawDisplay(ctx, rmpActiveRect(i), v.available ? rmpFormat(v.active) : "---.---", "#55555F", greenColor);
 
@@ -161,10 +214,7 @@ function drawRMP() {
     }
 
     // The transponder code
-    ctx.font = "20px Arial";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    ctx.fillText("XPDR", rmpSquawkRect.x + rmpSquawkRect.w / 2, 262);
+    panelLegend(ctx, "XPDR", rmpSquawkRect.x + rmpSquawkRect.w / 2, 262, 20);
     const code = (ndSquawk !== undefined) && (ndSquawk >= 0)
         ? ndSquawk.toString().padStart(4, "0") : "----";
     rmpDrawDisplay(ctx, rmpSquawkRect, code, "#55555F", greenColor);

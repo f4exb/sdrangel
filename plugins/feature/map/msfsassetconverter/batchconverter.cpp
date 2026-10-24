@@ -63,9 +63,30 @@ struct AircraftOutcome {
     Status m_status = Pending;
     QString m_failure;
     int m_reusedTextures = 0;
+    int m_downscaledTextures = 0;
     int m_synthesizedTextures = 0;
     int m_skippedFallbackDirectories = 0;
+    bool m_lowDetail = false;
 };
+
+// The model the 3D map draws an aircraft with once it is small on screen: the
+// second LOD of the model definition, when that is a different file from the
+// first. Returns an empty string when there is none
+QString lowDetailLodFile(const AircraftTask& task)
+{
+    ResolvedFsltlAircraft lod0;
+    ResolvedFsltlAircraft lod1;
+    QString error;
+    if (!resolveFsltlAircraft(task.m_config, task.m_flightSimIndex, 0, &lod0, &error)
+        || !resolveFsltlAircraft(task.m_config, task.m_flightSimIndex, 1, &lod1, &error)) {
+        return {};
+    }
+    if (QFileInfo(lod0.m_gltfFile).canonicalFilePath()
+        == QFileInfo(lod1.m_gltfFile).canonicalFilePath()) {
+        return {};
+    }
+    return lod1.m_gltfFile;
+}
 
 int automaticWorkerCount(int taskCount)
 {
@@ -166,7 +187,9 @@ bool convertMSFSAircraftDirectory(
     QString *error,
     const MSFSBatchProgress& progress,
     const MSFSBatchCancelled& isCancelled,
-    int maxThreadCount)
+    int maxThreadCount,
+    int maximumTextureSize,
+    int lowDetailMaximumTextureSize)
 {
     *summary = {};
     error->clear();
@@ -309,6 +332,7 @@ bool convertMSFSAircraftDirectory(
             options.m_outputNameSuffix = task.m_outputNameSuffix;
             options.m_sharedTextureDirectory = sharedTextureDirectory;
             options.m_flightSimIndex = task.m_flightSimIndex;
+            options.m_maximumTextureSize = maximumTextureSize;
             options.m_isCancelled = cancelled;
 
             ConversionResult conversion;
@@ -321,11 +345,56 @@ bool convertMSFSAircraftDirectory(
                 {
                     outcome.m_status = AircraftOutcome::Converted;
                     outcome.m_reusedTextures = conversion.m_reusedTextures;
+                    outcome.m_downscaledTextures = conversion.m_downscaledTextures;
                     outcome.m_synthesizedTextures = conversion.m_synthesizedTextures;
                     outcome.m_skippedFallbackDirectories =
                         conversion.m_skippedFallbackDirectories;
                     message = QStringLiteral("Converted %1%2")
                         .arg(task.m_aircraftName, task.m_outputNameSuffix);
+
+                    // A cheaper model for the map to switch to when the aircraft is
+                    // small on screen. It shares the textures just cached
+                    const QString lowDetailFile = QFileInfo(conversion.m_outputGltf).path()
+                        + "/" + QFileInfo(conversion.m_outputGltf).completeBaseName()
+                        + QStringLiteral("_lod1.gltf");
+                    if (!lowDetailLodFile(task).isEmpty())
+                    {
+                        ConversionOptions lowDetailOptions = options;
+                        lowDetailOptions.m_lodIndex = 1;
+                        // Its own, smaller textures. They stop being shared with the full
+                        // detail model, so both are resident while a swap is in flight -
+                        // which at a third of a megabyte each costs nothing. The cap is
+                        // part of the KTX2 cache fingerprint, so these get their own files
+                        lowDetailOptions.m_maximumTextureSize =
+                            (lowDetailMaximumTextureSize > 0)
+                                ? qMin(lowDetailMaximumTextureSize, maximumTextureSize)
+                                : maximumTextureSize;
+                        // A low detail model is only drawn small, so its animations can be
+                        // thinned harder than the full one's: about a degree of rotation
+                        lowDetailOptions.m_animationTolerance =
+                            qMax(options.m_animationTolerance, 0.01);
+                        lowDetailOptions.m_outputFileSuffix = QStringLiteral("_lod1");
+                        ConversionResult lowDetailConversion;
+                        QString lowDetailError;
+                        if (convertMsfsAsset(lowDetailOptions, &lowDetailConversion, &lowDetailError)) {
+                            outcome.m_lowDetail = true;
+                        } else if (lowDetailError == QStringLiteral("Conversion cancelled")) {
+                            QFile::remove(lowDetailFile);
+                            outcome.m_status = AircraftOutcome::Cancelled;
+                            return;
+                        } else {
+                            QFile::remove(lowDetailFile);
+                            message += QStringLiteral(" (low detail model failed: %1)").arg(lowDetailError);
+                        }
+                    }
+                    else
+                    {
+                        // Don't leave one from an earlier run that no longer matches
+                        QFile::remove(lowDetailFile);
+                    }
+                    if (outcome.m_lowDetail) {
+                        message += QStringLiteral(" with a low detail model");
+                    }
                     if (conversion.m_reusedTextures > 0) {
                         message += QStringLiteral(" (%1 cached texture%2 reused)")
                             .arg(conversion.m_reusedTextures)
@@ -417,7 +486,11 @@ bool convertMSFSAircraftDirectory(
         if (outcome.m_status == AircraftOutcome::Converted)
         {
             ++summary->m_converted;
+            if (outcome.m_lowDetail) {
+                ++summary->m_lowDetailModels;
+            }
             summary->m_reusedTextures += outcome.m_reusedTextures;
+            summary->m_downscaledTextures += outcome.m_downscaledTextures;
             summary->m_synthesizedTextures += outcome.m_synthesizedTextures;
             summary->m_skippedFallbackDirectories += outcome.m_skippedFallbackDirectories;
         }

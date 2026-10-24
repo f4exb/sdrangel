@@ -283,6 +283,7 @@ void MapSettings::resetToDefaults()
 #endif
     m_thunderforestAPIKey = "";
     m_maptilerAPIKey = "";
+    m_cartoDBAPIKey = "";
     m_mapBoxAPIKey = "";
     m_osmURL = "";
     m_mapBoxStyles = "";
@@ -302,10 +303,14 @@ void MapSettings::resetToDefaults()
     m_buildings = "None";
     m_sunLightEnabled = true;
     m_lightIntensity = 3.0f;
+    m_distantLightIntensity = 0.5f;
+    m_lowDetailModels = true;
     m_eciCamera = false;
     m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
     m_msfsNavigraphDir = defaultMSFSNavigraphDirectory();
     m_msfsAircraftDir = defaultMSFSAircraftDirectory();
+    m_msfsMaxTextureSize = 2048;
+    m_msfsLowDetailMaxTextureSize = 512;
     m_fxaa = true;
     m_msaa = 1;
     m_mapCenterLatitude = 0.0f;
@@ -317,6 +322,7 @@ void MapSettings::resetToDefaults()
     m_hdr = true;
     m_fog = true;
     m_fps = false;
+    m_frameRate = 0;
     m_displayMUF = false;
     m_displayfoF2 = false;
     m_displayRain = false;
@@ -370,6 +376,7 @@ QByteArray MapSettings::serialize() const
     s.writeBool(16, m_displayAllGroundTracks);
     s.writeString(17, m_thunderforestAPIKey);
     s.writeString(18, m_maptilerAPIKey);
+    s.writeString(86, m_cartoDBAPIKey);
 
     if (m_rollupState) {
         s.writeBlob(19, m_rollupState->serialize());
@@ -404,6 +411,8 @@ QByteArray MapSettings::serialize() const
     s.writeString(46, m_checkWXAPIKey);
 
     s.writeFloat(47, m_lightIntensity);
+    s.writeFloat(87, m_distantLightIntensity);
+    s.writeBool(88, m_lowDetailModels);
 
     s.writeBool(48, m_displayMaidenheadGrid);
     s.writeString(49, m_defaultImagery);
@@ -415,6 +424,7 @@ QByteArray MapSettings::serialize() const
     s.writeBool(55, m_hdr);
     s.writeBool(56, m_fog);
     s.writeBool(57, m_fps);
+    s.writeS32(85, m_frameRate);
     s.writeBool(58, m_fxaa);
     s.writeS32(59, m_msaa);
     s.writeFloat(60, m_mapCenterLatitude);
@@ -443,6 +453,8 @@ QByteArray MapSettings::serialize() const
     s.writeString(82, m_msfsAircraftDir);
     s.writeS32(83, m_cameraMode);
     s.writeString(84, m_msfsNavigraphDir);
+    s.writeS32(89, m_msfsMaxTextureSize);
+    s.writeS32(90, m_msfsLowDetailMaxTextureSize);
 
     return s.final();
 }
@@ -494,6 +506,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(16, &m_displayAllGroundTracks, true);
         d.readString(17, &m_thunderforestAPIKey, "");
         d.readString(18, &m_maptilerAPIKey, "");
+        d.readString(86, &m_cartoDBAPIKey, "");
 
         if (m_rollupState)
         {
@@ -532,6 +545,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readString(46, &m_checkWXAPIKey, "");
 
         d.readFloat(47, &m_lightIntensity, 3.0f);
+        d.readFloat(87, &m_distantLightIntensity, 0.5f);
+        d.readBool(88, &m_lowDetailModels, true);
         d.readBool(48, &m_displayMaidenheadGrid, false);
         d.readString(49, &m_defaultImagery, "ArcGIS world imagery");
         d.readString(50, &m_arcGISAPIKey, "");
@@ -547,6 +562,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(55, &m_hdr, true);
         d.readBool(56, &m_fog, true);
         d.readBool(57, &m_fps, false);
+        d.readS32(85, &m_frameRate, 0);
         d.readBool(58, &m_fxaa, false);
         d.readS32(59, &m_msaa, 1);
         d.readFloat(60, &m_mapCenterLatitude, 0.0f);
@@ -572,6 +588,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(71, &m_googlePhotorealistic3DTiles, false);
         d.readString(82, &m_msfsAircraftDir, defaultMSFSAircraftDirectory());
         d.readString(84, &m_msfsNavigraphDir, defaultMSFSNavigraphDirectory());
+        d.readS32(89, &m_msfsMaxTextureSize, 2048);
+        d.readS32(90, &m_msfsLowDetailMaxTextureSize, 512);
 
         // Airspaces never had a usable 2D colour: their groups were created without
         // display2DTrack, which makes PolygonMapModel::data() return a transparent fill,
@@ -812,6 +830,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("maptilerAPIKey")) {
         m_maptilerAPIKey = settings.m_maptilerAPIKey;
     }
+    if (settingsKeys.contains("cartoDBAPIKey")) {
+        m_cartoDBAPIKey = settings.m_cartoDBAPIKey;
+    }
     if (settingsKeys.contains("osmURL")) {
         m_osmURL = settings.m_osmURL;
     }
@@ -866,6 +887,12 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("sunLightEnabled")) {
         m_sunLightEnabled = settings.m_sunLightEnabled;
     }
+    if (settingsKeys.contains("distantLightIntensity")) {
+        m_distantLightIntensity = settings.m_distantLightIntensity;
+    }
+    if (settingsKeys.contains("lowDetailModels")) {
+        m_lowDetailModels = settings.m_lowDetailModels;
+    }
     if (settingsKeys.contains("lightIntensity")) {
         m_lightIntensity = settings.m_lightIntensity;
     }
@@ -880,6 +907,12 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("msfsAircraftDir")) {
         m_msfsAircraftDir = settings.m_msfsAircraftDir;
+    }
+    if (settingsKeys.contains("msfsMaxTextureSize")) {
+        m_msfsMaxTextureSize = settings.m_msfsMaxTextureSize;
+    }
+    if (settingsKeys.contains("msfsLowDetailMaxTextureSize")) {
+        m_msfsLowDetailMaxTextureSize = settings.m_msfsLowDetailMaxTextureSize;
     }
     if (settingsKeys.contains("fxaa")) {
         m_fxaa = settings.m_fxaa;
@@ -913,6 +946,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("fps")) {
         m_fps = settings.m_fps;
+    }
+    if (settingsKeys.contains("frameRate")) {
+        m_frameRate = settings.m_frameRate;
     }
     if (settingsKeys.contains("displayMUF")) {
         m_displayMUF = settings.m_displayMUF;
@@ -1028,6 +1064,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("maptilerAPIKey") || force) {
         ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
     }
+    if (settingsKeys.contains("cartoDBAPIKey") || force) {
+        ostr << " m_cartoDBAPIKey: " << m_cartoDBAPIKey.toStdString();
+    }
     if (settingsKeys.contains("mapBoxAPIKey") || force) {
         ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
     }
@@ -1082,6 +1121,12 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("sunLightEnabled") || force) {
         ostr << " m_sunLightEnabled: " << m_sunLightEnabled;
     }
+    if (settingsKeys.contains("distantLightIntensity") || force) {
+        ostr << " m_distantLightIntensity: " << m_distantLightIntensity;
+    }
+    if (settingsKeys.contains("lowDetailModels") || force) {
+        ostr << " m_lowDetailModels: " << m_lowDetailModels;
+    }
     if (settingsKeys.contains("lightIntensity") || force) {
         ostr << " m_lightIntensity: " << m_lightIntensity;
     }
@@ -1096,6 +1141,12 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("msfsAircraftDir") || force) {
         ostr << " m_msfsAircraftDir: " << m_msfsAircraftDir.toStdString();
+    }
+    if (settingsKeys.contains("msfsMaxTextureSize") || force) {
+        ostr << " m_msfsMaxTextureSize: " << m_msfsMaxTextureSize;
+    }
+    if (settingsKeys.contains("msfsLowDetailMaxTextureSize") || force) {
+        ostr << " m_msfsLowDetailMaxTextureSize: " << m_msfsLowDetailMaxTextureSize;
     }
     if (settingsKeys.contains("fxaa") || force) {
         ostr << " m_fxaa: " << m_fxaa;
@@ -1129,6 +1180,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("fps") || force) {
         ostr << " m_fps: " << m_fps;
+    }
+    if (settingsKeys.contains("frameRate") || force) {
+        ostr << " m_frameRate: " << m_frameRate;
     }
     if (settingsKeys.contains("displayMUF") || force) {
         ostr << " m_displayMUF: " << m_displayMUF;

@@ -39,6 +39,60 @@ class PolylineMapItem;
 
 class CZML
 {
+    // One interpolated PFD channel, run-length encoded.
+    //
+    // A Cesium SampledProperty appends every sample it is given and never checks whether
+    // the value actually moved, so sending an unchanged value on each update left 73% of
+    // the samples on the map exact repeats of their predecessor - of the order of a
+    // million of them, and a major GC pause tracks the live set. A run of identical
+    // values is emitted here as its two endpoints only. Under linear interpolation the
+    // straight line through those endpoints passes exactly through every sample that was
+    // suppressed, so moving the timeline into the past reads what it read before.
+    //
+    // That holds only at interpolation degree 1, which is CZML's default and which
+    // nothing in map3d.html overrides. A higher degree fits a polynomial through a window
+    // of neighbouring samples, and dropping one would move the curve in intervals it does
+    // not even bracket - so if these properties are ever given Lagrange or Hermite
+    // interpolation, this encoding stops being lossless.
+    //
+    // insertProperty() gives every sample a 30 second forward HOLD, so an in-progress run
+    // must still be refreshed inside that window or the value expires and the PFD field
+    // blanks. Constant runs of twenty minutes do occur - an aircraft sitting at a fixed
+    // flight level - so the refresh is not optional.
+    //
+    // The refresh can only happen on an update, so a fixed threshold overshoots: emitting
+    // once the elapsed time passes T actually lands at up to T + d, where d is the
+    // interval between updates for that aircraft. A flat 25 s was fine at d ~= 1 s and
+    // left the field briefly undefined at d = 4-20 s, which ADS-B traffic does produce.
+    // The threshold is therefore derived from the measured d, and when d is large enough
+    // that no threshold could stay inside the window it goes non-positive and every
+    // update is emitted - which is exactly what this code did before the encoding.
+    struct SampledChannel
+    {
+        // Writes nothing, one sample, or a closing sample plus the new one. dateTime is
+        // the channel's own measurement time, exactly as before; frameTime is used only
+        // as the clock for the keepalive.
+        void write(QJsonObject& properties, const QString& name, const QString& dateTime,
+                  const QDateTime& frameTime, float value, bool force);
+
+        // Must match insertProperty()'s forwardExtrapolationDuration
+        static const int m_holdSecs = 30;
+        // Deliberately well inside the HOLD rather than close to it. write() only runs
+        // when MapModel::flush() calls update3D(), which is gated on the item's change
+        // mask (ChangedPosition and friends) and never on elapsed time - so the refresh
+        // cannot be scheduled, only taken when an update happens to arrive. A cap of 25 s
+        // left no room for the next one to be late and briefly blanked PFD fields; the
+        // sweep over keepalive intervals showed 15 s and 60 s differ by one point of
+        // saving, so buying the margin costs almost nothing.
+        static const int m_keepaliveMaxSecs = 12;
+
+        float m_emitted = qQNaN();   // value carried by the last sample written
+        QString m_heldTime;          // measurement time of the newest withheld value
+        QDateTime m_heldFrame;       // its frame time, so the closing pair stays ordered
+        QDateTime m_sentFrame;       // frame time of the last sample written
+        QDateTime m_lastFrame;       // previous call, to measure the update interval
+    };
+
     // Record previous state of object, so we only send changes in state
     struct State {
         QString m_firstSeenDateTime;
@@ -55,7 +109,8 @@ class CZML
         QString m_lastLabel;
         QString m_lastImage;
 
-        QString m_modelGLTF;
+        QString m_modelGLTF;            // Empty while the item is drawn as a billboard
+        bool m_billboardShown = false;
         int m_modelAltitudeReference;
         bool m_modelShow;
         int m_modelMinimumPixelSize;
@@ -77,8 +132,19 @@ class CZML
 
         QDateTime m_aircraftStateDateTime;
         MapAircraftState m_aircraftState;
-        float m_aircraftRoll;
-        float m_aircraftPitch = 0.0f;
+
+        // The ten interpolated PFD channels. Each owns the last value it sent, so the
+        // matching scalars in m_aircraftState above are not used for change detection
+        SampledChannel m_chIndicatedAirspeed;
+        SampledChannel m_chTrueAirspeed;
+        SampledChannel m_chGroundspeed;
+        SampledChannel m_chAltitude;
+        SampledChannel m_chMach;
+        SampledChannel m_chVerticalSpeed;
+        SampledChannel m_chHeading;
+        SampledChannel m_chTrack;
+        SampledChannel m_chRoll;
+        SampledChannel m_chPitch;
         QString m_ndFlightPlan;     // JSON, as last sent in the ndFlightPlan property
         QString m_dcduMessage;      // JSON, as last sent in the dcduMessage property
         QString m_loopSound;        // Sound-set directory or legacy file, as last sent
@@ -117,8 +183,7 @@ class CZML
             m_labelAltitudeReference(0),
             m_pathColorInt(0),
             m_pathShow(false),
-            m_aircraftState{},
-            m_aircraftRoll(0.0f)
+            m_aircraftState{}
         { }
     };
 

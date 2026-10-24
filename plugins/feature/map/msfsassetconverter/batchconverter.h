@@ -26,11 +26,13 @@
 struct MSFSBatchConversionSummary {
     int m_discovered = 0;
     int m_converted = 0;
+    int m_lowDetailModels = 0;      // Converted aircraft that also got a _lod1 model
     int m_failed = 0;
     int m_reusedTextures = 0;
     int m_synthesizedTextures = 0;
     int m_skippedFallbackDirectories = 0;
     int m_removedTextures = 0;
+    int m_downscaledTextures = 0;
     qint64 m_removedTextureBytes = 0;
     int m_workerCount = 0;
     bool m_cancelled = false;
@@ -50,4 +52,11 @@ bool convertMSFSAircraftDirectory(
     QString *error,
     const MSFSBatchProgress& progress = {},
     const MSFSBatchCancelled& isCancelled = {},
-    int maxThreadCount = 0);
+    int maxThreadCount = 0,
+    int maximumTextureSize = 2048,
+    // A low detail model is only drawn while the aircraft is small on screen - measured at
+    // 33-49 px across, against a threshold of 8% of the window height - so its liveries
+    // carry far more detail than can ever be shown. Rendered side by side at 50, 92 and
+    // 200 px, 2048 and 512 are indistinguishable. 512 rather than 256 leaves headroom for
+    // a 4K window, where the threshold is nearer 173 px, and for a raised 3D min pixel size
+    int lowDetailMaximumTextureSize = 512);

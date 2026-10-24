@@ -266,6 +266,135 @@ function updateTcasInhibit(radioAlt, onGround) {
 
 const panelCloseRect = { x: 956, y: 6, w: 32, h: 32 };
 
+// measureText() builds a TextMetrics object for every call, and the panels redraw ten
+// times a second from a small set of fonts and strings - tape labels, fixed captions and
+// slowly changing readouts - so the same measurements were made again and again. Measured
+// at 6.7 KB an allocation for a PFD draw and 10 KB for an ND one.
+//
+// Metrics depend only on the font and the string (the current transform does not affect
+// them), so one cache serves every panel. It is keyed font first and then text, rather
+// than on a combined key, because building that key would allocate the string this is
+// trying to avoid. Bounded, since a callsign or an aircraft type can be anything
+const panelMetricsByFont = new Map();
+const panelMetricsLimit = 256;      // Per font
+
+function panelTextMetrics(ctx, text) {
+    const font = ctx.font;
+    let byText = panelMetricsByFont.get(font);
+    if (byText === undefined) {
+        byText = new Map();
+        panelMetricsByFont.set(font, byText);
+    }
+    let metrics = byText.get(text);
+    if (metrics === undefined) {
+        if (byText.size >= panelMetricsLimit) {
+            byText.clear();
+        }
+        metrics = ctx.measureText(text);
+        byText.set(text, metrics);
+    }
+    return metrics;
+}
+
+// Tape labels are the same few numbers every draw, so the strings are kept rather than
+// rebuilt. Speeds, altitudes, flight levels and headings are all within 0..999
+const panelPad3Strings = new Array(1000);
+const panelIntStrings = new Array(1000);
+
+// Math.round(value) as a three digit string, zero padded
+function panelPad3(value) {
+    const i = Math.round(value);
+    if ((i < 0) || (i > 999)) {
+        return i.toString().padStart(3, '0');
+    }
+    let s = panelPad3Strings[i];
+    if (s === undefined) {
+        s = i.toString().padStart(3, '0');
+        panelPad3Strings[i] = s;
+    }
+    return s;
+}
+
+// Math.round(value) as a plain string
+function panelInt(value) {
+    const i = Math.round(value);
+    if ((i < 0) || (i > 999)) {
+        return i.toString();
+    }
+    let s = panelIntStrings[i];
+    if (s === undefined) {
+        s = i.toString();
+        panelIntStrings[i] = s;
+    }
+    return s;
+}
+
+// The face of a control panel: moulded dark grey, lit from above, with a bevelled edge
+// and a screw in each corner. Drawn before anything else is put on it
+function panelBackground(ctx, w, h) {
+    const face = ctx.createLinearGradient(0, 0, 0, h);
+    face.addColorStop(0, "#43434E");
+    face.addColorStop(0.45, "#35353E");
+    face.addColorStop(1, "#26262D");
+    ctx.fillStyle = face;
+    ctx.fillRect(0, 0, w, h);
+
+    // A moulded edge: light where the light falls on it, dark where it turns away
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#5E5E6B";
+    ctx.beginPath();
+    ctx.moveTo(2, h - 2);
+    ctx.lineTo(2, 2);
+    ctx.lineTo(w - 2, 2);
+    ctx.stroke();
+    ctx.strokeStyle = "#191920";
+    ctx.beginPath();
+    ctx.moveTo(w - 2, 2);
+    ctx.lineTo(w - 2, h - 2);
+    ctx.lineTo(2, h - 2);
+    ctx.stroke();
+
+    const inset = 14;
+    panelScrew(ctx, inset, inset);
+    panelScrew(ctx, w - inset, inset);
+    panelScrew(ctx, inset, h - inset);
+    panelScrew(ctx, w - inset, h - inset);
+}
+
+// A cross head fastener, sunk into the face
+function panelScrew(ctx, x, y) {
+    const r = 7;
+    ctx.beginPath();
+    ctx.arc(x, y + 1, r, 0, 2 * Math.PI);
+    ctx.fillStyle = "#17171D";
+    ctx.fill();
+    const head = ctx.createLinearGradient(x - r, y - r, x + r, y + r);
+    head.addColorStop(0, "#6B6B78");
+    head.addColorStop(1, "#3A3A44");
+    ctx.beginPath();
+    ctx.arc(x, y, r - 1, 0, 2 * Math.PI);
+    ctx.fillStyle = head;
+    ctx.fill();
+    ctx.strokeStyle = "#1C1C22";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.55, y);
+    ctx.lineTo(x + r * 0.55, y);
+    ctx.moveTo(x, y - r * 0.55);
+    ctx.lineTo(x, y + r * 0.55);
+    ctx.stroke();
+}
+
+// A legend engraved into the face, which is silkscreened rather than lit
+function panelLegend(ctx, text, x, y, size) {
+    ctx.font = (size || 24) + "px Arial";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#0E0E12";
+    ctx.fillText(text, x, y + 1);
+    ctx.fillStyle = "#D2D2DA";
+    ctx.fillText(text, x, y);
+}
+
 function panelDrawClose(ctx) {
     const r = panelCloseRect;
     ctx.fillStyle = "#26262E";
@@ -589,7 +718,7 @@ function drawAirspeedIndicator(ctx, fm20, fm30) {
         ctx.font = "30px Arial";
         ctx.fillStyle = "white";
         if (speedText >= speedTapMinSpeed) {
-            const speedTextString = speedText.toString().padStart(3, '0');
+            const speedTextString = panelPad3(speedText);
             ctx.fillText(speedTextString, speedIndLeft + 20, speedOffset + i * speedTapeSpacing * 2 + speedIndMid + fm30.actualBoundingBoxAscent / 2);
         }
         speedText -= speedTextStep;
@@ -636,8 +765,8 @@ function drawAirspeedIndicator(ctx, fm20, fm30) {
         if ((speed !== undefined) && !isNaN(speed)) {
             ctx.font = "36px Arial";
             ctx.fillStyle = "white";
-            const speedString = Math.round(speed).toString().padStart(3, '0');
-            const speedMetrics = ctx.measureText(speedString);
+            const speedString = panelPad3(speed);
+            const speedMetrics = panelTextMetrics(ctx, speedString);
             ctx.fillText(speedString, boxRight - 8 - speedMetrics.width, speedIndMid + speedMetrics.actualBoundingBoxAscent / 2);
         }
     } else {
@@ -692,14 +821,14 @@ function drawAirspeedIndicator(ctx, fm20, fm30) {
             // Target speed as text on top
             ctx.font = "20px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetSpeedMetrics = ctx.measureText(targetSpeed);
+            const targetSpeedMetrics = panelTextMetrics(ctx, targetSpeed);
             ctx.fillText(targetSpeed, speedIndRight - targetSpeedMetrics.width / 2, speedIndTop - 4);
 
         } else if (targetSpeedY > speedIndBottom) {
             // Target speed as text underneath
             ctx.font = "20px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetSpeedMetrics = ctx.measureText(targetSpeed);
+            const targetSpeedMetrics = panelTextMetrics(ctx, targetSpeed);
             ctx.fillText(targetSpeed, speedIndRight - targetSpeedMetrics.width / 2, speedIndBottom + fm20.actualBoundingBoxAscent + 4);
         } else {
             // Cyan triangle on right side
@@ -736,7 +865,7 @@ function drawAltitudeIndicator(ctx, fm20, fm30) {
     ctx.fillRect(altitudeIndLeft, altitudeIndTop, altitudeIndWidth, altitudeIndHeight);
 
     ctx.font = "30px Arial";
-    const greaterThanMetrics = ctx.measureText(">");
+    const greaterThanMetrics = panelTextMetrics(ctx, ">");
 
     // Mid point marker (for glideslope, but always visible)
     ctx.fillStyle = pfdTheme.symbolColor;
@@ -809,7 +938,7 @@ function drawAltitudeIndicator(ctx, fm20, fm30) {
             // Target altitude as text on top
             ctx.font = "30px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetAltitudeMetrics = ctx.measureText(targetAltitudeText);
+            const targetAltitudeMetrics = panelTextMetrics(ctx, targetAltitudeText);
             if (asFlightLevel) {
                 ctx.fillText("FL", altitudeIndLeft, altitudeIndTop - 4);
             }
@@ -818,7 +947,7 @@ function drawAltitudeIndicator(ctx, fm20, fm30) {
             // Target altitude as text underneath
             ctx.font = "30px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetAltitudeMetrics = ctx.measureText(targetAltitudeText);
+            const targetAltitudeMetrics = panelTextMetrics(ctx, targetAltitudeText);
             if (asFlightLevel) {
                 ctx.fillText("FL", altitudeIndLeft, altitudeIndBottom + fm30.actualBoundingBoxAscent + 4);
             }
@@ -830,11 +959,11 @@ function drawAltitudeIndicator(ctx, fm20, fm30) {
             ctx.rect(altitudeIndLeft - greaterThanMetrics.width, altitudeIndTop, altitudeIndWidth + greaterThanMetrics.width, altitudeIndHeight);
             ctx.clip();
 
-            targetAltitudeText = targetAltitudeText.toString().padStart(3, '0');
+            targetAltitudeText = panelPad3(targetAltitudeText);
 
             ctx.font = "30px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetAltitudeMetrics = ctx.measureText(targetAltitudeText);
+            const targetAltitudeMetrics = panelTextMetrics(ctx, targetAltitudeText);
 
             // Cyan (Airbus) or magenta (Boeing) box
             const targetAltitudeWidth = 30;
@@ -870,8 +999,8 @@ function drawAltitudeIndicator(ctx, fm20, fm30) {
 
     ctx.font = "34px Arial";
     const levelText = (altitude === undefined) || isNaN(altitude) ? "" : Math.floor(altitude / 100).toString();
-    const levelTextMetrics = ctx.measureText(levelText);
-    const levelTextHeightMetrics = ctx.measureText("0");
+    const levelTextMetrics = panelTextMetrics(ctx, levelText);
+    const levelTextHeightMetrics = panelTextMetrics(ctx, "0");
     const border = 2;
     const levelHeight = levelTextHeightMetrics.actualBoundingBoxAscent + levelTextHeightMetrics.actualBoundingBoxDescent + 8 * border;
 
@@ -986,7 +1115,7 @@ function drawHeadingArc(ctx, fm20, fm30) {
             ctx.save();
             ctx.translate(cx + (radius - 44) * Math.sin(a), cy - (radius - 44) * Math.cos(a));
             ctx.rotate(a);
-            ctx.fillText(label.toString(), 0, 10);
+            ctx.fillText(panelInt(label), 0, 10);
             ctx.restore();
         }
     }
@@ -1030,7 +1159,7 @@ function drawHeadingArc(ctx, fm20, fm30) {
         } else {
             ctx.font = "24px Arial";
             ctx.textAlign = (rel > 0) ? "right" : "left";
-            ctx.fillText(Math.round(targetHeading).toString().padStart(3, '0'), (rel > 0) ? areaRight - 6 : areaLeft + 6, areaTop + 24);
+            ctx.fillText(panelPad3(targetHeading), (rel > 0) ? areaRight - 6 : areaLeft + 6, areaTop + 24);
         }
     }
     ctx.restore();
@@ -1050,7 +1179,7 @@ function drawHeadingArc(ctx, fm20, fm30) {
         ctx.font = "32px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "right";
-        ctx.fillText(Math.round(heading).toString().padStart(3, '0'), cx + 14, 990);
+        ctx.fillText(panelPad3(heading), cx + 14, 990);
         ctx.font = "24px Arial";
         ctx.fillStyle = greenColor;
         ctx.textAlign = "left";
@@ -1125,10 +1254,10 @@ function drawHeadingIndicator(ctx, fm20, fm30) {
 
     ctx.font = "30px Arial";
     ctx.fillStyle = "white";
-    const headingMetricsBig = ctx.measureText("36");
+    const headingMetricsBig = panelTextMetrics(ctx, "36");
     ctx.font = "24px Arial";
     ctx.fillStyle = "white";
-    const headingMetricsSmall = ctx.measureText("36");
+    const headingMetricsSmall = panelTextMetrics(ctx, "36");
 
     // Headings every 10 degrees
     var headingText = Math.round(heading - heading % headingTextStep - 3 * headingTextStep);
@@ -1144,8 +1273,8 @@ function drawHeadingIndicator(ctx, fm20, fm30) {
         if (headingTextMod < 0) {
             headingTextMod += 36;
         }
-        const headingTextString = headingTextMod.toString();
-        const headingMetrics = ctx.measureText(headingTextString);
+        const headingTextString = panelInt(headingTextMod);
+        const headingMetrics = panelTextMetrics(ctx, headingTextString);
 
         ctx.fillText(headingTextString, headingOffset + i * headingTapeSpacing * 2 + headingIndMid - headingMetrics.width / 2, headingIndTop + 30 + headingMetrics.actualBoundingBoxAscent);
         headingText += headingTextStep;
@@ -1184,8 +1313,8 @@ function drawHeadingIndicator(ctx, fm20, fm30) {
             // Display target heading as text on left
             ctx.font = "20px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetHeadingText = Math.round(targetHeading).toString().padStart(3, '0');
-            const targetHeadingMetrics = ctx.measureText(targetHeadingText);
+            const targetHeadingText = panelPad3(targetHeading);
+            const targetHeadingMetrics = panelTextMetrics(ctx, targetHeadingText);
             ctx.fillText(targetHeadingText, headingIndLeft, headingIndTop - 4);
 
         } else if (targetMid > headingIndRight) {
@@ -1193,8 +1322,8 @@ function drawHeadingIndicator(ctx, fm20, fm30) {
             // Display target heading as text on right
             ctx.font = "20px Arial";
             ctx.fillStyle = pfdTheme.targetColor;
-            const targetHeadingText = Math.round(targetHeading).toString().padStart(3, '0');
-            const targetHeadingMetrics = ctx.measureText(targetHeadingText);
+            const targetHeadingText = panelPad3(targetHeading);
+            const targetHeadingMetrics = panelTextMetrics(ctx, targetHeadingText);
             ctx.fillText(targetHeadingText, headingIndRight - targetHeadingMetrics.width, headingIndTop - 4);
 
         } else {
@@ -1540,16 +1669,16 @@ function drawAttitudeIndicator(ctx, fm20, fm30) {
 
     ctx.font = "20px Arial";
     ctx.fillStyle = 'white';
-    const labelCenterY = ctx.measureText("20").actualBoundingBoxAscent / 2;
+    const labelCenterY = panelTextMetrics(ctx, "20").actualBoundingBoxAscent / 2;
     const labelOffset = tenDegOffset + 10;
     for (var k = -ladderSteps; k <= ladderSteps; k++) {
         if ((k === 0) || ((k % 4) !== 0)) {
             continue;   // Numbers go on the ten degree bars
         }
-        const text = Math.abs(k * 2.5).toString();
+        const text = panelInt(Math.abs(k * 2.5));
         const y = -k * 2.5 * pfdPitchScale + labelCenterY;
         ctx.fillText(text, labelOffset, y);
-        ctx.fillText(text, -labelOffset - ctx.measureText(text).width, y);
+        ctx.fillText(text, -labelOffset - panelTextMetrics(ctx, text).width, y);
     }
 
     const rollBig = 18;
@@ -1647,7 +1776,7 @@ function drawAttitudeIndicator(ctx, fm20, fm30) {
     if ((pfdTheme.fdLabel !== undefined) && (fdCommands() !== undefined)) {
         ctx.font = "30px Arial";
         ctx.fillStyle = greenColor;
-        const fdMetrics = ctx.measureText(pfdTheme.fdLabel);
+        const fdMetrics = panelTextMetrics(ctx, pfdTheme.fdLabel);
         ctx.fillText(pfdTheme.fdLabel, attitudeIndMidX - fdMetrics.width / 2, attitudeIndTop - 12);
     }
 
@@ -1693,8 +1822,8 @@ function drawAttitudeIndicator(ctx, fm20, fm30) {
         } else {
             ctx.fillStyle = pfdTheme.raltColor;
         }
-        const raText = Math.round(radioAltitude).toString();
-        const raTextMetrics = ctx.measureText(raText);
+        const raText = panelInt(radioAltitude);
+        const raTextMetrics = panelTextMetrics(ctx, raText);
         ctx.fillText(raText, attitudeIndMidX - raTextMetrics.width / 2, attitudeIndTop + attitudeIndHeight - 4);
     }
 }
@@ -1715,7 +1844,7 @@ function drawPressure(ctx, fm20, fm30) {
             ctx.font = "30px Arial";
             ctx.fillStyle = pfdTheme.baroColor;
             const pressureText = "STD";
-            const pressureMetrics = ctx.measureText(pressureText);
+            const pressureMetrics = panelTextMetrics(ctx, pressureText);
             const height = pressureMetrics.actualBoundingBoxAscent + pressureMetrics.actualBoundingBoxDescent + 2 * border;
             ctx.fillText(pressureText, pressureMidX - pressureMetrics.width / 2, pressureMidY);
 
@@ -1897,7 +2026,7 @@ function drawVerticalSpeedIndicator(ctx, fm20, fm30) {
             ctx.font = "30px Arial";
             ctx.fillStyle = color;
             const vsText = (Math.round(verticalSpeedAbsolute / 50) * 50).toString();
-            const vsMetrics = ctx.measureText(vsText);
+            const vsMetrics = panelTextMetrics(ctx, vsText);
             ctx.fillText(vsText, verticalSpeedIndMidX - vsMetrics.width / 2, verticalSpeedIndTop - 10);
         }
     }
@@ -2037,9 +2166,9 @@ function drawPFD() {
     const ctx = pfdPrepareCanvas(canvas);
 
     ctx.font = "20px Arial";
-    const fm20 = ctx.measureText("180");
+    const fm20 = panelTextMetrics(ctx, "180");
     ctx.font = "30px Arial";
-    const fm30 = ctx.measureText("180");
+    const fm30 = panelTextMetrics(ctx, "180");
 
     // Background
 
@@ -2117,7 +2246,7 @@ function pfdFmaText(ctx, key, text, x, y, color) {
             pfdFmaState[key] = s;
         }
         if (now - s.since < 10000) {
-            const width = ctx.measureText(text).width;
+            const width = panelTextMetrics(ctx, text).width;
             ctx.lineWidth = 2;
             ctx.strokeStyle = greenColor;
             ctx.strokeRect(x - 6, y - 30, width + 12, 40);

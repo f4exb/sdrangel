@@ -808,7 +808,7 @@ public:
         {
             return new MsgAircraftReport(pipeSource, report);
         }
-        ~MsgAircraftReport()   // Owns m_report.m_mapItem until a consumer takes it
+        ~MsgAircraftReport();   // Owns m_report.m_mapItem until a consumer takes it
 
     private:
         const QObject *m_pipeSource;

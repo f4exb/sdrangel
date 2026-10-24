@@ -18,6 +18,10 @@
 
 #include "converter.h"
 #include "animationmapper.h"
+#include "nodestrip.h"
+#include "hiddenparts.h"
+#include "portholes.h"
+#include "primmerge.h"
 
 #include "ddsdecoder.h"
 #include "fsltlresolver.h"
@@ -54,7 +58,7 @@ constexpr int ComponentUnsignedInt = 5125;
 constexpr int ComponentFloat = 5126;
 constexpr int ArrayBufferTarget = 34962;
 
-enum class AttributeKind { Normal, Tangent, TexCoord, Color };
+enum class AttributeKind { Normal, Tangent, TexCoord, Color, Weights };
 
 std::mutex textureLocksMutex;
 std::map<QString, std::shared_ptr<std::mutex>> textureLocks;
@@ -284,6 +288,15 @@ float halfToFloat(quint16 half)
     return value;
 }
 
+float floatFromLittleEndian(const uchar *bytes)
+{
+    const quint32 bits = qFromLittleEndian<quint32>(bytes);
+    float value;
+    static_assert(sizeof(bits) == sizeof(value));
+    std::memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
 void appendFloat(QByteArray *destination, float value)
 {
     quint32 bits;
@@ -327,7 +340,7 @@ int componentSize(int componentType)
     }
 }
 
-bool identifyConversions(const QJsonArray &meshes,
+bool identifyConversions(const QJsonArray &meshes, const QJsonArray &accessors,
                          QHash<int, AttributeKind> *conversions,
                          QString *error)
 {
@@ -348,6 +361,8 @@ bool identifyConversions(const QJsonArray &meshes,
                     kind = AttributeKind::TexCoord;
                 } else if (it.key().startsWith("COLOR_")) {
                     kind = AttributeKind::Color;
+                } else if (it.key().startsWith("WEIGHTS_")) {
+                    kind = AttributeKind::Weights;
                 } else {
                     continue;
                 }
@@ -357,6 +372,14 @@ bool identifyConversions(const QJsonArray &meshes,
                     *error =
                         QStringLiteral("Invalid accessor for attribute %1").arg(it.key());
                     return false;
+                }
+                // Weights are only rewritten when they are not already what glTF asks
+                // for, so the models that are right are left untouched - see convertAccessor
+                if ((kind == AttributeKind::Weights) &&
+                    (accessorIndex < accessors.size()) &&
+                    (accessors.at(accessorIndex).toObject().value("type").toString() ==
+                     QLatin1String("VEC4"))) {
+                    continue;
                 }
                 if (conversions->contains(accessorIndex) &&
                     conversions->value(accessorIndex) != kind) {
@@ -468,6 +491,25 @@ bool convertAccessor(int accessorIndex, AttributeKind kind,
             return false;
         }
         outputComponents = 2;
+    }
+    else if (kind == AttributeKind::Weights)
+    {
+        // glTF requires WEIGHTS_0 to be VEC4. Asobo's exporter writes a SCALAR accessor
+        // for a primitive whose vertices each have a single full influence, and Cesium
+        // declares the attribute from that type - "in float a_weights_0" - then swizzles
+        // it .x/.y/.z/.w in the skinning loop. The vertex shader then fails to compile and
+        // the map stops rendering altogether, not just that model. The missing influences
+        // are written as zero, which is what a weight that was never given means
+        if ((sourceComponentType != ComponentFloat) &&
+            (sourceComponentType != ComponentUnsignedByte) &&
+            (sourceComponentType != ComponentUnsignedShort))
+        {
+            *error = QStringLiteral("WEIGHTS accessor %1 is not a float or normalized "
+                                    "integer vector")
+                         .arg(accessorIndex);
+            return false;
+        }
+        outputComponents = 4;
     } else if (kind == AttributeKind::Color) {
         const bool byteColor = sourceComponentType == ComponentByte ||
                                sourceComponentType == ComponentUnsignedByte;
@@ -492,6 +534,16 @@ bool convertAccessor(int accessorIndex, AttributeKind kind,
             float value;
             if (kind == AttributeKind::Normal || kind == AttributeKind::Tangent) {
                 value = std::max(-1.0F, static_cast<qint8>(input[component]) / 127.0F);
+            } else if (kind == AttributeKind::Weights) {
+                if (component >= sourceComponents) {
+                    value = 0.0F;   // An influence the exporter did not write
+                } else if (sourceComponentType == ComponentFloat) {
+                    value = floatFromLittleEndian(input + component * 4);
+                } else if (sourceComponentSize == 1) {
+                    value = input[component] / 255.0F;
+                } else {
+                    value = qFromLittleEndian<quint16>(input + component * 2) / 65535.0F;
+                }
             } else if (kind == AttributeKind::Color && sourceComponentSize == 1) {
                 // Some stock-derived MSFS models declare packed colours as BYTE even
                 // though their raw values use the full unsigned 0..255 range.
@@ -851,6 +903,75 @@ QString findTextureFile(const QString &uri, const QDir &modelDirectory,
     return containedFile(modelDirectory, relative);
 }
 
+// Qt's smooth scale works in premultiplied alpha, so a texel with zero alpha comes back
+// with its colour gone - black - and that black bleeds into its neighbours too. These
+// liveries are drawn with an OPAQUE material, which never applies the alpha, so the black
+// is simply what is seen: six B744F freighters lost their whole airframe and kept only
+// their decals, their albedo being a sheet 90% alpha-0 over perfectly good colour.
+// Scaling the colour and the alpha separately keeps the colour lying under a transparent
+// texel, which is the colour an opaque material goes on to draw
+QImage scaleKeepingColourUnderAlpha(const QImage &source, int width, int height)
+{
+    const QImage straight = source.convertToFormat(QImage::Format_RGBA8888);
+    const QImage colour = straight.convertToFormat(QImage::Format_RGB888)
+                              .scaled(width, height, Qt::IgnoreAspectRatio,
+                                      Qt::SmoothTransformation);
+    QImage alpha(straight.size(), QImage::Format_Grayscale8);
+    for (int y = 0; y < straight.height(); ++y)
+    {
+        const uchar *in = straight.constScanLine(y);
+        uchar *out = alpha.scanLine(y);
+        for (int x = 0; x < straight.width(); ++x) {
+            out[x] = in[x * 4 + 3];
+        }
+    }
+    alpha = alpha.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    QImage result(width, height, QImage::Format_RGBA8888);
+    for (int y = 0; y < height; ++y)
+    {
+        const uchar *c = colour.constScanLine(y);
+        const uchar *a = alpha.constScanLine(y);
+        uchar *out = result.scanLine(y);
+        for (int x = 0; x < width; ++x)
+        {
+            out[x * 4 + 0] = c[x * 3 + 0];
+            out[x * 4 + 1] = c[x * 3 + 1];
+            out[x * 4 + 2] = c[x * 3 + 2];
+            out[x * 4 + 3] = a[x];
+        }
+    }
+    return result;
+}
+
+// The mip chain already holds every smaller size, so a maximum size is applied by
+// dropping the levels above it rather than rescaling: level 1 of a 4096 texture is
+// exactly the 2048 image the GPU would have sampled from it anyway
+int capTextureLevels(QVector<QImage> *levels, int maximumSize)
+{
+    if ((maximumSize <= 0) || levels->isEmpty()) {
+        return 0;
+    }
+    int dropped = 0;
+    while ((levels->size() > 1) &&
+           (std::max(levels->first().width(), levels->first().height()) > maximumSize))
+    {
+        levels->removeFirst();
+        ++dropped;
+    }
+    // A source with no mip levels to drop to is scaled instead, so the cap always holds
+    QImage &top = (*levels)[0];
+    const int longest = std::max(top.width(), top.height());
+    if (longest > maximumSize)
+    {
+        top = scaleKeepingColourUnderAlpha(
+            top, std::max(1, top.width() * maximumSize / longest),
+            std::max(1, top.height() * maximumSize / longest));
+        ++dropped;
+    }
+    return dropped;
+}
+
 QByteArray fileFingerprint(const QString &fileName, const QByteArray &context,
                            QString *error)
 {
@@ -887,7 +1008,7 @@ bool writeNeutralTexture(const ConversionOptions &options,
                          UastcTextureSemantic semantic, bool srgb, QRgb pixel,
                          QString *outputUri, bool *reused, QString *error)
 {
-    QByteArray identity = QByteArrayLiteral("MSFSAssetConverter-neutral-v1\0") +
+    QByteArray identity = QByteArrayLiteral("MSFSAssetConverter-neutral-v2\0") +
                           QByteArray::number(static_cast<int>(semantic)) + ':' +
                           QByteArray::number(srgb) + ':' +
                           QByteArray::number(qRed(pixel)) + ':' +
@@ -914,7 +1035,10 @@ bool writeNeutralTexture(const ConversionOptions &options,
         return true;
     }
 
-    QImage neutral(1, 1, QImage::Format_RGBA8888);
+    // 4x4, one whole block, rather than 1x1. Cesium transcodes UASTC to a GPU block
+    // format, and a 1x1 base level is not whole blocks: in QtWebEngine it failed with
+    // GL_INVALID_OPERATION "Invalid compressed image size"
+    QImage neutral(4, 4, QImage::Format_RGBA8888);
     neutral.fill(pixel);
     if (!writeUastcKtx2({neutral}, outputPath, srgb, semantic, error,
                         options.m_isCancelled, options.m_zstdSupercompression)) {
@@ -956,6 +1080,120 @@ int blendPortholeMaterials(QJsonObject *root)
         root->insert("materials", materials);
     }
     return count;
+}
+
+// Asobo's "optimized" assets give every primitive of a mesh the one index accessor for the
+// whole mesh, and say which part of it each draws only in their extras:
+// ASOBO_primitive {StartIndex, PrimitiveCount (triangles), BaseVertexIndex}. Core glTF
+// knows nothing of that, so each primitive drew every triangle of the mesh - the CJ4 had its
+// placard atlas and registration over the whole airframe. Every Asobo aircraft in FSLTL is
+// built this way, and the Superjet. Gives each such primitive an accessor for its own range,
+// with the base vertex added in where there is one. Returns how many primitives were split
+int splitSharedIndices(QJsonObject *root, QVector<QByteArray> *buffers, QString *warning)
+{
+    QJsonArray meshes = root->value("meshes").toArray();
+    QJsonArray accessors = root->value("accessors").toArray();
+    QJsonArray bufferViews = root->value("bufferViews").toArray();
+    QHash<QString, int> made;   // Range to the accessor made for it, so none is flipped twice
+    int split = 0;
+    for (qsizetype m = 0; m < meshes.size(); m++)
+    {
+        QJsonObject mesh = meshes.at(m).toObject();
+        QJsonArray primitives = mesh.value("primitives").toArray();
+        bool changed = false;
+        for (qsizetype p = 0; p < primitives.size(); p++)
+        {
+            QJsonObject primitive = primitives.at(p).toObject();
+            const QJsonObject asobo = primitive.value("extras").toObject().value("ASOBO_primitive").toObject();
+            const int accessorIndex = primitive.value("indices").toInt(-1);
+            if (asobo.isEmpty() || !asobo.contains("PrimitiveCount") || (accessorIndex < 0)
+                || (accessorIndex >= accessors.size())) {
+                continue;
+            }
+            const QJsonObject accessor = accessors.at(accessorIndex).toObject();
+            const qint64 total = static_cast<qint64>(accessor.value("count").toDouble());
+            const qint64 start = static_cast<qint64>(asobo.value("StartIndex").toDouble());
+            const qint64 count = static_cast<qint64>(asobo.value("PrimitiveCount").toDouble()) * 3;
+            const qint64 base = static_cast<qint64>(asobo.value("BaseVertexIndex").toDouble());
+            if ((start == 0) && (count == total) && (base == 0)) {
+                continue;   // Already its own
+            }
+            const int componentType = accessor.value("componentType").toInt();
+            const int bytes = (componentType == ComponentUnsignedByte) ? 1
+                            : (componentType == ComponentUnsignedShort) ? 2
+                            : (componentType == ComponentUnsignedInt) ? 4 : 0;
+            if ((bytes == 0) || (start < 0) || (count <= 0) || (start + count > total) || accessor.contains("sparse"))
+            {
+                *warning = QStringLiteral("index range %1+%2 of %3 in mesh %4 left as it is")
+                    .arg(start).arg(count).arg(total).arg(mesh.value("name").toString());
+                continue;
+            }
+            const QString key = QStringLiteral("%1/%2/%3/%4").arg(accessorIndex).arg(start).arg(count).arg(base);
+            int newIndex = made.value(key, -1);
+            if (newIndex < 0)
+            {
+                const QJsonObject view = bufferViews.at(accessor.value("bufferView").toInt(-1)).toObject();
+                const int stride = view.value("byteStride").toInt(bytes);
+                if (base == 0)
+                {
+                    // The same data, from further in
+                    QJsonObject range = accessor;
+                    range.remove("min");
+                    range.remove("max");
+                    range.insert("byteOffset", accessor.value("byteOffset").toDouble() + static_cast<double>(start) * stride);
+                    range.insert("count", count);
+                    accessors.append(range);
+                }
+                else
+                {
+                    // The base vertex has to be added in, so a copy, as 32 bit
+                    const int bufferIndex = view.value("buffer").toInt(-1);
+                    if ((bufferIndex < 0) || (bufferIndex >= buffers->size())) {
+                        continue;
+                    }
+                    const QByteArray &source = buffers->at(bufferIndex);
+                    const qint64 offset = static_cast<qint64>(view.value("byteOffset").toDouble()
+                                                              + accessor.value("byteOffset").toDouble());
+                    if (offset + (start + count - 1) * stride + bytes > source.size()) {
+                        continue;
+                    }
+                    QByteArray data(count * 4, '\0');
+                    for (qint64 i = 0; i < count; i++)
+                    {
+                        quint32 value = 0;
+                        std::memcpy(&value, source.constData() + offset + (start + i) * stride, bytes);
+                        value = qFromLittleEndian(value) + static_cast<quint32>(base);
+                        value = qToLittleEndian(value);
+                        std::memcpy(data.data() + i * 4, &value, 4);
+                    }
+                    QByteArray &target = (*buffers)[0];
+                    while (target.size() % 4) {
+                        target.append('\0');
+                    }
+                    const qint64 targetOffset = target.size();
+                    target.append(data);
+                    bufferViews.append(QJsonObject{{"buffer", 0}, {"byteOffset", targetOffset}, {"byteLength", data.size()}});
+                    accessors.append(QJsonObject{{"bufferView", bufferViews.size() - 1}, {"componentType", ComponentUnsignedInt},
+                                                 {"count", count}, {"type", "SCALAR"}});
+                }
+                newIndex = static_cast<int>(accessors.size() - 1);
+                made.insert(key, newIndex);
+            }
+            primitive.insert("indices", newIndex);
+            primitives[p] = primitive;
+            changed = true;
+            split++;
+        }
+        if (changed)
+        {
+            mesh.insert("primitives", primitives);
+            meshes[m] = mesh;
+        }
+    }
+    root->insert("meshes", meshes);
+    root->insert("accessors", accessors);
+    root->insert("bufferViews", bufferViews);
+    return split;
 }
 
 } // namespace
@@ -1064,10 +1302,20 @@ bool convertMsfsAsset(const ConversionOptions &options,
         buffers.append(std::move(bytes));
     }
 
+    QString splitWarning;
+    const int splitPrimitives = splitSharedIndices(&root, &buffers, &splitWarning);
+    if (splitPrimitives > 0) {
+        emitLog(log, QStringLiteral("Gave %1 primitives sharing an index accessor their own range")
+                         .arg(splitPrimitives));
+    }
+    if (!splitWarning.isEmpty()) {
+        emitLog(log, QStringLiteral("WARNING: %1").arg(splitWarning));
+    }
+
     QJsonArray accessors = root.value("accessors").toArray();
     QJsonArray bufferViews = root.value("bufferViews").toArray();
     QHash<int, AttributeKind> conversions;
-    if (!identifyConversions(root.value("meshes").toArray(), &conversions,
+    if (!identifyConversions(root.value("meshes").toArray(), accessors, &conversions,
                              error)) {
         return false;
     }
@@ -1118,10 +1366,51 @@ bool convertMsfsAsset(const ConversionOptions &options,
         }
     }
 
+    // Whatever is left is either played or dead weight, and what is played was baked at a
+    // keyframe per simulation frame
+    const QString unplayed = dropUnplayedAnimations(&root);
+    if (!unplayed.isEmpty()) {
+        emitLog(log, QStringLiteral("Unplayed animations: %1").arg(unplayed));
+    }
+    const QString thinned = decimateAnimations(&root, &buffers, options.m_animationTolerance);
+    if (!thinned.isEmpty()) {
+        emitLog(log, QStringLiteral("Thinned animation %1").arg(thinned));
+    }
+
+    // What MSFS only shows some of the time, and Cesium would show all of it
+    const QString hidden = dropHiddenParts(&root, modelXml.isEmpty() ? QSet<QString>()
+                                                                     : readMsfsNeverVisibleNodes(modelXml));
+    if (!hidden.isEmpty()) {
+        emitLog(log, QStringLiteral("Hidden parts: %1").arg(hidden));
+    }
+
+    // Last of the node passes, so it also clears up what dropHiddenParts left behind
+    const QString stripped = stripRedundantNodes(&root);
+    if (!stripped.isEmpty()) {
+        emitLog(log, QStringLiteral("Stripped %1").arg(stripped));
+    }
+
     const int portholes = blendPortholeMaterials(&root);
     if (portholes > 0) {
         emitLog(log, QStringLiteral("Set alpha blending on %1 porthole materials")
                          .arg(portholes));
+    }
+    const QString mirroredWindows = mirrorInsetPortholes(&root, &buffers);
+    if (!mirroredWindows.isEmpty()) {
+        emitLog(log, QStringLiteral("Cabin %1").arg(mirroredWindows));
+    }
+
+    // After the passes that look primitives up by material, since this concatenates them.
+    // Fewer draw commands, and it empties the nodes the merged geometry came from, so the
+    // node strip runs once more to clear those away
+    const QString mergedPrimitives = mergeStaticPrimitives(&root, &buffers);
+    if (!mergedPrimitives.isEmpty())
+    {
+        emitLog(log, QStringLiteral("Merged %1").arg(mergedPrimitives));
+        const QString restripped = stripRedundantNodes(&root);
+        if (!restripped.isEmpty()) {
+            emitLog(log, QStringLiteral("Stripped %1").arg(restripped));
+        }
     }
 
     QJsonArray textures = root.value("textures").toArray();
@@ -1236,7 +1525,16 @@ bool convertMsfsAsset(const ConversionOptions &options,
             }
 
             const int imageIndex = static_cast<int>(i);
-            if (opaqueBaseColorImages.contains(imageIndex))
+            // An opaque colour texture that can't be found is normally a broken livery,
+            // and failing it lets ADS-B use a livery that works. But the Asobo aircraft
+            // FSLTL reuses also draw small parts - wipers, propeller blur, a far LOD's
+            // atlas - from the sim's shared texture folders, which their texture.cfg
+            // falls back to and FSLTL does not ship. Where one of those was missing, that
+            // is where the texture would have been, so the part is drawn plain grey
+            // rather than the King Air 350 and C152 not being converted at all
+            const bool missingFromFallback = opaqueBaseColorImages.contains(imageIndex)
+                && (result->m_skippedFallbackDirectories > 0);
+            if (opaqueBaseColorImages.contains(imageIndex) && !missingFromFallback)
             {
                 *error = QStringLiteral(
                              "Cannot resolve required opaque base-color texture through "
@@ -1268,6 +1566,8 @@ bool convertMsfsAsset(const ConversionOptions &options,
                 neutralPixel = qRgba(255, 255, 0, 255);
             } else if (emissiveImages.contains(imageIndex)) {
                 neutralPixel = qRgba(0, 0, 0, 255);
+            } else if (missingFromFallback) {
+                neutralPixel = qRgba(128, 128, 128, 255);
             } else if (transparentBaseColorImages.contains(imageIndex)) {
                 // Missing BLEND/MASK base colors are normally optional overlays.
                 neutralPixel = qRgba(255, 255, 255, 0);
@@ -1291,7 +1591,7 @@ bool convertMsfsAsset(const ConversionOptions &options,
             }
             emitLog(log,
                     QStringLiteral("WARNING: Replaced missing optional texture %1 "
-                                   "with a neutral 1x1 KTX2 texture")
+                                   "with a neutral 4x4 KTX2 texture")
                         .arg(uri));
             continue;
         }
@@ -1340,10 +1640,14 @@ bool convertMsfsAsset(const ConversionOptions &options,
                 : (srgb ? UastcTextureSemantic::Color : UastcTextureSemantic::Data);
         const QByteArray fingerprint =
             fileFingerprint(sourceTexture,
-                            QByteArrayLiteral("MSFSAssetConverter-UASTC-v2\0") +
+                            // v3: a capped texture no longer loses the colour under
+                            // its transparent texels, so everything v2 cached has to
+                            // be encoded again
+                            QByteArrayLiteral("MSFSAssetConverter-UASTC-v3\0") +
                                 QByteArray::number(static_cast<int>(semantic)) +
                                 QByteArray::number(options.m_flipDirectXNormalY) +
-                                QByteArray::number(options.m_zstdSupercompression),
+                                QByteArray::number(options.m_zstdSupercompression) +
+                                QByteArray::number(options.m_maximumTextureSize),
                             error);
         if (fingerprint.isEmpty())
             return false;
@@ -1386,6 +1690,16 @@ bool convertMsfsAsset(const ConversionOptions &options,
             if (!decodeDds(sourceTexture, isNormal, options.m_flipDirectXNormalY,
                            &decoded, error)) {
                 return false;
+            }
+            const int droppedLevels =
+                capTextureLevels(&decoded.m_levels, options.m_maximumTextureSize);
+            if (droppedLevels > 0)
+            {
+                ++result->m_downscaledTextures;
+                emitLog(log, QStringLiteral("Limited %1 to %2 by dropping %3 mip level(s)")
+                                 .arg(uri)
+                                 .arg(options.m_maximumTextureSize)
+                                 .arg(droppedLevels));
             }
             emitLog(
                 log,
@@ -1484,7 +1798,8 @@ bool convertMsfsAsset(const ConversionOptions &options,
                      .arg(result->m_removedExtras));
 
     const QString baseName =
-        outputBaseName + options.m_outputNameSuffix + QStringLiteral("_cesium");
+        outputBaseName + options.m_outputNameSuffix + QStringLiteral("_cesium") +
+        options.m_outputFileSuffix;
     for (qsizetype i = 0; i < buffers.size(); ++i)
     {
         if (cancelled(options, error))

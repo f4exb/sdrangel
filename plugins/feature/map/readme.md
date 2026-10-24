@@ -6,7 +6,8 @@ The Map Feature plugin displays a world map in 2D and 3D. It can display street 
 On top of this, it can plot data from other plugins, such as:
 
 * APRS symbols from the APRS Feature,
-* Aircraft from the ADS-B Demodulator including a PFD (Primary Flight Display),
+* Aircraft from the ADS-B Demodulator,
+* Aircraft from the Aircraft feature (which combines data from ADS-B and ACARS demodulators) including a PFD (Primary Flight Display) and ND (Navigation Display),
 * Ships from the AIS Demodulator,
 * Satellites from the Satellite Tracker,
 * Satellite imagery from APT Demodulator,
@@ -18,7 +19,7 @@ On top of this, it can plot data from other plugins, such as:
 * DSC geographic call areas,
 * Inmarsat C message geographic areas,
 * SID paths,
-* Pager messages that contain coordinates.
+* Pager messages that contain coordinates,
 * DJI drones from the DJI DroneID Demodulator.
 
 As well as internet and built-in data sources:
@@ -213,11 +214,19 @@ Sets the opacity used for the NASA GIBS overlay image overlay on the 3D map. Low
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>20: First Person View</h3>
+<h3>20: View</h3>
 
-When checked, tracking an object in the 3D view have the camera in a first person view. When unchecked, the camera will track the object from a third person view.
+Select from:
 
-<h3>21: PFD (Primary Flight Display)</h3>
+* First Person - The camera is positioned at the object and looks in the direction of its heading.
+* Third Person - The camera is positioned to the side of the object and looks at it. The camera can be rotated around the object by holding the left mouse button and dragging.
+* Fly By - The camera is positioned ahead of the object and tracks it as it moves. When the object reaches a distance away from the camera, the camera will move to a new position ahead of the object.
+
+<h3>21: Avionics</h3>
+
+Check to enable individual avionics displays for aircraft selected on the 3D Map. 
+
+<h4>PFD (Primary Flight Display)</h4>
 
 When checked, the aircraft PFD (Primary Flight Display) will be displayed. This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude and altitude.
 
@@ -225,7 +234,7 @@ The PFD can be moved by left clicking on it and dragging it. It can be resized b
 
 ![PFD](../../../doc/img/Map_plugin_pfd.png)
 
-<h3>22: ND (Navigation Display)</h3>
+<h4> ND (Navigation Display)</h4>
 
 When checked, the aircraft ND (Navigation Display) will be displayed for the selected aircraft. This shows a compass rose with range rings,
 ground speed, true air speed and wind direction, the flight plan and its waypoints when one has been received (via the Aircraft feature,
@@ -243,6 +252,31 @@ The ND can be moved by left clicking on it and dragging it. It can be resized by
 Note that the compass rose is orientated to the aircraft's magnetic heading, while waypoint and traffic positions are true bearings,
 so the overlay can be off by the local magnetic declination.
 
+![ND](../../../doc/img/Map_plugin_nd.png)
+
+<h4>EFIS (Electronic Flight Instrument System)</h4>
+
+When checked, the aircraft EFIS (Electronic Flight Instrument System) will be displayed. This controls what is displayed on the ND.
+
+**MODE**: ROSE / ARC
+**RANGE**: 10 - 360 nm. Sets the range of the ND in nautical miles.
+**WX**: Displays live weather radar on the ND.
+**TERR**: Displays terrain on the ND.
+**ARPT**: Displays airports on the ND.
+**VOR**: Displays VORs on the ND.
+
+![EFIS](../../../doc/img/Map_plugin_efis.png)
+
+<h4>RMP (Radio Management Panel)</h4>
+
+When checked, the Radio Management Panel will be displayed. This:
+
+* Displays transponder / squawk ID from ADS-B data.
+* Sets the TCAS mode for the ND. **ALL** displays all aircraft in range. **ABV** displays aircraft from -2700 to +7000 ft. **BLW** displays aircraft from -7000 to +2700 ft. **THRT** displays nearest 8 aircraft within +-2700 ft.
+* Allows control of two AM Demodulators as though there were two VHF radios in the aircraft. The AM demodulators are set in the Map Display Settings dialog. To set a frequency, select a STBY field by clicking on it, enter the frequency in MHz using the digit buttons, then press transfer to ACTIVE (the button in between the ACTIVE and STBY fields).
+
+![RMP](../../../doc/img/Map_plugin_rmp.png)
+
 <h4>DCDU (Datalink Control and Display Unit)</h4>
 
 When a datalink ATC message (CPDLC, pre-departure clearance or oceanic clearance, received via the Aircraft feature) arrives for the
@@ -250,8 +284,9 @@ currently selected aircraft, a DCDU window pops up on the 3D map showing the tim
 or from (e.g. 1412Z FROM EDDS) and the message text. Long messages are split over multiple pages - click the PG indicator to move
 between them. The window is closed by clicking CLOSE, and can be moved and resized like the PFD and ND.
 
-A ring is played when a message arrives. Its volume is set by the "Cockpit volume" slider in the Map Display Settings dialog,
-under 3D Map Settings - drag it to zero to silence it.
+A ring is played when a message arrives. Its volume is set by the "Cockpit volume" slider in the Map Display Settings dialog.
+
+![DCDU](../../../doc/img/Map_plugin_dcdu.png)
 
 <h3>23: Display tracks for selected object</h3>
 
@@ -303,6 +338,7 @@ Aircraft are placed on top of the tiles, but items that are clamped to the groun
 * Whether the globe and models are lit from the direction of the Sun or the camera.
 * The camera light intensity if Lighting is set to Camera.
 * Whether HDT (High Dynamic Range) rendering should be used.
+* Whether low detail models are used. Aircraft converted from MSFS with a second level of detail are drawn with the simpler model while they cover less than about 8% of the height of the map, and with the full model again above 11%, which greatly improves the frame rate with many aircraft in view. An aircraft being followed is always drawn in full detail.
 * Whether a fog effect should be applied.
 * The camera reference frame. For ECEF (Earth Centered Earth Fixed), the camera rotates with the globe.
 For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will rotate under it.

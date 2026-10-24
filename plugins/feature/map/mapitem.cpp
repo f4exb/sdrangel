@@ -21,7 +21,36 @@
 #include <QFileInfo>
 
 #include "mapitem.h"
+#include "util/aircraft3dmodels.h"
 #include "util/profiler.h"
+// For TrackColorModel, which mapitem.h only forward declares
+#include "mapmodel.h"
+
+// These have to live here rather than in the header, where TrackColorModel is an
+// incomplete type. "delete m_trackColorModel" there compiled, but freed the memory
+// without running ~QObject, so QQmlData::destroyed() never fired and QML kept a wrapper
+// pointing into the freed block. The crash came much later and nowhere near: the first
+// garbage collection to walk its weak values read the reused memory as a QObject and
+// died in markWeakValues. MSVC does warn (C4150), but it is level 2 and this builds at
+// the default /W1.
+// deleteLater rather than delete, because a MapItemView tears its delegates down on a
+// later pass of the event loop, after the item that owned the model has gone.
+ObjectMapItem::~ObjectMapItem()
+{
+    delete m_aircraftState;
+    qDeleteAll(m_takenTrackCoords);
+    qDeleteAll(m_takenTrackDateTimes);
+    if (m_trackColorModel) {
+        m_trackColorModel->deleteLater();
+    }
+}
+
+PolylineMapItem::~PolylineMapItem()
+{
+    if (m_trackColorModel) {
+        m_trackColorModel->deleteLater();
+    }
+}
 
 MapItem::MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
     m_latitude(0.0f),
@@ -129,7 +158,7 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
         m_liveryImage = "";
         if (!m_model.isEmpty())
         {
-            QString base = QFileInfo(m_model).completeBaseName();
+            QString base = Aircraft3DModels::liveryIconName(m_model);
             if (QFile::exists(":/map/liveries/" + base + ".png")) {
                 m_liveryImage = "qrc:///map/liveries/" + base + ".png";
             }

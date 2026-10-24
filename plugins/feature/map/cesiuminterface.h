@@ -72,11 +72,13 @@ public:
     void setBuildings(const QString &buildings);
     void setGooglePhotorealistic3DTiles(bool enabled);
     void setCameraReferenceFrame(bool eci);
-    void setLighting(bool useSunLight, float cameraLightIntensity);
+    void setLighting(bool useSunLight, float cameraLightIntensity, float distantLightIntensity);
+    void setLowDetailModels(bool enabled);
     void setAntiAliasing(bool fxaa, int msaa);
     void setHDR(bool enabled);
     void setFog(bool enabled);
     void showFPS(bool show);
+    void setFrameRate(int frameRate);
     void showPFD(bool show);
     void showND(bool show);
     void showEFIS(bool show);

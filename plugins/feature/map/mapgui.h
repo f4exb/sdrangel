@@ -20,6 +20,7 @@
 #define INCLUDE_FEATURE_MAPGUI_H_
 
 #include <QTimer>
+#include <QSet>
 #include <QQuickItem>
 #include <QQuickWidget>
 #include <QTextEdit>
@@ -208,8 +209,18 @@ public:
     void addNavAids();
     void addAirspace(const Airspace *airspace, const QString& group, int cnt);
     void addAirspace();
+    void loadAirportDatabase();
     void addAirports();
     void addWaypoints();
+    //!< Build the map items for the datasets that are big enough to be worth not
+    //!< building until something displays them. Called at startup and again whenever the
+    //!< item settings change, so enabling a layer fills it in
+    void addDeferredDatasets();
+    //!< Whether anything displays a group, and so whether its items are worth building
+    bool itemGroupEnabled(const QString& group) const;
+    //!< Whether anything displays any group whose name starts with this, for the
+    //!< datasets split over a group per category, such as the airspace classes
+    bool itemGroupsEnabled(const QString& groupPrefix) const;
     void addNavtex();
     void addVLF();
     void addKiwiSDR();
@@ -219,6 +230,9 @@ public:
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
     MapSettings::MapItemSettings *getItemSettings(const QString &group);
+    //!< Datasets whose map items have been built, so enabling a second group of the same
+    //!< dataset, or any other settings change, does not build them again
+    QSet<QString> m_builtDatasets;
     CesiumInterface *cesium() { return m_cesium; }
     bool useLiveryIcons() const { return m_settings.m_useLiveryIcons; }
 
@@ -286,6 +300,12 @@ private:
     SDRangelServerList m_sdrangelServerList;
 
     CesiumInterface *m_cesium;
+    //!< How many times the 3D map's renderer has died without lasting long enough in
+    //!< between to count as recovered, and when the last one went. The view keeps the
+    //!< dead page, so it is reloaded - but a page that died on sight would otherwise be
+    //!< reloaded for ever.
+    int m_renderProcessTerminations = 0;
+    QDateTime m_lastRenderProcessTermination;
 #ifdef QT_WEBENGINE_FOUND
     // One profile shared by every map, with a disk cache - see webEngineProfile()
     static QWebEngineProfile *s_webEngineProfile;
@@ -319,7 +339,10 @@ private:
     QAction *m_displayMaidenheadGrid;
 
     QString m_radarPath;
-    QString m_satellitePath;
+    // The cloud layer's frame, as an ISO 8601 instant rather than a path: RainViewer
+    // stopped publishing satellite infrared (its satellite.infrared array is empty),
+    // so clouds come from EUMETSAT's global geostationary composite instead
+    QString m_cloudTime;
 
     NASAGlobalImagery::Legend *m_legend;
     QWidget *m_nasaWidget;
@@ -363,14 +386,17 @@ private:
     void sendEFISState();
     QString osmCachePath();
     void clearOSMCache();
+    void clearStaleTileCache();
     void clearWikiMediaOSMCache();
     void displaySettings();
     bool handleMessage(const Message& message);
     void geoReply();
     QString thunderforestAPIKey() const;
     QString maptilerAPIKey() const;
+    QString cartoDBAPIKey() const;
     QString cesiumIonAPIKey() const;
     QString effectiveImagery() const;
+    int effectiveFrameRate() const;
     QString effectiveTerrain() const;
     QString effectiveBuildings() const;
     bool effectiveGoogleTiles() const;

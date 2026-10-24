@@ -27,6 +27,7 @@
 #include <QImageReader>
 #include <QBuffer>
 #include <QPainter>
+#include <QUrlQuery>
 #include <QHash>
 #include <QMutex>
 #include <QMutexLocker>
@@ -40,6 +41,7 @@ class MapTileServer : public QTcpServer
 private:
     QString m_thunderforestAPIKey;
     QString m_maptilerAPIKey;
+    QString m_cartoDBAPIKey;
     QNetworkAccessManager m_manager;
     QMutex m_mutex;
 
@@ -47,6 +49,9 @@ private:
         QTcpSocket* m_socket;
         QList<QString> m_urls;
         QHash<QString, QImage> m_images;
+        // Where in the downloaded image this tile is, as a fraction of it, for the
+        // layers that are fetched from an ancestor tile - see ancestorTile()
+        QHash<QString, QRectF> m_sourceRects;
         QString m_format;
     };
     QList<TileJob *> m_tileJobs;
@@ -55,7 +60,7 @@ private:
     QNetworkDiskCache *m_cache;
 
     QString m_radarPath;
-    QString m_satellitePath;
+    QString m_cloudTime;
     QString m_nasaGlobalImageryPath;
     QString m_nasaGlobalImageryFormat;
     bool m_displayRain;
@@ -70,8 +75,9 @@ public:
         QTcpServer(parent),
         m_thunderforestAPIKey(""),
         m_maptilerAPIKey(""),
+        m_cartoDBAPIKey(""),
         m_radarPath(""),
-        m_satellitePath(""),
+        m_cloudTime(""),
         m_nasaGlobalImageryPath(""),
         m_nasaGlobalImageryFormat(""),
         m_displayRain(false),
@@ -112,14 +118,28 @@ public:
         m_maptilerAPIKey = maptilerAPIKey;
     }
 
+    void setCartoDBAPIKey(const QString& cartoDBAPIKey)
+    {
+        m_cartoDBAPIKey = cartoDBAPIKey;
+    }
+
+    //!< Throw away every cached upstream tile. QNetworkDiskCache cannot be asked to
+    //!< remove entries matching a URL, only one known URL at a time or all of them
+    void clearCache()
+    {
+        if (m_cache) {
+            m_cache->clear();
+        }
+    }
+
     void setRadarPath(const QString& radarPath)
     {
         m_radarPath = radarPath;
     }
 
-    void setSatellitePath(const QString& satellitePath)
+    void setCloudTime(const QString& cloudTime)
     {
-        m_satellitePath = satellitePath;
+        m_cloudTime = cloudTime;
     }
 
     void setNASAGlobalImageryPath(const QString& nasaGlobalImageryPath)
@@ -192,6 +212,107 @@ public:
         return reply;
     }
 
+    // EUMETSAT's global geostationary infrared composite, which replaced RainViewer's
+    // satellite layer when that stopped publishing. It is a WMS rather than a tile
+    // server, so each tile is a GetMap for that tile's own bounding box. The service
+    // advertises only CRS:84 and EPSG:4326, but GeoServer reprojects to web mercator on
+    // request, which is what lets it line up with the other layers here
+    // Beyond a source's own largest zoom there is nothing more to see: RainViewer serves
+    // a "zoom not supported" placeholder past 7 (the same 1370 byte image at every level
+    // beyond it), and the cloud composite is a few km per pixel published every three
+    // hours, so past 6 it is only being enlarged anyway. Rather than ask for a tile that
+    // does not exist, the tile this one sits inside is asked for and the right part of it
+    // used, which also means every tile under that ancestor shares one request - so after
+    // the first it is a cache hit rather than another second of waiting on a WMS
+    // RainViewer's radar stops at 7; the cloud composite is coarse enough that 6 is
+    // already past the point where it carries any more detail
+    static constexpr int rainMaxZoom = 7;
+    static constexpr int cloudMaxZoom = 6;
+
+    struct Ancestor {
+        int m_z, m_x, m_y;
+        QRectF m_source;    // Fraction of the ancestor image this tile covers
+    };
+
+    static Ancestor ancestorTile(int z, int x, int y, int maxZoom)
+    {
+        if (z <= maxZoom) {
+            return { z, x, y, QRectF(0.0, 0.0, 1.0, 1.0) };
+        }
+        const int depth = z - maxZoom;
+        const int span = 1 << depth;                // Tiles across the ancestor
+        const double fraction = 1.0 / (double) span;
+        return { maxZoom, x >> depth, y >> depth,
+                 QRectF((x & (span - 1)) * fraction, (y & (span - 1)) * fraction,
+                        fraction, fraction) };
+    }
+
+    QString cloudTileURL(int z, int x, int y) const
+    {
+        // Web mercator bounds, in metres
+        const double half = 20037508.342789244;
+        const double size = 2.0 * half / (double)(1 << z);
+        const double minX = -half + x * size;
+        const double maxY = half - y * size;
+
+        // Built with QUrlQuery rather than by formatting a string: a percent-encoded
+        // literal in an arg() format is read as a placeholder, so "image%2Fpng" had its
+        // %2 replaced by the second argument and the server was asked for a format
+        // called "image<timestamp>Fpng". It answered with a ServiceException document,
+        // which arrives as a successful download of something that is not an image
+        QUrlQuery query;
+        query.addQueryItem("service", "WMS");
+        query.addQueryItem("version", "1.1.1");
+        query.addQueryItem("request", "GetMap");
+        query.addQueryItem("layers", "mumi:worldcloudmap_ir108");
+        query.addQueryItem("styles", "");
+        query.addQueryItem("srs", "EPSG:3857");
+        query.addQueryItem("bbox", QString("%1,%2,%3,%4")
+            .arg(minX, 0, 'f', 3).arg(maxY - size, 0, 'f', 3)
+            .arg(minX + size, 0, 'f', 3).arg(maxY, 0, 'f', 3));
+        query.addQueryItem("width", "256");
+        query.addQueryItem("height", "256");
+        query.addQueryItem("format", "image/png");
+        query.addQueryItem("transparent", "true");
+        query.addQueryItem("time", m_cloudTime);
+
+        QUrl url("https://view.eumetsat.int/geoserver/wms");
+        url.setQuery(query);
+        return url.toString(QUrl::FullyEncoded);
+    }
+
+    // The infrared image is opaque grey - dark where it is looking at warm ground, bright
+    // at cold cloud tops - so drawn as it comes it would hide the map. Brightness becomes
+    // opacity, which leaves clear air transparent and cloud white, and gives a softer
+    // edge than a straight colour-key would. The 3D map gets the same effect from
+    // Cesium's colorToAlpha, which is a threshold rather than a ramp
+    static constexpr int cloudAlphaFloor = 110;     // Below this it is clear air
+    static constexpr int cloudAlphaCeiling = 210;   // Above this, solid cloud
+
+    static QImage cloudToAlpha(const QImage &src)
+    {
+        QImage out = src.convertToFormat(QImage::Format_ARGB32);
+        for (int y = 0; y < out.height(); y++)
+        {
+            QRgb *line = (QRgb *) out.scanLine(y);
+            for (int x = 0; x < out.width(); x++)
+            {
+                const QRgb p = line[x];
+                if (qAlpha(p) == 0) {
+                    continue;
+                }
+                // Measured over the whole composite: warm ground sits around 70-100
+                // and cold cloud tops run from about 160 up, so everything below the
+                // floor is clear air and everything above the ceiling is solid cloud
+                const int luma = qGray(p);
+                const int alpha = qBound(0, (luma - cloudAlphaFloor) * 255
+                                            / (cloudAlphaCeiling - cloudAlphaFloor), 255);
+                line[x] = qRgba(255, 255, 255, alpha);
+            }
+        }
+        return out;
+    }
+
     QImage combine(const TileJob *job)
     {
         PROFILER_START()
@@ -209,8 +330,26 @@ public:
         for (int i = 0; i < job->m_images.size(); i++) {
             const QImage &img = job->m_images[job->m_urls[i]];
             //img.save(QString("in%1.png").arg(i), "PNG");
-            if (img.format() != QImage::Format_Invalid) {
-                painter.drawImage(image.rect(), img);
+            if (img.format() != QImage::Format_Invalid)
+            {
+                const QImage &drawn = job->m_urls[i].contains("view.eumetsat.int")
+                    ? cloudToAlpha(img) : img;
+                const QRectF fraction = job->m_sourceRects.value(job->m_urls[i],
+                                                                 QRectF(0.0, 0.0, 1.0, 1.0));
+                if (fraction == QRectF(0.0, 0.0, 1.0, 1.0))
+                {
+                    painter.drawImage(image.rect(), drawn);
+                }
+                else
+                {
+                    // Enlarging a small piece of the ancestor, so sample it smoothly
+                    // rather than showing its pixels as blocks
+                    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+                    painter.drawImage(QRectF(image.rect()), drawn,
+                        QRectF(fraction.x() * drawn.width(), fraction.y() * drawn.height(),
+                               qMax(1.0, fraction.width() * drawn.width()),
+                               qMax(1.0, fraction.height() * drawn.height())));
+                }
             }
         }
 
@@ -344,7 +483,7 @@ private slots:
                     } else if (map == "satellite") {
                         baseMapURL = QString("https://api.maptiler.com/tiles/satellite-v2/%3/%1/%2.jpg?key=%4").arg(x).arg(y).arg(z).arg(m_maptilerAPIKey);
                     } else if ((map == "dark_nolabels") || (map == "light_nolabels")) {
-                        baseMapURL = QString("http://1.basemaps.cartocdn.com/%4/%3/%1/%2.png?key=%5").arg(x).arg(y).arg(z).arg(map).arg("cb1_27a9_1_036ae52d2884fda8713b961c");
+                        baseMapURL = QString("http://1.basemaps.cartocdn.com/%4/%3/%1/%2.png?key=%5").arg(x).arg(y).arg(z).arg(map).arg(m_cartoDBAPIKey);
                     } else {
                         baseMapURL = QString("http://a.tile.thunderforest.com/%4/%3/%1/%2.png?apikey=%5").arg(x).arg(y).arg(z).arg(map).arg(m_thunderforestAPIKey);
                     }
@@ -359,11 +498,20 @@ private slots:
                     if (m_displayNASAGlobalImagery && !m_nasaGlobalImageryPath.isEmpty()) {
                         job->m_urls.append(QString("https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%4/%3/%2/%1.%5").arg(x).arg(y).arg(z).arg(m_nasaGlobalImageryPath).arg(m_nasaGlobalImageryFormat)); // x,y reversed compared to others
                     }
-                    if (m_displayClouds && !m_satellitePath.isEmpty()) {
-                        job->m_urls.append(QString("https://tilecache.rainviewer.com%4/256/%3/%1/%2/0/0_0.png").arg(x).arg(y).arg(z).arg(m_satellitePath));
+                    if (m_displayClouds && !m_cloudTime.isEmpty())
+                    {
+                        const Ancestor a = ancestorTile(z.toInt(), x.toInt(), y.toInt(), cloudMaxZoom);
+                        const QString url = cloudTileURL(a.m_z, a.m_x, a.m_y);
+                        job->m_urls.append(url);
+                        job->m_sourceRects.insert(url, a.m_source);
                     }
-                    if (m_displayRain && !m_radarPath.isEmpty()) {
-                        job->m_urls.append(QString("https://tilecache.rainviewer.com%4/256/%3/%1/%2/4/1_1.png").arg(x).arg(y).arg(z).arg(m_radarPath));
+                    if (m_displayRain && !m_radarPath.isEmpty())
+                    {
+                        const Ancestor a = ancestorTile(z.toInt(), x.toInt(), y.toInt(), rainMaxZoom);
+                        const QString url = QString("https://tilecache.rainviewer.com%4/256/%3/%1/%2/4/1_1.png")
+                            .arg(a.m_x).arg(a.m_y).arg(a.m_z).arg(m_radarPath);
+                        job->m_urls.append(url);
+                        job->m_sourceRects.insert(url, a.m_source);
                     }
                     m_tileJobs.append(job);
                     for (const auto& url : job->m_urls)

@@ -170,12 +170,22 @@ void CesiumInterface::setGooglePhotorealistic3DTiles(bool enabled)
     send(obj);
 }
 
-void CesiumInterface::setLighting(bool useSunLight, float cameraLightIntensity)
+void CesiumInterface::setLighting(bool useSunLight, float cameraLightIntensity, float distantLightIntensity)
 {
     QJsonObject obj {
         {"command", "setLighting"},
         {"useSunLight", useSunLight},
-        {"cameraLightIntensity", cameraLightIntensity}
+        {"cameraLightIntensity", cameraLightIntensity},
+        {"distantLightIntensity", distantLightIntensity}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setLowDetailModels(bool enabled)
+{
+    QJsonObject obj {
+        {"command", "setLowDetailModels"},
+        {"enabled", enabled}
     };
     send(obj);
 }
@@ -213,6 +223,17 @@ void CesiumInterface::setFog(bool enabled)
     QJsonObject obj {
         {"command", "setFog"},
         {"fog", enabled}
+    };
+    send(obj);
+}
+
+// 0 means render at the refresh rate of the display the map is on, which the page
+// cannot determine for itself
+void CesiumInterface::setFrameRate(int frameRate)
+{
+    QJsonObject obj {
+        {"command", "setFrameRate"},
+        {"frameRate", frameRate}
     };
     send(obj);
 }

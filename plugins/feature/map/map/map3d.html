@@ -613,6 +613,28 @@
         // model for the rest of the session. So the primitive being replaced is
         // remembered here, and playAnimation waits for its replacement instead.
         var staleModelPrimitives = new Map();   // Entity id to the Model primitive on its way out
+
+        // An entry is only wanted while the swap is in flight - playAnimation's test is
+        // whether the entity's current primitive is still the one being replaced - but the
+        // only delete is inside playAnimation, so an aircraft that is never asked to
+        // animate, which is most of them, kept its outgoing Model for the rest of the
+        // session. Each one holds a whole scene graph: its animation keyframes alone run
+        // to thousands of Quaternions for an FSLTL model. Measured before this swept:
+        // 56 entries, every one of them a destroyed primitive, none still current, and the
+        // renderer's live heap climbing about 6 MB a minute whatever the aircraft count
+        function sweepStaleModelPrimitives() {
+            for (const [id, primitive] of staleModelPrimitives) {
+                if ((primitive === undefined) || primitive.isDestroyed()) {
+                    staleModelPrimitives.delete(id);
+                    continue;
+                }
+                const entity = czmlStream.entities.getById(id);
+                if ((entity === undefined) || (getModelPrimitive(viewer, entity) !== primitive)) {
+                    staleModelPrimitives.delete(id);
+                }
+            }
+        }
+        setInterval(sweepStaleModelPrimitives, 1000);
         function noteModelChange(packet) {
             var entity = czmlStream.entities.getById(packet.id);
             if ((entity === undefined) || !entity.model || !entity.model.uri) {
@@ -645,6 +667,12 @@
                 } else {
                     staleModelPrimitives.delete(command.id);
                     animations = (primitive !== undefined) ? primitive.activeAnimations : undefined;
+                }
+                if ((animations !== undefined) && (command.record !== undefined)
+                    && appliedAnimations.has(primitive) && appliedAnimations.get(primitive).has(command.record)) {
+                    // Asked for while the level of detail changed, and already put on the
+                    // new model with the others
+                    return;
                 }
                 if (animations !== undefined) {
                     try {
@@ -807,19 +835,23 @@
         function pickAndTrack(e) {
             const entity = pickEntityPrioritized(e);
             if (Cesium.defined(entity)) {
-                if (cameraMode === cameraModeFirstPerson) {
-                    setFirstPersonView(entity);
-                } else if (cameraMode === cameraModeFlyBy) {
-                    setFlyByView(entity);
-                } else {
-                    if (Cesium.Property.getValueOrUndefined(entity.position, viewer.clock.currentTime)) {
-                        setThirdPersonView(entity);
+                withFullDetail(entity, function () {
+                    if (cameraMode === cameraModeFirstPerson) {
+                        setFirstPersonView(entity);
+                    } else if (cameraMode === cameraModeFlyBy) {
+                        setFlyByView(entity);
                     } else {
-                        viewer.zoomTo(entity);
+                        if (Cesium.Property.getValueOrUndefined(entity.position, viewer.clock.currentTime)) {
+                            setThirdPersonView(entity);
+                        } else {
+                            clearFarAmbient(entity);
+                            viewer.zoomTo(entity);
+                        }
                     }
-                }
+                });
             } else if (Cesium.defined(viewer.trackedEntity)) {
                 //viewer.trackedEntity = undefined;
+                lodPendingFocus = undefined;
                 setThirdPersonView(undefined);
             }
         }
@@ -1225,11 +1257,32 @@
                 // https://github.com/CesiumGS/cesium/issues/1640
                 transparentDefaultTexture: true
             },
-            terrainProviderViewModels: [] // User should adjust terrain via dialog, so depthTestAgainstTerrain doesn't get set
+            terrainProviderViewModels: [], // User should adjust terrain via dialog, so depthTestAgainstTerrain doesn't get set
+            // Cesium otherwise takes its clock from whichever data source was added last,
+            // and puts it back to the one before when that is removed - writing that
+            // source's currentTime straight into the viewer's clock. The CZML document
+            // packet carries the time SDRangel started, so adding and removing any data
+            // source - which the MUF and foF2 layers do on every GIRO refresh, every 15
+            // minutes - threw the clock back to the start of the session. Hours behind,
+            // every aircraft's samples were in its future, so nothing could be positioned
+            // and the map quietly emptied. Reproduced by adding and removing a bare
+            // CustomDataSource: the clock jumped back 9 hours in one step. This map sets
+            // its own time from the aircraft it is shown, so no data source should
+            automaticallyTrackDataSourceClocks: false
         });
         viewer.targetFrameRate = $TARGET_FRAME_RATE$;
-        viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain (this prevents pickPosition from working)
-        viewer.scene.globe.tileCacheSize = 5000; // FIXME: Embedded Chrome is slower at loading from cache
+        // Cesium stops the clock while a data source is still loading: every frame it sets
+        // clock.canAnimate from dataSourceDisplay.update(), and a tick that cannot animate
+        // still moves the clock's _lastSystemTime on, so the time spent waiting is thrown
+        // away rather than caught up. update() is false while any visualizer is not ready,
+        // so one aircraft whose model never loads stops time for the whole map. Found with
+        // the clock nine hours behind after a night's run - every aircraft's samples were
+        // then in its future, so nothing could be positioned and the map drew no traffic at
+        // all. That behaviour is meant for playing a recording back smoothly; here the
+        // aircraft are live and a stale sky is far worse than a model that pops in late
+        viewer.allowDataSourcesToSuspendAnimation = false;
+        viewer.scene.globe.depthTestAgainstTerrain = true; // false So labels/points aren't clipped by terrain (this prevents pickPosition from working)
+        viewer.scene.globe.tileCacheSize = 500; // FIXME: Embedded Chrome is slower at loading from cache
         viewer.scene.moon.onlySunLighting = false; // Moon can be just a black dot if default of true
         viewer.screenSpaceEventHandler.setInputAction(pickEntity, Cesium.ScreenSpaceEventType.LEFT_CLICK);
         viewer.screenSpaceEventHandler.setInputAction(pickAndTrack, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
@@ -1300,30 +1353,55 @@
             }
             farModelAmbient = a;
             farAmbientCoefficients = farAmbientFor(a);
+            // Take the old strength off everything that has it, then let the scan put
+            // the new one on - which for a strength of zero means leaving it off
             const primitives = viewer.scene.primitives;
             for (let i = 0; i < primitives.length; i++) {
                 const model = primitives.get(i);
-                if ((model instanceof Cesium.Model) && (model.imageBasedLighting !== undefined)) {
-                    if (model.farAmbient) {
-                        model.imageBasedLighting.sphericalHarmonicCoefficients =
-                            (a > 0) ? farAmbientCoefficients : undefined;
-                    }
-                    model.farAmbient = undefined;
+                if ((model instanceof Cesium.Model) && (model.imageBasedLighting !== undefined)
+                    && (model.farAmbient !== undefined)) {
+                    model.imageBasedLighting.sphericalHarmonicCoefficients = undefined;
+                    model.farAmbient = false;
                 }
             }
             updateFarMode();
         }
 
+        // Moving the camera to an aircraft takes it from far to near in a single step,
+        // while the scan that takes the fill light back off runs on the camera settling -
+        // so for a moment it is drawn close and still lit. Taking it off when the move is
+        // asked for, rather than after it, also gives the model's shaders time to rebuild
+        // while the aircraft is still in the distance
+        function clearFarAmbient(entity) {
+            if (!Cesium.defined(entity)) {
+                return;
+            }
+            const primitives = viewer.scene.primitives;
+            for (let i = 0; i < primitives.length; i++) {
+                const model = primitives.get(i);
+                if ((model instanceof Cesium.Model) && (model.id === entity)) {
+                    setFarAmbient(model, false);
+                    return;
+                }
+            }
+        }
+
         // Each model carries its own ImageBasedLighting, so this is per aircraft. Assigning
         // rebuilds the model's shaders, so it is only done when the side it is on changes
         function setFarAmbient(model, on) {
-            if ((farModelAmbient <= 0) || (model.imageBasedLighting === undefined)
-                || (model.farAmbient === on)) {
+            if (model.imageBasedLighting === undefined) {
                 return;
             }
-            model.farAmbient = on;
+            // A strength of zero is the same as being near: no coefficients. Folded in
+            // here rather than returning early, or turning the setting down to zero
+            // would leave the light on whatever was already carrying it
+            const wanted = on && (farModelAmbient > 0);
+            if (model.farAmbient === wanted) {
+                return;
+            }
+            model.farAmbient = wanted;
             model.imageBasedLighting.sphericalHarmonicCoefficients =
-                on ? farAmbientCoefficients : undefined;
+                wanted ? farAmbientCoefficients : undefined;
         }
 
         // A model covering less than this achieves nothing by being drawn. Cesium draws a
@@ -1424,6 +1502,25 @@
             });
         }
 
+        // One being followed or flown in is close, and is what is being looked at -
+        // whatever the camera's distance currently says.
+        //
+        // The distance must not be trusted at the moment focus changes. Setting
+        // viewer.trackedEntity fires trackedEntityChanged, whose handler calls
+        // updateFarMode() to put the followed aircraft into full detail - but it runs
+        // before the camera has moved, so the scan reads the old distance and does the
+        // opposite, putting the very aircraft being focused into far mode and undoing the
+        // clearFarAmbient() that setThirdPersonView() had just done. Measured: cleared at
+        // 1 ms, set again at 2 ms with the camera still 292 km away, and not corrected
+        // until 333 ms - the aircraft drawn at 83 m for eleven frames with the distant
+        // fill light still on it. Tracking a moving aircraft keeps camera.moveEnd from
+        // firing, so the wait can be the whole 1 s scan interval.
+        function isFocused(entity) {
+            return (entity === viewer.trackedEntity) || (entity === firstPersonEntity)
+                || (entity === flyByEntity)
+                || ((lodPendingFocus !== undefined) && (lodPendingFocus.entity === entity));
+        }
+
         function updateFarMode() {
             const cameraPosition = viewer.camera.positionWC;
             const time = viewer.clock.currentTime;
@@ -1441,38 +1538,673 @@
                 const tinyBeyond = (model.minimumPixelSize < hideBelowPixels) ? tooSmallBeyond(model) : undefined;
                 setTinyBeyond(entity, model, tinyBeyond);
                 const distance = Cesium.Cartesian3.distance(cameraPosition, model.boundingSphere.center);
-                // Before the checks below, which skip models with nothing animated to hide
-                setFarAmbient(model, distance > farModelDistance);
+                const isFar = (distance > farModelDistance) && !isFocused(entity);
                 let url = entity.model.uri.getValue(time);
                 if (url && (typeof url !== "string")) {
                     url = url.url;  // A Resource
                 }
                 if (!url) {
+                    setFarAmbient(model, isFar);
                     continue;
                 }
-                const nodes = modelAnimatedNodes.get(url);
-                if (nodes === undefined) {
-                    loadAnimatedNodes(url);
-                    continue;
+                applyFarMode(model, url, isFar);
+                const lod = lodEntities.get(entity.id);
+                if (lod !== undefined) {
+                    chooseLod(lod, entity, model);
                 }
-                if ((nodes === null) || (nodes.length == 0)) {
-                    continue;   // Still loading, or nothing animated to hide
-                }
-                const isFar = distance > farModelDistance;
-                if (model.farMode === isFar) {
-                    continue;
-                }
-                model.farMode = isFar;
-                for (const name of nodes) {
-                    const node = model.getNode(name);
-                    if (node) {
-                        node.show = !isFar;
-                    }
+            }
+            pumpLodSwaps();
+        }
+
+        function applyFarMode(model, url, isFar) {
+            // Before the checks below, which skip models with nothing animated to hide
+            setFarAmbient(model, isFar);
+            const nodes = modelAnimatedNodes.get(url);
+            if (nodes === undefined) {
+                loadAnimatedNodes(url);
+                return;
+            }
+            if ((nodes === null) || (nodes.length == 0)) {
+                return;     // Still loading, or nothing animated to hide
+            }
+            if (model.farMode === isFar) {
+                return;
+            }
+            model.farMode = isFar;
+            for (const name of nodes) {
+                const node = model.getNode(name);
+                if (node) {
+                    node.show = !isFar;
                 }
             }
         }
         setInterval(updateFarMode, 1000);          // Aircraft move
         viewer.camera.moveEnd.addEventListener(updateFarMode);
+
+        // A label is drawn as a screen-space quad at its anchor's depth, so Cesium's
+        // per-fragment depth test cuts the globe or the terrain through the middle of the
+        // text wherever the surface crosses that quad - the closer to edge-on, the more of
+        // the label goes. Cesium's own whole-label test, VS_THREE_POINT_DEPTH_CHECK, is
+        // what we want instead, but it only applies within threePointDepthTestDistance
+        // and samples the globe depth texture, which reads empty at map viewing distances:
+        // raising that distance hides nothing (measured). So the depth test is turned off
+        // for labels altogether, and whether a label is drawn is decided here, once per
+        // label, from whether its own position is over the horizon.
+        // translucencyByDistance is the channel used to hide one, because nothing else
+        // sets it - show belongs to the CZML, which would overwrite anything put there
+        const labelHidden = new Cesium.NearFarScalar(1.0, 0.0, 2.0, 0.0);   // alpha 0 at every distance
+        function updateLabelVisibility() {
+            const scene = viewer.scene;
+            const ellipsoid = scene.ellipsoid ?? Cesium.Ellipsoid.WGS84;
+            const occluder = new Cesium.EllipsoidalOccluder(ellipsoid, viewer.camera.positionWC);
+            const time = viewer.clock.currentTime;
+            const dataSources = viewer.dataSources;
+            for (let i = 0; i < dataSources.length; i++) {
+                for (const entity of dataSources.get(i).entities.values) {
+                    const label = entity.label;
+                    if (label === undefined) {
+                        continue;
+                    }
+                    if (label.disableDepthTestDistance === undefined) {
+                        label.disableDepthTestDistance = Number.POSITIVE_INFINITY;
+                    }
+                    const position = (entity.position !== undefined) ? entity.position.getValue(time) : undefined;
+                    const visible = (position !== undefined) && occluder.isPointVisible(position);
+                    // Only written when it changes: every write makes a ConstantProperty
+                    if (visible === (label.translucencyByDistance !== undefined)) {
+                        label.translucencyByDistance = visible ? undefined : labelHidden;
+                    }
+                }
+            }
+        }
+        setInterval(updateLabelVisibility, 1000);
+        viewer.camera.moveEnd.addEventListener(updateLabelVisibility);
+        viewer.camera.changed.addEventListener(updateLabelVisibility);
+
+        // Level of detail. The MSFS models come with a second, much cheaper model of the
+        // same aircraft and livery - for the A320neo 22 primitives against 74 - and with 200
+        // aircraft in view that took a frame from 18 ms to 6 ms. The cost is each model's
+        // update rather than its draw calls, and a loaded model costs most of it even when
+        // hidden, so an aircraft has one model at a time and changes between the two by
+        // changing its uri. It changes at the size the models' own definitions do: MSFS
+        // draws the full A320 only while it covers 8% of the screen height. It comes back
+        // at 11%, so an aircraft sitting on the line doesn't swap back and forth.
+        //
+        // Changing an entity's uri on its own looks bad: Cesium destroys the old model at
+        // once, so the aircraft vanishes for 6-12 frames and is then drawn untextured for
+        // a third of a second, as the textures the two models share were freed with the
+        // old one. So the model being changed to is first loaded as a hidden model of our
+        // own, the holder, which leaves everything the entity's new model needs in Cesium's
+        // cache; and the holder is shown in the aircraft's place, in its pose, for the 3-4
+        // frames the entity's new model still takes to appear.
+        // MSFS's own definitions switch the full model off at 8% of the screen height and
+        // back on at 11%, and those were used here directly. That band turns out to be too
+        // narrow for a sky of traffic: an aircraft hovering around it swaps repeatedly, and
+        // every swap is a whole model load - unpacking its accessors and deriving its
+        // shaders came to a third of all allocation in a heap profile. With ~160 aircraft
+        // that churn ran to about 1.3 GB of garbage between collections, which on a 1.34 GB
+        // live set meant a ~800 ms pause several times a minute. So the upper edge is
+        // raised: the point at which detail is dropped is unchanged, an aircraft simply has
+        // to be clearly large before the full model is brought back
+        const lowDetailBelow = 0.08;            // Fraction of the screen height
+        const fullDetailAbove = 0.16;
+        // Zooming out swaps a sky full at once. Measured with 200: 4 at a time took 10 s at
+        // 30 fps, 16 took 6 s at 13 fps
+        const maxConcurrentLodSwaps = 8;
+        const lodHolderTimeoutMs = 15000;
+        // Entity id -> {full, low, showingLow, wantLow, swapping}. Only for entities whose
+        // model has a low detail version
+        const lodEntities = new Map();
+        const lodFailedUrls = new Set();        // Models that would not load: not tried again
+        // The visualizer makes a Resource of an entity's uri every frame, which for a
+        // string means parsing it again: 3 us an aircraft, measurably slower than the
+        // Resource the CZML datasource gives it. So the uri is set as a Resource, one per model
+        const lodResources = new Map();         // URL -> Resource
+        // What has been done to a model is kept here rather than on it: a property added
+        // to some Models and not others gives Cesium's per-frame code two shapes of
+        // object to deal with, which measured slower
+        const lodPosedModels = new WeakSet();
+        const appliedAnimations = new WeakMap(); // Model -> the records put on it
+        let activeLodSwaps = 0;
+        let lowDetailModelsEnabled = true;      // Map setting "Low detail models"
+
+        // The packet's model, before the datasource sees it. lowDetailGltf is ours rather
+        // than CZML's, so it is taken out
+        function lodFromPacket(command) {
+            const low = command.model.lowDetailGltf;
+            delete command.model.lowDetailGltf;
+            const full = command.model.gltf;
+            if (full === undefined) {
+                return;     // Not a change of model: showing or hiding it
+            }
+            const state = lodEntities.get(command.id);
+            if ((state !== undefined) && (state.full === full) && (state.low === low)) {
+                // The same model sent again, because its size or visibility changed:
+                // it stays at the level it is at
+                if (state.showingLow) {
+                    command.model.gltf = state.low;
+                }
+                return;
+            }
+            // A different aircraft model, or the first: it starts at full detail. The
+            // sender puts the new model's animations on it itself
+            entityAnimations.delete(command.id);
+            if (low) {
+                lodEntities.set(command.id, { full: full, low: low, showingLow: false, wantLow: false, swapping: false });
+            } else {
+                lodEntities.delete(command.id);
+            }
+        }
+
+        function forgetLod(id) {
+            lodEntities.delete(id);
+            entityAnimations.delete(id);
+        }
+
+        // How much of the screen height the model covers as drawn, so including the
+        // minimum pixel size that holds a distant one up
+        function drawnScreenFraction(model) {
+            const scene = viewer.scene;
+            const sphere = model.boundingSphere;
+            const metresPerPixel = viewer.camera.getPixelSize(sphere, scene.drawingBufferWidth, scene.drawingBufferHeight);
+            if (!(metresPerPixel > 0)) {
+                return 1.0;
+            }
+            const diameter = Math.max(2.0 * sphere.radius / metresPerPixel, model.minimumPixelSize);
+            return diameter / scene.drawingBufferHeight;
+        }
+
+        // From the far mode pass, for each loaded model that has a low detail version
+        function chooseLod(state, entity, model) {
+            if (!lowDetailModelsEnabled || isFocused(entity)) {
+                state.wantLow = false;
+                return;
+            }
+            if (!model.show) {
+                return;     // Not drawn, so not worth changing
+            }
+            const fraction = drawnScreenFraction(model);
+            if (fraction < lowDetailBelow) {
+                state.wantLow = true;
+            } else if (fraction > fullDetailAbove) {
+                state.wantLow = false;
+            }
+        }
+
+        // A swap that gives up straight away - the aircraft has no position just now -
+        // calls this again from its finally, before it has returned. Without the guard
+        // that call started the same aircraft's swap again, which gave up again, without
+        // end, and the page hung. Now each pass tries each aircraft once, and one that
+        // gave up is tried again on the next pass
+        let pumpingLodSwaps = false;
+        function pumpLodSwaps() {
+            if (pumpingLodSwaps) {
+                return;
+            }
+            pumpingLodSwaps = true;
+            try {
+                // An aircraft about to be followed goes first, whatever else is changing
+                if (lodPendingFocus !== undefined) {
+                    const id = lodPendingFocus.entity.id;
+                    const state = lodEntities.get(id);
+                    if ((state !== undefined) && !state.swapping && state.showingLow
+                        && !lodFailedUrls.has(state.full)) {
+                        swapLod(id, state, false);
+                    }
+                }
+                for (const [id, state] of lodEntities) {
+                    if (activeLodSwaps >= maxConcurrentLodSwaps) {
+                        return;
+                    }
+                    if (!state.swapping && (state.wantLow !== state.showingLow)
+                        && !lodFailedUrls.has(state.wantLow ? state.low : state.full)) {
+                        swapLod(id, state, state.wantLow);
+                    }
+                }
+            } finally {
+                pumpingLodSwaps = false;
+            }
+        }
+
+        // Following an aircraft drawn in low detail changed its model just as the camera
+        // set off, since one being followed is drawn in full. Cesium aims the camera from
+        // the bounding sphere of the entity's model, and during the change that model is
+        // gone for a few frames and then replaced by one centred a little differently, so
+        // the aircraft shot ahead of the camera and jumped back and forth. So the full
+        // model is put in first, and the camera only moved once it is drawn. Usually a
+        // fraction of a second; if the model never arrives the camera goes anyway
+        const focusSwapTimeoutMs = 3000;
+        let lodPendingFocus;                    // {entity}: waiting to be followed
+        //
+        // The aircraft stays marked as about to be followed until the follow has started,
+        // not just until its model is in. Starting one means setting trackedEntity to
+        // undefined and then to the aircraft, and the far mode pass runs on each change:
+        // in between, nothing is followed, and an aircraft still far from the camera was
+        // sent back down to low detail - a swap the follow then reversed, two changes of
+        // model while the camera was following it, each freezing it for a few frames
+        function followingNow(focus, action) {
+            lodPendingFocus = focus;
+            try {
+                action();
+            } finally {
+                if (lodPendingFocus === focus) {
+                    lodPendingFocus = undefined;
+                }
+            }
+        }
+        function withFullDetail(entity, action) {
+            const state = Cesium.defined(entity) ? lodEntities.get(entity.id) : undefined;
+            if ((state === undefined) || (!state.showingLow && !state.swapping)) {
+                followingNow({ entity: entity }, action);
+                return;
+            }
+            const focus = { entity: entity };
+            lodPendingFocus = focus;            // Also keeps chooseLod from sending it back down
+            state.wantLow = false;
+            pumpLodSwaps();
+            afterFramesUntil(() => {
+                if (lodPendingFocus !== focus) {
+                    return true;                // Something else was clicked meanwhile
+                }
+                const current = lodEntities.get(entity.id);
+                return (current === undefined) || (!current.showingLow && !current.swapping);
+            }, focusSwapTimeoutMs).then(() => {
+                if (lodPendingFocus === focus) {
+                    followingNow(focus, action);
+                }
+            });
+        }
+
+        // The entity's own Model, whether or not it has loaded
+        function anyModelPrimitive(entity) {
+            const primitives = viewer.scene.primitives;
+            for (let i = 0; i < primitives.length; i++) {
+                const primitive = primitives.get(i);
+                if ((primitive instanceof Cesium.Model) && (primitive.id === entity)) {
+                    return primitive;
+                }
+            }
+            return undefined;
+        }
+
+        function textured(model) {
+            return model.ready && Cesium.defined(model._loader) && model._loader.texturesLoaded;
+        }
+
+        // Resolves true once test() passes, checked after each frame, or false on timeout
+        function afterFramesUntil(test, timeoutMs) {
+            return new Promise((resolve) => {
+                const start = performance.now();
+                const remove = viewer.scene.postRender.addEventListener(function () {
+                    const passed = test();
+                    if (passed || (performance.now() - start > timeoutMs)) {
+                        remove();
+                        // Dropped as soon as it is finished with. A caller's test closes
+                        // over the scope it was written in - for a level of detail swap
+                        // that is the model being watched and everything around it - and
+                        // this promise, or whatever holds it, can outlive the swap. The
+                        // listener going is not enough while the binding still points at
+                        // the test: a hundred-odd of those scopes were alive at a time,
+                        // each holding a destroyed model's scene graph
+                        test = undefined;
+                        resolve(passed);
+                    }
+                });
+            });
+        }
+
+        // Puts a model the entity is about to be drawn with into the state its current
+        // one is in: far mode, and the pose its animations have left it in
+        function matchModel(model, id, url) {
+            const isFar = (Cesium.Cartesian3.distance(viewer.camera.positionWC,
+                           model.boundingSphere.center) > farModelDistance)
+                       && !isFocused(model.id);
+            applyFarMode(model, url, isFar);
+            applyAnimations(model, id);
+        }
+
+        // What is known of the surface under an aircraft, carried from its old model to
+        // the new one. With a height reference, the bounding sphere a camera following the
+        // aircraft is aimed by needs the height of the ground under it, and the follow
+        // camera stands still on any frame it is pending. Where the globe can't answer -
+        // on Google's tiles - that height comes from the last one the model's own clip
+        // found, or else from a sample of the most detailed tiles that takes as long as
+        // they take to load. A new Model, and the visualizer's new record for it, start
+        // with neither, so after a change of model the sphere was pending, the camera
+        // stood still while the aircraft flew on, and then caught up in a jump
+        function entityModelData(entity) {
+            const visualizers = czmlStream._visualizers || [];
+            for (const visualizer of visualizers) {
+                if (visualizer._modelHash !== undefined) {
+                    return visualizer._modelHash[entity.id];
+                }
+            }
+            return undefined;
+        }
+        function surfaceKnownBy(entity, model) {
+            const data = entityModelData(entity);
+            return {
+                height: model._lastSurfaceHeight,
+                from: data,
+                sampled: (data === undefined) ? undefined : {
+                    position: data.mostDetailedHeightPosition,
+                    height: data.mostDetailedHeight,
+                    previous: data.mostDetailedHeightPrevious
+                }
+            };
+        }
+        function carrySurface(entity, model, known) {
+            if (known === undefined) {
+                return;
+            }
+            if ((model._lastSurfaceHeight === undefined) && (known.height !== undefined)) {
+                model._lastSurfaceHeight = known.height;
+            }
+            const data = entityModelData(entity);
+            if ((data === undefined) || (data === known.from) || (known.sampled === undefined)
+                || (data.mostDetailedHeightPosition !== undefined)) {
+                return;
+            }
+            if (known.sampled.height !== undefined) {
+                data.mostDetailedHeightPosition = known.sampled.position;
+                data.mostDetailedHeight = known.sampled.height;
+                data.mostDetailedHeightPrevious = known.sampled.previous;
+            } else if (known.sampled.previous !== undefined) {
+                // A sample still on its way answers into the old record, never this one,
+                // so only the answer before it is carried, and a new sample is asked for
+                // with that standing in meanwhile
+                data.mostDetailedHeightPrevious = known.sampled.previous;
+            }
+        }
+
+        // Model.modelMatrix is a plain field, so it is copied into rather than assigned: a
+        // shared scratch matrix assigned to several holders moved them all together.
+        // False when the entity has no position now - an aircraft between samples or gone
+        // stale - when the holder must not be placed at all. A model left at the identity
+        // matrix sits at the centre of the Earth, which has no cartographic position, and
+        // one with a height reference then hands the globe a height callback for an
+        // undefined position: the quadtree throws on it and rendering stops
+        const holderMatrixScratch = new Cesium.Matrix4();
+        function placeHolder(holder, entity, time) {
+            const matrix = entity.computeModelMatrix(time, holderMatrixScratch);
+            if (!matrix) {
+                return false;
+            }
+            holder.modelMatrix = Cesium.Matrix4.clone(matrix, holder.modelMatrix);
+            return true;
+        }
+
+        async function swapLod(id, state, toLow) {
+            const target = toLow ? state.low : state.full;
+            const current = () => (lodEntities.get(id) === state) && (czmlStream.entities.getById(id) !== undefined);
+            state.swapping = true;
+            activeLodSwaps++;
+            let holder;
+            let failed = false;
+            try {
+                const entity = czmlStream.entities.getById(id);
+                if ((entity === undefined) || !entity.model) {
+                    return;
+                }
+                const graphics = entity.model;
+                let time = viewer.clock.currentTime;
+                const startMatrix = entity.computeModelMatrix(time, new Cesium.Matrix4());
+                if (!startMatrix) {
+                    return;     // Nowhere to put it: tried again on a later pass
+                }
+                holder = await Cesium.Model.fromGltfAsync({
+                    url: target,
+                    scene: viewer.scene,
+                    show: false,
+                    modelMatrix: startMatrix,
+                    minimumPixelSize: Cesium.Property.getValueOrDefault(graphics.minimumPixelSize, time, 0.0),
+                    maximumScale: Cesium.Property.getValueOrUndefined(graphics.maximumScale, time),
+                    heightReference: Cesium.Property.getValueOrDefault(graphics.heightReference, time, Cesium.HeightReference.NONE)
+                });
+                holder.errorEvent.addEventListener(function () { failed = true; });
+                // Not given the entity as its id: nothing else here should take it for
+                // the entity's model
+                viewer.scene.primitives.add(holder);
+                const loaded = await afterFramesUntil(() => failed || !current() || textured(holder), lodHolderTimeoutMs);
+                if (failed || !loaded) {
+                    console.log("Level of detail: can't load " + target);
+                    lodFailedUrls.add(target);
+                    return;
+                }
+                if (!current()) {
+                    return;
+                }
+                if (state.wantLow !== toLow) {
+                    // Wanted the other way again while it loaded - an aircraft clicked on
+                    // and now being followed, say. Changing anyway, only to change back,
+                    // would replace the model twice for nothing; and a camera following
+                    // it stands still each time the model is replaced
+                    return;
+                }
+
+                // The handover. The old model goes at the next frame; the holder is drawn
+                // where it was until the entity's new model has loaded
+                time = viewer.clock.currentTime;
+                if (!placeHolder(holder, entity, time)) {
+                    return;
+                }
+                const old = getModelPrimitive(viewer, entity);
+                const surface = (old !== undefined) ? surfaceKnownBy(entity, old) : undefined;
+                if (old !== undefined) {
+                    carrySurface(entity, holder, surface);
+                    matchModel(holder, id, target);
+                    holder.distanceDisplayCondition = Cesium.Property.getValueOrUndefined(graphics.distanceDisplayCondition, time);
+                    holder.show = old.show;
+                    // So an animation asked for meanwhile waits for the new model - see noteModelChange
+                    staleModelPrimitives.set(id, old);
+                }
+                state.showingLow = toLow;
+                if (!lodResources.has(target)) {
+                    lodResources.set(target, new Cesium.Resource({ url: target }));
+                }
+                graphics.uri = new Cesium.ConstantProperty(lodResources.get(target));
+
+                // The holder follows the aircraft, and the new model is posed as soon as it
+                // is ready - before its first frame, which is the one after
+                let posed;
+                let framesPosed = 0;
+                // The pose waiting on the new model's ready event, so the swap can take it
+                // off again whichever way it ends. The closure holds this whole scope, and
+                // the scope still names the model being replaced, so one left behind on a
+                // model that never becomes ready pins its predecessor for as long as it
+                // lives. That is the chain a breadth-first walk of the heap found: a live
+                // model, its readyEvent, the listener map, this closure, and a destroyed
+                // model on the end of it
+                let removePose;
+                const follow = viewer.scene.preRender.addEventListener(function () {
+                    if (!placeHolder(holder, entity, viewer.clock.currentTime)) {
+                        holder.show = false;    // As the visualizer hides the entity's model
+                    }
+                });
+                try {
+                    await afterFramesUntil(() => {
+                        if (!current()) {
+                            return true;
+                        }
+                        const model = anyModelPrimitive(entity);
+                        if ((model === undefined) || model.isDestroyed()) {
+                            return false;
+                        }
+                        if (posed !== model) {
+                            posed = model;
+                            framesPosed = 0;
+                            const pose = function () {
+                                carrySurface(entity, model, surface);
+                                matchModel(model, id, target);
+                                lodPosedModels.add(model);
+                            };
+                            if (model.ready) {
+                                pose();
+                            } else {
+                                // Taken off once it has fired, and again by the swap's
+                                // finally if it never does. Cesium's Event holds a
+                                // listener until it is removed - in 1.145 in a Map - and
+                                // 117 of these were still registered across 138 aircraft
+                                if (removePose !== undefined) {
+                                    removePose();
+                                }
+                                removePose = model.readyEvent.addEventListener(() => {
+                                    if (removePose !== undefined) {
+                                        removePose();
+                                        removePose = undefined;
+                                    }
+                                    pose();
+                                });
+                            }
+                            return false;
+                        }
+                        if (lodPosedModels.has(model) && textured(model)) {
+                            framesPosed++;
+                        }
+                        // Drawn for a frame with its own textures and pose, under the holder
+                        return framesPosed >= 2;
+                    }, lodHolderTimeoutMs);
+                } finally {
+                    follow();
+                    // A model that never became ready still has the pose waiting on it
+                    if (removePose !== undefined) {
+                        removePose();
+                        removePose = undefined;
+                    }
+                }
+            } catch (e) {
+                console.log("Level of detail: change to " + target + " failed: " + formatRejection(e));
+                lodFailedUrls.add(target);
+            } finally {
+                if ((holder !== undefined) && !holder.isDestroyed()) {
+                    viewer.scene.primitives.remove(holder);     // Destroys it
+                }
+                // Dropped explicitly, because this scope outlives the swap. Something is
+                // still holding the closures made here - in a heap taken after a few
+                // hours, 150 of them were roots in their own right, which is what a
+                // promise that never settles leaves behind - and while `holder` pointed
+                // at the model, destroying it freed its GPU resources but not the
+                // JavaScript: the scene graph stayed, 65 runtime nodes and their
+                // transforms apiece. 505 Model objects were alive for 136 aircraft,
+                // 369 of them destroyed and still held, which is most of a heap that
+                // had grown to 3.85 MB an aircraft from 2.0 on a fresh start
+                holder = undefined;
+                state.swapping = false;
+                activeLodSwaps--;
+                pumpLodSwaps();
+            }
+        }
+
+        // The animations each aircraft with a low detail model has been asked for, so the
+        // model it changes to can be put in the same pose - gear up, flaps out - with its
+        // engines still turning. Kept here rather than read back from the old model, as the
+        // two levels differ in what they have: the low detail A320 has 8 of the 21, so the
+        // flaps set while it was showing would otherwise be lost on the way back up
+        const entityAnimations = new Map();     // Entity id -> [record]
+
+        function recordAnimation(command) {
+            if (!lodEntities.has(command.id)) {
+                return undefined;
+            }
+            const now = viewer.clock.currentTime;
+            // As playAnimation does: a start in the past plays now
+            let startTime = Cesium.JulianDate.fromIso8601(command.startDateTime);
+            if (Cesium.JulianDate.lessThan(startTime, now)) {
+                startTime = Cesium.JulianDate.clone(now);
+            }
+            const record = {
+                name: command.animation,
+                startTime: startTime,
+                stopTime: (command.duration != 0) ? Cesium.JulianDate.addSeconds(startTime, command.duration, new Cesium.JulianDate()) : undefined,
+                startOffset: command.startOffset,
+                reverse: !!command.reverse,
+                loop: !!command.loop,
+                multiplier: command.multiplier ? command.multiplier : 1.0
+            };
+            let records = entityAnimations.get(command.id) || [];
+            if (record.loop) {
+                // A looped animation asserted again replaces the one playing
+                records = records.filter((r) => r.name !== record.name);
+            }
+            records.push(record);
+            entityAnimations.set(command.id, pruneAnimations(records, now));
+            return record;
+        }
+
+        function recordAnimationStop(command) {
+            const records = entityAnimations.get(command.id);
+            if (records === undefined) {
+                return;
+            }
+            // The one stopAnimation stops: the latest to start
+            let latest;
+            for (const r of records) {
+                if ((r.name === command.animation) && ((latest === undefined) || Cesium.JulianDate.greaterThanOrEquals(r.startTime, latest.startTime))) {
+                    latest = r;
+                }
+            }
+            if (latest !== undefined) {
+                latest.stopTime = Cesium.JulianDate.fromIso8601(command.startDateTime);
+            }
+        }
+
+        // Once an animation has started, the earlier ones of the same name make no
+        // difference to the pose - it overrides them - so only it and any yet to start
+        // are kept. Otherwise a long flight's gear and flap movements would pile up
+        function pruneAnimations(records, now) {
+            const latestStarted = new Map();
+            for (const r of records) {
+                if (!r.loop && Cesium.JulianDate.lessThanOrEquals(r.startTime, now)) {
+                    const latest = latestStarted.get(r.name);
+                    if ((latest === undefined) || Cesium.JulianDate.greaterThanOrEquals(r.startTime, latest.startTime)) {
+                        latestStarted.set(r.name, r);
+                    }
+                }
+            }
+            return records.filter((r) => {
+                const latest = latestStarted.get(r.name);
+                return r.loop || (latest === undefined) || (r === latest) || Cesium.JulianDate.greaterThan(r.startTime, latest.startTime);
+            });
+        }
+
+        function applyAnimations(model, id) {
+            const records = entityAnimations.get(id);
+            if (records === undefined) {
+                return;
+            }
+            const applied = new Set();
+            appliedAnimations.set(model, applied);
+            for (const r of pruneAnimations(records, viewer.clock.currentTime)) {
+                const options = {
+                    name: r.name,
+                    startTime: r.startTime,
+                    startOffset: r.startOffset,
+                    reverse: r.reverse,
+                    multiplier: r.multiplier
+                };
+                if (r.loop) {
+                    // Started when the first one was, so engines and propellers carry on
+                    // turning where they had got to
+                    options.loop = Cesium.ModelAnimationLoop.REPEAT;
+                    options.stopTime = r.stopTime;
+                } else {
+                    // Cesium doesn't take an animation whose start has passed to where it
+                    // should have got to (https://github.com/CesiumGS/cesium/issues/10048) -
+                    // it doesn't play it at all - so that is worked out here: how far it
+                    // has got, held at the end, or where it was stopped
+                    const stopSeconds = (r.stopTime !== undefined) ? Cesium.JulianDate.secondsDifference(r.stopTime, r.startTime) : Infinity;
+                    options.animationTime = function (duration, seconds) {
+                        return Math.min(Math.min(seconds, stopSeconds) / duration, 1.0);
+                    };
+                }
+                try {
+                    model.activeAnimations.add(options);
+                    applied.add(r);
+                } catch (e) {
+                    // This level of detail doesn't have it
+                }
+            }
+        }
 
         // How much of Google's tileset is held in memory, and for how long. Both cost
         // requests to keep low and memory to keep high, and memory is what shows: the
@@ -1536,12 +2268,28 @@
         var pfdFrame = undefined;
         var pfdRadioAltTimer = undefined;
 
+        // The PFD is redrawn on a timer of its own rather than once a frame. What it shows
+        // comes from ADS-B, which arrives about once a second, so drawing it sixty or a
+        // hundred times a second repaints the same needles: measured against a sky of 150
+        // aircraft, the panels were making about 600 MB a minute of garbage, a fifth of
+        // all the map allocated, and a major collection is what the stutters are. The
+        // other panels were already paced - the ND every 50 ms, the radio every 250, the
+        // DCDU every second - so this was the one left running flat out.
+        // Still driven by requestAnimationFrame, so it stops when the page is not drawn
+        const pfdMinIntervalMs = 100;   // 10 Hz
+        let pfdLastUpdate = 0;
+
         function pfdLoop() {
             if (!pfdRunning) {
                 return;
             }
             // Booked before the work, so a throw in updatePFD does not end the loop
             pfdFrame = requestAnimationFrame(pfdLoop);
+            const now = performance.now();
+            if (now - pfdLastUpdate < pfdMinIntervalMs) {
+                return;
+            }
+            pfdLastUpdate = now;
             updatePFD();
         }
 
@@ -1569,7 +2317,8 @@
         function updateNDTimers() {
             if (pfdShown || ndShown) {
                 if (ndTimer === undefined) {
-                    ndTimer = setInterval(updateND, 50);
+                    // 10 Hz, as the PFD: its source updates about once a second
+                    ndTimer = setInterval(updateND, 100);
                     ndTrafficTimer = setInterval(updateNDTraffic, 1000);
                     // The radio altitude is the height the TCAS inhibit is measured
                     // against, so it is sampled for the ND as well as for the PFD
@@ -1988,12 +2737,67 @@
         const railwaysProvider = new Cesium.UrlTemplateImageryProvider({
             url: "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
         });
+        // The RainViewer API gives the frame path with a leading slash
+        // ("/v2/radar/d89dd451e329"), so a URL built by adding one of our own asks for
+        // tilecache.rainviewer.com//v2/radar/... That 404s, and because a 404 carries no
+        // Access-Control-Allow-Origin the browser reports it as a CORS failure rather
+        // than a missing tile. Cesium's Resource does not normalise the double slash
+        // away - checked against the 1.145 bundle - so the path is trimmed here, the way
+        // setNDWeatherPath() does for the navigation display's underlay
+        function rainViewerUrl(path, suffix) {
+            return "https://tilecache.rainviewer.com/" + String(path).replace(/^\/+/, "") + suffix;
+        }
+        const rainTileSuffix = "/256/{z}/{x}/{y}/4/1_1.png";
+        // Past its own largest zoom RainViewer serves a "zoom not supported" placeholder
+        // - the same small image at every level beyond 7 - and the cloud composite is a
+        // few km per pixel, so 6 is already as much as it holds. Told the limit, Cesium
+        // enlarges the tile above instead of asking for one that is not there
+        const rainMaxLevel = 7;
+        const cloudMaxLevel = 6;
+
         var rainProvider = new Cesium.UrlTemplateImageryProvider({
-            url: "https://tilecache.rainviewer.com/v2/radar/0000000000/256/{z}/{x}/{y}/4/1_1.png"
+            url: rainViewerUrl("v2/radar/0000000000", rainTileSuffix),
+            maximumLevel: rainMaxLevel
         });
-        var cloudProvider = new Cesium.UrlTemplateImageryProvider({
-            url: "https://tilecache.rainviewer.com/v2/satellite/0000000000/256/{z}/{x}/{y}/0/0_0.png"
-        });
+        // Clouds come from EUMETSAT's global geostationary infrared composite. RainViewer
+        // stopped publishing satellite infrared - its satellite.infrared array is empty -
+        // and this is the only free worldwide replacement found: IR 10.8 um from every
+        // geostationary satellite, so everything but the poles, published every 3 hours.
+        // A WMS rather than a tile server, which Cesium asks in EPSG:4326, the projection
+        // the service advertises
+        function cloudProviderFor(time) {
+            const parameters = {
+                format: "image/png",
+                transparent: true
+            };
+            if (time) {
+                parameters.time = time;
+            }
+            return new Cesium.WebMapServiceImageryProvider({
+                url: "https://view.eumetsat.int/geoserver/wms",
+                layers: "mumi:worldcloudmap_ir108",
+                parameters: parameters,
+                maximumLevel: cloudMaxLevel,
+                enablePickFeatures: false
+            });
+        }
+        var cloudProvider = cloudProviderFor(undefined);
+
+        // The infrared image is opaque grey, dark where it sees warm ground, so laid over
+        // the map as it comes it would hide it. Keying the dark end out leaves the cold
+        // cloud tops and lets the map through everywhere else
+        // Cesium's colorToAlpha is a hard cut rather than a ramp: everything within the
+        // threshold of the key colour goes fully transparent and the rest stays as it is.
+        // The image is neutral grey, so the distance from black is just its brightness,
+        // and 0.45 puts the cut at about 115 of 255 - measured over the whole composite,
+        // warm ground sits around 70-100 and cold cloud tops run from about 160 up. The
+        // layer alpha then softens what is left, since the cut has no gradient of its own
+        function styleCloudLayer(layer) {
+            layer.colorToAlpha = Cesium.Color.BLACK;
+            layer.colorToAlphaThreshold = 0.45;
+            layer.alpha = 0.75;
+            return layer;
+        }
         var auroraProvider = new Cesium.SingleTileImageryProvider({
             url: "aurora.png",
             tileWidth: 360,
@@ -2003,7 +2807,7 @@
         var gibsLayer = new Cesium.ImageryLayer(gibsProvider);
         gibsLayer.show = false;
         viewer.imageryLayers.add(gibsLayer);
-        var cloudLayer = new Cesium.ImageryLayer(cloudProvider);
+        var cloudLayer = styleCloudLayer(new Cesium.ImageryLayer(cloudProvider));
         cloudLayer.show = false;
         viewer.imageryLayers.add(cloudLayer);
         var rainLayer = new Cesium.ImageryLayer(rainProvider);
@@ -2204,6 +3008,11 @@
                     handleTrackPolyline(command);
                     return;
                 }
+                if (command["delete"]) {
+                    forgetLod(command.id);
+                } else if (command.model) {
+                    lodFromPacket(command);
+                }
                 // Before the datasource updates the entity's uri - see noteModelChange
                 if (command.model && command.model.gltf) {
                     noteModelChange(command);
@@ -2283,7 +3092,10 @@
 
                 if (command.command == "trackId") {
                     // Track an entity with the given ID
-                    viewer.trackedEntity = czmlStream.entities.getById(command.id);
+                    const entity = czmlStream.entities.getById(command.id);
+                    withFullDetail(entity, function () {
+                        viewer.trackedEntity = entity;
+                    });
                 } else if (command.command == "setHomeView") {
                     // Set the viewing rectangle used when the home button is pressed
                     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
@@ -2318,9 +3130,12 @@
                     // Play model animation
                     if (command.stop) {
                         //console.log(`stopping animation ${command.animation} for ${command.id}`);
+                        recordAnimationStop(command);
                         stopAnimation(viewer, command);
                     } else {
                         //console.log(`playing animation ${command.animation} for ${command.id} command` + JSON.stringify(command));
+                        // Remembered for a change of level of detail
+                        command.record = recordAnimation(command);
                         playAnimation(viewer, command, 30);
                     }
                 } else if (command.command == "setDateTime") {
@@ -2371,7 +3186,7 @@
                     } else {
                         console.log(`Unknown terrain ${command.terrain}`);
                     }
-                    viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain
+                    viewer.scene.globe.depthTestAgainstTerrain = true; // So labels/points aren't clipped by terrain
                 } else if (command.command == "setBuildings") {
                     if (command.buildings == "None") {
                         if (buildings !== undefined) {
@@ -2419,6 +3234,11 @@
                             googleTileset = undefined;
                         }
                         viewer.scene.globe.show = true;
+                    }
+                } else if (command.command == "setLowDetailModels") {
+                    if (lowDetailModelsEnabled !== command.enabled) {
+                        lowDetailModelsEnabled = command.enabled;
+                        updateFarMode();    // Turned off, every aircraft goes back to full detail now
                     }
                 } else if (command.command == "setLighting") {
                     viewer.scene.globe.enableLighting = command.useSunLight;
@@ -2653,27 +3473,14 @@
                             gibsLayer.alpha = command.opacity / 100.0;
                         }
                     } else if (command.layer == "clouds") {
-                        // RainViewer can have no frames at all for a layer - its
-                        // satellite.infrared array is empty as this is written, while
-                        // radar.past has thirteen - and the tile URL is built by
-                        // concatenation, so an empty path asks for
-                        // tilecache.rainviewer.com//256/... That 404s, a 404 carries no
-                        // Access-Control-Allow-Origin, and the browser reports every one
-                        // of them as a CORS failure. Removing the layer rather than
-                        // ignoring the command also covers a feed that stops mid-session,
-                        // which would otherwise leave the last tiles showing for ever.
+                        // Replacing the provider is what picks up a new frame, since the
+                        // time is a request parameter rather than part of a tile path
                         viewer.imageryLayers.remove(cloudLayer, true);
-                        cloudLayer = undefined;
-                        layers.delete(command.layer);
-                        if (command.path) {
-                            cloudProvider = new Cesium.UrlTemplateImageryProvider({
-                                url: "https://tilecache.rainviewer.com/" + command.path + "/256/{z}/{x}/{y}/0/0_0.png"
-                            });
-                            cloudLayer = new Cesium.ImageryLayer(cloudProvider);
-                            cloudLayer.show = command.show;
-                            viewer.imageryLayers.add(cloudLayer);
-                            layers.set(command.layer, cloudLayer);
-                        }
+                        cloudProvider = cloudProviderFor(command.time);
+                        cloudLayer = styleCloudLayer(new Cesium.ImageryLayer(cloudProvider));
+                        cloudLayer.show = command.show;
+                        viewer.imageryLayers.add(cloudLayer);
+                        layers.set(command.layer, cloudLayer);
                     } else if (command.layer == "rain") {
                         // The ND's weather radar underlay uses the same frame
                         setNDWeatherPath(command.path ? command.path : undefined);
@@ -2682,7 +3489,8 @@
                         layers.delete(command.layer);
                         if (command.path) {
                             rainProvider = new Cesium.UrlTemplateImageryProvider({
-                                url: "https://tilecache.rainviewer.com/" + command.path + "/256/{z}/{x}/{y}/4/1_1.png"
+                                url: rainViewerUrl(command.path, rainTileSuffix),
+                                maximumLevel: rainMaxLevel
                             });
                             rainLayer = new Cesium.ImageryLayer(rainProvider);
                             rainLayer.show = command.show;
@@ -2759,6 +3567,8 @@
                     setNDNavAids(command.navAids);
                 } else if (command.command == "removeAllCZMLEntities") {
                     czmlStream.entities.removeAll();
+                    lodEntities.clear();
+                    entityAnimations.clear();
                     if (trackPolylines) {
                         trackPolylines.removeAll();
                         trackPolylineById.clear();
@@ -2795,6 +3605,7 @@
         };
 
         function setFirstPersonView(entity) {
+            clearFarAmbient(entity);
             // Only one camera handler at a time, or they fight over the camera each frame
             viewer.scene.postUpdate.removeEventListener(cameraFlyBy);
             viewer.scene.screenSpaceCameraController.enableZoom = true;
@@ -2840,6 +3651,7 @@
         }
 
         function setFlyByView(entity) {
+            clearFarAmbient(entity);
             viewer.scene.postUpdate.removeEventListener(cameraFirstPerson);
             firstPersonEntity = undefined;
             if (!Cesium.defined(entity)) {
@@ -2868,6 +3680,7 @@
         }
 
         function setThirdPersonView(entity) {
+            clearFarAmbient(entity);
             viewer.scene.postUpdate.removeEventListener(cameraFlyBy);
             viewer.scene.screenSpaceCameraController.enableZoom = true;
             flyByEntity = undefined;
@@ -2904,18 +3717,20 @@
                 }
             } else {
                 const selectedEntity = viewer.selectedEntity;
-                if (cameraMode === cameraModeFirstPerson) {
-                    setFirstPersonView(selectedEntity);
-                } else if (cameraMode === cameraModeFlyBy) {
-                    setFlyByView(selectedEntity);
-                } else {
-                    const position = selectedEntity.position;
-                    if (Cesium.defined(position)) {
-                        setThirdPersonView(selectedEntity);
+                withFullDetail(selectedEntity, function () {
+                    if (cameraMode === cameraModeFirstPerson) {
+                        setFirstPersonView(selectedEntity);
+                    } else if (cameraMode === cameraModeFlyBy) {
+                        setFlyByView(selectedEntity);
                     } else {
-                        viewer.zoomTo(viewer.selectedEntity);
+                        const position = selectedEntity.position;
+                        if (Cesium.defined(position)) {
+                            setThirdPersonView(selectedEntity);
+                        } else {
+                            viewer.zoomTo(selectedEntity);
+                        }
                     }
-                }
+                });
             }
         }
 
@@ -2930,6 +3745,7 @@
         });
 
         viewer.trackedEntityChanged.addEventListener(function (trackedEntity) {
+            updateFarMode();    // A followed aircraft is drawn in full detail
             if (Cesium.defined(trackedEntity) && Cesium.defined(trackedEntity.id)) {
                 socket.send(JSON.stringify({ event: "tracking", id: trackedEntity.id }));
             } else {

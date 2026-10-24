@@ -24,6 +24,7 @@
 #include "mapsettings.h"
 #include "mapmodel.h"
 
+#include "util/aircraft3dmodels.h"
 #include "util/coordinates.h"
 #include "util/flightpathpalette.h"
 #include "util/units.h"
@@ -31,6 +32,23 @@
 // FIXME: Cesium now has some additional options: CLAMP_TO_TERRAIN, RELATIVE_TO_TERRAIN, CLAMP_TO_3D_TILE, RELATIVE_TO_3D_TILE
 // CLIP_TO_GROUND is our own addition
 const QStringList CZML::m_heightReferences = {"NONE", "CLAMP_TO_GROUND", "RELATIVE_TO_GROUND", "CLIP_TO_GROUND"};
+
+// Using CLAMP_TO_GROUND on a label, billboard or point, results in all of them being visible through the globe.
+// So use CLIP_TO_GROUND instead. 
+// A single CLAMP_TO_GROUND label, billboard or point latches _shaderDisableDepthDistance
+// on the Cesium collection it lands in, which recompiles every item in that collection
+// onto Cesium's manual globe-depth path. That path discards nothing beyond
+// coarseDepthTestDistance (~635 km), so at map viewing distances labels and images on the
+// far side of the Earth draw straight through the globe - including unclamped ones that
+// merely share the collection - and the latch is never cleared once set. CLIP_TO_GROUND
+// keeps them above the surface without tripping it, as Cesium's isHeightReferenceClamp
+// covers only the CLAMP_* references. Points come too: Cesium draws a clamped point as a
+// billboard, in the same collection as the images, so leaving them would keep it latched
+static int clipRatherThanClamp(int altitudeReference)
+{
+    return altitudeReference == 1 ? 3 : altitudeReference;   // CLAMP_TO_GROUND -> CLIP_TO_GROUND
+}
+
 
 CZML::CZML(const MapSettings *settings) :
     m_settings(settings)
@@ -372,6 +390,86 @@ static void insertProperty(QJsonObject& properties, const QString& name, const Q
             {"forwardExtrapolationDuration", 30},
         };
         properties.insert(name, obj);
+    }
+}
+
+// Two samples in one packet. CZML takes a sampled number as a flat
+// [time, value, time, value] array. Used to close a run of identical values with the last
+// sample that still carried the old value, immediately before the sample that changes it,
+// so the run reconstructs as a flat line instead of a ramp from where the run began.
+static void insertProperty2(QJsonObject& properties, const QString& name,
+                            const QString& dateTime0, float value0,
+                            const QString& dateTime1, float value1)
+{
+    if (!std::isnan(value0) && !std::isnan(value1))
+    {
+        QJsonArray ar;
+        ar.push_back(sampleTime(dateTime0));
+        ar.push_back(value0);
+        ar.push_back(sampleTime(dateTime1));
+        ar.push_back(value1);
+        QJsonObject obj {
+            {"number", ar},
+            {"backwardExtrapolationType", "HOLD"},
+            {"backwardExtrapolationDuration", 30},
+            {"forwardExtrapolationType", "HOLD"},
+            {"forwardExtrapolationDuration", 30},
+        };
+        properties.insert(name, obj);
+    }
+}
+
+void CZML::SampledChannel::write(QJsonObject& properties, const QString& name,
+    const QString& dateTime, const QDateTime& frameTime, float value, bool force)
+{
+    if (std::isnan(value)) {
+        return;             // insertProperty() would drop it anyway
+    }
+
+    const bool first = force || std::isnan(m_emitted) || !m_sentFrame.isValid();
+
+    // How often this aircraft is being updated, which bounds how early the keepalive has
+    // to fire. Measured from the previous call rather than assumed: it varies from about
+    // 0.5 s to tens of seconds across the traffic on the map
+    const qint64 interval = m_lastFrame.isValid()
+        ? qAbs(m_lastFrame.secsTo(frameTime)) : 1;
+    m_lastFrame = frameTime;
+
+    if (first || (value != m_emitted))
+    {
+        // Close the run that has just ended before opening the new one, so the old value
+        // is still held at the time it was last measured and the change stays a step
+        if (!first && !m_heldTime.isEmpty() && m_heldFrame.isValid()
+            && (m_heldFrame < frameTime))
+        {
+            insertProperty2(properties, name, m_heldTime, m_emitted, dateTime, value);
+        }
+        else
+        {
+            insertProperty(properties, name, dateTime, value);
+        }
+        m_emitted = value;
+        m_heldTime.clear();
+        m_heldFrame = QDateTime();
+        m_sentFrame = frameTime;
+        return;
+    }
+
+    // Unchanged, so withhold it - but keep the trailing edge of the run inside the
+    // forward HOLD, or the PFD field would blank mid-cruise. Emitting at `threshold`
+    // lands at up to threshold + interval, so the threshold has to leave room for the
+    // next update to be late; at a large enough interval it goes non-positive and every
+    // update is emitted, which is the only thing that can work at that cadence
+    const qint64 threshold = qMin<qint64>(m_keepaliveMaxSecs,
+                                          m_holdSecs - 2 * interval);
+    m_heldTime = dateTime;
+    m_heldFrame = frameTime;
+    if (qAbs(m_sentFrame.secsTo(frameTime)) >= threshold)
+    {
+        insertProperty(properties, name, dateTime, value);
+        m_sentFrame = frameTime;
+        m_heldTime.clear();
+        m_heldFrame = QDateTime();
     }
 }
 
@@ -1064,40 +1162,18 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 insertConstantProperty(properties, "pfdAircraftType", aircraftType);
                 state.m_aircraftState.m_aircraftType = aircraftType;
             }
-            if (   (!existingId && !aircraftIndicatedAirspeedDateTime.isEmpty())
-                || (aircraftIndicatedAirspeedDateTime != state.m_aircraftState.m_indicatedAirspeedDateTime)
-                || (aircraftIndicatedAirspeed != state.m_aircraftState.m_indicatedAirspeed)
-                )
-            {
-                insertProperty(properties, "pfdIndicatedAirspeed", aircraftIndicatedAirspeedDateTime, aircraftIndicatedAirspeed);
-                state.m_aircraftState.m_indicatedAirspeedDateTime = aircraftIndicatedAirspeedDateTime;
-                state.m_aircraftState.m_indicatedAirspeed = aircraftIndicatedAirspeed;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftTrueAirspeed != state.m_aircraftState.m_trueAirspeed)
-                )
-            {
-                insertProperty(properties, "pfdTrueAirspeed", dateTime, aircraftTrueAirspeed);
-                state.m_aircraftState.m_trueAirspeed = aircraftTrueAirspeed;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftGroundspeed != state.m_aircraftState.m_groundspeed)
-                )
-            {
-                insertProperty(properties, "pfdGroundspeed", dateTime, aircraftGroundspeed);
-                state.m_aircraftState.m_groundspeed = aircraftGroundspeed;
-            }
-            if (   (!existingId && !aircraftAltitudeDateTime.isEmpty())
-                || (aircraftAltitudeDateTime != state.m_aircraftState.m_altitudeDateTime)
-                || (aircraftAltitude != state.m_aircraftState.m_altitude)
-                )
-            {
-                insertProperty(properties, "pfdAltitude", aircraftAltitudeDateTime, aircraftAltitude);
-                state.m_aircraftState.m_altitudeDateTime = aircraftAltitudeDateTime;
-                state.m_aircraftState.m_altitude = aircraftAltitude;
-            }
+            state.m_chIndicatedAirspeed.write(properties, "pfdIndicatedAirspeed",
+                aircraftIndicatedAirspeedDateTime, aircraftStateDateTime, aircraftIndicatedAirspeed,
+                !existingId && !aircraftIndicatedAirspeedDateTime.isEmpty());
+            state.m_chTrueAirspeed.write(properties, "pfdTrueAirspeed",
+                dateTime, aircraftStateDateTime, aircraftTrueAirspeed,
+                !existingId);
+            state.m_chGroundspeed.write(properties, "pfdGroundspeed",
+                dateTime, aircraftStateDateTime, aircraftGroundspeed,
+                !existingId);
+            state.m_chAltitude.write(properties, "pfdAltitude",
+                aircraftAltitudeDateTime, aircraftStateDateTime, aircraftAltitude,
+                !existingId && !aircraftAltitudeDateTime.isEmpty());
             if (   !existingId
                 || aircraftStateDateTimeChanged
                 || (aircraftOnSurface != state.m_aircraftState.m_onSurface)
@@ -1106,15 +1182,9 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 insertProperty0(properties, "pfdOnSurface", dateTime, aircraftOnSurface);
                 state.m_aircraftState.m_onSurface = aircraftOnSurface;
             }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftMach != state.m_aircraftState.m_mach)
-                )
-            {
-                insertProperty(properties, "pfdMach", dateTime, aircraftMach);
-                state.m_aircraftState.m_mach = aircraftMach;
-
-            }
+            state.m_chMach.write(properties, "pfdMach",
+                dateTime, aircraftStateDateTime, aircraftMach,
+                !existingId);
             if (   !existingId
                 || aircraftStateDateTimeChanged
                 || (aircraftQNH != state.m_aircraftState.m_qnh)
@@ -1123,46 +1193,21 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 insertProperty0(properties, "pfdQNH", dateTime, aircraftQNH);
                 state.m_aircraftState.m_qnh = aircraftQNH;
             }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftVerticalSpeed != state.m_aircraftState.m_verticalSpeed)
-                )
-            {
-                insertProperty(properties, "pfdVerticalSpeed", dateTime, aircraftVerticalSpeed);
-                state.m_aircraftState.m_verticalSpeed = aircraftVerticalSpeed;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftHeading != state.m_aircraftState.m_heading)
-                )
-            {
-                insertProperty(properties, "pfdHeading", dateTime, aircraftHeading);
-                state.m_aircraftState.m_heading = aircraftHeading;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftTrack != state.m_aircraftState.m_track)
-                )
-            {
-                insertProperty(properties, "pfdTrack", dateTime, aircraftTrack);
-                state.m_aircraftState.m_track = aircraftTrack;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftRoll != state.m_aircraftRoll)
-                )
-            {
-                insertProperty(properties, "pfdRoll", dateTime, aircraftRoll);
-                state.m_aircraftRoll = aircraftRoll;
-            }
-            if (   !existingId
-                || aircraftStateDateTimeChanged
-                || (aircraftPitch != state.m_aircraftPitch)
-                )
-            {
-                insertProperty(properties, "pfdPitch", dateTime, aircraftPitch);
-                state.m_aircraftPitch = aircraftPitch;
-            }
+            state.m_chVerticalSpeed.write(properties, "pfdVerticalSpeed",
+                dateTime, aircraftStateDateTime, aircraftVerticalSpeed,
+                !existingId);
+            state.m_chHeading.write(properties, "pfdHeading",
+                dateTime, aircraftStateDateTime, aircraftHeading,
+                !existingId);
+            state.m_chTrack.write(properties, "pfdTrack",
+                dateTime, aircraftStateDateTime, aircraftTrack,
+                !existingId);
+            state.m_chRoll.write(properties, "pfdRoll",
+                dateTime, aircraftStateDateTime, aircraftRoll,
+                !existingId);
+            state.m_chPitch.write(properties, "pfdPitch",
+                dateTime, aircraftStateDateTime, aircraftPitch,
+                !existingId);
             if (   !existingId
                 || aircraftStateDateTimeChanged
                 || (aircraftSelectedAltitude != state.m_aircraftState.m_selectedAltitude)
@@ -1346,7 +1391,7 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
 
         // Point
         quint32 pointColorInt = mapItem->m_itemSettings->m_3DPointColor;
-        int pointAltitudeReference = mapItem->m_altitudeReference;
+        int pointAltitudeReference = clipRatherThanClamp(mapItem->m_altitudeReference);
         bool pointShow = mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DPoint;
 
         if (   !existingId
@@ -1381,7 +1426,7 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
         QString labelText = mapItem->m_label;
         bool labelShow = m_settings->m_displayNames && mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DLabel;
         float labelScale = mapItem->m_itemSettings->m_3DLabelScale;
-        int labelAltitudeReference = mapItem->m_altitudeReference;
+        int labelAltitudeReference = clipRatherThanClamp(mapItem->m_altitudeReference);
 
         if (   !existingId
             || (labelAltitudeOffset != state.m_lableAltitudeOffset)
@@ -1523,6 +1568,13 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 model.insert("nodeTransformations", nodeTransforms);
                 }*/
 
+                // Not CZML: map3d.html takes it out, and switches the entity to this
+                // model while the aircraft is small on screen
+                const QString lowDetail = Aircraft3DModels::instance().lowDetailModel(mapItem->m_model);
+                if (!lowDetail.isEmpty()) {
+                    model.insert("lowDetailGltf", m_settings->m_modelURL + lowDetail);
+                }
+
                 obj.insert("model", model);
 
                 state.m_modelGLTF = modelGLTF;
@@ -1530,9 +1582,26 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                 state.m_modelShow = modelShow;
                 state.m_modelMinimumPixelSize = modelMinimumPixelSize;
             }
+            // A packet only adds to what Cesium has for an entity, so an item that was a
+            // billboard and now has a model would otherwise show both
+            if (state.m_billboardShown)
+            {
+                obj.insert("billboard", QJsonObject{{"show", false}});
+                state.m_billboardShown = false;
+            }
         }
         else
         {
+            // And the other way round: an aircraft whose model is taken away - its stand-in
+            // replaced by one for its emitter category that is not installed - was left
+            // drawn as the old model with the billboard on top of it
+            if (!state.m_modelGLTF.isEmpty())
+            {
+                obj.insert("model", QJsonObject{{"show", false}});
+                state.m_modelGLTF.clear();
+            }
+            state.m_billboardShown = true;
+
             // Use billboard for APRS as we don't currently have 3D objects
             QString imageURL = mapItem->m_image;
             if (imageURL.startsWith("qrc://")) {
@@ -1540,7 +1609,8 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
             }
             QJsonObject billboard {
                 {"image", imageURL},
-                {"heightReference", heightReferences[mapItem->m_altitudeReference]},
+                {"show", true},     // In case a model had hidden it
+                {"heightReference", heightReferences[clipRatherThanClamp(mapItem->m_altitudeReference)]},
                 {"verticalOrigin", "BOTTOM"} // To stop it being cut in half when zoomed out
             };
 
@@ -1548,7 +1618,13 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
         }
 
         // Description
+        // Images in the description are qrc:/// URLs, which Qt Quick and the widgets
+        // resolve themselves, but the 3D map is a page served over http and Chromium
+        // refuses to load a local scheme resource from it - "Not allowed to load local
+        // resource". Point them at the embedded web server, which looks the path up in
+        // our resources, exactly as the billboard image above is redirected
         QString description = mapItem->m_text;
+        description.replace("qrc://", "");
         if (   !existingId
             || (description != state.m_description)
             )

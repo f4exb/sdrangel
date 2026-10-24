@@ -52,6 +52,8 @@ if(NOT SERVER_MODE)
         mapmaidenheaddialog.ui
         mapsettingsdialog.cpp
         mapsettingsdialog.ui
+        msfsassetconverter/animationmapper.cpp
+        msfsassetconverter/animationmapper.h
         msfsassetconverter/batchconverter.cpp
         msfsassetconverter/batchconverter.h
         msfsassetconverter/bc7decoder.cpp
@@ -62,8 +64,16 @@ if(NOT SERVER_MODE)
         msfsassetconverter/ddsdecoder.h
         msfsassetconverter/fsltlresolver.cpp
         msfsassetconverter/fsltlresolver.h
+        msfsassetconverter/hiddenparts.cpp
+        msfsassetconverter/hiddenparts.h
+        msfsassetconverter/nodestrip.cpp
+        msfsassetconverter/nodestrip.h
         msfsassetconverter/ktx2writer.cpp
         msfsassetconverter/ktx2writer.h
+        msfsassetconverter/portholes.cpp
+        msfsassetconverter/portholes.h
+        msfsassetconverter/primmerge.cpp
+        msfsassetconverter/primmerge.h
         mapbeacondialog.cpp
         mapbeacondialog.ui
         mapibpbeacondialog.cpp
@@ -136,6 +146,44 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     sdrbase
     ${TARGET_LIB_GUI}
 )
+
+if(NOT SERVER_MODE)
+    # Zstandard supercompression for the MSFS converter's KTX2 textures. Liveries are mostly
+    # flat colour and compress about 8x losslessly: the shared texture cache went from 44 GB
+    # to about 5 GB. A system libzstd is used where there is one; otherwise (always on
+    # Windows, where external/windows has none) its compressor is built here from source
+    find_package(PkgConfig QUIET)
+    if(PKG_CONFIG_FOUND AND NOT WIN32)
+        pkg_check_modules(ZSTD QUIET IMPORTED_TARGET libzstd)
+    endif()
+    if(ZSTD_FOUND)
+        target_link_libraries(${TARGET_NAME} PRIVATE PkgConfig::ZSTD)
+    else()
+        include(FetchContent)
+        # lib has no CMakeLists.txt, so this only downloads - zstd's own build would add
+        # install rules for its library and headers to SDRangel's package
+        FetchContent_Declare(zstd
+            URL https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz
+            URL_HASH SHA256=eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+            SOURCE_SUBDIR lib
+        )
+        FetchContent_MakeAvailable(zstd)
+        # Only compression is used, so the decompressor and its assembly aren't needed
+        file(GLOB MAP_ZSTD_SOURCES
+            ${zstd_SOURCE_DIR}/lib/common/*.c
+            ${zstd_SOURCE_DIR}/lib/compress/*.c
+        )
+        add_library(mapzstd STATIC ${MAP_ZSTD_SOURCES})
+        set_target_properties(mapzstd PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+            AUTOMOC OFF AUTOUIC OFF AUTORCC OFF
+        )
+        target_include_directories(mapzstd PUBLIC ${zstd_SOURCE_DIR}/lib)
+        target_link_libraries(${TARGET_NAME} PRIVATE mapzstd)
+    endif()
+    target_compile_definitions(${TARGET_NAME} PRIVATE MSFS_CONVERTER_WITH_ZSTD)
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 

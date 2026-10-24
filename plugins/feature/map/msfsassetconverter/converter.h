@@ -26,11 +26,26 @@ struct ConversionOptions {
     QString m_inputGltf;
     QString m_outputDirectory;
     QString m_outputNameSuffix;
+    QString m_outputFileSuffix;     // After "_cesium", e.g. "_lod1", so the model scan skips it
     QString m_sharedTextureDirectory;
     bool m_flipDirectXNormalY = true;
     int m_flightSimIndex = 0;
     int m_lodIndex = 0;
     bool m_strictExtensions = false;
+    // Liveries are authored at up to 4096 square. The KTX2 file is small - UASTC and zstd
+    // see to that - but once decoded and mipmapped a 4096 costs about 21 MB of GPU memory
+    // however far away the aircraft is, and a sky full of them was spending over a
+    // gigabyte on liveries alone. 2048 is indistinguishable from 4096 at any distance the
+    // map is used at; 1024 visibly softens small markings like door placards
+    int m_maximumTextureSize = 2048;    // 0 for no limit
+    // MSFS bakes an animation at a keyframe per simulation frame, so a gear leg that is a
+    // plain ramp arrives with 100 or 200 of them. Cesium unpacks each keyframe into a
+    // Quaternion object, and does it per model instance rather than per file, so a sky
+    // full of aircraft had half a million of them live - and a major GC tracing that many
+    // is what the map's a-second-and-a-third stutters were. Keyframes are dropped while
+    // the animation still reproduces to within this much per component: about a quarter
+    // of a degree of rotation, or two millimetres of travel, at the default
+    double m_animationTolerance = 0.002;    // 0 to keep every keyframe
 #ifdef MSFS_CONVERTER_WITH_ZSTD
     // Lossless, and about 8x smaller for liveries, which are mostly flat colour
     bool m_zstdSupercompression = true;
@@ -46,6 +61,7 @@ struct ConversionResult {
     int m_convertedTextures = 0;
     int m_synthesizedTextures = 0;
     int m_reusedTextures = 0;
+    int m_downscaledTextures = 0;
     int m_skippedFallbackDirectories = 0;
     int m_preservedMipLevels = 0;
     int m_flippedTriangles = 0;

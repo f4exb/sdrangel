@@ -98,6 +98,7 @@ struct MapSettings
     QString m_mapProvider;
     QString m_thunderforestAPIKey;
     QString m_maptilerAPIKey;
+    QString m_cartoDBAPIKey;    //!< carto.com key, for the aviation (no label) maps
     QString m_mapBoxAPIKey;
     QString m_osmURL;
     QString m_mapBoxStyles;
@@ -125,8 +126,12 @@ struct MapSettings
     QString m_modelDir;         // Directory to store 3D models (not customizable for now, as ADS-B plugin needs to know)
     QString m_msfsNavigraphDir; // Directory recursively scanned for Navigraph waypoint BGL files
     QString m_msfsAircraftDir;  // Parent directory scanned for MSFS aircraft.cfg files
+    int m_msfsMaxTextureSize;   // Largest livery texture the MSFS converter writes, in pixels
+    int m_msfsLowDetailMaxTextureSize;  // The same, for the low detail models
     bool m_sunLightEnabled;     // Light globe from direction of Sun
-    float m_lightIntensity;     // Intensity of camera light
+    float m_lightIntensity;
+    float m_distantLightIntensity;  // Ambient fill on distant 3D models, 0 to disable     // Intensity of camera light
+    bool m_lowDetailModels;     // Draw aircraft small on screen with their low detail model, where they have one
     bool m_eciCamera;           // Use ECI instead of ECEF for camera
     QString m_cesiumIonAPIKey;
     bool m_fxaa;
@@ -145,6 +150,7 @@ struct MapSettings
     bool m_hdr;
     bool m_fog;
     bool m_fps;
+    int m_frameRate;            //!< Frame rate to render the 3D map at,
 
     bool m_displayMUF;          // Plot MUF contours
     bool m_displayfoF2;         // Plot foF2 contours

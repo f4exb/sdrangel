@@ -37,6 +37,7 @@ var ndNavAidsCacheKey;
 
 var ndMode = 1; // 0 = ROSE NAV, 1 = ARC
 const ndRanges = [10, 20, 40, 80, 160, 320]; // NM
+const ndRangeLabels = ndRanges.map(String);  // The EFIS knob's legend, built once
 var ndRangeIdx = 3;
 
 // Weather radar underlay, composited from the same RainViewer tiles the map's rain
@@ -176,8 +177,11 @@ function setNDNavAids(navAids) {
 
 function setNDWeatherPath(path) {
     // The RainViewer API returns the path WITH a leading slash ("/v2/radar/..."), and
-    // a double slash in the tile URL 404s (verified against the live server - Cesium's
-    // rain layer gets away with it only because its Resource class normalises URLs)
+    // a double slash in the tile URL 404s (verified against the live server). Cesium's
+    // Resource does NOT normalise it away, whatever an earlier note here said: the map's
+    // own rain layer was dark for the same reason until rainViewerUrl() in map3d.html
+    // started trimming the path too. A 404 carries no Access-Control-Allow-Origin, so
+    // the browser blames CORS and the real cause does not appear in the log
     if (path !== undefined) {
         path = path.replace(/^\/+/, "");
     }
@@ -1056,6 +1060,38 @@ function ndIsTA(t) {
     return (a !== undefined) && a.ta;
 }
 
+// THRT keeps the 8 nearest within +-2700 ft, ALL keeps everything, ABV -2700..+7000 ft,
+// BLW -7000..+2700 ft. Relative altitude is in hundreds of feet. Advisory traffic is
+// never cut. Named rather than inline so no closure is built per draw
+function ndTcasKeeps(e, f) {
+    if (e.threat || e.ta) {
+        return true;
+    }
+    if (e.rel === undefined) {
+        return false;   // Cannot be classified against an altitude band
+    }
+    if (f === 0) {
+        return Math.abs(e.rel) <= 27;
+    }
+    if (f === 2) {
+        return (e.rel >= -27) && (e.rel <= 70);
+    }
+    return (e.rel >= -70) && (e.rel <= 27);
+}
+
+function ndTcasRank(e) {
+    return e.threat ? 0 : (e.ta ? 1 : 2);
+}
+
+function ndTcasCompare(a, b) {
+    const ra = ndTcasRank(a);
+    const rb = ndTcasRank(b);
+    if (ra !== rb) {
+        return ra - rb;
+    }
+    return a.p.dist - b.p.dist;
+}
+
 function ndDrawTraffic(ctx, geom, ppnm) {
     if ((ndLat === undefined) || (ndLon === undefined)) {
         return;
@@ -1067,6 +1103,11 @@ function ndDrawTraffic(ctx, geom, ppnm) {
 
     // Project and classify everything in range first, so the EFIS TCAS filter can
     // rank as well as cut
+    // Lowered once rather than per aircraft per draw. Undefined when there is no
+    // advisory, which keeps the comparison below from lowering anything at all
+    const threatIcao = ((ndTcasRA & 1) && (ndThreatIcao !== undefined))
+        ? String(ndThreatIcao).toLowerCase() : undefined;
+
     var targets = [];
     for (const t of ndTraffic) {
         if ((t.lat === undefined) || (t.lon === undefined)) {
@@ -1078,8 +1119,8 @@ function ndDrawTraffic(ctx, geom, ppnm) {
             rel = Math.round((t.altFt - ndAltitude) / 100);
         }
         // The aircraft an active resolution advisory is against - never filtered out
-        const threat = (ndTcasRA & 1) && (ndThreatIcao !== undefined) && (t.icao !== undefined)
-            && (String(t.icao).toLowerCase() === String(ndThreatIcao).toLowerCase());
+        const threat = (threatIcao !== undefined) && (t.icao !== undefined)
+            && (String(t.icao).toLowerCase() === threatIcao);
         const ta = !threat && ndIsTA(t);
         if (p.dist > range) {
             if (!(threat || ta)) {
@@ -1094,35 +1135,23 @@ function ndDrawTraffic(ctx, geom, ppnm) {
         targets.push({ t: t, p: p, rel: rel, threat: threat, ta: ta });
     }
 
-    // The EFIS TCAS selector: THRT keeps the 8 nearest within +-2700 ft, ALL keeps
-    // everything, ABV -2700..+7000 ft, BLW -7000..+2700 ft. Relative altitude is in
-    // hundreds of feet here. Advisory traffic is never cut
+    // The EFIS TCAS selector, applied by compacting the list in place and truncating it.
+    // targets is this function's own array, so filter() and slice() would each build
+    // another one every draw, and the predicate and comparator would be new closures
     const f = ndTcasFilterIdx;
     if (f !== 1) {
-        targets = targets.filter(function (e) {
-            if (e.threat || e.ta) {
-                return true;
+        var kept = 0;
+        for (var ti = 0; ti < targets.length; ti++) {
+            if (ndTcasKeeps(targets[ti], f)) {
+                targets[kept++] = targets[ti];
             }
-            if (e.rel === undefined) {
-                return false; // Cannot be classified against an altitude band
-            }
-            if (f === 0) {
-                return Math.abs(e.rel) <= 27;
-            }
-            if (f === 2) {
-                return (e.rel >= -27) && (e.rel <= 70);
-            }
-            return (e.rel >= -70) && (e.rel <= 27);
-        });
+        }
+        targets.length = kept;
         if (f === 0) {
-            const rank = function (e) { return e.threat ? 0 : (e.ta ? 1 : 2); };
-            targets.sort(function (a, b) {
-                if (rank(a) !== rank(b)) {
-                    return rank(a) - rank(b);
-                }
-                return a.p.dist - b.p.dist;
-            });
-            targets = targets.slice(0, 8);
+            targets.sort(ndTcasCompare);
+            if (targets.length > 8) {
+                targets.length = 8;      // THRT shows the 8 nearest
+            }
         }
     }
 
@@ -1234,7 +1263,7 @@ function ndDrawData(ctx) {
         const satText = (sat > 0 ? "+" : "") + sat;
         ctx.fillText(satText, 100, 970);
         ctx.fillStyle = cyanColor;
-        ctx.fillText("\u00B0C", 108 + ctx.measureText(satText).width, 970);
+        ctx.fillText("\u00B0C", 108 + panelTextMetrics(ctx, satText).width, 970);
     }
 
     // TCAS mode, bottom middle in a box. An active resolution advisory outranks the
@@ -1273,7 +1302,7 @@ function ndDrawData(ctx) {
         const text = "TCAS RA";
         ctx.font = "28px Arial";
         ctx.textAlign = "center";
-        const width = ctx.measureText(text).width + 40;
+        const width = panelTextMetrics(ctx, text).width + 40;
         ctx.fillStyle = "black";
         ctx.fillRect(500 - width / 2, 940, width, 44);
         ctx.strokeStyle = redColor;
@@ -1286,7 +1315,7 @@ function ndDrawData(ctx) {
         const text = (ndTcasMode === 1) ? "TCAS STBY" : "TA ONLY";
         ctx.font = "28px Arial";
         ctx.textAlign = "center";
-        const width = ctx.measureText(text).width + 40;
+        const width = panelTextMetrics(ctx, text).width + 40;
         ctx.fillStyle = "black";
         ctx.fillRect(500 - width / 2, 940, width, 44);
         ctx.strokeStyle = "white";
@@ -1712,53 +1741,180 @@ function efisPrepareCanvas() {
 
 // A rotary selector: labels on an arc over the knob, the selected one green, with
 // the pointer turned to it
+// A rotary selector: the labelled positions on an arc above it, the selected one lit,
+// and a knurled aluminium knob turned to it. The knob is drawn as a machined cylinder -
+// a shadow it sits in, the milled teeth around its edge, a domed top catching the light
+// from above left, and a milled flat for the pointer
 function efisDrawKnob(ctx, knob, title, labels, selected) {
-    ctx.font = "24px Arial";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
     // The title sits on the panel's title row unless the knob says otherwise (the RMP's
     // TCAS knob is in the lower half of a taller panel)
-    ctx.fillText(title, knob.cx, (knob.titleY !== undefined) ? knob.titleY : 42);
+    panelLegend(ctx, title, knob.cx, (knob.titleY !== undefined) ? knob.titleY : 42, 24);
 
     const n = labels.length;
+    const angleOf = function (i) {
+        return (n === 1) ? 0 : (-65 + 130 * i / (n - 1)) * Math.PI / 180;
+    };
     for (var i = 0; i < n; i++) {
-        const a = (n === 1) ? 0 : (-65 + 130 * i / (n - 1)) * Math.PI / 180;
+        const a = angleOf(i);
+        const lx = knob.cx + Math.sin(a) * (knob.r + 32);
+        const ly = knob.cy - Math.cos(a) * (knob.r + 32) + 7;
+        // A tick against each position, so the pointer reads against something
+        const tx = knob.cx + Math.sin(a) * (knob.r + 7);
+        const ty = knob.cy - Math.cos(a) * (knob.r + 7);
+        ctx.strokeStyle = (i === selected) ? greenColor : "#71717E";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(knob.cx + Math.sin(a) * (knob.r + 3), knob.cy - Math.cos(a) * (knob.r + 3));
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
         ctx.font = "20px Arial";
-        ctx.fillStyle = (i === selected) ? greenColor : "#C8C8C8";
-        ctx.fillText(labels[i], knob.cx + Math.sin(a) * (knob.r + 32), knob.cy - Math.cos(a) * (knob.r + 32) + 7);
+        ctx.textAlign = "center";
+        if (i === selected) {
+            ctx.fillStyle = greenColor;
+        } else {
+            ctx.fillStyle = "#0E0E12";
+            ctx.fillText(labels[i], lx, ly + 1);
+            ctx.fillStyle = "#B6B6C0";
+        }
+        ctx.fillText(labels[i], lx, ly);
     }
 
-    ctx.fillStyle = "#4A4A55";
+    // The well the knob stands in
     ctx.beginPath();
-    ctx.arc(knob.cx, knob.cy, knob.r, 0, 2 * Math.PI);
+    ctx.arc(knob.cx, knob.cy + 3, knob.r + 2, 0, 2 * Math.PI);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
     ctx.fill();
-    ctx.strokeStyle = "#6A6A75";
+
+    // Milled teeth around the edge
+    const teeth = 32;
+    ctx.lineWidth = 2;
+    for (var t = 0; t < teeth; t++) {
+        const a = (t / teeth) * 2 * Math.PI;
+        ctx.strokeStyle = ((t % 2) === 0) ? "#6C6C7A" : "#2E2E36";
+        ctx.beginPath();
+        ctx.moveTo(knob.cx + Math.sin(a) * knob.r * 0.84, knob.cy - Math.cos(a) * knob.r * 0.84);
+        ctx.lineTo(knob.cx + Math.sin(a) * knob.r, knob.cy - Math.cos(a) * knob.r);
+        ctx.stroke();
+    }
+
+    // The domed top, lit from above left
+    // Kept on the knob: the geometry and the colours are fixed, and the panel draws
+    // through one context, so rebuilding this ten times a second achieved nothing
+    let body = knob.bodyGradient;
+    if (body === undefined) {
+        body = ctx.createRadialGradient(
+            knob.cx - knob.r * 0.35, knob.cy - knob.r * 0.4, knob.r * 0.08,
+            knob.cx, knob.cy, knob.r);
+        body.addColorStop(0, "#71717F");
+        body.addColorStop(0.55, "#4A4A56");
+        body.addColorStop(1, "#303038");
+        knob.bodyGradient = body;
+    }
+    ctx.beginPath();
+    ctx.arc(knob.cx, knob.cy, knob.r * 0.84, 0, 2 * Math.PI);
+    ctx.fillStyle = body;
+    ctx.fill();
+    ctx.strokeStyle = "#24242B";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // A highlight along the top edge of the dome
+    ctx.beginPath();
+    ctx.arc(knob.cx, knob.cy, knob.r * 0.72, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    const a = (n === 1) ? 0 : (-65 + 130 * selected / (n - 1)) * Math.PI / 180;
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 7;
+    // The pointer, milled into the knob: a dark groove with a white fill
+    const a = angleOf(selected);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#1A1A20";
+    ctx.lineWidth = 9;
     ctx.beginPath();
-    ctx.moveTo(knob.cx + Math.sin(a) * knob.r * 0.35, knob.cy - Math.cos(a) * knob.r * 0.35);
-    ctx.lineTo(knob.cx + Math.sin(a) * knob.r * 0.95, knob.cy - Math.cos(a) * knob.r * 0.95);
+    ctx.moveTo(knob.cx + Math.sin(a) * knob.r * 0.22, knob.cy - Math.cos(a) * knob.r * 0.22);
+    ctx.lineTo(knob.cx + Math.sin(a) * knob.r * 0.78, knob.cy - Math.cos(a) * knob.r * 0.78);
     ctx.stroke();
+    ctx.strokeStyle = "#E6E6EE";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.lineCap = "butt";
 }
 
-// An A320 style pushbutton: dark cap, white legend, and a green bar lit when on
+// An A320 style pushbutton: a raised cap moulded into the panel, its legend engraved,
+// and the legend plate lit green when the layer it selects is on
 function efisDrawButton(ctx, rect, label, on) {
-    ctx.fillStyle = "#26262E";
-    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-    ctx.strokeStyle = "#55555F";
+    const r = Math.max(4, Math.min(9, rect.h / 7));
+    const lit = (on === true);
+
+    // The recess the cap sits in
+    ctx.beginPath();
+    pfdRoundRectPath(ctx, rect.x - 2, rect.y - 1, rect.w + 4, rect.h + 5, r + 2);
+    ctx.fillStyle = "#15151A";
+    ctx.fill();
+
+    // The cap, lit from above
+    let cap = rect.capGradient;
+    if (cap === undefined) {
+        cap = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.h);
+        cap.addColorStop(0, "#44444F");
+        cap.addColorStop(0.5, "#32323B");
+        cap.addColorStop(1, "#212128");
+        rect.capGradient = cap;
+    }
+    ctx.beginPath();
+    pfdRoundRectPath(ctx, rect.x, rect.y, rect.w, rect.h, r);
+    ctx.fillStyle = cap;
+    ctx.fill();
+
+    // Its moulded edge
+    ctx.save();
+    ctx.clip();
     ctx.lineWidth = 3;
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-    ctx.font = "26px Arial";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.20)";
+    ctx.beginPath();
+    ctx.moveTo(rect.x, rect.y + rect.h);
+    ctx.lineTo(rect.x, rect.y);
+    ctx.lineTo(rect.x + rect.w, rect.y);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.beginPath();
+    ctx.moveTo(rect.x + rect.w, rect.y);
+    ctx.lineTo(rect.x + rect.w, rect.y + rect.h);
+    ctx.lineTo(rect.x, rect.y + rect.h);
+    ctx.stroke();
+    ctx.restore();
+
+    // The legend, engraved into the cap
+    const legendY = lit ? rect.y + rect.h * 0.46 : rect.y + rect.h / 2 + 9;
+    ctx.font = Math.round(Math.min(26, rect.h * 0.42)) + "px Arial";
     ctx.textAlign = "center";
-    ctx.fillStyle = "#C8C8C8";
-    ctx.fillText(label, rect.x + rect.w / 2, rect.y + 38);
-    if (on) {
-        ctx.fillStyle = greenColor;
-        ctx.fillRect(rect.x + 30, rect.y + rect.h - 28, rect.w - 60, 14);
+    ctx.fillStyle = "#0C0C10";
+    ctx.fillText(label, rect.x + rect.w / 2, legendY + 1);
+    ctx.fillStyle = "#D2D2DA";
+    ctx.fillText(label, rect.x + rect.w / 2, legendY);
+
+    // The lit plate in the lower half, which is what says the layer is selected
+    if (lit) {
+        const plateH = Math.max(12, rect.h * 0.22);
+        const plateY = rect.y + rect.h - plateH - 6;
+        const plateX = rect.x + rect.w * 0.18;
+        const plateW = rect.w * 0.64;
+        let glow = rect.glowGradient;
+        if (glow === undefined) {
+            glow = ctx.createLinearGradient(0, plateY, 0, plateY + plateH);
+            glow.addColorStop(0, "#7CFFB0");
+            glow.addColorStop(0.5, greenColor);
+            glow.addColorStop(1, "#13A849");
+            rect.glowGradient = glow;
+        }
+        ctx.save();
+        ctx.shadowColor = greenColor;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        pfdRoundRectPath(ctx, plateX, plateY, plateW, plateH, 3);
+        ctx.fillStyle = glow;
+        ctx.fill();
+        ctx.restore();
     }
 }
 
@@ -1768,14 +1924,10 @@ function drawEFIS() {
     }
     const ctx = efisPrepareCanvas();
 
-    ctx.fillStyle = "#33333C";
-    ctx.fillRect(0, 0, 1000, 260);
-    ctx.strokeStyle = "#55555F";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, 2, 996, 256);
+    panelBackground(ctx, 1000, 260);
 
     efisDrawKnob(ctx, efisModeKnob, "MODE", efisModeLabels, ndMode);
-    efisDrawKnob(ctx, efisRangeKnob, "RANGE", ndRanges.map(String), ndRangeIdx);
+    efisDrawKnob(ctx, efisRangeKnob, "RANGE", ndRangeLabels, ndRangeIdx);
 
     efisDrawButton(ctx, efisWxRect, "WX", ndWxEnabled);
     efisDrawButton(ctx, efisTerrRect, "TERR", ndTerrEnabled);

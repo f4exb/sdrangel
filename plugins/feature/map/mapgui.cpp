@@ -88,7 +88,7 @@ void MapGUI::resetToDefaults()
     const QString oldMSFSNavigraphDir = m_settings.m_msfsNavigraphDir;
     m_settings.resetToDefaults();
     if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
-        addWaypoints();
+        waypointsUpdated();
     }
     displaySettings();
     applyAllSettings();
@@ -157,7 +157,7 @@ bool MapGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
-            addWaypoints();
+            waypointsUpdated();
         }
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         m_restoreMapPosition = true;
@@ -189,7 +189,7 @@ bool MapGUI::handleMessage(const Message& message)
         }
 
         if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
-            addWaypoints();
+            waypointsUpdated();
         }
 
         blockApplySettings(true);
@@ -340,8 +340,10 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_mapTileServer = new MapTileServer(m_mapTileServerPort);
     m_mapTileServer->setThunderforestAPIKey(thunderforestAPIKey());
     m_mapTileServer->setMaptilerAPIKey(maptilerAPIKey());
+    m_mapTileServer->setCartoDBAPIKey(cartoDBAPIKey());
     m_osmPort = 0;
-    m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_mapTileServerPort, m_osmPort);
+    m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), cartoDBAPIKey(), m_mapTileServerPort, m_osmPort);
+    clearStaleTileCache();
 
     // Web server to serve dynamic files from QResources
     m_webPort = 0;
@@ -372,6 +374,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     m_map = reinterpret_cast<Map*>(feature);
     m_map->setMessageQueueToGUI(&m_inputMessageQueue);
+    m_map->getAvailableChannelsReport();
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -449,29 +452,44 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &MapGUI::preferenceChanged);
 
-    // Read beacons, if they exist
+    // Read beacons, if they exist. Timed per dataset as well as in total: each builds a
+    // map item per row and the row counts are wildly different - airports alone is tens
+    // of thousands - so the total says nothing about where the time goes
+    auto loadDataset = [](const char *name, auto&& load)
+    {
+        PROFILER_START()
+        load();
+        PROFILER_STOP(QString("Map DB load: ") + name)
+        (void) name;
+    };
+
     PROFILER_START()
-    QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
-    if (beacons != nullptr) {
-        setBeacons(beacons);
-    }
-    addIBPBeacons();
-    addNAT();
-    addRadioTimeTransmitters();
-    addWEFAXTransmitters();
-    addRadar();
-    addAurora();
-    addIonosonde();
-    addBroadcast();
-    addNavAids();
-    addAirspace();
-    addAirports();
-    addWaypoints();
-    addNavtex();
-    addVLF();
-    addKiwiSDR();
-    addSpyServer();
-    addSDRangelServer();
+    loadDataset("beacons", [this] {
+        QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
+        if (beacons != nullptr) {
+            setBeacons(beacons);
+        }
+    });
+    loadDataset("IBP beacons", [this] { addIBPBeacons(); });
+    loadDataset("NAT", [this] { addNAT(); });
+    loadDataset("radio time", [this] { addRadioTimeTransmitters(); });
+    loadDataset("WEFAX", [this] { addWEFAXTransmitters(); });
+    loadDataset("radar", [this] { addRadar(); });
+    loadDataset("aurora", [this] { addAurora(); });
+    loadDataset("ionosonde", [this] { addIonosonde(); });
+    loadDataset("broadcast", [this] { addBroadcast(); });
+    loadDataset("navaids", [this] { addNavAids(); });
+    loadDataset("airport database", [this] { loadAirportDatabase(); });
+    // Airspace, airports and waypoints build a map item per row - hundreds of thousands
+    // between them, and the best part of two seconds - so they wait until a layer that
+    // shows them is enabled. addDeferredDatasets() is called again when the item
+    // settings change, which is what fills them in if one is switched on later
+    loadDataset("deferred", [this] { addDeferredDatasets(); });
+    loadDataset("navtex", [this] { addNavtex(); });
+    loadDataset("VLF", [this] { addVLF(); });
+    loadDataset("KiwiSDR", [this] { addKiwiSDR(); });
+    loadDataset("SpyServer", [this] { addSpyServer(); });
+    loadDataset("SDRangel servers", [this] { addSDRangelServer(); });
     PROFILER_STOP("Map DB load")
 
     // Before displaySettings(), which sets the menu actions' check states
@@ -1197,12 +1215,26 @@ void MapGUI::auroraUpdated(const QImage& image)
     }
 }
 
+// The frame to ask EUMETSAT for: the world cloud map is published every three hours,
+// so the current slot is what to request. The server matches the nearest time it has
+// (nearestValue="1" in its capabilities), so a slot that is not out yet still returns
+// the one before it, and a time that only changes every three hours keeps the tiles
+// cacheable rather than re-fetching the same image on every poll
+static QString cloudFrameTime()
+{
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    QTime t = now.time();
+    now.setTime(QTime(t.hour() - (t.hour() % 3), 0, 0));
+    return now.toString(Qt::ISODate);
+}
+
 void MapGUI::pathUpdated(const QString& radarPath, const QString& satellitePath)
 {
+    (void) satellitePath;   // Empty since RainViewer stopped publishing infrared
     m_radarPath = radarPath;
-    m_satellitePath = satellitePath;
+    m_cloudTime = cloudFrameTime();
     m_mapTileServer->setRadarPath(radarPath);
-    m_mapTileServer->setSatellitePath(satellitePath);
+    m_mapTileServer->setCloudTime(m_cloudTime);
     if (m_settings.m_displayRain || m_settings.m_displayClouds)
     {
         clearOSMCache();
@@ -1211,7 +1243,7 @@ void MapGUI::pathUpdated(const QString& radarPath, const QString& satellitePath)
     if (m_cesium)
     {
         m_cesium->setLayerSettings("rain", {"path", "show"}, {radarPath, m_settings.m_displayRain});
-        m_cesium->setLayerSettings("clouds", {"path", "show"}, {satellitePath, m_settings.m_displayClouds});
+        m_cesium->setLayerSettings("clouds", {"time", "show"}, {m_cloudTime, m_settings.m_displayClouds});
     }
 }
 
@@ -1615,9 +1647,16 @@ void MapGUI::addAirspace()
     }
 }
 
-void MapGUI::addAirports()
+// Read whether or not the airport layers are shown, because the Navigation Display uses
+// the database either way. Nearly free in practice - the ADS-B plugin has usually loaded
+// it already - where building a map item per airport is not, so only that is deferred
+void MapGUI::loadAirportDatabase()
 {
     m_airportInfo = OurAirportsDB::getAirportsById();
+}
+
+void MapGUI::addAirports()
+{
     if (m_airportInfo)
     {
         // One item, reused for every airport - see addWaypoints() for why. The strings
@@ -1810,19 +1849,26 @@ void MapGUI::navAidsUpdated()
     addNavAids();
 }
 
+// New data has been downloaded for one of the deferred datasets. Forget that its items
+// were built and go back through addDeferredDatasets(), so they are rebuilt from the new
+// data if a layer shows them, and simply left until one does if not
 void MapGUI::airspacesUpdated()
 {
-    addAirspace();
+    m_builtDatasets.remove("airspace");
+    addDeferredDatasets();
 }
 
 void MapGUI::airportsUpdated()
 {
-    addAirports();
+    loadAirportDatabase();      // The download has replaced what was read at startup
+    m_builtDatasets.remove("airports");
+    addDeferredDatasets();
 }
 
 void MapGUI::waypointsUpdated()
 {
-    addWaypoints();
+    m_builtDatasets.remove("waypoints");
+    addDeferredDatasets();
 }
 
 void MapGUI::addNavtex()
@@ -2070,6 +2116,37 @@ QString MapGUI::osmCachePath()
     return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_map";
 }
 
+// The CartoDB key was hard coded until the setting was added, and once it stopped being
+// accepted the server answered tile requests with an "API key required" image instead of
+// a tile. Those answers are in the caches like any other, so entering a key does nothing
+// until they are thrown away - and they outlive an upgrade, being in the cache rather
+// than the settings. Clear both caches once per installation.
+//
+// Not just the CartoDB tiles: QNetworkDiskCache can remove one known URL at a time or
+// everything, and the tiles the QML map holds are composed, so there is nothing in
+// either cache that identifies which upstream server a tile came from. The cost is
+// re-downloading tiles that were fine, once.
+void MapGUI::clearStaleTileCache()
+{
+    const int currentVersion = 1;
+    // Per installation rather than per Map feature or per preset: the caches are shared
+    // by every map, and QSettings is written immediately, where feature settings are
+    // only stored when the configuration is saved
+    QSettings settings;
+    const int version = settings.value("Map/tileCacheVersion", 0).toInt();
+
+    if (version < currentVersion)
+    {
+        qDebug() << "MapGUI::clearStaleTileCache: clearing map tile caches once, to discard"
+                 << "tiles fetched before the CartoDB API key became a setting";
+        clearOSMCache();
+        if (m_mapTileServer) {
+            m_mapTileServer->clearCache();
+        }
+        settings.setValue("Map/tileCacheVersion", currentVersion);
+    }
+}
+
 void MapGUI::clearOSMCache()
 {
     // Delete all cached custom tiles when user changes the URL. Is there a better way to do this?
@@ -2154,8 +2231,10 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
         // Update API keys in servers
         m_templateServer->setThunderforestAPIKey(thunderforestAPIKey());
         m_templateServer->setMaptilerAPIKey(maptilerAPIKey());
+        m_templateServer->setCartoDBAPIKey(cartoDBAPIKey());
         m_mapTileServer->setThunderforestAPIKey(thunderforestAPIKey());
         m_mapTileServer->setMaptilerAPIKey(maptilerAPIKey());
+        m_mapTileServer->setCartoDBAPIKey(cartoDBAPIKey());
 
         // Create the map using the specified provider
         QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
@@ -2363,6 +2442,50 @@ void MapGUI::setEnableOverlay()
     m_templateServer->setEnableOverlay(enable);
 }
 
+bool MapGUI::itemGroupEnabled(const QString& group) const
+{
+    const MapSettings::MapItemSettings *settings = m_settings.m_itemSettings.value(group, nullptr);
+
+    return settings && settings->m_enabled;
+}
+
+bool MapGUI::itemGroupsEnabled(const QString& groupPrefix) const
+{
+    for (auto i = m_settings.m_itemSettings.cbegin(); i != m_settings.m_itemSettings.cend(); ++i)
+    {
+        if (i.key().startsWith(groupPrefix) && i.value() && i.value()->m_enabled) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Datasets large enough that building their map items is worth avoiding until something
+// displays them. The databases behind airports and navaids are still read every time, as
+// the Navigation Display uses them whether or not the map shows the layer - it is only
+// the items that are deferred. Waypoints are used by nothing else, so the whole dataset
+// waits.
+void MapGUI::addDeferredDatasets()
+{
+    if (itemGroupsEnabled("Airspace (") && !m_builtDatasets.contains("airspace"))
+    {
+        m_builtDatasets.insert("airspace");
+        addAirspace();
+    }
+    if ((itemGroupsEnabled("Airport (") || itemGroupEnabled("Heliport"))
+        && !m_builtDatasets.contains("airports"))
+    {
+        m_builtDatasets.insert("airports");
+        addAirports();
+    }
+    if (itemGroupEnabled("Waypoints") && !m_builtDatasets.contains("waypoints"))
+    {
+        m_builtDatasets.insert("waypoints");
+        addWaypoints();
+    }
+}
+
 MapSettings::MapItemSettings *MapGUI::getItemSettings(const QString &group)
 {
     if (m_settings.m_itemSettings.contains(group)) {
@@ -2442,6 +2565,9 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         // So the base layer picker doesn't offer imagery that would use our Cesium Ion quota
         m_webServer->addSubstitution("/map/map/map3d.html", "$HAS_CESIUM_ION_USER_KEY$", m_settings.hasCesiumIonUserKey() ? "true" : "");
         m_webServer->addSubstitution("/map/map/map3d.html", "$DEFAULT_IMAGERY$", effectiveImagery());
+        // Set here as well as through CesiumInterface, so the very first frames are
+        // limited too - Chromium's own limiter is disabled (see main.cpp)
+        m_webServer->addSubstitution("/map/map/map3d.html", "$TARGET_FRAME_RATE$", QString::number(effectiveFrameRate()));
         //ui->web->page()->profile()->clearHttpCache();
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
         //ui->web->load(QUrl(QString("http://webglreport.com/")));
@@ -2461,7 +2587,9 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->setTerrain(effectiveTerrain(), maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
         m_cesium->setBuildings(effectiveBuildings());
         m_cesium->setGooglePhotorealistic3DTiles(effectiveGoogleTiles());
-        m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
+        m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity,
+                          m_settings.m_distantLightIntensity);
+        m_cesium->setLowDetailModels(m_settings.m_lowDetailModels);
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
         m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
         m_cesium->getDateTime();
@@ -2469,6 +2597,7 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->setHDR(m_settings.m_hdr);
         m_cesium->setFog(m_settings.m_fog);
         m_cesium->showFPS(m_settings.m_fps);
+        m_cesium->setFrameRate(effectiveFrameRate());
         applyCockpitPanels();
         applyAudioVolume();
         m_cesium->showMUF(m_settings.m_displayMUF);
@@ -2546,9 +2675,62 @@ void MapWebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, c
     }
 }
 
+// The 3D map's renderer is a separate process, and when it dies the view goes on
+// showing the dead page - so the map simply disappears and stays gone until SDRangel is
+// restarted. Reloading brings it back: the page reconnects, which runs init3DMap() and
+// re-sends every item.
+//
+// It has been seen to die with exit code 0xE0000008, which is Chromium's out of memory
+// code, on a sky busy enough to fill the renderer. That cause is worth fixing on its own,
+// but an out of memory kill is always possible, so recovering from one is worth having
+// whatever else is done about it.
 void MapGUI::renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
 {
     qDebug() << "MapGUI::renderProcessTerminated: " << terminationStatus << "exitCode" << exitCode;
+
+    if (terminationStatus == QWebEnginePage::NormalTerminationStatus)
+    {
+        return;     // The page was closed on purpose, which is what shutdown looks like
+    }
+
+    // Reloading a page that dies as soon as it draws would spin, so the retries are
+    // counted - and forgiven once one of them has lasted long enough to call a recovery
+    const int retryWindowSecs = 300;
+    const int maxRetries = 3;
+    const int reloadDelayMs = 2000;
+
+    const QDateTime now = QDateTime::currentDateTime();
+    if (m_lastRenderProcessTermination.isValid()
+        && (m_lastRenderProcessTermination.secsTo(now) > retryWindowSecs))
+    {
+        m_renderProcessTerminations = 0;
+    }
+    m_lastRenderProcessTermination = now;
+    m_renderProcessTerminations++;
+
+    if (m_renderProcessTerminations > maxRetries)
+    {
+        qWarning() << "MapGUI::renderProcessTerminated: the 3D map renderer has died"
+                   << m_renderProcessTerminations << "times within" << retryWindowSecs
+                   << "seconds - leaving it alone rather than reloading again";
+        return;
+    }
+
+    // Everything Cesium held died with the process, so the state describing what it holds
+    // has to go too. Without this the re-sent items are differential against entities
+    // that no longer exist, and come back missing whatever had not changed since they
+    // were first sent.
+    if (m_cesium) {
+        m_cesium->removeAllCZMLEntities();
+    }
+
+    qDebug() << "MapGUI::renderProcessTerminated: reloading the 3D map, attempt"
+             << m_renderProcessTerminations << "of" << maxRetries;
+    QTimer::singleShot(reloadDelayMs, this, [this]() {
+        if (ui->web) {
+            ui->web->reload();
+        }
+    });
 }
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -2583,13 +2765,16 @@ void MapGUI::init3DMap()
     m_cesium->setTerrain(effectiveTerrain(), maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
     m_cesium->setBuildings(effectiveBuildings());
     m_cesium->setGooglePhotorealistic3DTiles(effectiveGoogleTiles());
-    m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
+    m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity,
+                          m_settings.m_distantLightIntensity);
+    m_cesium->setLowDetailModels(m_settings.m_lowDetailModels);
     m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
     m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
     m_cesium->getDateTime();
     m_cesium->setHDR(m_settings.m_hdr);
     m_cesium->setFog(m_settings.m_fog);
     m_cesium->showFPS(m_settings.m_fps);
+    m_cesium->setFrameRate(effectiveFrameRate());
 
     m_objectMapModel.allUpdated();
     m_imageMapModel.allUpdated();
@@ -2623,9 +2808,11 @@ void MapGUI::init3DMap()
     if (!m_radarPath.isEmpty()) {
         m_cesium->setLayerSettings("rain", {"path", "show"}, {m_radarPath, m_settings.m_displayRain});
     }
-    if (!m_satellitePath.isEmpty()) {
-        m_cesium->setLayerSettings("clouds", {"path", "show"}, {m_satellitePath, m_settings.m_displayClouds});
+    if (m_cloudTime.isEmpty()) {
+        m_cloudTime = cloudFrameTime();
+        m_mapTileServer->setCloudTime(m_cloudTime);
     }
+    m_cesium->setLayerSettings("clouds", {"time", "show"}, {m_cloudTime, m_settings.m_displayClouds});
 #endif
 }
 
@@ -2682,6 +2869,8 @@ void MapGUI::displaySettings()
     m_imageMapModel.updateItemSettings(m_settings.m_itemSettings);
     m_polygonMapModel.updateItemSettings(m_settings.m_itemSettings);
     m_polylineMapModel.updateItemSettings(m_settings.m_itemSettings);
+    // A layer that has just been switched on has no items yet
+    addDeferredDatasets();
     setEnableOverlay();
     displayToolbar();
     applyMap2DSettings(true);
@@ -3312,6 +3501,11 @@ QString MapGUI::maptilerAPIKey() const
     return m_settings.m_maptilerAPIKey.isEmpty() ? "Nzl2cSyOnewxUc9VWg4n" : m_settings.m_maptilerAPIKey;
 }
 
+QString MapGUI::cartoDBAPIKey() const
+{
+    return m_settings.m_cartoDBAPIKey.isEmpty() ? "cb1_27a9_1_036ae52d2884fda8713b961c" : m_settings.m_cartoDBAPIKey;
+}
+
 QString MapGUI::cesiumIonAPIKey() const
 {
     return m_settings.m_cesiumIonAPIKey.isEmpty()
@@ -3323,6 +3517,21 @@ QString MapGUI::cesiumIonAPIKey() const
 // free alternatives when the user hasn't entered their own Cesium Ion API key.
 // The settings themselves are left untouched, so a preference saved in a preset
 // comes back as soon as a key is entered.
+
+// Chromium's frame rate limiter is disabled, as under QtWebEngine it is stuck at 60fps
+// whatever the display does (see main.cpp), so the map has to limit itself. A setting of
+// 0 means use the refresh rate of the display the map is on, which the page cannot
+// determine for itself
+int MapGUI::effectiveFrameRate() const
+{
+    if (m_settings.m_frameRate > 0) {
+        return m_settings.m_frameRate;
+    }
+
+    const QScreen *mapScreen = screen();
+
+    return mapScreen && (mapScreen->refreshRate() > 0.0) ? qRound(mapScreen->refreshRate()) : 60;
+}
 
 QString MapGUI::effectiveImagery() const
 {
@@ -3499,8 +3708,13 @@ void MapGUI::on_displaySettings_clicked()
         sendRMPState(true); // The VHF channel assignments may have changed
         applySettings(dialog.m_settingsKeysChanged);
         if (dialog.m_settingsKeysChanged.contains("msfsNavigraphDir")) {
-            addWaypoints();
+            waypointsUpdated();
         }
+        // The dialog edits m_settings in place, so a layer that has just been enabled
+        // only needs the models re-filtered - unless its items were never built, which
+        // is the case for the datasets big enough to be deferred until something shows
+        // them. Before allUpdated() below, so anything built here is included
+        addDeferredDatasets();
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
         m_polygonMapModel.allUpdated();

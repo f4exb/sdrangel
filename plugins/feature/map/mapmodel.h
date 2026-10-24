@@ -20,6 +20,7 @@
 #define INCLUDE_FEATURE_MAPMODEL_H_
 
 #include <QAbstractListModel>
+#include <QQmlEngine>
 #include <QSortFilterProxyModel>
 #include <QGeoCoordinate>
 #include <QGeoRectangle>
@@ -151,6 +152,16 @@ class TrackColorModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
+
+    TrackColorModel()
+    {
+        // This model is handed to QML from ObjectMapModel::data() and has no parent, and
+        // QML takes ownership of any such QObject it is given: its garbage collector can
+        // then delete the model while the map item still holds the pointer. That crashed
+        // in update(), emitting dataChanged on freed memory, and raced the delete in
+        // ~ObjectMapItem to a double free. The item owns it, so say so.
+        QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+    }
 
     enum SegmentRoles {
         segmentCoordinatesRole = Qt::UserRole + 1,

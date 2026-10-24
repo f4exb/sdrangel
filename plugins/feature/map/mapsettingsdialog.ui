@@ -28,7 +28,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="mapsTab">
          <attribute name="title">
@@ -401,6 +401,32 @@
                </property>
               </widget>
              </item>
+             <item row="14" column="2">
+              <widget class="QLabel" name="frameRateLabel">
+               <property name="text">
+                <string>Frame rate</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="3">
+              <widget class="QSpinBox" name="frameRate">
+               <property name="toolTip">
+                <string>Frame rate to render the 3D map at. Lower rates use less CPU and GPU. Display uses the refresh rate of the display the map is on</string>
+               </property>
+               <property name="specialValueText">
+                <string>Display</string>
+               </property>
+               <property name="suffix">
+                <string> fps</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
              <item row="9" column="1">
               <widget class="QCheckBox" name="fog">
                <property name="toolTip">
@@ -442,10 +468,53 @@
                </property>
               </widget>
              </item>
+             <item row="8" column="2">
+              <widget class="QLabel" name="lowDetailModelsLabel">
+               <property name="text">
+                <string>Low detail models</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="3">
+              <widget class="QCheckBox" name="lowDetailModels">
+               <property name="toolTip">
+                <string>Draw aircraft that are small on screen with a simpler model of the same aircraft and livery, where one is installed (MSFS models converted with a second level of detail). Much faster with many aircraft in view</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
              <item row="9" column="0">
               <widget class="QLabel" name="fogLabel">
                <property name="text">
                 <string>Fog</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="2">
+              <widget class="QLabel" name="distantLightIntensityLabel">
+               <property name="text">
+                <string>Distant light intensity</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="3">
+              <widget class="QDoubleSpinBox" name="distantLightIntensity">
+               <property name="toolTip">
+                <string>Ambient light added to 3D models in the distance, which are otherwise lit only from the side facing the Sun and appear as dark silhouettes against a bright sky. 0 to disable</string>
+               </property>
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="maximum">
+                <double>5.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
                </property>
               </widget>
              </item>
@@ -921,6 +990,26 @@
                </property>
               </widget>
              </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="cartoDBAPIKeyLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>140</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>CartoDB API Key</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="cartoDBAPIKey">
+               <property name="toolTip">
+                <string>Enter a CartoDB API key to use for the aviation maps, which use CartoDB tiles without labels: https://carto.com/ Leave blank to use the built in key</string>
+               </property>
+              </widget>
+             </item>
              <item row="5" column="1">
               <widget class="QLineEdit" name="checkWXAPIKey">
                <property name="toolTip">
@@ -955,7 +1044,7 @@
           <item>
            <widget class="QLabel" name="msfsDescription">
             <property name="text">
-             <string>Use Microsoft Flight Simulator Navigraph waypoint data and convert FSLTL aircraft models.</string>
+             <string>Use Microsoft Flight Simulator waypoint data and convert aircraft models.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -967,14 +1056,14 @@
             <item row="0" column="0">
              <widget class="QLabel" name="msfsNavigraphDirectoryLabel">
               <property name="text">
-               <string>Navigraph BGL directory</string>
+               <string>Waypoint BGL directory</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="msfsNavigraphDirectory">
               <property name="toolTip">
-               <string>Directory recursively scanned for Navigraph waypoint BGL files. Leave empty to use waypoints.csv.</string>
+               <string>Directory recursively scanned for waypoint BGL files. Leave empty to use waypoints.csv.</string>
               </property>
              </widget>
             </item>
@@ -987,8 +1076,11 @@
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="msfsAircraftDirectoryLabel">
+              <property name="toolTip">
+               <string/>
+              </property>
               <property name="text">
-               <string>FSLTL directory</string>
+               <string>Aircraft model directory</string>
               </property>
              </widget>
             </item>
@@ -1021,6 +1113,69 @@
               <property name="textInteractionFlags">
                <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
               </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="msfsMaxTextureSizeLabel">
+              <property name="text">
+               <string>Maximum texture size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="msfsMaxTextureSize">
+              <property name="toolTip">
+               <string>Largest livery texture written by the converter. A 4096 texture costs around 21MB of graphics memory however far away the aircraft is drawn, so this is the main control over how much memory a sky full of aircraft uses. 2048 is indistinguishable from 4096 except when very close; 1024 softens small markings. Takes effect on the next conversion.</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>1024</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2048</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4096</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="msfsLowDetailMaxTextureSizeLabel">
+              <property name="text">
+               <string>Maximum texture size (low detail)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="msfsLowDetailMaxTextureSize">
+              <property name="toolTip">
+               <string>Largest livery texture written for the low detail models. These are only drawn while an aircraft is small on screen - around 33 to 49 pixels across - so 512 is indistinguishable from 2048 there and uses a sixteenth of the graphics memory. Never larger than the setting above. Takes effect on the next conversion.</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>256</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>512</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1024</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2048</string>
+               </property>
+              </item>
              </widget>
             </item>
            </layout>

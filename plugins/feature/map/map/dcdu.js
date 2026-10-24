@@ -24,7 +24,7 @@ function dcduWrapText(ctx, text, maxWidth) {
         var line = "";
         for (const word of paragraph.split(/\s+/)) {
             const candidate = (line.length > 0) ? line + " " + word : word;
-            if ((ctx.measureText(candidate).width <= maxWidth) || (line.length === 0)) {
+            if ((panelTextMetrics(ctx, candidate).width <= maxWidth) || (line.length === 0)) {
                 line = candidate;
             } else {
                 lines.push(line);

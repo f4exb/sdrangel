@@ -246,10 +246,15 @@ bool resolveModel(const QStringList &hierarchy, const QString &variant,
     if (!readIni(modelCfg, &modelValues, error)) {
         return false;
     }
-    const QString normalModel = modelValues.value("models/normal");
+    // Asobo's newer aircraft call the outside model "exterior" rather than "normal"
+    // (the King Air 350, C172, CJ4, DA40, DR400 and Bonanza among FSLTL's)
+    QString normalModel = modelValues.value("models/normal");
+    if (normalModel.isEmpty()) {
+        normalModel = modelValues.value("models/exterior");
+    }
     if (normalModel.isEmpty())
     {
-        *error = QStringLiteral("No [models] normal entry in %1").arg(modelCfg);
+        *error = QStringLiteral("No [models] normal or exterior entry in %1").arg(modelCfg);
         return false;
     }
     const QString modelDefinition =

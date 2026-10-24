@@ -113,6 +113,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->mapProvider->setCurrentIndex(ui->mapProvider->findText(mapProviderName));
     ui->thunderforestAPIKey->setText(settings->m_thunderforestAPIKey);
     ui->maptilerAPIKey->setText(settings->m_maptilerAPIKey);
+    ui->cartoDBAPIKey->setText(settings->m_cartoDBAPIKey);
     ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
     ui->cesiumIonAPIKey->setText(settings->m_cesiumIonAPIKey);
     ui->checkWXAPIKey->setText(settings->m_checkWXAPIKey);
@@ -127,6 +128,9 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->buildings->setCurrentIndex(ui->buildings->findText(m_settings->m_buildings));
     ui->sunLightEnabled->setCurrentIndex((int)m_settings->m_sunLightEnabled);
     ui->lightIntensity->setValue(m_settings->m_lightIntensity);
+    // Unlike the camera light, this applies whichever light source is in use
+    ui->distantLightIntensity->setValue(m_settings->m_distantLightIntensity);
+    ui->lowDetailModels->setChecked(m_settings->m_lowDetailModels);
     ui->lightIntensity->setEnabled(!m_settings->m_sunLightEnabled);
     ui->eciCamera->setCurrentIndex((int)m_settings->m_eciCamera);
     ui->fxaa->setChecked(m_settings->m_fxaa);
@@ -137,11 +141,14 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->hdr->setChecked(m_settings->m_hdr);
     ui->fog->setChecked(m_settings->m_fog);
     ui->fps->setChecked(m_settings->m_fps);
+    ui->frameRate->setValue(m_settings->m_frameRate);
     ui->mapItemSoundVolume->setValue(m_settings->m_mapItemSoundVolume);
     ui->cockpitSoundVolume->setValue(m_settings->m_cockpitSoundVolume);
     ui->msfsNavigraphDirectory->setText(QDir::toNativeSeparators(m_settings->m_msfsNavigraphDir));
     ui->msfsAircraftDirectory->setText(QDir::toNativeSeparators(m_settings->m_msfsAircraftDir));
     ui->msfsOutputDirectory->setText(QDir::toNativeSeparators(QDir(m_settings->m_modelDir).filePath("MSFS")));
+    ui->msfsMaxTextureSize->setCurrentText(QString::number(m_settings->m_msfsMaxTextureSize));
+    ui->msfsLowDetailMaxTextureSize->setCurrentText(QString::number(m_settings->m_msfsLowDetailMaxTextureSize));
     ui->cancelMSFS->setEnabled(false);
 
     // The AM Demods the RMP's VHF channels can be linked to. The dialog is rebuilt each
@@ -270,6 +277,7 @@ void MapSettingsDialog::accept()
     QString mapBoxAPIKey = ui->mapBoxAPIKey->text();
     QString thunderforestAPIKey = ui->thunderforestAPIKey->text();
     QString maptilerAPIKey = ui->maptilerAPIKey->text();
+    QString cartoDBAPIKey = ui->cartoDBAPIKey->text();
     QString cesiumIonAPIKey = ui->cesiumIonAPIKey->text();
     QString arcGISAPIKey = ui->arcGISAPIKey->text();
     QString msfsNavigraphDir = QDir::fromNativeSeparators(ui->msfsNavigraphDirectory->text().trimmed());
@@ -281,6 +289,7 @@ void MapSettingsDialog::accept()
     if ((mapProvider != m_settings->m_mapProvider)
         || (thunderforestAPIKey != m_settings->m_thunderforestAPIKey)
         || (maptilerAPIKey != m_settings->m_maptilerAPIKey)
+        || (cartoDBAPIKey != m_settings->m_cartoDBAPIKey)
         || (mapBoxAPIKey != m_settings->m_mapBoxAPIKey)
         || (mapBoxStyles != m_settings->m_mapBoxStyles)
         || (osmURL != m_settings->m_osmURL))
@@ -288,6 +297,7 @@ void MapSettingsDialog::accept()
         m_settings->m_mapProvider = mapProvider;
         m_settings->m_thunderforestAPIKey = thunderforestAPIKey;
         m_settings->m_maptilerAPIKey = maptilerAPIKey;
+        m_settings->m_cartoDBAPIKey = cartoDBAPIKey;
         m_settings->m_mapBoxAPIKey = mapBoxAPIKey;
         m_settings->m_osmURL = osmURL;
         m_settings->m_mapBoxStyles = mapBoxStyles;
@@ -335,6 +345,18 @@ void MapSettingsDialog::accept()
         m_settings->m_msfsAircraftDir = msfsAircraftDir;
         m_settingsKeysChanged.append("msfsAircraftDir");
     }
+    const int msfsMaxTextureSize = ui->msfsMaxTextureSize->currentText().toInt();
+    if (m_settings->m_msfsMaxTextureSize != msfsMaxTextureSize)
+    {
+        m_settings->m_msfsMaxTextureSize = msfsMaxTextureSize;
+        m_settingsKeysChanged.append("msfsMaxTextureSize");
+    }
+    const int msfsLowDetailMaxTextureSize = ui->msfsLowDetailMaxTextureSize->currentText().toInt();
+    if (m_settings->m_msfsLowDetailMaxTextureSize != msfsLowDetailMaxTextureSize)
+    {
+        m_settings->m_msfsLowDetailMaxTextureSize = msfsLowDetailMaxTextureSize;
+        m_settingsKeysChanged.append("msfsLowDetailMaxTextureSize");
+    }
     if (m_settings->m_defaultImagery != ui->defaultImagery->currentText())
     {
         m_settings->m_defaultImagery = ui->defaultImagery->currentText();
@@ -359,6 +381,16 @@ void MapSettingsDialog::accept()
     {
         m_settings->m_lightIntensity = ui->lightIntensity->value();
         m_settingsKeysChanged.append("lightIntensity");
+    }
+    if (m_settings->m_distantLightIntensity != ui->distantLightIntensity->value())
+    {
+        m_settings->m_distantLightIntensity = ui->distantLightIntensity->value();
+        m_settingsKeysChanged.append("distantLightIntensity");
+    }
+    if (m_settings->m_lowDetailModels != ui->lowDetailModels->isChecked())
+    {
+        m_settings->m_lowDetailModels = ui->lowDetailModels->isChecked();
+        m_settingsKeysChanged.append("lowDetailModels");
     }
     if (m_settings->m_eciCamera != (ui->eciCamera->currentIndex() == 1))
     {
@@ -404,6 +436,11 @@ void MapSettingsDialog::accept()
     {
         m_settings->m_fps = ui->fps->isChecked();
         m_settingsKeysChanged.append("fps");
+    }
+    if (m_settings->m_frameRate != ui->frameRate->value())
+    {
+        m_settings->m_frameRate = ui->frameRate->value();
+        m_settingsKeysChanged.append("frameRate");
     }
     if (m_settings->m_mapItemSoundVolume != ui->mapItemSoundVolume->value())
     {
@@ -681,6 +718,9 @@ void MapSettingsDialog::on_convertMSFS_clicked()
     }
 
     const QString outputDirectory = QDir(m_settings->m_modelDir).filePath("MSFS");
+    // Read from the box rather than the settings: Convert can be pressed before OK
+    const int maximumTextureSize = ui->msfsMaxTextureSize->currentText().toInt();
+    const int lowDetailMaximumTextureSize = ui->msfsLowDetailMaxTextureSize->currentText().toInt();
     ui->msfsOutputDirectory->setText(QDir::toNativeSeparators(outputDirectory));
     ui->msfsLog->clear();
     ui->msfsProgress->setRange(0, 0);
@@ -688,12 +728,15 @@ void MapSettingsDialog::on_convertMSFS_clicked()
     ui->cancelMSFS->setEnabled(true);
     ui->msfsBrowse->setEnabled(false);
     ui->msfsAircraftDirectory->setEnabled(false);
+    ui->msfsMaxTextureSize->setEnabled(false);
+    ui->msfsLowDetailMaxTextureSize->setEnabled(false);
     ui->buttonBox->setEnabled(false);
 
     m_msfsCancelRequested = std::make_shared<std::atomic_bool>(false);
     const auto cancelRequested = m_msfsCancelRequested;
     const QPointer<MapSettingsDialog> dialog(this);
-    m_msfsWorker = QThread::create([dialog, aircraftDirectory, outputDirectory, cancelRequested] {
+    m_msfsWorker = QThread::create([dialog, aircraftDirectory, outputDirectory, cancelRequested,
+                                    maximumTextureSize, lowDetailMaximumTextureSize] {
         MSFSBatchConversionSummary summary;
         QString error;
         const bool success = convertMSFSAircraftDirectory(
@@ -710,7 +753,10 @@ void MapSettingsDialog::on_convertMSFS_clicked()
                     }, Qt::QueuedConnection);
                 }
             },
-            [cancelRequested] { return cancelRequested->load(); });
+            [cancelRequested] { return cancelRequested->load(); },
+            0,
+            maximumTextureSize,
+            lowDetailMaximumTextureSize);
 
         if (dialog) {
             QMetaObject::invokeMethod(dialog.data(), [dialog, success, summary, error] {
@@ -754,6 +800,8 @@ void MapSettingsDialog::msfsConversionFinished(
     ui->cancelMSFS->setEnabled(false);
     ui->msfsBrowse->setEnabled(true);
     ui->msfsAircraftDirectory->setEnabled(true);
+    ui->msfsMaxTextureSize->setEnabled(true);
+    ui->msfsLowDetailMaxTextureSize->setEnabled(true);
     ui->buttonBox->setEnabled(true);
 
     if (!success)
@@ -772,9 +820,12 @@ void MapSettingsDialog::msfsConversionFinished(
             .arg(summary.m_converted).arg(summary.m_discovered).arg(summary.m_failed)
         : QString("Conversion complete. %1 of %2 aircraft variants converted; %3 failed. Restart SDRangel to make the new models available.")
             .arg(summary.m_converted).arg(summary.m_discovered).arg(summary.m_failed);
+    const QString lowDetail = QString(" %1 also got a low detail model.").arg(summary.m_lowDetailModels);
     const QString performance = QString(" Used %1 worker%2; %3 cached texture%4 reused; "
                                         "%5 missing optional texture%6 replaced; "
-                                        "%7 missing fallback director%8 skipped.")
+                                        "%7 missing fallback director%8 skipped; "
+                                        "%9 unused cached texture%10 removed (%11 GB freed); "
+                                        "%12 texture%13 limited to %14.")
         .arg(summary.m_workerCount)
         .arg(summary.m_workerCount == 1 ? QString() : QStringLiteral("s"))
         .arg(summary.m_reusedTextures)
@@ -783,8 +834,15 @@ void MapSettingsDialog::msfsConversionFinished(
         .arg(summary.m_synthesizedTextures == 1 ? QString() : QStringLiteral("s"))
         .arg(summary.m_skippedFallbackDirectories)
         .arg(summary.m_skippedFallbackDirectories == 1
-            ? QStringLiteral("y") : QStringLiteral("ies"));
-    const QString resultWithPerformance = result + performance;
+            ? QStringLiteral("y") : QStringLiteral("ies"))
+        .arg(summary.m_removedTextures)
+        .arg(summary.m_removedTextures == 1 ? QString() : QStringLiteral("s"))
+        .arg(summary.m_removedTextureBytes / 1e9, 0, 'f', 1)
+        .arg(summary.m_downscaledTextures)
+        .arg(summary.m_downscaledTextures == 1 ? QString() : QStringLiteral("s"))
+        .arg(QStringLiteral("%1/%2").arg(ui->msfsMaxTextureSize->currentText(),
+                                         ui->msfsLowDetailMaxTextureSize->currentText()));
+    const QString resultWithPerformance = result + lowDetail + performance;
     ui->msfsLog->appendPlainText(resultWithPerformance);
 
     if (summary.m_cancelled) {

@@ -299,6 +299,8 @@ void Map::webapiFormatFeatureSettings(
     }
     response.getMapSettings()->setSunLightEnabled(settings.m_sunLightEnabled ? 1 : 0);
     response.getMapSettings()->setLightIntensity(settings.m_lightIntensity);
+    response.getMapSettings()->setDistantLightIntensity(settings.m_distantLightIntensity);
+    response.getMapSettings()->setLowDetailModels(settings.m_lowDetailModels ? 1 : 0);
     response.getMapSettings()->setEciCamera(settings.m_eciCamera ? 1 : 0);
     response.getMapSettings()->setFxaa(settings.m_fxaa ? 1 : 0);
     response.getMapSettings()->setMsaa(settings.m_msaa);
@@ -307,6 +309,7 @@ void Map::webapiFormatFeatureSettings(
     response.getMapSettings()->setHdr(settings.m_hdr ? 1 : 0);
     response.getMapSettings()->setFog(settings.m_fog ? 1 : 0);
     response.getMapSettings()->setFps(settings.m_fps ? 1 : 0);
+    response.getMapSettings()->setFrameRate(settings.m_frameRate);
     response.getMapSettings()->setDisplayMuf(settings.m_displayMUF ? 1 : 0);
     response.getMapSettings()->setDisplayfoF2(settings.m_displayfoF2 ? 1 : 0);
     response.getMapSettings()->setDisplayRain(settings.m_displayRain ? 1 : 0);
@@ -414,6 +417,12 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("sunLightEnabled")) {
         settings.m_sunLightEnabled = response.getMapSettings()->getSunLightEnabled() != 0;
     }
+    if (featureSettingsKeys.contains("distantLightIntensity")) {
+        settings.m_distantLightIntensity = response.getMapSettings()->getDistantLightIntensity();
+    }
+    if (featureSettingsKeys.contains("lowDetailModels")) {
+        settings.m_lowDetailModels = response.getMapSettings()->getLowDetailModels() != 0;
+    }
     if (featureSettingsKeys.contains("lightIntensity")) {
         settings.m_lightIntensity = response.getMapSettings()->getLightIntensity();
     }
@@ -440,6 +449,9 @@ void Map::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("fps")) {
         settings.m_fps = response.getMapSettings()->getFps() != 0;
+    }
+    if (featureSettingsKeys.contains("frameRate")) {
+        settings.m_frameRate = response.getMapSettings()->getFrameRate();
     }
     if (featureSettingsKeys.contains("displayMUF")) {
         settings.m_displayMUF = response.getMapSettings()->getDisplayMuf() != 0;
@@ -563,6 +575,12 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
     if (featureSettingsKeys.contains("sunLightEnabled") || force) {
         swgMapSettings->setSunLightEnabled(settings.m_sunLightEnabled);
     }
+    if (featureSettingsKeys.contains("distantLightIntensity") || force) {
+        swgMapSettings->setDistantLightIntensity(settings.m_distantLightIntensity);
+    }
+    if (featureSettingsKeys.contains("lowDetailModels") || force) {
+        swgMapSettings->setLowDetailModels(settings.m_lowDetailModels ? 1 : 0);
+    }
     if (featureSettingsKeys.contains("lightIntensity") || force) {
         swgMapSettings->setLightIntensity(settings.m_lightIntensity);
     }
@@ -589,6 +607,9 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
     }
     if (featureSettingsKeys.contains("fps") || force) {
         swgMapSettings->setFps(settings.m_fps);
+    }
+    if (featureSettingsKeys.contains("frameRate") || force) {
+        swgMapSettings->setFrameRate(settings.m_frameRate);
     }
     if (featureSettingsKeys.contains("displayMUF") || force) {
         swgMapSettings->setDisplayMuf(settings.m_displayMUF);
@@ -726,6 +747,12 @@ void Map::channelsOrFeaturesChanged(const QStringList& renameFrom, const QString
 {
     m_availableChannelOrFeatures = m_availableChannelOrFeatureHandler.getAvailableChannelOrFeatureList();
     notifyUpdate(renameFrom, renameTo);
+}
+
+// For the GUI, which is created after the constructor's scan has reported to nobody
+void Map::getAvailableChannelsReport()
+{
+    notifyUpdate(QStringList{}, QStringList{});
 }
 
 void Map::notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo)

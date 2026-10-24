@@ -113,13 +113,7 @@ public:
         update(mapItem);
     }
 
-    ~ObjectMapItem()
-    {
-        delete m_aircraftState;
-        qDeleteAll(m_takenTrackCoords);
-        qDeleteAll(m_takenTrackDateTimes);
-        delete m_trackColorModel;
-    }
+    ~ObjectMapItem();
 
     void update(SWGSDRangel::SWGMapItem *mapItem) override;
 
@@ -270,6 +264,10 @@ public:
     {
         update(mapItem);
     }
+
+    // As ObjectMapItem, defined in mapitem.cpp
+    ~PolylineMapItem();
+
     void update(SWGSDRangel::SWGMapItem *mapItem) override;
 
 protected:
