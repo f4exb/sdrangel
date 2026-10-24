@@ -13,8 +13,13 @@
 #include "config.h"
 #endif
 
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE /* for snprintf() on some linux systems  */
+/* SDRangel local modification: the skeleton asked glibc for the full set of
+ * declarations with _BSD_SOURCE, which glibc 2.20 deprecated in favour of
+ * _DEFAULT_SOURCE in 2014. Defining the old name on its own makes features.h warn,
+ * once for every translation unit that reaches here - over eight hundred of them in
+ * this directory. Other libcs ignore both */
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
 #endif
 
 #include <stdio.h>	/* For snprintf(3) */
