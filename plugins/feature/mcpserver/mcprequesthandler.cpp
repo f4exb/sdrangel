@@ -82,7 +82,10 @@ void MCPRequestHandler::service(qtwebapp::HttpRequest& request, qtwebapp::HttpRe
         return;
     }
 
-    if (!checkProtocolVersion(request, response)) {
+    // Check protocol version for non-POST requests
+    // POST requests check version in handlePost after parsing JSON
+    // to allow initialize requests to negotiate version
+    if (method != "POST" && !checkProtocolVersion(request, response)) {
         return;
     }
 
@@ -113,6 +116,8 @@ void MCPRequestHandler::service(qtwebapp::HttpRequest& request, qtwebapp::HttpRe
 // Clients send MCP-Protocol-Version on every request after initialize. A version this server
 // does not implement is refused with 400 rather than served on a guess, as the Streamable HTTP
 // transport requires. A missing header means the oldest version, which is supported.
+// Note: POST requests are checked in handlePost after JSON parsing to allow initialize
+// requests to negotiate version in the JSON body.
 bool MCPRequestHandler::checkProtocolVersion(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     QString version = QString::fromUtf8(request.getHeader("MCP-Protocol-Version")).trimmed();
@@ -310,6 +315,37 @@ void MCPRequestHandler::handlePost(qtwebapp::HttpRequest& request, qtwebapp::Htt
             QString("Parse error: %1").arg(parseError.errorString()));
         sendJson(response, 400, QJsonDocument(error));
         return;
+    }
+
+// Check protocol version for all requests except initialize
+    // Initialize negotiates version in the JSON body
+    QString version = QString::fromUtf8(request.getHeader("MCP-Protocol-Version")).trimmed();
+    if (!version.isEmpty() && !MCPProtocol::isSupportedVersion(version))
+    {
+        // Check if this is a single initialize request (not a batch)
+        // Allow initialize to negotiate version even with unsupported version in header,
+        // but reject batches entirely since they could contain other messages like tools/call
+        bool isSingleInitialize = false;
+        
+        if (doc.isObject()) {
+            // Single message
+            QJsonObject obj = doc.object();
+            if (obj["method"].toString() == "initialize") {
+                isSingleInitialize = true;
+            }
+        }
+        // Batch requests with unsupported version are always rejected,
+        // even if they contain only initialize messages
+        
+        // Reject requests that are not single initialize with unsupported protocol version
+        if (!isSingleInitialize) {
+            sendHttpError(response, 400, "Bad Request",
+                QString("Unsupported MCP protocol version %1. This server supports %2")
+                    .arg(version).arg(MCPProtocol::supportedVersions().join(", ")));
+            return;
+        }
+        // Single initialize requests with unsupported version in header are allowed
+        // The version will be negotiated in the initialize method
     }
 
     // A batch is an array of messages. Batches were removed in protocol version 2025-06-18

@@ -141,4 +141,4 @@ for:
     build_script:
       - cd sdrangel
       - ./build_vanilla.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
-      - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
+#      - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
