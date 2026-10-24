@@ -317,43 +317,34 @@ void MCPRequestHandler::handlePost(qtwebapp::HttpRequest& request, qtwebapp::Htt
         return;
     }
 
-    // Check protocol version for all requests except initialize
+// Check protocol version for all requests except initialize
     // Initialize negotiates version in the JSON body
     QString version = QString::fromUtf8(request.getHeader("MCP-Protocol-Version")).trimmed();
     if (!version.isEmpty() && !MCPProtocol::isSupportedVersion(version))
     {
-        // Check if this request contains an initialize message
-        // (allowing initialize to negotiate version even with unsupported version in header)
-        bool containsInitialize = false;
+        // Check if this is a single initialize request (not a batch)
+        // Allow initialize to negotiate version even with unsupported version in header,
+        // but reject batches entirely since they could contain other messages like tools/call
+        bool isSingleInitialize = false;
         
-        if (doc.isArray()) {
-            // Batch request - check all messages
-            QJsonArray array = doc.array();
-            for (const auto& value : array) {
-                if (value.isObject()) {
-                    QJsonObject msg = value.toObject();
-                    if (msg["method"].toString() == "initialize") {
-                        containsInitialize = true;
-                        break;
-                    }
-                }
-            }
-        } else if (doc.isObject()) {
+        if (doc.isObject()) {
             // Single message
             QJsonObject obj = doc.object();
             if (obj["method"].toString() == "initialize") {
-                containsInitialize = true;
+                isSingleInitialize = true;
             }
         }
+        // Batch requests with unsupported version are always rejected,
+        // even if they contain only initialize messages
         
-        // Reject requests without initialize that have unsupported protocol version
-        if (!containsInitialize) {
+        // Reject requests that are not single initialize with unsupported protocol version
+        if (!isSingleInitialize) {
             sendHttpError(response, 400, "Bad Request",
                 QString("Unsupported MCP protocol version %1. This server supports %2")
                     .arg(version).arg(MCPProtocol::supportedVersions().join(", ")));
             return;
         }
-        // Requests containing initialize with unsupported version in header are allowed
+        // Single initialize requests with unsupported version in header are allowed
         // The version will be negotiated in the initialize method
     }
 
