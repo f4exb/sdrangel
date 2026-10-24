@@ -348,7 +348,8 @@ void MeshtasticDemodSink::tryHeaderLock()
     {
         const std::vector<unsigned short> baseHeaderSlice(symbols.begin() + offset, symbols.begin() + offset + 8U);
 
-        for (int delta = -2; delta <= 2; delta++)
+        // Prefer the unmodified header, then try progressively larger value shifts.
+        for (int delta : {0, -1, 1, -2, 2})
         {
             std::vector<unsigned short> headerSlice(baseHeaderSlice);
 
