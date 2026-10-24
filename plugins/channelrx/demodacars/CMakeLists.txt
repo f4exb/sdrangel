@@ -40,28 +40,30 @@ include_directories(
 # ICAO ASN.1 applications (CM, CPDLC, ADS-C v2) vendored from dumpvdl2 (GPL-3.0) in
 # atn/. Built as a static library so the offline test harness in test/ can link the
 # same decoder. Used by the worker, so built in both GUI and server modes.
-file(GLOB demodacars_ATN_ASN1_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atn/asn1/*.c)
+if(NOT TARGET demodacarsatn)
+    file(GLOB demodacars_ATN_ASN1_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atn/asn1/*.c)
 
-add_library(demodacarsatn STATIC
-    vdl2atn.cpp
-    vdl2atn.h
-    atn/icao.c
-    atn/xid.c
-    atn/tlv.c
-    atn/asn1-util.c
-    atn/asn1-format-icao-text.c
-    atn/asn1-format-icao-json.c
-    atn/dumpvdl2shim.c
-    ${demodacars_ATN_ASN1_SOURCES}
-)
-target_include_directories(demodacarsatn PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/atn ${LIBACARS_INCLUDE_DIR})
-target_link_libraries(demodacarsatn PRIVATE Qt::Core ${LIBACARS_LIBRARIES})
-if(DEFINED LIBACARS_DEPENDS)
-    add_dependencies(demodacarsatn ${LIBACARS_DEPENDS})
+    add_library(demodacarsatn STATIC
+        vdl2atn.cpp
+        vdl2atn.h
+        atn/icao.c
+        atn/xid.c
+        atn/tlv.c
+        atn/asn1-util.c
+        atn/asn1-format-icao-text.c
+        atn/asn1-format-icao-json.c
+        atn/dumpvdl2shim.c
+        ${demodacars_ATN_ASN1_SOURCES}
+    )
+    target_include_directories(demodacarsatn PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/atn ${LIBACARS_INCLUDE_DIR})
+    target_link_libraries(demodacarsatn PRIVATE Qt::Core ${LIBACARS_LIBRARIES})
+    if(DEFINED LIBACARS_DEPENDS)
+        add_dependencies(demodacarsatn ${LIBACARS_DEPENDS})
+    endif()
+    # The vendored dumpvdl2 sources use C11 designated initializers
+    set_property(TARGET demodacarsatn PROPERTY C_STANDARD 11)
+    set_property(TARGET demodacarsatn PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
-# The vendored dumpvdl2 sources use C11 designated initializers
-set_property(TARGET demodacarsatn PROPERTY C_STANDARD 11)
-set_property(TARGET demodacarsatn PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(NOT SERVER_MODE)
     set(demodacars_SOURCES
