@@ -15,7 +15,9 @@ set(SERIALDV_TAG "v1.1.5")
 set(DSDCC_TAG "v1.9.6")
 set(LIMESUITE_TAG 524cd2e548b11084e6f739b2dfe0f958c2e30354)
 set(BLADERF_TAG "2025.10")
-if (WIN32)
+if (ENABLE_LIBIIO_V1 AND LINUX)
+    set(LIBIIO_TAG "v1.0.0")
+elseif (WIN32)
     # Using old version of libiio on windows, as we get unresolved symbols in dll: serial_create_context_from_uri
     set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 else()
@@ -1289,20 +1291,36 @@ if (LINUX)
 
     # apt install libiio-dev
     # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
+    # libiio 1.x (ENABLE_LIBIIO_V1) also needs libzstd and libavahi-client
     if (ENABLE_IIO AND (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL))
         set_global_cache(LIBIIO_FOUND ON)
         set(LIBIIO_EXTERNAL ON CACHE INTERNAL "")
-        set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
         set(LIBIIO_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libiio.so" CACHE INTERNAL "")
+        if (ENABLE_LIBIIO_V1)
+            # libiio 1.x keeps its public header in include/iio/iio.h
+            set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio/include" CACHE INTERNAL "")
+            set(LIBIIO_V1 TRUE CACHE INTERNAL "libiio 1.x API")
+            set(LIBIIO_CMAKE_ARGS
+                -DLIBIIO_COMPAT=OFF
+                -DWITH_UTILS=OFF
+                -DWITH_IIOD=OFF
+                -DWITH_EXAMPLES=OFF
+                -DWITH_TESTS=OFF
+                -DWITH_MAN=OFF)
+        else ()
+            set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
+            set(LIBIIO_V1 FALSE CACHE INTERNAL "libiio 1.x API")
+            set(LIBIIO_CMAKE_ARGS
+                -DOSX_PACKAGE=OFF
+                -DWITH_DOC=OFF
+                -DWITH_MATLAB_BINDINGS_API=OFF
+                -DWITH_TESTS=OFF)
+        endif ()
         ExternalProject_Add(libiio
                 GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
                 GIT_TAG ${LIBIIO_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-                  -DOSX_PACKAGE=OFF
-                  -DWITH_DOC=OFF
-                  -DWITH_MATLAB_BINDINGS_API=OFF
-                  -DWITH_TESTS=OFF
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${LIBIIO_CMAKE_ARGS}
                 BUILD_BYPRODUCTS "${LIBIIO_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -1638,6 +1656,13 @@ if (WIN32 OR APPLE)
                     FILES_MATCHING PATTERN "libhackrf*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         endif ()
     endif (ENABLE_HACKRF)
+
+    if (ENABLE_IIO AND ENABLE_LIBIIO_V1)
+        # Building libiio 1.x from source is only set up for Linux so far
+        message(WARNING "ENABLE_LIBIIO_V1 is not supported with external libraries on Windows and macOS: "
+            "building PlutoSDR support against libiio 0.x")
+        set(LIBIIO_V1 FALSE CACHE INTERNAL "libiio 1.x API")
+    endif ()
 
     if (ENABLE_IIO)
         if (WIN32)

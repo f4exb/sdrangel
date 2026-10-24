@@ -138,6 +138,8 @@ bool PlutoSDRMIMO::openDevice()
         }
     }
 
+    m_plutoParams->getBox()->setTxLOPowerdown(true); // do not radiate LO leakage until Tx is started
+
     return true;
 }
 
@@ -181,6 +183,7 @@ bool PlutoSDRMIMO::startRx()
     }
 
     qDebug("PlutoSDRMIMO::startRx");
+    m_plutoParams->getBox()->setRxLOPowerdown(false);
 
     m_sourceThread = new PlutoSDRMIThread(m_plutoParams->getBox());
     connect(m_sourceThread, &PlutoSDRMIThread::error, this, &PlutoSDRMIMO::handleError, Qt::QueuedConnection);
@@ -220,6 +223,7 @@ bool PlutoSDRMIMO::startTx()
     }
 
     qDebug("PlutoSDRMIMO::startTx");
+    m_plutoParams->getBox()->setTxLOPowerdown(false);
 
     m_sinkThread = new PlutoSDRMOThread(m_plutoParams->getBox());
     connect(m_sinkThread, &PlutoSDRMOThread::error, this, &PlutoSDRMIMO::handleError, Qt::QueuedConnection);
@@ -272,6 +276,7 @@ void PlutoSDRMIMO::stopRx()
 
     m_plutoParams->getBox()->deleteRxBuffer();
     m_plutoTxBuffer = nullptr;
+    m_plutoParams->getBox()->setRxLOPowerdown(true);
 }
 
 void PlutoSDRMIMO::stopTx()
@@ -303,6 +308,7 @@ void PlutoSDRMIMO::stopTx()
 
     m_plutoParams->getBox()->deleteTxBuffer();
     m_plutoRxBuffer = nullptr;
+    m_plutoParams->getBox()->setTxLOPowerdown(true);
 }
 
 void PlutoSDRMIMO::handleError(int errorCode)

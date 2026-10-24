@@ -1239,16 +1239,16 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
         settings.m_gpioPins = response.getXtrxMimoSettings()->getGpioPins();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getXtrxInputSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getXtrxMimoSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getXtrxInputSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getXtrxMimoSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getXtrxInputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getXtrxMimoSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getXtrxInputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getXtrxMimoSettings()->getReverseApiDeviceIndex();
     }
     // Rx
     if (deviceSettingsKeys.contains("rxDevSampleRate")) {
@@ -1445,8 +1445,8 @@ int XTRXMIMO::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setXtrxInputReport(new SWGSDRangel::SWGXtrxInputReport());
-    response.getXtrxInputReport()->init();
+    response.setXtrxMimoReport(new SWGSDRangel::SWGXtrxMIMOReport());
+    response.getXtrxMimoReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }

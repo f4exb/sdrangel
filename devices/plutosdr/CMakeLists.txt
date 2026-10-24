@@ -35,6 +35,10 @@ target_link_libraries(plutosdrdevice
     ${ICONV_LIBRARY}
 )
 
+if(LIBIIO_V1)
+    target_compile_definitions(plutosdrdevice PRIVATE LIBIIO_V1)
+endif()
+
 if(LIBIIO_EXTERNAL)
     add_dependencies(plutosdrdevice libiio)
 endif()

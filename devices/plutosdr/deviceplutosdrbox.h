@@ -36,6 +36,9 @@ typedef SSIZE_T ssize_t;
 #endif
 
 struct iio_channel;
+struct iio_channels_mask; // libiio 1.x
+struct iio_stream;        // libiio 1.x
+struct iio_block;         // libiio 1.x
 
 class DEVICES_API DevicePlutoSDRBox
 {
@@ -90,6 +93,8 @@ public:
     void closeTx();       //!< Close first Tx (Tx0)
     void closeSecondRx(); //!< Close second Rx (Rx1)
     void closeSecondTx(); //!< Close second Tx (Tx1)
+    void setRxLOPowerdown(bool powerdown); //!< Power down (true) or up (false) the Rx LO
+    void setTxLOPowerdown(bool powerdown); //!< Power down (true) or up (false) the Tx LO
     int getNbRx() const { return m_rxChannels.size() / 2; }
     int getNbTx() const { return m_txChannels.size() / 2; }
     int getRxSampleBytes() const { return m_rxSampleBytes; }
@@ -135,6 +140,12 @@ private:
     struct iio_device  *m_devTx;
     struct iio_buffer  *m_rxBuf;
     struct iio_buffer  *m_txBuf;
+    struct iio_channels_mask *m_rxMask; //!< libiio 1.x: Rx channels enabled for streaming
+    struct iio_stream  *m_rxStream;     //!< libiio 1.x: Rx block stream
+    const struct iio_block *m_rxBlock;  //!< libiio 1.x: last Rx block received
+    struct iio_channels_mask *m_txMask; //!< libiio 1.x: Tx channels enabled for streaming
+    struct iio_stream  *m_txStream;     //!< libiio 1.x: Tx block stream
+    const struct iio_block *m_txBlock;  //!< libiio 1.x: Tx block being filled
     bool m_valid;
     int64_t m_xoInitial;
     float m_temp;
