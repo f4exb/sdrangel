@@ -16,30 +16,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QTextDocumentFragment>
+#include <QRegularExpression>
 #include <algorithm>
 #include <limits>
 #include <cmath>
 
 #include <QDebug>
 #include <QDataStream>
+#include <QJsonDocument>
+#include <QHostInfo>
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
 
 #include "SWGMapItem.h"
 #include "SWGMapCoordinate.h"
+#include "SWGMapAnimation.h"
 
 #include "feature/feature.h"
 #include "maincore.h"
 #include "util/units.h"
+#include "util/acarstextformat.h"
 
 #include "util/airlines.h"
+#include "util/sidstar.h"
 #include "channel/channelwebapiutils.h"
 #include "util/aircraft3dmodels.h"
+#include "util/aircraftenginesound.h"
+#include "util/selcaldb.h"
 
 #include "aircrafttracker.h"
 
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgConfigureTracker, Message)
+MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgSelect, Message)
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgReport, Message)
 
 AircraftTracker::MsgReport::~MsgReport()
@@ -47,6 +57,7 @@ AircraftTracker::MsgReport::~MsgReport()
     delete m_report.m_mapItem;
 }
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgDeleteAll, Message)
+MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgAcarsBlock, Message)
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgResetStatistics, Message)
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgResync, Message)
 MESSAGE_CLASS_DEFINITION(AircraftTracker::MsgWatchFlight, Message)
@@ -97,9 +108,25 @@ void AircraftTracker::startWork()
     m_aircraftInfo = OsnDB::getAircraftInformationByReg();
     m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
     m_routeInfo = OsnDB::getAircraftRouteInformation();
+    m_selcalCodes = SELCALDB::getCodesByRegistration();
     m_navAids = OpenAIP::getNavAids();
     m_airports = OurAirportsDB::getAirportsByIdent();
+    // The ACARS parser resolves ICAO codes to airport names through a table of its own,
+    // which the demodulator fills in when IT starts. Documents are re-rendered here, at
+    // load, which happens before any demodulator has run and would happen even with none
+    // present - so without this every re-rendered document would read EGLL where it once
+    // read EGLL (London Heathrow Airport). Through the library's once-only initialiser,
+    // never by assignment: ACARS demodulator workers read and set the same global from
+    // their own threads, and QSharedPointer assignment is not atomic.
+    acarsInitAirportInfo();
     m_waypoints = Waypoints::getWaypoints();
+
+    // On this thread, not in the constructor: a socket belongs to the thread that
+    // created it, and everything that touches these runs here
+    m_feedSocket = new QUdpSocket(this);
+    m_feedAirframesTcpSocket = new QTcpSocket(this);
+    m_feedAvdelphiTcpSocket = new QTcpSocket(this);
+    updateFeedConnections();
 
     m_flushTimer = new QTimer(this);
     connect(m_flushTimer, &QTimer::timeout, this, &AircraftTracker::flush);
@@ -116,11 +143,8 @@ void AircraftTracker::startWork()
 
     if (openDatabase())
     {
+        // Brings the all time records and the airframe count with it - see loadDatabase()
         loadDatabase();
-        // The all time aircraft count lives in the database, so it can only be read once
-        // that is open - which may be after the settings first arrived
-        m_statistics.m_allTime.m_distinctAircraft = seenCount();
-        m_statisticsDirty = true;
     }
 }
 
@@ -149,9 +173,34 @@ bool AircraftTracker::handleMessage(const Message& message)
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
+    else if (MsgAcarsBlock::match(message))
+    {
+        const MsgAcarsBlock& block = (const MsgAcarsBlock&) message;
+        acarsBlockReceived(block.getBlock(), block.getDateTime(), block.getFrequency(),
+                           block.getLevel(), block.getProtocol());
+        return true;
+    }
     else if (MsgDeleteAll::match(message))
     {
         deleteAll();
+        // Straight to disk rather than waiting for the periodic save. Nothing is left in
+        // memory to lose, the user has just asked for everything to go, and until the
+        // save runs the database still holds all of it - so the size the statistics
+        // report would be unchanged, and closing SDRangel in between would bring it all
+        // back. Not inside deleteAll(): that is also how changing database clears the
+        // old session out of memory, and saving there would write the emptied state over
+        // the database being left behind.
+        if (m_db && !m_loadingDatabase) {
+            saveDatabase();
+        }
+        return true;
+    }
+    else if (MsgSelect::match(message))
+    {
+        MsgSelect& msg = (MsgSelect&) message;
+        // Straight through to the GUI: what is selected is a property of the tables,
+        // which live there
+        emit selectRequested((int) msg.getKind(), msg.getValue());
         return true;
     }
     else if (MsgResetStatistics::match(message))
@@ -169,6 +218,11 @@ bool AircraftTracker::handleMessage(const Message& message)
             // Anything heard since the reset still belongs to the new all time figures,
             // so let this session's airframes be counted again
             m_sessionRecorded.clear();
+            // The records are rows now, so clearing them in memory is only half of it.
+            // saveStatistics() writes only valid records, so the next save empties the
+            // table; without the dirty flag that save might not happen at all.
+            m_dbDirty = true;
+            m_recordMapState = RecordUnreported;
         }
         else
         {
@@ -199,6 +253,13 @@ bool AircraftTracker::handleMessage(const Message& message)
                 f->m_aircraft->m_mapTrackChanged = true;
                 m_dirtyAircraft.insert(f->m_aircraft);
             }
+        }
+        // The routes follow the selection, so the flight being left has its taken off
+        // the map and the one now selected has its put on
+        if (previous != flight)
+        {
+            removeRoutes(previous);
+            sendRoutes(flight);
         }
         if (flight) {
             emitProfile(flight);
@@ -238,10 +299,22 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
     // keys at all, and re-firing every rule on an unchanged preset load would be its own
     // bug - the aircraft would all announce themselves again.
     const QString notificationsBefore = notificationSignature(m_settings);
+    const bool coverageWasShown = m_settings.m_displayCoverage;
     if (force) {
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+    // Drawn or taken off the Map as the button is toggled. Sent from here rather than
+    // waiting for the next flush, so the map responds to the click rather than to the
+    // next aircraft heard - which on a quiet band can be minutes.
+    if (m_settings.m_displayCoverage != coverageWasShown)
+    {
+        if (m_settings.m_displayCoverage) {
+            sendCoverageToMap();
+        } else {
+            removeCoverageFromMap();
+        }
     }
     if (notificationSignature(m_settings) != notificationsBefore)
     {
@@ -250,10 +323,16 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
         }
     }
 
-    // The records come back from the preset the first time settings arrive. Reloading
-    // them later would undo anything set since - EXCEPT when the blob is empty, which is
-    // how the GUI asks for a reset. Without that exception "Reset records" did nothing
-    // after startup and the next update put the old values straight back.
+    // A changed host invalidates the cached DNS resolution, or the feed would keep
+    // sending to the address it looked up for the previous one
+    m_feedAirframesResolvedHost.clear();
+    m_feedAvdelphiResolvedHost.clear();
+    updateFeedConnections();
+
+    // The records live in the database now. A preset written before that still carries
+    // them, so they are imported once - only when the database had none, which is what
+    // loadStatistics() reports through m_statisticsLoaded. After the next save they are
+    // in the database and the blob is never read again.
     const bool resetRequested = settingsKeys.contains("statistics")
                              && settings.m_statistics.isEmpty();
     // Wait for a blob with something in it. The GUI's constructor forces a configuration
@@ -265,6 +344,10 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
     if (statisticsArrived && ((!m_statisticsLoaded && haveStored) || resetRequested))
     {
         m_statisticsLoaded = haveStored;
+        if (haveStored) {
+            qDebug() << "AircraftTracker: importing the all time statistics from the preset"
+                     << "into the session database, which is where they live now";
+        }
         AircraftStatistics stored = deserializeStatistics(m_settings.m_statistics);
         // Only the all time side is stored, so keep everything this session has counted
         stored.m_session = m_statistics.m_session;
@@ -285,6 +368,7 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
         stored.m_allTime.m_distinctAircraft = seenCount();
         m_statistics = stored;
         m_statisticsDirty = true;
+        m_dbDirty = true;       // So the import is written out
     }
 
     if (databaseChanged) {
@@ -535,7 +619,51 @@ int AircraftTracker::positionRank(const AircraftReport& report)
 
 void AircraftTracker::processReport(AircraftReport& report)
 {
+    // A SELCAL call names a code rather than an aircraft. Only when it can be pinned on
+    // one aircraft does it go any further; otherwise it is logged and that is all.
+    if ((report.m_protocol == AircraftReport::SELCAL) && !attributeSelcal(report)) {
+        return;
+    }
+
     TrackedAircraft *item = findOrCreateAircraft(report);
+
+    // A CSV file is a new observation run, even when it contains the same airframe and
+    // callsign as live traffic or a file replayed moments ago. Keeping the old current
+    // flight made the first historical position rewind the icon while the in-order
+    // track guard below quite correctly kept the old track. The Map then joined those
+    // two unrelated endpoints with its provisional point.
+    if (report.m_replayStart)
+    {
+        if (item->m_currentFlight) {
+            m_dirtyFlights.insert(item->m_currentFlight);
+        }
+        item->m_currentFlight = nullptr;
+        item->m_flight.clear();
+        item->m_departure.clear();
+        item->m_arrival.clear();
+        item->m_route.clear();
+
+        item->m_positionValid = false;
+        item->m_positionDateTime = QDateTime();
+        item->m_positionRank = PositionRanks;
+        for (QDateTime& time : item->m_positionRankTimes) {
+            time = QDateTime();
+        }
+
+        item->m_altitudeValid = false;
+        item->m_altitudeDateTime = QDateTime();
+        item->m_prevAltitudeDateTime = QDateTime();
+        for (QDateTime& time : item->m_altitudeRankTimes) {
+            time = QDateTime();
+        }
+
+        item->m_headingValid = false;
+        item->m_headingDateTime = QDateTime();
+        item->m_speedValid = false;
+        item->m_speedDateTime = QDateTime();
+        item->m_distanceValid = false;
+        item->m_mapTrackChanged = true;
+    }
 
     // Receiving data makes it active, which puts it in the active tables and on the map
     setActive(item, true);
@@ -572,11 +700,20 @@ void AircraftTracker::processReport(AircraftReport& report)
     if (flight) {
         flight->m_messages++;
     }
-    if (!flight->m_flight.isEmpty()) {
+    // The airframe's name is its current flight's. A late message filed against the
+    // flight before (see updateFlight()) is that flight's business, and copying its name
+    // across flipped the aircraft back to the old callsign until the next report.
+    if ((flight == item->m_currentFlight) && !flight->m_flight.isEmpty()) {
         item->m_flight = flight->m_flight;
     }
     addDocument(item, flight, report);
     addAtcMessage(item, flight, report);
+    if (report.m_protocol == AircraftReport::SELCAL)
+    {
+        item->m_selcalHeard = report.m_selcalCode;
+        logSelcalCall(item, flight, report, QStringList());
+    }
+    recordDcduMessage(item, report);
     addWeatherReport(item, report);
 
     checkNotifications(item, report);
@@ -673,8 +810,12 @@ void AircraftTracker::processReport(AircraftReport& report)
         // positions until their clock caught up with the last ADS-B one.
         QDateTime posTime = report.m_positionDateTime.isValid() ? report.m_positionDateTime : report.m_received;
         bool current = !item->m_positionDateTime.isValid()
-            || (item->m_positionDateTime.secsTo(posTime) >= 0)
-            || positionStale(item, report.m_received);
+            || (item->m_positionDateTime.msecsTo(posTime) >= 0)
+            // A live report from a slower bearer may legitimately replace an expired
+            // ADS-B position. Historical replay has its own explicit boundary above;
+            // comparing its old timestamp with today's wall clock would make every
+            // position stale and silently allow the replay to run backwards.
+            || (!report.m_replay && positionStale(item, report.m_received));
 
         const QGeoCoordinate reported(report.m_latitude, report.m_longitude);
         const int rank = positionRank(report);
@@ -698,7 +839,7 @@ void AircraftTracker::processReport(AircraftReport& report)
         if (item->m_positionValid && item->m_positionDateTime.isValid() && (rank >= item->m_positionRank))
         {
             const double km = QGeoCoordinate(item->m_latitude, item->m_longitude).distanceTo(reported) / 1000.0;
-            const double hours = std::abs((double) item->m_positionDateTime.secsTo(posTime)) / 3600.0;
+            const double hours = std::abs((double) item->m_positionDateTime.msecsTo(posTime)) / 3600000.0;
             plausible = km <= (m_maxGroundSpeedKn * 1.852 * hours) + m_positionToleranceKm;
         }
 
@@ -718,7 +859,7 @@ void AircraftTracker::processReport(AircraftReport& report)
         if (item->m_positionValid && item->m_positionDateTime.isValid())
         {
             const double km = QGeoCoordinate(item->m_latitude, item->m_longitude).distanceTo(reported) / 1000.0;
-            const double hours = std::abs((double) item->m_positionDateTime.secsTo(posTime)) / 3600.0;
+            const double hours = std::abs((double) item->m_positionDateTime.msecsTo(posTime)) / 3600000.0;
             rangePlausible = km <= (m_maxGroundSpeedKn * 1.852 * hours) + m_positionToleranceKm;
         }
         if (rangePlausible)
@@ -731,6 +872,10 @@ void AircraftTracker::processReport(AircraftReport& report)
             {
                 reportRangeKm = (float) (receiver.distanceTo(reported) / 1000.0);
                 reportRangeValid = true;
+                // Which direction it was heard in, as well as how far, so the range
+                // pattern can be drawn rather than just the one furthest figure
+                updateCoverage(report.m_protocol, receiver,
+                    (float) receiver.azimuthTo(reported), reportRangeKm);
             }
         }
 
@@ -774,18 +919,28 @@ void AircraftTracker::processReport(AircraftReport& report)
             // being held has gone stale, but appending it after a newer point would
             // leave the track's times running backwards - and the Map's smoother divides
             // by the difference between consecutive times, so a negative one gives inf
-            // and then nan, exactly as two identical times do.
-            const bool inOrder = flight && (flight->m_trackTimes.isEmpty()
-                || (posTime >= flight->m_trackTimes.last()));
-            const bool moved = inOrder && (flight->m_track.isEmpty()
-                || (flight->m_track.last().latitude() != coordinate.latitude())
-                || (flight->m_track.last().longitude() != coordinate.longitude()));
+            // and then nan, exactly as two identical times do - which is why a fix at
+            // the same time as the last point is not appended either. Minute-resolution
+            // ACARS and HFDL positions a few kilometres apart produced exactly that.
+            // Where the aircraft is now belongs to the flight it is flying now: a late
+            // message for the flight before still carries today's position, and adding
+            // it to the landed flight extended that leg past its landing.
+            TrackedFlight *flown = item->m_currentFlight ? item->m_currentFlight : flight;
+            // The stored points have to be in memory before anything is appended: until
+            // they are, m_trackSaved counts rows the list does not hold, and the save
+            // would append nothing at all
+            ensureTrackLoaded(flown);
+            const bool inOrder = flown && (flown->m_trackTimes.isEmpty()
+                || (posTime > flown->m_trackTimes.last()));
+            const bool moved = inOrder && (flown->m_track.isEmpty()
+                || (flown->m_track.last().latitude() != coordinate.latitude())
+                || (flown->m_track.last().longitude() != coordinate.longitude()));
             if (moved)
             {
                 // Heading along the track when the report has none
-                if (!flight->m_track.isEmpty())
+                if (!flown->m_track.isEmpty())
                 {
-                    float trackHeading = (float) flight->m_track.last().azimuthTo(coordinate);
+                    float trackHeading = (float) flown->m_track.last().azimuthTo(coordinate);
                     if (!report.m_headingValid)
                     {
                         item->m_heading = trackHeading;
@@ -793,9 +948,9 @@ void AircraftTracker::processReport(AircraftReport& report)
                         item->m_headingDateTime = posTime;
                     }
                 }
-                flight->m_track.append(coordinate);
-                flight->m_trackTimes.append(posTime);
-                item->m_mapTrackChanged = true;
+                flown->m_track.append(coordinate);
+                flown->m_trackTimes.append(posTime);
+                item->m_mapTrackAppended = true;
 
             }
         }
@@ -832,7 +987,11 @@ void AircraftTracker::processReport(AircraftReport& report)
         // report's aircraft state for the Map's PFD
         forwardMapItem(item, report.m_mapItem);
         report.m_mapItem = nullptr;     // Ownership transferred
-        item->m_lastMapItemTime = report.m_received;
+        // Wall clock, not the report's time: this says whether pass-through is still
+        // FLOWING, which flush() tests against now. A CSV replay's reports are hours old,
+        // so stamping their time made every replayed item look abandoned and flush()
+        // replaced each one with a basic item 300 ms later.
+        item->m_lastMapItemTime = QDateTime::currentDateTime();
     }
 }
 
@@ -894,7 +1053,8 @@ void AircraftTracker::flush()
     // record marker below are re-sent within this one.
     checkMapConsumers();
 
-    // Both cheap unless something they depend on has changed
+    // All three are cheap unless something they depend on has changed
+    updateWatchedTrack();
     updateRecordMapItem();
     retryRoutes();
 
@@ -912,6 +1072,9 @@ void AircraftTracker::flush()
         {
             m_statisticsMinute = minute;
             m_statisticsDirty = true;
+            // On this tick rather than on every flush: it is a file stat, and the database
+            // only grows when it is saved, which is far less often than a flush
+            updateDatabaseSize();
         }
     }
 
@@ -963,6 +1126,21 @@ void AircraftTracker::flush()
         emit weatherReports(m_pendingWeather);
         m_pendingWeather.clear();
     }
+
+    // Redrawn only when a bin actually grew, which on a busy day is a few times a minute
+    // rather than once per report
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    {
+        if (m_coverageDirty[i])
+        {
+            sendCoverageToMap(i);
+            m_coverageDirty[i] = false;
+            m_coverageChanged = true;
+        }
+    }
+
+    // For the web API's report, which reads it from another thread
+    updateTotals();
 }
 
 void AircraftTracker::updateChartCounts()
@@ -989,6 +1167,12 @@ AircraftDisplay AircraftTracker::displayFor(const TrackedAircraft *item) const
     d.m_icao = item->m_icao;
     d.m_registration = item->m_registration;
     d.m_flight = item->m_flight;
+    // From the current flight where there is one, since that is what holds the other
+    // name; from the airframe's own last flight name otherwise, which leaves the
+    // callsign showing it and the number empty rather than showing nothing at all
+    flightNameForms(item->m_flight,
+                    item->m_currentFlight ? item->m_currentFlight->m_aliases : QStringList(),
+                    d.m_callsign, d.m_flightNumber);
     d.m_positionValid = item->m_positionValid;
     d.m_distanceValid = item->m_distanceValid;
     d.m_distanceKm = item->m_distanceKm;
@@ -1003,9 +1187,15 @@ AircraftDisplay AircraftTracker::displayFor(const TrackedAircraft *item) const
     d.m_protocols = sourcesText(item->m_sources);
     d.m_messages = item->m_messages;
     d.m_lastSeen = item->m_lastSeen;
+    d.m_mapAvailableUntil = mapAvailableUntil(item);
     d.m_mapName = item->m_mapName.isEmpty() ? mapItemName(item) : item->m_mapName;
     d.m_currentFlightId = item->m_currentFlight ? item->m_currentFlight->m_id : 0;
     d.m_active = item->m_active;
+    if (!item->m_selcalHeard.isEmpty()) {
+        d.m_selcal = item->m_selcalHeard;
+    } else if (m_selcalCodes && !item->m_registration.isEmpty()) {
+        d.m_selcal = m_selcalCodes->value(item->m_registration);
+    }
     return d;
 }
 
@@ -1015,14 +1205,62 @@ FlightDisplay AircraftTracker::displayFor(const TrackedFlight *flight) const
     d.m_id = flight->m_id;
     d.m_aircraftId = flight->m_aircraft->m_id;
     d.m_flight = flight->m_flight;
+    flightNameForms(flight->m_flight, flight->m_aliases, d.m_callsign, d.m_flightNumber);
     d.m_aliases = flight->m_aliases.join(", ");
     d.m_reg = regFor(flight->m_aircraft);
     d.m_departure = flight->m_departure;
     d.m_arrival = flight->m_arrival;
     d.m_route = flight->m_route;
+    if (!flight->m_departure.isEmpty() || !flight->m_arrival.isEmpty())
+    {
+        // Whichever end we hold; where both are held and disagree about where they
+        // came from, a message anywhere in the pair is what the column reports
+        d.m_departureFromMessage =
+            !flight->m_departure.isEmpty() && !flight->m_departureFromDatabase;
+        d.m_arrivalFromMessage =
+            !flight->m_arrival.isEmpty() && !flight->m_arrivalFromDatabase;
+        d.m_routeSource = (d.m_departureFromMessage || d.m_arrivalFromMessage)
+            ? "Message" : "Database";
+    }
+    // Only worth comparing when something told us: a pair taken FROM the database
+    // trivially agrees with it and says nothing. Aliases are searched too, because the
+    // database is keyed on callsign and a flight answers to more than one - the entry
+    // may be filed under the ICAO form while the ACARS form is the primary here.
+    if (m_routeInfo && (d.m_routeSource == "Message"))
+    {
+        QStringList names;
+        names.append(flight->m_flight);
+        names.append(flight->m_aliases);
+        for (const QString& name : names)
+        {
+            if (name.isEmpty() || !m_routeInfo->contains(name)) {
+                continue;
+            }
+            const AircraftRouteInformation *route = m_routeInfo->value(name);
+            // Each end judged only where we hold one, so a flight known to be going to
+            // KJFK with no departure yet is not called a disagreement for the half that
+            // is simply not known
+            const bool departureAgrees = flight->m_departure.isEmpty()
+                || (route->m_dep == flight->m_departure);
+            const bool arrivalAgrees = flight->m_arrival.isEmpty()
+                || (route->m_arr == flight->m_arrival);
+            d.m_routeChecked = true;
+            d.m_routeAgrees = departureAgrees && arrivalAgrees;
+            break;
+        }
+    }
     d.m_firstSeen = flight->m_firstSeen;
     d.m_lastSeen = flight->m_lastSeen;
-    d.m_documents = flight->m_documents.size();
+    // Logons excluded: they are counted in the thousands where everything else is in
+    // the tens, so a count including them said nothing about whether a flight had
+    // anything worth opening. They have their own tab.
+    d.m_documents = 0;
+    for (const TrackedDocument *doc : flight->m_documents)
+    {
+        if (doc->m_kind != AircraftReport::Logon) {
+            d.m_documents++;
+        }
+    }
     d.m_messages = flight->m_messages;
     d.m_protocols = sourcesText(flight->m_sources);
     d.m_out = flight->m_out;
@@ -1035,6 +1273,10 @@ FlightDisplay AircraftTracker::displayFor(const TrackedFlight *flight) const
         {
         case AircraftReport::Loadsheet:  d.m_hasLoadsheet = true; break;
         case AircraftReport::Clearance:  d.m_hasClearance = true; break;
+        case AircraftReport::DepartureClearance: d.m_hasClearance = true; break;
+        // Asking for one counts: it says the flight is going oceanic, which is what the
+        // column is read for
+        case AircraftReport::ClearanceRequest: d.m_hasClearance = true; break;
         case AircraftReport::FlightPlan: d.m_hasFlightPlan = true; break;
         default: break;
         }
@@ -1078,6 +1320,9 @@ AircraftTracker::TrackedFlight *AircraftTracker::flightById(quint64 id) const
 
 void AircraftTracker::emitProfile(const TrackedFlight *flight)
 {
+    // Fetched now if it never was. Const because everything else about emitting is, and
+    // reading the flight's own stored history does not change what the flight IS.
+    ensureProfileLoaded(const_cast<TrackedFlight *>(flight));
     emit profileUpdated(flight->m_id, flight->m_profileTimes, flight->m_profileAltFt, flight->m_profileSpeedKts);
 }
 
@@ -1131,10 +1376,8 @@ void AircraftTracker::deleteAll()
         // the airframe, so removing the aircraft leaves the lines and their waypoint
         // markers behind - and a moment later the flights holding the only record of what
         // those items are called are deleted, so nothing can ever take them off.
-        for (TrackedFlight *flight : item->m_flights)
-        {
-            removeDrawnRoute(flight->m_flightPlan);
-            removeDrawnRoute(flight->m_clearance);
+        for (TrackedFlight *flight : item->m_flights) {
+            removeRoutes(flight);
         }
     }
     qDeleteAll(m_aircraft);
@@ -1146,17 +1389,27 @@ void AircraftTracker::deleteAll()
     m_dirtyFlights.clear();
     m_pendingDocuments.clear();
     m_pendingAtc.clear();
+    // The documents and ATC messages go with them, and the next save has to be told so:
+    // it will not empty those tables on its own initiative - see saveDatabase()
+    m_dbMessageWipe = true;
     // The weather log is keyed on airports rather than aircraft, so it is easy to
     // forget here - but the GUI clears its rows on allCleared(), and leaving the log
     // behind put every report straight back on the next resync. Worse, the dedupe index
     // survived too, so a report that arrived again after the clear was recognised as
     // one already held and never re-emitted at all.
+    m_acarsBlocks.clear();
     m_pendingWeather.clear();
     m_weatherLog.clear();
     m_weatherIndex.clear();
     m_routesPending.clear();
+    if (!m_watchedTrackName.isEmpty())
+    {
+        removeFromMap(m_watchedTrackName);
+        m_watchedTrackName.clear();
+        m_watchedTrackKey.clear();
+    }
     m_watchedFlight = 0;
-    forgetSavedTracks();
+    forgetSavedHistory();
     m_dbDirty = true;
     emit allCleared();
 }
@@ -1167,14 +1420,18 @@ void AircraftTracker::removeOldAircraft()
 {
     QDateTime currentDateTime = QDateTime::currentDateTime();
 
-    // The aircraft database may have been downloaded since we last looked
+    // The aircraft databases may have been downloaded since we last looked
     m_aircraftInfo = OsnDB::getAircraftInformationByReg();
     m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
     m_routeInfo = OsnDB::getAircraftRouteInformation();
+    m_selcalCodes = SELCALDB::getCodesByRegistration();
 
     // The timer that drives this also drives the periodic session save
     if (m_db && !m_loadingDatabase) {
         saveDatabase();
+    } else if (!m_db) {
+        // Only a save empties them, and with no database there is never one
+        forgetPendingChanges();
     }
 
     for (TrackedAircraft *item : m_aircraft)
@@ -1191,7 +1448,7 @@ void AircraftTracker::removeOldAircraft()
         // The 3D map drops the entity on its own when the availability interval ends,
         // but nothing takes it off the 2D map, so it would sit at its last known
         // position until the aircraft was archived - three hours later by default.
-        if (item->m_active && !item->m_mapName.isEmpty()
+        if (item->m_active && !item->m_mapReplay && !item->m_mapName.isEmpty()
             && positionStale(item, currentDateTime))
         {
             removeFromMap(item->m_mapName);
@@ -1206,6 +1463,13 @@ void AircraftTracker::removeOldAircraft()
 // Archived aircraft are kept for a while so their history is still there, but not for
 // ever - the session database is rewritten in full on every save, so it has to be
 // bounded. A retention of zero means the user wants to keep everything.
+// What the weather log's dedupe index is keyed on
+static size_t weatherKey(const WeatherEvent& e)
+{
+    // (qHashMulti would do this, but it is Qt 6 only)
+    return qHash(e.m_airport + QChar(0) + e.m_kind + QChar(0) + e.m_text);
+}
+
 void AircraftTracker::discardOldAircraft()
 {
     if (m_settings.m_retentionDays <= 0) {
@@ -1230,6 +1494,10 @@ void AircraftTracker::discardOldAircraft()
             discardedFlights.append(flight->m_id);
             m_flightsToDelete.insert(flight->m_id);
             m_dirtyFlights.remove(flight);
+            // Before the flight is deleted, which is where the names its lines and
+            // waypoint markers were drawn under are held - after it, nothing could ever
+            // take them off the map again
+            removeRoutes(flight);
             if (m_watchedFlight == flight->m_id) {
                 m_watchedFlight = 0;
             }
@@ -1242,6 +1510,54 @@ void AircraftTracker::discardOldAircraft()
         m_aircraft.removeAt(i);
         delete item;
         m_dbDirty = true;
+    }
+
+    // The ATC and weather logs go by the same rule, or they grow for ever: a message goes
+    // with the aircraft it was from, and one with no aircraft once it is older than the
+    // retention period. That is an unattributed call (id 0), or a message from an aircraft
+    // that went before its messages were taken with it - which otherwise stayed for ever.
+    // A weather report is about an airport, so it goes by age alone.
+    const QSet<quint64> discardedIds(discardedAircraft.begin(), discardedAircraft.end());
+    QSet<quint64> liveIds;
+    for (const TrackedAircraft *item : m_aircraft) {
+        liveIds.insert(item->m_id);
+    }
+    QList<AtcEvent> keptAtc;
+    bool atcPruned = false;
+    for (const AtcEvent& e : m_atcLog)
+    {
+        if (discardedIds.contains(e.m_aircraftId))
+        {
+            atcPruned = true;
+        }
+        else if (!liveIds.contains(e.m_aircraftId) && e.m_received.isValid() && (e.m_received < cutoff))
+        {
+            m_atcPrunedIds.insert(e.m_aircraftId);
+            atcPruned = true;
+        }
+        else
+        {
+            keptAtc.append(e);
+        }
+    }
+    if (atcPruned)
+    {
+        m_atcLog = keptAtc;
+        m_atcAircraftToDelete.unite(discardedIds);
+        m_atcPruneCutoff = cutoff;
+        m_dbDirty = true;
+    }
+    const int weatherBefore = m_weatherLog.size();
+    m_weatherLog.erase(std::remove_if(m_weatherLog.begin(), m_weatherLog.end(),
+        [&](const WeatherEvent& e) { return e.m_received.isValid() && (e.m_received < cutoff); }),
+        m_weatherLog.end());
+    if (m_weatherLog.size() != weatherBefore)
+    {
+        // The index holds positions in the log, which have all moved
+        m_weatherIndex.clear();
+        for (int i = 0; i < m_weatherLog.size(); i++) {
+            m_weatherIndex.insert(weatherKey(m_weatherLog[i]), i);
+        }
     }
 
     if (!discardedFlights.isEmpty()) {
@@ -1439,11 +1755,40 @@ void AircraftTracker::absorbAircraft(TrackedAircraft *item, TrackedAircraft *wea
     QList<TrackedFlight *> flights = weak->m_flights;
     flights.append(item->m_flights);
     item->m_flights = flights;
-    if (!item->m_currentFlight) {
+    // The more recently heard of the two. Keeping the survivor's because it survives
+    // kept yesterday's flight current over the one the weak entry is hearing now - so the
+    // next report started a third flight, splitting today's in two.
+    if (weak->m_currentFlight
+        && (!item->m_currentFlight
+            || (weak->m_currentFlight->m_lastSeen > item->m_currentFlight->m_lastSeen))) {
         item->m_currentFlight = weak->m_currentFlight;
     }
     weak->m_flights.clear();
     weak->m_currentFlight = nullptr;
+
+    // What would otherwise be done again, or lost: a rule that has already fired for the
+    // weak entry fired for this airframe, and an ADS-B item it was receiving says the
+    // pass-through is live, which stops a basic item being sent over the top of it
+    item->m_notifiedRules.unite(weak->m_notifiedRules);
+    if (weak->m_lastMapItemTime.isValid()
+        && (!item->m_lastMapItemTime.isValid() || (weak->m_lastMapItemTime > item->m_lastMapItemTime))) {
+        item->m_lastMapItemTime = weak->m_lastMapItemTime;
+    }
+    if (item->m_selcalHeard.isEmpty()) {
+        item->m_selcalHeard = weak->m_selcalHeard;
+    }
+    if (weak->m_dcduMessage.m_received > item->m_dcduMessage.m_received)
+    {
+        // The sequence carries on from the survivor's, so the Map sees a new message
+        const int seq = std::max(item->m_dcduMessage.m_seq, weak->m_dcduMessage.m_seq) + 1;
+        item->m_dcduMessage = weak->m_dcduMessage;
+        item->m_dcduMessage.m_seq = seq;
+    }
+
+    // ATC messages are held by id, so they are moved by hand - see mergeFlightInto()
+    if (moveMessages(true, weak->m_id, item->m_id)) {
+        m_atcAircraftMoves.append({weak->m_id, item->m_id});
+    }
 
     for (const QString& key : m_byKey.keys(weak)) {
         m_byKey.insert(key, item);
@@ -1461,6 +1806,7 @@ void AircraftTracker::absorbAircraft(TrackedAircraft *item, TrackedAircraft *wea
         m_statisticsDirty = true;
     }
     m_sessionRecorded.remove(weak->m_id);
+    emit aircraftMerged(weak->m_id, item->m_id);
     emit aircraftRemoved(QList<quint64>{weak->m_id});
     m_aircraft.removeAll(weak);
     delete weak;
@@ -1472,6 +1818,36 @@ void AircraftTracker::absorbAircraft(TrackedAircraft *item, TrackedAircraft *wea
         m_dirtyFlights.insert(flight);
     }
     m_dbDirty = true;
+}
+
+// Re-point the messages held against one aircraft or flight id to another, saying
+// whether the ATC log had any (which the database then has to be told about). The
+// pending ATC messages and documents too: they are on their way to the GUI, which has
+// already been told of the merge by the time they arrive, so they would reach it under
+// an id that no longer exists.
+bool AircraftTracker::moveMessages(bool aircraftId, quint64 from, quint64 to)
+{
+    auto move = [aircraftId, from, to](auto& e) {
+        quint64& id = aircraftId ? e.m_aircraftId : e.m_flightId;
+        if (id == from)
+        {
+            id = to;
+            return true;
+        }
+        return false;
+    };
+
+    bool moved = false;
+    for (AtcEvent& e : m_atcLog) {
+        moved |= move(e);
+    }
+    for (AtcEvent& e : m_pendingAtc) {
+        move(e);
+    }
+    for (DocumentEvent& e : m_pendingDocuments) {
+        move(e);
+    }
+    return moved;
 }
 
 // Merge any of an aircraft's flights that are the same flight under different
@@ -1534,6 +1910,42 @@ void AircraftTracker::mergeLoadedFlights(TrackedAircraft *item)
 // Split a flight identity into the airline designator and the flight number:
 // a 3-letter ICAO designator (BAW31) or a 2-character IATA one (BA0031), with
 // leading zeros stripped from the number so the two forms compare equal
+// Which of the names a flight is known by is the ICAO callsign and which the IATA
+// flight number. The airline designator is what tells them apart - three letters for
+// ICAO, two characters for IATA - which is the same split the aliasing itself is built
+// on, so a pair that were matched as the same flight are classified consistently here.
+//
+// The callsign falls back to the primary name so the column is never empty: a flight
+// heard only under its IATA number is still called something, and blanking it would
+// lose from the table what the aircraft is actually being called.
+void AircraftTracker::flightNameForms(const QString& primary, const QStringList& aliases,
+                                      QString& callsign, QString& flightNumber)
+{
+    callsign.clear();
+    flightNumber.clear();
+
+    QStringList names;
+    if (!primary.isEmpty()) {
+        names.append(primary);
+    }
+    names.append(aliases);
+
+    for (const QString& name : names)
+    {
+        QString airline, number;
+        if (!splitFlightName(name, airline, number)) {
+            continue;       // Neither form - a registration flown as a callsign, say
+        }
+        QString& into = (airline.size() == 3) ? callsign : flightNumber;
+        if (into.isEmpty()) {
+            into = name;
+        }
+    }
+    if (callsign.isEmpty()) {
+        callsign = primary;
+    }
+}
+
 bool AircraftTracker::splitFlightName(const QString& flight, QString& airline, QString& number)
 {
     int prefixLen;
@@ -1588,7 +2000,16 @@ bool AircraftTracker::flightMatches(const TrackedFlight *flight, const QString& 
 // is keyed on - with the other forms kept as aliases.
 void AircraftTracker::addFlightAlias(TrackedAircraft *item, TrackedFlight *flight, const QString& name)
 {
-    if ((flight->m_flight == name) || flight->m_aliases.contains(name)) {
+    // No name is not another name for it. Recorded, it showed as a trailing ", " in the
+    // Aliases column and put "F" in the key map - after which every unnamed flight
+    // matched this one by "name" and was merged into it.
+    if (name.isEmpty() || (flight->m_flight == name) || flight->m_aliases.contains(name)) {
+        return;
+    }
+    if (flight->m_flight.isEmpty())
+    {
+        flight->m_flight = name;
+        m_byKey.insert("F" + name, item);
         return;
     }
 
@@ -1611,6 +2032,15 @@ void AircraftTracker::addFlightAlias(TrackedAircraft *item, TrackedFlight *fligh
 // Fold one flight into another - they are the same flight under different names
 void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst, TrackedFlight *src)
 {
+    // Both histories have to be in memory BEFORE they are combined - see
+    // ensureTrackLoaded(). Loading afterwards did nothing: the merge below resets the
+    // saved counts to zero, which is what tells these there is nothing stored to read, so
+    // a restored flight's stored track and profile were dropped and then rewritten away.
+    ensureTrackLoaded(dst);
+    ensureTrackLoaded(src);
+    ensureProfileLoaded(dst);
+    ensureProfileLoaded(src);
+
     addFlightAlias(item, dst, src->m_flight);
     for (const QString& alias : src->m_aliases) {
         addFlightAlias(item, dst, alias);
@@ -1621,11 +2051,23 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
     if (src->m_lastSeen.isValid() && (src->m_lastSeen > dst->m_lastSeen)) {
         dst->m_lastSeen = src->m_lastSeen;
     }
-    if (dst->m_departure.isEmpty()) {
+    // Keeping whatever dst already had meant a database guess beat a fact, because the
+    // two were indistinguishable once stored. These two flights are the same operation
+    // under its ACARS and ADS-B identities, and only one of them tends to carry the
+    // filed plan - so the side that was told wins over the side that guessed.
+    if (dst->m_departure.isEmpty()
+        || (dst->m_departureFromDatabase && !src->m_departureFromDatabase
+            && !src->m_departure.isEmpty()))
+    {
         dst->m_departure = src->m_departure;
+        dst->m_departureFromDatabase = src->m_departureFromDatabase;
     }
-    if (dst->m_arrival.isEmpty()) {
+    if (dst->m_arrival.isEmpty()
+        || (dst->m_arrivalFromDatabase && !src->m_arrivalFromDatabase
+            && !src->m_arrival.isEmpty()))
+    {
         dst->m_arrival = src->m_arrival;
+        dst->m_arrivalFromDatabase = src->m_arrivalFromDatabase;
     }
     if (dst->m_route.isEmpty())
     {
@@ -1673,7 +2115,7 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
         dst->m_profileSpeedKts = speeds;
         // Rebuilt, not appended to, so what is stored for this flight is now wrong
         dst->m_profileSaved = 0;
-        m_flightsToRewrite.insert(dst->m_id);
+        m_profilesToRewrite.insert(dst->m_id);
     }
 
     dst->m_messages += src->m_messages;
@@ -1707,7 +2149,7 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
         dst->m_track = track;
         dst->m_trackTimes = times;
         dst->m_trackSaved = 0;
-        m_flightsToRewrite.insert(dst->m_id);
+        m_tracksToRewrite.insert(dst->m_id);
         item->m_mapTrackChanged = true;
     }
 
@@ -1746,6 +2188,12 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
     m_routesPending.remove(src->m_id);
 
     m_flightsToDelete.insert(src->m_id);
+    // The ATC log holds ids, not pointers, so its messages have to be moved by hand - or
+    // after the next resync or restart they belong to a flight that no longer exists, and
+    // selecting the survivor shows none of them
+    if (moveMessages(false, src->m_id, dst->m_id)) {
+        m_atcFlightMoves.append({src->m_id, dst->m_id});
+    }
     if (m_watchedFlight == src->m_id) {
         m_watchedFlight = dst->m_id;
     }
@@ -1754,7 +2202,23 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
     }
     m_dirtyFlights.remove(src);
     m_dirtyFlights.insert(dst);
+    // The route that moved was taken off the map above, under the name it was drawn
+    // under. If what survives is the flight being looked at, it goes back on under the
+    // survivor's - and the merge may be what made it the selected one, just above.
+    if (routeDrawn(dst)) {
+        sendRoutes(dst);
+    }
     m_dbDirty = true;
+    // Logged because it is invisible otherwise, and it moves documents, ATC messages and
+    // the drawn route from one flight to another under the user - which is exactly the
+    // kind of thing to want in the log when a view goes empty on its own
+    qDebug() << "AircraftTracker::mergeFlights: flight" << src->m_id << src->m_flight
+             << "merged into" << dst->m_id << dst->m_flight
+             << "-" << dst->m_documents.size() << "documents now on it";
+    // Before flightsRemoved, so that anything holding the old id has moved to the new one
+    // by the time the removal is announced - including the selection, which would
+    // otherwise be cleared for a flight that has not gone anywhere
+    emit flightsMerged(src->m_id, dst->m_id);
     emit flightsRemoved(QList<quint64>{src->m_id});
     item->m_flights.removeAll(src);
     delete src;
@@ -1827,8 +2291,20 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
                 && previous->m_lastSeen.isValid()
                 && (sincePrevious >= 0) && (sincePrevious < 10*60))
             {
-                mergeFlightInto(item, previous, flight);
-                flight = previous;
+                if (previous->m_on.isValid() || previous->m_in.isValid())
+                {
+                    // Except once the previous flight has landed: then the current one is
+                    // the next operation, and a late message for the last one (the IN
+                    // report, or a flight ID that lags the transponder) merged the two
+                    // for good - both routes and both sets of OOOI times on one flight.
+                    // The message is filed against the flight it names instead.
+                    flight = previous;
+                }
+                else
+                {
+                    mergeFlightInto(item, previous, flight);
+                    flight = previous;
+                }
             }
             else
             {
@@ -1853,9 +2329,27 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
         }
     }
 
+    // Another name for this flight, from a message that gave one. An alias rather than
+    // a rename: the two forms belong to the same operation and neither is more correct,
+    // and replacing the name would read as a different flight and start a second one.
+    if (!report.m_flightAlias.isEmpty() && (report.m_flightAlias != flight->m_flight)
+        && !flight->m_aliases.contains(report.m_flightAlias))
+    {
+        addFlightAlias(item, flight, report.m_flightAlias);
+    }
+
+    // A late message for the flight before the current one, filed against it above. It
+    // does not move that flight's last seen time past the start of the current one: the
+    // two would then overlap, and mergeLoadedFlights() - at the next start, or the next
+    // time this airframe absorbs a duplicate - merges overlapping flights as one.
+    TrackedFlight *current = item->m_currentFlight;
+    const bool lateForPrevious = (flight != current) && current
+        && current->m_firstSeen.isValid() && report.m_received.isValid()
+        && (report.m_received >= current->m_firstSeen);
+
     // The latest report, not the last to arrive - as on the aircraft above. A flight
     // whose last seen time went backwards sorts wrongly and reads as finished.
-    if (report.m_received.isValid()
+    if (!lateForPrevious && report.m_received.isValid()
         && (!flight->m_lastSeen.isValid() || (report.m_received > flight->m_lastSeen))) {
         flight->m_lastSeen = report.m_received;
     }
@@ -1874,15 +2368,19 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
         }
     }
 
-    // Flight profile sample, at most one every 5 seconds
+    // Flight profile sample, at most one every 5 seconds. Like the position, the altitude
+    // and speed are the aircraft's now, so they go to the flight it is flying now.
+    TrackedFlight *flown = current ? current : flight;
     if ((report.m_altitudeValid || report.m_speedValid) && report.m_received.isValid())
     {
         qint64 ms = report.m_received.toMSecsSinceEpoch();
-        if (flight->m_profileTimes.isEmpty() || (ms - flight->m_profileTimes.last() >= 5000))
+        // Loaded before the last sample is looked at - see ensureTrackLoaded()
+        ensureProfileLoaded(flown);
+        if (flown->m_profileTimes.isEmpty() || (ms - flown->m_profileTimes.last() >= 5000))
         {
-            flight->m_profileTimes.append(ms);
-            flight->m_profileAltFt.append(report.m_altitudeValid ? report.m_altitudeFt : std::numeric_limits<float>::quiet_NaN());
-            flight->m_profileSpeedKts.append(report.m_speedValid ? report.m_speedKts : std::numeric_limits<float>::quiet_NaN());
+            flown->m_profileTimes.append(ms);
+            flown->m_profileAltFt.append(report.m_altitudeValid ? report.m_altitudeFt : std::numeric_limits<float>::quiet_NaN());
+            flown->m_profileSpeedKts.append(report.m_speedValid ? report.m_speedKts : std::numeric_limits<float>::quiet_NaN());
         }
     }
 
@@ -1896,18 +2394,72 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
     // genuinely newer message would be rejected by it.
     const bool routeIsNewer = !flight->m_routeFiled.isValid() || !report.m_received.isValid()
                            || (report.m_received >= flight->m_routeFiled);
+    // What is held is only a guess from the callsign, so anything an aircraft actually
+    // said replaces it whatever the clock says. TOM3TW was the case: the route database
+    // had that callsign as East Midlands to Lanzarote, the aircraft's own FMC filed
+    // Bristol to Corfu, and the flight was listed as the former while showing the
+    // latter's flight plan.
+    const bool guessHeld = flight->m_departureFromDatabase || flight->m_arrivalFromDatabase;
+
+    // A database entry is one route per callsign, filed as a whole. Where a message
+    // contradicts either end of it, the entry is describing a different operation and
+    // the other end of it is no more trustworthy than the end just disproved - so the
+    // whole guess goes, not just the half that was contradicted.
+    //
+    // That leaves a field empty where the message names only one end, which is the
+    // honest outcome: half of a wrong answer is still a wrong answer, and shown beside
+    // a corrected one it reads as though both had been confirmed.
+    if (guessHeld)
+    {
+        const bool contradicted =
+               (!report.m_departure.isEmpty() && !flight->m_departure.isEmpty()
+                && (report.m_departure != flight->m_departure))
+            || (!report.m_arrival.isEmpty() && !flight->m_arrival.isEmpty()
+                && (report.m_arrival != flight->m_arrival));
+        if (contradicted)
+        {
+            // Only the ends the database supplied - one already corrected by a message
+            // is not part of the guess being thrown away
+            if (flight->m_departureFromDatabase)
+            {
+                flight->m_departure.clear();
+                flight->m_departureFromDatabase = false;
+            }
+            if (flight->m_arrivalFromDatabase)
+            {
+                flight->m_arrival.clear();
+                flight->m_arrivalFromDatabase = false;
+            }
+        }
+    }
+
     bool routeFactTaken = false;
-    if (!report.m_departure.isEmpty() && (routeIsNewer || flight->m_departure.isEmpty()))
+    if (!report.m_departure.isEmpty()
+        && (routeIsNewer || flight->m_departure.isEmpty() || guessHeld))
     {
         flight->m_departure = report.m_departure;
+        flight->m_departureFromDatabase = false;
         routeFactTaken = true;
     }
-    if (!report.m_arrival.isEmpty() && (routeIsNewer || flight->m_arrival.isEmpty()))
+    if (!report.m_arrival.isEmpty()
+        && (routeIsNewer || flight->m_arrival.isEmpty() || guessHeld))
     {
         flight->m_arrival = report.m_arrival;
+        flight->m_arrivalFromDatabase = false;
         routeFactTaken = true;
     }
-    if (!report.m_route.isEmpty() && (routeIsNewer || flight->m_route.isEmpty()))
+    // A flight plan comes in parts: one route insert carries the en route path, the next
+    // only the approach - "ILS 19L" - and an approach is not a route. Newer is not better
+    // here, so a route that names nothing which can be placed does not replace one that
+    // does. Without this the second insert overwrote the first, the Route column read
+    // "ILS 19L", and the line already on the Map was erased as undrawable.
+    // Worked out once: placing a waypoint searches the navaid list, and a long route
+    // asked four times over would search it for every fix four times over
+    const int reportPlaceable = report.m_route.isEmpty()
+        ? 0 : routePlaceable(report.m_route, report.m_routeWaypoints);
+    const bool routeIsBetter = report.m_route.isEmpty() || (reportPlaceable >= 2)
+        || (routePlaceable(flight->m_route, QList<AircraftReport::RouteWaypoint>()) < 2);
+    if (!report.m_route.isEmpty() && routeIsBetter && (routeIsNewer || flight->m_route.isEmpty()))
     {
         flight->m_route = report.m_route;
         routeFactTaken = true;
@@ -1918,35 +2470,113 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
     // A flight plan and an oceanic clearance both name a list of waypoints, and both
     // are drawn. Nothing else that fills in m_route does - the route database fills it
     // with the airport pair, which is not a route at all.
-    if (!report.m_route.isEmpty())
+    //
+    // ANY part of a plan, not only a path. The arrival end of a plan names no waypoints
+    // at all - just the STAR and the approach - so testing the route alone dropped that
+    // insert on the floor and the STAR never reached the plan being assembled. The
+    // demodulator already had to make this exact correction on its side when it decides
+    // what counts as a flight plan document; this is the same test, one layer up, and it
+    // was still the old one.
+    const bool carriesPlan = !report.m_route.isEmpty() || !report.m_routeRunway.isEmpty()
+        || !report.m_routeSid.isEmpty() || !report.m_routeStar.isEmpty()
+        || !report.m_routeApproach.isEmpty() || !report.m_routeAlternate.isEmpty();
+    if (carriesPlan)
     {
         // A route filed before the one being held is a record of what the aircraft was
         // cleared onto earlier, not what it is on now. Replacing on arrival rather than
         // on filing time let a delayed message overwrite the current route, and redraw
         // the Map with it.
-        auto file = [&report](TrackedFlight::FiledRoute& route)
+        // One plan, assembled from the inserts that carry it. An aircraft files the
+        // departure end - runway, SID and the en route path - in one message and the
+        // arrival end - STAR and approach - in another, so taking a message whole meant
+        // the second half replaced the first and the plan was never whole. Each part is
+        // taken from whichever message carried it instead.
+        auto file = [this, &report, reportPlaceable](TrackedFlight::FiledRoute& route)
         {
             if (route.m_filed.isValid() && report.m_received.isValid()
                 && (report.m_received < route.m_filed)) {
                 return false;
             }
-            route.m_waypoints = report.m_route;
-            route.m_points = report.m_routeWaypoints;
-            route.m_text = report.m_documentText;
+
+            // Assembled only where it IS the same plan. An insert naming a different
+            // departure or arrival is a re-file, and then nothing of the old one is
+            // worth keeping - including what was drawn from it, which has to come off
+            // the Map here, while the names it was drawn under are still known.
+            const bool samePlan =
+                   (report.m_departure.isEmpty() || route.m_departure.isEmpty()
+                    || (report.m_departure == route.m_departure))
+                && (report.m_arrival.isEmpty() || route.m_arrival.isEmpty()
+                    || (report.m_arrival == route.m_arrival));
+            if (!samePlan)
+            {
+                removeDrawnRoute(route);
+                route = TrackedFlight::FiledRoute();
+            }
+
+            auto take = [](QString& into, const QString& from)
+            {
+                if (!from.isEmpty()) {
+                    into = from;
+                }
+            };
+            take(route.m_departure, report.m_departure);
+            take(route.m_arrival, report.m_arrival);
+            take(route.m_runway, report.m_routeRunway);
+            take(route.m_sid, report.m_routeSid);
+            take(route.m_star, report.m_routeStar);
+            take(route.m_approach, report.m_routeApproach);
+            take(route.m_alternate, report.m_routeAlternate);
+            if (report.m_routeFlightLevel > 0) {
+                route.m_flightLevel = report.m_routeFlightLevel;
+            }
+            if (report.m_routeMach > 0.0f) {
+                route.m_mach = report.m_routeMach;
+            }
+
+            // The path only from a message that has one, and only when it places at
+            // least as much as what is held: the arrival end of a plan places nothing,
+            // and taking it because it is newer erased the line that was drawn
+            const bool takePath = !report.m_route.isEmpty()
+                && ((reportPlaceable >= 2)
+                    || (routePlaceable(route.m_waypoints, route.m_points) < 2));
+            if (takePath)
+            {
+                route.m_waypoints = report.m_route;
+                route.m_points = report.m_routeWaypoints;
+            }
+
+            // The message that carried the path, since that is the substantive half and
+            // the two are otherwise near identical - both are position reports, so
+            // keeping both would show the same position, altitude and waypoints twice
+            if (takePath || route.m_text.isEmpty()) {
+                route.m_text = report.m_documentText;
+            }
             route.m_filed = report.m_received;
             return true;
         };
 
-        if (report.m_documentKind == AircraftReport::FlightPlan)
+        // Stored either way; drawn only when this is the flight being looked at, which
+        // sendRouteToMap() decides
+        if ((report.m_documentKind == AircraftReport::FlightPlan)
+            || (report.m_documentKind == AircraftReport::DepartureClearance))
         {
-            if (file(flight->m_flightPlan)) {
+            if (file(flight->m_flightPlan))
+            {
                 sendRouteToMap(flight, flight->m_flightPlan, "Flight plan");
+                // So the plan reaches the ND without waiting for the next report
+                if (flight->m_aircraft) {
+                    sendToMap(flight->m_aircraft);
+                }
             }
         }
         else if (report.m_documentKind == AircraftReport::Clearance)
         {
-            if (file(flight->m_clearance)) {
+            if (file(flight->m_clearance))
+            {
                 sendRouteToMap(flight, flight->m_clearance, "Oceanic clearance");
+                if (flight->m_aircraft) {
+                    sendToMap(flight->m_aircraft);
+                }
             }
         }
     }
@@ -1959,23 +2589,29 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
         const AircraftRouteInformation *route = m_routeInfo->value(flight->m_flight);
         flight->m_departure = route->m_dep;
         flight->m_arrival = route->m_arr;
+        // Remembered, so that the first message to say otherwise can overturn it. A
+        // callsign is flown day after day and the database holds one route for it, so
+        // this is a reasonable guess and no more than that.
+        flight->m_departureFromDatabase = true;
+        flight->m_arrivalFromDatabase = true;
         if (!route->m_stops.isEmpty()) {
             flight->m_route = route->m_stops;
         }
     }
 
-    // The aircraft-level route facts drive the Map popups
-    if (item->m_departure.isEmpty()) {
+    // The aircraft-level route facts drive the Map label and popups, so they are the
+    // current flight's. Only filling them when empty kept the first value for the whole
+    // flight - a database guess that a flight plan then corrected stayed on the Map while
+    // the Flights table showed the filed route.
+    if (flight == item->m_currentFlight)
+    {
         item->m_departure = flight->m_departure;
-    }
-    if (item->m_arrival.isEmpty()) {
         item->m_arrival = flight->m_arrival;
-    }
-    if (item->m_route.isEmpty()) {
         item->m_route = flight->m_route;
     }
 
     m_dirtyFlights.insert(flight);
+    m_dirtyFlights.insert(flown);   // Its profile, when that went to the current flight
 
     return flight;
 }
@@ -1990,6 +2626,13 @@ QString AircraftTracker::documentKindName(int kind) const
     case AircraftReport::Loadsheet: return "Loadsheet";
     case AircraftReport::FlightPlan: return "Flight plan";
     case AircraftReport::Clearance: return "Clearance";
+    case AircraftReport::DepartureClearance: return "Departure clearance";
+    case AircraftReport::ClearanceRequest: return "Clearance request";
+    case AircraftReport::AtisRequest: return "ATIS request";
+    case AircraftReport::WeatherRequest: return "Weather request";
+    case AircraftReport::AirlineDownlink: return "Airline downlink";
+    case AircraftReport::AircrewMessage: return "Aircrew message";
+    case AircraftReport::EmergencyMessage: return "Emergency";
     case AircraftReport::Cpdlc: return "CPDLC";
     case AircraftReport::Logon: return "Logon";
     case AircraftReport::PerformanceReport: return "Performance";
@@ -2007,6 +2650,13 @@ void AircraftTracker::addDocument(TrackedAircraft *item, TrackedFlight *flight, 
     case AircraftReport::Loadsheet:
     case AircraftReport::FlightPlan:
     case AircraftReport::Clearance:
+    case AircraftReport::DepartureClearance:
+    case AircraftReport::ClearanceRequest:
+    case AircraftReport::AtisRequest:
+    case AircraftReport::WeatherRequest:
+    case AircraftReport::AirlineDownlink:
+    case AircraftReport::AircrewMessage:
+    case AircraftReport::EmergencyMessage:
     case AircraftReport::Logon:
     case AircraftReport::OooiEvent:
         break;
@@ -2028,6 +2678,19 @@ void AircraftTracker::addDocument(TrackedAircraft *item, TrackedFlight *flight, 
     doc->m_title = report.m_documentTitle.isEmpty() ? documentKindName(report.m_documentKind) : report.m_documentTitle;
     doc->m_text = report.m_documentText;
     doc->m_received = report.m_received;
+    if (report.m_documentDerivable)
+    {
+        doc->m_raw = report.m_documentRaw;
+        doc->m_source = report.m_documentSource;
+        // Rendered here rather than taken from the report, so that what is shown live is
+        // produced by exactly the same call that will produce it after a reload. Taking
+        // the report's text would leave the two able to differ, and the difference would
+        // only appear the next time the session was opened.
+        const QString rendered = renderDocument(doc->m_raw, doc->m_source);
+        if (!rendered.isEmpty()) {
+            doc->m_text = rendered;
+        }
+    }
     flight->m_documents.append(doc);
 
     m_pendingDocuments.append(documentEvent(item, flight, doc));
@@ -2066,7 +2729,10 @@ void AircraftTracker::addWeatherReport(TrackedAircraft *item, const AircraftRepo
     e.m_airport = report.m_weatherAirport;
     e.m_kind = weatherKindName(report.m_weatherKind);
     e.m_text = report.m_weatherText;
-    e.m_summary = QString(e.m_text).replace('\n', " ").simplified();
+    // The report is HTML, which a table cell shows as tags - the detail pane below
+    // the table renders it. One line of plain text is what the Report column wants
+    e.m_summary = QTextDocumentFragment::fromHtml(e.m_text).toPlainText()
+                      .replace('\n', " ").simplified();
     e.m_from = !item->m_flight.isEmpty() ? item->m_flight : regFor(item);
 
     // The same METAR is sent to every aircraft that asks, so the identical report
@@ -2075,7 +2741,7 @@ void AircraftTracker::addWeatherReport(TrackedAircraft *item, const AircraftRepo
     // This used to scan the whole log, comparing the full text of every entry against
     // every arrival - and since the log only grows, the cost per report grew with it, on
     // the tracker thread, for exactly the traffic that produces the most repeats.
-    const size_t key = qHashMulti(0, e.m_airport, e.m_kind, e.m_text);
+    const size_t key = weatherKey(e);
     for (auto it = m_weatherIndex.constFind(key);
          (it != m_weatherIndex.constEnd()) && (it.key() == key); ++it)
     {
@@ -2107,6 +2773,7 @@ void AircraftTracker::addAtcMessage(TrackedAircraft *item, TrackedFlight *flight
     e.m_flightId = flight->m_id;
     e.m_received = report.m_received;
     e.m_protocol = documentKindName(report.m_documentKind);
+    e.m_link = sourceText(report.m_protocol, report.m_frequency);
     e.m_uplink = report.m_uplink;
     e.m_from = report.m_uplink ? report.m_station : flightName;
     e.m_to = report.m_uplink ? flightName : report.m_station;
@@ -2120,6 +2787,138 @@ void AircraftTracker::addAtcMessage(TrackedAircraft *item, TrackedFlight *flight
         && (m_atcLog.last().m_from == e.m_from)
         && (m_atcLog.last().m_to == e.m_to)) {
         return;
+    }
+
+    m_atcLog.append(e);
+    m_pendingAtc.append(e);
+    m_dbDirty = true;
+}
+
+// Work out which aircraft a SELCAL call was for, and give the report its identity so it
+// is processed like any other. A code is assigned to several aircraft, so it is only
+// pinned on one when nothing else could have been meant:
+//
+//  - exactly one of the aircraft holding the code is being heard now, or
+//  - the database gives the code to one aircraft only, and that one is in the archive.
+//    Being called on a voice channel means it is flying, so it is made active again.
+//
+// Anything else - several candidates in the air, or none being tracked - is logged
+// against nobody. Guessing would make up an aircraft, and a made up aircraft is far
+// harder to notice than an unattributed call. A call never creates an aircraft: with no
+// identity and no position there would be nothing to show for it.
+bool AircraftTracker::attributeSelcal(AircraftReport& report)
+{
+    const QString code = SELCALDB::normalizeCode(report.m_selcalCode);
+    if (code.isEmpty()) {
+        return false;
+    }
+    report.m_selcalCode = code;
+
+    const QStringList registrations = SELCALDB::getRegistrations(code);
+    QList<TrackedAircraft *> tracked;
+
+    for (const QString& registration : registrations)
+    {
+        // By registration, and failing that by the ICAO address the aircraft database
+        // gives it, since an airframe heard only on ADS-B may not have a registration yet
+        TrackedAircraft *item = m_byKey.value(regKey(registration));
+        if (!item && m_aircraftInfo && m_aircraftInfo->contains(registration))
+        {
+            const quint32 icao = (quint32) m_aircraftInfo->value(registration)->m_icao;
+            if (icao) {
+                item = m_byKey.value(icaoKey(icao));
+            }
+        }
+        if (item && !tracked.contains(item)) {
+            tracked.append(item);
+        }
+    }
+
+    QList<TrackedAircraft *> active;
+    for (TrackedAircraft *item : tracked)
+    {
+        if (item->m_active) {
+            active.append(item);
+        }
+    }
+
+    TrackedAircraft *chosen = nullptr;
+    if (active.size() == 1) {
+        chosen = active.first();
+    } else if (active.isEmpty() && (registrations.size() == 1) && (tracked.size() == 1)) {
+        chosen = tracked.first();
+    }
+
+    if (!chosen)
+    {
+        logSelcalCall(nullptr, nullptr, report, registrations);
+
+        // Still a message heard on this protocol, so it counts towards the rates and
+        // totals - just with no aircraft to set a record or be counted as heard
+        m_chartCounts[AircraftReport::SELCAL]++;
+        m_chartCounts[AircraftReport::ProtocolCount]++;
+        const QDateTime when = report.m_received.isValid() ? report.m_received
+                                                           : QDateTime::currentDateTime();
+        for (AircraftStatistics::Scope *scope : { &m_statistics.m_session, &m_statistics.m_allTime }) {
+            scope->update(report.m_protocol, false, 0.0f, false, 0.0f, false, 0.0f, QString(),
+                          when, false, 0.0f, 0.0f, report.m_frequency);
+        }
+        m_statisticsDirty = true;
+        return false;
+    }
+
+    report.m_icao = chosen->m_icao;
+    report.m_registration = chosen->m_registration;
+    return true;
+}
+
+// A SELCAL call in the ATC log, with the aircraft it was for where that is known. From
+// is the frequency it was heard on: the call carries no station, and the frequency is
+// what says which oceanic control or airline radio made it.
+void AircraftTracker::logSelcalCall(TrackedAircraft *item, TrackedFlight *flight,
+                                    const AircraftReport& report, const QStringList& candidates)
+{
+    AtcEvent e;
+    e.m_aircraftId = item ? item->m_id : 0;
+    e.m_flightId = flight ? flight->m_id : 0;
+    e.m_received = report.m_received;
+    e.m_protocol = protocolName(AircraftReport::SELCAL);
+    e.m_uplink = true;
+    e.m_from = report.m_frequency
+        ? QString("%1 MHz").arg(report.m_frequency / 1e6, 0, 'f', 3) : QString();
+    e.m_message = QString("SELCAL %1").arg(report.m_selcalCode);
+
+    if (item)
+    {
+        e.m_to = (flight && !flight->m_flight.isEmpty()) ? flight->m_flight : regFor(item);
+        e.m_tooltip = QString("SELCAL %1 called %2").arg(report.m_selcalCode, regFor(item));
+        e.m_mapName = item->m_mapName.isEmpty() ? mapItemName(item) : item->m_mapName;
+    }
+    else if (candidates.isEmpty())
+    {
+        e.m_to = "Unknown";
+        e.m_tooltip = QString("SELCAL %1 is not assigned to any aircraft in the SELCAL"
+                              " database, or the database has not been downloaded").arg(report.m_selcalCode);
+    }
+    else
+    {
+        e.m_to = (candidates.size() == 1) ? candidates.first()
+                                           : QString("%1 aircraft").arg(candidates.size());
+        e.m_tooltip = QString("SELCAL %1 is assigned to %2. None could be picked out as the"
+                              " one called: either none is being heard, or more than one is")
+                          .arg(report.m_selcalCode, candidates.join(", "));
+    }
+
+    // A ground station calls more than once when the crew is slow to answer, and the
+    // decoder can report one transmission twice. Calls close together are one event.
+    if (!m_atcLog.isEmpty())
+    {
+        const AtcEvent& last = m_atcLog.last();
+        if ((last.m_message == e.m_message) && (last.m_from == e.m_from) && (last.m_to == e.m_to)
+            && last.m_received.isValid() && e.m_received.isValid()
+            && (std::abs(last.m_received.secsTo(e.m_received)) < 30)) {
+            return;
+        }
     }
 
     m_atcLog.append(e);
@@ -2171,7 +2970,7 @@ void AircraftTracker::checkNotifications(TrackedAircraft *item, const AircraftRe
                 emit speechNotification(subAircraftString(item, report, rule->m_speech));
             }
             if (!rule->m_command.isEmpty()) {
-                commandNotification(subAircraftString(item, report, rule->m_command));
+                commandNotification(item, report, rule->m_command);
             }
         }
     }
@@ -2179,30 +2978,58 @@ void AircraftTracker::checkNotifications(TrackedAircraft *item, const AircraftRe
 
 QString AircraftTracker::subAircraftString(TrackedAircraft *item, const AircraftReport& report, const QString& string) const
 {
-    QString s = string;
-    s = s.replace("${icao}", item->m_icao ? QString("%1").arg(item->m_icao, 6, 16, QChar('0')).toUpper() : QString());
-    s = s.replace("${reg}", item->m_registration);
-    s = s.replace("${flight}", item->m_flight);
     QString type;
     if (m_aircraftInfo && m_aircraftInfo->contains(item->m_registration)) {
         type = m_aircraftInfo->value(item->m_registration)->m_type;
     }
-    s = s.replace("${type}", type);
-    s = s.replace("${protocol}", protocolName(report.m_protocol));
+    const QHash<QString, QString> values {
+        {"icao", item->m_icao ? QString("%1").arg(item->m_icao, 6, 16, QChar('0')).toUpper() : QString()},
+        {"reg", item->m_registration},
+        {"flight", item->m_flight},
+        {"type", type},
+        {"protocol", protocolName(report.m_protocol)}
+    };
+
+    // In one pass over the template, so a value is never searched for variables itself.
+    // Replacing them one after another did exactly that: a registration or flight number
+    // comes off the air, and one reading "${type}" was expanded again by the next step.
+    static const QRegularExpression variable(R"(\$\{(\w+)\})");
+    QString s;
+    int last = 0;
+    QRegularExpressionMatchIterator it = variable.globalMatch(string);
+    while (it.hasNext())
+    {
+        const QRegularExpressionMatch match = it.next();
+        s += string.mid(last, match.capturedStart() - last);
+        auto value = values.constFind(match.captured(1));
+        s += (value != values.constEnd()) ? value.value() : match.captured(0);
+        last = match.capturedEnd();
+    }
+    s += string.mid(last);
     return s;
 }
 
-void AircraftTracker::commandNotification(const QString& command)
+// The template is split into arguments BEFORE the aircraft's details go in. They come off
+// the air - anyone transmitting chooses them - so substituting first let quotes and spaces
+// in a received registration or flight number become argument boundaries, adding arguments
+// to the user's program. Substituted per argument, a value stays within the one it was put in.
+void AircraftTracker::commandNotification(TrackedAircraft *item, const AircraftReport& report,
+                                          const QString& command)
 {
 #if QT_CONFIG(process)
     QStringList allArgs = QProcess::splitCommand(command);
     if (allArgs.size() > 0)
     {
+        for (QString& arg : allArgs) {
+            arg = subAircraftString(item, report, arg);
+        }
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
     }
 #else
+    (void) item;
+    (void) report;
     qWarning() << "AircraftTracker::commandNotification: QProcess not supported. Can't run: " << command;
 #endif
 }
@@ -2218,13 +3045,14 @@ void AircraftTracker::commandNotification(const QString& command)
 // Version 1 held the records alone. It still reads, and its records become the all time
 // records, which is what they always were. Version 3 added where each record was set;
 // records read from an older blob simply have no position, and are not drawn on the Map.
+// Version 4 added the frequency it was heard on, which an older record likewise lacks.
 QByteArray AircraftTracker::serializeStatistics(const AircraftStatistics& statistics)
 {
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
     stream.setVersion(QDataStream::Qt_5_15);
 
-    stream << (quint32) 3;      // format version
+    stream << (quint32) 4;      // format version
     stream << (quint32) AircraftReport::ProtocolCount;
 
     auto put = [&stream](const AircraftStatistics::Record& r)
@@ -2233,6 +3061,7 @@ QByteArray AircraftTracker::serializeStatistics(const AircraftStatistics& statis
         // Added in version 3
         stream << r.m_positionValid << r.m_latitude << r.m_longitude
                << r.m_altitudeValid << r.m_altitudeFt;
+        stream << r.m_frequency;    // Added in version 4
     };
 
     const AircraftStatistics::Scope& all = statistics.m_allTime;
@@ -2265,7 +3094,10 @@ AircraftStatistics AircraftTracker::deserializeStatistics(const QByteArray& data
     quint32 version = 0;
     quint32 protocols = 0;
     stream >> version >> protocols;
-    if ((version < 1) || (version > 3) || (stream.status() != QDataStream::Ok)) {
+    // The protocol count is bounded too: a corrupt blob could otherwise ask for four
+    // billion records from a stream that has already run dry. Far more than there will
+    // ever be protocols, but small enough that a nonsense count is caught.
+    if ((version < 1) || (version > 4) || (protocols > 256) || (stream.status() != QDataStream::Ok)) {
         return statistics;      // Written by something else, or truncated: start clean
     }
 
@@ -2276,6 +3108,9 @@ AircraftStatistics AircraftTracker::deserializeStatistics(const QByteArray& data
         {
             stream >> r.m_positionValid >> r.m_latitude >> r.m_longitude
                    >> r.m_altitudeValid >> r.m_altitudeFt;
+        }
+        if (version >= 4) {
+            stream >> r.m_frequency;
         }
     };
 
@@ -2402,6 +3237,34 @@ QGeoCoordinate AircraftTracker::receiverPosition(int deviceSetIndex)
     return position;
 }
 
+// What the web API's report says. Counted on demand rather than kept, because it is
+// asked for rarely and would otherwise be another thing to keep in step.
+AircraftTracker::Totals AircraftTracker::totals() const
+{
+    QMutexLocker locker(&m_totalsMutex);
+    return m_totals;
+}
+
+// On the tracker's thread, which is the only one that may walk the aircraft
+void AircraftTracker::updateTotals()
+{
+    Totals totals;
+    totals.m_aircraft = m_aircraft.size();
+    for (const TrackedAircraft *item : m_aircraft)
+    {
+        if (item->m_active) {
+            totals.m_activeAircraft++;
+        }
+        totals.m_flights += item->m_flights.size();
+    }
+    totals.m_messages = m_statistics.m_session.m_totalMessages;
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++) {
+        totals.m_messagesByProtocol[i] = m_statistics.m_session.m_messagesByProtocol[i];
+    }
+    QMutexLocker locker(&m_totalsMutex);
+    m_totals = totals;
+}
+
 // Records, counters and the concurrent aircraft window
 void AircraftTracker::updateStatistics(const AircraftReport& report, TrackedAircraft *item,
                                       bool rangeValid, float rangeKm,
@@ -2427,10 +3290,10 @@ void AircraftTracker::updateStatistics(const AircraftReport& report, TrackedAirc
 
     m_statistics.m_session.update(report.m_protocol, rangeValid, rangeKm,
         item->m_speedValid, item->m_speedKts, altitudeValid, altitudeFt, who, when,
-        positionValid, report.m_latitude, report.m_longitude);
+        positionValid, report.m_latitude, report.m_longitude, report.m_frequency);
     m_statistics.m_allTime.update(report.m_protocol, rangeValid, rangeKm,
         item->m_speedValid, item->m_speedKts, altitudeValid, altitudeFt, who, when,
-        positionValid, report.m_latitude, report.m_longitude);
+        positionValid, report.m_latitude, report.m_longitude, report.m_frequency);
 
     // First time this airframe has been heard in this session - which is not the same as
     // the first time it was tracked, because the tracked list is restored from the
@@ -2499,7 +3362,7 @@ QString AircraftTracker::notificationSignature(const AircraftSettings& settings)
     return parts.join(QChar(0x1e));
 }
 
-QString AircraftTracker::protocolName(int protocol) const
+QString AircraftTracker::protocolName(int protocol)
 {
     switch (protocol)
     {
@@ -2508,12 +3371,25 @@ QString AircraftTracker::protocolName(int protocol) const
     case AircraftReport::VDL2: return "VDL2";
     case AircraftReport::HFDL: return "HFDL";
     case AircraftReport::AERO: return "Aero";
+    case AircraftReport::SELCAL: return "SELCAL";
+    case AircraftReport::IRIDIUM: return "Iridium";
     default: return "?";
     }
 }
 
 // E.g: {"ADS-B", "ACARS 131.725", "HFDL 5.720"}. ADS-B has no frequency - it is
 // always 1090 MHz.
+QString AircraftTracker::sourceText(int protocol, qint64 frequency)
+{
+    QString text = protocolName(protocol);
+
+    if ((frequency != 0) && (protocol != (int) AircraftReport::ADSB)) {
+        text += QString(" %1").arg(frequency / 1e6, 0, 'f', 3);
+    }
+
+    return text;
+}
+
 QStringList AircraftTracker::sourcesList(const QHash<QPair<int, qint64>, int>& sources) const
 {
     QStringList parts;
@@ -2521,10 +3397,7 @@ QStringList AircraftTracker::sourcesList(const QHash<QPair<int, qint64>, int>& s
     std::sort(keys.begin(), keys.end());
     for (const auto& key : keys)
     {
-        QString part = protocolName(key.first);
-        if ((key.second != 0) && (key.first != (int) AircraftReport::ADSB)) {
-            part += QString(" %1").arg(key.second / 1e6, 0, 'f', 3);
-        }
+        QString part = sourceText(key.first, key.second);
         if (!parts.contains(part)) {
             parts.append(part);
         }
@@ -2557,16 +3430,7 @@ QString AircraftTracker::flightLabel(const QString& flight) const
 
 QString AircraftTracker::mapItemName(const TrackedAircraft *item) const
 {
-    if (!item->m_registration.isEmpty()) {
-        return item->m_registration;
-    }
-    if (!item->m_flight.isEmpty()) {
-        return item->m_flight;
-    }
-    if (item->m_icao) {
-        return QString("%1").arg(item->m_icao, 6, 16, QChar('0')).toUpper();
-    }
-    return QString();
+    return aircraftMapItemName(item->m_registration, item->m_flight, item->m_icao);
 }
 
 // ATC style Map label, like the ADS-B demodulator's: identity, route, flight
@@ -2628,7 +3492,7 @@ QString AircraftTracker::aircraftImage(const QString& registration, const QStrin
     // demodulator's resources, so may not exist in every build
     if (m_settings.m_useLiveryIcons && !model3D.isEmpty())
     {
-        QString image = QString("liveries/%1.png").arg(QFileInfo(model3D).completeBaseName());
+        QString image = QString("liveries/%1.png").arg(Aircraft3DModels::liveryIconName(model3D));
         if (QFile::exists(":/map/" + image)) {
             return image;
         }
@@ -2716,6 +3580,16 @@ QDateTime AircraftTracker::mapAvailableUntil(const TrackedAircraft *item) const
 // Selecting one of an aircraft's past flights draws that flight's track instead of the
 // one it is on now. The icon is left where the aircraft actually is - the track is
 // history, the aircraft is not
+// The flight whose track is drawn, with its stored points fetched. Everything that draws
+// goes through here rather than trackFlight() directly, or a restored flight would be
+// drawn as however much of it has been heard since - usually nothing.
+AircraftTracker::TrackedFlight *AircraftTracker::trackFlightLoaded(TrackedAircraft *item)
+{
+    TrackedFlight *flight = const_cast<TrackedFlight *>(trackFlight(item));
+    ensureTrackLoaded(flight);
+    return flight;
+}
+
 const AircraftTracker::TrackedFlight *AircraftTracker::trackFlight(const TrackedAircraft *item) const
 {
     if (m_watchedFlight != 0)
@@ -2755,8 +3629,19 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
 {
     // The Map shows what we are currently hearing. Archived aircraft are taken off it
     // by setActive(), and must not be put back by any other path - nor may an aircraft
-    // whose position has gone stale, which keeps sending messages that carry no new one
-    if (!item->m_active || positionStale(item, QDateTime::currentDateTime())) {
+    // whose position has gone stale, which keeps sending messages that carry no new one.
+    // Nor one with no position at all: positionStale() says no to that, having no time to
+    // go on, and an ACARS-only aircraft given a clearance at the gate was drawn at 0N 0E.
+    if (!item->m_active || !item->m_positionValid
+        || (!item->m_mapReplay && positionStale(item, QDateTime::currentDateTime()))) {
+        return;
+    }
+    // Nor while the ADS-B pass-through is supplying the item. The basic item built here
+    // replaced it whole - zeroing the PFD and dropping the altitude handling, so the model
+    // sank or floated - whenever a clearance or CPDLC message arrived. forwardMapItem()
+    // attaches the plan and the message to the next ADS-B item instead.
+    if (item->m_lastMapItemTime.isValid()
+        && (item->m_lastMapItemTime.secsTo(QDateTime::currentDateTime()) < 60)) {
         return;
     }
 
@@ -2778,7 +3663,8 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
     }
     // Rebuilding the whole track for every report is expensive, so it is only
     // sent when it has changed; the Map keeps its stored track otherwise
-    bool sendTrack = item->m_mapTrackChanged || (item->m_mapName != name);
+    bool sendTrack = item->m_mapTrackChanged || item->m_mapTrackAppended
+        || (item->m_mapName != name);
     item->m_mapName = name;
 
     const AircraftInformation *info =
@@ -2815,11 +3701,18 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
             text.append(QString("<img src=%1>").arg(airline));
         }
     }
+    // The identities are links: clicking one selects that aircraft or flight in this
+    // feature, which is the question someone looking at the Map usually has next
+    if (item->m_icao)
+    {
+        text.append(QString("ICAO: %1").arg(aircraftMapLink("icao",
+            QString("%1").arg(item->m_icao, 6, 16, QChar('0')).toUpper())));
+    }
     if (!item->m_registration.isEmpty()) {
-        text.append(QString("Reg: %1").arg(item->m_registration));
+        text.append(QString("Reg: %1").arg(aircraftMapLink("registration", item->m_registration)));
     }
     if (!item->m_flight.isEmpty()) {
-        text.append(QString("Flight: %1").arg(item->m_flight));
+        text.append(QString("Flight: %1").arg(aircraftMapLink("flight", item->m_flight)));
     }
     if (info)
     {
@@ -2885,7 +3778,14 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
             swgMapItem->setLabel(new QString(item->m_flight.isEmpty() ? name : item->m_flight));
         }
         if (sendTrack) {
-            swgMapItem->setTrack(buildTrack(trackFlight(item)));
+            swgMapItem->setTrack(buildTrack(trackFlightLoaded(item)));
+        }
+
+        // Engine sound, looped by the 3D map, spatially located at the aircraft
+        const QString engineSound = AircraftEngineSound::engineSound(
+            info ? info->m_type : QString(), QString(), info ? info->m_model : QString());
+        if (!engineSound.isEmpty()) {
+            swgMapItem->setLoopSound(new QString(engineSound));
         }
 
         // Keep using the 3D model a pass-through provided, so the 3D map shows
@@ -2906,24 +3806,113 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
             }
         }
 
+        // A minimal aircraft state to carry the filed route for the Map's ND and the
+        // latest datalink message for its DCDU, built only when there is something to
+        // send - this path is for aircraft heard on protocols that do not build the
+        // full state the ADS-B pass-through has
+        SWGSDRangel::SWGMapFlightPlan *plan = buildFlightPlan(item);
+        SWGSDRangel::SWGMapDatalinkMessage *datalinkMessage = buildDatalinkMessage(item);
+        if (plan || datalinkMessage)
+        {
+            SWGSDRangel::SWGMapAircraftState *aircraftState = new SWGSDRangel::SWGMapAircraftState();
+            aircraftState->setCallsign(new QString(item->m_flight.isEmpty() ? name : item->m_flight));
+            if (info && !info->m_type.isEmpty()) {
+                aircraftState->setAircraftType(new QString(info->m_type));
+            }
+            aircraftState->setOnSurface(-1);
+            if (item->m_altitudeValid)
+            {
+                aircraftState->setAltitude(item->m_altitudeFt);
+                if (item->m_altitudeDateTime.isValid()) {
+                    aircraftState->setAltitudeDateTime(new QString(item->m_altitudeDateTime.toString(Qt::ISODateWithMs)));
+                }
+            }
+            if (item->m_headingValid) {
+                aircraftState->setTrack(item->m_heading);
+            }
+            if (item->m_speedValid) {
+                aircraftState->setGroundspeed(item->m_speedKts);
+            }
+            if (plan) {
+                aircraftState->setFlightPlan(plan);
+            }
+            if (datalinkMessage) {
+                aircraftState->setDatalinkMessage(datalinkMessage);
+            }
+            swgMapItem->setAircraftState(aircraftState);
+        }
+
         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_feature, swgMapItem);
         messageQueue->push(msg);
     }
-    item->m_mapTrackChanged = false;
+    if (sendTrack)
+    {
+        item->m_mapTrackChanged = false;
+        item->m_mapTrackAppended = false;
+        item->m_mapTrackSentMs = QDateTime::currentMSecsSinceEpoch();
+    }
 }
 
 // Forward a fully-built map item from a demodulator (the ADS-B pass-through, which
 // carries the 3D model and full aircraft state for the Map's PFD) to the Map,
 // renamed to this feature's naming and enriched with the collated track and route
 // facts. Takes ownership of the item.
+template <typename T>
+static QList<T *> *cloneSWGList(QList<T *> *list)
+{
+    if (!list) {
+        return nullptr;
+    }
+    QList<T *> *copy = new QList<T *>();
+    for (T *element : *list)
+    {
+        T *elementCopy = new T();
+        QJsonObject *json = element->asJsonObject();
+        elementCopy->fromJsonObject(*json);
+        delete json;
+        copy->append(elementCopy);
+    }
+    return copy;
+}
+
+// A copy for each additional Map feature. The lists are not left to the JSON round trip:
+// the default constructor leaves them null, which fromJsonObject dereferences as soon as
+// the JSON has an array for them, and asJsonObject drops an empty list - which to the Map
+// means "clear the track", where null means "unchanged".
+static SWGSDRangel::SWGMapItem *cloneMapItem(SWGSDRangel::SWGMapItem *item)
+{
+    SWGSDRangel::SWGMapItem *copy = new SWGSDRangel::SWGMapItem();
+    QJsonObject *json = item->asJsonObject();
+    json->remove("track");
+    json->remove("predictedTrack");
+    json->remove("animations");
+    json->remove("coordinates");
+    copy->fromJsonObject(*json);
+    delete json;
+    copy->setTrack(cloneSWGList(item->getTrack()));
+    copy->setPredictedTrack(cloneSWGList(item->getPredictedTrack()));
+    copy->setAnimations(cloneSWGList(item->getAnimations()));
+    copy->setCoordinates(cloneSWGList(item->getCoordinates()));
+    return copy;
+}
+
 void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapItem *swgMapItem)
 {
+    // ADS-B marks every CSV replay state with its frame time. The tracked position is
+    // historical too, so comparing it with wall-clock time would discard the item here
+    // (and again in removeOldAircraft()) before either its track or PFD history reached
+    // the 3D Map. A later live pass-through has no state date and restores normal expiry.
+    SWGSDRangel::SWGMapAircraftState *aircraftState = swgMapItem->getAircraftState();
+    const bool replay = aircraftState && aircraftState->getDateTime()
+        && !aircraftState->getDateTime()->isEmpty();
+    item->m_mapReplay = replay;
+
     QList<ObjectPipe*> mapPipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_feature, "mapitems", mapPipes);
 
     QString name = mapItemName(item);
     if ((mapPipes.size() == 0) || name.isEmpty()
-        || positionStale(item, QDateTime::currentDateTime()))
+        || (!replay && positionStale(item, QDateTime::currentDateTime())))
     {
         delete swgMapItem;
         return;
@@ -2932,21 +3921,23 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
         removeFromMap(item->m_mapName);
     }
     // Rebuilding the whole track for every report is expensive, so it is only
-    // sent when it has changed; the Map keeps its stored track otherwise
-    bool sendTrack = item->m_mapTrackChanged || (item->m_mapName != name);
+    // sent when it has changed; the Map keeps its stored track otherwise. Here, at ADS-B
+    // rates, a track that has merely grown is only sent every few seconds: building it
+    // for every position was O(n) per report and O(n^2) per flight. In between, the Map
+    // draws a provisional point from the last one sent to the live position, so the line
+    // still reaches the aircraft.
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool sendTrack = item->m_mapTrackChanged || (item->m_mapName != name)
+        || (item->m_mapTrackAppended && ((nowMs - item->m_mapTrackSentMs) >= 5000));
 
-    // On the 3D map an entity shows either its model or a flat billboard of the
-    // 2D icon. When the pass-through brings a model to an aircraft first drawn
-    // without one, the item is removed and re-added so the stale billboard goes.
+    // A model from the pass-through is remembered for the items built here. It used to be
+    // removed and re-added when it replaced a billboard, since a CZML packet only adds to
+    // an entity and both would show - but the Map now hides the one it is not drawing,
+    // and the removal threw away the Map's history for the aircraft.
     QString *model = swgMapItem->getModel();
     bool hasModel = (model != nullptr) && !model->isEmpty();
     if (hasModel)
     {
-        if (!item->m_mapModelForm && (item->m_mapName == name))
-        {
-            removeFromMap(name);
-            sendTrack = true;
-        }
         item->m_model3D = *model;
         // ... and what goes with it. Without these the item built here on the next quiet
         // period, and the row written to the database, carry a zero offset or the offsets
@@ -2955,7 +3946,6 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
         item->m_modelAltitudeOffset = swgMapItem->getModelAltitudeOffset();
         item->m_labelAltitudeOffset = swgMapItem->getLabelAltitudeOffset();
         item->m_modelIsOurs = false;
-        item->m_mapModelForm = true;
     }
     item->m_mapName = name;
     item->m_mapResync = false;
@@ -3018,23 +4008,34 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
         swgMapItem->setLabel(new QString(label));
     }
 
+    // The filed route and latest datalink message, for the Map's ND and DCDU, which
+    // the demodulator's state does not have - both come by ACARS and are collated here
+    if (swgMapItem->getAircraftState())
+    {
+        SWGSDRangel::SWGMapFlightPlan *plan = buildFlightPlan(item);
+        if (plan) {
+            swgMapItem->getAircraftState()->setFlightPlan(plan);
+        }
+        SWGSDRangel::SWGMapDatalinkMessage *message = buildDatalinkMessage(item);
+        if (message) {
+            swgMapItem->getAircraftState()->setDatalinkMessage(message);
+        }
+    }
+
     if (sendTrack)
     {
-        swgMapItem->setTrack(buildTrack(trackFlight(item)));
+        swgMapItem->setTrack(buildTrack(trackFlightLoaded(item)));
         item->m_mapTrackChanged = false;
+        item->m_mapTrackAppended = false;
+        item->m_mapTrackSentMs = nowMs;
     }
 
     // Each message takes ownership of its item, so additional Map features get a
     // copy
     QList<SWGSDRangel::SWGMapItem *> items;
     items.append(swgMapItem);
-    for (int i = 1; i < mapPipes.size(); i++)
-    {
-        SWGSDRangel::SWGMapItem *copy = new SWGSDRangel::SWGMapItem();
-        QJsonObject *json = swgMapItem->asJsonObject();
-        copy->fromJsonObject(*json);
-        delete json;
-        items.append(copy);
+    for (int i = 1; i < mapPipes.size(); i++) {
+        items.append(cloneMapItem(swgMapItem));
     }
     for (int i = 0; i < mapPipes.size(); i++)
     {
@@ -3054,6 +4055,402 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
 // best record that CAN be drawn is used rather than the best overall - otherwise
 // upgrading would leave the option doing nothing until the old record was beaten.
 const char *AircraftTracker::RecordMapItemName = "Max range record";
+// Has to match a group the Map knows, or it falls back to this feature's own - see
+// MapSettings::MapSettings() and MapItem.group in the API
+const char *AircraftTracker::RouteMapGroup = "Aircraft Routes";
+
+const char *AircraftTracker::CoverageMapGroup = "Aircraft Coverage";
+
+// One colour per protocol, chosen to stay apart from each other and from the orange the
+// aircraft themselves are drawn in. Alpha is low because the polygons overlap - VHF
+// coverage sits inside HFDL's - and an opaque fill would hide whatever is underneath.
+QRgb AircraftTracker::coverageColor(int protocol)
+{
+    switch (protocol)
+    {
+    case AircraftReport::ADSB: return qRgba(244, 151,  57, 80);     // Orange
+    case AircraftReport::ACARS: return qRgba( 80, 200,  80, 80);    // Green
+    case AircraftReport::VDL2: return qRgba( 70, 140, 255, 80);     // Blue
+    case AircraftReport::HFDL: return qRgba(200,  80, 200, 80);     // Magenta
+    case AircraftReport::AERO: return qRgba( 80, 220, 220, 80);     // Cyan
+    default: return qRgba(200, 200, 200, 80);
+    }
+}
+
+// The furthest this protocol has heard an aircraft on this bearing. Called with the
+// range that was just measured, from the receiver that measured it.
+void AircraftTracker::updateCoverage(int protocol, const QGeoCoordinate& receiver,
+                                     float azimuthDeg, float rangeKm)
+{
+    if ((protocol < 0) || (protocol >= AircraftReport::ProtocolCount)
+        || !receiver.isValid() || (rangeKm <= 0.0f)) {
+        return;
+    }
+
+    if (m_coverageRangeKm[protocol].isEmpty()) {
+        m_coverageRangeKm[protocol].fill(0.0f, m_coverageBins);
+    }
+    // The receiver is remembered from the first report that measured anything, and then
+    // left alone: moving the centre would move every bin's endpoint with it, so a
+    // relocated receiver invalidates the pattern rather than shifting it. Clearing is
+    // the user's call - the button offers it.
+    if (!m_coverageOrigin[protocol].isValid()) {
+        m_coverageOrigin[protocol] = receiver;
+    }
+
+    // azimuthTo() gives 0 to 360; 360 itself would index off the end
+    int bin = (int) (azimuthDeg / m_coverageBinDeg);
+    if (bin < 0) {
+        bin = 0;
+    } else if (bin >= m_coverageBins) {
+        bin = m_coverageBins - 1;
+    }
+
+    if (rangeKm > m_coverageRangeKm[protocol][bin])
+    {
+        m_coverageRangeKm[protocol][bin] = rangeKm;
+        m_coverageDirty[protocol] = true;
+    }
+}
+
+// A polygon per protocol, two points per bin so each is a flat step at its own range
+// rather than a line to the next bin's - the same shape the ADS-B demodulator draws.
+// One shape per RUN of adjacent bearings that were actually measured, rather than one
+// outline around the lot.
+//
+// Joining across bearings nothing was heard on cannot be done honestly. Taking the gap
+// to zero draws a star of thin spikes back to the receiver; interpolating across it
+// draws a smooth arc at roughly constant range through directions that were never
+// listened to at all - which on HFDL, measured on a handful of bearings, claimed a
+// clean 180 degree arc across the whole western sky. Both are inventions. A wedge per
+// run says exactly what was heard and nothing about what was not: where every bearing
+// has been measured, as ADS-B's have, the runs join up and it is a single filled shape
+// again.
+void AircraftTracker::sendCoverageToMap(int protocol)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_feature, "mapitems", mapPipes);
+    if (mapPipes.isEmpty()) {
+        return;
+    }
+
+    const QVector<float>& ranges = m_coverageRangeKm[protocol];
+
+    // Which bearings were measured, as runs of adjacent bins. Rotated so a run never
+    // straddles the start of the array, or the one covering north would come out as two.
+    QList<QPair<int, int>> runs;        // First bin, and how many
+    const int bins = ranges.size();
+    int measured = 0;
+    for (int i = 0; i < bins; i++)
+    {
+        if (ranges[i] > 0.0f) {
+            measured++;
+        }
+    }
+
+    if (measured && m_settings.m_displayCoverage && m_coverageOrigin[protocol].isValid())
+    {
+        int first = 0;
+        if (measured < bins)
+        {
+            // Start at a bin whose predecessor is empty, so runs are whole
+            while (!((ranges[first] > 0.0f)
+                     && (ranges[(first + bins - 1) % bins] <= 0.0f))) {
+                first++;
+            }
+        }
+        int i = 0;
+        while (i < bins)
+        {
+            const int bin = (first + i) % bins;
+            if (ranges[bin] <= 0.0f)
+            {
+                i++;
+                continue;
+            }
+            int length = 0;
+            while ((i + length < bins) && (ranges[(first + i + length) % bins] > 0.0f)) {
+                length++;
+            }
+            runs.append(qMakePair(bin, length));
+            i += length;
+        }
+    }
+
+    // Whatever was drawn last time and is not being drawn now has to come off - the
+    // number of runs changes as bearings fill in
+    QStringList drawn;
+    float furthest = 0.0f;
+    for (int i = 0; i < bins; i++) {
+        furthest = std::max(furthest, ranges[i]);
+    }
+
+    for (int r = 0; r < runs.size(); r++)
+    {
+        const int firstBin = runs[r].first;
+        const int length = runs[r].second;
+        // Numbered, because one protocol can need many. The name is what the Map keys
+        // on, so it has to be stable for a given run index.
+        const QString name = QString("Coverage %1 %2").arg(protocolName(protocol)).arg(r);
+        drawn.append(name);
+
+        QStringList text;
+        text.append(QString("%1 coverage").arg(protocolName(protocol)));
+        text.append(QString("Bearings: %1 to %2 degrees")
+            .arg(firstBin * m_coverageBinDeg)
+            .arg(((firstBin + length) % bins) * m_coverageBinDeg));
+        float runFurthest = 0.0f;
+        for (int i = 0; i < length; i++) {
+            runFurthest = std::max(runFurthest, ranges[(firstBin + i) % bins]);
+        }
+        text.append(QString("Furthest here: %1 km").arg(runFurthest, 0, 'f', 1));
+        text.append(QString("Furthest overall: %1 km").arg(furthest, 0, 'f', 1));
+        text.append(QString("Measured from: %1, %2")
+            .arg(m_coverageOrigin[protocol].latitude(), 0, 'f', 4)
+            .arg(m_coverageOrigin[protocol].longitude(), 0, 'f', 4));
+
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setGroup(new QString(CoverageMapGroup));
+            swgMapItem->setLabel(new QString(""));
+            swgMapItem->setText(new QString(text.join("\n")));
+            swgMapItem->setLatitude(m_coverageOrigin[protocol].latitude());
+            swgMapItem->setLongitude(m_coverageOrigin[protocol].longitude());
+            swgMapItem->setAltitude(0.0);
+            swgMapItem->setImage(new QString("none"));
+            swgMapItem->setImageRotation(0);
+            swgMapItem->setFixedPosition(true);
+            swgMapItem->setAltitudeReference(1);     // Clamp to ground
+            swgMapItem->setColorValid(1);
+            swgMapItem->setColor(coverageColor(protocol));
+
+            QList<SWGSDRangel::SWGMapCoordinate *> *polygon = new QList<SWGSDRangel::SWGMapCoordinate *>();
+            auto at = [&](double bearing, double km)
+            {
+                const QGeoCoordinate c =
+                    m_coverageOrigin[protocol].atDistanceAndAzimuth(km * 1000.0, bearing);
+                SWGSDRangel::SWGMapCoordinate *p = new SWGSDRangel::SWGMapCoordinate();
+                p->setLatitude(c.latitude());
+                p->setLongitude(c.longitude());
+                p->setAltitude(0.0);
+                polygon->append(p);
+            };
+
+            // A run short of the full circle is a wedge, so it starts and ends at the
+            // receiver; one that goes all the way round is a ring and must not, or the
+            // shape is slit open along one bearing.
+            //
+            // The two radial edges are stepped rather than drawn as one straight run out
+            // from the receiver. A constant bearing over thousands of miles is a curve on
+            // the 2D map, which draws a straight line between consecutive vertices - so a
+            // single segment cut visibly across where the edge should lie, worst on the
+            // longest wedges. The 3D map was right all along because Cesium draws polygon
+            // edges as geodesics whatever it is given. One step per 250 km, which puts the
+            // error well under the width of the line.
+            const bool wedge = (length < bins);
+            auto radial = [&](double bearing, float km, bool outward)
+            {
+                const int steps = qBound(1, (int) (km / 250.0f) + 1, 16);
+                for (int k = 0; k <= steps; k++)
+                {
+                    const int step = outward ? k : (steps - k);
+                    at(bearing, km * step / (float) steps);
+                }
+            };
+
+            if (wedge) {
+                radial(firstBin * m_coverageBinDeg, ranges[firstBin], true);
+            }
+            for (int i = 0; i < length; i++)
+            {
+                const int bin = (firstBin + i) % bins;
+                // Both edges of the bin at its own range, so each bearing is a flat step
+                at(bin * m_coverageBinDeg, ranges[bin]);
+                at((bin + 1) * m_coverageBinDeg, ranges[bin]);
+            }
+            if (wedge)
+            {
+                const int lastBin = (firstBin + length - 1) % bins;
+                radial((lastBin + 1) * m_coverageBinDeg, ranges[lastBin], false);
+            }
+
+            swgMapItem->setCoordinates(polygon);
+            swgMapItem->setType(2);                  // Polygon
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_feature, swgMapItem);
+            messageQueue->push(msg);
+        }
+    }
+
+    for (const QString& previous : m_coverageDrawnNames[protocol])
+    {
+        if (!drawn.contains(previous)) {
+            removeFromMap(previous);
+        }
+    }
+    m_coverageDrawnNames[protocol] = drawn;
+}
+
+void AircraftTracker::sendCoverageToMap()
+{
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    {
+        sendCoverageToMap(i);
+        m_coverageDirty[i] = false;
+    }
+}
+
+void AircraftTracker::removeCoverageFromMap()
+{
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    {
+        for (const QString& name : m_coverageDrawnNames[i]) {
+            removeFromMap(name);
+        }
+        m_coverageDrawnNames[i].clear();
+    }
+}
+
+// Start again, which is what the button's right click offers - after moving the antenna,
+// or when a stray position has thrown the outline out to somewhere it never reached
+void AircraftTracker::clearCoverage()
+{
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    {
+        m_coverageRangeKm[i].fill(0.0f, m_coverageBins);
+        m_coverageOrigin[i] = QGeoCoordinate();
+        m_coverageDirty[i] = true;
+    }
+    removeCoverageFromMap();
+    m_coverageChanged = true;
+}
+
+
+
+
+// Selecting one of an aircraft's past flights draws that flight's track. Where the
+// aircraft is still being heard that comes for free - trackFlight() hands the watched
+// flight to the aircraft's own map item - but an ARCHIVED aircraft is not on the Map at
+// all, so there was nothing to hang the track on and selecting one of its flights showed
+// a profile and no track.
+//
+// So the track goes out on its own, as a line of its own, exactly as a filed route does.
+// Not by relaxing the guard in sendToMap(): that guard is what keeps archived aircraft
+// off the Map, and an icon sitting at a position from hours ago would say the aircraft is
+// there, which a historic track does not.
+void AircraftTracker::updateWatchedTrack()
+{
+    TrackedFlight *flight = m_watchedFlight ? flightById(m_watchedFlight) : nullptr;
+    TrackedAircraft *item = flight ? flight->m_aircraft : nullptr;
+
+    // Only when the aircraft is not drawn itself, or its own item would carry the same
+    // track and the two would be drawn one on top of the other
+    const bool aircraftDrawn = item && item->m_active && item->m_positionValid
+        && (item->m_mapReplay || !positionStale(item, QDateTime::currentDateTime()));
+
+    if (!flight || !item || aircraftDrawn)
+    {
+        if (!m_watchedTrackName.isEmpty())
+        {
+            removeFromMap(m_watchedTrackName);
+            m_watchedTrackName.clear();
+            m_watchedTrackKey.clear();
+        }
+        return;
+    }
+
+    ensureTrackLoaded(flight);
+    if (flight->m_track.size() < 2)
+    {
+        // One point is not a line, and drawing it draws nothing
+        if (!m_watchedTrackName.isEmpty())
+        {
+            removeFromMap(m_watchedTrackName);
+            m_watchedTrackName.clear();
+            m_watchedTrackKey.clear();
+        }
+        return;
+    }
+
+    const QString name = QString("%1 Track").arg(
+        flight->m_flight.isEmpty() ? regFor(item) : flight->m_flight);
+    // The flight and how much of it there is: the track only grows, so its length is
+    // enough to notice a change without comparing every point three times a second
+    const QString key = QString("%1|%2|%3").arg(name).arg(flight->m_id).arg(flight->m_track.size());
+    if ((key == m_watchedTrackKey) && !m_watchedTrackName.isEmpty()) {
+        return;
+    }
+
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_feature, "mapitems", mapPipes);
+    if (mapPipes.isEmpty()) {
+        return;             // No Map open: try again when there is one
+    }
+
+    // A rename means the old line is a different item, and the Map keys on the name
+    if (!m_watchedTrackName.isEmpty() && (m_watchedTrackName != name)) {
+        removeFromMap(m_watchedTrackName);
+    }
+    m_watchedTrackName = name;
+    m_watchedTrackKey = key;
+
+    QStringList text;
+    text.append("Flight track");
+    text.append(QString("Flight: %1").arg(flight->m_flight.isEmpty() ? regFor(item) : flight->m_flight));
+    if (!flight->m_departure.isEmpty() && !flight->m_arrival.isEmpty()) {
+        text.append(QString("Route: %1 to %2").arg(flight->m_departure).arg(flight->m_arrival));
+    }
+    if (flight->m_firstSeen.isValid() && flight->m_lastSeen.isValid())
+    {
+        text.append(QString("Heard: %1 to %2")
+            .arg(flight->m_firstSeen.toString("yyyy-MM-dd hh:mm"))
+            .arg(flight->m_lastSeen.toString("hh:mm")));
+    }
+    text.append(QString("Points: %1").arg(flight->m_track.size()));
+
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setLabel(new QString(name));
+        swgMapItem->setText(new QString(text.join("\n")));
+        swgMapItem->setLatitude(flight->m_track[0].latitude());
+        swgMapItem->setLongitude(flight->m_track[0].longitude());
+        swgMapItem->setAltitude(flight->m_track[0].altitude());
+        swgMapItem->setImage(new QString("none"));
+        swgMapItem->setImageRotation(0);
+        swgMapItem->setFixedPosition(true);
+        // Absolute rather than clamped: unlike a filed route, a flown track has real
+        // altitudes and on the 3D map they are most of what makes it worth looking at
+        swgMapItem->setAltitudeReference(0);
+
+        QList<SWGSDRangel::SWGMapCoordinate *> *line = new QList<SWGSDRangel::SWGMapCoordinate *>();
+        for (const auto& coord : flight->m_track)
+        {
+            SWGSDRangel::SWGMapCoordinate *c = new SWGSDRangel::SWGMapCoordinate();
+            c->setLatitude(coord.latitude());
+            c->setLongitude(coord.longitude());
+            // Every coordinate must carry a finite altitude: Qt writes a non-finite
+            // double into the Map's CZML as null, which Cesium rejects outright
+            c->setAltitude(std::isfinite(coord.altitude()) ? coord.altitude() : 0.0);
+            line->append(c);
+        }
+        swgMapItem->setCoordinates(line);
+        // A track rather than a plain line, so the Map colours it by altitude out of the
+        // group's palette, the way it colours the track under a live aircraft. A filed
+        // route stays a line: its waypoints carry no altitude to colour it by.
+        swgMapItem->setType(4);
+
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_feature, swgMapItem);
+        messageQueue->push(msg);
+    }
+}
 
 void AircraftTracker::updateRecordMapItem()
 {
@@ -3082,19 +4479,22 @@ void AircraftTracker::updateRecordMapItem()
     // table - said once, since this is checked several times a second.
     if (best && !best->m_positionValid)
     {
-        if (!m_recordUnplaceableWarned)
+        if (m_recordMapState != RecordUnplaceable)
         {
-            qDebug() << "AircraftTracker: the maximum range record" << best->m_value
+            qDebug() << "AircraftTracker: the maximum range record -" << best->m_value
                      << "km, set by" << best->m_aircraft
                      << "on" << protocolName(bestProtocol)
-                     << "- was set before positions were kept with records, so it cannot"
-                     << "be drawn on the Map. It will appear once the record is beaten.";
-            m_recordUnplaceableWarned = true;
+                     << "- was set before positions were kept with records, so there is"
+                     << "nowhere to draw it. It will appear once the record is beaten,"
+                     << "or reset the all time statistics to start again.";
+            m_recordMapState = RecordUnplaceable;
         }
         best = nullptr;
     }
-    else if (best) {
-        m_recordUnplaceableWarned = false;
+    else if (!best && m_settings.m_displayMaxRangeOnMap && (m_recordMapState != RecordNone))
+    {
+        qDebug() << "AircraftTracker: no maximum range record to draw on the Map yet";
+        m_recordMapState = RecordNone;
     }
 
     if (!best)
@@ -3126,6 +4526,14 @@ void AircraftTracker::updateRecordMapItem()
     }
     m_recordMapKey = key;
     m_recordOnMap = true;
+    if (m_recordMapState != RecordDrawn)
+    {
+        qDebug() << "AircraftTracker: drawing the maximum range record on the Map -"
+                 << best->m_value << "km, set by" << best->m_aircraft
+                 << "on" << protocolName(bestProtocol)
+                 << "at" << best->m_latitude << best->m_longitude;
+        m_recordMapState = RecordDrawn;
+    }
 
     // The record names the aircraft as its registration where it had one, otherwise its
     // flight number - both of which the key map is built on, so the airframe can be found
@@ -3145,6 +4553,9 @@ void AircraftTracker::updateRecordMapItem()
     text.append(QString("Aircraft: %1").arg(best->m_aircraft));
     text.append(QString("Range: %1 km").arg(best->m_value, 0, 'f', 1));
     text.append(QString("Protocol: %1").arg(protocolName(bestProtocol)));
+    if (best->m_frequency) {
+        text.append(QString("Frequency: %1 MHz").arg(best->m_frequency / 1e6, 0, 'f', 3));
+    }
     if (best->m_altitudeValid) {
         text.append(QString("Altitude: %1 ft").arg((int) std::round(best->m_altitudeFt)));
     }
@@ -3184,6 +4595,182 @@ void AircraftTracker::updateRecordMapItem()
 // leaves altitude as qQNaN() while still reporting isValid(), and Qt writes a non-finite
 // double into the Map's CZML as null, which Cesium rejects outright - taking down the
 // whole 3D map rather than misplacing one route.
+// Roughly where a run of route names is, taken from the first of them the waypoint
+// database can place. Used to choose between navaids sharing an ident, which have no
+// equivalent of findWayPoint()'s disambiguation - and one neighbour is enough, since the
+// copies of an ident are hundreds of miles apart.
+//
+// The nearest placeable neighbour rather than an average of them: averaging longitudes
+// puts a route either side of the antimeridian in the Gulf of Guinea. The names arrive
+// nearest first, so the first hit is the closest one that could be placed.
+//
+// Waypoints only. An airway name is in no database, and looking a three letter ident up
+// here would be the very ambiguity this exists to resolve.
+// "58N030W" is 58 North 030 West, "5730N020W" is 57 degrees 30 minutes North. Written
+// out once because the position is now read both to place the fix and, before that, to
+// give the named fixes around it something to be judged against.
+static QGeoCoordinate oceanicPosition(const QRegularExpressionMatch& match)
+{
+    float latitude = match.captured(1).toInt() + match.captured(2).toInt() / 60.0f;
+    if (match.captured(3) == "S") {
+        latitude = -latitude;
+    }
+    float longitude = match.captured(4).toInt() + match.captured(5).toInt() / 60.0f;
+    if (match.captured(6) == "W") {
+        longitude = -longitude;
+    }
+    return QGeoCoordinate(latitude, longitude, 0.0);
+}
+
+QGeoCoordinate AircraftTracker::routeAnchor(const QStringList& names)
+{
+    for (const QString& name : names)
+    {
+        if (name.size() != 5) {
+            continue;
+        }
+        const Waypoint *waypoint = Waypoints::findWayPoint(name, names);
+        if (waypoint) {
+            return QGeoCoordinate(waypoint->m_latitude, waypoint->m_longitude);
+        }
+    }
+    return QGeoCoordinate();        // Nothing to choose by
+}
+
+// The fixes a named departure or arrival procedure flies through, ready to be dropped
+// into a route.
+//
+// A flight plan names its SID and STAR rather than listing them - "runway 26L, LAM1Z
+// departure" - so the drawn line used to leave the departure airport straight for the
+// first en route fix, which is not where the aircraft goes. A SID out of Gatwick turns
+// through half a dozen fixes before it joins the airway.
+//
+// The database gives every point a position, so they are marked placed and never looked
+// up by name. That matters as much as the shape: procedure fixes are named for their
+// procedure - KKE02, KKN43 - and are in no en route waypoint database, so by name alone
+// every one of them would be dropped.
+//
+// Empty when the procedure is not known, which includes the whole database being absent
+// until it has been downloaded. Nothing else changes in that case: the route is drawn
+// exactly as it was before.
+// An altitude constraint as a procedure plate would read it, or empty where the fix
+// carries none. Both bounds equal is a crossing altitude, one bound is a floor or a
+// ceiling, and two different ones are a window.
+QString AircraftTracker::altitudeConstraint(const AircraftReport::RouteWaypoint& point)
+{
+    if (point.m_hasMinimumAltitude && point.m_hasMaximumAltitude)
+    {
+        if (point.m_minimumAltitudeFt == point.m_maximumAltitudeFt) {
+            return QString("%1 ft").arg(point.m_minimumAltitudeFt);
+        }
+        return QString("%1 to %2 ft").arg(point.m_minimumAltitudeFt)
+                                     .arg(point.m_maximumAltitudeFt);
+    }
+    if (point.m_hasMinimumAltitude) {
+        return QString("%1 ft or above").arg(point.m_minimumAltitudeFt);
+    }
+    if (point.m_hasMaximumAltitude) {
+        return QString("%1 ft or below").arg(point.m_maximumAltitudeFt);
+    }
+    return QString();
+}
+
+QList<AircraftReport::RouteWaypoint> AircraftTracker::procedurePoints(
+    const QString& procedure, const QString& airport, const QString& procedureType)
+{
+    QList<AircraftReport::RouteWaypoint> points;
+
+    // Four characters because the lookup is by ICAO code, and a plan can carry an IATA
+    // one or nothing at all
+    if (procedure.isEmpty() || (airport.size() != 4)) {
+        return points;
+    }
+
+    // A plan often qualifies the procedure with the runway it starts on - LAM1Z/26L -
+    // and the database holds the procedure alone
+    QString name = procedure.trimmed().toUpper();
+    const int slash = name.indexOf('/');
+    if (slash > 0) {
+        name = name.left(slash);
+    }
+
+    const QString icao = airport.trimmed().toUpper();
+    QList<SidStarPoint> procedureFixes = SidStar::getWaypoints(name, icao, procedureType);
+
+    // The American form, which is most of the world's procedures: a base and a transition,
+    // written BASE.TRANSITION, held in the database as two entries. DSNEE6.HIMDU is the
+    // twelve fixes from HIMDU down to DSNEE, and DSNEE6 on its own is the three from DSNEE
+    // to the runway - the part every transition joins. Flown, it is one and then the
+    // other, so that is how it is drawn. They meet on the fix they share, which the
+    // duplicate collapse in sendRouteToMap() folds back into one.
+    //
+    // A SID is the same idea the other way round: the common part first and the transition
+    // off the end of it.
+    if (procedureFixes.isEmpty() && name.contains('.'))
+    {
+        const int dot = name.indexOf('.');
+        const QString base = name.left(dot);
+        QString transition = name.mid(dot + 1);
+
+        // Shortened a character at a time because the message can leave its own checksum
+        // stuck on the end of the last field it wrote - DSNEE6.HIMDU83CF is the HIMDU
+        // transition with 83CF after it. Longest first, so a transition that is a prefix
+        // of a longer one cannot win over the longer one, and it stops at the first that
+        // the database actually holds rather than guessing where the name ends.
+        while (transition.size() >= 2)
+        {
+            procedureFixes = SidStar::getWaypoints(base + "." + transition, icao, procedureType);
+            if (!procedureFixes.isEmpty()) {
+                break;
+            }
+            transition.chop(1);
+        }
+
+        if (!procedureFixes.isEmpty())
+        {
+            const QList<SidStarPoint> common = SidStar::getWaypoints(base, icao, procedureType);
+            // Which end the transition attaches to. A runway transition - named RW05,
+            // RW13B - is the bit off the runway itself, so it comes before the common
+            // part whichever kind of procedure it belongs to. Anything else is an en
+            // route transition, which leads INTO an arrival and away from a departure.
+            //
+            //   departure, runway transition : off the runway, then the common part
+            //   departure, en route          : the common part, then away to the airway
+            //   arrival,   en route          : in off the airway, then the common part
+            //   arrival,   runway transition : the common part, then on to the runway
+            //
+            // which is transition first exactly when the two agree.
+            const bool runwayTransition = transition.startsWith("RW");
+            const bool departure = procedureType.compare("SID", Qt::CaseInsensitive) == 0;
+            if (departure == runwayTransition) {
+                procedureFixes = procedureFixes + common;
+            } else {
+                procedureFixes = common + procedureFixes;
+            }
+        }
+    }
+
+    for (const SidStarPoint& fix : procedureFixes)
+    {
+        AircraftReport::RouteWaypoint point;
+        point.m_name = fix.m_waypoint;
+        point.m_positionValid = true;
+        point.m_latitude = fix.m_latitude;
+        point.m_longitude = fix.m_longitude;
+        // Which procedure put it there, so the fix can say so on the Map - a procedure
+        // fix is named for its procedure and means nothing on its own
+        point.m_procedure = name;
+        point.m_procedureType = procedureType;
+        point.m_hasMinimumAltitude = fix.m_hasMinimumAltitude;
+        point.m_minimumAltitudeFt = fix.m_minimumAltitudeFt;
+        point.m_hasMaximumAltitude = fix.m_hasMaximumAltitude;
+        point.m_maximumAltitudeFt = fix.m_maximumAltitudeFt;
+        points.append(point);
+    }
+
+    return points;
+}
+
 void AircraftTracker::resolveRoute(QList<AircraftReport::RouteWaypoint>& points,
                                    QList<QGeoCoordinate>& coords) const
 {
@@ -3191,20 +4778,164 @@ void AircraftTracker::resolveRoute(QList<AircraftReport::RouteWaypoint>& points,
     // M604 GIVPO". An airway is a letter or two and then digits, which no fix ident is,
     // so this is what keeps Q295 from being looked up as an airport and drawn as one.
     static const QRegularExpression airwayRe("^[A-Z]{1,2}[0-9]{1,4}$");
-    // 5530N is 55 North 030 West
-    static const QRegularExpression oceanicRe("^([0-9][0-9])([NS])([0-9]?[0-9][0-9])([EW])$");
+    // An oceanic position names itself: 58N030W is 58 North 030 West. The minutes are
+    // optional on either half, so the same fix appears as 58N030W, 5730N020W (57 degrees
+    // 30 minutes North, 020 West) or 5730N02030W - and a NAT track is routinely given on
+    // the half degree, so the longer forms are not unusual. Only the 7 character form
+    // used to be recognised, which dropped exactly those waypoints from the line.
+    static const QRegularExpression oceanicRe(
+        "^([0-9]{2})([0-9]{2})?([NS])([0-9]{3})([0-9]{2})?([EW])$");
+
+    // A fix ident is not unique. There is more than one BALAN, and asked for the name
+    // alone the databases can only hand back the first they hold - which is how one fix
+    // of a route across France came out on the far side of the world. What tells them
+    // apart is the company they keep, so every lookup is given the names around it.
+    //
+    // A WINDOW rather than the whole route: a candidate is scored on its mean distance
+    // to the names it is given, so on a long route the far end would pull the choice
+    // towards the middle of the span instead of towards the fixes either side of it.
+    // Three either way, which survives the airway names in between - they are in no
+    // database, so they contribute nothing and only take up room.
+    QStringList allNames;
+    allNames.reserve(points.size());
+    for (const AircraftReport::RouteWaypoint& point : points) {
+        allNames.append(point.m_name);
+    }
+    // Where each name is, for every one that needs no disambiguating: an oceanic
+    // position states its own latitude and longitude, an ICAO airport ident is unique,
+    // and a fix that arrived carrying a position already has one. These are what the
+    // ambiguous names are then judged against, and they are worked out FIRST because a
+    // name cannot be judged against a neighbour that has not been placed yet.
+    //
+    // Without this an oceanic clearance had nothing to judge by at all. ETARI exists
+    // twice - once on the North Atlantic, once in Japan - and every fix around it on a
+    // Shanwick clearance is a bare latitude and longitude that no waypoint database
+    // holds. So the scoring found no neighbours it could look up, scored nothing, and
+    // fell through to the first ETARI in the file, which is the Japanese one. The
+    // 2000 km plausibility check could not catch it either, because it was anchored the
+    // same way and so had no anchor.
+    QList<QGeoCoordinate> placed;
+    placed.reserve(points.size());
+    for (const AircraftReport::RouteWaypoint& point : points)
+    {
+        const QRegularExpressionMatch oceanic = oceanicRe.match(point.m_name);
+        if (point.m_positionValid) {
+            placed.append(QGeoCoordinate(point.m_latitude, point.m_longitude));
+        } else if (oceanic.hasMatch()) {
+            placed.append(oceanicPosition(oceanic));
+        } else if ((point.m_name.size() == 4) && m_airports
+                   && m_airports->contains(point.m_name)) {
+            const AirportInformation *airport = m_airports->value(point.m_name);
+            placed.append(QGeoCoordinate(airport->m_latitude, airport->m_longitude));
+        } else {
+            placed.append(QGeoCoordinate());        // Needs a name lookup to be placed
+        }
+    }
+
+    // The placed positions around a name, nearest first. The same window as the names
+    // below and for the same reason: a candidate is scored on its mean distance to
+    // these, so the far end of a long route would drag the choice towards the middle.
+    auto placedNear = [&placed](int index)
+    {
+        QList<QGeoCoordinate> nearby;
+        for (int offset = 1; offset <= 3; offset++)
+        {
+            if ((index - offset >= 0) && placed[index - offset].isValid()) {
+                nearby.append(placed[index - offset]);
+            }
+            if ((index + offset < placed.size()) && placed[index + offset].isValid()) {
+                nearby.append(placed[index + offset]);
+            }
+        }
+        return nearby;
+    };
+
+    // The plausibility check needs only ONE position to measure from, so unlike the
+    // scoring window it looks as far along the route as it must to find one
+    auto placedAnchor = [&placed](int index)
+    {
+        for (int offset = 1; offset < placed.size(); offset++)
+        {
+            if ((index - offset >= 0) && placed[index - offset].isValid()) {
+                return placed[index - offset];
+            }
+            if ((index + offset < placed.size()) && placed[index + offset].isValid()) {
+                return placed[index + offset];
+            }
+        }
+        return QGeoCoordinate();
+    };
+
+    // Nearest first, which is what lets routeAnchor() take the closest it can place
+    auto neighbours = [&allNames](int index)
+    {
+        QStringList nearby;
+        for (int offset = 1; offset <= 3; offset++)
+        {
+            if (index - offset >= 0) {
+                nearby.append(allNames[index - offset]);
+            }
+            if (index + offset < allNames.size()) {
+                nearby.append(allNames[index + offset]);
+            }
+        }
+        return nearby;
+    };
+
+    // Its own, because the iterator's position moves as unresolvable names are dropped
+    // while the window has to index the route as it was named
+    int index = -1;
 
     QMutableListIterator<AircraftReport::RouteWaypoint> i(points);
     while (i.hasNext())
     {
         const AircraftReport::RouteWaypoint& point = i.next();
         const QString name = point.m_name;
+        index++;
 
         if (point.m_positionValid)
         {
-            coords.append(QGeoCoordinate(point.m_latitude, point.m_longitude, 0.0));
+            // A procedure fix is flown at the altitude the procedure requires, so draw it
+            // there rather than on the ground. The floor where there is one - an aircraft
+            // is at least that high - otherwise the ceiling.
+            double altitude = 0.0;
+            if (point.m_hasAltitude) {
+                altitude = Units::feetToMetres((float) point.m_altitudeFt);
+            } else if (point.m_hasMinimumAltitude) {
+                altitude = Units::feetToMetres((float) point.m_minimumAltitudeFt);
+            } else if (point.m_hasMaximumAltitude) {
+                altitude = Units::feetToMetres((float) point.m_maximumAltitudeFt);
+            }
+            coords.append(QGeoCoordinate(point.m_latitude, point.m_longitude, altitude));
             continue;
         }
+
+        // Where a placed fix would have to be, to be believed. Not disambiguation - the
+        // databases can hold exactly ONE fix of a name and still have the wrong one.
+        //
+        // ALR01 is the case that showed it up: a Stansted to Algiers route named it, and
+        // the only ALR01 any database here holds is at 2S 44W, off the coast of Brazil.
+        // The real one is a fix the aircraft's own FMS computed near the Alger VOR, which
+        // is in no database at all, so choosing better among candidates cannot help -
+        // there is only one and it is wrong. Drawn, it took the route across the Atlantic
+        // and back.
+        //
+        // 2000 km, measured from the nearest fix around it that could be placed. Legs are
+        // long on an oceanic route - a NAT track steps about 700 km between waypoints -
+        // so this has to be generous to avoid throwing away good fixes, and it still
+        // rejects a placement on the wrong continent by a wide margin. With nothing around
+        // it placeable there is nothing to judge against, and the fix is taken as it comes.
+        auto plausible = [&](const QGeoCoordinate& at)
+        {
+            QGeoCoordinate anchor = placedAnchor(index);
+            if (!anchor.isValid()) {
+                anchor = routeAnchor(neighbours(index));
+            }
+            if (!anchor.isValid() || !at.isValid()) {
+                return true;
+            }
+            return anchor.distanceTo(at) <= 2000000.0;
+        };
 
         bool found = false;
         if (!airwayRe.match(name).hasMatch())
@@ -3220,41 +4951,77 @@ void AircraftTracker::resolveRoute(QList<AircraftReport::RouteWaypoint>& points,
             }
             else if (name.size() == 5)
             {
-                const Waypoint *waypoint = Waypoints::findWayPoint(name);
+                // Positions where the fixes around it could be placed without a
+                // lookup, names where they could not - an ordinary airway route names
+                // fixes that are themselves only in the database, and there the name
+                // form is all there is
+                const QList<QGeoCoordinate> nearby = placedNear(index);
+                const Waypoint *waypoint = nearby.isEmpty()
+                    ? Waypoints::findWayPoint(name, neighbours(index))
+                    : Waypoints::findWayPoint(name, nearby);
                 if (waypoint)
                 {
-                    found = true;
-                    coords.append(QGeoCoordinate(waypoint->m_latitude, waypoint->m_longitude, 0.0));
+                    const QGeoCoordinate at(waypoint->m_latitude, waypoint->m_longitude, 0.0);
+                    if (plausible(at))
+                    {
+                        found = true;
+                        placed[index] = at;     // Now an anchor for the names after it
+                        coords.append(at);
+                    }
                 }
             }
             else if ((name.size() == 3) && m_navAids)
             {
+                // Idents are no more unique than waypoint names, so the same rule
+                // applies: of the navaids carrying this one, take the one nearest the
+                // fixes around it. Where none of those can be placed there is nothing to
+                // choose by, and the first is as good as any - which is all this did.
+                QGeoCoordinate anchor = placedAnchor(index);
+                if (!anchor.isValid()) {
+                    anchor = routeAnchor(neighbours(index));
+                }
+                const NavAid *best = nullptr;
+                double bestDistance = 0.0;
+
                 for (int j = 0; j < m_navAids->size(); j++)
                 {
-                    if (m_navAids->at(j)->m_ident == name)
+                    const NavAid *navAid = m_navAids->at(j);
+                    if (navAid->m_ident != name) {
+                        continue;
+                    }
+                    if (!anchor.isValid())
                     {
-                        const NavAid *navAid = m_navAids->at(j);
+                        best = navAid;
+                        break;
+                    }
+                    const double d = anchor.distanceTo(
+                        QGeoCoordinate(navAid->m_latitude, navAid->m_longitude));
+                    if (!best || (d < bestDistance))
+                    {
+                        best = navAid;
+                        bestDistance = d;
+                    }
+                }
+                if (best)
+                {
+                    const QGeoCoordinate at(best->m_latitude, best->m_longitude, 0.0);
+                    if (plausible(at))
+                    {
                         found = true;
-                        coords.append(QGeoCoordinate(navAid->m_latitude, navAid->m_longitude, 0.0));
-                        break;      // Idents are not globally unique; take the first
+                        placed[index] = at;     // Now an anchor for the names after it
+                        coords.append(at);
                     }
                 }
             }
-            else if (name.size() == 7)
+            else
             {
+                // Whatever length it is - the regex is what decides, since the minutes
+                // are optional on both halves
                 const QRegularExpressionMatch match = oceanicRe.match(name);
                 if (match.hasMatch())
                 {
-                    float latitude = match.captured(1).toInt();
-                    if (match.captured(2) == "S") {
-                        latitude = -latitude;
-                    }
-                    float longitude = match.captured(3).toInt();
-                    if (match.captured(4) == "W") {
-                        longitude = -longitude;
-                    }
                     found = true;
-                    coords.append(QGeoCoordinate(latitude, longitude, 0.0));
+                    coords.append(oceanicPosition(match));
                 }
             }
         }
@@ -3278,10 +5045,630 @@ void AircraftTracker::resolveRoute(QList<AircraftReport::RouteWaypoint>& points,
 // Not removed when the flight is archived, which is how clearances have always behaved:
 // the route is a record of where the aircraft was going, and that stays interesting
 // after it has landed.
+// Whose filed routes are on the map. Only the selected one's: every oceanic flight in
+// earshot files a clearance, so drawing them all covered the map in lines that had
+// nothing to do with what the user was looking at - and since the routes are stored, a
+// reload put every one of them up at once. Selecting an aircraft watches its current
+// flight, so this one test covers a selected aircraft and a selected flight alike.
+// How many of a route's waypoints can actually be placed, which is what decides whether
+// a new filing is worth anything against the one already held - see updateFlight()
+int AircraftTracker::routePlaceable(const QString& waypoints,
+                                    const QList<AircraftReport::RouteWaypoint>& given) const
+{
+    QList<AircraftReport::RouteWaypoint> points = given;
+
+    if (points.isEmpty())
+    {
+        static const QRegularExpression separatorRe("[ .]+");
+        for (const QString& name : waypoints.split(separatorRe, Qt::SkipEmptyParts))
+        {
+            AircraftReport::RouteWaypoint point;
+            point.m_name = name;
+            points.append(point);
+        }
+    }
+
+    QList<QGeoCoordinate> coords;
+    resolveRoute(points, coords);       // Drops what it cannot place
+    return coords.size();
+}
+
+bool AircraftTracker::routeDrawn(const TrackedFlight *flight) const
+{
+    return flight && (flight->m_id == m_watchedFlight);
+}
+
+// Both of a flight's routes at once, which is always how they are drawn and undrawn -
+// the selection moves to a flight, not to one of its two routes
+// One ACARS block as received: archived, and fed on to the aggregators.
+//
+// The block is kept exactly as it came off the air. That is the point of doing it here:
+// the parser lives in the library now, so a later decoder can be run over the whole
+// archive, and everything already stored improves with it. A rendered document cannot -
+// one written before the three character sublabel fix keeps its stray characters for
+// good.
+// Render a document from what it was decoded from, with whatever the parser does today.
+//
+// This is what makes a decoder improvement reach everything already stored. Documents
+// used to be written as finished text, so a fix reached only messages received after it -
+// a three character sublabel read as two put a stray character through the middle of long
+// messages, and every document written before that was found kept it for good, as did a
+// wind direction rendered with an HTML entity in a field that is shown as plain text.
+//
+// The block is decoded for its header - the registration, the label, which way it was
+// going - and then decoded again with the text, which for a message that arrived in
+// several blocks is the assembled whole rather than any one of them. That is exactly what
+// the demodulator does on reception.
+QString AircraftTracker::renderDocument(const QByteArray& raw, const QString& source)
+{
+    if (raw.isEmpty()) {
+        return QString();
+    }
+
+    // Decoded once, on the whole: decoding the block and then the whole into the same
+    // object doubles every list a decoder appends to
+    QScopedPointer<AcarsMessage> message(source.isEmpty() ? AcarsMessage::decode(raw) : AcarsMessage::decode(raw, source));
+    if (!message) {
+        return QString();
+    }
+    return acarsDecodeToPlain(message->toString());
+}
+
+void AircraftTracker::acarsBlockReceived(const QByteArray& block, const QDateTime& dateTime,
+                                         qint64 frequency, double level, int protocol)
+{
+    AcarsBlockRecord record;
+    record.m_block = block;
+    record.m_dateTime = dateTime;
+    record.m_frequency = frequency;
+    record.m_level = level;
+    record.m_protocol = protocol;
+    // Only queued for a database to take them: the queue is emptied by a save, and with
+    // no database (it would not open - locked, or read only) it grew for the whole session
+    if (m_db)
+    {
+        m_acarsBlocks.append(record);
+        m_dbDirty = true;
+    }
+
+    if (!m_settings.m_feedEnabled) {
+        return;
+    }
+
+    // Decoded only for the feed, and only when there is one - the archive does not need
+    // it, and an aggregator wants the fields rather than the block
+    QScopedPointer<AcarsMessage> message(AcarsMessage::decode(block));
+    if (message) {
+        feedMessage(*message, dateTime, frequency, level);
+    }
+}
+
+// Send one ACARS message on to the aggregators that are enabled, as one acarsdec style
+// JSON object per UDP datagram - the format both airframes.io (port 5550) and
+// avdelphi.com (vdlm2dec JSON, port 5556) ingest.
+//
+// Built here rather than in the demodulator so that the whole feed - the station identity,
+// the connections and the format - is one thing in one place, set up once for the station
+// however many demodulators are running. Messages from all three ACARS bearers arrive
+// here over one set of connections.
+void AircraftTracker::feedMessage(const AcarsMessage& message, const QDateTime& dateTime,
+                                  qint64 frequency, double level)
+{
+    if (!m_feedSocket) {
+        return;
+    }
+
+    QJsonObject json;
+    json.insert("timestamp", dateTime.toMSecsSinceEpoch() / 1000.0);
+    if (!m_settings.m_feedStationId.isEmpty()) {
+        json.insert("station_id", m_settings.m_feedStationId);
+    }
+    json.insert("channel", 0);
+    json.insert("freq", frequency / 1e6);
+    json.insert("level", level);
+    json.insert("error", 0);
+    json.insert("mode", message.m_mode);
+    json.insert("label", message.m_label);
+    json.insert("block_id", QString(message.m_blockId));
+    if ((message.m_ack == QChar(ASCII_NAK)) || message.m_ack.isNull()) {
+        json.insert("ack", false);
+    } else {
+        json.insert("ack", QString(message.m_ack));
+    }
+    json.insert("tail", message.m_address);
+    if (!message.m_flight.isEmpty()) {
+        json.insert("flight", message.m_flight);
+    }
+    const QString msgNo = message.m_originator + message.m_messageNumber + message.m_blockSequence;
+    if (!msgNo.isEmpty()) {
+        json.insert("msgno", msgNo);
+    }
+    json.insert("text", message.m_text);
+    json.insert("end", !message.m_multiBlock);
+    // Identify the client, as the standalone decoders do - aggregators use this to
+    // recognise the source
+    QJsonObject app;
+    app.insert("name", "SDRangel");
+    app.insert("ver", QCoreApplication::applicationVersion());
+    json.insert("app", app);
+
+    QByteArray datagram = QJsonDocument(json).toJson(QJsonDocument::Compact);
+    datagram.append('\n');
+
+    // UDP: host names are resolved once and cached; the cache invalidates when the
+    // setting changes, so a blocking DNS lookup happens at most once per host. A host
+    // that would not resolve is not tried again for a minute: the lookup blocks this
+    // thread, and with the network down it timed out again on every block received.
+    auto sendUdp = [this, &datagram](const QString& host, int port, QHostAddress& cache,
+                                     QString& cachedHost)
+    {
+        if (host.isEmpty()) {
+            return;
+        }
+        if (host != cachedHost)
+        {
+            const QDateTime now = QDateTime::currentDateTimeUtc();
+            const QDateTime retry = m_feedResolveRetry.value(host);
+            if (retry.isValid() && (now < retry)) {
+                return;
+            }
+            const QHostInfo info = QHostInfo::fromName(host);
+            if (info.addresses().isEmpty())
+            {
+                qWarning() << "AircraftTracker: feed cannot resolve host" << host;
+                m_feedResolveRetry.insert(host, now.addSecs(60));
+                return;
+            }
+            m_feedResolveRetry.remove(host);
+            cache = info.addresses().first();
+            cachedHost = host;
+            qDebug() << "AircraftTracker: feed sending UDP to" << host << "(" << cache << ") :" << port;
+        }
+        m_feedSocket->writeDatagram(datagram, cache, port);
+    };
+
+    // TCP: reconnect if the link has dropped, and drop this message rather than queue it -
+    // a feed that has been down is not helped by a burst of stale reports, which matches
+    // how the standalone feeder clients behave.
+    auto sendTcp = [this, &datagram](QTcpSocket& socket, const QString& host, int port,
+                                     const char *service)
+    {
+        if (host.isEmpty()) {
+            return;
+        }
+        if (socket.state() == QAbstractSocket::ConnectedState)
+        {
+            const qint64 written = socket.write(datagram);
+            socket.flush();
+            qDebug() << "AircraftTracker: feed sent" << written << "bytes to" << service;
+        }
+        else if (socket.state() == QAbstractSocket::UnconnectedState)
+        {
+            qDebug() << "AircraftTracker: feed not connected to" << service
+                     << "- reconnecting, message dropped";
+            socket.abort();
+            socket.connectToHost(host, port);
+        }
+        else
+        {
+            qDebug() << "AircraftTracker: feed still connecting to" << service
+                     << "- message dropped";
+        }
+    };
+
+    if (m_settings.m_feedAirframes)
+    {
+        if (m_settings.m_feedAirframesTcp) {
+            sendTcp(*m_feedAirframesTcpSocket, m_settings.m_feedAirframesHost,
+                m_settings.m_feedAirframesPort, "airframes.io");
+        } else {
+            sendUdp(m_settings.m_feedAirframesHost, m_settings.m_feedAirframesPort,
+                m_feedAirframesAddr, m_feedAirframesResolvedHost);
+        }
+    }
+    if (m_settings.m_feedAvdelphi)
+    {
+        if (m_settings.m_feedAvdelphiTcp) {
+            sendTcp(*m_feedAvdelphiTcpSocket, m_settings.m_feedAvdelphiHost,
+                m_settings.m_feedAvdelphiPort, "avdelphi.com");
+        } else {
+            sendUdp(m_settings.m_feedAvdelphiHost, m_settings.m_feedAvdelphiPort,
+                m_feedAvdelphiAddr, m_feedAvdelphiResolvedHost);
+        }
+    }
+}
+
+// Open (or close) the aggregator connections to match the settings. Connections are also
+// re-made on demand when a message needs sending, but connecting eagerly here means
+// enabling the feed gives immediate feedback in the log rather than silently waiting for
+// the first ACARS message.
+void AircraftTracker::updateFeedConnections()
+{
+    if (!m_feedAirframesTcpSocket) {
+        return;         // Not started yet; startWork() calls back in here
+    }
+
+    auto update = [this](QTcpSocket& socket, bool enabled, bool tcp, const QString& host, int port)
+    {
+        bool want = m_settings.m_feedEnabled && enabled && tcp && !host.isEmpty();
+        bool wrongPeer = (socket.peerName() != host) || (socket.peerPort() != port);
+        if (want)
+        {
+            if ((socket.state() == QAbstractSocket::UnconnectedState) || wrongPeer)
+            {
+                qDebug() << "AircraftTracker: feed connecting to" << host << ":" << port;
+                socket.abort();
+                socket.connectToHost(host, port);
+            }
+        }
+        else if (socket.state() != QAbstractSocket::UnconnectedState)
+        {
+            socket.abort();
+        }
+    };
+    update(*m_feedAirframesTcpSocket, m_settings.m_feedAirframes, m_settings.m_feedAirframesTcp,
+        m_settings.m_feedAirframesHost, m_settings.m_feedAirframesPort);
+    update(*m_feedAvdelphiTcpSocket, m_settings.m_feedAvdelphi, m_settings.m_feedAvdelphiTcp,
+        m_settings.m_feedAvdelphiHost, m_settings.m_feedAvdelphiPort);
+}
+
+void AircraftTracker::sendRoutes(TrackedFlight *flight)
+{
+    if (flight)
+    {
+        sendRouteToMap(flight, flight->m_flightPlan, "Flight plan");
+        sendRouteToMap(flight, flight->m_clearance, "Oceanic clearance");
+    }
+}
+
+void AircraftTracker::removeRoutes(TrackedFlight *flight)
+{
+    if (flight)
+    {
+        removeDrawnRoute(flight->m_flightPlan);
+        removeDrawnRoute(flight->m_clearance);
+    }
+}
+
+// Assemble a filed route into placed fixes: the airports it runs between, the departure
+// and arrival procedures expanded, the path itself, altitudes stamped and duplicates
+// collapsed, then everything resolved against the databases. Points and coords come out
+// index aligned, resolveRoute() having dropped anything it could not place. Shared by
+// the drawn route (sendRouteToMap()) and the ND flight plan (buildFlightPlan()).
+QList<AircraftReport::RouteWaypoint> AircraftTracker::assembleRoutePoints(
+    const TrackedFlight *flight, const TrackedFlight::FiledRoute& route,
+    QList<QGeoCoordinate>& coords) const
+{
+    // The route field is the waypoints alone, so the airports it runs between are added
+    // here - which is what makes the drawn line start and finish somewhere recognisable
+    QList<AircraftReport::RouteWaypoint> points;
+    auto named = [](const QString& waypoint)
+    {
+        AircraftReport::RouteWaypoint point;
+        point.m_name = waypoint;
+        return point;
+    };
+    // The plan's own airports in preference to the flight's: a procedure belongs to the
+    // aerodrome the plan was filed against, and a flight that has been re-filed still
+    // carries the arrival it was first heard with.
+    const QString departure = route.m_departure.size() == 4 ? route.m_departure
+                                                            : flight->m_departure;
+    const QString arrival = route.m_arrival.size() == 4 ? route.m_arrival
+                                                        : flight->m_arrival;
+
+    // The same airports as the procedures, so the line runs down the STAR to the airport
+    // it serves. Bookending with the flight's own let a re-file the flight had not taken
+    // on draw down the new STAR and then jump to the old arrival.
+    if (departure.size() == 4) {
+        points.append(named(departure));
+    }
+    // The departure procedure, between the aerodrome and the route it joins
+    points.append(procedurePoints(route.m_sid, departure, "SID"));
+    // The message's own positions where it gave them, its names alone where it did not
+    if (route.m_points.isEmpty())
+    {
+        // Both separators, because both forms reach here. A clearance names its waypoints
+        // with spaces - SUNOT 58N030W JANJO - while a flight plan is written as an ARINC
+        // 702A path, DVR.UL9.KONAN.UL607.KOK..KOMOB.., where a single dot joins a fix to
+        // the airway leaving it and a double dot means direct to the next fix. Split on
+        // spaces alone, the whole of a filed plan was one unresolvable name, and all that
+        // was left to draw was the line between the two airports.
+        static const QRegularExpression separatorRe("[ .]+");
+        for (const QString& waypoint : route.m_waypoints.split(separatorRe, Qt::SkipEmptyParts)) {
+            points.append(named(waypoint));
+        }
+    }
+    else
+    {
+        points.append(route.m_points);
+    }
+    // And the arrival procedure, between the route and the aerodrome
+    points.append(procedurePoints(route.m_star, arrival, "STAR"));
+    if (arrival.size() == 4) {
+        points.append(named(arrival));
+    }
+
+    // The level the route is flown at, which is what a clearance clears the aircraft to
+    // and what a filed plan cruises at. Applied to the FIXES, never to the airports it
+    // runs between, and never over an altitude something more specific already gave - a
+    // procedure fix has its own, and a predicted route gives one per fix.
+    //
+    // Identified by name rather than by position in the list: an airport is four
+    // characters where a waypoint is five, a navaid three and an oceanic position seven
+    // or more. Skipping the first and last entries instead looks equivalent and is not -
+    // the list does not always start or end with an airport, and doing it that way left
+    // the last fix of every route on the ground.
+    if (route.m_flightLevel > 0)
+    {
+        for (AircraftReport::RouteWaypoint& point : points)
+        {
+            // ANY altitude of its own, which is three separate fields: what a predicted
+            // route expects at the fix, and the floor and ceiling a procedure requires
+            // there. Testing only the first of them is a trap, because a procedure fix
+            // carries the other two and looks unconstrained - a SID that crosses BPK at
+            // 6000 ft had it stamped with the cruise level instead and drawn at FL390,
+            // which is where the aircraft is an hour later rather than on departure.
+            const bool hasOwn = point.m_hasAltitude
+                             || point.m_hasMinimumAltitude
+                             || point.m_hasMaximumAltitude;
+            if (!hasOwn && (point.m_name.size() != 4))
+            {
+                point.m_hasAltitude = true;
+                point.m_altitudeFt = route.m_flightLevel * 100;
+            }
+        }
+    }
+
+    // A fix named twice in a row is one fix. It happens: a clearance gives its entry
+    // point and then repeats it as the first waypoint of the route, and the departure
+    // airport prepended above can be the first waypoint too. Drawn as they come, they
+    // make a segment of no length and two markers under one name - and the Map keys its
+    // items on the name, so the second would quietly replace the first.
+    //
+    // Which of the two to keep is not arbitrary. A procedure and the route it joins name
+    // the same fix at the join, and only the procedure's copy knows what altitude to
+    // cross it at - so the one carrying something is kept and the bare one dropped,
+    // whichever came first. Dropping the later one always would have worked for a SID,
+    // which is spliced in BEFORE the route, and quietly discarded every STAR constraint,
+    // because a STAR is spliced in after it.
+    auto informative = [](const AircraftReport::RouteWaypoint& point)
+    {
+        return point.m_positionValid || point.m_hasAltitude
+            || point.m_hasMinimumAltitude || point.m_hasMaximumAltitude;
+    };
+    for (int i = points.size() - 1; i > 0; i--)
+    {
+        if (points[i].m_name != points[i - 1].m_name) {
+            continue;
+        }
+        if (informative(points[i]) && !informative(points[i - 1])) {
+            points.removeAt(i - 1);
+        } else {
+            points.removeAt(i);
+        }
+    }
+
+    resolveRoute(points, coords);
+    return points;
+}
+
+// Build the flight plan attached to the aircraft's own map item, which is what the 3D
+// map's ND (Navigation Display) draws. Unlike the drawn route this goes out for every
+// aircraft with a filed route, not just the watched flight - the ND shows it only for
+// the selected aircraft. Returns nullptr when there is nothing to send; otherwise the
+// caller owns the object (typically handing it to SWGMapAircraftState::setFlightPlan()).
+SWGSDRangel::SWGMapFlightPlan *AircraftTracker::buildFlightPlan(TrackedAircraft *item) const
+{
+    TrackedFlight *flight = item->m_currentFlight;
+    if (!flight) {
+        return nullptr;
+    }
+
+    // Prefer the clearance when it has waypoints and is at least as recently filed as
+    // the plan - a clearance is what the aircraft is actually cleared to fly
+    const TrackedFlight::FiledRoute& plan = flight->m_flightPlan;
+    const TrackedFlight::FiledRoute& clearance = flight->m_clearance;
+    const bool planUsable = !plan.m_waypoints.isEmpty()
+                         || !plan.m_sid.isEmpty() || !plan.m_star.isEmpty();
+    const bool clearanceUsable = !clearance.m_waypoints.isEmpty();
+    const TrackedFlight::FiledRoute *route;
+    if (clearanceUsable && (!planUsable || (clearance.m_filed >= plan.m_filed))) {
+        route = &clearance;
+    } else if (planUsable) {
+        route = &plan;
+    } else {
+        return nullptr;
+    }
+
+    const QString departure = route->m_departure.size() == 4 ? route->m_departure
+                                                             : flight->m_departure;
+    const QString arrival = route->m_arrival.size() == 4 ? route->m_arrival
+                                                         : flight->m_arrival;
+
+    // Everything assembleRoutePoints() depends on, so the assembly - database lookups
+    // per fix - runs only when the route actually changes, not per position report
+    const QString signature = QStringList({
+        departure, arrival, route->m_waypoints, route->m_sid, route->m_star,
+        QString::number(route->m_flightLevel),
+        route->m_filed.toString(Qt::ISODateWithMs)
+    }).join(QChar(0x1f));
+    if (signature != flight->m_ndPlanSignature)
+    {
+        flight->m_ndPlanCoords.clear();
+        flight->m_ndPlanPoints = assembleRoutePoints(flight, *route, flight->m_ndPlanCoords);
+        flight->m_ndPlanSignature = signature;
+    }
+    const QList<AircraftReport::RouteWaypoint>& points = flight->m_ndPlanPoints;
+    const QList<QGeoCoordinate>& coords = flight->m_ndPlanCoords;
+    if (coords.size() < 2) {
+        return nullptr;
+    }
+
+    SWGSDRangel::SWGMapFlightPlan *swgPlan = new SWGSDRangel::SWGMapFlightPlan();
+    if (!departure.isEmpty()) {
+        swgPlan->setDeparture(new QString(departure));
+    }
+    if (!arrival.isEmpty()) {
+        swgPlan->setArrival(new QString(arrival));
+    }
+    if (!route->m_approach.isEmpty()) {
+        swgPlan->setApproach(new QString(route->m_approach));
+    }
+    // The arrival runway, for the ND's approach annunciator. An FPN writes the
+    // departure runway with the arrival's in brackets - 27L(01R) - and the approach
+    // procedure name usually ends in the runway it serves, e.g. ILSY01R. The bare
+    // runway field is NOT used: on its own it is the departure runway.
+    static const QRegularExpression bracketedRunwayRe(R"(\(([0-9]{2}[LRC]?)\))");
+    static const QRegularExpression approachRunwayRe(R"(([0-9]{2}[LRC]?)$)");
+    QString arrivalRunway;
+    QRegularExpressionMatch runwayMatch = bracketedRunwayRe.match(route->m_runway);
+    if (runwayMatch.hasMatch()) {
+        arrivalRunway = runwayMatch.captured(1);
+    }
+    else
+    {
+        runwayMatch = approachRunwayRe.match(route->m_approach);
+        if (runwayMatch.hasMatch()) {
+            arrivalRunway = runwayMatch.captured(1);
+        }
+    }
+    if (!arrivalRunway.isEmpty()) {
+        swgPlan->setArrivalRunway(new QString(arrivalRunway));
+    }
+
+    // The waypoint being flown to: the one after the nearest, since past waypoints are
+    // behind the aircraft. Rough - an aircraft mid-leg far from both ends still picks
+    // its neighbours - but only leg colouring on the ND depends on it.
+    int active = -1;
+    if (item->m_positionValid)
+    {
+        const QGeoCoordinate position(item->m_latitude, item->m_longitude);
+        int nearest = -1;
+        double nearestDistance = 0.0;
+        for (int i = 0; i < coords.size(); i++)
+        {
+            const double distance = position.distanceTo(coords[i]);
+            if ((nearest == -1) || (distance < nearestDistance))
+            {
+                nearest = i;
+                nearestDistance = distance;
+            }
+        }
+        active = std::min(nearest + 1, (int) (coords.size() - 1));
+    }
+    swgPlan->setActiveWaypoint(active);
+
+    QList<SWGSDRangel::SWGMapRouteWaypoint *> *waypoints = new QList<SWGSDRangel::SWGMapRouteWaypoint *>();
+    for (int i = 0; i < points.size(); i++)
+    {
+        SWGSDRangel::SWGMapRouteWaypoint *waypoint = new SWGSDRangel::SWGMapRouteWaypoint();
+        waypoint->setName(new QString(points[i].m_name));
+        waypoint->setLatitude(coords[i].latitude());
+        waypoint->setLongitude(coords[i].longitude());
+        if (points[i].m_hasAltitude) {
+            waypoint->setAltitude(points[i].m_altitudeFt);
+        } else if (points[i].m_hasMinimumAltitude) {
+            waypoint->setAltitude(points[i].m_minimumAltitudeFt);
+        } else if (points[i].m_hasMaximumAltitude) {
+            waypoint->setAltitude(points[i].m_maximumAltitudeFt);
+        }
+        if (points[i].m_hasEta) {
+            waypoint->setEta(new QString(points[i].m_eta.toString("hh:mm:ss")));
+        }
+        waypoints->append(waypoint);
+    }
+    swgPlan->setWaypoints(waypoints);
+
+    return swgPlan;
+}
+
+// Note the latest datalink ATC message, which the 3D map's DCDU pops up for the
+// selected aircraft, and push it to the Map at once - these are events, and waiting
+// for the next position report could sit on one for minutes
+void AircraftTracker::recordDcduMessage(TrackedAircraft *item, const AircraftReport& report)
+{
+    TrackedAircraft::DcduMessage message;
+
+    switch (report.m_documentKind)
+    {
+    case AircraftReport::Cpdlc:
+        // The concise expanded text rather than the full decode tree. The station is
+        // the ARINC 622 ground address (an ATC facility) on the ACARS path, and the
+        // VDL-2 ground station on the ATN path.
+        if (report.m_atc.isEmpty()) {
+            return;
+        }
+        message.m_text = report.m_atc;
+        message.m_station = report.m_station;
+        break;
+    case AircraftReport::DepartureClearance:
+        // The message as transmitted, which is what the real unit shows. A PDC never
+        // carries a station; the issuing facility is the departure airport.
+        message.m_text = report.m_documentSource.isEmpty() ? report.m_documentText
+                                                           : report.m_documentSource;
+        message.m_station = report.m_departure;
+        break;
+    case AircraftReport::Clearance:
+    case AircraftReport::ClearanceRequest:
+        message.m_text = report.m_documentSource.isEmpty() ? report.m_documentText
+                                                           : report.m_documentSource;
+        message.m_station = report.m_station;
+        break;
+    default:
+        return;
+    }
+    if (message.m_text.isEmpty()) {
+        return;
+    }
+
+    message.m_seq = item->m_dcduMessage.m_seq + 1;
+    message.m_received = report.m_received;
+    message.m_uplink = report.m_uplink;
+    item->m_dcduMessage = message;
+
+    sendToMap(item);
+}
+
+// Build the datalink message attached to the aircraft's own map item, which the 3D
+// map's DCDU displays. nullptr when the aircraft has never had one; otherwise the
+// caller owns the object.
+SWGSDRangel::SWGMapDatalinkMessage *AircraftTracker::buildDatalinkMessage(const TrackedAircraft *item) const
+{
+    const TrackedAircraft::DcduMessage& message = item->m_dcduMessage;
+    if (message.m_seq == 0) {
+        return nullptr;
+    }
+
+    SWGSDRangel::SWGMapDatalinkMessage *swgMessage = new SWGSDRangel::SWGMapDatalinkMessage();
+    swgMessage->setId(message.m_seq);
+    if (message.m_received.isValid()) {
+        swgMessage->setReceived(new QString(message.m_received.toUTC().toString(Qt::ISODateWithMs)));
+    }
+    swgMessage->setUplink(message.m_uplink ? 1 : 0);
+    if (!message.m_station.isEmpty()) {
+        swgMessage->setStation(new QString(message.m_station));
+    }
+    swgMessage->setText(new QString(message.m_text));
+    return swgMessage;
+}
+
 void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::FiledRoute& route,
                                      const QString& kind)
 {
-    if (route.m_waypoints.isEmpty()) {
+    if (!routeDrawn(flight))
+    {
+        // Off the map, and not waiting to go on it: selecting the flight is what sends a
+        // route now, so nothing has to remember that this one wanted to be drawn. Cheap
+        // for the flight that was never drawn - removeDrawnRoute() returns straight away.
+        route.m_pending = false;
+        removeDrawnRoute(route);
+        return;
+    }
+    // Nothing to draw only when the plan names no path AND no procedure. A plan whose
+    // arrival end is all that has been heard has no waypoints of its own, but its STAR
+    // expands into a run of fixes, and the line from the departure airport through those
+    // to the arrival airport is worth drawing.
+    if (route.m_waypoints.isEmpty() && route.m_sid.isEmpty() && route.m_star.isEmpty()) {
         route.m_pending = false;
         return;
     }
@@ -3315,37 +5702,8 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
     }
     route.m_pending = false;
 
-    // The route field is the waypoints alone, so the airports it runs between are added
-    // here - which is what makes the drawn line start and finish somewhere recognisable
-    QList<AircraftReport::RouteWaypoint> points;
-    // Not "name": that is the flight's, just above, and shadowing it here would read
-    // as though the route were being built out of it
-    auto named = [](const QString& waypoint)
-    {
-        AircraftReport::RouteWaypoint point;
-        point.m_name = waypoint;
-        return point;
-    };
-    if (flight->m_departure.size() == 4) {
-        points.append(named(flight->m_departure));
-    }
-    // The message's own positions where it gave them, its names alone where it did not
-    if (route.m_points.isEmpty())
-    {
-        for (const QString& waypoint : route.m_waypoints.split(" ", Qt::SkipEmptyParts)) {
-            points.append(named(waypoint));
-        }
-    }
-    else
-    {
-        points.append(route.m_points);
-    }
-    if (flight->m_arrival.size() == 4) {
-        points.append(named(flight->m_arrival));
-    }
-
     QList<QGeoCoordinate> coords;
-    resolveRoute(points, coords);
+    QList<AircraftReport::RouteWaypoint> points = assembleRoutePoints(flight, route, coords);
     QStringList names;
     for (const AircraftReport::RouteWaypoint& point : points) {
         names.append(point.m_name);
@@ -3372,10 +5730,26 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
     signature.append(flight->m_departure);
     signature.append(flight->m_arrival);
     signature.append(route.m_text);
+    // Or an insert that adds only the STAR would change the popup without redrawing it
+    signature.append(route.m_runway);
+    signature.append(route.m_sid);
+    signature.append(route.m_star);
+    signature.append(route.m_approach);
+    signature.append(route.m_alternate);
+    // The level the route is flown at, and the ALTITUDE of every fix with it.
+    //
+    // Without these a route already on the map is never redrawn when only its heights
+    // change, because nothing else about it has moved: the cruise level arrives in a
+    // later message than the path it applies to, so the fixes stayed on the ground while
+    // a SID or STAR - which changes m_sid or m_star, and so the signature - came out at
+    // its proper height. That asymmetry is exactly what it looked like from outside.
+    signature.append(QString::number(route.m_flightLevel));
+    signature.append(QString::number(route.m_mach, 'f', 2));
     for (int i = 0; i < names.size(); i++)
     {
-        signature.append(QString("%1@%2,%3").arg(names[i])
-            .arg(coords[i].latitude(), 0, 'f', 5).arg(coords[i].longitude(), 0, 'f', 5));
+        signature.append(QString("%1@%2,%3,%4").arg(names[i])
+            .arg(coords[i].latitude(), 0, 'f', 5).arg(coords[i].longitude(), 0, 'f', 5)
+            .arg(coords[i].altitude(), 0, 'f', 0));
     }
     const QString drawn = signature.join(QChar(0x1f));
     if (drawn == route.m_drawn) {
@@ -3409,7 +5783,30 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
     if (!flight->m_departure.isEmpty() && !flight->m_arrival.isEmpty()) {
         text.append(QString("Route: %1 to %2").arg(flight->m_departure).arg(flight->m_arrival));
     }
+    // In the order the flight is flown, and only the parts that were filed. A
+    // clearance has none of them; a plan assembled from its inserts has most.
+    if (!route.m_runway.isEmpty()) {
+        text.append(QString("Runway: %1").arg(route.m_runway));
+    }
+    if (!route.m_sid.isEmpty()) {
+        text.append(QString("SID: %1").arg(route.m_sid));
+    }
     text.append("Waypoints: " + names.join(" "));
+    if (!route.m_star.isEmpty()) {
+        text.append(QString("STAR: %1").arg(route.m_star));
+    }
+    if (!route.m_approach.isEmpty()) {
+        text.append(QString("Approach: %1").arg(route.m_approach));
+    }
+    if (!route.m_alternate.isEmpty()) {
+        text.append(QString("Alternate: %1").arg(route.m_alternate));
+    }
+    if (route.m_flightLevel > 0) {
+        text.append(QString("Flight level: FL%1").arg(route.m_flightLevel));
+    }
+    if (route.m_mach > 0.0f) {
+        text.append(QString("Mach: %1").arg(route.m_mach, 0, 'f', 2));
+    }
     // The message itself, which is where the clearance number, entry time, flight level
     // and Mach are. The demodulator used to repeat those on every waypoint; one copy on
     // the route says the same thing without covering the map in it.
@@ -3425,6 +5822,7 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
 
         SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
         swgMapItem->setName(new QString(lineName));
+        swgMapItem->setGroup(new QString(RouteMapGroup));
         swgMapItem->setLabel(new QString(name));
         swgMapItem->setText(new QString(text.join("\n")));
         swgMapItem->setLatitude(coords[0].latitude());
@@ -3458,12 +5856,43 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
             swgMapItem = new SWGSDRangel::SWGMapItem();
             // Not the name the Map uses for the waypoint itself, which would replace it
             swgMapItem->setName(new QString(waypointNames[i]));
+            swgMapItem->setGroup(new QString(RouteMapGroup));
             swgMapItem->setLabel(new QString(names[i]));
 
             QStringList waypointText;
             waypointText.append(QString("%1 waypoint").arg(kind));
             waypointText.append(QString("Flight: %1").arg(name));
             waypointText.append(QString("Waypoint: %1").arg(names[i]));
+            // Which procedure it came out of. Without this a procedure fix is an
+            // unexplained marker in the middle of nowhere - it is named for its
+            // procedure, so KKN43 says nothing unless the SID is named with it.
+            const AircraftReport::RouteWaypoint& point = points[i];
+            if (!point.m_procedure.isEmpty())
+            {
+                waypointText.append(QString("%1: %2")
+                    .arg(point.m_procedureType.isEmpty() ? QString("Procedure")
+                                                         : point.m_procedureType)
+                    .arg(point.m_procedure));
+            }
+            // A predicted fix says what the aircraft's own FMS expects there, which is
+            // a plain figure rather than the procedure's constraint
+            if (point.m_hasAltitude) {
+                waypointText.append(QString("Altitude: %1 ft").arg(point.m_altitudeFt));
+            }
+            else
+            {
+                const QString constraint = altitudeConstraint(point);
+                if (!constraint.isEmpty()) {
+                    waypointText.append(QString("Altitude: %1").arg(constraint));
+                }
+            }
+            if (point.m_hasEta) {
+                waypointText.append(QString("ETA: %1").arg(point.m_eta.toString("hh:mm:ss")));
+            }
+            // What the clearance said to fly the route at, on every fix of it
+            if (route.m_mach > 0.0f) {
+                waypointText.append(QString("Mach: %1").arg(route.m_mach, 0, 'f', 2));
+            }
             swgMapItem->setText(new QString(waypointText.join("\n")));
 
             swgMapItem->setLatitude(coords[i].latitude());
@@ -3472,7 +5901,9 @@ void AircraftTracker::sendRouteToMap(TrackedFlight *flight, TrackedFlight::Filed
             swgMapItem->setImage(new QString("waypoint.png"));
             swgMapItem->setImageRotation(0);
             swgMapItem->setFixedPosition(true);
-            swgMapItem->setAltitudeReference(3);
+            // A fix with a real altitude is drawn AT it - clipping it to the ground would
+            // throw away the constraint that was the point of using it
+            swgMapItem->setAltitudeReference(coords[i].altitude() > 0.0 ? 0 : 3);
 
             msg = MainCore::MsgMapItem::create(m_feature, swgMapItem);
             messageQueue->push(msg);
@@ -3536,8 +5967,11 @@ void AircraftTracker::checkMapConsumers()
     {
         if (item->m_active)
         {
+            // The whole track goes again. The name is kept: the Maps that already had
+            // the item need it to be told when it is renamed or taken off, and with it
+            // cleared, an item whose resend was then skipped (its position gone stale in
+            // the meantime) stayed on them as a ghost for the rest of the session.
             item->m_mapTrackChanged = true;
-            item->m_mapName.clear();    // Draw it again rather than assuming it is there
             // Held until it has actually been sent. A pass-through aircraft whose ADS-B
             // has gone quiet is skipped by flush() for a minute after its last item, and
             // the dirty set is cleared either way - so without this the aircraft would
@@ -3547,21 +5981,24 @@ void AircraftTracker::checkMapConsumers()
             m_dirtyAircraft.insert(item);
         }
 
-        // Routes are drawn for archived aircraft too - they are a record of where the
-        // aircraft was going, and are deliberately left up - so unlike the aircraft
-        // itself they are re-sent whether or not it is still being heard
-        for (TrackedFlight *flight : item->m_flights)
+    }
+
+    // Only the selected flight's routes are on a map at all, so only they have to be put
+    // on a new one. It is offered whether or not its aircraft is still being heard: a
+    // route is a record of where the aircraft was going, and is deliberately left up.
+    if (TrackedFlight *watched = flightById(m_watchedFlight))
+    {
+        for (TrackedFlight::FiledRoute *route : { &watched->m_flightPlan, &watched->m_clearance })
         {
-            for (TrackedFlight::FiledRoute *route : { &flight->m_flightPlan, &flight->m_clearance })
+            // The same test as sendRouteToMap(): a plan with only a SID or a STAR is
+            // drawn too, so it has to reach a new Map as well
+            if (!route->m_waypoints.isEmpty() || !route->m_sid.isEmpty() || !route->m_star.isEmpty())
             {
-                if (!route->m_waypoints.isEmpty())
-                {
-                    // Not removeDrawnRoute(): the items are still on the Maps that
-                    // already had them, and re-sending replaces them by name
-                    route->m_drawn.clear();
-                    route->m_pending = true;
-                    m_routesPending.insert(flight->m_id);
-                }
+                // Not removeDrawnRoute(): the items are still on the Maps that already
+                // had them, and re-sending replaces them by name
+                route->m_drawn.clear();
+                route->m_pending = true;
+                m_routesPending.insert(watched->m_id);
             }
         }
     }
@@ -3569,6 +6006,14 @@ void AircraftTracker::checkMapConsumers()
     // Sent again for the same reason, and by the same means: forget what was last drawn
     m_recordMapKey.clear();
     m_recordOnMap = false;
+    m_watchedTrackKey.clear();
+
+    // The coverage outline is otherwise only sent when a bin grows, which on HFDL can be
+    // hours away - and the one restored from the database at startup, before any Map
+    // existed, was never sent at all
+    if (m_settings.m_displayCoverage) {
+        sendCoverageToMap();
+    }
 }
 
 // A route held back for want of a Map to draw it on, or a name to draw it under. Neither

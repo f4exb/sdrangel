@@ -25,7 +25,7 @@
 #include "profiler.h"
 
 QHash<QString, ProfileData> GlobalProfileData::m_profileData;
-QMutex GlobalProfileData::m_mutex;
+QRecursiveMutex GlobalProfileData::m_mutex;
 QElapsedTimer GlobalProfileData::m_startTimer;
 
 // Format a time in nanoseconds as the Profile dialog does

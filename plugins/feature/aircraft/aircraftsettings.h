@@ -31,10 +31,10 @@ class Serializable;
 // the header's own sectionMoved/sectionResized hand back a logical index straight out of
 // the model - so a column added to a model without changing the count here writes off
 // the end of the array. aircrafttablemodels.cpp asserts the two agree at compile time.
-#define AIRCRAFT_COLUMNS 16
+#define AIRCRAFT_COLUMNS 18
 // Flight, Reg, From, To, Out, Off, On, In, First seen, Last seen, LS, OC, FP, Docs,
 // Protocols
-#define FLIGHT_COLUMNS 15
+#define FLIGHT_COLUMNS 17
 
 struct AircraftSettings
 {
@@ -94,6 +94,23 @@ struct AircraftSettings
     // Prefer a model in the right airline livery over a model of exactly the right type
     bool m_favourLivery;
     bool m_useLiveryIcons;  // Use aircraft icons with airline liveries on 2D map, instead of black icons
+
+    // Feeding received ACARS on to aggregators, in acarsdec style JSON. Here rather than
+    // in the ACARS demodulator because a receiver runs one of those per band - VHF,
+    // VDL-2, HFDL - and the feed is a property of the station, not of any one of them.
+    bool m_feedEnabled;
+    QString m_feedStationId;        //!< Station ident sent with each message
+    bool m_feedAirframes;
+    QString m_feedAirframesHost;
+    int m_feedAirframesPort;
+    bool m_feedAirframesTcp;        //!< TCP (as the airframes.io wizard assigns) or UDP
+    bool m_feedAvdelphi;
+    QString m_feedAvdelphiHost;
+    int m_feedAvdelphiPort;
+    bool m_feedAvdelphiTcp;
+    //!< Draw the polar coverage of each protocol on the Map - see
+    //!< AircraftTracker::updateCoverage()
+    bool m_displayCoverage;
     QString m_databaseFilename;     // Where the session is kept; empty means the default location
     QStringList m_disabledSources;  // Channel URIs not to accept reports from; empty accepts all
 

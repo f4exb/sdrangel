@@ -41,6 +41,7 @@ QMutex AircraftInformation::m_mutex;
 QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::m_aircraftInformation;
 QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::m_aircraftInformationByReg;
 QSharedPointer<const QHash<QString, AircraftRouteInformation *>> OsnDB::m_aircraftRouteInformation;
+QRecursiveMutex OsnDB::m_dbMutex;
 QDateTime OsnDB::m_modifiedDateTime;
 
 
@@ -100,6 +101,8 @@ void OsnDB::downloadFinished(const QString& filename, bool success)
 
 QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::getAircraftInformation()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     QFileInfo fastFileInfo(getFastDBFilename());
     QFileInfo fullFileInfo(getOSNDBFilename());
     QDateTime fastModifiedDateTime = fastFileInfo.lastModified();
@@ -134,12 +137,16 @@ QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::getAircraftInform
 
 QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::getAircraftInformationByReg()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     getAircraftInformation();
     return m_aircraftInformationByReg;
 }
 
 QSharedPointer<const QHash<QString, AircraftRouteInformation *>>  OsnDB::getAircraftRouteInformation()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     if (!m_aircraftRouteInformation) {
         m_aircraftRouteInformation = QSharedPointer<const QHash<QString, AircraftRouteInformation *>>(OsnDB::readRouteDB(getRouteDBFilename()));
     }

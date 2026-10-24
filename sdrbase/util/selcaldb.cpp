@@ -35,6 +35,7 @@
 #include "util/csv.h"
 
 QSharedPointer<const QMultiHash<QString, QString>> SELCALDB::m_registrations;
+QSharedPointer<const QHash<QString, QString>> SELCALDB::m_codes;
 QDateTime SELCALDB::m_modifiedDateTime;
 QMutex SELCALDB::m_mutex;
 
@@ -182,10 +183,27 @@ QSharedPointer<const QMultiHash<QString, QString>> SELCALDB::getRegistrations()
         {
             m_registrations = QSharedPointer<const QMultiHash<QString, QString>>(registrations);
             m_modifiedDateTime = modifiedDateTime;
+
+            QHash<QString, QString> *codes = new QHash<QString, QString>();
+            for (auto it = registrations->constBegin(); it != registrations->constEnd(); ++it)
+            {
+                QString& held = (*codes)[it.value()];
+                if (!held.split(", ").contains(it.key())) {
+                    held = held.isEmpty() ? it.key() : held + ", " + it.key();
+                }
+            }
+            m_codes = QSharedPointer<const QHash<QString, QString>>(codes);
         }
     }
 
     return m_registrations;
+}
+
+QSharedPointer<const QHash<QString, QString>> SELCALDB::getCodesByRegistration()
+{
+    getRegistrations();     // Loads, or reloads after a download, both tables together
+    QMutexLocker locker(&m_mutex);
+    return m_codes;
 }
 
 QStringList SELCALDB::getRegistrations(const QString& code)

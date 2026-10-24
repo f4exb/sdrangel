@@ -16,6 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "SWGFeatureSettings.h"
+#include "SWGAircraftSettings.h"
+#include "aircraft.h"
 #include "aircraftwebapiadapter.h"
 
 AircraftWebAPIAdapter::AircraftWebAPIAdapter()
@@ -30,9 +33,11 @@ int AircraftWebAPIAdapter::webapiSettingsGet(
     SWGSDRangel::SWGFeatureSettings& response,
     QString& errorMessage)
 {
-    (void) response;
-    errorMessage = "Not implemented";
-    return 501;
+    (void) errorMessage;
+    response.setAircraftSettings(new SWGSDRangel::SWGAircraftSettings());
+    response.getAircraftSettings()->init();
+    Aircraft::webapiFormatFeatureSettings(response, m_settings);
+    return 200;
 }
 
 int AircraftWebAPIAdapter::webapiSettingsPutPatch(
@@ -41,9 +46,8 @@ int AircraftWebAPIAdapter::webapiSettingsPutPatch(
     SWGSDRangel::SWGFeatureSettings& response,
     QString& errorMessage)
 {
-    (void) force;
-    (void) featureSettingsKeys;
-    (void) response;
-    errorMessage = "Not implemented";
-    return 501;
+    (void) force;       // Nothing to apply it to: this adapter holds settings, not a feature
+    (void) errorMessage;
+    Aircraft::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
+    return 200;
 }

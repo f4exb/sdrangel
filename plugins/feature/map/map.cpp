@@ -109,8 +109,18 @@ bool Map::handleMessage(const Message& cmd)
     {
         // qDebug() << "Map::handleMessage: MsgMapItem";
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) cmd;
-        MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
-        getMessageQueueToGUI()->push(copy);
+
+        if (getMessageQueueToGUI())
+        {
+            // The GUI owns the item from here, and deletes it once the map has it
+            MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
+            getMessageQueueToGUI()->push(copy);
+        }
+        else
+        {
+            // Nothing to display it, so it would otherwise be leaked
+            delete msgMapItem.getSWGMapItem();
+        }
         return true;
     }
     else
@@ -314,7 +324,13 @@ void Map::webapiFormatFeatureSettings(
     response.getMapSettings()->setDisplayMagDec(settings.m_displayMagDec ? 1 : 0);
     response.getMapSettings()->setDisplayMaidenheadGrid(settings.m_displayMaidenheadGrid ? 1 : 0);
     response.getMapSettings()->setDisplayPfd(settings.m_displayPFD ? 1 : 0);
-    response.getMapSettings()->setViewFirstPerson(settings.m_viewFirstPerson ? 1 : 0);
+    // The boolean this API field was built around became a three-valued camera mode
+    // (third person, first person, fly by). The field is kept working as it always did -
+    // true means first person - rather than dropped, which would break existing callers.
+    // Fly by is not reachable over the web API until the schema gains a cameraMode field,
+    // which needs a swagger regeneration.
+    response.getMapSettings()->setViewFirstPerson(
+        (settings.m_cameraMode == MapSettings::FirstPerson) ? 1 : 0);
     if (response.getMapSettings()->getDefaultImagery()) {
         *response.getMapSettings()->getDefaultImagery() = settings.m_defaultImagery;
     } else {
@@ -464,8 +480,12 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("displayPFD")) {
         settings.m_displayPFD = response.getMapSettings()->getDisplayPfd() != 0;
     }
-    if (featureSettingsKeys.contains("viewFirstPerson")) {
-        settings.m_viewFirstPerson = response.getMapSettings()->getViewFirstPerson() != 0;
+    if (featureSettingsKeys.contains("viewFirstPerson"))
+    {
+        // See webapiFormatFeatureSettings: clearing it returns to third person, which is
+        // what the boolean's false meant before the camera mode replaced it
+        settings.m_cameraMode = (response.getMapSettings()->getViewFirstPerson() != 0)
+            ? MapSettings::FirstPerson : MapSettings::ThirdPerson;
     }
     if (featureSettingsKeys.contains("defaultImagery")) {
         settings.m_defaultImagery = *response.getMapSettings()->getDefaultImagery();
@@ -610,7 +630,7 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
         swgMapSettings->setDisplayPfd(settings.m_displayPFD);
     }
     if (featureSettingsKeys.contains("viewFirstPerson") || force) {
-        swgMapSettings->setViewFirstPerson(settings.m_viewFirstPerson);
+        swgMapSettings->setViewFirstPerson(settings.m_cameraMode == MapSettings::FirstPerson);
     }
     if (featureSettingsKeys.contains("defaultImagery") || force) {
         swgMapSettings->setDefaultImagery(new QString(settings.m_defaultImagery));

@@ -382,7 +382,7 @@ MapItem:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAircraftState"
       description: "Current states of aircraft tracked by the ADS-B demodulator."
     loopSound:
-      description: "Sound to loop while the item is on the 3D map, spatially located at the item. Either the name of an engine sound set (cfm, v2500, 777, 787, A380, jet), whose -n1/-n2/-idle recordings the map layers and mixes by phase of flight, or an audio file name from the Map's audio directory (e.g. helicopter.wav). Empty for none"
+      description: "Sound to loop while the item is on the 3D map, spatially located at the item. Either an engine sound-set directory below the configured 3d/Sounds directory, containing engine.json and OGG layers, or a legacy audio file name from the Map's bundled audio directory (e.g. helicopter.wav). Empty for none"
       type: string
 
 MapAnimation:
@@ -452,6 +452,12 @@ MapCoordinate:
 MapAircraftState:
   description: "Aircraft state for PFD/ND"
   properties:
+    dateTime:
+      description: "Date and time at which this complete aircraft state applies (ISO 8601 extended format). When set, the Map preserves this sample instead of coalescing it with a later update."
+      type: string
+    icao:
+      description: "ICAO Mode S address of this aircraft as lower-case hex"
+      type: string
     callsign:
       type: string
       description: "Radio callsign."
@@ -528,8 +534,17 @@ MapAircraftState:
       description: "0 unknown, 1 LNAV, APP (LOC)"
       type: integer
     tcasMode:
-      description: "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
-      type: integer  
+      description: "0 unknown, 1 Off, 2 TA only, 3 TA/RA"
+      type: integer
+    tcasRA:
+      description: "Active TCAS resolution advisory bitfield. 0 none, bit 0 active, bit 1 corrective (vs preventive), bit 2 downward sense (descend), bit 3 positive (vs vertical speed limit), bit 4 clear of conflict, bit 5 multiple threats, bit 6 opposite-sense multiple-threat coding"
+      type: integer
+    tcasThreatIcao:
+      description: "ICAO Mode S address of the RA threat aircraft as lower-case hex, empty if not identified"
+      type: string
+    squawk:
+      description: "Mode A squawk code as decimal digits (e.g. 7000), -1 for unknown"
+      type: integer
     windSpeed:
       type: number
       format: float
@@ -608,4 +623,3 @@ MapRouteWaypoint:
     eta:
       description: "Estimated time over this waypoint (ISO 8601 extended format). Empty if unknown"
       type: string
-

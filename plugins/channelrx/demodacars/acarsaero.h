@@ -2,6 +2,13 @@
 // Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 // Some code by AI                                                               //
 //                                                                               //
+// The Inmarsat Classic Aero protocol parameters - the convolutional code and    //
+// its polynomials, the interleaver row permutation, the scrambler polynomial    //
+// and seed, the unique words, the frame and signal unit layouts, and the        //
+// ISU/SSU reassembly rules - were established by reading JAERO by Jonti Olds,   //
+// https://github.com/jontio/JAERO, MIT. The receiver below is an independent    //
+// implementation: no code is taken from it.                                     //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -407,6 +414,24 @@ public:
         // this check exists to stop a false sync wasting a whole frame of deaf time, not
         // to keep garbage out of the output.
         int m_headerMaxErrors = 3;
+        //!< How strongly the unique word has to correlate before the frame header is
+        //!< trusted rather than checked, and what is allowed then. The header is 16 bits,
+        //!< so 16 is no check at all - see the note in consumeSoftBit().
+        //!< Carry the converged rotation from one frame into the next. Added when the
+        //!< unique word seed was poor; kept configurable so it can be measured against
+        //!< the seed now that the seed is good - see seedOqpsk().
+        bool m_carryDphi = true;
+        //!< Rotate the seeded carrier reference by this many quarter turns. For OQPSK a
+        //!< 90 degree error swaps the arms, which is indistinguishable from starting on
+        //!< the wrong symbol clock phase - both give a frame that decodes nothing at all.
+        //!< Diagnostic: if the frames that die are dying of a quadrant error, forcing the
+        //!< quadrant swaps which offsets work.
+        int m_seedQuadrant = 0;
+        //!< Print the carrier loop's state through the first few frames, to stderr.
+        //!< Diagnostic only - see the note on the tuning cliff in test/README.md.
+        bool m_traceLoop = false;
+        double m_headerTrustCorrelation = 0.85;
+        int m_headerMaxErrorsTrusted = 16;
         // Accept signal units that are entirely zero with a zero CRC as fill. JAERO
         // does this, and real P channels do transmit them.
         bool m_acceptZeroFill = true;
@@ -428,6 +453,33 @@ public:
         double m_uwPeak = 0.0;          //!< Largest unique word correlation seen
         uint64_t m_framesDecoded = 0;
         uint64_t m_headerBad = 0;       //!< Headers not exactly legal, whether or not accepted
+        //!< OQPSK arm selection: how often a frame confirmed the symbol clock phase by
+        //!< decoding something, and how often one decoded nothing and the phase was
+        //!< flipped to the other candidate half a symbol away
+        uint64_t m_phaseConfirms = 0;
+        uint64_t m_phaseFlips = 0;
+        uint64_t m_phaseDeadFrames = 0;
+        //!< How good the carrier seed from the unique word is: the seed the frame started
+        //!< with against the rotation the loop had converged on by the end of it, summed
+        //!< over frames that decoded. Radians per symbol; the harness converts to Hz.
+        double m_seedErrorSum = 0.0;
+        double m_seedErrorMax = 0.0;
+        double m_convergedSum = 0.0;
+        uint64_t m_seedCount = 0;
+        //!< Frames where the seed came from the unique word rather than the carry, split
+        //!< by whether they went on to decode anything
+        uint64_t m_seededFromUw = 0;
+        uint64_t m_seededFromUwOk = 0;
+        //!< Frames by how many of their 26 signal units passed: none, some, most, all.
+        //!< Whether a bad frame is bad outright or merely noisy says whether the loss is
+        //!< a lock going wrong or ordinary noise.
+        uint64_t m_frameYield[4] = {0, 0, 0, 0};
+        //!< Which symbol clock phase the frames that decoded everything started on, and
+        //!< which the frames that decoded nothing did. If the dead frames sit half a
+        //!< symbol away from the live ones then the arm really is alternating; if they
+        //!< sit on the same phase then whatever kills them is not the timing.
+        uint64_t m_phaseHistOk[32] = {0};
+        uint64_t m_phaseHistDead[32] = {0};
         uint64_t m_headerRejected = 0;  //!< ... and those too far off to keep the frame
         uint64_t m_uwTracked = 0;       //!< Frames whose unique word was confirmed where predicted
         uint64_t m_uwLost = 0;          //!< Tracking gave up and returned to search
@@ -1460,6 +1512,9 @@ private:
     int m_ringFill = 0;
 
     State m_state = StateSearch;
+    //!< How well the unique word correlated for the frame being decoded now, which is
+    //!< how sure we are that this IS a frame - see the header check in consumeSoftBit()
+    double m_syncCorrelation = 0.0;
     int m_lockedPhase = -1;         //!< OQPSK symbol clock phase held across frames, -1 until locked
     int m_framePhase = -1;          //!< Phase this frame was started on, locked if it decodes
     bool m_phaseConfirmed = false;  //!< A frame has actually decoded on m_lockedPhase
@@ -1501,6 +1556,11 @@ private:
     std::vector<uint8_t> m_burstBits;
     int m_burstTargetSus = 0;       //!< T burst signal unit count, from unit one's SEQNO
     double m_carriedDphi = 0.0;     //!< Per-symbol rotation carried from the last good frame
+    double m_frameSeedDphi = 0.0;   //!< What the unique word alone said, for the statistics
+    int m_traceSymbol = 0;
+    int m_traceFrame = 0;
+    int m_frameHeaderDistance = 0;
+    bool m_frameSeededFromUw = false;
     bool m_haveCarriedDphi = false; //!< ... and whether there is one
     int m_burstCols = 0;
 
@@ -1699,6 +1759,7 @@ private:
         m_syncPending = false;
         m_dphi = std::arg(m_bestSum);
         m_lastSyncError = m_bestStat;
+        m_syncCorrelation = m_bestStat;
         startFrame(refineTiming(m_bestAgo));
         return true;
     }
@@ -1761,6 +1822,10 @@ private:
         m_stats.m_uwTracked++;
         m_stats.m_syncs++;
         m_dphi = std::arg(m_bestSum);
+        // This frame's own correlation, not the one the acquisition had - a tracked
+        // frame is accepted against a much lower threshold, so inheriting the previous
+        // frame's confidence would trust a header that has not earned it
+        m_syncCorrelation = m_bestStat;
         measureTimingSlip(m_bestAgo);
         startFrame(refineTiming(m_bestAgo));
         return true;
@@ -1819,12 +1884,66 @@ private:
     // worse - 210 signal units of 222 without it, against 195, 175 and 81 for the three
     // ways of aligning it to MSK's 33 symbol differentially carried word. Refining
     // something that is already right can only add noise.
+    // Kay's estimator over the unique word at a given sampling instant. The same
+    // estimator seedOqpsk() uses, factored out because the timing refinement needs it
+    // too - and needs it BEFORE the seed runs.
+    double uwKayDphi(int at) const
+    {
+        const int n = ACARSAERO_UW_LEN;
+        double sum = 0.0;
+        double weight = 0.0;
+        Cd previous(0.0, 0.0);
+
+        for (int k = 0; k < n; k++)
+        {
+            Cd v = tap(at + (n - 1 - k) * m_sps) * (uwBit(k) ? 1.0 : -1.0);
+            if (k)
+            {
+                const Cd step = v * std::conj(previous);
+                if (std::abs(step) > 1e-12)
+                {
+                    const double x = ((double) k - n / 2.0) / (n / 2.0);
+                    const double w = 1.0 - x * x;
+                    sum += w * std::arg(step);
+                    weight += w;
+                }
+            }
+            previous = v;
+        }
+        return (weight > 0.0) ? (sum / weight) : 0.0;
+    }
+
+    // Two passes, because the timing needs the frequency and the frequency needs the
+    // timing.
+    //
+    // The rotation the scoring needs cannot come from the acquisition correlator, which
+    // is where it was taken from first. That correlator multiplies adjacent I arm
+    // samples, and the unique word sits on the Q arm as well, so the crosstalk between
+    // the arms is coherent across the word rather than averaging away and its argument
+    // carries a systematic bias - measured at +30 Hz on a noiseless channel with no
+    // offset at all, and +50 Hz at 1200 Hz. Thirty Hz sounds negligible for a frequency
+    // and is not: across the 32 symbols of the word it is 1.15 rad of de-rotation that
+    // should not be there, which moved the chosen instant and cost half the frames at
+    // offsets that had been working perfectly.
+    //
+    // So: refine once with the correlator's estimate, which is biased but close enough
+    // to sample the word near its centre; re-estimate the frequency there with Kay's
+    // estimator, which is good to a few Hz; then refine again with that. The improved
+    // estimate is kept, since it is strictly better than the one acquisition produced.
     int refineTiming(int ago)
     {
         if (!isOqpsk(m_rate)) {
             return ago;
         }
 
+        const int first = refineTimingAt(ago, m_dphi);
+        const double kay = uwKayDphi(first);
+        m_dphi = kay;
+        return refineTimingAt(ago, kay);
+    }
+
+    int refineTimingAt(int ago, double rot)
+    {
         const int span = m_sps / 2;
         int bestOffset = 0;
         double best = -1.0;
@@ -1846,12 +1965,26 @@ private:
                 continue;
             }
 
-            // A reference direction from the I arm with the modulation stripped
+            // A reference direction from the I arm with the modulation stripped, and
+            // with the carrier rotation taken out.
+            //
+            // The de-rotation is not a refinement, it is what makes this work off
+            // frequency at all. The sum runs over 32 symbols, so at 300 Hz the vectors
+            // being added swing through 3.8 rad and the "reference direction" becomes
+            // the average of an arc rather than a direction. The score below then
+            // projects every symbol onto that one direction, so the symbols at the ends
+            // of the word contribute nothing, and the instant this picks is wrong by up
+            // to half a symbol. Everything downstream is then built on samples taken off
+            // the eye: the frequency estimate seeded from those taps came out at -657 Hz
+            // where the truth was +300, the carrier reference spun at 45 degrees a
+            // symbol, and the frame decoded nothing at all.
+            //
+            // rot is the per symbol rotation, supplied by refineTiming() above.
             Cd acc(0.0, 0.0);
             for (int k = 0; k < ACARSAERO_UW_LEN; k++)
             {
                 Cd v = tap(at + (ACARSAERO_UW_LEN - 1 - k) * m_sps);
-                acc += uwBit(k) ? v : -v;
+                acc += (uwBit(k) ? v : -v) * std::polar(1.0, -(double) k * rot);
             }
             double amag = std::abs(acc);
             if (amag < 1e-12) {
@@ -1873,8 +2006,12 @@ private:
             for (int k = 0; k < ACARSAERO_UW_LEN; k++)
             {
                 int off = at + (ACARSAERO_UW_LEN - 1 - k) * m_sps;
-                score += std::abs((tap(off) * std::conj(u)).real());
-                score += std::abs((tap(off + m_sps / 2) * std::conj(u)).imag());
+                // The reference carried forward to this symbol, and back half a symbol
+                // again for the Q arm, which is sampled that much earlier
+                const Cd uk = u * std::polar(1.0, (double) k * rot);
+                const Cd uq = uk * std::polar(1.0, -0.5 * rot);
+                score += std::abs((tap(off) * std::conj(uk)).real());
+                score += std::abs((tap(off + m_sps / 2) * std::conj(uq)).imag());
             }
 
             if (score > best)
@@ -2053,6 +2190,88 @@ private:
             prev = v;
         }
 
+        // The rotation again, this time from Kay's estimator rather than the plain mean
+        // of the symbol to symbol phase steps.
+        //
+        // Why it is worth the extra loop: the reference below is referenced to the END of
+        // the word, which means extrapolating the rotation across 31 symbols, so an error
+        // in it is multiplied by 31. The plain mean is good to about 30 Hz at this SNR,
+        // which sounds ample for a frequency and is not: 30 Hz over 31 symbols is
+        // 31 * 2*pi*30/5250 = 1.1 rad, most of the way to the quadrant boundary, and the
+        // detector is decision directed so it then locks to the wrong thing and the whole
+        // frame decodes nothing. Measured on generated signal at 20 dB, the receiver was
+        // losing 23 frames in 27 at a 180 Hz offset for exactly this reason.
+        //
+        // Kay weights each phase step by how much of the word it sits inside - a
+        // parabolic window, heaviest in the middle - which is the minimum variance
+        // combination for a constant frequency in white noise, and costs one more pass
+        // over 32 symbols.
+        double kaySum = 0.0;
+        double kayWeight = 0.0;
+        {
+            const int n = ACARSAERO_UW_LEN;
+            Cd previous(0.0, 0.0);
+            for (int k = 0; k < n; k++)
+            {
+                Cd v = tap(ago + (n - 1 - k) * m_sps) * (uwBit(k) ? 1.0 : -1.0);
+                if (k)
+                {
+                    const Cd step = v * std::conj(previous);
+                    if (std::abs(step) > 1e-12)
+                    {
+                        // 1 - ((k - n/2)/(n/2))^2, zero at the ends and one in the middle
+                        const double x = ((double) k - n / 2.0) / (n / 2.0);
+                        const double w = 1.0 - x * x;
+                        kaySum += w * std::arg(step);
+                        kayWeight += w;
+                    }
+                }
+                previous = v;
+            }
+        }
+
+        // Sum again with the rotation taken out, referenced to the LAST symbol of the
+        // word. Two things were wrong with the plain sum above once the tuning is not
+        // exact, and both of them only bite off frequency:
+        //
+        //   - it smears. At 100 Hz the symbol to symbol advance is 0.12 rad, so across
+        //     32 symbols the vectors being added swing through 3.8 rad and largely
+        //     cancel, which is a poor reference however it is pointed.
+        //   - it points at the MIDDLE of the word. The data starts after the word, so by
+        //     the first data symbol the reference is already half the word's rotation
+        //     behind - 1.9 rad at 100 Hz, most of a quadrant.
+        //
+        // The detector is decision directed, so a reference that far out makes the first
+        // decisions wrong and the loop then locks to the wrong thing and stays there.
+        // That is why the receiver was bistable in tuning: at the exact centre the seed
+        // is good and every frame decodes, and 100 Hz away NO frame ever decodes, so the
+        // frame to frame carry below - which is what usually rescues the seed - never
+        // gets its first good frame to start from.
+        const double seedDphi = (kayWeight > 0.0) ? (kaySum / kayWeight)
+                              : ((std::abs(rot) > 1e-12) ? std::arg(rot) : 0.0);
+        // Referenced to the FIRST symbol of the word, not the last. Aligning it to the
+        // last means extrapolating the rotation across 31 symbols, which multiplies the
+        // frequency estimate's error by 31: on the first frame of a run, before the
+        // frame to frame carry has anything to offer, that error is 10 to 12 Hz and
+        // becomes 25 degrees of phase. The loop then spends the header walking it off,
+        // the header decodes wrong on a channel with no noise in it, and the interleaver
+        // spreads the damage over all 26 signal units so the whole frame dies.
+        Cd aligned(0.0, 0.0);
+        for (int k = 0; k < ACARSAERO_UW_LEN; k++)
+        {
+            Cd v = tap(ago + (ACARSAERO_UW_LEN - 1 - k) * m_sps) * (uwBit(k) ? 1.0 : -1.0);
+            aligned += v * std::polar(1.0, -(double) k * seedDphi);
+        }
+        // Always, never "whichever sum is bigger". That test looked like prudence and
+        // was the bug: the two sums are referenced to DIFFERENT points in the word - the
+        // plain one to its centre, the de-rotated one to its end - and those differ by
+        // half the word's rotation, 15.5 symbols' worth. At 180 Hz that is 3.3 rad, so
+        // letting noise pick between them threw the phase reference across the quadrant
+        // boundary at random, frame by frame, and a decision directed detector cannot
+        // survive that. It is why the receiver looked chaotic in tuning rather than
+        // merely worse off frequency.
+        acc = aligned;
+
         double mag = std::abs(acc);
         if (mag > 1e-12)
         {
@@ -2066,7 +2285,33 @@ private:
             m_cohValid = false;
             m_oqpskInit = false;
         }
-        m_dphiSym = (std::abs(rot) > 1e-12) ? std::arg(rot) : 0.0;
+        m_dphiSym = seedDphi;
+
+        // Now walk the carrier loop across the unique word itself, using its KNOWN bits
+        // where the detector would use decisions. The reference then arrives at the end
+        // of the word by tracking rather than by extrapolation, so it is as good as the
+        // loop can make it rather than as good as a single algebraic estimate - and the
+        // 31x amplification above is gone entirely. It is the same loop the data uses,
+        // so it also arrives already settled instead of converging through the header.
+        if (m_cohValid)
+        {
+            for (int k = 1; k < ACARSAERO_UW_LEN; k++)
+            {
+                m_ref *= std::polar(1.0, m_dphiSym);
+                Cd d = tap(ago + (ACARSAERO_UW_LEN - 1 - k) * m_sps) * (uwBit(k) ? 1.0 : -1.0);
+                const double mag = std::abs(d);
+                if (mag < 1e-12) {
+                    continue;
+                }
+                d /= mag;
+                m_dphiSym += m_config.m_oqpskFreqGain * std::arg(d * std::conj(m_ref));
+                m_ref = (1.0 - m_config.m_oqpskRefGain) * m_ref + m_config.m_oqpskRefGain * d;
+                const double refMag = std::abs(m_ref);
+                if (refMag > 1e-12) {
+                    m_ref /= refMag;
+                }
+            }
+        }
 
         // CARRY THE FREQUENCY ACROSS FRAMES. The unique word is only 32 symbols, so the
         // rotation estimated from it is coarse - and a 10500 bps frame is 2625 symbols
@@ -2080,7 +2325,20 @@ private:
         // of a good frame is a far better seed for the next one than the unique word can
         // ever be. Only carried from a frame that actually decoded, so a bad frame cannot
         // poison the next - the same evidence gate the symbol clock phase uses.
-        if (m_haveCarriedDphi) {
+        if (m_config.m_seedQuadrant && m_cohValid) {
+            m_ref *= std::polar(1.0, m_config.m_seedQuadrant * M_PI / 2.0);
+        }
+        m_traceSymbol = 0;
+        m_traceFrame++;
+        if (m_config.m_traceLoop && (m_traceFrame <= 3))
+        {
+            fprintf(stderr, "FRAME %d seed %+8.2f Hz  acqDphi %+8.2f Hz  (carried %d)\n",
+                    m_traceFrame, m_dphiSym * 5250.0 / (2.0 * M_PI),
+                    m_dphi * 5250.0 / (2.0 * M_PI), (int) m_haveCarriedDphi);
+        }
+        m_frameSeedDphi = m_dphiSym;
+        m_frameSeededFromUw = !m_haveCarriedDphi;
+        if (m_haveCarriedDphi && m_config.m_carryDphi) {
             m_dphiSym = m_carriedDphi;
         }
         m_magMeanCoh = 0.0;
@@ -2104,16 +2362,27 @@ private:
         const Cd yI = tap(0);
         const Cd yQ = tap(m_sps / 2);
 
+        // The Q arm is sampled HALF A SYMBOL BEFORE the I instant, so the carrier has
+        // rotated half a symbol's worth less by the time it was taken - m_dphiSym/2.
+        // Derotating both arms by the same reference leaves that as a systematic error
+        // on Q which grows with the frequency offset: 6 degrees at 180 Hz, 24 at 700,
+        // a quadrant at 2.6 kHz. And because the reference is decision directed, the
+        // error does not merely sit on the Q bit, it is fed back into the reference and
+        // the frequency, so both arms then drift.
+        const Cd refQ = m_ref * std::polar(1.0, -0.5 * m_dphiSym);
+
         double sI = (yI * std::conj(m_ref)).real();
-        double sQ = (yQ * std::conj(m_ref)).imag();
+        double sQ = (yQ * std::conj(refQ)).imag();
 
         // Decision-directed update from both arms. The Q arm is rotated onto the real
-        // axis before it is blended in, so the two contribute symmetrically.
+        // axis before it is blended in, so the two contribute symmetrically - and
+        // forward by the same half symbol, so that both are on the I arm's timebase
+        // when they reach the reference.
         const double signI = (sI >= 0.0) ? 1.0 : -1.0;
         const double signQ = (sQ >= 0.0) ? 1.0 : -1.0;
 
         Cd dI = yI * signI;
-        Cd dQ = yQ * Cd(0.0, -1.0) * signQ;
+        Cd dQ = yQ * Cd(0.0, -1.0) * signQ * std::polar(1.0, 0.5 * m_dphiSym);
 
         for (int i = 0; i < 2; i++)
         {
@@ -2131,9 +2400,38 @@ private:
             m_ref /= refMag;
         }
 
+        if (m_config.m_traceLoop && (m_traceFrame <= 3)
+            && ((m_traceSymbol % 250) == 0) && (m_traceSymbol <= 2625))
+        {
+            // The rotation the loop is holding, and how far the reference is from where
+            // the decisions say it should be - the residual the loop has not removed
+            const double errI = std::arg(Cd(std::abs(sI), 0.0) * std::conj(Cd(1.0, 0.0)));
+            (void) errI;
+            fprintf(stderr, "  sym %5d  dphi %+8.2f Hz  |sI| %7.4f  |sQ| %7.4f\n",
+                    m_traceSymbol, m_dphiSym * 5250.0 / (2.0 * M_PI),
+                    std::abs(sI), std::abs(sQ));
+        }
+        m_traceSymbol++;
+
         double mag = 0.5 * (std::abs(sI) + std::abs(sQ));
         m_magMeanCoh = (m_magMeanCoh > 0.0) ? (0.995 * m_magMeanCoh + 0.005 * mag) : mag;
         double scale = (m_magMeanCoh > 1e-12) ? m_magMeanCoh : 1.0;
+
+        // Error vector magnitude, exactly as detectCoherent() measures it and for the
+        // same reason: the amplitude error about the decision, with the quadrature error
+        // left out. The arms are staggered by half a symbol and the pulse is a raised
+        // cosine, which is Nyquist at multiples of T - so at one arm's sampling instant
+        // the other is nowhere near zero, and its crosstalk would swamp the figure.
+        //
+        // Both arms, averaged, since OQPSK carries a decision on each and either can be
+        // the one degrading. Only counted for this rate here: the MSK lane has its own,
+        // and this detector is the ONLY one 10500 bps runs, which is why the rate showed
+        // no quality figure at all.
+        const double errI = std::abs(sI) / scale - 1.0;
+        const double errQ = std::abs(sQ) / scale - 1.0;
+        const double meanSq = 0.5 * (errI * errI + errQ * errQ);
+        m_evmMeanSq = (m_evmMeanSq > 0.0)
+                    ? (0.999 * m_evmMeanSq + 0.001 * meanSq) : meanSq;
 
         auto quantise = [scale](double v)
         {
@@ -2216,8 +2514,18 @@ private:
             while (d < -M_PI) { d += 2.0 * M_PI; }
             m_refPhaseAcc += d;
         }
-        m_symBuf.push_back(u);
-        m_refPhase.push_back(m_refPhaseAcc);
+
+        // Buffered for smoothCoherent() only, which runs on a P channel data field and
+        // nowhere else. R and T bursts never reach the header, so nothing clears these
+        // for them: buffering in every state let them grow without bound on an R/T
+        // channel. The loop itself still runs on everything, so the EVM and the carrier
+        // tracking are unchanged; and a P header's symbols were cleared out when it was
+        // accepted anyway, so the data field's buffer is exactly what it was
+        if (m_state == StateData)
+        {
+            m_symBuf.push_back(u);
+            m_refPhase.push_back(m_refPhaseAcc);
+        }
 
         Cd proj = u * std::conj(refUsed);
         double s = proj.real();
@@ -2404,11 +2712,36 @@ private:
                     header = (uint16_t) ((header << 1) | b);
                 }
                 int distance = headerDistance(header);
+                m_frameHeaderDistance = distance;
                 if (distance > 0) {
                     m_stats.m_headerBad++;
                 }
 
-                if (distance > m_config.m_headerMaxErrors)
+                // The header is the weakest thing in the frame: 16 bits, uncoded and
+                // hard decided, where everything behind it is rate 1/2 coded and
+                // interleaved and carries its own CRC per signal unit. It is not there
+                // to check the data - it is there to stop a false sync burning a whole
+                // frame, and it earns its place at correlations near the sync threshold,
+                // where noise does reach.
+                //
+                // But a unique word that correlated at 0.96 IS a frame, and rejecting it
+                // for header bit errors throws away 26 signal units that would have
+                // decoded. Measured on a real off air recording: a 100 Hz tuning error
+                // left the correlation at 0.96 to 0.97 and unchanged, while header
+                // rejections went from 4 frames in 193 to 272 in 273 - the whole channel
+                // lost, with the data behind it perfectly good. So the tolerance follows
+                // the correlation: strict where the sync was marginal, and off where it
+                // was emphatic.
+                // OQPSK only. The MSK correlator is a different statistic - differential,
+                // over the transitions between 33 symbols rather than 32 symbols - and it
+                // sits near 0.9 on a clean channel, so the same threshold would disable
+                // the check for those rates. Measured: it cost 600 bps P a message and
+                // six signal unit CRCs on a channel with no noise in it at all.
+                const int maxErrors =
+                    (isOqpsk(m_rate) && (m_syncCorrelation >= m_config.m_headerTrustCorrelation))
+                        ? m_config.m_headerMaxErrorsTrusted
+                        : m_config.m_headerMaxErrors;
+                if (distance > maxErrors)
                 {
                     m_stats.m_headerRejected++;
                     m_state = StateSearch;
@@ -2551,6 +2884,24 @@ private:
         m_stats.m_framesDecoded++;
         int suOkThisFrame = 0;
 
+        // How much of the frame came back, which is the statistic that mattered while
+        // the 10500 bps frame losses were being chased: a frame is 26 signal units
+        // sharing one interleaver and one coded block, so it comes back whole or not at
+        // all, and "0 of 26 with a perfect header" is a very different fault from a few
+        // units failing.
+        if (m_config.m_traceLoop && isOqpsk(m_rate))
+        {
+            int here = 0;
+            for (size_t i = 0; i + ACARSAERO_SU_LEN <= octets.size(); i += ACARSAERO_SU_LEN)
+            {
+                if (suCrcOk(octets.data() + i, ACARSAERO_SU_LEN)) {
+                    here++;
+                }
+            }
+            fprintf(stderr, "  FRAME yield %2d/26  header distance %2d of 16\n",
+                    here, m_frameHeaderDistance);
+        }
+
         for (size_t i = 0; i + ACARSAERO_SU_LEN <= octets.size(); i += ACARSAERO_SU_LEN)
         {
             const uint8_t *diff = octets.data() + i;
@@ -2609,16 +2960,66 @@ private:
         //
         // A frame started on the wrong phase yields ZERO signal units, never a few, so
         // this is a clean signal rather than a threshold.
+        // A frame that decoded NOTHING says the carried rotation no longer describes the
+        // signal, so it is dropped and the next frame seeds itself from the unique word
+        // again. Without this the carry is a trap rather than a shortcut: it is only ever
+        // refreshed by a frame that decodes, so once it stops matching, nothing decodes,
+        // and because nothing decodes it is never refreshed. The receiver stays locked to
+        // the unique word the whole time - the correlator is differential and finds the
+        // word whatever the offset - so it never gives up and re-acquires either.
+        //
+        // That is what retuning the channel did to it. Moving the frequency offset moves
+        // the residual by the same amount, the carried figure is wrong by that much from
+        // the next frame onwards, and the demodulator went silent until the mode or rate
+        // was changed - which is the one path that resets the receiver outright.
+        //
+        // Seeding from the word costs nothing now: Kay's estimator over the 32 symbols is
+        // good to a few Hz, which is what the carry was introduced to improve on when the
+        // seed was a plain mean and 30 Hz out.
+        if (isOqpsk(m_rate) && (suOkThisFrame == 0)) {
+            m_haveCarriedDphi = false;
+        }
+
         if (isOqpsk(m_rate) && (suOkThisFrame > 0))
         {
             // Taken outright rather than averaged over frames: blending the previous
             // value in at 0.5, 0.3 and 0.15 measured identical to the message, because
             // the loop converges to the same figure inside every frame and there is
             // almost no frame to frame variance left to average away.
+            const double seedError = std::abs(m_dphiSym - m_frameSeedDphi);
+            m_stats.m_seedErrorSum += seedError;
+            m_stats.m_convergedSum += m_dphiSym;
+            m_stats.m_seedCount++;
+            if (seedError > m_stats.m_seedErrorMax) {
+                m_stats.m_seedErrorMax = seedError;
+            }
             m_carriedDphi = m_dphiSym;
             m_haveCarriedDphi = true;
         }
 
+        if (isOqpsk(m_rate) && (m_framePhase >= 0) && (suOkThisFrame == 0)) {
+            m_stats.m_phaseDeadFrames++;
+        }
+        if (isOqpsk(m_rate) && (m_framePhase >= 0))
+        {
+            const int bucket = (suOkThisFrame == 0) ? 0
+                             : (suOkThisFrame < ACARSAERO_MAX_SUS / 2) ? 1
+                             : (suOkThisFrame < ACARSAERO_MAX_SUS) ? 2 : 3;
+            m_stats.m_frameYield[bucket]++;
+            const int ph = m_framePhase % 32;
+            if (suOkThisFrame == 0) {
+                m_stats.m_phaseHistDead[ph]++;
+            } else if (suOkThisFrame >= ACARSAERO_MAX_SUS) {
+                m_stats.m_phaseHistOk[ph]++;
+            }
+        }
+        if (isOqpsk(m_rate) && m_frameSeededFromUw)
+        {
+            m_stats.m_seededFromUw++;
+            if (suOkThisFrame > 0) {
+                m_stats.m_seededFromUwOk++;
+            }
+        }
         if (isOqpsk(m_rate) && (m_framePhase >= 0))
         {
             if (suOkThisFrame > 0)
@@ -2626,6 +3027,7 @@ private:
                 m_lockedPhase = m_framePhase;
                 m_phaseConfirmed = true;
                 m_phaseFailures = 0;
+                m_stats.m_phaseConfirms++;
             }
             else if (!m_phaseConfirmed
                      || (++m_phaseFailures >= ACARSAERO_PHASE_FAILURES))
@@ -2640,6 +3042,7 @@ private:
                 m_lockedPhase = (m_framePhase + m_sps / 2) % m_sps;
                 m_phaseConfirmed = false;
                 m_phaseFailures = 0;
+                m_stats.m_phaseFlips++;
             }
         }
         expireReassemblies();

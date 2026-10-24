@@ -16,9 +16,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
+#include <QColor>
 #include "util/airlines.h"
 #include "util/osndb.h"
+#include "util/ourairportsdb.h"
 
 #include "aircrafttablemodels.h"
 #include "aircraftsettings.h"
@@ -48,7 +52,39 @@ int AircraftTableModel::columnCount(const QModelIndex& parent) const
 
 QVariant AircraftTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if ((orientation != Qt::Horizontal) || (role != Qt::DisplayRole)) {
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    // What each column holds. Several headings are abbreviated to fit, and the table's
+    // own tooltip says nothing about the columns.
+    if (role == Qt::ToolTipRole)
+    {
+        switch (section)
+        {
+        case COL_ICAO: return "The aircraft's ICAO 24 bit address as hex. Unique to the airframe.";
+        case COL_REG: return "Registration, from a message or looked up from the ICAO address";
+        case COL_TYPE: return "ICAO aircraft type designator, e.g. B77W";
+        case COL_FLIGHT: return "Callsign the aircraft is transmitting - not the flight number";
+        case COL_FLIGHT_NO: return "Flight number, the form a passenger is sold. Often differs from the callsign.";
+        case COL_AIRLINE: return "Operator, from the callsign's airline designator";
+        case COL_SIDEVIEW: return "Side view of the type in the operator's livery, where one is known";
+        case COL_COUNTRY: return "Country of registration, from the ICAO address block";
+        case COL_LATITUDE: return "Latitude last reported, in degrees";
+        case COL_LONGITUDE: return "Longitude last reported, in degrees";
+        case COL_DISTANCE: return "Distance from the receiver that heard it, in km";
+        case COL_ALTITUDE: return "Altitude last reported, in feet";
+        case COL_HEADING: return "Heading or track last reported, in degrees";
+        case COL_SPEED: return "Speed last reported, in knots";
+        case COL_PROTOCOLS: return "Which protocols this aircraft has been heard on, and on what frequencies";
+        case COL_MESSAGES: return "Messages received from this aircraft";
+        case COL_LAST_SEEN: return "When a message was last received from this aircraft";
+        case COL_SELCAL: return "SELCAL code: the one it was heard called on, otherwise what the"
+                                " SELCAL database assigns it. Download the database from the"
+                                " SELCAL Demodulator";
+        default: return QVariant();
+        }
+    }
+    if (role != Qt::DisplayRole) {
         return QVariant();
     }
     switch (section)
@@ -56,7 +92,8 @@ QVariant AircraftTableModel::headerData(int section, Qt::Orientation orientation
     case COL_ICAO: return "ICAO";
     case COL_REG: return "Reg";
     case COL_TYPE: return "Type";
-    case COL_FLIGHT: return "Flight";
+    case COL_FLIGHT: return "Callsign";
+    case COL_FLIGHT_NO: return "Flight No";
     case COL_AIRLINE: return "Airline";
     case COL_SIDEVIEW: return "Sideview";
     case COL_COUNTRY: return "Country";
@@ -69,6 +106,7 @@ QVariant AircraftTableModel::headerData(int section, Qt::Orientation orientation
     case COL_PROTOCOLS: return "Protocols";
     case COL_MESSAGES: return "Msgs";
     case COL_LAST_SEEN: return "Last seen";
+    case COL_SELCAL: return "SELCAL";
     default: return QVariant();
     }
 }
@@ -181,7 +219,10 @@ QVariant AircraftTableModel::data(const QModelIndex& index, int role) const
         return d.m_icao ? QString("%1").arg(d.m_icao, 6, 16, QChar('0')).toUpper() : QVariant();
     case COL_REG: return d.m_registration;
     case COL_TYPE: return row.m_type;
-    case COL_FLIGHT: return d.m_flight;
+    // The ICAO callsign the transponder broadcasts and the IATA number ACARS carries,
+    // for the flight the airframe is on now - see AircraftTracker::flightNameForms()
+    case COL_FLIGHT: return d.m_callsign;
+    case COL_FLIGHT_NO: return d.m_flightNumber;
     case COL_AIRLINE: return row.m_airline.isNull() ? QVariant(row.m_airlineText) : QVariant();
     case COL_LATITUDE: return d.m_positionValid ? QVariant((double) d.m_latitude) : QVariant();
     case COL_LONGITUDE: return d.m_positionValid ? QVariant((double) d.m_longitude) : QVariant();
@@ -199,12 +240,15 @@ QVariant AircraftTableModel::data(const QModelIndex& index, int role) const
     case COL_PROTOCOLS: return d.m_protocols;
     case COL_MESSAGES: return d.m_messages;
     case COL_LAST_SEEN: return d.m_lastSeen;
+    case COL_SELCAL: return d.m_selcal;
     default: return QVariant();
     }
 }
 
 void AircraftTableModel::upsert(const QList<AircraftDisplay>& aircraft)
 {
+    QList<Row> added;
+
     for (const AircraftDisplay& d : aircraft)
     {
         int row = m_rowById.value(d.m_id, -1);
@@ -220,30 +264,66 @@ void AircraftTableModel::upsert(const QList<AircraftDisplay>& aircraft)
         }
         else
         {
-            beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size());
+            // Collected and inserted in one go below: a beginInsertRows per aircraft makes
+            // the proxy re-sort and the view relayout once per row, and a feed delivers
+            // these in batches of dozens
             Row newRow;
             newRow.m_display = d;
-            m_rowById.insert(d.m_id, m_rows.size());
-            m_rows.append(newRow);
-            endInsertRows();
+            added.append(newRow);
         }
     }
+
+    if (!added.isEmpty())
+    {
+        beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size() + added.size() - 1);
+        for (const Row& r : added)
+        {
+            m_rowById.insert(r.m_display.m_id, m_rows.size());
+            m_rows.append(r);
+        }
+        endInsertRows();
+    }
+}
+
+// Rows for ids we hold, highest first, so removing one never moves the next
+template <typename T>
+static QList<int> rowsDescending(const QHash<quint64, int>& rowById, const QList<quint64>& ids, T&& forget)
+{
+    QList<int> rows;
+    for (quint64 id : ids)
+    {
+        const int row = rowById.value(id, -1);
+        if (row >= 0)
+        {
+            rows.append(row);
+            forget(id);
+        }
+    }
+    std::sort(rows.begin(), rows.end(), std::greater<int>());
+    return rows;
 }
 
 void AircraftTableModel::remove(const QList<quint64>& ids)
 {
-    for (quint64 id : ids)
-    {
-        int row = m_rowById.value(id, -1);
-        if (row >= 0)
-        {
-            beginRemoveRows(QModelIndex(), row, row);
-            m_rows.removeAt(row);
-            m_rowById.remove(id);
-            reindex(row);
-            endRemoveRows();
-        }
+    // Removed in contiguous runs and reindexed once. One row at a time reindexed
+    // everything below each removal, so the retention sweep discarding a few hundred
+    // archived aircraft cost hundreds of passes over the whole table.
+    const QList<int> rows = rowsDescending(m_rowById, ids, [this](quint64 id) { m_rowById.remove(id); });
+    if (rows.isEmpty()) {
+        return;
     }
+    for (int i = 0; i < rows.size(); )
+    {
+        const int last = rows[i];
+        int first = last;
+        while ((++i < rows.size()) && (rows[i] == first - 1)) {
+            first--;
+        }
+        beginRemoveRows(QModelIndex(), first, last);
+        m_rows.erase(m_rows.begin() + first, m_rows.begin() + last + 1);
+        endRemoveRows();
+    }
+    reindex(rows.last());
 }
 
 void AircraftTableModel::reindex(int from)
@@ -266,6 +346,20 @@ const AircraftDisplay *AircraftTableModel::aircraftAt(int row) const
     return ((row >= 0) && (row < m_rows.size())) ? &m_rows[row].m_display : nullptr;
 }
 
+// Both the current and the archived aircraft views are proxies over this one model, so
+// this finds an aircraft whichever of them is showing it - and returns nullptr for one
+// that has been discarded altogether
+const AircraftDisplay *AircraftTableModel::aircraftById(quint64 id) const
+{
+    const auto it = m_rowById.constFind(id);
+    return (it != m_rowById.constEnd()) ? aircraftAt(it.value()) : nullptr;
+}
+
+int AircraftTableModel::rowOf(quint64 id) const
+{
+    return m_rowById.value(id, -1);
+}
+
 FlightTableModel::FlightTableModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -281,14 +375,58 @@ int FlightTableModel::columnCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : COL_COUNT;
 }
 
+// The airport's name, for a tooltip. Looked up here rather than carried on every
+// flight display: it is wanted only while the pointer rests on a cell, and the database
+// is a shared hash that is loaded already.
+static QString airportName(const QString& icao)
+{
+    if (icao.size() != 4) {
+        return QString();
+    }
+    QSharedPointer<const QHash<QString, AirportInformation *>> airports =
+        OurAirportsDB::getAirportsByIdent();
+    const AirportInformation *airport = airports ? airports->value(icao, nullptr) : nullptr;
+    return airport ? airport->m_name : QString();
+}
+
 QVariant FlightTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if ((orientation != Qt::Horizontal) || (role != Qt::DisplayRole)) {
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    // Four of these headings are two letters, so without this there is nothing anywhere
+    // that says what they are
+    if (role == Qt::ToolTipRole)
+    {
+        switch (section)
+        {
+        case COL_FLIGHT: return "Callsign the flight was flown under - what the aircraft transmits, not the flight number";
+        case COL_FLIGHT_NO: return "Flight number, the form a passenger is sold. Often unrelated to the callsign.";
+        case COL_REG: return "Registration of the aircraft that flew it";
+        case COL_FROM: return "Departure airport. Green where a message said so, plain where it is only the route database's guess.";
+        case COL_TO: return "Arrival airport. Green where a message said so, plain where it is only the route database's guess.";
+        case COL_DOCS: return "Documents collected for this flight: flight plans, clearances, loadsheets and OOOI events. Logons have their own tab and are not counted here.";
+        case COL_LS: return "Loadsheet: weights, fuel and passenger figures, sent before departure";
+        case COL_CL: return "Clearance: an oceanic clearance, a request for one, or a pre-departure clearance";
+        case COL_FP: return "Flight plan: a filed route, from the aircraft's own FMC or from a departure clearance";
+        case COL_OUT: return "OOOI: off the gate";
+        case COL_OFF: return "OOOI: airborne";
+        case COL_ON: return "OOOI: landed";
+        case COL_IN: return "OOOI: on the gate";
+        case COL_FIRST_SEEN: return "When this flight was first heard";
+        case COL_LAST_SEEN: return "When this flight was last heard";
+        case COL_PROTOCOLS: return "Which protocols this flight was heard on, and on what frequencies";
+        case COL_ROUTE_SOURCE: return "Where From and To came from: a received message or the callsign to route database, and whether the two agree";
+        default: return QVariant();
+        }
+    }
+    if (role != Qt::DisplayRole) {
         return QVariant();
     }
     switch (section)
     {
-    case COL_FLIGHT: return "Flight";
+    case COL_FLIGHT: return "Callsign";
+    case COL_FLIGHT_NO: return "Flight No";
     case COL_REG: return "Reg";
     case COL_FROM: return "From";
     case COL_TO: return "To";
@@ -299,10 +437,11 @@ QVariant FlightTableModel::headerData(int section, Qt::Orientation orientation, 
     case COL_FIRST_SEEN: return "First seen";
     case COL_LAST_SEEN: return "Last seen";
     case COL_LS: return "LS";
-    case COL_OC: return "OC";
+    case COL_CL: return "CL";
     case COL_FP: return "FP";
     case COL_DOCS: return "Docs";
     case COL_PROTOCOLS: return "Protocols";
+    case COL_ROUTE_SOURCE: return "Route src";
     default: return QVariant();
     }
 }
@@ -339,13 +478,62 @@ QVariant FlightTableModel::data(const QModelIndex& index, int role) const
         }
     }
 
+    // Green where an aircraft itself said so, plain where it is only the callsign to
+    // route database's guess. That is the distinction worth seeing at a glance, and it
+    // does not depend on the database holding the callsign at all - most do not, so
+    // colouring by agreement with it left confirmed routes looking unconfirmed.
+    //
+    // No red: where a message and the database disagree, what is displayed is the
+    // message's own answer, so marking it suspect said the opposite of the truth. The
+    // disagreement is reported in the Route src column instead.
+    if ((role == Qt::ForegroundRole)
+        && ((index.column() == COL_FROM) || (index.column() == COL_TO)))
+    {
+        const bool fromMessage = (index.column() == COL_FROM) ? d.m_departureFromMessage
+                                                              : d.m_arrivalFromMessage;
+        return fromMessage ? QVariant(QColor(0, 192, 0)) : QVariant();
+    }
+
     if (role == Qt::ToolTipRole)
     {
-        if ((index.column() == COL_FLIGHT) && !d.m_aliases.isEmpty()) {
+        if (((index.column() == COL_FLIGHT) || (index.column() == COL_FLIGHT_NO))
+            && !d.m_aliases.isEmpty()) {
             return QString("Also known as: %1").arg(d.m_aliases);
         }
-        if ((index.column() == COL_FROM) && !d.m_route.isEmpty()) {
-            return QString("Route: %1").arg(d.m_route);
+        if ((index.column() == COL_FROM) || (index.column() == COL_TO)
+            || (index.column() == COL_ROUTE_SOURCE))
+        {
+            QStringList lines;
+            // Named, because a four letter ident is only recognisable if you happen to
+            // know it. Both ends whichever cell is hovered, since the pair is what the
+            // row is about.
+            for (int end = 0; end < 2; end++)
+            {
+                const QString ident = end ? d.m_arrival : d.m_departure;
+                if (ident.isEmpty()) {
+                    continue;
+                }
+                const QString name = airportName(ident);
+                lines.append(QString("%1: %2").arg(end ? "To" : "From")
+                    .arg(name.isEmpty() ? ident : QString("%1 - %2").arg(ident).arg(name)));
+            }
+            if ((index.column() == COL_FROM) && !d.m_route.isEmpty()) {
+                lines.append(QString("Route: %1").arg(d.m_route));
+            }
+            if (d.m_routeSource.isEmpty()) {
+                return lines.isEmpty() ? QVariant() : QVariant(lines.join("\n"));
+            }
+            QString tip = (d.m_routeSource == "Database")
+                ? "From the callsign to route database, which is a guess until a message says otherwise"
+                : "From a received message";
+            if (d.m_routeChecked)
+            {
+                tip += d.m_routeAgrees
+                    ? " - the route database agrees"
+                    : " - the route database says something different";
+            }
+            lines.append(tip);
+            return lines.join("\n");
         }
         return QVariant();
     }
@@ -355,7 +543,10 @@ QVariant FlightTableModel::data(const QModelIndex& index, int role) const
 
     switch (index.column())
     {
-    case COL_FLIGHT: return d.m_flight;
+    // The ICAO callsign the transponder broadcasts, and the IATA number ACARS carries.
+    // One flight, two names - see AircraftTracker::flightNameForms()
+    case COL_FLIGHT: return d.m_callsign;
+    case COL_FLIGHT_NO: return d.m_flightNumber;
     case COL_REG: return d.m_reg;
     case COL_FROM: return d.m_departure;
     case COL_TO: return d.m_arrival;
@@ -374,18 +565,33 @@ QVariant FlightTableModel::data(const QModelIndex& index, int role) const
     // crosses is as loud as a column of ticks, which makes the ticks - the thing worth
     // spotting - harder to pick out than an empty cell does.
     case COL_LS: return d.m_hasLoadsheet ? QString(QChar(0x2713)) : QString();
-    case COL_OC: return d.m_hasClearance ? QString(QChar(0x2713)) : QString();
+    case COL_CL: return d.m_hasClearance ? QString(QChar(0x2713)) : QString();
     case COL_FP: return d.m_hasFlightPlan ? QString(QChar(0x2713)) : QString();
     case COL_DOCS: return d.m_documents;
     // What THIS flight has been heard on. The aircraft table's column of the same
     // name is the airframe's, over every flight it has ever made.
     case COL_PROTOCOLS: return d.m_protocols;
+    // "Message" on its own where the database has never heard of the callsign, and with
+    // a verdict where it has
+    case COL_ROUTE_SOURCE:
+        if (d.m_routeSource.isEmpty() || !d.m_routeChecked) {
+            return d.m_routeSource;
+        }
+        return d.m_routeAgrees ? QString("Message =DB") : QString("Message <>DB");
     default: return QVariant();
     }
 }
 
 void FlightTableModel::upsert(const QList<FlightDisplay>& flights)
 {
+    // New flights are collected and inserted in one go, as AircraftTableModel::upsert()
+    // does and for the same reason: a resync delivers every flight in the session at once,
+    // and a beginInsertRows per flight re-sorted both proxies and relaid out both views
+    // once per row. Indexed as they are collected, so a flight that appears twice in the
+    // batch updates the row it is about to get rather than getting two.
+    QList<FlightDisplay> added;
+    QHash<quint64, int> addedIndex;
+
     for (const FlightDisplay& d : flights)
     {
         int row = m_rowById.value(d.m_id, -1);
@@ -396,28 +602,50 @@ void FlightTableModel::upsert(const QList<FlightDisplay>& flights)
         }
         else
         {
-            beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size());
+            const int pending = addedIndex.value(d.m_id, -1);
+            if (pending >= 0)
+            {
+                added[pending] = d;
+            }
+            else
+            {
+                addedIndex.insert(d.m_id, added.size());
+                added.append(d);
+            }
+        }
+    }
+
+    if (!added.isEmpty())
+    {
+        beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size() + added.size() - 1);
+        for (const FlightDisplay& d : added)
+        {
             m_rowById.insert(d.m_id, m_rows.size());
             m_rows.append(d);
-            endInsertRows();
         }
+        endInsertRows();
     }
 }
 
 void FlightTableModel::remove(const QList<quint64>& ids)
 {
-    for (quint64 id : ids)
-    {
-        int row = m_rowById.value(id, -1);
-        if (row >= 0)
-        {
-            beginRemoveRows(QModelIndex(), row, row);
-            m_rows.removeAt(row);
-            m_rowById.remove(id);
-            reindex(row);
-            endRemoveRows();
-        }
+    // In contiguous runs and reindexed once - see AircraftTableModel::remove()
+    const QList<int> rows = rowsDescending(m_rowById, ids, [this](quint64 id) { m_rowById.remove(id); });
+    if (rows.isEmpty()) {
+        return;
     }
+    for (int i = 0; i < rows.size(); )
+    {
+        const int last = rows[i];
+        int first = last;
+        while ((++i < rows.size()) && (rows[i] == first - 1)) {
+            first--;
+        }
+        beginRemoveRows(QModelIndex(), first, last);
+        m_rows.erase(m_rows.begin() + first, m_rows.begin() + last + 1);
+        endRemoveRows();
+    }
+    reindex(rows.last());
 }
 
 void FlightTableModel::reindex(int from)
@@ -438,4 +666,9 @@ void FlightTableModel::clear()
 const FlightDisplay *FlightTableModel::flightAt(int row) const
 {
     return ((row >= 0) && (row < m_rows.size())) ? &m_rows[row] : nullptr;
+}
+
+int FlightTableModel::rowOf(quint64 id) const
+{
+    return m_rowById.value(id, -1);
 }

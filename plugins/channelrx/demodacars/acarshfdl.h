@@ -2,6 +2,12 @@
 // Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 // Some code by AI                                                               //
 //                                                                               //
+// The HFDL constants and conventions - the physical layer parameters and the    //
+// MPDU, LPDU and SPDU layouts - were cross-checked against dumphfdl by Tomasz   //
+// Lemiech, https://github.com/szpajder/dumphfdl, GPL-3.0, and the ARINC 635     //
+// system table of ground station names, positions and frequency assignments     //
+// is the one dumphfdl ships.                                                    //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -165,7 +171,9 @@ public:
         // thread's time, which matters at accelerated file replay. 0 disables the
         // limit (every failed burst runs the full chain).
         double m_retryLimitFraction = 0.30;
-        // Decision directed per-symbol frequency update on the phase residual
+        // Decision directed per-symbol frequency update on the phase residual. Applied
+        // scaled by (1 - the reference blend in use), as the loop originally had it in
+        // effect - see updateRefLane()
         double m_freqGain = 0.01;
         // Reference phasor blending for decision-directed symbols...
         double m_refGain = 0.15;
@@ -990,7 +998,7 @@ private:
         }
         delta = std::max(-0.5, std::min(0.5, delta));
 
-        m_dphiSym = std::arg(m_bestD);
+        m_dphiSym = refineAcquisitionDphi(std::arg(m_bestD));
 
         // First following symbol lands one symbol after the peak
         if (delta >= 0.0)
@@ -1081,6 +1089,71 @@ private:
         m_laneMeta.clear();
     }
 
+    // Refine the acquisition's per-symbol rotation by maximising the coherent sum over the
+    // whole A sequence, modulation removed - the maximum likelihood estimate given the
+    // known symbols. The differential correlation that found the burst multiplies noise
+    // by noise and averages only 126 products, so its estimate is far noisier: the
+    // coherent sum's error falls as N^-1.5 rather than N^-0.5.
+    //
+    // It matters because of how the carrier loop uses it. Any error in the rotation
+    // leaves the decision-directed reference lagging by error / gain - about seven times
+    // the error at the data gain - and the A2 gate, a coherent sum, is where that bites.
+    // The loop used to apply only (1 - gain) of the estimate (see updateRefLane()),
+    // which by accident shrank a noisy estimate towards zero and so suited the near-zero
+    // offsets of real recordings; applying it in full needs it to be accurate instead.
+    // Measured: the corrected loop order alone lost 2.5 percent of the LPDUs on the
+    // short real recordings, all at the A2 gate; with this as well it gains 5 percent
+    // on them, and 4 percent (3249 to 3375) on the overnight Reykjavik capture.
+    //
+    // A grid of quarter-bin steps around the coarse estimate, then a parabola through
+    // the best and its neighbours. Once per sync, so its cost does not matter
+    double refineAcquisitionDphi(double coarse) const
+    {
+        const int sps = ACARSHFDL_SAMPLES_PER_SYMBOL;
+        const int n = ACARSHFDL_A_LEN;
+        const int span = 8;
+        const double step = (2.0 * M_PI / n) / 4.0;
+
+        Cd stripped[ACARSHFDL_A_LEN];
+        for (int k = 0; k < n; k++)
+        {
+            int back = m_bestAgo + (n - 1 - k) * sps;
+            stripped[k] = tap(back) * (aBit(k) ? -1.0 : 1.0);
+        }
+
+        double power[2 * span + 1];
+        int best = span;
+        for (int i = 0; i <= 2 * span; i++)
+        {
+            const double d = coarse + (i - span) * step;
+            // Symbol k is (n - 1 - k) symbols before the newest, so rotating it on by
+            // that many steps lines every symbol up with the newest one
+            const Cd rot = std::polar(1.0, d);
+            Cd phasor(1.0, 0.0);
+            Cd sum(0.0, 0.0);
+            for (int k = n - 1; k >= 0; k--)
+            {
+                sum += stripped[k] * phasor;
+                phasor *= rot;
+            }
+            power[i] = std::norm(sum);
+            if (power[i] > power[best]) {
+                best = i;
+            }
+        }
+
+        double shift = 0.0;
+        if ((best > 0) && (best < 2 * span))
+        {
+            const double denom = power[best - 1] - 2.0 * power[best] + power[best + 1];
+            if (denom < -1e-20) {
+                shift = std::max(-0.5, std::min(0.5, 0.5 * (power[best - 1] - power[best + 1]) / denom));
+            }
+        }
+
+        return coarse + ((best - span) + shift) * step;
+    }
+
     void abandonBurst()
     {
         m_state = StateSearch;
@@ -1094,10 +1167,29 @@ private:
     // ---------------------------------------------------------------------------------
 
     // Update a lane's carrier reference with a symbol whose modulation is known or
-    // decided: the sample with the modulation removed is blended into the reference
-    static void updateRefLane(Cd& ref, double dphiSym, const Cd& yDemod, double gain)
+    // decided: the sample with the modulation removed is blended into the reference.
+    //
+    // The reference must already have been advanced to this symbol by advanceRef(),
+    // BEFORE the symbol was derotated and its residual taken - the order the VDL-2
+    // receiver uses. Advancing it here instead, after the residual, meant every residual
+    // was measured against last symbol's phase, so the loop carried the per-symbol
+    // rotation as a standing lead and the frequency estimate settled at
+    // rotation / (1 - gain) rather than at the rotation. That is harmless while the gain
+    // never changes, but it switches between the training and the data gains every 15
+    // and 30 symbols, so the estimate was always wrong for one of them, and the data
+    // symbols carried a phase bias that grew with the tuning error. Measured on
+    // generated bursts, 1200 and 1800 bps at 20 dB: nothing at all decoded from 150 Hz
+    // of tuning error either way - the 4PSK and 8PSK decisions slipped - and 8PSK was
+    // already losing a quarter of its messages at 100 Hz. In this order both decode
+    // every message out to 400 Hz.
+    //
+    // With the gain held constant the two orders are the same second order loop except
+    // for the integrator's gain, which the old order scaled by (1 - gain); the frequency
+    // updates below keep that scaling, so the loop's noise behaviour is the one the
+    // receiver was tuned with. Without it 600 bps lost 6 percent of its messages at the
+    // cliff
+    static void updateRefLane(Cd& ref, const Cd& yDemod, double gain)
     {
-        ref *= std::polar(1.0, dphiSym);
         double mag = std::abs(yDemod);
         if (mag > 1e-12) {
             ref = (1.0 - gain) * ref + gain * (yDemod / mag);
@@ -1106,6 +1198,13 @@ private:
         if (refMag > 1e-12) {
             ref /= refMag;
         }
+    }
+
+    // Step a lane's carrier reference on by one symbol's rotation, so it predicts the
+    // phase of the symbol about to be derotated. Called once per symbol, first
+    static void advanceRef(Cd& ref, double dphiSym)
+    {
+        ref *= std::polar(1.0, dphiSym);
     }
 
     void gardner(const Cd& y0)
@@ -1168,6 +1267,9 @@ private:
     void laneSymbol(EqLane& lane, const Cd& y0)
     {
         const int sps = ACARSHFDL_SAMPLES_PER_SYMBOL;
+        // Advanced first, every symbol, warm-up included, so the derotation below and
+        // the residual further down are both against this symbol's predicted phase
+        advanceRef(lane.m_ref, lane.m_dphiSym);
         Cd xHalf = interpAt(sps / 2, m_mu) * std::conj(lane.m_ref)
             * std::polar(1.0, 0.5 * lane.m_dphiSym) * m_eqScale;
         eqPush(lane, xHalf);
@@ -1175,8 +1277,8 @@ private:
 
         if ((int) m_laneMeta.size() <= lane.m_delay)
         {
-            // Warm-up: keep the reference advancing until the first delayed decision
-            lane.m_ref *= std::polar(1.0, lane.m_dphiSym);
+            // Warm-up: nothing to decide until the first delayed decision, but the
+            // reference has still been advanced above
             return;
         }
 
@@ -1202,9 +1304,9 @@ private:
             Cd yDemod = meta.m_knownBit ? -y0d : y0d;
             double res = std::arg(yDemod * std::conj(lane.m_ref));
             if (m_config.m_freqGain != 0.0) {
-                lane.m_dphiSym += m_config.m_freqGain * res;
+                lane.m_dphiSym += m_config.m_freqGain * (1.0 - m_config.m_trainGain) * res;
             }
-            updateRefLane(lane.m_ref, lane.m_dphiSym, yDemod, m_config.m_trainGain);
+            updateRefLane(lane.m_ref, yDemod, m_config.m_trainGain);
             // The known symbols are also the equalizer's training: the taps update
             // here and are frozen over the data frames
             double mu = m_config.m_eqMu;
@@ -1219,11 +1321,10 @@ private:
         else
         {
             if (m_config.m_freqGain != 0.0) {
-                lane.m_dphiSym += m_config.m_freqGain * residual;
+                lane.m_dphiSym += m_config.m_freqGain * (1.0 - m_config.m_refGain) * residual;
             }
             double modPhase = phaseIdx * step + (meta.m_flip ? M_PI : 0.0);
-            updateRefLane(lane.m_ref, lane.m_dphiSym, y0d * std::polar(1.0, -modPhase),
-                m_config.m_refGain);
+            updateRefLane(lane.m_ref, y0d * std::polar(1.0, -modPhase), m_config.m_refGain);
         }
 
         // Soft chips for the delayed data symbols; they trail the raw lane's by the
@@ -1255,7 +1356,9 @@ private:
         m_symbolsSinceSync++;
         Cd y0 = interpAt(0, m_mu);
         // Raw lane: identical to the receiver without an equalizer, so its soft chips
-        // and its carrier trajectory are exactly the proven baseline
+        // and its carrier trajectory are exactly the proven baseline. The reference is
+        // stepped on to this symbol before it derotates anything - see updateRefLane()
+        advanceRef(m_ref, m_dphiSym);
         Cd y = y0 * std::conj(m_ref);
 
         gardner(y0);
@@ -1306,9 +1409,9 @@ private:
             Cd yDemod = knownBit ? -y0 : y0;
             double res = std::arg(yDemod * std::conj(m_ref));
             if (m_config.m_freqGain != 0.0) {
-                m_dphiSym += m_config.m_freqGain * res;
+                m_dphiSym += m_config.m_freqGain * (1.0 - m_config.m_trainGain) * res;
             }
-            updateRefLane(m_ref, m_dphiSym, yDemod, m_config.m_trainGain);
+            updateRefLane(m_ref, yDemod, m_config.m_trainGain);
             int rxBit = (std::abs(phi) > M_PI_2) ? 1 : 0;
             m_stats.m_trainBitsTotal++;
             m_trainTotalThisBurst++;
@@ -1323,10 +1426,10 @@ private:
             // Decision-directed: remove the decided modulation (constellation phase
             // plus the scrambler flip) from the received sample and blend it in
             if (m_config.m_freqGain != 0.0) {
-                m_dphiSym += m_config.m_freqGain * residual;
+                m_dphiSym += m_config.m_freqGain * (1.0 - m_config.m_refGain) * residual;
             }
             double modPhase = phaseIdx * step + (flip ? M_PI : 0.0);
-            updateRefLane(m_ref, m_dphiSym, y0 * std::polar(1.0, -modPhase), m_config.m_refGain);
+            updateRefLane(m_ref, y0 * std::polar(1.0, -modPhase), m_config.m_refGain);
         }
 
         // Equalizer lanes, active once the mode is known: each has its own carrier

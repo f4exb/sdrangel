@@ -49,7 +49,8 @@ public:
     };
 
     int m_id;
-    QString m_ident;
+    QString m_ident;        //!< ICAO, four characters
+    QString m_iata;         //!< IATA, three characters - empty for most airports
     AirportType m_type;
     QString m_name;
     float m_latitude;
@@ -74,12 +75,15 @@ public:
 
     static QSharedPointer<const QHash<int, AirportInformation *>> getAirportsById();
     static QSharedPointer<const QHash<QString, AirportInformation *>> getAirportsByIdent();
+    //!< Keyed on the three letter IATA code, which is how a loadsheet writes an airport
+    static QSharedPointer<const QHash<QString, AirportInformation *>> getAirportsByIata();
 
 private:
     HttpDownloadManager m_dlm;
 
     static QSharedPointer<QHash<int, AirportInformation *>> m_airportsById;
     static QSharedPointer<QHash<QString, AirportInformation *>> m_airportsByIdent;
+    static QSharedPointer<QHash<QString, AirportInformation *>> m_airportsByIata;
     static QDateTime m_modifiedDateTime;
 
     static QMutex m_mutex;
@@ -94,6 +98,7 @@ private:
 
     // Create hash table using ICAO identifier as key
     static QHash<QString, AirportInformation *> *identHash(QHash<int, AirportInformation *> *in);
+    static QHash<QString, AirportInformation *> *iataHash(QHash<int, AirportInformation *> *in);
 
     // Read OurAirport's airport frequencies CSV file
     static bool readFrequenciesDB(const QString &filename, QHash<int, AirportInformation *> *airportInfo);

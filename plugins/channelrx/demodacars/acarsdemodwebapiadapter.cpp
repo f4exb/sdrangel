@@ -31,9 +31,9 @@ int AcarsDemodWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-   /* response.setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
+    response.setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
     response.getAcarsDemodSettings()->init();
-    AcarsDemod::webapiFormatChannelSettings(response, m_settings);  */
+    AcarsDemod::webapiFormatChannelSettings(response, m_settings);
 
     return 200;
 }
@@ -46,7 +46,7 @@ int AcarsDemodWebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) force;
     (void) errorMessage;
-  //  AcarsDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
+    AcarsDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
     return 200;
 }

@@ -134,7 +134,7 @@ public:
 private:
 
     static QHash<QString, ProfileData> m_profileData;
-    static QMutex m_mutex;
+    static QRecursiveMutex m_mutex;
     static QElapsedTimer m_startTimer;
 
 };

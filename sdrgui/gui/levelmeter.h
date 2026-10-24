@@ -96,6 +96,26 @@ protected slots:
     void redrawTimerExpired();
 
 protected:
+    /** Repaint only if the meter would actually look different. */    
+    void requestUpdate();
+
+    /** Position of a level in pixels, as the renders below compute it */
+    int levelPixel(qreal level) const
+    {
+        return (int) (width() - (1.0 - levelScale() * level) * width());
+    }
+
+    /** Fraction of the width the bars span: the VU meter uses three quarters of it */
+    virtual qreal levelScale() const { return 1.0; }
+
+    /** Levels, in pixels, as of the last paint, to compare the current ones against */
+    int m_paintedAvg;
+    int m_paintedPeak;
+    int m_paintedHold;
+
+    /** A repaint already asked for will show the newest levels, so do not ask again */
+    bool m_updatePending;
+
     /**
      * Height of RMS level bar.
      * Range 0.0 - 1.0.
@@ -169,6 +189,7 @@ public:
 protected:
     virtual void render(QPainter *painter);
     virtual void resized();
+    virtual qreal levelScale() const override { return 0.75; }
 };
 
 class SDRGUI_API LevelMeterSignalDB : public LevelMeter

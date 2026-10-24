@@ -9,8 +9,6 @@ set(demodacars_SOURCES
     acarsdemodwebapiadapter.cpp
     acarsdemodworker.cpp
     acarsdemoddata.qrc
-    acarsmessage.cpp
-    acarsmultipartassembler.cpp
 )
 
 set(demodacars_HEADERS
@@ -21,14 +19,15 @@ set(demodacars_HEADERS
     acarsdemodplugin.h
     acarsdemodwebapiadapter.h
     acarsdemodworker.h
-    acarsmessage.h
-    acarsmultipartassembler.h
-    acarstextformat.h
     acarsoqpsk.h
     acarsvdl2.h
     acarshfdl.h
     acarsaero.h
-    do219.h
+    acarsiridium.h
+    acarsiridiumframe.h
+    acarsiridiumfft.h
+    acarsiridiumchannelizer.h
+    acarsiridiumscanner.h
     vdl2atn.h
 )
 

@@ -37,9 +37,12 @@ AircraftSettings::AircraftSettings() :
 // unless the user turns it off, so a demodulator added later is included by default.
 const QStringList& AircraftSettings::sourceURIs()
 {
+    // Also the list the feature connects its pipes to, so a demodulator added here is
+    // both heard and offered in the settings dialog
     static const QStringList uris = {
         "sdrangel.channel.adsbdemod",
-        "sdrangel.channel.acarsdemod"
+        "sdrangel.channel.acarsdemod",
+        "sdrangel.channel.selcaldemod"
     };
     return uris;
 }
@@ -50,6 +53,8 @@ QString AircraftSettings::sourceName(const QString& uri)
         return "ADS-B Demodulator";
     } else if (uri == "sdrangel.channel.acarsdemod") {
         return "ACARS Demodulator";
+    } else if (uri == "sdrangel.channel.selcaldemod") {
+        return "SELCAL Demodulator";
     }
     return uri;
 }
@@ -85,6 +90,17 @@ void AircraftSettings::resetToDefaults()
     m_displayChart = false;
     m_favourLivery = true;
     m_useLiveryIcons = false;
+    m_feedEnabled = false;
+    m_feedStationId = "";
+    m_feedAirframes = true;
+    m_feedAirframesHost = "feed.airframes.io";
+    m_feedAirframesPort = 5550;
+    m_feedAirframesTcp = false;
+    m_feedAvdelphi = false;
+    m_feedAvdelphiHost = "data.avdelphi.com";
+    m_feedAvdelphiPort = 5556;
+    m_feedAvdelphiTcp = false;
+    m_displayCoverage = false;
     m_databaseFilename = "";
     m_disabledSources.clear();
     // Rules that speak and run commands are exactly the kind of thing a reset is asked
@@ -139,15 +155,30 @@ QByteArray AircraftSettings::serialize() const
     s.writeBlob(43, m_splitterStates);
     s.writeBool(40, m_favourLivery);
     s.writeBool(45, m_useLiveryIcons);
+    s.writeBool(46, m_feedEnabled);
+    s.writeString(47, m_feedStationId);
+    s.writeBool(48, m_feedAirframes);
+    s.writeString(49, m_feedAirframesHost);
+    s.writeS32(50, m_feedAirframesPort);
+    s.writeBool(51, m_feedAirframesTcp);
+    s.writeBool(52, m_feedAvdelphi);
+    s.writeString(53, m_feedAvdelphiHost);
+    s.writeS32(54, m_feedAvdelphiPort);
+    s.writeBool(55, m_feedAvdelphiTcp);
+    s.writeBool(56, m_displayCoverage);
 
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
         s.writeS32(300 + i, m_columnIndexes[i]);
     }
     for (int i = 0; i < FLIGHT_COLUMNS; i++) {
-        s.writeS32(500 + i, m_flightColumnIndexes[i]);
+        // 700/800 rather than 500/600: the flight columns were reordered, so a layout
+        // saved against the old order describes different columns and must not be
+        // applied to them. Reading from new keys makes an old preset fall back to
+        // the defaults, which are the new order, exactly once.
+        s.writeS32(700 + i, m_flightColumnIndexes[i]);
     }
     for (int i = 0; i < FLIGHT_COLUMNS; i++) {
-        s.writeS32(600 + i, m_flightColumnSizes[i]);
+        s.writeS32(800 + i, m_flightColumnSizes[i]);
     }
 
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
@@ -214,12 +245,31 @@ bool AircraftSettings::deserialize(const QByteArray& data)
         d.readBlob(43, &m_splitterStates);
         d.readBool(40, &m_favourLivery, true);
         d.readBool(45, &m_useLiveryIcons, false);
+        d.readBool(46, &m_feedEnabled, false);
+        d.readString(47, &m_feedStationId, "");
+        d.readBool(48, &m_feedAirframes, true);
+        d.readString(49, &m_feedAirframesHost, "feed.airframes.io");
+        d.readS32(50, &m_feedAirframesPort, 5550);
+        // A port out of range would be refused by the socket and the feed would sit there
+        // failing, so a corrupt or hand edited preset falls back to the published one
+        if ((m_feedAirframesPort <= 1023) || (m_feedAirframesPort >= 65535)) {
+            m_feedAirframesPort = 5550;
+        }
+        d.readBool(51, &m_feedAirframesTcp, false);
+        d.readBool(52, &m_feedAvdelphi, false);
+        d.readString(53, &m_feedAvdelphiHost, "data.avdelphi.com");
+        d.readS32(54, &m_feedAvdelphiPort, 5556);
+        if ((m_feedAvdelphiPort <= 1023) || (m_feedAvdelphiPort >= 65535)) {
+            m_feedAvdelphiPort = 5556;
+        }
+        d.readBool(55, &m_feedAvdelphiTcp, false);
+    d.readBool(56, &m_displayCoverage, false);
 
         for (int i = 0; i < FLIGHT_COLUMNS; i++) {
-            d.readS32(500 + i, &m_flightColumnIndexes[i], i);
+            d.readS32(700 + i, &m_flightColumnIndexes[i], i);
         }
         for (int i = 0; i < FLIGHT_COLUMNS; i++) {
-            d.readS32(600 + i, &m_flightColumnSizes[i], -1);
+            d.readS32(800 + i, &m_flightColumnSizes[i], -1);
         }
         for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
             d.readS32(300 + i, &m_columnIndexes[i], i);
@@ -291,11 +341,44 @@ void AircraftSettings::applySettings(const QStringList& settingsKeys, const Airc
     if (settingsKeys.contains("displayChart")) {
         m_displayChart = settings.m_displayChart;
     }
+    if (settingsKeys.contains("displayCoverage")) {
+        m_displayCoverage = settings.m_displayCoverage;
+    }
     if (settingsKeys.contains("favourLivery")) {
         m_favourLivery = settings.m_favourLivery;
     }
     if (settingsKeys.contains("useLiveryIcons")) {
         m_useLiveryIcons = settings.m_useLiveryIcons;
+    }
+    if (settingsKeys.contains("feedEnabled")) {
+        m_feedEnabled = settings.m_feedEnabled;
+    }
+    if (settingsKeys.contains("feedStationId")) {
+        m_feedStationId = settings.m_feedStationId;
+    }
+    if (settingsKeys.contains("feedAirframes")) {
+        m_feedAirframes = settings.m_feedAirframes;
+    }
+    if (settingsKeys.contains("feedAirframesHost")) {
+        m_feedAirframesHost = settings.m_feedAirframesHost;
+    }
+    if (settingsKeys.contains("feedAirframesPort")) {
+        m_feedAirframesPort = settings.m_feedAirframesPort;
+    }
+    if (settingsKeys.contains("feedAirframesTcp")) {
+        m_feedAirframesTcp = settings.m_feedAirframesTcp;
+    }
+    if (settingsKeys.contains("feedAvdelphi")) {
+        m_feedAvdelphi = settings.m_feedAvdelphi;
+    }
+    if (settingsKeys.contains("feedAvdelphiHost")) {
+        m_feedAvdelphiHost = settings.m_feedAvdelphiHost;
+    }
+    if (settingsKeys.contains("feedAvdelphiPort")) {
+        m_feedAvdelphiPort = settings.m_feedAvdelphiPort;
+    }
+    if (settingsKeys.contains("feedAvdelphiTcp")) {
+        m_feedAvdelphiTcp = settings.m_feedAvdelphiTcp;
     }
     if (settingsKeys.contains("statistics")) {
         m_statistics = settings.m_statistics;

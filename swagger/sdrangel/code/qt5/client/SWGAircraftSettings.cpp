@@ -48,6 +48,30 @@ SWGAircraftSettings::SWGAircraftSettings() {
     m_display_statistics_isSet = false;
     display_chart = 0;
     m_display_chart_isSet = false;
+    display_coverage = 0;
+    m_display_coverage_isSet = false;
+    use_livery_icons = 0;
+    m_use_livery_icons_isSet = false;
+    feed_enabled = 0;
+    m_feed_enabled_isSet = false;
+    feed_station_id = nullptr;
+    m_feed_station_id_isSet = false;
+    feed_airframes = 0;
+    m_feed_airframes_isSet = false;
+    feed_airframes_host = nullptr;
+    m_feed_airframes_host_isSet = false;
+    feed_airframes_port = 0;
+    m_feed_airframes_port_isSet = false;
+    feed_airframes_tcp = 0;
+    m_feed_airframes_tcp_isSet = false;
+    feed_avdelphi = 0;
+    m_feed_avdelphi_isSet = false;
+    feed_avdelphi_host = nullptr;
+    m_feed_avdelphi_host_isSet = false;
+    feed_avdelphi_port = 0;
+    m_feed_avdelphi_port_isSet = false;
+    feed_avdelphi_tcp = 0;
+    m_feed_avdelphi_tcp_isSet = false;
     database_filename = nullptr;
     m_database_filename_isSet = false;
     disabled_sources = nullptr;
@@ -100,6 +124,30 @@ SWGAircraftSettings::init() {
     m_display_statistics_isSet = false;
     display_chart = 0;
     m_display_chart_isSet = false;
+    display_coverage = 0;
+    m_display_coverage_isSet = false;
+    use_livery_icons = 0;
+    m_use_livery_icons_isSet = false;
+    feed_enabled = 0;
+    m_feed_enabled_isSet = false;
+    feed_station_id = new QString("");
+    m_feed_station_id_isSet = false;
+    feed_airframes = 0;
+    m_feed_airframes_isSet = false;
+    feed_airframes_host = new QString("");
+    m_feed_airframes_host_isSet = false;
+    feed_airframes_port = 0;
+    m_feed_airframes_port_isSet = false;
+    feed_airframes_tcp = 0;
+    m_feed_airframes_tcp_isSet = false;
+    feed_avdelphi = 0;
+    m_feed_avdelphi_isSet = false;
+    feed_avdelphi_host = new QString("");
+    m_feed_avdelphi_host_isSet = false;
+    feed_avdelphi_port = 0;
+    m_feed_avdelphi_port_isSet = false;
+    feed_avdelphi_tcp = 0;
+    m_feed_avdelphi_tcp_isSet = false;
     database_filename = new QString("");
     m_database_filename_isSet = false;
     disabled_sources = new QList<QString*>();
@@ -138,6 +186,15 @@ SWGAircraftSettings::cleanup() {
 
 
 
+    if(feed_station_id != nullptr) { 
+        delete feed_station_id;
+    }
+    if(feed_airframes_host != nullptr) { 
+        delete feed_airframes_host;
+    }
+    if(feed_avdelphi_host != nullptr) { 
+        delete feed_avdelphi_host;
+    }
     if(database_filename != nullptr) { 
         delete database_filename;
     }
@@ -202,6 +259,30 @@ SWGAircraftSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&display_statistics, pJson["displayStatistics"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_chart, pJson["displayChart"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_coverage, pJson["displayCoverage"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_livery_icons, pJson["useLiveryIcons"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_enabled, pJson["feedEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_station_id, pJson["feedStationId"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feed_airframes, pJson["feedAirframes"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_airframes_host, pJson["feedAirframesHost"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feed_airframes_port, pJson["feedAirframesPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_airframes_tcp, pJson["feedAirframesTcp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_avdelphi, pJson["feedAvdelphi"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_avdelphi_host, pJson["feedAvdelphiHost"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feed_avdelphi_port, pJson["feedAvdelphiPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_avdelphi_tcp, pJson["feedAvdelphiTcp"], "qint32", "");
     
     ::SWGSDRangel::setValue(&database_filename, pJson["databaseFilename"], "QString", "QString");
     
@@ -272,6 +353,42 @@ SWGAircraftSettings::asJsonObject() {
     }
     if(m_display_chart_isSet){
         obj->insert("displayChart", QJsonValue(display_chart));
+    }
+    if(m_display_coverage_isSet){
+        obj->insert("displayCoverage", QJsonValue(display_coverage));
+    }
+    if(m_use_livery_icons_isSet){
+        obj->insert("useLiveryIcons", QJsonValue(use_livery_icons));
+    }
+    if(m_feed_enabled_isSet){
+        obj->insert("feedEnabled", QJsonValue(feed_enabled));
+    }
+    if(feed_station_id != nullptr && *feed_station_id != QString("")){
+        toJsonValue(QString("feedStationId"), feed_station_id, obj, QString("QString"));
+    }
+    if(m_feed_airframes_isSet){
+        obj->insert("feedAirframes", QJsonValue(feed_airframes));
+    }
+    if(feed_airframes_host != nullptr && *feed_airframes_host != QString("")){
+        toJsonValue(QString("feedAirframesHost"), feed_airframes_host, obj, QString("QString"));
+    }
+    if(m_feed_airframes_port_isSet){
+        obj->insert("feedAirframesPort", QJsonValue(feed_airframes_port));
+    }
+    if(m_feed_airframes_tcp_isSet){
+        obj->insert("feedAirframesTcp", QJsonValue(feed_airframes_tcp));
+    }
+    if(m_feed_avdelphi_isSet){
+        obj->insert("feedAvdelphi", QJsonValue(feed_avdelphi));
+    }
+    if(feed_avdelphi_host != nullptr && *feed_avdelphi_host != QString("")){
+        toJsonValue(QString("feedAvdelphiHost"), feed_avdelphi_host, obj, QString("QString"));
+    }
+    if(m_feed_avdelphi_port_isSet){
+        obj->insert("feedAvdelphiPort", QJsonValue(feed_avdelphi_port));
+    }
+    if(m_feed_avdelphi_tcp_isSet){
+        obj->insert("feedAvdelphiTcp", QJsonValue(feed_avdelphi_tcp));
     }
     if(database_filename != nullptr && *database_filename != QString("")){
         toJsonValue(QString("databaseFilename"), database_filename, obj, QString("QString"));
@@ -411,6 +528,126 @@ void
 SWGAircraftSettings::setDisplayChart(qint32 display_chart) {
     this->display_chart = display_chart;
     this->m_display_chart_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getDisplayCoverage() {
+    return display_coverage;
+}
+void
+SWGAircraftSettings::setDisplayCoverage(qint32 display_coverage) {
+    this->display_coverage = display_coverage;
+    this->m_display_coverage_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getUseLiveryIcons() {
+    return use_livery_icons;
+}
+void
+SWGAircraftSettings::setUseLiveryIcons(qint32 use_livery_icons) {
+    this->use_livery_icons = use_livery_icons;
+    this->m_use_livery_icons_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedEnabled() {
+    return feed_enabled;
+}
+void
+SWGAircraftSettings::setFeedEnabled(qint32 feed_enabled) {
+    this->feed_enabled = feed_enabled;
+    this->m_feed_enabled_isSet = true;
+}
+
+QString*
+SWGAircraftSettings::getFeedStationId() {
+    return feed_station_id;
+}
+void
+SWGAircraftSettings::setFeedStationId(QString* feed_station_id) {
+    this->feed_station_id = feed_station_id;
+    this->m_feed_station_id_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAirframes() {
+    return feed_airframes;
+}
+void
+SWGAircraftSettings::setFeedAirframes(qint32 feed_airframes) {
+    this->feed_airframes = feed_airframes;
+    this->m_feed_airframes_isSet = true;
+}
+
+QString*
+SWGAircraftSettings::getFeedAirframesHost() {
+    return feed_airframes_host;
+}
+void
+SWGAircraftSettings::setFeedAirframesHost(QString* feed_airframes_host) {
+    this->feed_airframes_host = feed_airframes_host;
+    this->m_feed_airframes_host_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAirframesPort() {
+    return feed_airframes_port;
+}
+void
+SWGAircraftSettings::setFeedAirframesPort(qint32 feed_airframes_port) {
+    this->feed_airframes_port = feed_airframes_port;
+    this->m_feed_airframes_port_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAirframesTcp() {
+    return feed_airframes_tcp;
+}
+void
+SWGAircraftSettings::setFeedAirframesTcp(qint32 feed_airframes_tcp) {
+    this->feed_airframes_tcp = feed_airframes_tcp;
+    this->m_feed_airframes_tcp_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAvdelphi() {
+    return feed_avdelphi;
+}
+void
+SWGAircraftSettings::setFeedAvdelphi(qint32 feed_avdelphi) {
+    this->feed_avdelphi = feed_avdelphi;
+    this->m_feed_avdelphi_isSet = true;
+}
+
+QString*
+SWGAircraftSettings::getFeedAvdelphiHost() {
+    return feed_avdelphi_host;
+}
+void
+SWGAircraftSettings::setFeedAvdelphiHost(QString* feed_avdelphi_host) {
+    this->feed_avdelphi_host = feed_avdelphi_host;
+    this->m_feed_avdelphi_host_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAvdelphiPort() {
+    return feed_avdelphi_port;
+}
+void
+SWGAircraftSettings::setFeedAvdelphiPort(qint32 feed_avdelphi_port) {
+    this->feed_avdelphi_port = feed_avdelphi_port;
+    this->m_feed_avdelphi_port_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFeedAvdelphiTcp() {
+    return feed_avdelphi_tcp;
+}
+void
+SWGAircraftSettings::setFeedAvdelphiTcp(qint32 feed_avdelphi_tcp) {
+    this->feed_avdelphi_tcp = feed_avdelphi_tcp;
+    this->m_feed_avdelphi_tcp_isSet = true;
 }
 
 QString*
@@ -566,6 +803,42 @@ SWGAircraftSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_display_chart_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_coverage_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_livery_icons_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(feed_station_id && *feed_station_id != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_airframes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(feed_airframes_host && *feed_airframes_host != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_airframes_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_airframes_tcp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_avdelphi_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(feed_avdelphi_host && *feed_avdelphi_host != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_avdelphi_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_avdelphi_tcp_isSet){
             isObjectUpdated = true; break;
         }
         if(database_filename && *database_filename != QString("")){

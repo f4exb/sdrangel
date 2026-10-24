@@ -31,6 +31,42 @@ AircraftSettings:
     displayChart:
       description: "Show the message rate chart (1 for yes, 0 for no)"
       type: integer
+    displayCoverage:
+      description: "Draw each protocol's polar coverage on the map (1 for yes, 0 for no)"
+      type: integer
+    useLiveryIcons:
+      description: "Use aircraft icons in airline liveries on the 2D map, rather than black icons (1 for yes, 0 for no)"
+      type: integer
+    feedEnabled:
+      description: "Feed received ACARS messages on to aggregators (1 for yes, 0 for no)"
+      type: integer
+    feedStationId:
+      description: "Station ident sent with each message fed to aggregators"
+      type: string
+    feedAirframes:
+      description: "Feed airframes.io (1 for yes, 0 for no)"
+      type: integer
+    feedAirframesHost:
+      description: "airframes.io feed host"
+      type: string
+    feedAirframesPort:
+      description: "airframes.io feed port"
+      type: integer
+    feedAirframesTcp:
+      description: "Feed airframes.io over TCP rather than UDP (1 for TCP, 0 for UDP)"
+      type: integer
+    feedAvdelphi:
+      description: "Feed avdelphi.com (1 for yes, 0 for no)"
+      type: integer
+    feedAvdelphiHost:
+      description: "avdelphi.com feed host"
+      type: string
+    feedAvdelphiPort:
+      description: "avdelphi.com feed port"
+      type: integer
+    feedAvdelphiTcp:
+      description: "Feed avdelphi.com over TCP rather than UDP (1 for TCP, 0 for UDP)"
+      type: integer
     databaseFilename:
       description: "Where the session database is kept. Empty for the default location"
       type: string

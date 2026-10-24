@@ -33,12 +33,10 @@
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
-#include "util/waypoints.h"
 #include "util/messagequeue.h"
 #include "util/planespotters.h"
-#include "util/openaip.h"
 #include "settings/rollupstate.h"
-#include "acarsmessage.h"
+#include "util/acarsmessage.h"
 #include "gui/acarsmessageview.h"
 #include "acarsdemodsettings.h"
 #include "acarsdemodworker.h"
@@ -108,13 +106,9 @@ private:
     uint32_t m_tickCount;
     MessageQueue m_inputMessageQueue;
 
-    QSharedPointer<const QList<NavAid *>> m_navAids;
-    QSharedPointer<const QHash<QString, AirportInformation *>> m_airports;
-    QSharedPointer<const QMultiHash<QString, Waypoint *>> m_waypoints;
     PlaneSpotters m_planeSpotters;
     QString m_photoLink;
     QSharedPointer<const QHash<QString, AircraftInformation *>> m_aircraftInfo;
-    QSharedPointer<const QHash<int, AircraftInformation *>> m_aircraftInfoByIcao;
     OsnDB m_osnDB;
     QProgressDialog *m_progressDialog;
 
@@ -201,10 +195,9 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_mode_currentIndexChanged(int value);
     void on_aeroChannel_currentIndexChanged(int value);
+    void on_iridiumBandwidth_currentIndexChanged(int value);
     void on_gsTable_clicked();
     void gsTableContextMenu(QPoint pos);
-    void on_feed_clicked(bool checked);
-    void feedSelect(const QPoint& p);
     void on_rfBW_valueChanged(int index);
     void on_threshold_valueChanged(int value);
     void on_filter_currentIndexChanged(int index);

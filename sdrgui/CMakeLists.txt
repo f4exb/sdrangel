@@ -41,6 +41,8 @@ set(sdrgui_SOURCES
     gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
+    gui/fastheaderview.cpp
+    gui/fastitemdelegate.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
@@ -157,6 +159,8 @@ set(sdrgui_SOURCES
 set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
+    gui/fastheaderview.h
+    gui/fastitemdelegate.h
     gui/accessiblevaluedial.h
     gui/accessiblevaluedialz.h
     gui/acarsmessageview.h

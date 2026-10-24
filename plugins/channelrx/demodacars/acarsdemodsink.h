@@ -34,6 +34,8 @@
 #include "acarsvdl2.h"
 #include "acarshfdl.h"
 #include "acarsaero.h"
+#include "acarsiridium.h"
+#include "acarsiridiumscanner.h"
 
 #define ACARSDEMOD_CHANNEL_SAMPLE_RATE ACARSOQPSK_CHANNEL_SAMPLE_RATE
 
@@ -66,6 +68,11 @@ public:
         case AcarsDemodSettings::Aero:
             return AcarsAeroReceiver::channelSampleRate(
                 AcarsAeroReceiver::submodeRate(settings.m_aeroChannel));
+        // Iridium scans rather than tuning one channel, so the rate is the width of band
+        // it covers, not the rate one receiver runs at
+        case AcarsDemodSettings::Iridium:
+            return AcarsDemodSettings::iridiumScanChannels(settings.m_iridiumBandwidth)
+                 * ACARSIRIDIUM_SCAN_SPACING;
         default: return ACARSDEMOD_CHANNEL_SAMPLE_RATE;
         }
     }
@@ -134,6 +141,34 @@ private:
     AcarsVdl2Receiver m_vdl2Receiver;
     AcarsHfdlReceiver m_hfdlReceiver;
     AcarsAeroReceiver m_aeroReceiver;
+    AcarsIridiumScanner m_iridiumScanner;
+    int m_iridiumChannels;      //!< What the scanner is currently configured for
+
+    //!< Scanning the whole band decodes a dozen frames a second, so none of them are
+    //!< logged individually - what the band is doing is summarised this often instead,
+    //!< as the change in the scanner's counters since the last one
+    static constexpr double m_iridiumLogSeconds = 60.0;
+    qint64 m_iridiumLogCount;   //!< Input samples since the last summary
+    int m_iridiumCarrierCount;  //!< Reassembled messages whose type carries a payload
+
+    struct IridiumLog
+    {
+        int m_bursts = 0;
+        int m_duplicates = 0;
+        int m_frames = 0;
+        int m_ida = 0;
+        int m_messages = 0;
+        int m_carriers = 0;
+        int m_acars = 0;
+    };
+
+    IridiumLog m_iridiumLog;    //!< The counters as of the last summary
+
+    //!< Whether a Demod Analyzer is attached, rechecked every so many samples rather
+    //!< than per sample. A tenth of a second at the fastest rate the plugin runs at
+    bool m_demodPipesPresent;
+    int m_demodPipeCheck;
+    static const int m_demodPipeCheckInterval = 100000;
 
     static const int m_scopeBufferSize = 512;
     SampleVector m_scopeBuffer;
@@ -144,6 +179,7 @@ private:
     int m_demodBufferFill;
 
     void processOneSample(Complex &ci);
+    void logIridiumSummary();
     void sampleToScope(Real ch1, Real ch2);
     Real scopeChannel(int selection, const Complex& ci, Real magsq) const;
 

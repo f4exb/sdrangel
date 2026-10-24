@@ -808,6 +808,7 @@ public:
         {
             return new MsgAircraftReport(pipeSource, report);
         }
+        ~MsgAircraftReport()   // Owns m_report.m_mapItem until a consumer takes it
 
     private:
         const QObject *m_pipeSource;
@@ -817,6 +818,61 @@ public:
             Message(),
             m_pipeSource(pipeSource),
             m_report(report)
+        { }
+    };
+
+    // Message to pass a received ACARS block, exactly as it came off the air, to a
+    // feature that archives it and feeds it on to aggregators.
+    //
+    // The RAW block rather than anything decoded, which is the whole point: a decoder
+    // improves, and everything already stored improves with it. That is not theoretical -
+    // a three character sublabel was being read as two, which put a stray character into
+    // the middle of every block after the first of a long message, and every rendered
+    // document written before the fix keeps its corruption for good. The block re-decodes
+    // clean.
+    //
+    // Per BLOCK, not per reassembled message: that defect was introduced while parsing a
+    // block's own header, before reassembly, so the reassembled text would not have been
+    // enough to recover from it.
+    //
+    // The reception metadata travels with it because none of it is in the block - the
+    // aggregators want the frequency and the signal level, and the archive wants to know
+    // which bearer heard it.
+    class SDRBASE_API MsgAcarsBlock : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QObject *getPipeSource() const { return m_pipeSource; }
+        const QByteArray& getBlock() const { return m_block; }
+        const QDateTime& getDateTime() const { return m_dateTime; }
+        qint64 getFrequency() const { return m_frequency; }
+        double getLevel() const { return m_level; }
+        int getProtocol() const { return m_protocol; }
+
+        static MsgAcarsBlock* create(const QObject *pipeSource, const QByteArray& block,
+                                     const QDateTime& dateTime, qint64 frequency,
+                                     double level, int protocol)
+        {
+            return new MsgAcarsBlock(pipeSource, block, dateTime, frequency, level, protocol);
+        }
+
+    private:
+        const QObject *m_pipeSource;
+        QByteArray m_block;
+        QDateTime m_dateTime;
+        qint64 m_frequency;         //!< Hz
+        double m_level;             //!< dB
+        int m_protocol;             //!< An AircraftReport::Protocol
+
+        MsgAcarsBlock(const QObject *pipeSource, const QByteArray& block,
+                      const QDateTime& dateTime, qint64 frequency, double level, int protocol) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_block(block),
+            m_dateTime(dateTime),
+            m_frequency(frequency),
+            m_level(level),
+            m_protocol(protocol)
         { }
     };
 
@@ -844,6 +900,8 @@ public:
         QByteArray m_packet;
         QDateTime m_dateTime;
 
+    protected:
+        // Protected rather than private so it can be subclassed to add extra info
         MsgPacket(const QObject *pipeSource, QByteArray packet, QDateTime dateTime) :
             Message(),
             m_pipeSource(pipeSource),

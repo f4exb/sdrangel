@@ -282,7 +282,8 @@ Item {
                                             console.log("z=" + aircraft.sourceItem.z)
                                             aircraft.sourceItem.z = aircraft.sourceItem.z + 1
                                         } else if (mouse.button === Qt.RightButton) {
-                                            contextMenu.popup()
+                                            var p = mapToItem(contextMenu.parent, mouse.x, mouse.y)
+                                            contextMenu.popup(p.x, p.y)
                                         }
                                     }
                                     onDoubleClicked: {
@@ -331,7 +332,8 @@ Item {
                                     if (mouse.button === Qt.LeftButton) {
                                         showAll = !showAll
                                     } else if (mouse.button === Qt.RightButton) {
-                                        contextMenu.popup()
+                                        var p = mapToItem(contextMenu.parent, mouse.x, mouse.y)
+                                        contextMenu.popup(p.x, p.y)
                                     }
                                 }
                                 Menu {
@@ -459,7 +461,8 @@ Item {
                                                 scanner: scanners[i]
                                             })
                                         }
-                                        contextMenu.popup()
+                                        var p = mapToItem(contextMenu.parent, mouse.x, mouse.y)
+                                        contextMenu.popup(p.x, p.y)
                                     }
                                 }
                                 onDoubleClicked: (mouse) => {

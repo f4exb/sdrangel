@@ -24,11 +24,15 @@
 #include <QDebug>
 #include <QtNetwork>
 #include <QImage>
+#include <QImageReader>
+#include <QBuffer>
 #include <QPainter>
 #include <QHash>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QNetworkDiskCache>
+
+#include "util/profiler.h"
 
 class MapTileServer : public QTcpServer
 {
@@ -190,6 +194,7 @@ public:
 
     QImage combine(const TileJob *job)
     {
+        PROFILER_START()
         // Don't use job->m_images[job->m_urls[0]].size() as not always valid (E.g. map tiler can return http 204 - no content)
         // Do we need to support 512x512?
         QImage image(QSize(256, 256), QImage::Format_ARGB32_Premultiplied);
@@ -209,11 +214,54 @@ public:
             }
         }
 
+        PROFILER_STOP("Map tile combine")
         return image;
+    }
+
+    // A single-layer tile that is already what was asked for doesn't need to be decoded,
+    // composited and re-encoded - the bytes we downloaded can go straight to the client.
+    // Only the image header is read, to check it is the size combine() would have produced
+    bool canPassThrough(const QByteArray& data, QNetworkReply *reply, const TileJob *job) const
+    {
+        if (!job || (job->m_urls.size() != 1) || reply->error() || data.isEmpty()) {
+            return false;
+        }
+
+        const QString contentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+        if (job->m_format == "PNG")
+        {
+            if (!contentType.startsWith("image/png")) {
+                return false;
+            }
+        }
+        else if (!contentType.startsWith("image/jpeg") && !contentType.startsWith("image/jpg"))
+        {
+            return false;
+        }
+
+        QByteArray copy(data);
+        QBuffer buffer(&copy);
+        QImageReader reader(&buffer);
+
+        return reader.size() == QSize(256, 256);
+    }
+
+    void replyData(QTcpSocket* socket, const QByteArray& data)
+    {
+        socket->write("HTTP/1.0 200 Ok\r\n"
+            "Content-Type: image/png\r\n"
+            "\r\n");
+        socket->write(data);
+        socket->close();
+
+        if (socket->state() == QTcpSocket::UnconnectedState) {
+            delete socket;
+        }
     }
 
     void replyImage(QTcpSocket* socket, const QImage& image, const QString& format)
     {
+        PROFILER_START()
         QByteArray ba;
         QBuffer buffer(&ba);
         buffer.open(QIODevice::WriteOnly);
@@ -229,6 +277,7 @@ public:
         if (socket->state() == QTcpSocket::UnconnectedState) {
             delete socket;
         }
+        PROFILER_STOP("Map tile encode")
     }
 
     void replyError(QTcpSocket* socket)
@@ -295,7 +344,7 @@ private slots:
                     } else if (map == "satellite") {
                         baseMapURL = QString("https://api.maptiler.com/tiles/satellite-v2/%3/%1/%2.jpg?key=%4").arg(x).arg(y).arg(z).arg(m_maptilerAPIKey);
                     } else if ((map == "dark_nolabels") || (map == "light_nolabels")) {
-                        baseMapURL = QString("http://1.basemaps.cartocdn.com/%4/%3/%1/%2.png").arg(x).arg(y).arg(z).arg(map);
+                        baseMapURL = QString("http://1.basemaps.cartocdn.com/%4/%3/%1/%2.png?key=%5").arg(x).arg(y).arg(z).arg(map).arg("cb1_27a9_1_036ae52d2884fda8713b961c");
                     } else {
                         baseMapURL = QString("http://a.tile.thunderforest.com/%4/%3/%1/%2.png?apikey=%5").arg(x).arg(y).arg(z).arg(map).arg(m_thunderforestAPIKey);
                     }
@@ -353,10 +402,19 @@ private slots:
         if (!isHttpRedirect(reply))
         {
             QByteArray data = reply->readAll();
+
+            bool found = false;
+            TileJob *job = m_replies[reply];
+            if (!m_tileJobs.contains(job)) {
+                qDebug() << "job has been deleted!";
+            }
+
+            const bool passThrough = canPassThrough(data, reply, job);
+
             QImage image;
             if (!reply->error())
             {
-                if (!image.loadFromData(data))
+                if (!passThrough && !image.loadFromData(data))
                 {
                     qDebug() << "MapTileServer::downloadFinished: Failed to load image: " << url;
                 }
@@ -365,32 +423,43 @@ private slots:
             {
                 qDebug() << "MapTileServer::downloadFinished: Error: " << reply->error() << "for" << url;
             }
-
-            bool found = false;
-            TileJob *job = m_replies[reply];
-            if (!m_tileJobs.contains(job)) {
-                qDebug() << "job has been deleted!";
-            }
             for (const auto& jobURL : job->m_urls)
             {
                 if (jobURL == url)
                 {
-                    job->m_images.insert(url, image);
-                    if (job->m_urls.size() == job->m_images.size())
+                    if (passThrough)
                     {
-                        // All images available
-                        QImage combinedImage = combine(job);
                         if (job->m_socket)
                         {
-                            replyImage(job->m_socket, combinedImage, job->m_format);
+                            replyData(job->m_socket, data);
                             job->m_socket = nullptr;
                             m_tileJobs.removeAll(job);
                             delete job;
-                            //qDebug() << "Delete job" << job;
                         }
                         else
                         {
                             qDebug() << "Socket was null. URL: " << url << "job:" << job;
+                        }
+                    }
+                    else
+                    {
+                        job->m_images.insert(url, image);
+                        if (job->m_urls.size() == job->m_images.size())
+                        {
+                            // All images available
+                            QImage combinedImage = combine(job);
+                            if (job->m_socket)
+                            {
+                                replyImage(job->m_socket, combinedImage, job->m_format);
+                                job->m_socket = nullptr;
+                                m_tileJobs.removeAll(job);
+                                delete job;
+                                //qDebug() << "Delete job" << job;
+                            }
+                            else
+                            {
+                                qDebug() << "Socket was null. URL: " << url << "job:" << job;
+                            }
                         }
                     }
                     found = true;

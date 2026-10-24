@@ -19,6 +19,7 @@
 #include <QComboBox>
 
 #include "aircraftnotificationdialog.h"
+#include "gui/fastitemdelegate.h"
 
 AircraftNotificationDialog::AircraftNotificationDialog(AircraftSettings *settings,
         QWidget* parent) :
@@ -27,6 +28,11 @@ AircraftNotificationDialog::AircraftNotificationDialog(AircraftSettings *setting
     m_settings(settings)
 {
     ui->setupUi(this);
+
+    // Cells painted through QStyle cost a SystemParametersInfo call each with the Fusion
+    // style - 28 to 93 us depending on the machine. See FastItemDelegate
+    ui->table->setItemDelegate(new FastItemDelegate(ui->table));
+
 
     resizeTable();
 

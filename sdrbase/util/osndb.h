@@ -141,6 +141,8 @@ private:
     static QSharedPointer<const QHash<QString, AircraftInformation *>> m_aircraftInformationByReg;
     static QSharedPointer<const QHash<QString, AircraftRouteInformation *>> m_aircraftRouteInformation;
     static QDateTime m_modifiedDateTime;
+    // Guards the loading and replacement of the three databases above.
+    static QRecursiveMutex m_dbMutex;
 
     // Write a reduced size and validated version of the DB, so it loads quicker
     static bool writeFastDB(const QString &filename, const QHash<int, AircraftInformation *> *aircraftInfo);

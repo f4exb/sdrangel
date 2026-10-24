@@ -34,6 +34,7 @@
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
 #include "channel/channelapi.h"
+#include "SWGMapItem.h"
 #ifdef ANDROID
 #include "util/android.h"
 #endif
@@ -74,6 +75,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveFeatureUIToWorkspace, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveChannelUIToWorkspace, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgMapItem, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAircraftReport, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgAcarsBlock, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgPacket, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgTargetAzimuthElevation, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerTarget, Message)
@@ -827,4 +829,9 @@ bool MainCore::getWindowState(const void* owner, WindowState& state) const
 
     state = it.value();
     return true;
+}
+
+MainCore::MsgAircraftReport::~MsgAircraftReport()
+{
+    delete m_report.m_mapItem;
 }

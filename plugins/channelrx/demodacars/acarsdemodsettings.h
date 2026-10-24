@@ -36,7 +36,9 @@ struct AcarsDemodSettings
         ACARS = 0,      //!< Plain old ACARS: 2400 baud MSK on AM
         VDL2 = 1,       //!< VDL Mode 2: 10500 baud D8PSK, ACARS over AVLC
         HFDL = 2,       //!< HFDL: 1800 baud M-PSK on a 1440 Hz subcarrier, ACARS over MPDU/LPDU
-        Aero = 3        //!< Inmarsat Classic Aero: L band satellite, ACARS over signal units
+        Aero = 3,       //!< Inmarsat Classic Aero: L band satellite, ACARS over signal units
+        Iridium = 4,    //!< Iridium: L band satellite, burst DQPSK from low earth orbit.               
+        ModeCount
     };
 
     // The protocol tag an AircraftReport gets for a given mode.
@@ -47,9 +49,39 @@ struct AcarsDemodSettings
         case VDL2: return AircraftReport::VDL2;
         case HFDL: return AircraftReport::HFDL;
         case Aero: return AircraftReport::AERO;
+        case Iridium: return AircraftReport::IRIDIUM;
         default:   return AircraftReport::ACARS;
         }
     }
+
+    //! Whether a change moves the channel sample rate, and so needs the channelizer
+    //! retuned, the resampler rebuilt and the receivers restarted.
+    static bool rateChanged(const AcarsDemodSettings& a, const AcarsDemodSettings& b)
+    {
+        if (a.m_mode != b.m_mode) {
+            return true;
+        }
+
+        switch (a.m_mode)
+        {
+        case Aero:    return a.m_aeroChannel != b.m_aeroChannel;
+        case Iridium: return a.m_iridiumBandwidth != b.m_iridiumBandwidth;
+        default:      return false;
+        }
+    }
+
+    //! How many channelizer outputs each Iridium scan width uses. They have to be powers
+    //! of two, and the sample rate the channel needs is this times the 31.25 kHz channel
+    //! spacing - so 256 channels is 8 MS/s and covers 8 MHz, the whole Iridium band.
+    static int iridiumScanChannels(int bandwidth)
+    {
+        static const int channels[] = { 32, 64, 128, 256 };
+        const int count = (int) (sizeof(channels) / sizeof(channels[0]));
+
+        return channels[((bandwidth < 0) || (bandwidth >= count)) ? (count - 1) : bandwidth];
+    }
+
+    static const int IridiumScanWidths = 4;
 
     qint32 m_inputFrequencyOffset;
     int m_mode;                     //!< One of enum Mode
@@ -57,6 +89,12 @@ struct AcarsDemodSettings
     //!< HFDL, where the M1 sequence identifies the rate, these are properties of the
     //!< frequency tuned, so they are a setting rather than something detected.
     int m_aeroChannel;
+    //!< How much of the band the Iridium scanner covers. Iridium assigns a duplex channel
+    //!< when a call is set up, out of about 240 across 7 MHz, so watching one channel sees
+    //!< a few percent of the traffic - the scanner splits the whole width with a polyphase
+    //!< channelizer instead and runs a receiver on every output. An index into the table
+    //!< in iridiumScanChannels() below
+    int m_iridiumBandwidth;
     Real m_rfBandwidth;
     Real m_correlationThreshold;   //!< Pre-key detection threshold, 0 to 1
     QString m_filter;       // Regular expression the filtered column must match
@@ -80,17 +118,6 @@ struct AcarsDemodSettings
     QString m_logFilename;
     bool m_logEnabled;
 
-    // Feeding of received ACARS messages to aggregators, in acarsdec-style JSON
-    bool m_feedEnabled;
-    QString m_feedStationId;        //!< Station ident sent with each message
-    bool m_feedAirframes;
-    QString m_feedAirframesHost;
-    int m_feedAirframesPort;
-    bool m_feedAirframesTcp;        //!< TCP (as the airframes.io wizard assigns) or UDP
-    bool m_feedAvdelphi;
-    QString m_feedAvdelphiHost;
-    int m_feedAvdelphiPort;
-    bool m_feedAvdelphiTcp;
 
     quint32 m_rgbColor;
     QString m_title;

@@ -37,6 +37,7 @@ void AcarsDemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_mode = ACARS;
     m_aeroChannel = AcarsAeroReceiver::Submode600P;
+    m_iridiumBandwidth = AcarsDemodSettings::IridiumScanWidths - 1;
     m_rfBandwidth = 12500.0f;
     // Pre-key detection threshold, as a fraction of the AM modulation index seen at 2400 Hz.
     // A real pre-key reads about 0.85 (ARINC 618 section 4.4.3 asks for at least 85 percent
@@ -57,18 +58,8 @@ void AcarsDemodSettings::resetToDefaults()
     m_displayChart = false;
     m_logFilename = "acars_log.csv";
     m_logEnabled = false;
-    m_feedEnabled = false;
-    m_feedStationId = "";
-    m_feedAirframes = true;
-    m_feedAirframesHost = "feed.airframes.io";
-    m_feedAirframesPort = 5550;
     // The airframes.io ACARS (acarsdec) station type ingests UDP on 5550; only some
     // other station types (e.g. VDL2/vdlm2dec on 5555) are TCP
-    m_feedAirframesTcp = false;
-    m_feedAvdelphi = false;
-    m_feedAvdelphiHost = "data.avdelphi.com";
-    m_feedAvdelphiPort = 5556;
-    m_feedAvdelphiTcp = false;
 
     m_rgbColor = QColor(25, 205, 2).rgb();
     m_title = "ACARS Demodulator";
@@ -129,6 +120,7 @@ QByteArray AcarsDemodSettings::serialize() const
     s.writeBool(38, m_logEnabled);
     s.writeS32(39, m_mode);
     s.writeS32(53, m_aeroChannel);
+    s.writeS32(56, m_iridiumBandwidth);
     // Key 40 stored the opposite question, "show these frames", so it is written
     // inverted rather than moved to a new key - that way an existing preset keeps
     // behaving exactly as it did, whichever way it was set
@@ -136,16 +128,6 @@ QByteArray AcarsDemodSettings::serialize() const
     s.writeBool(54, m_showDate);
     s.writeBlob(55, m_splitterState);
     s.writeBool(41, m_displayChart);
-    s.writeBool(42, m_feedEnabled);
-    s.writeString(43, m_feedStationId);
-    s.writeBool(44, m_feedAirframes);
-    s.writeString(45, m_feedAirframesHost);
-    s.writeS32(46, m_feedAirframesPort);
-    s.writeBool(47, m_feedAvdelphi);
-    s.writeString(48, m_feedAvdelphiHost);
-    s.writeS32(49, m_feedAvdelphiPort);
-    s.writeBool(50, m_feedAirframesTcp);
-    s.writeBool(51, m_feedAvdelphiTcp);
 
     for (int i = 0; i < ACARSDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -248,13 +230,17 @@ bool AcarsDemodSettings::deserialize(const QByteArray& data)
         d.readString(37, &m_logFilename, "acars_log.csv");
         d.readBool(38, &m_logEnabled, false);
         d.readS32(39, &m_mode, (int)ACARS);
-        if ((m_mode != (int)ACARS) && (m_mode != (int)VDL2) && (m_mode != (int)HFDL)
-            && (m_mode != (int)Aero)) {
+        if ((m_mode < 0) || (m_mode >= (int)ModeCount)) {
             m_mode = (int)ACARS;
         }
         d.readS32(53, &m_aeroChannel, AcarsAeroReceiver::Submode600P);
         if ((m_aeroChannel < 0) || (m_aeroChannel >= AcarsAeroReceiver::SubmodeCount)) {
             m_aeroChannel = AcarsAeroReceiver::Submode600P;
+        }
+
+        d.readS32(56, &m_iridiumBandwidth, AcarsDemodSettings::IridiumScanWidths - 1);
+        if ((m_iridiumBandwidth < 0) || (m_iridiumBandwidth >= AcarsDemodSettings::IridiumScanWidths)) {
+            m_iridiumBandwidth = AcarsDemodSettings::IridiumScanWidths - 1;
         }
         bool displayNoInfo = false;
         d.readBool(40, &displayNoInfo, false);
@@ -262,22 +248,6 @@ bool AcarsDemodSettings::deserialize(const QByteArray& data)
         d.readBool(54, &m_showDate, true);
         d.readBlob(55, &m_splitterState);
         d.readBool(41, &m_displayChart, false);
-        d.readBool(42, &m_feedEnabled, false);
-        d.readString(43, &m_feedStationId, "");
-        d.readBool(44, &m_feedAirframes, true);
-        d.readString(45, &m_feedAirframesHost, "feed.airframes.io");
-        d.readS32(46, &m_feedAirframesPort, 5550);
-        if ((m_feedAirframesPort <= 1023) || (m_feedAirframesPort >= 65535)) {
-            m_feedAirframesPort = 5550;
-        }
-        d.readBool(47, &m_feedAvdelphi, false);
-        d.readString(48, &m_feedAvdelphiHost, "data.avdelphi.com");
-        d.readS32(49, &m_feedAvdelphiPort, 5556);
-        if ((m_feedAvdelphiPort <= 1023) || (m_feedAvdelphiPort >= 65535)) {
-            m_feedAvdelphiPort = 5556;
-        }
-        d.readBool(50, &m_feedAirframesTcp, false);
-        d.readBool(51, &m_feedAvdelphiTcp, false);
 
         // Both of these are fed to the table header - moveSection() and setColumnWidth() -
         // so a preset from a build with a different column count, or a corrupt one, would

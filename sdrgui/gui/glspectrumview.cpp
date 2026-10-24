@@ -5432,6 +5432,15 @@ void GLSpectrumView::tick()
 
     if (m_displayChanged)
     {
+        // Qt only skips painting widgets that are hidden, not ones that are covered, so
+        // a spectrum behind another subwindow or under a floating workspace still gets
+        // repainted at the full rate. The paint itself is not the expense: on a window
+        // holding a QQuickWidget or QWebEngineView, every repaint makes Qt composite the
+        // whole window through the RHI.
+        if (!isVisible() || window()->isMinimized() || visibleRegion().isEmpty()) {
+            return;
+        }
+
         m_displayChanged = false;
         update();
     }

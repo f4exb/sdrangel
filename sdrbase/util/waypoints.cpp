@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2024 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -28,6 +29,7 @@
 #endif
 
 #include "waypoints.h"
+#include "bglwaypointreader.h"
 #include "csv.h"
 
 namespace {
@@ -61,10 +63,22 @@ QMultiHash<QString, Waypoint *> *Waypoint::readCSV(const QString &filename)
         QStringList cols;
         while(CSV::readRow(in, &cols))
         {
+            if ((cols.size() < 3) || cols[0].startsWith('#')) {
+                continue;
+            }
+
+            bool latitudeOk;
+            bool longitudeOk;
+            const float latitude = cols[1].toFloat(&latitudeOk);
+            const float longitude = cols[2].toFloat(&longitudeOk);
+            if (cols[0].isEmpty() || !latitudeOk || !longitudeOk) {
+                continue;
+            }
+
             Waypoint *waypoint = new Waypoint();
             waypoint->m_name = cols[0];
-            waypoint->m_latitude = cols[1].toFloat();
-            waypoint->m_longitude = cols[2].toFloat();
+            waypoint->m_latitude = latitude;
+            waypoint->m_longitude = longitude;
             waypoints->insert(waypoint->m_name, waypoint);
         }
 
@@ -75,6 +89,11 @@ QMultiHash<QString, Waypoint *> *Waypoint::readCSV(const QString &filename)
         qDebug() << "Waypoint::readCSV: Could not open " << filename << " for reading.";
     }
     return waypoints;
+}
+
+QMultiHash<QString, Waypoint *> *Waypoint::readBGL(const QString& path, QStringList *errors)
+{
+    return BGLWaypointReader::read(path, errors);
 }
 
 QSharedPointer<QMultiHash<QString, Waypoint *>> Waypoints::m_waypoints;
@@ -177,6 +196,46 @@ QDateTime Waypoints::getWaypointsModifiedDateTime()
 
 // Find a waypoint by name. If the name is ambiguous, use nearby waypoint names
 // to select the candidate closest to the surrounding route.
+const Waypoint *Waypoints::findWayPoint(const QString& name, const QList<QGeoCoordinate>& nearby)
+{
+    const QList<Waypoint *> matches = m_waypoints->values(name);
+
+    if (matches.isEmpty()) {
+        return nullptr;
+    }
+
+    if ((matches.size() == 1) || nearby.isEmpty()) {
+        return matches.constFirst();
+    }
+
+    const Waypoint *closest = matches.constFirst();
+    double closestDistance = std::numeric_limits<double>::max();
+
+    for (const Waypoint *candidate : matches)
+    {
+        const QGeoCoordinate at(candidate->m_latitude, candidate->m_longitude);
+        double totalDistance = 0.0;
+        int nearbyCount = 0;
+
+        for (const QGeoCoordinate& position : nearby)
+        {
+            if (!position.isValid()) {
+                continue;
+            }
+            totalDistance += at.distanceTo(position);
+            nearbyCount++;
+        }
+
+        if ((nearbyCount > 0) && ((totalDistance / nearbyCount) < closestDistance))
+        {
+            closest = candidate;
+            closestDistance = totalDistance / nearbyCount;
+        }
+    }
+
+    return closest;
+}
+
 const Waypoint *Waypoints::findWayPoint(const QString& name, const QStringList& nearby)
 {
     const QList<Waypoint *> matches = m_waypoints->values(name);

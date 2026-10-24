@@ -173,6 +173,7 @@ bool SELCALDemod::handleMessage(const Message& cmd)
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(MsgMessage::create(call));
         }
+        sendAircraftReport(call);
         if (m_settings.m_udpEnabled)
         {
             QJsonObject json;
@@ -357,6 +358,33 @@ void SELCALDemod::sendSampleRateToDemodAnalyzer()
             MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(this, getAudioSampleRate());
             messageQueue->push(msg);
         }
+    }
+}
+
+// Tell the Aircraft feature about the call.
+void SELCALDemod::sendAircraftReport(const SELCALMessages::Call& call)
+{
+    QList<ObjectPipe *> pipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "aircraftreport", pipes);
+
+    if (pipes.isEmpty()) {
+        return;
+    }
+
+    AircraftReport report;
+    report.m_protocol = AircraftReport::SELCAL;
+    report.m_selcalCode = call.m_code;
+    report.m_frequency = call.m_frequency;
+    report.m_received = call.m_dateTime;
+    report.m_uplink = true;     // A ground station calling an aircraft
+    report.m_label = "SELCAL";
+    report.m_deviceSetIndex = getDeviceSetIndex();
+    report.m_channelIndex = getIndexInDeviceSet();
+
+    for (const auto& pipe : pipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue *>(pipe->m_element);
+        messageQueue->push(MainCore::MsgAircraftReport::create(this, report));
     }
 }
 

@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 // Copyright (C) 2021 Jon Beniston, M7RCE                                        //
-// Copyright (c) 2018-2021 Tomasz Lemiech <szpajder@gmail.com>                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,6 +18,8 @@
 
 #include <limits>
 #include <cstdint>
+#include <algorithm>
+#include <iterator>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
@@ -63,7 +64,9 @@
 
 #include "acarsdemod.h"
 #include "acarsdemodsink.h"
-#include "acarstextformat.h"
+#include "util/acarstextformat.h"
+#include "gui/fastheaderview.h"
+#include "gui/fastitemdelegate.h"
 
 
 
@@ -137,9 +140,17 @@ void AcarsDemodGUI::resizeTable()
 // Columns in table reordered
 void AcarsDemodGUI::messages_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
+    (void) logicalIndex;
     (void) oldVisualIndex;
+    (void) newVisualIndex;
 
-    m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
+    // Every column between the two positions moved too, so record them all. Recording
+    // only the one dragged left the others stale, and replaying them in displaySettings()
+    // gave a different order after more than one move.
+    QHeaderView *header = ui->messages->horizontalHeader();
+    for (int i = 0; i < ACARSDEMOD_COLUMNS; i++) {
+        m_settings.m_columnIndexes[i] = header->visualIndex(i);
+    }
 }
 
 // Column in table resized (when hidden size is 0)
@@ -411,7 +422,15 @@ bool AcarsDemodGUI::handleMessage(const Message& message)
     {
         qDebug("AcarsDemodGUI::handleMessage: AcarsDemod::MsgConfigureAcarsDemod");
         const AcarsDemod::MsgConfigureAcarsDemod& cfg = (AcarsDemod::MsgConfigureAcarsDemod&) message;
-        m_settings = cfg.getSettings();
+        // The table layout and the splitter are the GUI's own: changed here without being
+        // applied, so the channel's copy of them is stale, and taking it moved columns,
+        // widths and the splitter back whenever the channel echoed its settings (a REST
+        // PATCH, a centre frequency change)
+        AcarsDemodSettings settings = cfg.getSettings();
+        std::copy(std::begin(m_settings.m_columnIndexes), std::end(m_settings.m_columnIndexes), std::begin(settings.m_columnIndexes));
+        std::copy(std::begin(m_settings.m_columnSizes), std::end(m_settings.m_columnSizes), std::begin(settings.m_columnSizes));
+        settings.m_splitterState = ui->splitter->saveState();
+        m_settings = settings;
         blockApplySettings(true);
         ui->scopeGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
@@ -472,11 +491,19 @@ void AcarsDemodGUI::on_mode_currentIndexChanged(int value)
     case 1: m_settings.m_mode = AcarsDemodSettings::VDL2; break;
     case 2: m_settings.m_mode = AcarsDemodSettings::HFDL; break;
     case 3: m_settings.m_mode = AcarsDemodSettings::Aero; break;
+    case 4: m_settings.m_mode = AcarsDemodSettings::Iridium; break;
     default: m_settings.m_mode = AcarsDemodSettings::ACARS; break;
     }
 
     updateModeDependentWidgets();
     applyModeBandwidth();
+}
+
+void AcarsDemodGUI::on_iridiumBandwidth_currentIndexChanged(int value)
+{
+    m_settings.m_iridiumBandwidth = value;
+    // The channel sample rate is the width scanned, so changing it restarts the channel
+    applySettings();
 }
 
 void AcarsDemodGUI::on_aeroChannel_currentIndexChanged(int value)
@@ -512,6 +539,9 @@ void AcarsDemodGUI::applyModeBandwidth()
     case AcarsDemodSettings::Aero:
         bw = AcarsAeroReceiver::submodeBandwidth(m_settings.m_aeroChannel) / 100;
         break;
+    // Ignored: Iridium scans the whole tuned width, and the sink passes all of it
+    // rather than filtering to a channel. The control is hidden in this mode
+    case AcarsDemodSettings::Iridium: bw = ui->rfBW->maximum(); break;
     default: bw = 125; break;
     }
     if (ui->rfBW->value() != bw) {
@@ -864,6 +894,19 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_helpURL = "plugins/channelrx/demodacars/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
+
+    ui->messages->setItemDelegate(new FastItemDelegate(ui->messages));
+    ui->channelPower->setFixedSize(
+        ui->channelPower->fontMetrics().horizontalAdvance("-100.0") + 2,
+        ui->channelPower->sizeHint().height());
+    ui->channelPower->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    ui->quality->setFixedSize(
+        ui->quality->fontMetrics().horizontalAdvance("100.0%  SU 100%") + 2,
+        ui->quality->sizeHint().height());
+
+    // Before any header configuration below: setHorizontalHeader() resets column state
+    ui->messages->setHorizontalHeader(new FastHeaderView(Qt::Horizontal, ui->messages));
+
     setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -991,11 +1034,6 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(&m_osnDB, &OsnDB::downloadProgress, this, &AcarsDemodGUI::downloadProgress);
     connect(&m_osnDB, &OsnDB::downloadAircraftInformationFinished, this, &AcarsDemodGUI::downloadAircraftInformationFinished);
     m_aircraftInfo = OsnDB::getAircraftInformationByReg();
-    m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
-
-    m_navAids = OpenAIP::getNavAids();
-    m_airports = OurAirportsDB::getAirportsByIdent();
-    m_waypoints = Waypoints::getWaypoints();
 
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &AcarsDemodGUI::aircraftPhoto);
     connect(ui->photo, &ClickableLabel::clicked, this, &AcarsDemodGUI::photoClicked);
@@ -1018,6 +1056,10 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     }
 
     plotChart();
+    // The splitter saves a hidden pane as size 0, and restoreState() collapses a
+    // collapsible pane restored at 0, so the chart button showed a chart with no height.
+    // Not collapsible, a 0 is raised to the chart's minimum height instead.
+    ui->splitter->setCollapsible(ui->splitter->indexOf(ui->chart), false);
     CRightClickEnabler *displayChartClickEnabler = new CRightClickEnabler(ui->displayChart);
     connect(displayChartClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(clearChart(const QPoint &)));
 
@@ -1062,71 +1104,6 @@ void AcarsDemodGUI::applySettings(bool force)
     {
         AcarsDemod::MsgConfigureAcarsDemod* message = AcarsDemod::MsgConfigureAcarsDemod::create( m_settings, force);
         m_acarsDemod->getInputMessageQueue()->push(message);
-    }
-}
-
-void AcarsDemodGUI::on_feed_clicked(bool checked)
-{
-    m_settings.m_feedEnabled = checked;
-    applySettings();
-}
-
-// Feed settings dialog: station ident plus per-aggregator enable, host and port
-void AcarsDemodGUI::feedSelect(const QPoint& p)
-{
-    QDialog dialog(this);
-    dialog.setWindowTitle("ACARS Feed Settings");
-
-    QLineEdit *stationId = new QLineEdit(m_settings.m_feedStationId);
-    stationId->setToolTip("Station identifier sent with each message (e.g. XX-JBLOGGS-VHF1). Register it with the aggregator to claim your feed");
-    QCheckBox *airframes = new QCheckBox("Feed airframes.io");
-    airframes->setChecked(m_settings.m_feedAirframes);
-    QLineEdit *airframesHost = new QLineEdit(m_settings.m_feedAirframesHost);
-    QSpinBox *airframesPort = new QSpinBox();
-    airframesPort->setRange(1, 65535);
-    airframesPort->setValue(m_settings.m_feedAirframesPort);
-    QComboBox *airframesProtocol = new QComboBox();
-    airframesProtocol->addItems({"TCP", "UDP"});
-    airframesProtocol->setCurrentIndex(m_settings.m_feedAirframesTcp ? 0 : 1);
-    airframesProtocol->setToolTip("Use the protocol, host and port the airframes.io Add Ground Station wizard assigns to your station");
-    QCheckBox *avdelphi = new QCheckBox("Feed avdelphi.com");
-    avdelphi->setChecked(m_settings.m_feedAvdelphi);
-    QLineEdit *avdelphiHost = new QLineEdit(m_settings.m_feedAvdelphiHost);
-    QSpinBox *avdelphiPort = new QSpinBox();
-    avdelphiPort->setRange(1, 65535);
-    avdelphiPort->setValue(m_settings.m_feedAvdelphiPort);
-    QComboBox *avdelphiProtocol = new QComboBox();
-    avdelphiProtocol->addItems({"TCP", "UDP"});
-    avdelphiProtocol->setCurrentIndex(m_settings.m_feedAvdelphiTcp ? 0 : 1);
-
-    QFormLayout *form = new QFormLayout(&dialog);
-    form->addRow("Station ID", stationId);
-    form->addRow(airframes);
-    form->addRow("Host", airframesHost);
-    form->addRow("Port", airframesPort);
-    form->addRow("Protocol", airframesProtocol);
-    form->addRow(avdelphi);
-    form->addRow("Host", avdelphiHost);
-    form->addRow("Port", avdelphiPort);
-    form->addRow("Protocol", avdelphiProtocol);
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    form->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-    dialog.move(p);
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        m_settings.m_feedStationId = stationId->text().trimmed();
-        m_settings.m_feedAirframes = airframes->isChecked();
-        m_settings.m_feedAirframesHost = airframesHost->text().trimmed();
-        m_settings.m_feedAirframesPort = airframesPort->value();
-        m_settings.m_feedAirframesTcp = airframesProtocol->currentIndex() == 0;
-        m_settings.m_feedAvdelphi = avdelphi->isChecked();
-        m_settings.m_feedAvdelphiHost = avdelphiHost->text().trimmed();
-        m_settings.m_feedAvdelphiPort = avdelphiPort->value();
-        m_settings.m_feedAvdelphiTcp = avdelphiProtocol->currentIndex() == 0;
-        applySettings();
     }
 }
 
@@ -1258,6 +1235,12 @@ void AcarsDemodGUI::updateModeDependentWidgets()
     // The rate and channel selector only means anything in Aero mode, and so does the
     // link quality readout - it needs a continuous carrier to average over
     ui->aeroChannel->setVisible(aero);
+    // Iridium scans the whole tuned width rather than one channel
+    ui->iridiumBandwidth->setVisible(m_settings.m_mode == AcarsDemodSettings::Iridium);
+    const bool iridium = (m_settings.m_mode == AcarsDemodSettings::Iridium);
+    ui->rfBW->setVisible(!iridium);
+    ui->rfBWLabel->setVisible(!iridium);
+    ui->rfBWText->setVisible(!iridium);
     ui->qualityLabel->setVisible(aero);
     ui->quality->setVisible(aero);
     if (!aero) {
@@ -1311,12 +1294,10 @@ void AcarsDemodGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    ui->mode->setCurrentIndex(m_settings.m_mode == AcarsDemodSettings::VDL2 ? 1
-                            : m_settings.m_mode == AcarsDemodSettings::HFDL ? 2
-                            : m_settings.m_mode == AcarsDemodSettings::Aero ? 3 : 0);
+    ui->mode->setCurrentIndex(m_settings.m_mode);
     ui->aeroChannel->setCurrentIndex(m_settings.m_aeroChannel);
+    ui->iridiumBandwidth->setCurrentIndex(m_settings.m_iridiumBandwidth);
     updateModeDependentWidgets();
-    ui->feed->setChecked(m_settings.m_feedEnabled);
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
@@ -1520,6 +1501,7 @@ void AcarsDemodGUI::makeUIConnections()
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AcarsDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_mode_currentIndexChanged);
     QObject::connect(ui->aeroChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_aeroChannel_currentIndexChanged);
+    QObject::connect(ui->iridiumBandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_iridiumBandwidth_currentIndexChanged);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AcarsDemodGUI::on_rfBW_valueChanged);
     QObject::connect(ui->threshold, &QDial::valueChanged, this, &AcarsDemodGUI::on_threshold_valueChanged);
     QObject::connect(ui->filter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_filter_currentIndexChanged);
@@ -1531,12 +1513,6 @@ void AcarsDemodGUI::makeUIConnections()
     QObject::connect(ui->channel1, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_channel1_currentIndexChanged);
     QObject::connect(ui->channel2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AcarsDemodGUI::on_channel2_currentIndexChanged);
     QObject::connect(ui->gsTable, &QToolButton::clicked, this, &AcarsDemodGUI::on_gsTable_clicked);
-    QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &AcarsDemodGUI::on_feed_clicked);
-    CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
-    connect(feedRightClickEnabler, &CRightClickEnabler::rightClick, this, &AcarsDemodGUI::feedSelect);
-
-    // Log the feed connections' lifecycle, so a misconfigured host/port or a
-    // dropped aggregator connection is visible in the debug output
     QObject::connect(ui->messages->selectionModel(), &QItemSelectionModel::selectionChanged,
                      this, &AcarsDemodGUI::messagesSelectionChanged);
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &AcarsDemodGUI::on_logEnable_clicked);
@@ -1917,7 +1893,6 @@ void AcarsDemodGUI::on_logOpen_clicked()
                 QDateTime startTime = QDateTime::currentDateTime();
                 // Sorting stays on: the proxy places each row as it arrives
                 //ui->messages->setUpdatesEnabled(false);
-                ui->messages->blockSignals(true);
                 QTextStream in(&file);
                 QString error;
                 QHash<QString, int> colIndexes = CSV::readHeader(in, {"DateTime", "Data"}, error);
@@ -1943,9 +1918,12 @@ void AcarsDemodGUI::on_logOpen_clicked()
                             QDateTime dateTime = QDateTime::fromString(cols[dateTimeCol], Qt::ISODateWithMs);
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
 
-                            // Decoded by the worker, which echoes display events back here
-                            m_acarsDemod->getWorker()->getInputMessageQueue()->push(
-                                MainCore::MsgPacket::create(m_acarsDemod, bytes, dateTime));
+                            // Decoded by the worker, which echoes display events back here.
+                            // As a replay, so it is not sent out again as live traffic.
+                            if (!bytes.isEmpty()) {
+                                m_acarsDemod->getWorker()->getInputMessageQueue()->push(
+                                    AcarsDemodWorker::MsgReplayPacket::create(bytes, dateTime));
+                            }
 
                             if (count % 50000 == 0)
                             {
@@ -1958,7 +1936,6 @@ void AcarsDemodGUI::on_logOpen_clicked()
                         }
                     }
                     dialog.close();
-                    ui->messages->blockSignals(false);
                     //ui->messages->setUpdatesEnabled(true);
                     // Nothing to re-sort: the proxy kept the order as the rows arrived
                 }
@@ -2102,7 +2079,10 @@ void AcarsDemodGUI::downloadAircraftInformationFinished()
         QApplication::processEvents();
     }
     m_aircraftInfo = OsnDB::getAircraftInformationByReg();
-    m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
+    // The worker holds its own copy, for the registration lookups
+    if (m_acarsDemod->getWorker()) {
+        m_acarsDemod->getWorker()->getInputMessageQueue()->push(AcarsDemodWorker::MsgReloadAircraftDatabase::create());
+    }
     if (m_progressDialog)
     {
         m_progressDialog->close();

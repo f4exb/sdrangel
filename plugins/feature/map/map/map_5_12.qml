@@ -6,7 +6,7 @@ import QtPositioning 5.12
 
 Item {
     id: qmlMap
-    property int mapZoomLevel: 11
+    property real mapZoomLevel: 11
     property string mapProvider: "osm"
     property variant mapPtr
     property variant guiPtr
@@ -120,8 +120,8 @@ Item {
         id: mapComponent
         MapQuickItem {
             id: mapElement
-            anchorPoint.x: image.width/2
-            anchorPoint.y: image.height/2
+            anchorPoint.x: imageBounds.width/2
+            anchorPoint.y: imageBounds.height/2
             coordinate: position
             zoomLevel: mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom
             //autoFadeIn: false               // not in 5.12
@@ -134,30 +134,38 @@ Item {
                     columnSpacing: 5
                     layer.enabled: true
                     layer.smooth: true
-                    Image {
-                        id: image
-                        rotation: mapImageRotation
-                        source: mapImage
-                        visible: mapImageVisible
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
-                                if (mouse.button === Qt.LeftButton) {
-                                    selected = !selected
-                                    if (selected) {
-                                        mapModel.moveToFront(index)
+                    // Sized to the rotated image's bounding box, so the smoothing layer
+                    // doesn't clip wingtips and the bubble sits close at every rotation
+                    Item {
+                        id: imageBounds
+                        width: image.implicitWidth * Math.abs(Math.cos(mapImageRotation * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.sin(mapImageRotation * Math.PI / 180))
+                        height: image.implicitWidth * Math.abs(Math.sin(mapImageRotation * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.cos(mapImageRotation * Math.PI / 180))
+                        Image {
+                            id: image
+                            anchors.centerIn: parent
+                            rotation: mapImageRotation
+                            source: mapImage
+                            visible: mapImageVisible
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        selected = !selected
+                                        if (selected) {
+                                            mapModel.moveToFront(index)
+                                        }
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        if (frequency > 0) {
+                                            freqMenuItem.text = "Set frequency to " + frequencyString
+                                            freqMenuItem.enabled = true
+                                        } else {
+                                            freqMenuItem.text = "No frequency available"
+                                            freqMenuItem.enabled = false
+                                        }
+                                        contextMenu.popup()
                                     }
-                                } else if (mouse.button === Qt.RightButton) {
-                                    if (frequency > 0) {
-                                        freqMenuItem.text = "Set frequency to " + frequencyString
-                                        freqMenuItem.enabled = true
-                                    } else {
-                                        freqMenuItem.text = "No frequency available"
-                                        freqMenuItem.enabled = false
-                                    }
-                                    contextMenu.popup()
                                 }
                             }
                         }

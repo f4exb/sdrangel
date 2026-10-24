@@ -21,19 +21,28 @@
 #ifndef INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 #define INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 
+#include <QComboBox>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QMessageBox>
+#include <QPointer>
 #include <QProgressDialog>
+#include <QThread>
+
+#include <atomic>
+#include <memory>
 
 #include "gui/httpdownloadmanagergui.h"
 #include "gui/tablecolorchooser.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
 #include "util/waypoints.h"
+#include "util/sidstar.h"
 
 #include "ui_mapsettingsdialog.h"
 #include "mapsettings.h"
+
+struct MSFSBatchConversionSummary;
 
 class MapItemSettingsGUI : public QObject {
     Q_OBJECT
@@ -44,6 +53,7 @@ public:
     TableColorChooser m_track2D;
     TableColorChooser m_point3D;
     TableColorChooser m_track3D;
+    QComboBox *m_trackPalette;
     QSpinBox *m_minZoom;
     QSpinBox *m_minPixels;
     QDoubleSpinBox *m_labelScale;
@@ -65,6 +75,7 @@ public:
         COL_2D_LABEL,
         COL_2D_MIN_ZOOM,
         COL_2D_TRACK,
+        COL_2D_TRACK_PALETTE,
         COL_3D_MODEL,
         COL_3D_MIN_PIXELS,
         COL_3D_LABEL,
@@ -93,20 +104,34 @@ private:
     OpenAIP m_openAIP;
     OurAirportsDB m_ourAirportsDB;
     Waypoints m_waypoints;
+    SidStar m_sidStar;
+    QPointer<QThread> m_msfsWorker;
+    std::shared_ptr<std::atomic_bool> m_msfsCancelRequested;
 
     void unzip(const QString &filename);
     QString msaaToString(int msaa) const;
     int stringToMSAA(const QString& string) const;
-    
+    void updateCesiumIonItems();
+    void updateComboItems(QComboBox *combo, const QStringList& ionItems, bool enable, const QString& fallback);
+    void updateMSFSProgress(int current, int total, const QString& message);
+    void msfsConversionFinished(bool success, const MSFSBatchConversionSummary& summary, const QString& error);
+
 private slots:
     void accept();
     void on_map2DEnabled_clicked(bool checked=false);
     void on_map3DEnabled_clicked(bool checked=false);
     void on_terrain_currentIndexChanged(int index);
+    void on_cesiumIonAPIKey_textChanged(const QString& text);
+    void on_googlePhotorealistic3DTiles_toggled(bool checked);
     void on_downloadModels_clicked();
+    void on_msfsNavigraphBrowse_clicked();
+    void on_msfsBrowse_clicked();
+    void on_convertMSFS_clicked();
+    void on_cancelMSFS_clicked();
     void on_getAirportDB_clicked();
     void on_getAirspacesDB_clicked();
     void on_getWaypoints_clicked();
+    void on_getSidStar_clicked();
     void on_sunLightEnabled_currentIndexChanged(int index);
     void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
     void downloadingURL(const QString& url);
@@ -116,6 +141,7 @@ private slots:
     void downloadNavAidsFinished();
     void downloadAirportInformationFinished();
     void downloadWaypointsFinished();
+    void downloadSidStarFinished();
 
 signals:
     void navAidsUpdated();

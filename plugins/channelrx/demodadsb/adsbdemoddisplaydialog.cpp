@@ -21,6 +21,8 @@
 #endif
 #include <QDebug>
 
+#include "util/flightpathpalette.h"
+
 #include "adsbdemoddisplaydialog.h"
 
 ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWidget* parent) :
@@ -67,15 +69,15 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     }
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
     ui->maptilerAPIKey->setText(m_settings->m_maptilerAPIKey);
+    ui->cartoDBAPIKey->setText(m_settings->m_cartoDBAPIKey);
     ui->navAids->setChecked(settings->m_displayNavAids);
     ui->atcCallsigns->setChecked(settings->m_atcCallsigns);
     ui->photos->setChecked(settings->m_displayPhotos);
     ui->verboseModelMatching->setChecked(settings->m_verboseModelMatching);
     ui->favourLivery->setChecked(settings->m_favourLivery);
+    ui->useLiveryIcons->setChecked(settings->m_useLiveryIcons);
     ui->transitionAltitude->setValue(settings->m_transitionAlt);
-    for (auto i = ADSBDemodSettings::m_palettes.cbegin(), end = ADSBDemodSettings::m_palettes.cend(); i != end; ++i) {
-        ui->flightPathPalette->addItem(i.key());
-    }
+    ui->flightPathPalette->addItems(FlightPathPalette::getPaletteNames());
     ui->flightPathPalette->setCurrentText(settings->m_flightPathPaletteName);
 }
 
@@ -164,6 +166,11 @@ void ADSBDemodDisplayDialog::accept()
         m_settings->m_maptilerAPIKey = ui->maptilerAPIKey->text();
         m_settingsKeys.append("maptilerAPIKey");
     }
+    if (m_settings->m_cartoDBAPIKey != ui->cartoDBAPIKey->text())
+    {
+        m_settings->m_cartoDBAPIKey = ui->cartoDBAPIKey->text();
+        m_settingsKeys.append("cartoDBAPIKey");
+    }
     if (m_settings->m_displayNavAids != ui->navAids->isChecked())
     {
         m_settings->m_displayNavAids = ui->navAids->isChecked();
@@ -188,6 +195,11 @@ void ADSBDemodDisplayDialog::accept()
     {
         m_settings->m_favourLivery = ui->favourLivery->isChecked();
         m_settingsKeys.append("favourLivery");
+    }
+    if (m_settings->m_useLiveryIcons != ui->useLiveryIcons->isChecked())
+    {
+        m_settings->m_useLiveryIcons = ui->useLiveryIcons->isChecked();
+        m_settingsKeys.append("useLiveryIcons");
     }
     if (m_settings->m_transitionAlt != ui->transitionAltitude->value())
     {

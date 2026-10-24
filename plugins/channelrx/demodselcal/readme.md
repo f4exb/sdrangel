@@ -192,6 +192,10 @@ aircraft database used by the ADS-B demodulator has not been downloaded, you are
 asked whether to download it too (45MB): it provides aircraft types and images.
 The databases are stored in SDRangel's application data directory.
 
+The [Aircraft feature](../../feature/aircraft/readme.md) uses the same database. When
+one is running, every received call is passed to it, and it works out which aircraft
+the call was for from the aircraft it is tracking - see its SELCAL section.
+
 <h3>22: Read calls from a CSV log</h3>
 
 Click the load button to select an existing CSV log and add its calls to the

@@ -3,6 +3,7 @@ project(map)
 set(map_SOURCES
     map.cpp
     mapsettings.cpp
+    mapviewcoordinator.cpp
     mapplugin.cpp
     mapwebapiadapter.cpp
     osmtemplateserver.cpp
@@ -13,6 +14,7 @@ set(map_SOURCES
 set(map_HEADERS
     map.h
     mapsettings.h
+    mapviewcoordinator.h
     mapplugin.h
     mapreport.h
     mapwebapiadapter.h
@@ -38,6 +40,8 @@ include_directories(
 )
 
 if(NOT SERVER_MODE)
+    find_package(Threads REQUIRED)
+
     set(map_SOURCES
         ${map_SOURCES}
         mapgui.cpp
@@ -48,6 +52,18 @@ if(NOT SERVER_MODE)
         mapmaidenheaddialog.ui
         mapsettingsdialog.cpp
         mapsettingsdialog.ui
+        msfsassetconverter/batchconverter.cpp
+        msfsassetconverter/batchconverter.h
+        msfsassetconverter/bc7decoder.cpp
+        msfsassetconverter/bc7decoder.h
+        msfsassetconverter/converter.cpp
+        msfsassetconverter/converter.h
+        msfsassetconverter/ddsdecoder.cpp
+        msfsassetconverter/ddsdecoder.h
+        msfsassetconverter/fsltlresolver.cpp
+        msfsassetconverter/fsltlresolver.h
+        msfsassetconverter/ktx2writer.cpp
+        msfsassetconverter/ktx2writer.h
         mapbeacondialog.cpp
         mapbeacondialog.ui
         mapibpbeacondialog.cpp
@@ -62,6 +78,7 @@ if(NOT SERVER_MODE)
         czml.cpp
         map.qrc
         mapicons.qrc
+        mapaudio.qrc
         cesium.qrc
         mapdata.qrc
     )
@@ -83,7 +100,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}map)
-    set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::Positioning Qt::Location)
+    set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::Positioning Qt::Location Threads::Threads)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 

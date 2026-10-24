@@ -43,6 +43,18 @@ class CZML
     struct State {
         QString m_firstSeenDateTime;
 
+        // For the early-out in update(): what the item and its settings looked like the
+        // last time a packet was actually built for it
+        bool m_seen = false;
+        bool m_deleted = false;     // Cesium has already been told to delete this one
+        quint32 m_settingsSignature = 0;
+        float m_latitude = 0.0f;
+        float m_longitude = 0.0f;
+        float m_altitude = 0.0f;
+        QDateTime m_altitudeDateTime;   // When m_altitude was set, to work out how fast it is being lost
+        QString m_lastLabel;
+        QString m_lastImage;
+
         QString m_modelGLTF;
         int m_modelAltitudeReference;
         bool m_modelShow;
@@ -66,6 +78,31 @@ class CZML
         QDateTime m_aircraftStateDateTime;
         MapAircraftState m_aircraftState;
         float m_aircraftRoll;
+        float m_aircraftPitch = 0.0f;
+        QString m_ndFlightPlan;     // JSON, as last sent in the ndFlightPlan property
+        QString m_dcduMessage;      // JSON, as last sent in the dcduMessage property
+        QString m_loopSound;        // Sound-set directory or legacy file, as last sent
+
+        // The 3D altitude coloured track, as last emitted - one polyline entity per
+        // altitude band, ids "<item name> t3d <n>". See updateTrackSegments3D().
+        QString m_trackPalette;          // Palette the segments were built with
+        int m_trackPointCount = 0;       // Taken track points segmented so far
+        int m_trackLastColorIndex = -1;
+        QList<int> m_trackSegmentSizes;  // Points per segment (boundary points repeated)
+        QList<int> m_trackSegmentBands;  // Altitude band per segment
+        int m_trackSegmentsEmitted = 0;  // Entities created in Cesium, for deletion
+        bool m_trackSegmentsShow = false;
+        QGeoCoordinate m_trackFirstCoord; // Trim/rebuild detection
+        QGeoCoordinate m_trackLastCoord;  // Same-size provisional-tail replacement
+        quint64 m_trackRevision = 0;      // Any rewrite, including timestamp-only changes
+        QDateTime m_trackTailEmit;       // Throttle for the growing tail segment
+
+        // Orientation and availability as last sent, so a packet raised by something
+        // else - a new altitude, say - does not carry them again unchanged
+        int m_orientationMode = -1;      // -1 never sent, 0 velocityReference, 1 sampled quaternion
+        QJsonArray m_orientationQuaternion;
+        int m_orientationExtrapolate = -1;
+        QString m_availability;
 
         State() :
             m_modelAltitudeReference(0),
@@ -88,6 +125,10 @@ class CZML
 private:
     const MapSettings *m_settings;
     QHash<QString, State> m_ids;
+    // Whether a delete needs sending for this id, and if so records that it has been
+    bool deleteNeeded(const QString& id);
+    // Records that Cesium has been told about this id, so a later delete is sent
+    void described(const QString& id);
     QHash<QString, QJsonArray> m_lastPosition;
     QHash<QString, bool> m_hasMoved;
     QGeoCoordinate m_position;
@@ -98,7 +139,14 @@ private:
 public:
     CZML(const MapSettings *settings);
     QJsonObject init();
+    // Forget everything cached about what Cesium has been told. Call whenever Cesium is
+    // made to drop its entities, or the next description of each one is a difference
+    // against a state that no longer exists there - see update(ObjectMapItem *).
+    void clear();
     QJsonObject update(ObjectMapItem *mapItem, bool isTarget, bool isSelected);
+    // The altitude coloured track segments for the 3D map. Call BEFORE update(), which
+    // resets the item's cached state when the item is deleted.
+    QList<QJsonObject> updateTrackSegments3D(ObjectMapItem *mapItem, bool isSelected);
     QJsonObject update(PolygonMapItem *mapItem);
     QJsonObject update(PolylineMapItem *mapItem);
     bool filter(const MapItem *mapItem) const;

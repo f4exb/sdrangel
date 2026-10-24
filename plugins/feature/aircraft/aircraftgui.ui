@@ -93,7 +93,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Flight</string>
+          <string>Callsign</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SELCAL</string>
          </property>
         </item>
        </widget>
@@ -107,7 +112,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Highlight the next aircraft or flight matching this text. Matches ICAO address, registration, type, flight number, airline, departure or arrival. Press Enter to step through the matches</string>
+         <string>Highlight the next aircraft or flight matching this text. Matches ICAO address, registration, type, flight number, SELCAL code, airline, departure or arrival. Press Enter to step through the matches</string>
         </property>
         <property name="placeholderText">
          <string>Find</string>
@@ -183,6 +188,40 @@
         <property name="icon">
          <iconset resource="aircrafticons.qrc">
           <normaloff>:/icons/chart.png</normaloff>:/icons/chart.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="coverage">
+        <property name="toolTip">
+         <string>Display the coverage of each protocol on the Map, one colour each. Right click to reset the coverage data.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="aircrafticons.qrc">
+          <normaloff>:/icons/coverage.png</normaloff>:/icons/coverage.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="feed">
+        <property name="toolTip">
+         <string>Enable feeding of received ACARS messages to aggregators (airframes.io / avdelphi.com). Right click for settings.</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -702,7 +741,14 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QTableWidget" name="documents">
+         <widget class="QSplitter" name="documentsSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QTableWidget" name="documents">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -731,10 +777,10 @@
           </column>
           <column>
            <property name="text">
-            <string>Flight</string>
+            <string>Callsign</string>
            </property>
            <property name="toolTip">
-            <string>Flight the document belongs to</string>
+            <string>Callsign of the flight the document belongs to</string>
            </property>
           </column>
           <column>
@@ -762,15 +808,114 @@
            </property>
           </column>
          </widget>
-        </item>
-        <item>
-         <widget class="AcarsMessageView" name="documentText">
+          <widget class="AcarsMessageView" name="documentText">
           <property name="toolTip">
            <string>The selected document</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
+         </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     <widget class="QWidget" name="logonsTab">
+       <attribute name="title">
+        <string>Logons</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="logonsTabLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="logonsSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QTableWidget" name="logons">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Datalink logons for the selected aircraft or flight. Kept apart from the documents because there are far more of them than of everything else together.</string>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <column>
+           <property name="text">
+            <string>Time</string>
+           </property>
+           <property name="toolTip">
+            <string>Time the logon was received</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Callsign</string>
+           </property>
+           <property name="toolTip">
+            <string>Callsign of the flight the logon belongs to</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Reg</string>
+           </property>
+           <property name="toolTip">
+            <string>Aircraft registration or ICAO address</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Type</string>
+           </property>
+           <property name="toolTip">
+            <string>Kind of logon</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Title</string>
+           </property>
+           <property name="toolTip">
+            <string>Logon title</string>
+           </property>
+          </column>
+         </widget>
+          <widget class="AcarsMessageView" name="logonText">
+          <property name="toolTip">
+           <string>The selected logon</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
          </widget>
         </item>
        </layout>

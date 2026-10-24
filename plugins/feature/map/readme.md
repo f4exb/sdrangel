@@ -225,15 +225,43 @@ The PFD can be moved by left clicking on it and dragging it. It can be resized b
 
 ![PFD](../../../doc/img/Map_plugin_pfd.png)
 
-<h3>22: Display tracks for selected object</h3>
+<h3>22: ND (Navigation Display)</h3>
+
+When checked, the aircraft ND (Navigation Display) will be displayed for the selected aircraft. This shows a compass rose with range rings,
+ground speed, true air speed and wind direction, the flight plan and its waypoints when one has been received (via the Aircraft feature,
+from an ACARS FPN message or oceanic clearance), and other nearby aircraft as TCAS-style traffic symbols with relative altitudes.
+
+Two display modes are supported, toggled by clicking the button in the top right corner: ARC, which shows a 120 degree arc ahead of
+the aircraft, and ROSE, which shows a full 360 degree compass rose. The range (10 to 320 nautical miles) can be changed with the
++ and - buttons or by scrolling the mouse wheel over the display.
+
+When the flight plan includes an arrival approach or runway (e.g. ILSY 18R), it is displayed at the top of the ND once the aircraft
+is within 250 nautical miles of the arrival airport, or whenever the approach is being flown (G/S or LOC mode active).
+
+The ND can be moved by left clicking on it and dragging it. It can be resized by left clicking and dragging in the bottom right corner.
+
+Note that the compass rose is orientated to the aircraft's magnetic heading, while waypoint and traffic positions are true bearings,
+so the overlay can be off by the local magnetic declination.
+
+<h4>DCDU (Datalink Control and Display Unit)</h4>
+
+When a datalink ATC message (CPDLC, pre-departure clearance or oceanic clearance, received via the Aircraft feature) arrives for the
+currently selected aircraft, a DCDU window pops up on the 3D map showing the time the message was received, which station it is to
+or from (e.g. 1412Z FROM EDDS) and the message text. Long messages are split over multiple pages - click the PG indicator to move
+between them. The window is closed by clicking CLOSE, and can be moved and resized like the PFD and ND.
+
+A ring is played when a message arrives. Its volume is set by the "Cockpit volume" slider in the Map Display Settings dialog,
+under 3D Map Settings - drag it to zero to silence it.
+
+<h3>23: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>23: Display tracks for all objects</h3>
+<h3>24: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>24: Save to .kml</h3>
+<h3>25: Save to .kml</h3>
 
 When clicked, items and tracks on the map will be saved to a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) (.kml or .kmz) file, for use in other applications.
 
@@ -241,11 +269,11 @@ Note that the KML format requires 3D models in the Collada (.dae) format. Howeve
 If you wish to view the models in a KML viewer, you will need to manually convert them. Note that you should still be able to view tracks without the models.
 Note that the .glbe files cannot be converted to .dae.
 
-<h3>25: Delete</h3>
+<h3>26: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>26: Display settings</h3>
+<h3>27: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
@@ -260,15 +288,18 @@ For the 2D map, the settings include:
   or [gdal2tiles](https://gdal.org/programs/gdal2tiles.html)
   or any other tool that creates map images compatible with Google Maps, OpenLayers and Leaflet.
 * When MapboxGL is used as the provider, custom styles can be specified.
+* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models, so require the 3D models to have been downloaded. Aircraft without a matching livery icon are displayed with the plain icon sent by the source plugin.
 
 For the 3D map, the settings include:
 
 * Whether the 3D map is displayed.
-* The default imagery to use. Bing Maps Aerial and ArcGIS are higher resolution than Sentinel-2. To use these, you should enter your own API key on the API Keys tab.
-* The terrain provider, which provides elevation data. For a "flat" globe, terrain can be set to Ellipsoid for the WGS-84 ellipsoid.
+* The default imagery to use. Bing Maps Aerial, Sentinel-2, Earth at night and the Google Maps imagery use Cesium Ion quota, so require a Cesium Ion API key to be entered on the API Keys tab. Without one, they are greyed out and ArcGIS world imagery is used.
+* The terrain provider, which provides elevation data. For a "flat" globe, terrain can be set to Ellipsoid for the WGS-84 ellipsoid. Cesium World Terrain requires a Cesium Ion API key.
 * Whether lighting is applied to the terrain. Not applicable if terrain is set to Ellipsoid.
 * Whether animated water effects (such as waves) are used. Not applicable if terrain is set to Ellipsoid.
-* The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired. The buildings may float in the air if terrain is set to Ellipsoid.
+* The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired. The buildings may float in the air if terrain is set to Ellipsoid. Cesium OSM Buildings requires a Cesium Ion API key.
+* Whether Google Photorealistic 3D Tiles are displayed. These combine terrain, buildings and imagery in a single photorealistic model, so the imagery, terrain and buildings settings above are not used while they are enabled. As the globe itself is not drawn, the map layers that are drawn on it, such as rain, clouds, sea marks, railways, NASA global imagery and the Maidenhead grid, are not displayed either. Requires a Cesium Ion API key.
+Aircraft are placed on top of the tiles, but items that are clamped to the ground by Cesium itself, rather than clipped to it by SDRangel, such as airports and navigation aids, may be hidden underneath them.
 * Whether the globe and models are lit from the direction of the Sun or the camera.
 * The camera light intensity if Lighting is set to Camera.
 * Whether HDT (High Dynamic Range) rendering should be used.
@@ -284,11 +315,22 @@ These are not included with the SDRangel distribution, so must be downloaded. It
 
 ![Map Display Settings Dialog Items Tab](../../../doc/img/Map_plugin_display_settings_items.png)
 
-The Map Items tab customization of how objects from different SDRangel plugins and the Internet are displayed on the 2D and 3D maps. This includes:
+The Map Items tab customization of how objects from different SDRangel plugins and the Internet are displayed on the 2D and 3D maps.
+
+Each row is a group of items. Most groups are named after the plugin that sends them, and
+everything that plugin draws shares the row. A plugin can also put some of what it draws
+in a group of its own, where those items want different settings from the rest - the
+Aircraft feature does this for filed flight plans and oceanic clearances, which appear as
+**Aircraft Routes**. That exists because a route wants the opposite of an aircraft from
+the 2D Min Zoom column: an aircraft icon has to be decluttered away when the map is zoomed
+out, while a route drawn across an ocean is exactly what should still be visible there.
+So Aircraft can be left at 11 and Aircraft Routes at 0.
+
+The settings include:
 
 * Whether images are displayed on the 2D map and whether 3D models are displayed on the 3D map.
 * Whether labels are displayed giving the name of the object.
-* Whether taken and predicted tracks are displayed and in which colour.
+* Whether taken and predicted tracks are displayed and in which colour. Instead of a single colour, a palette can be chosen in the Palette column, which colours the track on both the 2D and 3D maps according to the altitude of the object, with a different colour for every 5000ft, in the same way as the tracks on the ADS-B Demodulator's map. This defaults to Spectral for aircraft and None (a single colour) for everything else. Objects with predicted tracks, such as satellites, are always drawn in a single colour on the 3D map.
 * How the image or 3D model is scaled as the zoom level changes.
 
 ![Map Display Settings Dialog API Keys Tab](../../../doc/img/Map_plugin_display_settings_apikeys.png)
@@ -304,6 +346,10 @@ Free API keys are available by signing up for an accounts with:
 * [ArcGIS Location Account](https://location.arcgis.com/)
 
 If API keys are not specified, a default key will be used, but this may not work if too many users use it, so please create and use your own.
+
+The Cesium Ion key is an exception: several 3D map layers use quota from the Cesium Ion account the key belongs to, so those layers are only available once you have entered your own key.
+This applies to Bing Maps Aerial, Sentinel-2, Earth at night and Google Maps imagery, Cesium World Terrain, Cesium OSM Buildings and Google Photorealistic 3D Tiles.
+Without a key, these are greyed out in the settings dialog and are not offered in the imagery selector on the 3D map itself.
 
 <h3>Map</h3>
 

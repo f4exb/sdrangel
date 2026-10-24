@@ -44,6 +44,12 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGMapAircraftState* fromJson(QString &jsonString) override;
 
+    QString* getDateTime();
+    void setDateTime(QString* date_time);
+
+    QString* getIcao();
+    void setIcao(QString* icao);
+
     QString* getCallsign();
     void setCallsign(QString* callsign);
 
@@ -110,6 +116,15 @@ public:
     qint32 getTcasMode();
     void setTcasMode(qint32 tcas_mode);
 
+    qint32 getTcasRa();
+    void setTcasRa(qint32 tcas_ra);
+
+    QString* getTcasThreatIcao();
+    void setTcasThreatIcao(QString* tcas_threat_icao);
+
+    qint32 getSquawk();
+    void setSquawk(qint32 squawk);
+
     float getWindSpeed();
     void setWindSpeed(float wind_speed);
 
@@ -129,6 +144,12 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* date_time;
+    bool m_date_time_isSet;
+
+    QString* icao;
+    bool m_icao_isSet;
+
     QString* callsign;
     bool m_callsign_isSet;
 
@@ -194,6 +215,15 @@ private:
 
     qint32 tcas_mode;
     bool m_tcas_mode_isSet;
+
+    qint32 tcas_ra;
+    bool m_tcas_ra_isSet;
+
+    QString* tcas_threat_icao;
+    bool m_tcas_threat_icao_isSet;
+
+    qint32 squawk;
+    bool m_squawk_isSet;
 
     float wind_speed;
     bool m_wind_speed_isSet;

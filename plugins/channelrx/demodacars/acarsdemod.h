@@ -31,6 +31,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+#include "maincore.h"       // MsgAcarsPacket subclasses MainCore::MsgPacket
 
 #include "acarsdemodbaseband.h"
 #include "acarsdemodsettings.h"
@@ -150,6 +151,37 @@ public:
         { }
     };
 
+    // An ACARS block, plus what the bearer knew about it that the block itself does not
+    // say. VDL-2 puts the aircraft's 24 bit ICAO address in the AVLC header of the frame
+    // the block came out of, where the block names only a registration.
+    //
+    // A subclass rather than a separate message so that the address travels WITH its
+    // packet: there is then no ordering to get right and no way for an address to be
+    // applied to the wrong block. MainCore::MsgPacket::match() matches this too, because
+    // Message::matchIdentifier defers to the base class, so the existing packet handling
+    // - the APRS pipe, the UDP feed, the log - needs no change and sees a plain packet.
+    class MsgAcarsPacket : public MainCore::MsgPacket {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        //!< 0 when the bearer gave no address, which is every bearer but VDL-2
+        quint32 getIcao() const { return m_icao; }
+
+        static MsgAcarsPacket* create(const QObject *pipeSource, QByteArray packet, quint32 icao)
+        {
+            return new MsgAcarsPacket(pipeSource, packet, QDateTime::currentDateTime(), icao);
+        }
+
+    private:
+        quint32 m_icao;
+
+        MsgAcarsPacket(const QObject *pipeSource, QByteArray packet, QDateTime dateTime,
+                       quint32 icao) :
+            MainCore::MsgPacket(pipeSource, packet, dateTime),
+            m_icao(icao)
+        { }
+    };
+
     // A demodulated VDL-2 AVLC frame that does not carry an ACARS message (XID/GSIF,
     // X.25, supervisory frames). ACARS frames go out as MainCore::MsgPacket instead, so
     // downstream consumers of that message always see pure ACARS bytes.
@@ -224,10 +256,16 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             const AcarsDemodSettings& settings);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static void webapiUpdateChannelSettings(
             AcarsDemodSettings& settings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
+
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
     ScopeVis *getScopeSink() { return m_basebandSink->getScopeSink(); }
     double getMagSq() const { return m_basebandSink->getMagSq(); }

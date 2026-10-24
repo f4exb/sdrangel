@@ -124,6 +124,11 @@ public:
         COL_PROTOCOLS,
         COL_MESSAGES,
         COL_LAST_SEEN,
+        // Appended rather than placed beside the callsign where it belongs: the saved
+        // column widths and order are stored by index, so inserting in the middle would
+        // shift every one of them. Drag it where you want it.
+        COL_FLIGHT_NO,
+        COL_SELCAL,         // Appended for the same reason
         COL_COUNT
     };
 
@@ -138,6 +143,9 @@ public:
     void remove(const QList<quint64>& ids);
     void clear();
     const AircraftDisplay *aircraftAt(int row) const;
+    const AircraftDisplay *aircraftById(quint64 id) const;
+    //!< The model row holding this aircraft, or -1 if it has none
+    int rowOf(quint64 id) const;
 
 private:
     struct Row {
@@ -162,25 +170,33 @@ class FlightTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
+    // In the order the table reads left to right: who and which aircraft, where it is
+    // going, what it has sent, when it did the four things a flight does, when it was
+    // heard, and last the two that are more diagnostic than operational.
+    //
+    // Columns used to be appended here rather than placed where they belonged, because
+    // the saved widths and order are stored BY INDEX and inserting one shifted them all.
+    // That is settled by moving the stored layout to its own settings keys, so a layout
+    // saved before this reorder falls back to the defaults - which are this order - once,
+    // rather than being applied to the wrong columns.
     enum Col {
-        COL_FLIGHT,
+        COL_FLIGHT,         // Callsign, which is what the aircraft transmits
+        COL_FLIGHT_NO,      // Flight number, which is what a passenger is sold
         COL_REG,
         COL_FROM,
         COL_TO,
+        COL_DOCS,
+        COL_LS,             // Loadsheet
+        COL_CL,             // Any clearance: oceanic, and cleared for departure
+        COL_FP,             // Flight plan
         COL_OUT,            // OOOI: off the gate
         COL_OFF,            //       airborne
         COL_ON,             //       landed
         COL_IN,             //       on the gate
         COL_FIRST_SEEN,
         COL_LAST_SEEN,
-        COL_LS,             // Loadsheet
-        COL_OC,             // Oceanic clearance
-        COL_FP,             // Flight plan
-        COL_DOCS,
-        // Appended rather than placed beside Messages where it belongs: the saved
-        // column widths and order are stored by index, so inserting in the middle
-        // would shift every one of them. Drag it where you want it.
         COL_PROTOCOLS,
+        COL_ROUTE_SOURCE,   // Where From and To came from
         COL_COUNT
     };
 
@@ -195,6 +211,8 @@ public:
     void remove(const QList<quint64>& ids);
     void clear();
     const FlightDisplay *flightAt(int row) const;
+    //!< The model row holding this flight, or -1 if it has none
+    int rowOf(quint64 id) const;
 
 private:
     QList<FlightDisplay> m_rows;

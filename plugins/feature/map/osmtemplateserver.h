@@ -131,7 +131,7 @@ private slots:
                     if (m_overlay) {
                         url = QString("http://127.0.0.1:%1/%2/%z/%x/%y.png").arg(m_tileServerPort).arg(mapUrl[idx]);
                     } else {
-                        url = QString("http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1").arg(hiresURL).arg(mapUrl[idx]);
+                        url = QString("http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1?key=%3").arg(hiresURL).arg(mapUrl[idx]).arg("cb1_27a9_1_036ae52d2884fda8713b961c");
                     }
                     xml = QString("\
                     {\

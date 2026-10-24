@@ -19,9 +19,12 @@
 #ifndef INCLUDE_FEATURE_AIRCRAFTGUI_H_
 #define INCLUDE_FEATURE_AIRCRAFTGUI_H_
 
+#include <functional>
+
 #include <QTimer>
 #include <QMenu>
 #include <QDateTime>
+#include <QSet>
 #include <QtCharts>
 
 #include "feature/featuregui.h"
@@ -73,10 +76,6 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     AircraftSettings m_settings;
-    // The statistics records, serialised by the tracker and held ready for serialize(),
-    // which is const and cannot go and ask for them
-    QByteArray m_statisticsBlob;
-
     // All three splitters in one blob - see AircraftSettings::m_splitterStates
     QByteArray saveSplitters() const;
     void restoreSplitters(const QByteArray& data);
@@ -86,7 +85,7 @@ private:
     // the selection that triggered the rebuild had just chosen
     bool m_updatingHistoryTables = false;
     // Which column Find looks in, in the order the combo lists them
-    enum FindColumn { FindAll = 0, FindIcao, FindReg, FindType, FindFlight };
+    enum FindColumn { FindAll = 0, FindIcao, FindReg, FindType, FindFlight, FindSelcal };
     // Where the last match was, so Enter steps on to the next one rather than finding
     // the same row again
     int m_findRow = -1;
@@ -114,10 +113,34 @@ private:
     QMenu *m_flightColumnMenu;
 
     // Selection driving the Documents/ATC filter, the photo and the profile
+    //!< Which table the documents are being shown for. The Aircraft and Flights tables
+    //!< each hold their own selection and Qt keeps both, so without this the handlers
+    //!< fought: each cleared the other's state, and a selection model re-emitting after
+    //!< a sort took the selection back from the table the user had actually clicked.
+    enum SelectionOwner { SelectionNone, SelectionAircraft, SelectionFlight };
+    SelectionOwner m_selectionOwner = SelectionNone;
     quint64 m_selectedAircraftId = 0;
     QString m_selectedRegistration;
     quint32 m_selectedIcao = 0;
     quint64 m_selectedFlightId = 0;
+    // A selected row whose aircraft or flight was merged into another goes with it when
+    // the merged-away one is removed. These hold the survivor whose row should take the
+    // selection over, until the tracker sends that row as it is after the merge - see
+    // reselectMerged()
+    quint64 m_reselectAircraftId = 0;
+    quint64 m_reselectFlightId = 0;
+    // Set while the tracker's changes are being applied to a model, or a reselection is
+    // moving a selection we mean to keep, so the selection changes they cause are not taken
+    // as the user's. A row leaving a view makes Qt select its neighbour, and the models are
+    // half updated while it happens - see keepSelections()
+    bool m_ignoreSelectionChanges = false;
+    // When the message tables were last pruned of rows belonging to nothing - see
+    // pruneOrphanMessageRows()
+    qint64 m_orphansPrunedMs = 0;
+    // What the history tables were last filled for. The default sort is applied only
+    // when that changes, so a sort the user chose survives the refills every flush brings
+    quint64 m_pastFlightsAircraftId = 0;
+    QString m_pastAircraftFlightNumber;
 
     // Message rate chart, driven by the tracker's rate samples
     static const int CHART_SERIES = AircraftReport::ProtocolCount + 1;
@@ -156,12 +179,31 @@ private:
     void trackerStatistics(const AircraftStatistics& statistics);
     bool messageRowVisible(const QTableWidgetItem *firstItem) const;
     void applyMessageFilter();
+    bool filterAppendedRows(QTableWidget *table, int firstNewRow, const QSet<const QTableWidgetItem *>& added);
+    void retagMessageRows(int role, quint64 from, quint64 to);
+    void removeMessageRows(const std::function<bool(quint64 aircraftId, quint64 flightId)>& matches,
+                           const QDateTime& olderThan = QDateTime());
+    void pruneOrphanMessageRows();
+    bool reselectMerged();
+    //!< The aircraft or flight selected in each of a pair of views, by id
+    struct ViewSelections {
+        quint64 m_live = 0;
+        quint64 m_archive = 0;
+    };
+    quint64 selectedIdIn(bool flights, bool archive) const;
+    ViewSelections selectedIds(bool flights) const;
+    void keepSelections(bool flights, const ViewSelections& before);
+    void dropSelection();
+    void clearSelectionState();
     void tableContextMenu(QTableWidget *table, QPoint pos);
     void viewContextMenu(QTableView *view, bool aircraftView, QPoint pos);
     void showContextMenu(QWidget *parent, const QString& cellText, const QString& mapName,
                          QPoint globalPos, const QString& showFlight = QString(),
-                         quint64 showAircraftId = 0);
+                         quint64 showAircraftId = 0, quint64 mapAircraftId = 0);
+    bool aircraftOnMap(quint64 aircraftId) const;
+    bool selectRow(bool flights, const std::function<bool(int sourceRow)>& matches);
     void selectFlight(const QString& flight);
+    void selectFlightById(quint64 flightId);
     void selectAircraft(quint64 aircraftId);
     void plotChart();
     void plotProfileChart();
@@ -178,6 +220,8 @@ private slots:
     void handleInputMessages();
     void on_deleteAircraft_clicked();
     void on_settings_clicked();
+    void on_feed_clicked(bool checked);
+    void feedSelect(const QPoint& p);
     void on_notifications_clicked();
     void on_atcLabels_clicked(bool checked);
     void on_stats_clicked(bool checked);
@@ -191,7 +235,9 @@ private slots:
     void pastFlightSelectionChanged();
     void chartContextMenu(const QPoint& pos);
     void on_displayChart_clicked(bool checked);
+    void on_coverage_clicked(bool checked);
     void documentSelectionChanged();
+    void logonSelectionChanged();
     void aircraftSelectionChanged();
     void flightSelectionChanged();
     void aircraft_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
@@ -211,6 +257,8 @@ private slots:
     void trackerAircraftRemoved(const QList<quint64>& ids);
     void trackerFlightsUpdated(const QList<FlightDisplay>& flights);
     void trackerFlightsRemoved(const QList<quint64>& ids);
+    void trackerFlightsMerged(quint64 from, quint64 to);
+    void trackerAircraftMerged(quint64 from, quint64 to);
     void trackerDocumentsAdded(const QList<DocumentEvent>& documents);
     void trackerAtcMessages(const QList<AtcEvent>& messages);
     void trackerProfileUpdated(quint64 flightId, const QList<qint64>& times, const QList<float>& altitudeFt, const QList<float>& speedKts);
@@ -218,6 +266,7 @@ private slots:
     void trackerSpeechNotification(const QString& speech);
     void trackerAllCleared();
     void trackerDatabaseFilenameReverted(const QString& filename);
+    void trackerSelectRequested(int kind, const QString& value);
 
     // Column enums for the Documents and ATC tables (still QTableWidgets)
 private:

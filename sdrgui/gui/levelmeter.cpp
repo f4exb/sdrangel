@@ -75,6 +75,10 @@ const int PeakHoldLevelDuration = 2000; // ms
 
 LevelMeter::LevelMeter(QWidget *parent)
     :   QWidget(parent)
+    ,   m_paintedAvg(-1)
+    ,   m_paintedPeak(-1)
+    ,   m_paintedHold(-1)
+    ,   m_updatePending(false)
     ,   m_avgLevel(0.0)
     ,   m_peakLevel(0.0)
     ,   m_decayedPeakLevel(0.0)
@@ -105,6 +109,27 @@ void LevelMeter::reset()
 {
     m_avgLevel = 0.0;
     m_peakLevel = 0.0;
+    requestUpdate();
+}
+
+void LevelMeter::requestUpdate()
+{
+    if (m_updatePending) {
+        return;
+    }
+    // A hidden meter is still fed by its channel's tick. Qt would discard the repaint,
+    // but asking for it still marks the window dirty
+    if (!isVisible()) {
+        return;
+    }
+    if ((levelPixel(m_avgLevel) == m_paintedAvg)
+        && (levelPixel(m_decayedPeakLevel) == m_paintedPeak)
+        && (levelPixel(m_peakHoldLevel) == m_paintedHold))
+    {
+        return;
+    }
+
+    m_updatePending = true;
     update();
 }
 
@@ -125,7 +150,13 @@ void LevelMeter::levelChanged(qreal avgLevel, qreal peakLevel, int numSamples)
         m_peakHoldLevelChanged.start();
     }
 
-    update();
+    // The redraw timer exists to animate the peak decaying between readings. A reading
+    // has just arrived, so restart it rather than let it free run: otherwise its ticks
+    // interleave with these and the meter asks for half as many repaints again as there
+    // is new data to show
+    m_redrawTimer->start(RedrawInterval);
+
+    requestUpdate();
 }
 
 void LevelMeter::redrawTimerExpired()
@@ -142,7 +173,13 @@ void LevelMeter::redrawTimerExpired()
     if (m_peakHoldLevelChanged.elapsed() > PeakHoldLevelDuration)
         m_peakHoldLevel = 0.0;
 
-    update();
+    // Nothing left to decay or hold, so there is nothing for the timer to animate until
+    // the next reading arrives, which restarts it
+    if ((m_decayedPeakLevel == 0.0) && (m_peakHoldLevel == 0.0)) {
+        m_redrawTimer->stop();
+    }
+
+    requestUpdate();
 }
 
 void LevelMeter::paintEvent(QPaintEvent *event)
@@ -151,6 +188,13 @@ void LevelMeter::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     render(&painter);
+
+    // Record what is now on screen, so the next reading can tell whether it would
+    // change anything
+    m_paintedAvg = levelPixel(m_avgLevel);
+    m_paintedPeak = levelPixel(m_decayedPeakLevel);
+    m_paintedHold = levelPixel(m_peakHoldLevel);
+    m_updatePending = false;
 }
 
 void LevelMeter::resizeEvent(QResizeEvent * event)
@@ -158,6 +202,10 @@ void LevelMeter::resizeEvent(QResizeEvent * event)
     Q_UNUSED(event)
 
     resized();
+    // Pixel positions from the old width say nothing about the new one
+    m_paintedAvg = -1;
+    m_paintedPeak = -1;
+    m_paintedHold = -1;
 }
 
 void LevelMeter::setAverageSmoothing(uint32_t smoothingFactor)
@@ -301,6 +349,14 @@ LevelMeterSignalDB::LevelMeterSignalDB(QWidget *parent) :
     m_scaleEngine.setFont(font());
     m_scaleEngine.setOrientation(Qt::Horizontal);
     m_scaleEngine.setRange(Unit::Decibel, -100, 0);
+
+    // render() draws an opaque background pixmap over the whole widget, so nothing
+    // underneath can show through. Saying so stops Qt repainting the parent beneath this
+    // widget on every level change - and with it every sibling the repaint touches.
+    // Each channel GUI updates its meter 20 times a second, and the profile showed the
+    // whole settings container being redrawn at that rate: every button, dial and label,
+    // at 60-100 us each through the Fusion style
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
 
     resized();
 }

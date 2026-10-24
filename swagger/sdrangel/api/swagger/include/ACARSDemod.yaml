@@ -5,10 +5,13 @@ ACARSDemodSettings:
       type: integer
       format: int64
     mode:
-      description: "Which protocol to demodulate: 0 ACARS, 1 VDL Mode 2, 2 HFDL, 3 Inmarsat Classic Aero"
+      description: "Which protocol to demodulate: 0 ACARS, 1 VDL Mode 2, 2 HFDL, 3 Inmarsat Classic Aero, 4 Iridium"
       type: integer
     aeroChannel:
       description: "Which Aero rate and channel is tuned. 0 600 bps P, 1 1200 bps P, 2 10500 bps P, 3 600 bps R, 4 1200 bps R, 5 600 bps T, 6 1200 bps T. Only used when mode is 3"
+      type: integer
+    iridiumBandwidth:
+      description: "How much of the band the Iridium scanner covers: 0 1 MHz, 1 2 MHz, 2 4 MHz, 3 8 MHz. The device has to be able to supply the width chosen. Only used when mode is 4"
       type: integer
     rfBandwidth:
       type: number
@@ -47,32 +50,6 @@ ACARSDemodSettings:
     logFilename:
       type: string
     logEnabled:
-      type: integer
-    feedEnabled:
-      description: "Feed received messages to aggregators, in acarsdec style JSON (1 for yes, 0 for no)"
-      type: integer
-    feedStationId:
-      description: "Station identifier sent with each fed message"
-      type: string
-    feedAirframes:
-      description: "Feed to airframes.io (1 for yes, 0 for no)"
-      type: integer
-    feedAirframesHost:
-      type: string
-    feedAirframesPort:
-      type: integer
-    feedAirframesTcp:
-      description: "Use TCP rather than UDP for the airframes.io feed (1 for yes, 0 for no)"
-      type: integer
-    feedAvdelphi:
-      description: "Feed to airframes.io's avdelphi (1 for yes, 0 for no)"
-      type: integer
-    feedAvdelphiHost:
-      type: string
-    feedAvdelphiPort:
-      type: integer
-    feedAvdelphiTcp:
-      description: "Use TCP rather than UDP for the avdelphi feed (1 for yes, 0 for no)"
       type: integer
     scopeCh1:
       description: "Which internal signal the scope shows on channel 1"

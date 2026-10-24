@@ -247,6 +247,7 @@ set(sdrbase_SOURCES
     util/fixedtraits.cpp
     util/fits.cpp
     util/flightinformation.cpp
+    util/flightpathpalette.cpp
     util/ft8message.cpp
     util/giro.cpp
     util/goesxray.cpp
@@ -267,6 +268,8 @@ set(sdrbase_SOURCES
     util/nasaglobalimagery.cpp
     util/navtex.cpp
     util/openaip.cpp
+    util/aircraft3dmodels.cpp
+    util/bglwaypointreader.cpp
     util/osndb.cpp
     util/ourairportsdb.cpp
     util/peakfinder.cpp
@@ -285,6 +288,9 @@ set(sdrbase_SOURCES
     util/sdrangelserverlist.cpp
     util/simpleserializer.cpp
     util/serialutil.cpp
+    util/acarsmessage.cpp
+    util/acarsmultipartassembler.cpp
+    util/sidstar.cpp
     util/socket.cpp
     util/solardynamicsobservatory.cpp
     util/sondehub.cpp
@@ -427,6 +433,7 @@ set(sdrbase_HEADERS
     dsp/kissfft.h
     dsp/kissengine.h
     dsp/firfilter.h
+    dsp/afskmlse.h
     dsp/gaussian.h
     dsp/gmskmlse.h
     dsp/mimochannel.h
@@ -529,6 +536,7 @@ set(sdrbase_HEADERS
     util/fixedtraits.h
     util/fits.h
     util/flightinformation.h
+    util/flightpathpalette.h
     util/ft8message.h
     util/giro.h
     util/goesxray.h
@@ -553,9 +561,13 @@ set(sdrbase_HEADERS
     util/nasaglobalimagery.h
     util/navtex.h
     util/openaip.h
+    util/aircraft3dmodels.h
+    util/aircraftenginesound.h
+    util/bglwaypointreader.h
     util/osndb.h
     util/outairportsdb.h
     util/peakfinder.h
+    util/aircraftreport.h
     util/planespotters.h
     util/vesselfinder.h
     util/png.h
@@ -574,6 +586,11 @@ set(sdrbase_HEADERS
     util/sdrangelserverlist.h
     util/simpleserializer.h
     util/serialutil.h
+    util/acarsmessage.h
+    util/acarstextformat.h
+    util/acarsmultipartassembler.h
+    util/do219.h
+    util/sidstar.h
     util/socket.h
     util/solardynamicsobservatory.h
     util/sondehub.h

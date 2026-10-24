@@ -2,5 +2,6 @@
     <qresource>
         <file>icons/stats.png</file>
         <file>icons/chart.png</file>
+        <file>icons/coverage.png</file>
     </qresource>
 </RCC>

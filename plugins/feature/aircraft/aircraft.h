@@ -19,6 +19,8 @@
 #ifndef INCLUDE_FEATURE_AIRCRAFT_H_
 #define INCLUDE_FEATURE_AIRCRAFT_H_
 
+#include <QNetworkRequest>
+
 #include "feature/feature.h"
 #include "util/message.h"
 #include "availablechannelorfeaturehandler.h"
@@ -28,6 +30,8 @@
 
 class WebAPIAdapterInterface;
 class QThread;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 // Collates aircraft data from the ADS-B and ACARS (VHF/VDL-2/HFDL/Aero) demodulators
 // into a combined aircraft/flight model, and is the source of aircraft items for
@@ -79,21 +83,56 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
+    static void webapiFormatFeatureSettings(
+            SWGSDRangel::SWGFeatureSettings& response,
+            const AircraftSettings& settings);
+
+    static void webapiUpdateFeatureSettings(
+            AircraftSettings& settings,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response);
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
 private:
     AircraftSettings m_settings;
     AvailableChannelOrFeatureHandler m_availableChannelHandler;
+    QSet<const QObject *> m_disabledChannels;   //!< Channels whose "aircraftreport" pipe has been withdrawn. Compared, never dereferenced.
     QThread *m_thread;
     AircraftTracker *m_tracker;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void start();
     void stop();
     void applySettings(const AircraftSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AircraftSettings& settings, bool force);
 
 private slots:
     void handleChannelMessageQueue(MessageQueue* messageQueue);
+    void updateReportPipes();
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FEATURE_AIRCRAFT_H_

@@ -22,6 +22,7 @@
 #define INCLUDE_FEATURE_MAP_H_
 
 #include <QHash>
+#include <QMultiHash>
 #include <QNetworkRequest>
 #include <QDateTime>
 #include <QRecursiveMutex>

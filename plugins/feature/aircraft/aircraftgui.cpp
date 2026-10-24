@@ -19,15 +19,26 @@
 #include <algorithm>
 #include <cmath>
 
+#include <QTableView>
 #include <QAction>
 #include <QClipboard>
+#include <QFileInfo>
+#include <QLocale>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFontMetrics>
 #include <QGuiApplication>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QComboBox>
 #include <QTableWidgetItem>
+#include <QSet>
 #include <QUrl>
 #ifdef QT_TEXTTOSPEECH_FOUND
 #include <QTextToSpeech>
@@ -36,6 +47,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
 #include "util/osndb.h"
@@ -45,6 +57,101 @@
 #include "aircraftgui.h"
 #include "aircraftnotificationdialog.h"
 #include "aircraftsettingsdialog.h"
+#include "util/profiler.h"
+#include "gui/fastitemdelegate.h"
+#include "gui/fastheaderview.h"
+
+// How many columns the user can actually see. Hiding the last one is refused, because
+// the menu that unhides them hangs off the header, and a table with nothing visible has
+// no header left to right-click - there is then no way back without editing the settings
+static int visibleColumnCount(const QTableView *view, int columns)
+{
+    int visible = 0;
+    for (int i = 0; i < columns; i++)
+    {
+        if (!view->isColumnHidden(i)) {
+            visible++;
+        }
+    }
+    return visible;
+}
+
+// Gives a table's header the context menu that hides and shows its columns, the same
+// one the aircraft and flights tables have. Those two keep their own menus as members,
+// because their column state is saved and restored; the tables here only need the menu
+static void addColumnMenu(QTableView *view, int columns)
+{
+    QMenu *menu = new QMenu(view);
+    const QAbstractItemModel *model = view->model();
+
+    for (int i = 0; i < columns; i++)
+    {
+        QAction *action = menu->addAction(model ? model->headerData(i, Qt::Horizontal).toString() : QString());
+        action->setCheckable(true);
+        action->setChecked(!view->isColumnHidden(i));
+        QObject::connect(action, &QAction::toggled, view, [view, columns, i, action](bool checked)
+        {
+            // Refuse the last one: the menu that would put it back hangs off the header,
+            // and a table with nothing visible has no header left to right-click
+            if (!checked && (visibleColumnCount(view, columns) <= 1))
+            {
+                action->setChecked(true);
+                return;
+            }
+            view->setColumnHidden(i, !checked);
+        });
+    }
+
+    view->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(view->horizontalHeader(), &QWidget::customContextMenuRequested, view,
+        [view, menu](const QPoint& pos)
+        {
+            menu->popup(view->horizontalHeader()->viewport()->mapToGlobal(pos));
+        });
+}
+
+// Settings saved before that guard existed can still have everything hidden, so recover
+// rather than restoring a table the user cannot use
+static void showAllColumnsIfNoneVisible(QTableView *view, int *columnSizes, int columns, QMenu *menu)
+{
+    if (visibleColumnCount(view, columns) > 0) {
+        return;
+    }
+    qWarning() << "AircraftGUI: every column was hidden in the saved settings - showing them all";
+    for (int i = 0; i < columns; i++)
+    {
+        view->setColumnHidden(i, false);
+        if (columnSizes[i] == 0) {
+            columnSizes[i] = view->columnWidth(i);
+        }
+        if (i < menu->actions().size()) {
+            menu->actions().at(i)->setChecked(true);
+        }
+    }
+}
+
+// Puts a header's columns in the saved order, each column's saved value being its visual
+// index. They are placed leftmost first: moving a column into place only shifts the ones
+// to the right of where it lands, so those already placed stay put. Going through them in
+// logical order instead lets a later move push an earlier one out of position - 207 of
+// the orders of up to six columns come back wrong that way. Sorting by the saved value,
+// rather than indexing by it, also copes with a layout saved before every column's
+// position was stored, in which two columns can claim the same place.
+static void restoreColumnOrder(QHeaderView *header, const int *visualIndexes, int columns)
+{
+    QList<int> order;
+    for (int i = 0; i < columns; i++) {
+        order.append(i);
+    }
+    // Read in full before the first move, because each move emits sectionMoved and the
+    // handlers write the new layout back over these very settings
+    std::stable_sort(order.begin(), order.end(), [visualIndexes](int a, int b) {
+        return visualIndexes[a] < visualIndexes[b];
+    });
+    for (int visual = 0; visual < columns; visual++) {
+        header->moveSection(header->visualIndex(order[visual]), visual);
+    }
+}
 
 AircraftGUI* AircraftGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -73,10 +180,15 @@ QByteArray AircraftGUI::saveSplitters() const
     QDataStream stream(&data, QIODevice::WriteOnly);
     stream.setVersion(QDataStream::Qt_5_15);
 
-    stream << (quint32) 1;
+    // Version 2 adds the Documents and Logons splitters. Bumped rather than appended
+    // silently: restoreSplitters() reads a fixed number of blobs, so a version 1 preset
+    // has to be recognised as such and its two missing states left at their defaults.
+    stream << (quint32) 2;
     stream << ui->splitter->saveState()
            << ui->aircraftSplitter->saveState()
-           << ui->weatherSplitter->saveState();
+           << ui->weatherSplitter->saveState()
+           << ui->documentsSplitter->saveState()
+           << ui->logonsSplitter->saveState();
     return data;
 }
 
@@ -90,7 +202,7 @@ void AircraftGUI::restoreSplitters(const QByteArray& data)
 
     quint32 version = 0;
     stream >> version;
-    if ((version != 1) || (stream.status() != QDataStream::Ok)) {
+    if (((version != 1) && (version != 2)) || (stream.status() != QDataStream::Ok)) {
         return;             // Written by something else, or truncated: leave the defaults
     }
 
@@ -102,15 +214,28 @@ void AircraftGUI::restoreSplitters(const QByteArray& data)
     ui->splitter->restoreState(outer);
     ui->aircraftSplitter->restoreState(aircraft);
     ui->weatherSplitter->restoreState(weather);
+
+    // A version 1 preset stops here, and the two below keep the layout the .ui gives them
+    if (version < 2) {
+        return;
+    }
+    QByteArray documents, logons;
+    stream >> documents >> logons;
+    if (stream.status() != QDataStream::Ok) {
+        return;
+    }
+    ui->documentsSplitter->restoreState(documents);
+    ui->logonsSplitter->restoreState(logons);
 }
 
 QByteArray AircraftGUI::serialize() const
 {
-    // The records live in the tracker, which is where they are set. serialize() is const
-    // and is the actual persistence path for a feature, so take a copy of the settings
-    // and drop the current blob into that.
+    // The records live in the session database now, written by the tracker that sets
+    // them, so nothing goes in the preset. An empty blob is deliberate rather than an
+    // omission: a preset written before the move still carries one, and the tracker
+    // imports that once, so leaving a stale copy here would only invite confusion.
     AircraftSettings settings = m_settings;
-    settings.m_statistics = m_statisticsBlob;
+    settings.m_statistics = QByteArray();
     settings.m_splitterStates = saveSplitters();
     return settings.serialize();
 }
@@ -119,9 +244,8 @@ bool AircraftGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        // Hold on to the records that were just read: serialize() writes this back, and
-        // until the tracker sends its first update there is nothing else to write
-        m_statisticsBlob = m_settings.m_statistics;
+        // m_settings.m_statistics is only still read for the one time import into the
+        // session database, which the tracker does - see AircraftTracker::applySettings()
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
@@ -215,6 +339,19 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
 
     AircraftInformation::init();
 
+    // Before any header configuration below, as setHorizontalHeader() resets section
+    // state. QHeaderView draws through QStyle, and the Fusion style asks Windows for the
+    // high contrast setting once per drawn primitive, uncached - around 14 system calls
+    // for one header repaint. FastHeaderView draws the section itself
+    for (QTableView *view : {(QTableView *) ui->aircraft, (QTableView *) ui->oldAircraft,
+                             (QTableView *) ui->flights, (QTableView *) ui->oldFlights,
+                             (QTableView *) ui->documents, (QTableView *) ui->logons,
+                             (QTableView *) ui->atcMessages, (QTableView *) ui->statistics,
+                             (QTableView *) ui->weather, (QTableView *) ui->aircraftInfo,
+                             (QTableView *) ui->pastFlights, (QTableView *) ui->pastAircraft}) {
+        view->setHorizontalHeader(new FastHeaderView(Qt::Horizontal, view));
+    }
+
     // Aircraft and flights tables: model/view, with the data coming as
     // snapshots from the tracker thread
     m_aircraftModel = new AircraftTableModel(this);
@@ -223,6 +360,15 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     m_flightModel = new FlightTableModel(this);
     m_flightProxy = new ActiveFilterProxy(true, this);
     m_oldFlightProxy = new ActiveFilterProxy(false, this);
+    // The live views are re-sorted and re-filtered once per batch from the tracker, by
+    // trackerAircraftUpdated() and trackerFlightsUpdated(), rather than dynamically. The
+    // models emit a dataChanged for each row they update, and a sorted dynamic proxy
+    // re-sorts on every one of them - a layout change of the whole view per aircraft, for
+    // batches of dozens every 300 ms. The archive views stay dynamic: the rows changing
+    // are almost all live ones, which they look at and ignore, and invalidating them
+    // instead would sort the whole archive on every batch.
+    m_aircraftProxy->setDynamicSortFilter(false);
+    m_flightProxy->setDynamicSortFilter(false);
 
     for (auto pair : { qMakePair(ui->aircraft, m_aircraftProxy), qMakePair(ui->oldAircraft, m_oldAircraftProxy) })
     {
@@ -254,7 +400,11 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     ui->documents->setSortingEnabled(true);
     ui->documents->horizontalHeader()->setSectionsMovable(true);
     ui->documents->horizontalHeader()->setStretchLastSection(true);
+    ui->logons->setSortingEnabled(true);
+    ui->logons->horizontalHeader()->setSectionsMovable(true);
+    ui->logons->horizontalHeader()->setStretchLastSection(true);
     connect(ui->documents, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::documentSelectionChanged);
+    connect(ui->logons, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::logonSelectionChanged);
     connect(ui->weather, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::weatherSelectionChanged);
     ui->weather->setSortingEnabled(true);
     ui->weather->horizontalHeader()->setSectionsMovable(true);
@@ -270,6 +420,17 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     // A row found while the keyboard stays in the Find box is a selection in a view
     // that does not have focus, which most styles draw in a washed out grey. Make the
     // unfocused highlight the same as the focused one so the match is actually visible.
+    // Painting cells through QStyle costs a SystemParametersInfo call per cell with the
+    // Fusion style - see FastItemDelegate. These tables are the ones that showed it
+    for (QAbstractItemView *view : {(QAbstractItemView *) ui->aircraft, (QAbstractItemView *) ui->oldAircraft,
+                                    (QAbstractItemView *) ui->flights, (QAbstractItemView *) ui->oldFlights,
+                                    (QAbstractItemView *) ui->documents, (QAbstractItemView *) ui->logons,
+                                    (QAbstractItemView *) ui->atcMessages, (QAbstractItemView *) ui->statistics,
+                                    (QAbstractItemView *) ui->weather, (QAbstractItemView *) ui->aircraftInfo,
+                                    (QAbstractItemView *) ui->pastFlights, (QAbstractItemView *) ui->pastAircraft}) {
+        view->setItemDelegate(new FastItemDelegate(view));
+    }
+
     for (QTableView *view : {ui->aircraft, ui->oldAircraft, ui->flights, ui->oldFlights})
     {
         QPalette palette = view->palette();
@@ -286,6 +447,16 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     ui->atcMessages->setSortingEnabled(true);
     ui->atcMessages->horizontalHeader()->setSectionsMovable(true);
     ui->atcMessages->horizontalHeader()->setStretchLastSection(true);
+
+    // A row's hidden flag belongs to the view's row number, not to the row's items, so a
+    // sort the user asks for leaves the flags where they were while the rows move. New
+    // messages only filter the rows they add, so nothing else would put that right.
+    // Queued, so that it runs after the view's own handler has done the sort.
+    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
+    {
+        connect(table->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this,
+            [this](int, Qt::SortOrder) { applyMessageFilter(); }, Qt::QueuedConnection);
+    }
 
     // Selecting an aircraft or a flight filters the Documents and ATC tables
     connect(ui->aircraftTabs, &QTabWidget::currentChanged, this, [this](int) {
@@ -314,7 +485,7 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
         connect(view, &QTableView::customContextMenuRequested, this,
             [this, view, isAircraft](QPoint pos) { viewContextMenu(view, isAircraft, pos); });
     }
-    for (QTableWidget *table : {ui->documents, ui->atcMessages})
+    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages, ui->statistics})
     {
         table->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(table, &QTableWidget::customContextMenuRequested, this,
@@ -360,6 +531,11 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     }
     ui->flights->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->flights->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(flightColumnSelectMenu(QPoint)));
+
+    // The tables whose column state is not saved, so they need no menu of their own
+    addColumnMenu(ui->oldAircraft, AIRCRAFT_COLUMNS);
+    addColumnMenu(ui->oldFlights, FLIGHT_COLUMNS);
+    addColumnMenu(ui->weather, WEATHER_COL_REPORT + 1);
     connect(ui->flights->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(flights_sectionMoved(int, int, int)));
     connect(ui->flights->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(flights_sectionResized(int, int, int)));
 
@@ -371,6 +547,8 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     connect(t, &AircraftTracker::flightsUpdated, this, &AircraftGUI::trackerFlightsUpdated);
     connect(t, &AircraftTracker::flightsRemoved, this, &AircraftGUI::trackerFlightsRemoved);
     connect(t, &AircraftTracker::documentsAdded, this, &AircraftGUI::trackerDocumentsAdded);
+    connect(t, &AircraftTracker::flightsMerged, this, &AircraftGUI::trackerFlightsMerged);
+    connect(t, &AircraftTracker::aircraftMerged, this, &AircraftGUI::trackerAircraftMerged);
     connect(t, &AircraftTracker::atcMessages, this, &AircraftGUI::trackerAtcMessages);
     connect(t, &AircraftTracker::weatherReports, this, &AircraftGUI::trackerWeatherReports);
     connect(t, &AircraftTracker::profileUpdated, this, &AircraftGUI::trackerProfileUpdated);
@@ -380,6 +558,7 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     connect(t, &AircraftTracker::allCleared, this, &AircraftGUI::trackerAllCleared);
     connect(t, &AircraftTracker::databaseFilenameReverted,
             this, &AircraftGUI::trackerDatabaseFilenameReverted);
+    connect(t, &AircraftTracker::selectRequested, this, &AircraftGUI::trackerSelectRequested);
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -412,6 +591,17 @@ void AircraftGUI::makeUIConnections()
         this,
         &AircraftGUI::on_settings_clicked
     );
+    QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &AircraftGUI::on_feed_clicked);
+    // The settings are behind a right click, as they were on the demodulator's button
+    CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
+    connect(feedRightClickEnabler, &CRightClickEnabler::rightClick, this, &AircraftGUI::feedSelect);
+
+    // Same gesture the ADS-B demodulator uses for its own coverage map. Queued because
+    // the tracker lives on its own thread.
+    CRightClickEnabler *coverageRightClickEnabler = new CRightClickEnabler(ui->coverage);
+    connect(coverageRightClickEnabler, &CRightClickEnabler::rightClick, this, [this] (const QPoint&) {
+        QMetaObject::invokeMethod(m_aircraft->getTracker(), "clearCoverage", Qt::QueuedConnection);
+    });
     QObject::connect(
         ui->notifications,
         &QToolButton::clicked,
@@ -434,6 +624,7 @@ void AircraftGUI::makeUIConnections()
     ui->stats->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->stats, &QWidget::customContextMenuRequested, this, &AircraftGUI::statsContextMenu);
     QObject::connect(ui->displayChart, &ButtonSwitch::clicked, this, &AircraftGUI::on_displayChart_clicked);
+    QObject::connect(ui->coverage, &ButtonSwitch::clicked, this, &AircraftGUI::on_coverage_clicked);
     ui->displayChart->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->displayChart, &QWidget::customContextMenuRequested, this, &AircraftGUI::chartContextMenu);
 
@@ -491,13 +682,7 @@ void AircraftGUI::showRowNumbers(QTableView *table)
 // ones that change while you watch.
 void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
 {
-    m_statisticsBlob = AircraftTracker::serializeStatistics(statistics);
-
-    // Sized by the enum, so adding a protocol fails to compile here rather than
-    // reading past the end of the array on the very next line
-    static const char *protocolNames[AircraftReport::ProtocolCount] =
-        { "ADS-B", "ACARS", "VDL-2", "HFDL", "Aero" };
-
+    PROFILER_START()
     QTableWidget *table = ui->statistics;
     const bool first = (table->columnCount() == 0);
     if (first)
@@ -516,11 +701,16 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
         if (!r.m_valid) {
             return QStringList{ QString(), QString() };
         }
-        return QStringList{
-            QString("%1 %2").arg(r.m_value, 0, 'f', 1).arg(suffix),
-            QString("%1, %2").arg(r.m_aircraft,
-                r.m_when.isValid() ? r.m_when.toString("yyyy-MM-dd hh:mm") : QString("?"))
-        };
+        // Who, when, and on what. The row already says which protocol, but not which of
+        // its frequencies - and on HFDL, where the usable band moves through the day,
+        // that is most of what the record tells you. Records kept before the frequency
+        // was recorded have none, and simply do not show one.
+        QString by = QString("%1, %2").arg(r.m_aircraft,
+            r.m_when.isValid() ? r.m_when.toString("yyyy-MM-dd hh:mm") : QString("?"));
+        if (r.m_frequency) {
+            by.append(QString(", %1 MHz").arg(r.m_frequency / 1e6, 0, 'f', 3));
+        }
+        return QStringList{ QString("%1 %2").arg(r.m_value, 0, 'f', 1).arg(suffix), by };
     };
 
     // Interleaves a statistic computed for each scope into one row: label, then the
@@ -537,9 +727,13 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
     // Furthest per protocol. They are wildly different by nature - line of sight VHF
     // against HF skywave against a satellite downlink - so one combined figure would
     // say nothing useful.
-    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    for (int i : AircraftReport::displayOrder())
     {
-        both(QString("Maximum range, %1").arg(protocolNames[i]),
+        if (!AircraftReport::reportsPosition(i)) {
+            continue;
+        }
+        // The tracker's names, which the web API report uses too, so the two cannot drift
+        both(QString("Maximum range, %1").arg(AircraftTracker::protocolName(i)),
              record(ses.m_maxRange[i], "km"), record(all.m_maxRange[i], "km"));
     }
 
@@ -562,6 +756,14 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
          QStringList{ QString::number(ses.m_totalMessages), QString() },
          QStringList{ QString::number(all.m_totalMessages), QString() });
 
+    // A property of the database rather than of either period, so it goes in the all time
+    // column - which is the one the aircraft, flight and message counts beside it describe
+    both("Database size", QStringList{ QString(), QString() },
+         QStringList{ statistics.m_databaseBytes > 0
+                        ? QString("%1 MB").arg(statistics.m_databaseBytes / (1024.0 * 1024.0), 0, 'f', 1)
+                        : QString(),
+                      QFileInfo(AircraftTracker::databasePath(m_settings)).fileName() });
+
     // The share is of that scope's own total, so a protocol that has been quiet today
     // shows its reduced share against its long run one rather than against nothing
     auto messages = [](const AircraftStatistics::Scope& scope, int protocol)
@@ -573,8 +775,8 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
         }
         return QStringList{ QString::number(n), share };
     };
-    for (int i = 0; i < AircraftReport::ProtocolCount; i++) {
-        both(QString("Messages, %1").arg(protocolNames[i]), messages(ses, i), messages(all, i));
+    for (int i : AircraftReport::displayOrder()) {
+        both(QString("Messages, %1").arg(AircraftTracker::protocolName(i)), messages(ses, i), messages(all, i));
     }
 
     auto elapsed = [](qint64 secs, const QDateTime& since)
@@ -617,18 +819,29 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
     if (first) {
         table->resizeColumnsToContents();
     }
+    PROFILER_STOP("Aircraft table: statistics")
 }
 
 void AircraftGUI::setDefaultColumnWidths()
 {
 
     const QFontMetrics fm(font());
-    auto width = [&fm](const char *sample) { return fm.horizontalAdvance(sample) + 12; };
+    // A sorted column draws a sort arrow in its header, and the header lays that out
+    // BESIDE the text rather than over it - so a width that only just fits the text hid
+    // the text itself the moment the column was sorted on. The style knows how big the
+    // arrow is; asking it is better than picking a number that is wrong on another theme.
+    QHeaderView *anyHeader = ui->flights->horizontalHeader();
+    const int sortArrow = style()->pixelMetric(QStyle::PM_HeaderMarkSize, nullptr, anyHeader)
+                        + 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, nullptr, anyHeader);
+    auto width = [&fm, sortArrow](const char *sample) {
+        return fm.horizontalAdvance(sample) + 12 + sortArrow;
+    };
 
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_ICAO, width("ABCDEF"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_REG, width("G-ABCDEF"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_TYPE, width("B77W"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_FLIGHT, width("RYR33KQW"));
+    ui->aircraft->setColumnWidth(AircraftTableModel::COL_FLIGHT_NO, width("Flight No"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_AIRLINE, std::max(90, width("Airline name")));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_SIDEVIEW, 90);
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_COUNTRY, 45);
@@ -641,15 +854,31 @@ void AircraftGUI::setDefaultColumnWidths()
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_PROTOCOLS, width("ACARS 131.725; HFDL 10.081"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_MESSAGES, width("10000"));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_LAST_SEEN, width("12/12/2026 12:00:00"));
+    ui->aircraft->setColumnWidth(AircraftTableModel::COL_SELCAL, width("SELCAL"));
 
+    // Every column, not just some: the ones left out took Qt's default and came out far
+    // wider than a tick or a time needs. Sized to the widest thing each actually shows,
+    // or to its own heading where that is wider - a column narrower than its title reads
+    // as truncated even when the data fits.
     ui->flights->setColumnWidth(FlightTableModel::COL_FLIGHT, width("RYR33KQW"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_FLIGHT_NO, width("Flight No"));
     ui->flights->setColumnWidth(FlightTableModel::COL_REG, width("G-ABCDEF"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_FROM, width("EGKK"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_TO, width("EGKK"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_FROM, width("WWWW"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_TO, width("WWWW"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_DOCS, width("Docs"));
+    // A tick, so the heading is what sets the width
+    ui->flights->setColumnWidth(FlightTableModel::COL_LS, width("LS"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_CL, width("CL"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_FP, width("FP"));
+    // Shown as hh:mm, and the headings are shorter than that
+    ui->flights->setColumnWidth(FlightTableModel::COL_OUT, width("00:00"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_OFF, width("00:00"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_ON, width("00:00"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_IN, width("00:00"));
     ui->flights->setColumnWidth(FlightTableModel::COL_FIRST_SEEN, width("12/12/2026 12:00:00"));
     ui->flights->setColumnWidth(FlightTableModel::COL_LAST_SEEN, width("12/12/2026 12:00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_DOCS, width("Docs"));
     ui->flights->setColumnWidth(FlightTableModel::COL_PROTOCOLS, width("ACARS 131.725; HFDL 10.081"));
+    ui->flights->setColumnWidth(FlightTableModel::COL_ROUTE_SOURCE, width("Message <>DB"));
 
     // The archive views show the same columns, so give them the same widths
     for (auto pair : { qMakePair((QTableView *) ui->aircraft, (QTableView *) ui->oldAircraft),
@@ -659,6 +888,13 @@ void AircraftGUI::setDefaultColumnWidths()
             pair.second->setColumnWidth(col, pair.first->columnWidth(col));
         }
     }
+
+    // These carry a date and a time to the second now. Left at the default width they
+    // wrapped onto two lines, which they were already close to doing without the seconds.
+    ui->documents->setColumnWidth(DOCUMENT_COL_TIME, width("29/08/2026 13:41:22"));
+    ui->atcMessages->setColumnWidth(ATC_COL_TIME, width("29/08/2026 13:41:22"));
+    // Wide enough for a protocol and an HF frequency, which is the longest it gets
+    ui->atcMessages->setColumnWidth(ATC_COL_PROTOCOL, width("HFDL 11384.000"));
 }
 
 void AircraftGUI::displaySettings()
@@ -672,6 +908,11 @@ void AircraftGUI::displaySettings()
     ui->stats->setChecked(m_settings.m_displayStatistics);
     ui->statistics->setVisible(m_settings.m_displayStatistics);
     ui->displayChart->setChecked(m_settings.m_displayChart);
+    ui->coverage->setChecked(m_settings.m_displayCoverage);
+    // The feed itself is restored by applySettings(), which calls updateFeedConnections()
+    // whatever changed - so without this the feed came back up on restart while its
+    // button sat unlit, saying the opposite of what was happening
+    ui->feed->setChecked(m_settings.m_feedEnabled);
     ui->chart->setVisible(m_settings.m_displayChart);
 
     // Order and size columns
@@ -687,8 +928,9 @@ void AircraftGUI::displaySettings()
         if (m_settings.m_columnSizes[i] > 0) {
             ui->aircraft->setColumnWidth(i, m_settings.m_columnSizes[i]);
         }
-        header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
     }
+    restoreColumnOrder(header, m_settings.m_columnIndexes, AIRCRAFT_COLUMNS);
+    showAllColumnsIfNoneVisible(ui->aircraft, m_settings.m_columnSizes, AIRCRAFT_COLUMNS, m_columnMenu);
 
     QHeaderView *flightHeader = ui->flights->horizontalHeader();
     for (int i = 0; i < FLIGHT_COLUMNS; i++)
@@ -701,8 +943,9 @@ void AircraftGUI::displaySettings()
         if (m_settings.m_flightColumnSizes[i] > 0) {
             ui->flights->setColumnWidth(i, m_settings.m_flightColumnSizes[i]);
         }
-        flightHeader->moveSection(flightHeader->visualIndex(i), m_settings.m_flightColumnIndexes[i]);
     }
+    restoreColumnOrder(flightHeader, m_settings.m_flightColumnIndexes, FLIGHT_COLUMNS);
+    showAllColumnsIfNoneVisible(ui->flights, m_settings.m_flightColumnSizes, FLIGHT_COLUMNS, m_flightColumnMenu);
 
     // After the column work, so the tables are their final shape before the splitters
     // are asked to divide the space between them
@@ -757,9 +1000,28 @@ void AircraftGUI::onMenuDialogCalled(const QPoint &p)
 
 void AircraftGUI::trackerAircraftUpdated(const QList<AircraftDisplay>& aircraft)
 {
+    PROFILER_START()
+    // As ADS-B does: the view repaints on every dataChanged otherwise, and each repaint
+    // of a table cell costs a SystemParametersInfo syscall per primitive drawn through
+    // the Fusion style, so a batch of a hundred aircraft repainted the table a hundred
+    // times
+    // Both views, since both are proxies over the one model and both relayout
+    const ViewSelections before = selectedIds(false);
+    ui->aircraft->setUpdatesEnabled(false);
+    ui->oldAircraft->setUpdatesEnabled(false);
+    m_ignoreSelectionChanges = true;
     m_aircraftModel->upsert(aircraft);
+    // The one re-sort and re-filter of the live view for the whole batch - see the
+    // constructor. An aircraft archived here leaves the view without the neighbouring
+    // row being selected in its place, as it would be by a row removal.
+    m_aircraftProxy->invalidate();
+    m_ignoreSelectionChanges = false;
+    ui->aircraft->setUpdatesEnabled(true);
+    ui->oldAircraft->setUpdatesEnabled(true);
+    keepSelections(false, before);
 
     // Keep the selection-derived state fresh
+    bool survivorArrived = false;
     for (const AircraftDisplay& d : aircraft)
     {
         if (d.m_id == m_selectedAircraftId)
@@ -767,53 +1029,388 @@ void AircraftGUI::trackerAircraftUpdated(const QList<AircraftDisplay>& aircraft)
             m_selectedRegistration = d.m_registration;
             m_selectedIcao = d.m_icao;
         }
+        survivorArrived = survivorArrived || ((m_reselectAircraftId != 0) && (d.m_id == m_reselectAircraftId));
     }
+    // The survivor of a merge that took a selected row with it, as it is after the merge.
+    // Not before: the row it had until now can be in the other view of the pair from the
+    // one the merge has put it in, and selecting it there would have the selection taken
+    // away again when this batch moved it.
+    if (survivorArrived) {
+        reselectMerged();
+    }
+    PROFILER_STOP("Aircraft table: aircraft upsert")
 }
 
+// Gone for good - discarded by the retention sweep, or absorbed into another aircraft,
+// which trackerAircraftMerged() has already been told about. Archiving is not removal:
+// an archived aircraft stays in the model and moves to the other view.
 void AircraftGUI::trackerAircraftRemoved(const QList<quint64>& ids)
 {
+    // The row of an aircraft that was merged away goes here, and with it the selection
+    // if it was the selected one. That selection has already been moved to the survivor,
+    // and is put on its row when the tracker sends it. Any other selection stays with the
+    // aircraft it was made on - see keepSelections().
+    const ViewSelections before = selectedIds(false);
+    m_ignoreSelectionChanges = true;
     m_aircraftModel->remove(ids);
+    m_ignoreSelectionChanges = false;
+    keepSelections(false, before);
     if (ids.contains(m_selectedAircraftId)) {
         m_selectedAircraftId = 0;
+    }
+    if (ids.contains(m_reselectAircraftId)) {
+        m_reselectAircraftId = 0;       // The survivor went too, so there is nothing to put back
+    }
+
+    // Their messages go too, or the tables grow for as long as the feature runs. A row
+    // whose flight is still with us is kept: the flight is what it belongs to, and an
+    // absorbed aircraft's flights move to the survivor rather than going with it.
+    const QSet<quint64> gone(ids.begin(), ids.end());
+    removeMessageRows([this, &gone](quint64 aircraftId, quint64 flightId) {
+        return gone.contains(aircraftId) && ((flightId == 0) || (m_flightModel->rowOf(flightId) < 0));
+    });
+    // The retention sweep is what removes aircraft other than by merging, and the tracker
+    // prunes its own log of what belongs to nothing at the same time
+    pruneOrphanMessageRows();
+
+    // The selected aircraft itself was discarded, which the view was not allowed to turn
+    // into a selection of its neighbour, so nothing else will deselect it
+    if ((m_selectionOwner == SelectionAircraft) && (m_reselectAircraftId == 0)
+        && (m_aircraftModel->rowOf(m_selectedAircraftId) < 0)) {
+        dropSelection();
     }
 }
 
 void AircraftGUI::trackerFlightsUpdated(const QList<FlightDisplay>& flights)
 {
+    PROFILER_START()
+    // As trackerAircraftUpdated()
+    const ViewSelections before = selectedIds(true);
+    ui->flights->setUpdatesEnabled(false);
+    ui->oldFlights->setUpdatesEnabled(false);
+    m_ignoreSelectionChanges = true;
     m_flightModel->upsert(flights);
+    m_flightProxy->invalidate();
+    m_ignoreSelectionChanges = false;
+    ui->flights->setUpdatesEnabled(true);
+    ui->oldFlights->setUpdatesEnabled(true);
+    keepSelections(true, before);
+    // The survivor of a merge is reselected only once its row is as the merge left it, as
+    // in trackerAircraftUpdated(). Typically the merged-away flight was the current one
+    // and the survivor an older name for it, archived until the merge made it current:
+    // selected straight away it was selected in the archive, and lost from there when
+    // this batch moved it back to the live view. reselectMerged() refills the history
+    // tables itself when it succeeds.
+    bool survivorArrived = false;
+    for (const FlightDisplay& d : flights)
+    {
+        if ((m_reselectFlightId != 0) && (d.m_id == m_reselectFlightId))
+        {
+            survivorArrived = true;
+            break;
+        }
+    }
+    const bool reselected = survivorArrived && reselectMerged();
     // A new flight for the aircraft on screen, or a new aircraft on the flight on screen,
     // has to show up without the user clicking away and back
+    if (!reselected && ((m_selectedAircraftId != 0) || !m_selectedFlightNumber.isEmpty())) {
+        updateHistoryTables();
+    }
+    PROFILER_STOP("Aircraft table: flights upsert")
+}
+
+// Two flights were the same flight, so everything shown against the old one now belongs
+// to the survivor.
+//
+// The document and ATC tables hold every message from every aircraft and show only the
+// rows whose flight is the selected one, so a row still tagged with the id that has just
+// been merged away matches nothing and is hidden. That is what made a selected flight's
+// documents disappear a few seconds after they appeared - the ACARS and ADS-B names for
+// it were recognised as one flight, and the rows were left pointing at the half that
+// ceased to exist. Selecting the flight again rebuilt them, which is why it looked
+// intermittent rather than broken.
+void AircraftGUI::trackerFlightsMerged(quint64 from, quint64 to)
+{
+    retagMessageRows(Qt::UserRole + 2, from, to);
+    // The selection follows the flight rather than being dropped with the id it was
+    // made under. Done here, before flightsRemoved is delivered, so that its own test
+    // for the selected flight no longer matches.
+    if (m_selectedFlightId == from)
+    {
+        m_selectedFlightId = to;
+        // The row it was made on is about to be removed, which empties the view's
+        // selection; the survivor's row takes it over once the tracker sends it as the
+        // merge left it - see trackerFlightsUpdated()
+        if (m_selectionOwner == SelectionFlight) {
+            m_reselectFlightId = to;
+        }
+    }
+    if (m_reselectFlightId == from) {
+        m_reselectFlightId = to;        // Merged again before its row arrived
+    }
+    // The tracker moves its watch to the survivor and sends the profile under the
+    // survivor's id, which would otherwise be discarded as being for some other flight
+    // and leave the chart frozen at the moment of the merge
+    if (m_profileFlightId == from) {
+        m_profileFlightId = to;
+    }
+    applyMessageFilter();
+}
+
+// The same for an aircraft: a weak duplicate - known only by one identifier - turned out
+// to be an airframe already tracked under another, and has been absorbed into it. Its
+// flights keep their ids, so only what is held against the aircraft id has to move.
+void AircraftGUI::trackerAircraftMerged(quint64 from, quint64 to)
+{
+    retagMessageRows(Qt::UserRole + 1, from, to);
+    if (m_selectedAircraftId == from)
+    {
+        m_selectedAircraftId = to;
+        if (m_selectionOwner == SelectionAircraft) {
+            m_reselectAircraftId = to;
+        }
+    }
+    if (m_reselectAircraftId == from) {
+        m_reselectAircraftId = to;
+    }
+    // Still the same aircraft's history, so a sort chosen in Past Flights is kept
+    if (m_pastFlightsAircraftId == from) {
+        m_pastFlightsAircraftId = to;
+    }
+    applyMessageFilter();
+}
+
+// Gone for good - discarded with its aircraft by the retention sweep, or merged into
+// another flight, which trackerFlightsMerged() has already been told about
+void AircraftGUI::trackerFlightsRemoved(const QList<quint64>& ids)
+{
+    // As in trackerAircraftRemoved(): a selected row removed because its flight was
+    // merged is a selection we mean to keep
+    const ViewSelections before = selectedIds(true);
+    m_ignoreSelectionChanges = true;
+    m_flightModel->remove(ids);
+    m_ignoreSelectionChanges = false;
+    keepSelections(true, before);
+    if (ids.contains(m_reselectFlightId)) {
+        m_reselectFlightId = 0;
+    }
+
+    // A merged flight's rows were moved to the survivor before this, so these are the
+    // rows of flights that are genuinely gone
+    const QSet<quint64> gone(ids.begin(), ids.end());
+    removeMessageRows([&gone](quint64 aircraftId, quint64 flightId) {
+        (void) aircraftId;
+        return (flightId != 0) && gone.contains(flightId);
+    });
+
+    if (ids.contains(m_selectedFlightId))
+    {
+        m_selectedFlightId = 0;
+        // Nothing can match a selection that no longer exists, so the tables would keep
+        // showing whatever was last let through until something else refiltered them
+        applyMessageFilter();
+    }
+    // As for an aircraft: the selected flight was discarded, not merged
+    if ((m_selectionOwner == SelectionFlight) && (m_reselectFlightId == 0)
+        && (m_flightModel->rowOf(m_selectedFlightId) < 0))
+    {
+        dropSelection();        // Refills the history tables as well
+        return;
+    }
+    // The history tables list flights too, and would go on listing the removed ones
+    // until the next flush happened to refill them
     if ((m_selectedAircraftId != 0) || !m_selectedFlightNumber.isEmpty()) {
         updateHistoryTables();
     }
 }
 
-void AircraftGUI::trackerFlightsRemoved(const QList<quint64>& ids)
+// A time cell that shows seconds and still sorts chronologically. A QDateTime in the
+// display role sorts correctly but Qt renders it in the locale's SHORT format, which has
+// no seconds; a formatted string shows what we want but sorts by its first character, so
+// the 2nd of a month would come before the 29th of the one before it. The two therefore
+// have to be separated - the text is what is shown, the date what is compared.
+//
+// The date part keeps the locale's own format so the column looks as it did; only the
+// time is spelled out.
+class DateTimeTableItem : public QTableWidgetItem
 {
-    m_flightModel->remove(ids);
-    if (ids.contains(m_selectedFlightId)) {
-        m_selectedFlightId = 0;
+public:
+    explicit DateTimeTableItem(const QDateTime& when) :
+        QTableWidgetItem(when.toString(format())),
+        m_when(when)
+    {
+    }
+
+    bool operator<(const QTableWidgetItem& other) const override
+    {
+        const DateTimeTableItem *item = dynamic_cast<const DateTimeTableItem *>(&other);
+        return item ? (m_when < item->m_when) : QTableWidgetItem::operator<(other);
+    }
+
+    const QDateTime& when() const { return m_when; }
+
+private:
+    static const QString& format()
+    {
+        static const QString f = QLocale().dateFormat(QLocale::ShortFormat) + " hh:mm:ss";
+        return f;
+    }
+
+    QDateTime m_when;
+};
+
+// Re-points the Documents, Logons and ATC rows tagged with one aircraft or flight id
+// (the role says which) at another
+void AircraftGUI::retagMessageRows(int role, quint64 from, quint64 to)
+{
+    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
+    {
+        for (int row = 0; row < table->rowCount(); row++)
+        {
+            QTableWidgetItem *item = table->item(row, 0);
+            if (item && (item->data(role).toULongLong() == from)) {
+                item->setData(role, (qulonglong) to);
+            }
+        }
+    }
+}
+
+// Takes out of the Documents, Logons and ATC tables the rows the test picks, given each
+// row's aircraft and flight ids - and, when olderThan is valid, only those received before
+// it. Unattributed SELCAL calls carry neither id, so a test for the ids of something that
+// has gone never picks them; only pruneOrphanMessageRows() does, by age.
+//
+// From the bottom up and a run of adjacent rows at a time, so each removal moves only
+// the rows below it once. The header keeps the hidden flags of the rows that remain in
+// step with them, so nothing needs refiltering afterwards.
+void AircraftGUI::removeMessageRows(const std::function<bool(quint64 aircraftId, quint64 flightId)>& matches,
+                                    const QDateTime& olderThan)
+{
+    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
+    {
+        auto rowMatches = [table, &matches, &olderThan](int row) {
+            const QTableWidgetItem *item = table->item(row, 0);
+            if (!item) {
+                return false;
+            }
+            if (olderThan.isValid())
+            {
+                // Every row's first item is one of these - trackerDocumentsAdded() and
+                // trackerAtcMessages() are what fill the tables
+                const DateTimeTableItem *timeItem = dynamic_cast<const DateTimeTableItem *>(item);
+                if (!timeItem || !timeItem->when().isValid() || (timeItem->when() >= olderThan)) {
+                    return false;
+                }
+            }
+            return matches(item->data(Qt::UserRole + 1).toULongLong(),
+                           item->data(Qt::UserRole + 2).toULongLong());
+        };
+        bool updatesSuspended = false;
+        int row = table->rowCount() - 1;
+        while (row >= 0)
+        {
+            if (!rowMatches(row))
+            {
+                row--;
+                continue;
+            }
+            const int last = row;
+            while ((row >= 0) && rowMatches(row)) {
+                row--;
+            }
+            if (!updatesSuspended)
+            {
+                table->setUpdatesEnabled(false);
+                updatesSuspended = true;
+            }
+            table->model()->removeRows(row + 1, last - row);
+        }
+        if (updatesSuspended) {
+            table->setUpdatesEnabled(true);
+        }
+    }
+}
+
+// The tracker's retention sweep discards an ATC message that belongs to no aircraft it
+// still holds once the message is older than the retention period: an unattributed SELCAL
+// call, or a message from an aircraft that went before its messages were taken with it.
+// The tables here are only ever pruned by the aircraft and flights the tracker removes, so
+// without the same rule those rows stayed until the feature was restarted. Documents and
+// logons go by it too, keeping a row while its flight is still with us as
+// trackerAircraftRemoved() does, and weather reports, which are about airports, go by
+// age alone as the tracker's do.
+void AircraftGUI::pruneOrphanMessageRows()
+{
+    if (m_settings.m_retentionDays <= 0) {
+        return;
+    }
+    m_orphansPrunedMs = QDateTime::currentMSecsSinceEpoch();
+    const QDateTime cutoff = QDateTime::currentDateTime().addDays(-m_settings.m_retentionDays);
+    removeMessageRows([this](quint64 aircraftId, quint64 flightId) {
+        return ((aircraftId == 0) || (m_aircraftModel->rowOf(aircraftId) < 0))
+            && ((flightId == 0) || (m_flightModel->rowOf(flightId) < 0));
+    }, cutoff);
+
+    bool updatesSuspended = false;
+    for (int row = ui->weather->rowCount() - 1; row >= 0; row--)
+    {
+        const QTableWidgetItem *item = ui->weather->item(row, WEATHER_COL_TIME);
+        const QDateTime received = item ? item->data(Qt::DisplayRole).toDateTime() : QDateTime();
+        if (received.isValid() && (received < cutoff))
+        {
+            if (!updatesSuspended)
+            {
+                ui->weather->setUpdatesEnabled(false);
+                updatesSuspended = true;
+            }
+            ui->weather->removeRow(row);
+        }
+    }
+    if (updatesSuspended) {
+        ui->weather->setUpdatesEnabled(true);
     }
 }
 
 void AircraftGUI::trackerDocumentsAdded(const QList<DocumentEvent>& documents)
 {
+    PROFILER_START()
+    // Size and repaint each table once for the batch. The rows are split between two
+    // tables, so count them before sizing rather than growing a row at a time
+    int logonCount = 0;
+    for (const DocumentEvent& e : documents) {
+        logonCount += (e.m_kind == "Logon") ? 1 : 0;
+    }
+    ui->documents->setUpdatesEnabled(false);
+    ui->logons->setUpdatesEnabled(false);
+    int nextDocumentRow = ui->documents->rowCount();
+    int nextLogonRow = ui->logons->rowCount();
+    ui->documents->setRowCount(nextDocumentRow + documents.size() - logonCount);
+    ui->logons->setRowCount(nextLogonRow + logonCount);
     ui->documents->setSortingEnabled(false);
+    ui->logons->setSortingEnabled(false);
+    const int firstDocumentRow = nextDocumentRow;
+    const int firstLogonRow = nextLogonRow;
+    QSet<const QTableWidgetItem *> addedDocuments;
+    QSet<const QTableWidgetItem *> addedLogons;
     for (const DocumentEvent& e : documents)
     {
-        int row = ui->documents->rowCount();
-        ui->documents->setRowCount(row + 1);
-        QTableWidgetItem *timeItem = new QTableWidgetItem();
-        timeItem->setData(Qt::DisplayRole, e.m_received);
+        // Logons go to their own tab. There are far more of them than of everything else
+        // together - 6610 against 700 in a week here - so left in with the flight plans
+        // and clearances they buried them.
+        const bool logon = (e.m_kind == "Logon");
+        QTableWidget *table = logon ? ui->logons : ui->documents;
+        const int row = logon ? nextLogonRow++ : nextDocumentRow++;
+        QTableWidgetItem *timeItem = new DateTimeTableItem(e.m_received);
         timeItem->setData(Qt::UserRole, e.m_text);
         timeItem->setData(Qt::UserRole + 1, (qulonglong) e.m_aircraftId);
         timeItem->setData(Qt::UserRole + 2, (qulonglong) e.m_flightId);
         timeItem->setData(Qt::UserRole + 3, e.m_mapName);
-        ui->documents->setItem(row, DOCUMENT_COL_TIME, timeItem);
-        ui->documents->setItem(row, DOCUMENT_COL_FLIGHT, new QTableWidgetItem(e.m_flight));
-        ui->documents->setItem(row, DOCUMENT_COL_REG, new QTableWidgetItem(e.m_reg));
-        ui->documents->setItem(row, DOCUMENT_COL_TYPE, new QTableWidgetItem(e.m_kind));
-        ui->documents->setItem(row, DOCUMENT_COL_TITLE, new QTableWidgetItem(e.m_title));
+        table->setItem(row, DOCUMENT_COL_TIME, timeItem);
+        (logon ? addedLogons : addedDocuments).insert(timeItem);
+        table->setItem(row, DOCUMENT_COL_FLIGHT, new QTableWidgetItem(e.m_flight));
+        table->setItem(row, DOCUMENT_COL_REG, new QTableWidgetItem(e.m_reg));
+        table->setItem(row, DOCUMENT_COL_TYPE, new QTableWidgetItem(e.m_kind));
+        table->setItem(row, DOCUMENT_COL_TITLE, new QTableWidgetItem(e.m_title));
     }
     // setSortingEnabled(true) sorts immediately, and a row's hidden flag belongs to the
     // VIEW's row number rather than to the item, so it does not travel with the row.
@@ -821,13 +1418,26 @@ void AircraftGUI::trackerDocumentsAdded(const QList<DocumentEvent>& documents)
     // happened to move into those positions - documents vanishing or being replaced by
     // unrelated ones, with nothing touched.
     ui->documents->setSortingEnabled(true);
-    applyMessageFilter();
+    ui->logons->setSortingEnabled(true);
+    // Usually the new rows have sorted to the end and nothing else moved, and then only
+    // they need filtering. Both are tried, so neither is left unfiltered when the other
+    // falls back to the full pass.
+    const bool documentsFiltered = filterAppendedRows(ui->documents, firstDocumentRow, addedDocuments);
+    const bool logonsFiltered = filterAppendedRows(ui->logons, firstLogonRow, addedLogons);
+    if (!documentsFiltered || !logonsFiltered) {
+        applyMessageFilter();
+    }
+    // After the filter: hiding rows repaints too, so keep both suppressed until the end
+    ui->documents->setUpdatesEnabled(true);
+    ui->logons->setUpdatesEnabled(true);
+    PROFILER_STOP("Aircraft table: documents")
 }
 
 // Weather is about airports, so unlike the Documents and ATC tables it is not filtered
 // by the selected aircraft - the aircraft that carried a METAR is incidental to it.
 void AircraftGUI::trackerWeatherReports(const QList<WeatherEvent>& reports)
 {
+    PROFILER_START()
     ui->weather->setSortingEnabled(false);
     for (const WeatherEvent& e : reports)
     {
@@ -847,6 +1457,7 @@ void AircraftGUI::trackerWeatherReports(const QList<WeatherEvent>& reports)
     }
     ui->weather->setSortingEnabled(true);
     ui->weather->scrollToBottom();
+    PROFILER_STOP("Aircraft table: weather")
 }
 
 void AircraftGUI::weatherSelectionChanged()
@@ -857,7 +1468,8 @@ void AircraftGUI::weatherSelectionChanged()
         QTableWidgetItem *timeItem = ui->weather->item(selItem->row(), WEATHER_COL_TIME);
         if (timeItem)
         {
-            ui->weatherText->setPlainText(timeItem->data(Qt::UserRole).toString());
+            // The report carries HTML, which setPlainText() would show as tags
+            ui->weatherText->setHtml(timeItem->data(Qt::UserRole).toString());
             return;
         }
     }
@@ -866,18 +1478,27 @@ void AircraftGUI::weatherSelectionChanged()
 
 void AircraftGUI::trackerAtcMessages(const QList<AtcEvent>& messages)
 {
+    PROFILER_START()
+    // Size and repaint once for the batch, not once per message
+    ui->atcMessages->setUpdatesEnabled(false);
+    int nextRow = ui->atcMessages->rowCount();
+    const int firstRow = nextRow;
+    QSet<const QTableWidgetItem *> added;
+    ui->atcMessages->setRowCount(nextRow + messages.size());
     ui->atcMessages->setSortingEnabled(false);
     for (const AtcEvent& e : messages)
     {
-        int row = ui->atcMessages->rowCount();
-        ui->atcMessages->setRowCount(row + 1);
-        QTableWidgetItem *timeItem = new QTableWidgetItem();
-        timeItem->setData(Qt::DisplayRole, e.m_received);
+        const int row = nextRow++;
+        QTableWidgetItem *timeItem = new DateTimeTableItem(e.m_received);
         timeItem->setData(Qt::UserRole + 1, (qulonglong) e.m_aircraftId);
         timeItem->setData(Qt::UserRole + 2, (qulonglong) e.m_flightId);
         timeItem->setData(Qt::UserRole + 3, e.m_mapName);
         ui->atcMessages->setItem(row, ATC_COL_TIME, timeItem);
-        ui->atcMessages->setItem(row, ATC_COL_PROTOCOL, new QTableWidgetItem(e.m_protocol));
+        added.insert(timeItem);
+        // The link it arrived on, not e.m_protocol: every ATC message is CPDLC by
+        // definition - addAtcMessage() returns early for anything else - so that
+        // column held the same word in every row
+        ui->atcMessages->setItem(row, ATC_COL_PROTOCOL, new QTableWidgetItem(e.m_link));
         ui->atcMessages->setItem(row, ATC_COL_DIR,
             new QTableWidgetItem(QString("%1").arg(QChar(e.m_uplink ? 0x2191 : 0x2193))));
         ui->atcMessages->setItem(row, ATC_COL_FROM, new QTableWidgetItem(e.m_from));
@@ -886,10 +1507,15 @@ void AircraftGUI::trackerAtcMessages(const QList<AtcEvent>& messages)
         messageItem->setToolTip(e.m_tooltip);
         ui->atcMessages->setItem(row, ATC_COL_MESSAGE, messageItem);
     }
-    // As in trackerDocumentsAdded: hide after the sort, not before
+    // As in trackerDocumentsAdded: hide after the sort, not before, and only the new
+    // rows where nothing else moved
     ui->atcMessages->setSortingEnabled(true);
-    applyMessageFilter();
+    if (!filterAppendedRows(ui->atcMessages, firstRow, added)) {
+        applyMessageFilter();
+    }
     ui->atcMessages->scrollToBottom();
+    ui->atcMessages->setUpdatesEnabled(true);
+    PROFILER_STOP("Aircraft table: ATC messages")
 }
 
 // The tracker could not move to the database that was asked for and has stayed with the
@@ -905,20 +1531,100 @@ void AircraftGUI::trackerDatabaseFilenameReverted(const QString& filename)
     applySettings();
 }
 
+// Asked from outside - the web API, and so a link clicked in an aircraft's Map popup -
+// to show a particular aircraft or flight. The row may be in the live table or the
+// archive, so both are searched and the tab holding the match is brought forward.
+void AircraftGUI::trackerSelectRequested(int kind, const QString& value)
+{
+    if (value.isEmpty()) {
+        return;
+    }
+
+    if (kind == AircraftTracker::MsgSelect::Flight)
+    {
+        // The most recently seen flight of that number, which is what someone clicking a
+        // flight number on the Map means by it
+        quint64 best = 0;
+        QDateTime bestSeen;
+        for (int i = 0; i < m_flightModel->rowCount(); i++)
+        {
+            const FlightDisplay *f = m_flightModel->flightAt(i);
+            if (!f || f->m_flight.compare(value, Qt::CaseInsensitive)) {
+                continue;
+            }
+            if (!bestSeen.isValid() || (f->m_lastSeen > bestSeen))
+            {
+                bestSeen = f->m_lastSeen;
+                best = f->m_id;
+            }
+        }
+        // By id, so it is the flight found above and not merely the first of that number
+        if (best) {
+            selectFlightById(best);
+        }
+        return;
+    }
+
+    for (int i = 0; i < m_aircraftModel->rowCount(); i++)
+    {
+        const AircraftDisplay *d = m_aircraftModel->aircraftAt(i);
+        if (!d) {
+            continue;
+        }
+        const bool match = (kind == AircraftTracker::MsgSelect::Icao)
+            ? (d->m_icao && (QString("%1").arg(d->m_icao, 6, 16, QChar('0')).compare(
+                   value, Qt::CaseInsensitive) == 0))
+            : (!d->m_registration.isEmpty()
+               && (d->m_registration.compare(value, Qt::CaseInsensitive) == 0));
+        if (match)
+        {
+            selectAircraft(d->m_id);
+            return;
+        }
+    }
+}
+
 void AircraftGUI::trackerAllCleared()
 {
     m_aircraftModel->clear();
     m_flightModel->clear();
     ui->documents->setRowCount(0);
+    ui->logons->setRowCount(0);
     ui->documentText->clear();
+    ui->logonText->clear();
     ui->atcMessages->setRowCount(0);
     ui->weather->setRowCount(0);
     ui->weatherText->clear();
+    clearSelectionState();
+}
+
+// Back to nothing selected. The models were reset rather than having rows removed, and a
+// reset emits no selection change, so none of the handlers that would otherwise do this
+// get to run - and everything the selection drove went on showing the deleted aircraft.
+void AircraftGUI::clearSelectionState()
+{
+    m_selectionOwner = SelectionNone;
     m_selectedAircraftId = 0;
     m_selectedFlightId = 0;
+    m_selectedFlightNumber.clear();
     m_selectedRegistration.clear();
     m_selectedIcao = 0;
+    m_reselectAircraftId = 0;
+    m_reselectFlightId = 0;
+    m_findRow = -1;
+
+    // The local half of watchFlight(0) only. The tracker is watching nothing already:
+    // Delete All clears its watch, and a resync is for a GUI that has not chosen one.
+    // Left as it was, plotProfileChart() redrew the deleted flight from what it held.
+    m_profileFlightId = 0;
+    m_profileTitle.clear();
+    m_profileTimes.clear();
+    m_profileAltFt.clear();
+    m_profileSpeedKts.clear();
     plotProfileChart();
+
+    updatePhoto(QString(), 0);      // Hides the photograph and empties the details table
+    updateHistoryTables();          // Empties both history tabs, and hides them
 }
 
 void AircraftGUI::trackerSpeechNotification(const QString& speech)
@@ -945,17 +1651,98 @@ bool AircraftGUI::messageRowVisible(const QTableWidgetItem *firstItem) const
     if (m_selectedAircraftId) {
         return firstItem->data(Qt::UserRole + 1).toULongLong() == m_selectedAircraftId;
     }
-    return false;
+    // With nothing selected, what belongs to no aircraft at all: the SELCAL calls that
+    // could not be pinned on one. Nothing else is ever logged without an aircraft, and
+    // these would otherwise have nowhere to be seen.
+    return firstItem->data(Qt::UserRole + 1).toULongLong() == 0;
+}
+
+// Filters only the rows a batch has just added, when that is enough: the table has to be
+// sorted again once they are in, and a row's hidden flag stays with the view's row number
+// rather than travelling with the row, so if the sort put any new row among the old ones
+// the old rows below it have moved under their flags and everything needs doing. Usually
+// - sorted by time, which is the default - the new rows all land at the end. Returns false
+// when the caller must fall back to applyMessageFilter().
+bool AircraftGUI::filterAppendedRows(QTableWidget *table, int firstNewRow, const QSet<const QTableWidgetItem *>& added)
+{
+    // All the rows from where the new ones were added must be new ones, which can only
+    // be if every old row is where it was
+    for (int row = firstNewRow; row < table->rowCount(); row++)
+    {
+        if (!added.contains(table->item(row, 0))) {
+            return false;
+        }
+    }
+    for (int row = firstNewRow; row < table->rowCount(); row++)
+    {
+        const bool visible = messageRowVisible(table->item(row, 0));
+        if (table->isRowHidden(row) == visible) {
+            table->setRowHidden(row, !visible);
+        }
+    }
+    return true;
 }
 
 void AircraftGUI::applyMessageFilter()
 {
-    for (QTableWidget *table : {ui->documents, ui->atcMessages})
+    PROFILER_START()
+    int shown = 0;
+    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
     {
-        for (int row = 0; row < table->rowCount(); row++) {
-            table->setRowHidden(row, !messageRowVisible(table->item(row, 0)));
+        for (int row = 0; row < table->rowCount(); row++)
+        {
+            const bool visible = messageRowVisible(table->item(row, 0));
+            // Only where it changes. setRowHidden() is itself O(rows) in QHeaderView, and
+            // this runs on every batch of new messages over every row ever logged - the
+            // trap AcarsMessageModel describes, quadratic in a log that is never pruned
+            // by default. Asking is cheap; it is the change that costs.
+            if (table->isRowHidden(row) == visible) {
+                table->setRowHidden(row, !visible);
+            }
+            shown += visible ? 1 : 0;
         }
     }
+
+    // Hiding a row keeps its selection and emits no selection change, so the pane below
+    // went on showing a message whose row was no longer on screen - and with nothing
+    // selected at all it showed the last message the user had happened to click, which
+    // reads as though it belonged to whatever is selected now.
+    auto clearWhenNothingShown = [](QTableWidget *table, AcarsMessageView *pane)
+    {
+        const QList<QTableWidgetItem *> selected = table->selectedItems();
+        for (const QTableWidgetItem *item : selected)
+        {
+            if (!table->isRowHidden(item->row())) {
+                return;     // Still showing the row it describes
+            }
+        }
+        pane->clear();
+    };
+    clearWhenNothingShown(ui->documents, ui->documentText);
+    clearWhenNothingShown(ui->logons, ui->logonText);
+
+    // Only when what it filters on has moved, so this is a handful of lines around a
+    // selection change rather than one on every message. The Documents and ATC tables
+    // hide EVERY row when nothing is selected, so a selection lost without the user
+    // touching anything empties them, and nothing used to say when that happened.
+    static quint64 lastFlight = 0;
+    static quint64 lastAircraft = 0;
+    static int lastShown = -1;
+    // Also when the number of visible rows moves without the selection moving, which is
+    // the symptom itself: documents that were on screen going away while the same flight
+    // is still selected. Logging only the selection could never have caught that.
+    if ((m_selectedFlightId != lastFlight) || (m_selectedAircraftId != lastAircraft)
+        || (shown != lastShown))
+    {
+        lastShown = shown;
+        qDebug() << "AircraftGUI::applyMessageFilter: flight" << lastFlight << "->"
+                 << m_selectedFlightId << " aircraft" << lastAircraft << "->"
+                 << m_selectedAircraftId << " showing" << shown << "rows of"
+                 << (ui->documents->rowCount() + ui->atcMessages->rowCount());
+        lastFlight = m_selectedFlightId;
+        lastAircraft = m_selectedAircraftId;
+    }
+    PROFILER_STOP("Aircraft table: message filter")
 }
 
 // The archive tabs show what we are no longer hearing from
@@ -1058,6 +1845,11 @@ bool AircraftGUI::findFrom(int startRow, const QString& text)
         return false;
     }
     const int column = ui->findColumn->currentIndex();
+    // Fetched once for the whole search. Each fetch takes a lock and looks at the
+    // database file's modification time, twice, and doing that for every row of a
+    // couple of thousand aircraft made a search thousands of file system calls.
+    const QSharedPointer<const QHash<QString, AircraftInformation *>> byReg
+        = OsnDB::getAircraftInformationByReg();
 
     for (int i = 0; i < rows; i++)
     {
@@ -1069,10 +1861,8 @@ bool AircraftGUI::findFrom(int startRow, const QString& text)
         // Type and airline are not on either snapshot - they come from the database,
         // which is what the table itself displays in those columns, so searching them
         // matches what is on screen
-        auto typeFields = [](const QString& registration) {
+        auto typeFields = [&byReg](const QString& registration) {
             QStringList f;
-            QSharedPointer<const QHash<QString, AircraftInformation *>> byReg
-                = OsnDB::getAircraftInformationByReg();
             if (byReg && byReg->contains(registration))
             {
                 const AircraftInformation *info = byReg->value(registration);
@@ -1093,6 +1883,7 @@ bool AircraftGUI::findFrom(int startRow, const QString& text)
             switch (column)
             {
             case FindIcao:   break;
+            case FindSelcal: break;     // Belongs to the airframe, like the ICAO address
             case FindReg:    fields << d->m_reg; break;
             case FindType:   fields << typeFields(d->m_reg); break;
             case FindFlight: fields << d->m_flight << d->m_aliases; break;
@@ -1116,11 +1907,10 @@ bool AircraftGUI::findFrom(int startRow, const QString& text)
             case FindReg:    fields << d->m_registration; break;
             case FindType:   fields << typeFields(d->m_registration); break;
             case FindFlight: fields << d->m_flight; break;
+            case FindSelcal: fields << d->m_selcal; break;
             default:
                 fields << icao << d->m_registration << d->m_flight << d->m_mapName
-                       << typeFields(d->m_registration);
-                QSharedPointer<const QHash<QString, AircraftInformation *>> byReg
-                    = OsnDB::getAircraftInformationByReg();
+                       << d->m_selcal << typeFields(d->m_registration);
                 if (byReg && byReg->contains(d->m_registration))
                 {
                     const AircraftInformation *info = byReg->value(d->m_registration);
@@ -1170,17 +1960,44 @@ void AircraftGUI::on_find_returnPressed()
 void AircraftGUI::updateHistoryTables()
 {
     m_updatingHistoryTables = true;
+    // "Callsign", not "Flight": this is what the aircraft transmits - BAW31, TOM3TW -
+    // which is not the flight number a passenger is sold, and the two often differ
     static const QStringList flightHeadings =
-        { "Flight", "From", "To", "First seen", "Last seen", "Msgs" };
+        { "Callsign", "From", "To", "First seen", "Last seen", "Msgs" };
     static const QStringList aircraftHeadings =
         { "Reg", "From", "To", "First seen", "Last seen", "Msgs" };
+    // The tables in the .ui carry these on each column; these two are built here, so
+    // they had none at all
+    static const QStringList flightTips = {
+        "Callsign the flight was flown under",
+        "Departure airport, from a message where one said so, otherwise from the callsign"
+            " to route database",
+        "Arrival airport, from a message where one said so, otherwise from the callsign"
+            " to route database",
+        "When the flight was first heard",
+        "When the flight was last heard",
+        "Messages received for this flight" };
+    static const QStringList aircraftTips = {
+        "Registration, or the ICAO 24 bit address where no registration is known",
+        "Departure airport of the last flight heard",
+        "Arrival airport of the last flight heard",
+        "When the aircraft was first heard",
+        "When the aircraft was last heard",
+        "Messages received from this aircraft" };
 
-    auto prepare = [](QTableWidget *table, const QStringList& headings)
+    auto prepare = [](QTableWidget *table, const QStringList& headings,
+                      const QStringList& tips)
     {
         if (table->columnCount() == 0)
         {
             table->setColumnCount(headings.size());
             table->setHorizontalHeaderLabels(headings);
+            for (int col = 0; (col < tips.size()) && (col < table->columnCount()); col++)
+            {
+                if (QTableWidgetItem *header = table->horizontalHeaderItem(col)) {
+                    header->setToolTip(tips[col]);
+                }
+            }
             table->horizontalHeader()->setSectionsMovable(true);
             table->verticalHeader()->setVisible(false);
         }
@@ -1208,7 +2025,7 @@ void AircraftGUI::updateHistoryTables()
     const quint64 keepSelected = m_selectedFlightId;
 
     // Past Flights: everything this aircraft has operated
-    prepare(ui->pastFlights, flightHeadings);
+    prepare(ui->pastFlights, flightHeadings, flightTips);
     if (m_selectedAircraftId != 0)
     {
         int row = 0;
@@ -1227,8 +2044,15 @@ void AircraftGUI::updateHistoryTables()
             row++;
         }
     }
+    // Re-enabling sorting re-sorts by whatever the header says, which keeps a sort the
+    // user picked. Most recent first only when the table is filled for a different
+    // aircraft - forcing it on every refill undid their choice within a second.
     ui->pastFlights->setSortingEnabled(true);
-    ui->pastFlights->sortByColumn(4, Qt::DescendingOrder);
+    if (m_selectedAircraftId != m_pastFlightsAircraftId)
+    {
+        ui->pastFlights->sortByColumn(4, Qt::DescendingOrder);
+        m_pastFlightsAircraftId = m_selectedAircraftId;
+    }
 
     // After the sort, because sorting moves the rows around
     if (keepSelected)
@@ -1245,7 +2069,7 @@ void AircraftGUI::updateHistoryTables()
     }
 
     // Past Aircraft: everything that has operated this flight number
-    prepare(ui->pastAircraft, aircraftHeadings);
+    prepare(ui->pastAircraft, aircraftHeadings, aircraftTips);
     if (!m_selectedFlightNumber.isEmpty())
     {
         int row = 0;
@@ -1264,7 +2088,11 @@ void AircraftGUI::updateHistoryTables()
         }
     }
     ui->pastAircraft->setSortingEnabled(true);
-    ui->pastAircraft->sortByColumn(4, Qt::DescendingOrder);
+    if (m_selectedFlightNumber.compare(m_pastAircraftFlightNumber, Qt::CaseInsensitive))
+    {
+        ui->pastAircraft->sortByColumn(4, Qt::DescendingOrder);
+        m_pastAircraftFlightNumber = m_selectedFlightNumber;
+    }
 
     // These two tabs live in messageTabs, NOT aircraftTabs - asking aircraftTabs for
     // them returns -1, and setTabVisible(-1) does nothing at all, which is why they
@@ -1320,6 +2148,41 @@ void AircraftGUI::pastFlightSelectionChanged()
 
 void AircraftGUI::aircraftSelectionChanged()
 {
+    if (m_ignoreSelectionChanges) {
+        return;
+    }
+    QTableView *aircraftView = showingArchive() ? ui->oldAircraft : ui->aircraft;
+    const bool haveSelection = !aircraftView->selectionModel()->selectedRows().isEmpty();
+
+    // Nothing selected here and the documents are not ours to change: a selection model
+    // re-emitting with nothing in it says nothing about what the other table holds, and
+    // acting on it is what stole the selection from a flight the user had just clicked.
+    // Sorting by a column whose value changes - Docs, as documents arrive - moves rows
+    // under the selection and makes that happen every few seconds.
+    if (!haveSelection && (m_selectionOwner != SelectionAircraft)) {
+        return;
+    }
+    // Whatever happens below re-derives the selection from the table, so a merge's
+    // survivor no longer needs putting back
+    m_reselectAircraftId = 0;
+    m_reselectFlightId = 0;
+    if (haveSelection)
+    {
+        m_selectionOwner = SelectionAircraft;
+        // Only one table may hold a selection, or the loser goes on re-asserting itself.
+        // Blocked, or clearing it would re-enter through flightSelectionChanged(). Its
+        // current index goes as well: left behind, Qt selects the next row in its place
+        // when that row leaves the view, which handed the selection to a flight nobody
+        // had clicked.
+        QTableView *flightView = showingArchive() ? ui->oldFlights : ui->flights;
+        const QSignalBlocker blocker(flightView->selectionModel());
+        flightView->selectionModel()->clear();
+    }
+    else
+    {
+        m_selectionOwner = SelectionNone;
+    }
+
     m_selectedAircraftId = 0;
     m_selectedRegistration.clear();
     m_selectedIcao = 0;
@@ -1354,6 +2217,30 @@ void AircraftGUI::aircraftSelectionChanged()
 
 void AircraftGUI::flightSelectionChanged()
 {
+    if (m_ignoreSelectionChanges) {
+        return;
+    }
+    QTableView *flightView = showingArchive() ? ui->oldFlights : ui->flights;
+    const bool haveSelection = !flightView->selectionModel()->selectedRows().isEmpty();
+
+    // The same rule as aircraftSelectionChanged(), for the same reason
+    if (!haveSelection && (m_selectionOwner != SelectionFlight)) {
+        return;
+    }
+    m_reselectAircraftId = 0;
+    m_reselectFlightId = 0;
+    if (haveSelection)
+    {
+        m_selectionOwner = SelectionFlight;
+        QTableView *aircraftView = showingArchive() ? ui->oldAircraft : ui->aircraft;
+        const QSignalBlocker blocker(aircraftView->selectionModel());
+        aircraftView->selectionModel()->clear();
+    }
+    else
+    {
+        m_selectionOwner = SelectionNone;
+    }
+
     m_selectedFlightId = 0;
     m_selectedFlightNumber.clear();
     m_selectedAircraftId = 0;
@@ -1383,6 +2270,226 @@ void AircraftGUI::flightSelectionChanged()
     watchFlight(watchId, title);
 }
 
+// Puts the selection back on the survivor of a merge, once the tracker has sent its row as
+// the merge left it - the tracker always does, in the flush after the merge, and only then
+// is the row in the view it is going to stay in. Called with that batch, by
+// trackerAircraftUpdated() and trackerFlightsUpdated().
+// The merged-away row was removed, and the view's selection with it. Done quietly, with
+// the selection handlers ignoring it: trackerAircraftMerged() and trackerFlightsMerged()
+// moved everything the selection drives across already, and going through the handlers
+// would redo it from nothing - restarting the profile and redrawing the track on the Map
+// for what is still the same flight. Returns whether it reselected.
+bool AircraftGUI::reselectMerged()
+{
+    const bool flights = (m_selectionOwner == SelectionFlight);
+    const quint64 id = flights ? m_reselectFlightId : m_reselectAircraftId;
+    const quint64 selectedId = flights ? m_selectedFlightId : m_selectedAircraftId;
+    if ((id == 0) || (m_selectionOwner == SelectionNone) || (selectedId != id))
+    {
+        // Nothing to do, or something else has been selected since
+        m_reselectAircraftId = 0;
+        m_reselectFlightId = 0;
+        return false;
+    }
+
+    const int sourceRow = flights ? m_flightModel->rowOf(id) : m_aircraftModel->rowOf(id);
+    if (sourceRow < 0) {
+        return false;       // Not delivered yet - tried again when it is
+    }
+    m_reselectAircraftId = 0;
+    m_reselectFlightId = 0;
+
+    struct Place {
+        QWidget *m_tab;
+        QTableView *m_view;
+        ActiveFilterProxy *m_proxy;
+    };
+    const QList<Place> places = flights
+        ? QList<Place>{ { ui->flightsTab, ui->flights, m_flightProxy },
+                        { ui->oldFlightsTab, ui->oldFlights, m_oldFlightProxy } }
+        : QList<Place>{ { ui->aircraftTab, ui->aircraft, m_aircraftProxy },
+                        { ui->oldAircraftTab, ui->oldAircraft, m_oldAircraftProxy } };
+    const QModelIndex sourceIndex = flights ? m_flightModel->index(sourceRow, 0)
+                                            : m_aircraftModel->index(sourceRow, 0);
+    QWidget *shown = ui->aircraftTabs->currentWidget();
+    const bool showingThisKind = (shown == places[0].m_tab) || (shown == places[1].m_tab);
+
+    m_ignoreSelectionChanges = true;
+    for (const Place& place : places)
+    {
+        const QModelIndex index = place.m_proxy->mapFromSource(sourceIndex);
+        if (index.isValid())
+        {
+            // The survivor can be live where the merged-away one was archived, or the
+            // other way round. If the other of the pair is on show, bring this one
+            // forward, as selectRow() does - but not from some other tab altogether,
+            // which would be taking the user somewhere they did not go.
+            if (showingThisKind && (shown != place.m_tab)) {
+                ui->aircraftTabs->setCurrentWidget(place.m_tab);
+            }
+            place.m_view->selectRow(index.row());
+        }
+        else
+        {
+            // With the current index, which would otherwise make Qt select a neighbour
+            // when its row left the view
+            place.m_view->selectionModel()->clear();
+        }
+    }
+    m_ignoreSelectionChanges = false;
+
+    // What the survivor brings that the merged-away one may not have had
+    if (flights)
+    {
+        const FlightDisplay *d = m_flightModel->flightAt(sourceRow);
+        m_selectedFlightNumber = d->m_flight;
+        const QString title = d->m_flight.isEmpty() ? d->m_reg : d->m_flight;
+        if ((m_profileFlightId == id) && (title != m_profileTitle))
+        {
+            m_profileTitle = title;
+            plotProfileChart();
+        }
+        updatePhoto(d->m_reg, 0);
+    }
+    else
+    {
+        // The watched flight is left alone: flights keep their ids when their aircraft is
+        // absorbed, so the tracker goes on sending the same one
+        const AircraftDisplay *d = m_aircraftModel->aircraftAt(sourceRow);
+        m_selectedRegistration = d->m_registration;
+        m_selectedIcao = d->m_icao;
+        updatePhoto(m_selectedRegistration, m_selectedIcao);
+    }
+    applyMessageFilter();
+    updateHistoryTables();
+    return true;
+}
+
+// The id of the aircraft or flight selected in one of the four views, or 0 for none
+quint64 AircraftGUI::selectedIdIn(bool flights, bool archive) const
+{
+    QTableView *view = flights ? (archive ? ui->oldFlights : ui->flights)
+                               : (archive ? ui->oldAircraft : ui->aircraft);
+    const QModelIndexList selected = view->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        return 0;
+    }
+    if (flights)
+    {
+        const ActiveFilterProxy *proxy = archive ? m_oldFlightProxy : m_flightProxy;
+        const FlightDisplay *d = m_flightModel->flightAt(proxy->mapToSource(selected.first()).row());
+        return d ? d->m_id : 0;
+    }
+    const ActiveFilterProxy *proxy = archive ? m_oldAircraftProxy : m_aircraftProxy;
+    const AircraftDisplay *d = m_aircraftModel->aircraftAt(proxy->mapToSource(selected.first()).row());
+    return d ? d->m_id : 0;
+}
+
+AircraftGUI::ViewSelections AircraftGUI::selectedIds(bool flights) const
+{
+    ViewSelections ids;
+    ids.m_live = selectedIdIn(flights, false);
+    ids.m_archive = selectedIdIn(flights, true);
+    return ids;
+}
+
+// Puts each of a pair of views' selections back on the aircraft or flight it was made on,
+// after the tracker's changes have been applied to their model with the selection handlers
+// ignoring what that did. Taken by id beforehand, as selectedIds().
+//
+// A selection belongs to an aircraft or a flight, not to a row. Rows move under it as the
+// view re-sorts, which the views' persistent indexes take care of, but they also leave a
+// view - archived, back from the archive, merged, discarded - and then Qt, keeping one row
+// selected in a single selection view, selects the row next to the one that went. Taken as
+// the user's choice, that put an unrelated aircraft's documents, photograph and profile on
+// screen, and it happened just as readily in a view whose selection had been cleared but
+// whose current index had not, which was how the other table came to take the selection.
+// Applied in the middle of the model's removal, it also read the model while its rows and
+// the proxy's mapping disagreed.
+//
+// So a view's selection is put back on its own aircraft or flight if that is still in the
+// view, and otherwise cleared with the current index, and a row Qt selected in a view that
+// had nothing is cleared again. The aircraft or flight the documents are being shown for
+// moves to the other view of the pair along with its row, bringing that tab forward if the
+// pair is on show, as reselectMerged() and selectRow() do.
+void AircraftGUI::keepSelections(bool flights, const ViewSelections& before)
+{
+    struct Place {
+        QWidget *m_tab;
+        QTableView *m_view;
+        ActiveFilterProxy *m_proxy;
+        quint64 m_was;
+        QModelIndex m_keep;
+    };
+    Place places[2] = {
+        { flights ? ui->flightsTab : ui->aircraftTab, flights ? ui->flights : ui->aircraft,
+          flights ? m_flightProxy : m_aircraftProxy, before.m_live, QModelIndex() },
+        { flights ? ui->oldFlightsTab : ui->oldAircraftTab, flights ? ui->oldFlights : ui->oldAircraft,
+          flights ? m_oldFlightProxy : m_oldAircraftProxy, before.m_archive, QModelIndex() }
+    };
+    auto indexIn = [this, flights](const Place& place, quint64 id) {
+        const int sourceRow = (id == 0) ? -1 : (flights ? m_flightModel->rowOf(id) : m_aircraftModel->rowOf(id));
+        if (sourceRow < 0) {
+            return QModelIndex();
+        }
+        return place.m_proxy->mapFromSource(flights ? m_flightModel->index(sourceRow, 0)
+                                                    : m_aircraftModel->index(sourceRow, 0));
+    };
+
+    for (Place& place : places) {
+        place.m_keep = indexIn(place, place.m_was);
+    }
+    const bool owned = (m_selectionOwner == (flights ? SelectionFlight : SelectionAircraft));
+    const quint64 ownedId = flights ? m_selectedFlightId : m_selectedAircraftId;
+    int followedTo = -1;
+    for (int i = 0; owned && (ownedId != 0) && (i < 2); i++)
+    {
+        if ((places[i].m_was == ownedId) && !places[i].m_keep.isValid())
+        {
+            const QModelIndex index = indexIn(places[1 - i], ownedId);
+            if (index.isValid())
+            {
+                places[1 - i].m_keep = index;
+                followedTo = 1 - i;
+            }
+        }
+    }
+
+    m_ignoreSelectionChanges = true;
+    QWidget *shown = ui->aircraftTabs->currentWidget();
+    if ((followedTo >= 0) && ((shown == places[0].m_tab) || (shown == places[1].m_tab))) {
+        ui->aircraftTabs->setCurrentWidget(places[followedTo].m_tab);
+    }
+    for (const Place& place : places)
+    {
+        QItemSelectionModel *selection = place.m_view->selectionModel();
+        if (place.m_keep.isValid())
+        {
+            // Usually it is still selected where it was, and there is nothing to do
+            if ((selection->currentIndex().row() != place.m_keep.row())
+                || !selection->isRowSelected(place.m_keep.row(), QModelIndex())) {
+                selection->setCurrentIndex(place.m_keep, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+            }
+        }
+        else if ((place.m_was != 0) || selection->hasSelection())
+        {
+            selection->clear();
+        }
+    }
+    m_ignoreSelectionChanges = false;
+}
+
+// The aircraft or flight the documents were being shown for has gone for good, so there is
+// nothing left for the selection to follow. Its row went without Qt being allowed to select
+// a neighbour in its place, so this is the deselection the handlers used to do then.
+void AircraftGUI::dropSelection()
+{
+    clearSelectionState();
+    applyMessageFilter();
+    // The tracker half of watchFlight(0), which clearSelectionState() leaves out
+    tracker()->getInputMessageQueue()->push(AircraftTracker::MsgWatchFlight::create(0));
+}
+
 // Tell the tracker which flight's profile to send us
 void AircraftGUI::watchFlight(quint64 flightId, const QString& title)
 {
@@ -1404,6 +2511,23 @@ void AircraftGUI::trackerProfileUpdated(quint64 flightId, const QList<qint64>& t
     m_profileAltFt = altitudeFt;
     m_profileSpeedKts = speedKts;
     plotProfileChart();
+}
+
+// The Logons tab is the Documents tab over a different set of rows, so it behaves the
+// same way - selecting a row shows the logon underneath it
+void AircraftGUI::logonSelectionChanged()
+{
+    QList<QTableWidgetItem *> selected = ui->logons->selectedItems();
+    for (const auto *selItem : selected)
+    {
+        QTableWidgetItem *timeItem = ui->logons->item(selItem->row(), DOCUMENT_COL_TIME);
+        if (timeItem)
+        {
+            ui->logonText->setPlainText(timeItem->data(Qt::UserRole).toString());
+            return;
+        }
+    }
+    ui->logonText->clear();
 }
 
 void AircraftGUI::documentSelectionChanged()
@@ -1441,7 +2565,11 @@ void AircraftGUI::updatePhoto(const QString& registration, quint32 icao)
     ui->flightDetails->setVisible(false);
     m_photoLink.clear();
 
-    if (key.isEmpty()) {
+    if (key.isEmpty())
+    {
+        // updateAircraftInfo() is what empties the details table, and it is not reached
+        // from here, so the last airframe's details stayed beside nothing selected
+        ui->aircraftInfo->setRowCount(0);
         return;
     }
 
@@ -1523,48 +2651,88 @@ void AircraftGUI::photoClicked()
 // ---- Context menus ----
 
 // Jump to a flight in the Flights table, from the aircraft that is flying it
-void AircraftGUI::selectFlight(const QString& flight)
+// Select the first row the test accepts, looking in the live table and then in the
+// archive, and bring forward whichever tab holds it. The archive matters: an aircraft
+// that has just gone quiet is still linked from its Map popup and from other rows.
+bool AircraftGUI::selectRow(bool flights, const std::function<bool(int sourceRow)>& matches)
 {
-    ui->aircraftTabs->setCurrentWidget(ui->flightsTab);
+    struct Place {
+        QWidget *m_tab;
+        QTableView *m_view;
+        ActiveFilterProxy *m_proxy;
+    };
+    const QList<Place> places = flights
+        ? QList<Place>{ { ui->flightsTab, ui->flights, m_flightProxy },
+                        { ui->oldFlightsTab, ui->oldFlights, m_oldFlightProxy } }
+        : QList<Place>{ { ui->aircraftTab, ui->aircraft, m_aircraftProxy },
+                        { ui->oldAircraftTab, ui->oldAircraft, m_oldAircraftProxy } };
 
-    ActiveFilterProxy *proxy = m_flightProxy;
-    QTableView *view = ui->flights;
-    for (int row = 0; row < proxy->rowCount(); row++)
+    for (const Place& place : places)
     {
-        const FlightDisplay *d = m_flightModel->flightAt(proxy->mapToSource(proxy->index(row, 0)).row());
-        if (d && !d->m_flight.compare(flight, Qt::CaseInsensitive))
+        for (int row = 0; row < place.m_proxy->rowCount(); row++)
         {
-            view->selectRow(row);
-            view->scrollTo(proxy->index(row, 0), QAbstractItemView::PositionAtCenter);
-            return;
+            const int sourceRow = place.m_proxy->mapToSource(place.m_proxy->index(row, 0)).row();
+            if (matches(sourceRow))
+            {
+                ui->aircraftTabs->setCurrentWidget(place.m_tab);
+                place.m_view->selectRow(row);
+                place.m_view->scrollTo(place.m_proxy->index(row, 0), QAbstractItemView::PositionAtCenter);
+                return true;
+            }
         }
     }
+    return false;
+}
+
+void AircraftGUI::selectFlight(const QString& flight)
+{
+    selectRow(true, [this, &flight](int sourceRow) {
+        const FlightDisplay *d = m_flightModel->flightAt(sourceRow);
+        return d && !d->m_flight.compare(flight, Qt::CaseInsensitive);
+    });
+}
+
+void AircraftGUI::selectFlightById(quint64 flightId)
+{
+    selectRow(true, [this, flightId](int sourceRow) {
+        const FlightDisplay *d = m_flightModel->flightAt(sourceRow);
+        return d && (d->m_id == flightId);
+    });
 }
 
 // And the other way: the airframe that flew a flight
 void AircraftGUI::selectAircraft(quint64 aircraftId)
 {
-    ui->aircraftTabs->setCurrentWidget(ui->aircraftTab);
+    selectRow(false, [this, aircraftId](int sourceRow) {
+        const AircraftDisplay *d = m_aircraftModel->aircraftAt(sourceRow);
+        return d && (d->m_id == aircraftId);
+    });
+}
 
-    ActiveFilterProxy *proxy = m_aircraftProxy;
-    QTableView *view = ui->aircraft;
-    for (int row = 0; row < proxy->rowCount(); row++)
-    {
-        const AircraftDisplay *d = m_aircraftModel->aircraftAt(proxy->mapToSource(proxy->index(row, 0)).row());
-        if (d && (d->m_id == aircraftId))
-        {
-            view->selectRow(row);
-            view->scrollTo(proxy->index(row, 0), QAbstractItemView::PositionAtCenter);
-            return;
-        }
+// Whether the Map still holds this aircraft, and so whether finding it there can work.
+// Asked of the tracker's own expiry rather than recomputed here, so this cannot drift
+// away from what the Map was actually told: an aircraft comes off the Map when the
+// position it was placed at stops being believable - after "Keep ADS-B position for" or
+// "Keep ACARS position for" depending on where the position came from - and when it is
+// archived, which takes it off whatever its position said.
+bool AircraftGUI::aircraftOnMap(quint64 aircraftId) const
+{
+    const AircraftDisplay *d = m_aircraftModel->aircraftById(aircraftId);
+    if (!d) {
+        return false;           // Discarded entirely, so certainly not on the Map
     }
+    return d->m_active
+        && d->m_mapAvailableUntil.isValid()
+        && (d->m_mapAvailableUntil > QDateTime::currentDateTime());
 }
 
 void AircraftGUI::showContextMenu(QWidget *parent, const QString& cellText, const QString& mapName,
-                                  QPoint globalPos, const QString& showFlight, quint64 showAircraftId)
+                                  QPoint globalPos, const QString& showFlight, quint64 showAircraftId,
+                                  quint64 mapAircraftId)
 {
     QMenu *menu = new QMenu(parent);
     menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->setToolTipsVisible(true);     // Off by default, and the disabled Find explains itself
 
     if (!cellText.isEmpty())
     {
@@ -1580,6 +2748,15 @@ void AircraftGUI::showContextMenu(QWidget *parent, const QString& cellText, cons
         connect(findAction, &QAction::triggered, this, [mapName]() {
             FeatureWebAPIUtils::mapFind(mapName);
         });
+        // Shown but disabled once the aircraft has come off the Map, rather than hidden:
+        // the menu stays the same shape wherever it is opened, and the reason is worth
+        // saying - otherwise Find silently does nothing and looks broken
+        if ((mapAircraftId != 0) && !aircraftOnMap(mapAircraftId))
+        {
+            findAction->setEnabled(false);
+            findAction->setToolTip(QString("%1 is no longer on the map - its position was"
+                                           " last updated too long ago").arg(mapName));
+        }
         menu->addAction(findAction);
     }
     if (!showFlight.isEmpty())
@@ -1618,6 +2795,7 @@ void AircraftGUI::viewContextMenu(QTableView *view, bool aircraftView, QPoint po
     QString mapName;
     QString showFlight;
     quint64 showAircraftId = 0;
+    quint64 mapAircraftId = 0;
     if (aircraftView)
     {
         const AircraftDisplay *d = m_aircraftModel->aircraftAt(proxy->mapToSource(index).row());
@@ -1625,6 +2803,7 @@ void AircraftGUI::viewContextMenu(QTableView *view, bool aircraftView, QPoint po
         {
             mapName = d->m_mapName;
             showFlight = d->m_flight;
+            mapAircraftId = d->m_id;
         }
     }
     else
@@ -1634,10 +2813,11 @@ void AircraftGUI::viewContextMenu(QTableView *view, bool aircraftView, QPoint po
         {
             mapName = d->m_reg;
             showAircraftId = d->m_aircraftId;
+            mapAircraftId = d->m_aircraftId;
         }
     }
     showContextMenu(view, cellText, mapName, view->viewport()->mapToGlobal(pos),
-                    showFlight, showAircraftId);
+                    showFlight, showAircraftId, mapAircraftId);
 }
 
 void AircraftGUI::tableContextMenu(QTableWidget *table, QPoint pos)
@@ -1646,8 +2826,13 @@ void AircraftGUI::tableContextMenu(QTableWidget *table, QPoint pos)
     if (!item) {
         return;
     }
-    QString mapName = table->item(item->row(), 0)->data(Qt::UserRole + 3).toString();
-    showContextMenu(table, item->text(), mapName, table->viewport()->mapToGlobal(pos));
+    // The statistics table shares this menu but carries no map name, and its first
+    // column is a label rather than something to find
+    QTableWidgetItem *first = table->item(item->row(), 0);
+    const QString mapName = first ? first->data(Qt::UserRole + 3).toString() : QString();
+    const quint64 mapAircraftId = first ? first->data(Qt::UserRole + 1).toULongLong() : 0;
+    showContextMenu(table, item->text(), mapName, table->viewport()->mapToGlobal(pos),
+                    QString(), 0, mapAircraftId);
 }
 
 // ---- Charts ----
@@ -1670,11 +2855,13 @@ void AircraftGUI::plotChart()
     m_chart->addAxis(m_chartXAxis, Qt::AlignBottom);
     m_chart->addAxis(m_chartYAxis, Qt::AlignLeft);
 
-    static const char *seriesNames[CHART_SERIES] = {"ADS-B", "ACARS", "VDL2", "HFDL", "Aero", "Total"};
     for (int i = 0; i < CHART_SERIES; i++)
     {
         m_chartSeries[i] = new QLineSeries();
-        m_chartSeries[i]->setName(seriesNames[i]);
+        // One per protocol, named as everywhere else, and then the total. A fixed list
+        // of names here went out of step the moment a protocol was added.
+        m_chartSeries[i]->setName((i < AircraftReport::ProtocolCount)
+            ? AircraftTracker::protocolName(i) : QString("Total"));
         m_chart->addSeries(m_chartSeries[i]);
         m_chartSeries[i]->attachAxis(m_chartXAxis);
         m_chartSeries[i]->attachAxis(m_chartYAxis);
@@ -1710,16 +2897,35 @@ void AircraftGUI::trackerMessageRates(const QList<float>& rates)
 {
     const QDateTime now = QDateTime::currentDateTime();
 
+    // The tracker prunes its ATC log of what belongs to nothing even in a sweep that
+    // discards no aircraft, and then sends nothing to say so. These samples come every ten
+    // seconds; the sweep runs once a minute, so pruning as often as that is enough.
+    if (now.toMSecsSinceEpoch() - m_orphansPrunedMs >= 60 * 1000) {
+        pruneOrphanMessageRows();
+    }
+
+    // The axis fits what is plotted now, falling as well as rising. Only ever growing
+    // left one burst flattening the chart for as long as the feature ran. Every retained
+    // point is in view - the x axis starts at the oldest - and a series hidden from the
+    // legend does not count.
+    qreal maxRate = 0.0;
     for (int i = 0; (i < CHART_SERIES) && (i < rates.size()); i++)
     {
         m_chartSeries[i]->append(now.toMSecsSinceEpoch(), rates[i]);
-        if (m_chartYAxis->max() < rates[i]) {
-            m_chartYAxis->setMax(std::ceil(rates[i]) + 1.0);
-        }
         // Bound long-running growth
         if (m_chartSeries[i]->count() > 1000) {
             m_chartSeries[i]->removePoints(0, m_chartSeries[i]->count() - 1000);
         }
+        if (m_chartSeries[i]->isVisible())
+        {
+            for (int j = 0; j < m_chartSeries[i]->count(); j++) {
+                maxRate = std::max(maxRate, m_chartSeries[i]->at(j).y());
+            }
+        }
+    }
+    const qreal yMax = std::ceil(maxRate) + 1.0;
+    if (m_chartYAxis->max() != yMax) {
+        m_chartYAxis->setMax(yMax);
     }
     m_chartXAxis->setMax(now);
     if (m_chartSeries[0]->count() > 0) {
@@ -1801,6 +3007,80 @@ void AircraftGUI::on_deleteAircraft_clicked()
     tracker()->getInputMessageQueue()->push(AircraftTracker::MsgDeleteAll::create());
 }
 
+void AircraftGUI::on_feed_clicked(bool checked)
+{
+    m_settings.m_feedEnabled = checked;
+    m_settingsKeys.append("feedEnabled");
+    applySettings();
+}
+
+// Feed settings dialog: station ident plus per-aggregator enable, host and port.
+//
+// Here rather than in the ACARS demodulator, where it used to be: a receiver runs one
+// demodulator per band - VHF, VDL-2, HFDL - and this had to be filled in identically in
+// each of them, opening three sets of connections to the same aggregator under the same
+// station identity. The station is a property of the receiver, so it is configured once.
+void AircraftGUI::feedSelect(const QPoint& p)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("ACARS Feed Settings");
+
+    QLineEdit *stationId = new QLineEdit(m_settings.m_feedStationId);
+    stationId->setToolTip("Station identifier sent with each message (e.g. XX-JBLOGGS-VHF1). Register it with the aggregator to claim your feed");
+    QCheckBox *airframes = new QCheckBox("Feed airframes.io");
+    airframes->setChecked(m_settings.m_feedAirframes);
+    QLineEdit *airframesHost = new QLineEdit(m_settings.m_feedAirframesHost);
+    QSpinBox *airframesPort = new QSpinBox();
+    airframesPort->setRange(1, 65535);
+    airframesPort->setValue(m_settings.m_feedAirframesPort);
+    QComboBox *airframesProtocol = new QComboBox();
+    airframesProtocol->addItems({"TCP", "UDP"});
+    airframesProtocol->setCurrentIndex(m_settings.m_feedAirframesTcp ? 0 : 1);
+    airframesProtocol->setToolTip("Use the protocol, host and port the airframes.io Add Ground Station wizard assigns to your station");
+    QCheckBox *avdelphi = new QCheckBox("Feed avdelphi.com");
+    avdelphi->setChecked(m_settings.m_feedAvdelphi);
+    QLineEdit *avdelphiHost = new QLineEdit(m_settings.m_feedAvdelphiHost);
+    QSpinBox *avdelphiPort = new QSpinBox();
+    avdelphiPort->setRange(1, 65535);
+    avdelphiPort->setValue(m_settings.m_feedAvdelphiPort);
+    QComboBox *avdelphiProtocol = new QComboBox();
+    avdelphiProtocol->addItems({"TCP", "UDP"});
+    avdelphiProtocol->setCurrentIndex(m_settings.m_feedAvdelphiTcp ? 0 : 1);
+
+    QFormLayout *form = new QFormLayout(&dialog);
+    form->addRow("Station ID", stationId);
+    form->addRow(airframes);
+    form->addRow("Host", airframesHost);
+    form->addRow("Port", airframesPort);
+    form->addRow("Protocol", airframesProtocol);
+    form->addRow(avdelphi);
+    form->addRow("Host", avdelphiHost);
+    form->addRow("Port", avdelphiPort);
+    form->addRow("Protocol", avdelphiProtocol);
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.move(p);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settings.m_feedStationId = stationId->text().trimmed();
+        m_settings.m_feedAirframes = airframes->isChecked();
+        m_settings.m_feedAirframesHost = airframesHost->text().trimmed();
+        m_settings.m_feedAirframesPort = airframesPort->value();
+        m_settings.m_feedAirframesTcp = airframesProtocol->currentIndex() == 0;
+        m_settings.m_feedAvdelphi = avdelphi->isChecked();
+        m_settings.m_feedAvdelphiHost = avdelphiHost->text().trimmed();
+        m_settings.m_feedAvdelphiPort = avdelphiPort->value();
+        m_settings.m_feedAvdelphiTcp = avdelphiProtocol->currentIndex() == 0;
+        m_settingsKeys.append({"feedStationId", "feedAirframes", "feedAirframesHost",
+                               "feedAirframesPort", "feedAirframesTcp", "feedAvdelphi",
+                               "feedAvdelphiHost", "feedAvdelphiPort", "feedAvdelphiTcp"});
+        applySettings();
+    }
+}
+
 void AircraftGUI::on_settings_clicked()
 {
     AircraftSettingsDialog dialog(&m_settings, this);
@@ -1847,9 +3127,8 @@ void AircraftGUI::statsContextMenu(const QPoint& pos)
     }
     else if (chosen == allTime)
     {
-        // The stored blob has to be cleared as well as the tracker's copy, or the next
-        // update would serialise the old figures straight back out of the preset
-        m_statisticsBlob = QByteArray();
+        // Clearing the preset's copy as well, so a preset written before the records
+        // moved into the database cannot be imported over the reset that just happened
         m_settings.m_statistics = QByteArray();
         m_settingsKeys.append("statistics");
         tracker()->getInputMessageQueue()->push(
@@ -1889,6 +3168,13 @@ void AircraftGUI::on_displayChart_clicked(bool checked)
     applySettings();
 }
 
+void AircraftGUI::on_coverage_clicked(bool checked)
+{
+    m_settings.m_displayCoverage = checked;
+    m_settingsKeys.append("displayCoverage");
+    applySettings();
+}
+
 void AircraftGUI::on_atcLabels_clicked(bool checked)
 {
     m_settings.m_atcLabels = checked;
@@ -1898,11 +3184,19 @@ void AircraftGUI::on_atcLabels_clicked(bool checked)
 
 // ---- Column management ----
 
+// Every column's position, not just the one dragged: those between where it was and where
+// it went have each moved one place, and storing only the dragged column left them
+// claiming their old places - so the order restored was not the order saved
 void AircraftGUI::aircraft_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
+    (void) logicalIndex;
     (void) oldVisualIndex;
+    (void) newVisualIndex;
 
-    m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
+    const QHeaderView *header = ui->aircraft->horizontalHeader();
+    for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
+        m_settings.m_columnIndexes[i] = header->visualIndex(i);
+    }
     m_settingsKeys.append("columnIndexes");
     applySettings();
 }
@@ -1916,11 +3210,17 @@ void AircraftGUI::aircraft_sectionResized(int logicalIndex, int oldSize, int new
     applySettings();
 }
 
+// As aircraft_sectionMoved()
 void AircraftGUI::flights_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
+    (void) logicalIndex;
     (void) oldVisualIndex;
+    (void) newVisualIndex;
 
-    m_settings.m_flightColumnIndexes[logicalIndex] = newVisualIndex;
+    const QHeaderView *header = ui->flights->horizontalHeader();
+    for (int i = 0; i < FLIGHT_COLUMNS; i++) {
+        m_settings.m_flightColumnIndexes[i] = header->visualIndex(i);
+    }
     m_settingsKeys.append("flightColumnIndexes");
     applySettings();
 }
@@ -1947,6 +3247,13 @@ void AircraftGUI::flightColumnSelectMenuChecked(bool checked)
     if (action != nullptr)
     {
         int idx = action->data().toInt(nullptr);
+        if (!action->isChecked() && (visibleColumnCount(ui->flights, FLIGHT_COLUMNS) <= 1))
+        {
+            // The menu that would put it back lives on the header, and a table with no
+            // visible columns has no header to right-click: refuse the last one
+            action->setChecked(true);
+            return;
+        }
         ui->flights->setColumnHidden(idx, !action->isChecked());
     }
 }
@@ -1964,6 +3271,13 @@ void AircraftGUI::aircraftColumnSelectMenuChecked(bool checked)
     if (action != nullptr)
     {
         int idx = action->data().toInt(nullptr);
+        if (!action->isChecked() && (visibleColumnCount(ui->aircraft, AIRCRAFT_COLUMNS) <= 1))
+        {
+            // The menu that would put it back lives on the header, and a table with no
+            // visible columns has no header to right-click: refuse the last one
+            action->setChecked(true);
+            return;
+        }
         ui->aircraft->setColumnHidden(idx, !action->isChecked());
     }
 }

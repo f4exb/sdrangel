@@ -34,6 +34,8 @@ SWGACARSDemodSettings::SWGACARSDemodSettings() {
     m_mode_isSet = false;
     aero_channel = 0;
     m_aero_channel_isSet = false;
+    iridium_bandwidth = 0;
+    m_iridium_bandwidth_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     correlation_threshold = 0.0f;
@@ -60,26 +62,6 @@ SWGACARSDemodSettings::SWGACARSDemodSettings() {
     m_log_filename_isSet = false;
     log_enabled = 0;
     m_log_enabled_isSet = false;
-    feed_enabled = 0;
-    m_feed_enabled_isSet = false;
-    feed_station_id = nullptr;
-    m_feed_station_id_isSet = false;
-    feed_airframes = 0;
-    m_feed_airframes_isSet = false;
-    feed_airframes_host = nullptr;
-    m_feed_airframes_host_isSet = false;
-    feed_airframes_port = 0;
-    m_feed_airframes_port_isSet = false;
-    feed_airframes_tcp = 0;
-    m_feed_airframes_tcp_isSet = false;
-    feed_avdelphi = 0;
-    m_feed_avdelphi_isSet = false;
-    feed_avdelphi_host = nullptr;
-    m_feed_avdelphi_host_isSet = false;
-    feed_avdelphi_port = 0;
-    m_feed_avdelphi_port_isSet = false;
-    feed_avdelphi_tcp = 0;
-    m_feed_avdelphi_tcp_isSet = false;
     scope_ch1 = 0;
     m_scope_ch1_isSet = false;
     scope_ch2 = 0;
@@ -122,6 +104,8 @@ SWGACARSDemodSettings::init() {
     m_mode_isSet = false;
     aero_channel = 0;
     m_aero_channel_isSet = false;
+    iridium_bandwidth = 0;
+    m_iridium_bandwidth_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     correlation_threshold = 0.0f;
@@ -148,26 +132,6 @@ SWGACARSDemodSettings::init() {
     m_log_filename_isSet = false;
     log_enabled = 0;
     m_log_enabled_isSet = false;
-    feed_enabled = 0;
-    m_feed_enabled_isSet = false;
-    feed_station_id = new QString("");
-    m_feed_station_id_isSet = false;
-    feed_airframes = 0;
-    m_feed_airframes_isSet = false;
-    feed_airframes_host = new QString("");
-    m_feed_airframes_host_isSet = false;
-    feed_airframes_port = 0;
-    m_feed_airframes_port_isSet = false;
-    feed_airframes_tcp = 0;
-    m_feed_airframes_tcp_isSet = false;
-    feed_avdelphi = 0;
-    m_feed_avdelphi_isSet = false;
-    feed_avdelphi_host = new QString("");
-    m_feed_avdelphi_host_isSet = false;
-    feed_avdelphi_port = 0;
-    m_feed_avdelphi_port_isSet = false;
-    feed_avdelphi_tcp = 0;
-    m_feed_avdelphi_tcp_isSet = false;
     scope_ch1 = 0;
     m_scope_ch1_isSet = false;
     scope_ch2 = 0;
@@ -205,6 +169,7 @@ SWGACARSDemodSettings::cleanup() {
 
 
 
+
     if(filter != nullptr) { 
         delete filter;
     }
@@ -221,22 +186,6 @@ SWGACARSDemodSettings::cleanup() {
     if(log_filename != nullptr) { 
         delete log_filename;
     }
-
-
-    if(feed_station_id != nullptr) { 
-        delete feed_station_id;
-    }
-
-    if(feed_airframes_host != nullptr) { 
-        delete feed_airframes_host;
-    }
-
-
-
-    if(feed_avdelphi_host != nullptr) { 
-        delete feed_avdelphi_host;
-    }
-
 
 
 
@@ -281,6 +230,8 @@ SWGACARSDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&aero_channel, pJson["aeroChannel"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&iridium_bandwidth, pJson["iridiumBandwidth"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&correlation_threshold, pJson["correlationThreshold"], "float", "");
@@ -306,26 +257,6 @@ SWGACARSDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_enabled, pJson["feedEnabled"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_station_id, pJson["feedStationId"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&feed_airframes, pJson["feedAirframes"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_airframes_host, pJson["feedAirframesHost"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&feed_airframes_port, pJson["feedAirframesPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_airframes_tcp, pJson["feedAirframesTcp"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_avdelphi, pJson["feedAvdelphi"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_avdelphi_host, pJson["feedAvdelphiHost"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&feed_avdelphi_port, pJson["feedAvdelphiPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&feed_avdelphi_tcp, pJson["feedAvdelphiTcp"], "qint32", "");
     
     ::SWGSDRangel::setValue(&scope_ch1, pJson["scopeCh1"], "qint32", "");
     
@@ -380,6 +311,9 @@ SWGACARSDemodSettings::asJsonObject() {
     if(m_aero_channel_isSet){
         obj->insert("aeroChannel", QJsonValue(aero_channel));
     }
+    if(m_iridium_bandwidth_isSet){
+        obj->insert("iridiumBandwidth", QJsonValue(iridium_bandwidth));
+    }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
@@ -418,36 +352,6 @@ SWGACARSDemodSettings::asJsonObject() {
     }
     if(m_log_enabled_isSet){
         obj->insert("logEnabled", QJsonValue(log_enabled));
-    }
-    if(m_feed_enabled_isSet){
-        obj->insert("feedEnabled", QJsonValue(feed_enabled));
-    }
-    if(feed_station_id != nullptr && *feed_station_id != QString("")){
-        toJsonValue(QString("feedStationId"), feed_station_id, obj, QString("QString"));
-    }
-    if(m_feed_airframes_isSet){
-        obj->insert("feedAirframes", QJsonValue(feed_airframes));
-    }
-    if(feed_airframes_host != nullptr && *feed_airframes_host != QString("")){
-        toJsonValue(QString("feedAirframesHost"), feed_airframes_host, obj, QString("QString"));
-    }
-    if(m_feed_airframes_port_isSet){
-        obj->insert("feedAirframesPort", QJsonValue(feed_airframes_port));
-    }
-    if(m_feed_airframes_tcp_isSet){
-        obj->insert("feedAirframesTcp", QJsonValue(feed_airframes_tcp));
-    }
-    if(m_feed_avdelphi_isSet){
-        obj->insert("feedAvdelphi", QJsonValue(feed_avdelphi));
-    }
-    if(feed_avdelphi_host != nullptr && *feed_avdelphi_host != QString("")){
-        toJsonValue(QString("feedAvdelphiHost"), feed_avdelphi_host, obj, QString("QString"));
-    }
-    if(m_feed_avdelphi_port_isSet){
-        obj->insert("feedAvdelphiPort", QJsonValue(feed_avdelphi_port));
-    }
-    if(m_feed_avdelphi_tcp_isSet){
-        obj->insert("feedAvdelphiTcp", QJsonValue(feed_avdelphi_tcp));
     }
     if(m_scope_ch1_isSet){
         obj->insert("scopeCh1", QJsonValue(scope_ch1));
@@ -523,6 +427,16 @@ void
 SWGACARSDemodSettings::setAeroChannel(qint32 aero_channel) {
     this->aero_channel = aero_channel;
     this->m_aero_channel_isSet = true;
+}
+
+qint32
+SWGACARSDemodSettings::getIridiumBandwidth() {
+    return iridium_bandwidth;
+}
+void
+SWGACARSDemodSettings::setIridiumBandwidth(qint32 iridium_bandwidth) {
+    this->iridium_bandwidth = iridium_bandwidth;
+    this->m_iridium_bandwidth_isSet = true;
 }
 
 float
@@ -653,106 +567,6 @@ void
 SWGACARSDemodSettings::setLogEnabled(qint32 log_enabled) {
     this->log_enabled = log_enabled;
     this->m_log_enabled_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedEnabled() {
-    return feed_enabled;
-}
-void
-SWGACARSDemodSettings::setFeedEnabled(qint32 feed_enabled) {
-    this->feed_enabled = feed_enabled;
-    this->m_feed_enabled_isSet = true;
-}
-
-QString*
-SWGACARSDemodSettings::getFeedStationId() {
-    return feed_station_id;
-}
-void
-SWGACARSDemodSettings::setFeedStationId(QString* feed_station_id) {
-    this->feed_station_id = feed_station_id;
-    this->m_feed_station_id_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAirframes() {
-    return feed_airframes;
-}
-void
-SWGACARSDemodSettings::setFeedAirframes(qint32 feed_airframes) {
-    this->feed_airframes = feed_airframes;
-    this->m_feed_airframes_isSet = true;
-}
-
-QString*
-SWGACARSDemodSettings::getFeedAirframesHost() {
-    return feed_airframes_host;
-}
-void
-SWGACARSDemodSettings::setFeedAirframesHost(QString* feed_airframes_host) {
-    this->feed_airframes_host = feed_airframes_host;
-    this->m_feed_airframes_host_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAirframesPort() {
-    return feed_airframes_port;
-}
-void
-SWGACARSDemodSettings::setFeedAirframesPort(qint32 feed_airframes_port) {
-    this->feed_airframes_port = feed_airframes_port;
-    this->m_feed_airframes_port_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAirframesTcp() {
-    return feed_airframes_tcp;
-}
-void
-SWGACARSDemodSettings::setFeedAirframesTcp(qint32 feed_airframes_tcp) {
-    this->feed_airframes_tcp = feed_airframes_tcp;
-    this->m_feed_airframes_tcp_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAvdelphi() {
-    return feed_avdelphi;
-}
-void
-SWGACARSDemodSettings::setFeedAvdelphi(qint32 feed_avdelphi) {
-    this->feed_avdelphi = feed_avdelphi;
-    this->m_feed_avdelphi_isSet = true;
-}
-
-QString*
-SWGACARSDemodSettings::getFeedAvdelphiHost() {
-    return feed_avdelphi_host;
-}
-void
-SWGACARSDemodSettings::setFeedAvdelphiHost(QString* feed_avdelphi_host) {
-    this->feed_avdelphi_host = feed_avdelphi_host;
-    this->m_feed_avdelphi_host_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAvdelphiPort() {
-    return feed_avdelphi_port;
-}
-void
-SWGACARSDemodSettings::setFeedAvdelphiPort(qint32 feed_avdelphi_port) {
-    this->feed_avdelphi_port = feed_avdelphi_port;
-    this->m_feed_avdelphi_port_isSet = true;
-}
-
-qint32
-SWGACARSDemodSettings::getFeedAvdelphiTcp() {
-    return feed_avdelphi_tcp;
-}
-void
-SWGACARSDemodSettings::setFeedAvdelphiTcp(qint32 feed_avdelphi_tcp) {
-    this->feed_avdelphi_tcp = feed_avdelphi_tcp;
-    this->m_feed_avdelphi_tcp_isSet = true;
 }
 
 qint32
@@ -909,6 +723,9 @@ SWGACARSDemodSettings::isSet(){
         if(m_aero_channel_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_iridium_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_rf_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
@@ -946,36 +763,6 @@ SWGACARSDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_log_enabled_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_enabled_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(feed_station_id && *feed_station_id != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_airframes_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(feed_airframes_host && *feed_airframes_host != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_airframes_port_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_airframes_tcp_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_avdelphi_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(feed_avdelphi_host && *feed_avdelphi_host != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_avdelphi_port_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_feed_avdelphi_tcp_isSet){
             isObjectUpdated = true; break;
         }
         if(m_scope_ch1_isSet){

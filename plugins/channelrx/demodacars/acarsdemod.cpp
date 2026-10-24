@@ -29,6 +29,9 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGACARSDemodSettings.h"
+#include "SWGACARSDemodReport.h"
 //#include "SWGACARSDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGMapItem.h"
@@ -44,6 +47,7 @@
 
 MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgConfigureAcarsDemod, Message)
 MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgVdl2Frame, Message)
+MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgAcarsPacket, MainCore::MsgPacket)
 MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgHfdlFrame, Message)
 MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgAeroFrame, Message)
 MESSAGE_CLASS_DEFINITION(AcarsDemod::MsgProtocolChange, Message)
@@ -111,13 +115,16 @@ AcarsDemod::~AcarsDemod()
         stop();
     }
 
-    delete m_basebandSink;
-
-    // The sink is gone, so nothing pushes to the worker any more
+    // The sink has stopped, so nothing new reaches the worker - but frames it already
+    // queued are still being processed, and those read the sink (getMagSq() for the feed
+    // level). So the worker thread must finish, which also deletes the worker, before the
+    // sink is deleted
     m_workerThread->quit();
     m_workerThread->wait();
     m_worker = nullptr;
     m_workerThread = nullptr;
+
+    delete m_basebandSink;
 }
 
 void AcarsDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -253,6 +260,51 @@ void AcarsDemod::applySettings(const AcarsDemodSettings& settings, bool force)
     if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
         reverseAPIKeys.append("logEnabled");
     }
+    if ((settings.m_mode != m_settings.m_mode) || force) {
+        reverseAPIKeys.append("mode");
+    }
+    if ((settings.m_aeroChannel != m_settings.m_aeroChannel) || force) {
+        reverseAPIKeys.append("aeroChannel");
+    }
+    if ((settings.m_iridiumBandwidth != m_settings.m_iridiumBandwidth) || force) {
+        reverseAPIKeys.append("iridiumBandwidth");
+    }
+    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
+        reverseAPIKeys.append("correlationThreshold");
+    }
+    if ((settings.m_filter != m_settings.m_filter) || force) {
+        reverseAPIKeys.append("filter");
+    }
+    if ((settings.m_filterColumn != m_settings.m_filterColumn) || force) {
+        reverseAPIKeys.append("filterColumn");
+    }
+    if ((settings.m_hideNoInfo != m_settings.m_hideNoInfo) || force) {
+        reverseAPIKeys.append("hideNoInfo");
+    }
+    if ((settings.m_showDate != m_settings.m_showDate) || force) {
+        reverseAPIKeys.append("showDate");
+    }
+    if ((settings.m_displayPhotos != m_settings.m_displayPhotos) || force) {
+        reverseAPIKeys.append("displayPhotos");
+    }
+    if ((settings.m_displayChart != m_settings.m_displayChart) || force) {
+        reverseAPIKeys.append("displayChart");
+    }
+    if ((settings.m_scopeCh1 != m_settings.m_scopeCh1) || force) {
+        reverseAPIKeys.append("scopeCh1");
+    }
+    if ((settings.m_scopeCh2 != m_settings.m_scopeCh2) || force) {
+        reverseAPIKeys.append("scopeCh2");
+    }
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+    if ((settings.m_workspaceIndex != m_settings.m_workspaceIndex) || force) {
+        reverseAPIKeys.append("workspaceIndex");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -310,14 +362,35 @@ bool AcarsDemod::deserialize(const QByteArray& data)
     }
 }
 
+// NOTE: the API carries these settings in three directions - reading a PATCH,
+// writing a GET, and sending an update to a reverse API - and each one now lists
+// them out in full below. A setting added to AcarsDemodSettings has to be added to
+// ALL THREE: webapiUpdateChannelSettings, webapiFormatChannelSettings and
+// webapiFormatChannelSettings(keys, ...). Missing one leaves the setting silently
+// unreadable, unreportable or unsynchronised rather than failing to build.
+
+// The strings need their own handling: a generated setter takes ownership of what it is
+// given, and the default constructor leaves every pointer null - so assigning in place
+// without checking writes through nullptr
+static void acarsApiSetString(SWGSDRangel::SWGACARSDemodSettings *swg, QString *held,
+                              void (SWGSDRangel::SWGACARSDemodSettings::*setter)(QString *),
+                              const QString& value)
+{
+    if (held) {
+        *held = value;
+    } else {
+        (swg->*setter)(new QString(value));
+    }
+}
+
 int AcarsDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-  /*  response.setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
+    response.setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
     response.getAcarsDemodSettings()->init();
-    webapiFormatChannelSettings(response, m_settings);  */
+    webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
@@ -327,23 +400,50 @@ int AcarsDemod::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
-  /*  (void) errorMessage;
+    (void) errorMessage;
     AcarsDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
     MsgConfigureAcarsDemod *msg = MsgConfigureAcarsDemod::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("AcarsDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
+    if (m_guiMessageQueue)      // forward to GUI if any
     {
         MsgConfigureAcarsDemod *msgToGUI = MsgConfigureAcarsDemod::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
     webapiFormatChannelSettings(response, settings);
-               */
     return 200;
+}
+
+int AcarsDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAcarsDemodReport(new SWGSDRangel::SWGACARSDemodReport());
+    response.getAcarsDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void AcarsDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    SWGSDRangel::SWGACARSDemodReport *swg = response.getAcarsDemodReport();
+
+    const double magsqAvg = getMagSq();
+    swg->setChannelPowerDb(magsqAvg > 0.0 ? 10.0 * log10(magsqAvg) : -200.0);
+    // Depends on the protocol, and in Aero on the rate tuned - see channelSampleRate()
+    swg->setChannelSampleRate(AcarsDemodSink::channelSampleRate(m_settings));
+
+    // Both are only meaningful in Aero mode, which is the only one with a continuous
+    // carrier to average over. The other protocols leave them at zero.
+    double evm = 0.0;
+    double suRate = 0.0;
+    getAeroQuality(evm, suRate);
+    swg->setAeroEvm((float) evm);
+    swg->setAeroSignalUnitRate((float) suRate);
 }
 
 void AcarsDemod::webapiUpdateChannelSettings(
@@ -351,83 +451,177 @@ void AcarsDemod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-   /* if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getAcarsDemodSettings()->getInputFrequencyOffset();
+    SWGSDRangel::SWGACARSDemodSettings *swg = response.getAcarsDemodSettings();
+    if (!swg) {
+        return;
     }
-    if (channelSettingsKeys.contains("fmDeviation")) {
-        settings.m_fmDeviation = response.getAcarsDemodSettings()->getFmDeviation();
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = (qint32) swg->getInputFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getAcarsDemodSettings()->getRfBandwidth();
+    // The ranges are the ones AcarsDemodSettings::deserialize() enforces, as the values go
+    // to the same places - mode and aeroChannel index tables, rfBandwidth becomes a filter
+    // cutoff. Deserialize falls back to the default; here a value out of range is ignored
+    // and the current setting kept
+    if (channelSettingsKeys.contains("mode"))
+    {
+        const int mode = swg->getMode();
+        if ((mode >= 0) && (mode < (int) AcarsDemodSettings::ModeCount)) {
+            settings.m_mode = mode;
+        }
+    }
+    if (channelSettingsKeys.contains("aeroChannel"))
+    {
+        const int aeroChannel = swg->getAeroChannel();
+        if ((aeroChannel >= 0) && (aeroChannel < AcarsAeroReceiver::SubmodeCount)) {
+            settings.m_aeroChannel = aeroChannel;
+        }
+    }
+    if (channelSettingsKeys.contains("iridiumBandwidth"))
+    {
+        const int iridiumBandwidth = swg->getIridiumBandwidth();
+        if ((iridiumBandwidth >= 0) && (iridiumBandwidth < AcarsDemodSettings::IridiumScanWidths)) {
+            settings.m_iridiumBandwidth = iridiumBandwidth;
+        }
+    }
+    if (channelSettingsKeys.contains("rfBandwidth"))
+    {
+        const Real rfBandwidth = (Real) swg->getRfBandwidth();
+        if ((rfBandwidth >= 1000.0f) && (rfBandwidth <= 40000.0f)) {
+            settings.m_rfBandwidth = rfBandwidth;
+        }
+    }
+    if (channelSettingsKeys.contains("correlationThreshold"))
+    {
+        const Real correlationThreshold = (Real) swg->getCorrelationThreshold();
+        if ((correlationThreshold >= 0.0f) && (correlationThreshold <= 1.0f)) {
+            settings.m_correlationThreshold = correlationThreshold;
+        }
+    }
+    if (channelSettingsKeys.contains("filterColumn"))
+    {
+        const int filterColumn = swg->getFilterColumn();
+        if ((filterColumn >= 0) && (filterColumn <= 3)) {
+            settings.m_filterColumn = filterColumn;
+        }
+    }
+    if (channelSettingsKeys.contains("hideNoInfo")) {
+        settings.m_hideNoInfo = (bool) swg->getHideNoInfo();
+    }
+    if (channelSettingsKeys.contains("showDate")) {
+        settings.m_showDate = (bool) swg->getShowDate();
+    }
+    if (channelSettingsKeys.contains("displayPhotos")) {
+        settings.m_displayPhotos = (bool) swg->getDisplayPhotos();
+    }
+    if (channelSettingsKeys.contains("displayChart")) {
+        settings.m_displayChart = (bool) swg->getDisplayChart();
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getAcarsDemodSettings()->getUdpEnabled();
+        settings.m_udpEnabled = (bool) swg->getUdpEnabled();
     }
-    if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getAcarsDemodSettings()->getUdpAddress();
+    if (channelSettingsKeys.contains("udpPort"))
+    {
+        const int udpPort = swg->getUdpPort();
+        if ((udpPort > 1023) && (udpPort < 65535)) {
+            settings.m_udpPort = (uint16_t) udpPort;
+        }
     }
-    if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getAcarsDemodSettings()->getUdpPort();
+    if (channelSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = (bool) swg->getLogEnabled();
+    }
+    if (channelSettingsKeys.contains("scopeCh1")) {
+        settings.m_scopeCh1 = (int) swg->getScopeCh1();
+    }
+    if (channelSettingsKeys.contains("scopeCh2")) {
+        settings.m_scopeCh2 = (int) swg->getScopeCh2();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getAcarsDemodSettings()->getRgbColor();
-    }
-    if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getAcarsDemodSettings()->getTitle();
+        settings.m_rgbColor = (quint32) swg->getRgbColor();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getAcarsDemodSettings()->getStreamIndex();
+        settings.m_streamIndex = (int) swg->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getAcarsDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = (bool) swg->getUseReverseApi();
     }
-    if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getAcarsDemodSettings()->getReverseApiAddress();
-    }
-    if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getAcarsDemodSettings()->getReverseApiPort();
+    if (channelSettingsKeys.contains("reverseAPIPort"))
+    {
+        const int reverseAPIPort = swg->getReverseApiPort();
+        if ((reverseAPIPort > 1023) && (reverseAPIPort < 65535)) {
+            settings.m_reverseAPIPort = (uint16_t) reverseAPIPort;
+        }
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getAcarsDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) qBound(0, swg->getReverseApiDeviceIndex(), 99);
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getAcarsDemodSettings()->getReverseApiChannelIndex();
-    }        */
+        settings.m_reverseAPIChannelIndex = (uint16_t) qBound(0, swg->getReverseApiChannelIndex(), 99);
+    }
+    if (channelSettingsKeys.contains("workspaceIndex")) {
+        settings.m_workspaceIndex = (int) swg->getWorkspaceIndex();
+    }
+
+    if (channelSettingsKeys.contains("filter") && swg->getFilter()) {
+        settings.m_filter = *swg->getFilter();
+    }
+    if (channelSettingsKeys.contains("udpAddress") && swg->getUdpAddress()) {
+        settings.m_udpAddress = *swg->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("logFilename") && swg->getLogFilename()) {
+        settings.m_logFilename = *swg->getLogFilename();
+    }
+    if (channelSettingsKeys.contains("title") && swg->getTitle()) {
+        settings.m_title = *swg->getTitle();
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress") && swg->getReverseApiAddress()) {
+        settings.m_reverseAPIAddress = *swg->getReverseApiAddress();
+    }
 }
 
 void AcarsDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AcarsDemodSettings& settings)
 {
-    /*response.getAcarsDemodSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getAcarsDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getAcarsDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getAcarsDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getAcarsDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
-    response.getAcarsDemodSettings()->setUdpPort(settings.m_udpPort);
+    SWGSDRangel::SWGACARSDemodSettings *swg = response.getAcarsDemodSettings();
 
-    response.getAcarsDemodSettings()->setRgbColor(settings.m_rgbColor);
-    if (response.getAcarsDemodSettings()->getTitle()) {
-        *response.getAcarsDemodSettings()->getTitle() = settings.m_title;
-    } else {
-        response.getAcarsDemodSettings()->setTitle(new QString(settings.m_title));
-    }
+    swg->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    swg->setMode(settings.m_mode);
+    swg->setAeroChannel(settings.m_aeroChannel);
+    swg->setIridiumBandwidth(settings.m_iridiumBandwidth);
+    swg->setRfBandwidth(settings.m_rfBandwidth);
+    swg->setCorrelationThreshold(settings.m_correlationThreshold);
+    swg->setFilterColumn(settings.m_filterColumn);
+    swg->setHideNoInfo(settings.m_hideNoInfo);
+    swg->setShowDate(settings.m_showDate);
+    swg->setDisplayPhotos(settings.m_displayPhotos);
+    swg->setDisplayChart(settings.m_displayChart);
+    swg->setUdpEnabled(settings.m_udpEnabled);
+    swg->setUdpPort(settings.m_udpPort);
+    swg->setLogEnabled(settings.m_logEnabled);
+    swg->setScopeCh1(settings.m_scopeCh1);
+    swg->setScopeCh2(settings.m_scopeCh2);
+    swg->setRgbColor(settings.m_rgbColor);
+    swg->setStreamIndex(settings.m_streamIndex);
+    swg->setUseReverseApi(settings.m_useReverseAPI);
+    swg->setReverseApiPort(settings.m_reverseAPIPort);
+    swg->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    swg->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    swg->setWorkspaceIndex(settings.m_workspaceIndex);
 
-    response.getAcarsDemodSettings()->setStreamIndex(settings.m_streamIndex);
-    response.getAcarsDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
-
-    if (response.getAcarsDemodSettings()->getReverseApiAddress()) {
-        *response.getAcarsDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
-    } else {
-        response.getAcarsDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
-    }
-
-    response.getAcarsDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAcarsDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getAcarsDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);   */
+    acarsApiSetString(swg, swg->getFilter(), &SWGSDRangel::SWGACARSDemodSettings::setFilter,
+                      settings.m_filter);
+    acarsApiSetString(swg, swg->getUdpAddress(), &SWGSDRangel::SWGACARSDemodSettings::setUdpAddress,
+                      settings.m_udpAddress);
+    acarsApiSetString(swg, swg->getLogFilename(), &SWGSDRangel::SWGACARSDemodSettings::setLogFilename,
+                      settings.m_logFilename);
+    acarsApiSetString(swg, swg->getTitle(), &SWGSDRangel::SWGACARSDemodSettings::setTitle,
+                      settings.m_title);
+    acarsApiSetString(swg, swg->getReverseApiAddress(), &SWGSDRangel::SWGACARSDemodSettings::setReverseApiAddress,
+                      settings.m_reverseAPIAddress);
 }
 
 void AcarsDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AcarsDemodSettings& settings, bool force)
 {
-   /* SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -447,9 +641,11 @@ void AcarsDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
     buffer->setParent(reply);
 
-    delete swgChannelSettings; */
+    delete swgChannelSettings;
 }
 
+// Only what changed, unless forced - and never the reverse API settings themselves,
+// which describe this end of the link rather than the channel
 void AcarsDemod::webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
@@ -457,39 +653,98 @@ void AcarsDemod::webapiFormatChannelSettings(
         bool force
 )
 {
-  /*  swgChannelSettings->setDirection(0); // Single sink (Rx)
+    swgChannelSettings->setDirection(0);     // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("AcarsDemod"));
+    swgChannelSettings->setChannelType(new QString(m_channelId));
     swgChannelSettings->setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
-    SWGSDRangel::SWGACARSDemodSettings *sWGACARSDemodSettings = swgChannelSettings->getAcarsDemodSettings();
-
-    // transfer data that has been modified. When force is on transfer all data except reverse API data
+    SWGSDRangel::SWGACARSDemodSettings *swg = swgChannelSettings->getAcarsDemodSettings();
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
-        sWGACARSDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+        swg->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("mode") || force) {
+        swg->setMode(settings.m_mode);
+    }
+    if (channelSettingsKeys.contains("aeroChannel") || force) {
+        swg->setAeroChannel(settings.m_aeroChannel);
+    }
+    if (channelSettingsKeys.contains("iridiumBandwidth") || force) {
+        swg->setIridiumBandwidth(settings.m_iridiumBandwidth);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        sWGACARSDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+        swg->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("correlationThreshold") || force) {
+        swg->setCorrelationThreshold(settings.m_correlationThreshold);
+    }
+    if (channelSettingsKeys.contains("filterColumn") || force) {
+        swg->setFilterColumn(settings.m_filterColumn);
+    }
+    if (channelSettingsKeys.contains("hideNoInfo") || force) {
+        swg->setHideNoInfo(settings.m_hideNoInfo);
+    }
+    if (channelSettingsKeys.contains("showDate") || force) {
+        swg->setShowDate(settings.m_showDate);
+    }
+    if (channelSettingsKeys.contains("displayPhotos") || force) {
+        swg->setDisplayPhotos(settings.m_displayPhotos);
+    }
+    if (channelSettingsKeys.contains("displayChart") || force) {
+        swg->setDisplayChart(settings.m_displayChart);
     }
     if (channelSettingsKeys.contains("udpEnabled") || force) {
-        sWGACARSDemodSettings->setUdpEnabled(settings.m_udpEnabled);
-    }
-    if (channelSettingsKeys.contains("udpAddress") || force) {
-        sWGACARSDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        swg->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
-        sWGACARSDemodSettings->setUdpPort(settings.m_udpPort);
+        swg->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("logEnabled") || force) {
+        swg->setLogEnabled(settings.m_logEnabled);
+    }
+    if (channelSettingsKeys.contains("scopeCh1") || force) {
+        swg->setScopeCh1(settings.m_scopeCh1);
+    }
+    if (channelSettingsKeys.contains("scopeCh2") || force) {
+        swg->setScopeCh2(settings.m_scopeCh2);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        sWGACARSDemodSettings->setRgbColor(settings.m_rgbColor);
-    }
-    if (channelSettingsKeys.contains("title") || force) {
-        sWGACARSDemodSettings->setTitle(new QString(settings.m_title));
+        swg->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
-        sWGACARSDemodSettings->setStreamIndex(settings.m_streamIndex);
-    }            */
+        swg->setStreamIndex(settings.m_streamIndex);
+    }
+    if (channelSettingsKeys.contains("useReverseAPI") || force) {
+        swg->setUseReverseApi(settings.m_useReverseAPI);
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort") || force) {
+        swg->setReverseApiPort(settings.m_reverseAPIPort);
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        swg->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex") || force) {
+        swg->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    }
+    if (channelSettingsKeys.contains("workspaceIndex") || force) {
+        swg->setWorkspaceIndex(settings.m_workspaceIndex);
+    }
+
+    if (channelSettingsKeys.contains("filter") || force) {
+        swg->setFilter(new QString(settings.m_filter));
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swg->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("logFilename") || force) {
+        swg->setLogFilename(new QString(settings.m_logFilename));
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swg->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress") || force) {
+        swg->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
 }
 
 void AcarsDemod::networkManagerFinished(QNetworkReply *reply)

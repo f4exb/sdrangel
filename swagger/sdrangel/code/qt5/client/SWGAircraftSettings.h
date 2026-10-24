@@ -75,6 +75,42 @@ public:
     qint32 getDisplayChart();
     void setDisplayChart(qint32 display_chart);
 
+    qint32 getDisplayCoverage();
+    void setDisplayCoverage(qint32 display_coverage);
+
+    qint32 getUseLiveryIcons();
+    void setUseLiveryIcons(qint32 use_livery_icons);
+
+    qint32 getFeedEnabled();
+    void setFeedEnabled(qint32 feed_enabled);
+
+    QString* getFeedStationId();
+    void setFeedStationId(QString* feed_station_id);
+
+    qint32 getFeedAirframes();
+    void setFeedAirframes(qint32 feed_airframes);
+
+    QString* getFeedAirframesHost();
+    void setFeedAirframesHost(QString* feed_airframes_host);
+
+    qint32 getFeedAirframesPort();
+    void setFeedAirframesPort(qint32 feed_airframes_port);
+
+    qint32 getFeedAirframesTcp();
+    void setFeedAirframesTcp(qint32 feed_airframes_tcp);
+
+    qint32 getFeedAvdelphi();
+    void setFeedAvdelphi(qint32 feed_avdelphi);
+
+    QString* getFeedAvdelphiHost();
+    void setFeedAvdelphiHost(QString* feed_avdelphi_host);
+
+    qint32 getFeedAvdelphiPort();
+    void setFeedAvdelphiPort(qint32 feed_avdelphi_port);
+
+    qint32 getFeedAvdelphiTcp();
+    void setFeedAvdelphiTcp(qint32 feed_avdelphi_tcp);
+
     QString* getDatabaseFilename();
     void setDatabaseFilename(QString* database_filename);
 
@@ -144,6 +180,42 @@ private:
 
     qint32 display_chart;
     bool m_display_chart_isSet;
+
+    qint32 display_coverage;
+    bool m_display_coverage_isSet;
+
+    qint32 use_livery_icons;
+    bool m_use_livery_icons_isSet;
+
+    qint32 feed_enabled;
+    bool m_feed_enabled_isSet;
+
+    QString* feed_station_id;
+    bool m_feed_station_id_isSet;
+
+    qint32 feed_airframes;
+    bool m_feed_airframes_isSet;
+
+    QString* feed_airframes_host;
+    bool m_feed_airframes_host_isSet;
+
+    qint32 feed_airframes_port;
+    bool m_feed_airframes_port_isSet;
+
+    qint32 feed_airframes_tcp;
+    bool m_feed_airframes_tcp_isSet;
+
+    qint32 feed_avdelphi;
+    bool m_feed_avdelphi_isSet;
+
+    QString* feed_avdelphi_host;
+    bool m_feed_avdelphi_host_isSet;
+
+    qint32 feed_avdelphi_port;
+    bool m_feed_avdelphi_port_isSet;
+
+    qint32 feed_avdelphi_tcp;
+    bool m_feed_avdelphi_tcp_isSet;
 
     QString* database_filename;
     bool m_database_filename_isSet;

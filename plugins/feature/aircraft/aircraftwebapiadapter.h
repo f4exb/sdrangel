@@ -22,9 +22,9 @@
 #include "feature/featurewebapiadapter.h"
 #include "aircraftsettings.h"
 
-// Standalone API adapter only for the settings. WebAPI settings access needs a
-// generated SWGAircraftSettings class, which does not exist yet - until then the
-// settings blob round-trips but the REST settings endpoints report unimplemented.
+// Standalone API adapter for the settings of a feature that is not instantiated - the
+// preset editor's view of them. The formatting is Aircraft's own, so the two cannot
+// describe the same settings differently.
 class AircraftWebAPIAdapter : public FeatureWebAPIAdapter {
 public:
     AircraftWebAPIAdapter();

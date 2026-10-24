@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,6 +23,7 @@
 #include <QStringList>
 #include <QFile>
 #include <QMultiHash>
+#include <QGeoCoordinate>
 
 #include <stdio.h>
 #include <string.h>
@@ -41,6 +43,7 @@ struct SDRBASE_API Waypoint {
     float m_longitude;
 
     static QMultiHash<QString, Waypoint *> *readCSV(const QString &filename);
+    static QMultiHash<QString, Waypoint *> *readBGL(const QString& path, QStringList *errors = nullptr);
 };
 
 class SDRBASE_API Waypoints : public QObject {
@@ -53,6 +56,12 @@ public:
     void downloadWaypoints();
 
     static const Waypoint* findWayPoint(const QString& name, const QStringList& nearby = QStringList());
+    // The same choice made against positions rather than names. Needed wherever the
+    // fixes around a name are things no waypoint database holds - an oceanic clearance
+    // surrounds its named entry point with bare latitudes and longitudes - because the
+    // name form can only score against names it can itself look up, and scores nothing
+    // at all when it cannot.
+    static const Waypoint* findWayPoint(const QString& name, const QList<QGeoCoordinate>& nearby);
     static QSharedPointer<const QMultiHash<QString, Waypoint *>> getWaypoints();
 
 private:

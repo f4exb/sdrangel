@@ -24,7 +24,14 @@
 #include <QDateTime>
 #include <QHash>
 #include <QSet>
+#include <QJsonObject>
+#include <QUdpSocket>
+#include <QTcpSocket>
+#include <QHostAddress>
 #include <QGeoCoordinate>
+#include <QMutex>
+
+#include "util/acarsmessage.h"
 #include <QMetaType>
 
 #include "util/message.h"
@@ -44,6 +51,8 @@ struct sqlite3;
 namespace SWGSDRangel {
     class SWGMapItem;
     class SWGMapCoordinate;
+    class SWGMapFlightPlan;
+    class SWGMapDatalinkMessage;
 }
 
 // Snapshots of the tracker's state, sent to the GUI over queued signals so the
@@ -53,6 +62,11 @@ struct AircraftDisplay {
     quint32 m_icao = 0;
     QString m_registration;
     QString m_flight;
+    // The flight it is on now, under both of its names - see FlightDisplay and
+    // AircraftTracker::flightNameForms(). The aliases belong to the FLIGHT, so an
+    // airframe that is not on one has only the name it was last heard under.
+    QString m_callsign;
+    QString m_flightNumber;
     bool m_positionValid = false;
     // Distance from the antenna that heard the aircraft, in km - see TrackedAircraft
     bool m_distanceValid = false;
@@ -68,15 +82,31 @@ struct AircraftDisplay {
     QString m_protocols;
     int m_messages = 0;
     QDateTime m_lastSeen;
+    //!< When the Map stops holding this aircraft, which is the same instant the CZML
+    //!< availability interval ends. An expiry rather than a flag, so that a row the
+    //!< tracker has not touched since still answers correctly as time passes - the
+    //!< sweep that takes a stale aircraft off the Map does not refresh the tables.
+    //!< Invalid when there is no position, i.e. it was never placed at all.
+    QDateTime m_mapAvailableUntil;
     QString m_mapName;
     quint64 m_currentFlightId = 0;
     bool m_active = false;      // Data is arriving for this aircraft
+    //!< Its SELCAL code: the one it was heard called on, otherwise what the SELCAL
+    //!< database assigns it
+    QString m_selcal;
 };
 
 struct FlightDisplay {
     quint64 m_id = 0;
     quint64 m_aircraftId = 0;
     QString m_flight;
+    // The same flight under its two names. An airline has an ICAO designator of three
+    // letters and an IATA one of two, and the aircraft is called by both: the transponder
+    // broadcasts TOM7BD while ACARS carries BY07BD, which is the same flight. They are
+    // held together as aliases; these say which of them is which, so the table can put
+    // them side by side rather than leaving you to match them up.
+    QString m_callsign;         // ICAO form, or the primary name where none is known
+    QString m_flightNumber;     // IATA form, empty until a message gives one
     QString m_aliases;
     QString m_reg;
     QString m_departure;
@@ -97,6 +127,17 @@ struct FlightDisplay {
     bool m_hasClearance = false;
     bool m_hasFlightPlan = false;
     bool m_active = false;      // The flight an active aircraft is currently flying
+    // Where the airport pair came from, and what the callsign to route database makes of
+    // it. The database is a guess - one route per callsign, flown or not - so a message
+    // that disagrees with it is the message being right, as TOM3TW was.
+    QString m_routeSource;      // "Database" or "Message", empty when neither end is known
+    bool m_routeChecked = false;    // The database had an entry to compare against
+    bool m_routeAgrees = false;     // ...and it says the same thing
+    // Whether each end was stated by a received message rather than guessed from the
+    // callsign. Per end, because they often arrive from different messages at different
+    // times, and the table colours each cell on its own.
+    bool m_departureFromMessage = false;
+    bool m_arrivalFromMessage = false;
 };
 
 struct DocumentEvent {
@@ -116,12 +157,17 @@ struct AtcEvent {
     quint64 m_flightId = 0;
     QDateTime m_received;
     QString m_protocol;
+    //!< The link the message came in on and its frequency, as "VDL2 136.975", in the
+    //!< same form as the Protocols column of the aircraft and flights tables. Empty for
+    //!< messages read back from a database written before this was recorded
+    QString m_link;
     bool m_uplink = false;
     QString m_from;
     QString m_to;
     QString m_message;
     QString m_tooltip;
     QString m_mapName;
+    bool m_stored = false;      //!< Already in the database - only the rest are written
 };
 
 Q_DECLARE_METATYPE(AircraftDisplay)
@@ -172,11 +218,15 @@ struct AircraftStatistics {
         float m_longitude = 0.0f;
         bool m_altitudeValid = false;
         float m_altitudeFt = 0.0f;
+        //!< The channel it was heard on, in Hz. Which protocol set the record is already
+        //!< known - there is a row per protocol - but not which of its frequencies, and
+        //!< on HFDL and Aero that is the interesting part of the answer.
+        qint64 m_frequency = 0;
 
         // Returns true if this beat the record
         bool update(float value, const QString& aircraft, const QDateTime& when,
                     bool positionValid, float latitude, float longitude,
-                    bool altitudeValid, float altitudeFt)
+                    bool altitudeValid, float altitudeFt, qint64 frequency)
         {
             if (m_valid && (value <= m_value)) {
                 return false;
@@ -190,6 +240,7 @@ struct AircraftStatistics {
             m_longitude = longitude;
             m_altitudeValid = altitudeValid;
             m_altitudeFt = altitudeFt;
+            m_frequency = frequency;
             return true;
         }
     };
@@ -215,7 +266,8 @@ struct AircraftStatistics {
         void update(int protocol, bool rangeValid, float rangeKm, bool speedValid,
                     float speedKts, bool altitudeValid, float altitudeFt,
                     const QString& who, const QDateTime& when,
-                    bool positionValid, float latitude, float longitude)
+                    bool positionValid, float latitude, float longitude,
+                    qint64 frequency)
         {
             m_totalMessages++;
             if ((protocol >= 0) && (protocol < AircraftReport::ProtocolCount))
@@ -223,16 +275,17 @@ struct AircraftStatistics {
                 m_messagesByProtocol[protocol]++;
                 if (rangeValid) {
                     m_maxRange[protocol].update(rangeKm, who, when, positionValid,
-                                                latitude, longitude, altitudeValid, altitudeFt);
+                                                latitude, longitude, altitudeValid, altitudeFt,
+                                                frequency);
                 }
             }
             if (speedValid) {
                 m_fastest.update(speedKts, who, when, positionValid, latitude, longitude,
-                                 altitudeValid, altitudeFt);
+                                 altitudeValid, altitudeFt, frequency);
             }
             if (altitudeValid) {
                 m_highest.update(altitudeFt, who, when, positionValid, latitude, longitude,
-                                 altitudeValid, altitudeFt);
+                                 altitudeValid, altitudeFt, frequency);
             }
         }
     };
@@ -241,6 +294,9 @@ struct AircraftStatistics {
     Scope m_allTime;
     QDateTime m_sessionStart;
     QDateTime m_firstStart;         // When the all time figures began
+    // How much disk the session database is taking, including its write ahead log.
+    // Measured rather than stored, so it is not part of what is saved or restored.
+    qint64 m_databaseBytes = 0;
 
     static const int ConcurrentWindowMins = 15;
 };
@@ -252,6 +308,25 @@ class AircraftTracker : public QObject
     Q_OBJECT
 
 public:
+    //!< Select an aircraft or a flight in the GUI. Sent by the web API, and so by the
+    //!< Map when one of the links in an aircraft's popup is clicked.
+    class MsgSelect : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        enum Kind { Icao, Registration, Flight };
+        Kind getKind() const { return m_kind; }
+        const QString& getValue() const { return m_value; }
+        static MsgSelect* create(Kind kind, const QString& value) {
+            return new MsgSelect(kind, value);
+        }
+    private:
+        Kind m_kind;
+        QString m_value;
+        MsgSelect(Kind kind, const QString& value) :
+            Message(), m_kind(kind), m_value(value)
+        { }
+    };
+
     class MsgConfigureTracker : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
@@ -279,6 +354,30 @@ public:
     private:
         AircraftReport m_report;
         MsgReport(const AircraftReport& report) : Message(), m_report(report) {}
+    };
+
+    // One ACARS block as received, to be archived and fed on
+    class MsgAcarsBlock : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QByteArray& getBlock() const { return m_block; }
+        const QDateTime& getDateTime() const { return m_dateTime; }
+        qint64 getFrequency() const { return m_frequency; }
+        double getLevel() const { return m_level; }
+        int getProtocol() const { return m_protocol; }
+        static MsgAcarsBlock* create(const QByteArray& block, const QDateTime& dateTime,
+                                     qint64 frequency, double level, int protocol)
+        { return new MsgAcarsBlock(block, dateTime, frequency, level, protocol); }
+    private:
+        QByteArray m_block;
+        QDateTime m_dateTime;
+        qint64 m_frequency;
+        double m_level;
+        int m_protocol;
+        MsgAcarsBlock(const QByteArray& block, const QDateTime& dateTime, qint64 frequency,
+                      double level, int protocol) :
+            Message(), m_block(block), m_dateTime(dateTime), m_frequency(frequency),
+            m_level(level), m_protocol(protocol) {}
     };
 
     class MsgDeleteAll : public Message {
@@ -334,12 +433,48 @@ public:
 
 public slots:
     void startWork();
+    // Invoked from the GUI thread by the coverage button's right click, so it has
+    // to be a slot to cross to the tracker's own thread
+    void clearCoverage();
+
+public:
+    //!< A snapshot of what is being tracked, for the web API's report. In a public
+    //!< section of its own: moc reads everything under "public slots:" as a slot
+    //!< declaration and rejects a type there.
+    struct Totals {
+        int m_aircraft = 0;
+        int m_activeAircraft = 0;
+        int m_flights = 0;
+        quint64 m_messages = 0;
+        quint64 m_messagesByProtocol[AircraftReport::ProtocolCount] = {};
+    };
+    //!< Safe to call from any thread: it returns a copy of a snapshot the tracker's own
+    //!< thread refreshes on every flush, rather than walking the aircraft list, which
+    //!< that thread is free to change and delete from at any moment
+    Totals totals() const;
+    //!< Public because the web API's report names each protocol, and the names belong
+    //!< with the protocol enum rather than being written out a second time there
+    static QString protocolName(int protocol);
+    //!< A protocol and the frequency it was heard on, as "VDL2 136.975". The
+    //!< frequency is left off when it is unknown, and for ADS-B, where it is always
+    //!< the same and says nothing
+    static QString sourceText(int protocol, qint64 frequency);
 
 signals:
     void aircraftUpdated(const QList<AircraftDisplay>& aircraft);
+    //!< Asked to select an aircraft or flight from outside - see MsgSelect
+    void selectRequested(int kind, const QString& value);
     void aircraftRemoved(const QList<quint64>& ids);
     void flightsUpdated(const QList<FlightDisplay>& flights);
     void flightsRemoved(const QList<quint64>& ids);
+    //!< Two flights turned out to be one - the same flight under its ACARS and its ADS-B
+    //!< name - and everything that belonged to "from" now belongs to "to". Distinct from
+    //!< flightsRemoved, which means a flight is genuinely gone: anything the views hold
+    //!< against the old id has to be re-pointed rather than dropped.
+    void flightsMerged(quint64 from, quint64 to);
+    //!< The same for an aircraft absorbed into another: emitted before the aircraftRemoved
+    //!< for "from", whose flights now belong to "to" with their ids unchanged
+    void aircraftMerged(quint64 from, quint64 to);
     void documentsAdded(const QList<DocumentEvent>& documents);
     void atcMessages(const QList<AtcEvent>& messages);
     void weatherReports(const QList<WeatherEvent>& reports);
@@ -359,8 +494,14 @@ private:
     struct TrackedDocument {
         int m_kind;
         QString m_title;
-        QString m_text;
+        QString m_text;         //!< Rendered from the two below when they are set
         QDateTime m_received;
+        //!< What it was rendered FROM, so a later decoder renders it again rather than
+        //!< the text being frozen as it was first written - see renderDocument(). Empty
+        //!< for a document libacars or the ATN decoder produced, which cannot be re-run
+        //!< from here, and whose m_text is therefore what is stored.
+        QByteArray m_raw;
+        QString m_source;
     };
 
     struct TrackedFlight {
@@ -378,6 +519,17 @@ private:
         //!< Invalid where the facts came from the callsign to route database, which is a
         //!< standing guess rather than something the aircraft said.
         QDateTime m_routeFiled;
+        //!< Whether m_departure and m_arrival are a guess from the callsign to route
+        //!< database rather than something an aircraft said. Without it the two are
+        //!< indistinguishable once stored, and a guess planted first was then defended
+        //!< against the truth - see updateFlight() and mergeFlightInto().
+        //!< Deliberately not persisted: it matters while a flight is being built up, and
+        //!< adding a column would mean recreating everyone's database to gain nothing on
+        //!< reload, where the stored airports are simply taken as they are.
+        //!< Per airport, not per flight: one end can be a database guess while the
+        //!< other has been stated by a message, and the table colours each on its own
+        bool m_departureFromDatabase = false;
+        bool m_arrivalFromDatabase = false;
         // A route the aircraft has been given, drawn on the Map. Kept apart from
         // m_route because the callsign to route database also fills that in, with the
         // airport pair rather than a list of waypoints, and only a real waypoint list
@@ -387,6 +539,20 @@ private:
             //!< Where the message put those waypoints, when it said. Same order and
             //!< length as m_waypoints, or empty when it named them without placing them.
             QList<AircraftReport::RouteWaypoint> m_points;
+            //!< The rest of the plan, each part taken from whichever insert carried
+            //!< it - see updateFlight(). A clearance leaves them empty.
+            QString m_runway;
+            QString m_sid;
+            QString m_star;
+            QString m_approach;
+            QString m_alternate;
+            //!< What an oceanic clearance cleared it to fly the route at
+            int m_flightLevel = 0;
+            float m_mach = 0.0f;
+            //!< The plan's own airports rather than the flight's, which is what tells a
+            //!< second insert of the same plan from a re-file to somewhere else
+            QString m_departure;
+            QString m_arrival;
             QString m_text;         //!< The message that filed it, for the popup
             QDateTime m_filed;      //!< When, so a merge can tell two routes apart
             QString m_drawn;        //!< What was last sent, so it is only sent once
@@ -401,6 +567,13 @@ private:
         };
         FiledRoute m_flightPlan;    //!< An FPN plan, or a position report's route insert
         FiledRoute m_clearance;     //!< An oceanic clearance or its readback
+        //!< Cache for the flight plan attached to map items for the Map's ND.
+        //!< Assembling a route is database lookups per fix, so it is rebuilt only when
+        //!< the signature - what the assembly depends on - changes. Points and coords
+        //!< are index aligned, resolveRoute() having dropped anything unplaceable.
+        QString m_ndPlanSignature;
+        QList<AircraftReport::RouteWaypoint> m_ndPlanPoints;
+        QList<QGeoCoordinate> m_ndPlanCoords;
         //!< Protocols and frequencies THIS flight has been heard on, the same tally the
         //!< airframe keeps but bounded to one flight. The Map shows this one: an
         //!< airframe heard on HFDL over the Atlantic last month is not being heard on
@@ -416,9 +589,20 @@ private:
         // How many of the points below are already in the database. The track and the
         // profile only ever grow, so a save writes the tail rather than rewriting the
         // whole history - see saveDatabase(). Reset to zero, and the flight added to
-        // m_flightsToRewrite, whenever the arrays are rebuilt rather than appended to.
+        // m_tracksToRewrite or m_profilesToRewrite, whenever that array is rebuilt rather
+        // than appended to.
         int m_trackSaved = 0;
         int m_profileSaved = 0;
+        //!< Likewise for the documents, which are only ever appended to. Reset to zero,
+        //!< and the flight added to m_documentsToRewrite, when the list is cut down.
+        int m_documentsSaved = 0;
+        //!< Whether the stored track and profile have been read in. A flight created
+        //!< while running has nothing stored, so both start true; a restored one starts
+        //!< false. Between them they were nine million rows and eight of the ten seconds
+        //!< a season's database took to open, for history that is looked at one flight at
+        //!< a time if at all - see ensureTrackLoaded().
+        bool m_trackLoaded = true;
+        bool m_profileLoaded = true;
         QList<QGeoCoordinate> m_track;
         QList<QDateTime> m_trackTimes;
         int m_messages = 0;             // Reports of any kind attributed to this flight
@@ -515,6 +699,16 @@ private:
         QString m_arrival;
         QString m_route;
         QString m_lastDocumentText;
+        //!< The latest datalink ATC message (CPDLC/PDC/oceanic clearance), attached to
+        //!< map items for the Map's DCDU. The sequence number is what tells the Map a
+        //!< new message from a re-send of the last one.
+        struct DcduMessage {
+            int m_seq = 0;          // 0 = never had one
+            QDateTime m_received;
+            bool m_uplink = false;
+            QString m_station;
+            QString m_text;
+        } m_dcduMessage;
         // Every protocol and frequency this airframe has EVER been heard on, kept for
         // as long as the airframe is. The flight has its own, which is what the Map
         // shows: an airframe heard on HFDL over the Atlantic last month is not being
@@ -530,8 +724,16 @@ private:
         // be thrown away and chosen again when the livery preference changes - replacing
         // a pass-through model with our own would fight the demodulator for it.
         bool m_modelIsOurs = false;
-        bool m_mapModelForm = false;
         bool m_mapTrackChanged = true;
+        //!< The track has only grown since it was last sent. The ADS-B pass-through sends
+        //!< it at most every few seconds for that (see forwardMapItem()), where a change
+        //!< to what was already sent goes at once.
+        bool m_mapTrackAppended = false;
+        qint64 m_mapTrackSentMs = 0;
+        // A fully timestamped ADS-B map item came from CSV replay. Its position is
+        // deliberately historical, so wall-clock stale-position expiry must not
+        // remove it before the Map's historical clock can display the flight.
+        bool m_mapReplay = false;
         //!< Owed to a Map that has just appeared, and still owed until something has
         //!< actually been sent - see checkMapConsumers()
         bool m_mapResync = false;
@@ -542,12 +744,21 @@ private:
         // with empty active tables
         bool m_active = false;
         QSet<int> m_notifiedRules;
+        //!< The SELCAL code it was last called on this session. Only ever one the database
+        //!< assigns it - a call is not attributed otherwise - but where the database gives
+        //!< it several, this says which is in use.
+        QString m_selcalHeard;
 
         ~TrackedAircraft() { qDeleteAll(m_flights); }
     };
 
     Feature *m_feature;                 // Pipe source for the Map
     AircraftSettings m_settings;
+
+    //!< What totals() hands out - see there
+    mutable QMutex m_totalsMutex;
+    Totals m_totals;
+    void updateTotals();
     MessageQueue m_inputMessageQueue;
 
     QList<TrackedAircraft *> m_aircraft;
@@ -595,8 +806,22 @@ private:
     // flights have to be named, because the save no longer empties those tables and so
     // would otherwise leave their rows behind for ever.
     QSet<quint64> m_flightsToDelete;
-    QSet<quint64> m_flightsToRewrite;
+    // Separate, because rewriting one must not delete the other's stored rows when only
+    // one of them was rebuilt - the other may not even be loaded
+    QSet<quint64> m_tracksToRewrite;
+    QSet<quint64> m_profilesToRewrite;
+    QSet<quint64> m_documentsToRewrite;
     bool m_dbTrackWipe = false;     //!< Everything in track and profile is stale
+    // The ATC log is written incrementally too, so what changes in it after a message is
+    // stored has to be carried to the database: the aircraft and flights it belongs to
+    // when they are merged (from, to), and the messages that go with discarded aircraft
+    QList<QPair<quint64, quint64>> m_atcAircraftMoves;
+    QList<QPair<quint64, quint64>> m_atcFlightMoves;
+    QSet<quint64> m_atcAircraftToDelete;
+    //!< Messages from before m_atcPruneCutoff whose aircraft no longer exists - or never
+    //!< did, id 0 being an unattributed call - by aircraft id
+    QSet<quint64> m_atcPrunedIds;
+    QDateTime m_atcPruneCutoff;
     bool m_dbDirty = false;
     bool m_loadingDatabase = false;
 
@@ -609,6 +834,8 @@ private:
     void mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst, TrackedFlight *src);
     void mergeLoadedFlights(TrackedAircraft *item);
     static bool splitFlightName(const QString& flight, QString& airline, QString& number);
+    static void flightNameForms(const QString& primary, const QStringList& aliases,
+                                QString& callsign, QString& flightNumber);
     static bool sameFlightNumber(const QString& a, const QString& b);
     static bool flightMatches(const TrackedFlight *flight, const QString& name);
     //!< When this aircraft was last heard flying this callsign, which is not when it was
@@ -620,26 +847,88 @@ private:
     void addFlightAlias(TrackedAircraft *item, TrackedFlight *flight, const QString& name);
     void addDocument(TrackedAircraft *item, TrackedFlight *flight, const AircraftReport& report);
     void addAtcMessage(TrackedAircraft *item, TrackedFlight *flight, const AircraftReport& report);
+    //!< Returns false when the call could not be pinned on one aircraft, having logged it
+    bool attributeSelcal(AircraftReport& report);
+    //!< item and flight are null for a call that was not attributed; candidates are then
+    //!< the registrations the database gives the code
+    void logSelcalCall(TrackedAircraft *item, TrackedFlight *flight, const AircraftReport& report,
+                       const QStringList& candidates);
+    //!< The SELCAL codes assigned to each registration, for the table's SELCAL column.
+    //!< Refreshed with the other databases rather than per row: looking it up checks the
+    //!< file for a newer download.
+    QSharedPointer<const QHash<QString, QString>> m_selcalCodes;
     void addWeatherReport(TrackedAircraft *item, const AircraftReport& report);
     static QString weatherKindName(int kind);
     QString documentKindName(int kind) const;
-    QString protocolName(int protocol) const;
     static QString notificationSignature(const AircraftSettings& settings);
     void claimKey(TrackedAircraft *item, const QString& key);
     void updateRecordMapItem();
     static const char *RecordMapItemName;
+    //!< The Map settings group a filed route is drawn under, instead of this feature's
+    //!< own. A route wants the opposite of what an aircraft wants from a minimum zoom -
+    //!< an icon has to be decluttered away when zoomed out, while a route drawn across
+    //!< an ocean is exactly what should still be visible there.
+    static const char *RouteMapGroup;
+    static const char *CoverageMapGroup;
+    //!< Aggregator feed. One set of connections for the whole station, however many
+    //!< ACARS demodulators are running - which is why this lives here and not in them.
+    QUdpSocket *m_feedSocket = nullptr;
+    QTcpSocket *m_feedAirframesTcpSocket = nullptr;
+    QTcpSocket *m_feedAvdelphiTcpSocket = nullptr;
+    QHostAddress m_feedAirframesAddr;   //!< Cached DNS resolutions, for UDP
+    QString m_feedAirframesResolvedHost;
+    QHostAddress m_feedAvdelphiAddr;
+    QString m_feedAvdelphiResolvedHost;
+    QHash<QString, QDateTime> m_feedResolveRetry;   //!< When a host that would not resolve is tried again
+    //!< ACARS blocks heard since the last save, exactly as received, waiting to be written
+    //!< to the archive. Raw so that a later decoder can be run over the whole archive -
+    //!< see MainCore::MsgAcarsBlock. Emptied by each save; the archive lives on disk only.
+    struct AcarsBlockRecord {
+        QByteArray m_block;
+        QDateTime m_dateTime;
+        qint64 m_frequency = 0;
+        double m_level = 0.0;
+        int m_protocol = 0;
+    };
+    QList<AcarsBlockRecord> m_acarsBlocks;
+    static QGeoCoordinate routeAnchor(const QStringList& names);
+    static QString altitudeConstraint(const AircraftReport::RouteWaypoint& point);
+    static QList<AircraftReport::RouteWaypoint> procedurePoints(const QString& procedure,
+                                                                const QString& airport,
+                                                                const QString& procedureType);
     void resolveRoute(QList<AircraftReport::RouteWaypoint>& points,
                       QList<QGeoCoordinate>& coords) const;
+    QList<AircraftReport::RouteWaypoint> assembleRoutePoints(const TrackedFlight *flight,
+                                                             const TrackedFlight::FiledRoute& route,
+                                                             QList<QGeoCoordinate>& coords) const;
+    SWGSDRangel::SWGMapFlightPlan *buildFlightPlan(TrackedAircraft *item) const;
+    void recordDcduMessage(TrackedAircraft *item, const AircraftReport& report);
+    SWGSDRangel::SWGMapDatalinkMessage *buildDatalinkMessage(const TrackedAircraft *item) const;
     void sendRouteToMap(TrackedFlight *flight, TrackedFlight::FiledRoute& route,
                         const QString& kind);
     void removeDrawnRoute(TrackedFlight::FiledRoute& route);
+    bool routeDrawn(const TrackedFlight *flight) const;
+    int routePlaceable(const QString& waypoints,
+                       const QList<AircraftReport::RouteWaypoint>& given) const;
+    void sendRoutes(TrackedFlight *flight);
+    void removeRoutes(TrackedFlight *flight);
 
     // What updateRecordMapItem() last put on the Map, so an unchanged record is not
     // re-sent 3 times a second, and so it can be taken off again when the option is
     // turned off or the record is reset
+    //!< The Map item name and contents of the watched flight's track, drawn on its own
+    //!< when the aircraft itself is not on the Map - see updateWatchedTrack()
+    QString m_watchedTrackName;
+    QString m_watchedTrackKey;
+    void updateWatchedTrack();
+
     QString m_recordMapKey;
     bool m_recordOnMap = false;
-    bool m_recordUnplaceableWarned = false;
+    //!< Which of the reasons the record marker is or is not on the Map has been
+    //!< reported. Said once each rather than several times a second, and reset when the
+    //!< situation changes, so the log explains a missing marker without filling up.
+    enum RecordMapState { RecordUnreported, RecordDrawn, RecordNone, RecordUnplaceable };
+    int m_recordMapState = RecordUnreported;
 
     // Flights with a route that could not be delivered. Held by id rather than by
     // pointer, so a flight deleted or merged away in the meantime simply fails to
@@ -668,6 +957,13 @@ private:
                           bool altitudeValid, float altitudeFt);
 
     void updateConcurrent(const QDateTime& now);
+    void updateDatabaseSize();
+    static QString renderDocument(const QByteArray& raw, const QString& source);
+    void acarsBlockReceived(const QByteArray& block, const QDateTime& dateTime,
+                            qint64 frequency, double level, int protocol);
+    void feedMessage(const AcarsMessage& message, const QDateTime& dateTime,
+                     qint64 frequency, double level);
+    void updateFeedConnections();
     QGeoCoordinate receiverPosition(int deviceSetIndex);
     void update3DModel(TrackedAircraft *item);
 
@@ -716,13 +1012,15 @@ private:
     // Which of an aircraft's flights the map should draw the track of - the one it is
     // flying now, unless the GUI is looking at one of its past flights
     const TrackedFlight *trackFlight(const TrackedAircraft *item) const;
+    //!< trackFlight() and then ensureTrackLoaded() on it, for the two places that draw
+    TrackedFlight *trackFlightLoaded(TrackedAircraft *item);
     void sendToMap(TrackedAircraft *item);
     void forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapItem *swgMapItem);
 
     void removeFromMap(const QString& name);
     void checkNotifications(TrackedAircraft *item, const AircraftReport& report);
     QString subAircraftString(TrackedAircraft *item, const AircraftReport& report, const QString& string) const;
-    void commandNotification(const QString& command);
+    void commandNotification(TrackedAircraft *item, const AircraftReport& report, const QString& command);
     void deleteAll();
     void resync();
     void applySettings(const AircraftSettings& settings, const QList<QString>& settingsKeys, bool force);
@@ -751,10 +1049,79 @@ private:
     //!< is no database. The session is then still only in memory, which is what makes it
     //!< unsafe to switch databases: see changeDatabase().
     bool saveDatabase();
+    //!< The all time records and counters, which live with the session they were measured
+    //!< from rather than in the preset. saveStatistics() runs inside saveDatabase()'s
+    //!< transaction; loadStatistics() returns false when there are none stored, which is
+    //!< what makes the one time import from an older preset happen.
+    bool saveStatistics();
+    bool loadStatistics();
+    //!< The coverage polygons, kept in their own table so that adding them did not mean
+    //!< recreating everyone's database - see loadCoverage()
+    bool saveCoverage();
+    bool loadCoverage();
+
+    //!< How far out each protocol has ever heard an aircraft, in each direction. The
+    //!< ADS-B demodulator draws the same thing for itself; here there is one per
+    //!< protocol, in its own colour, so their ranges can be compared - HFDL and Aero
+    //!< reach thousands of miles where VHF is line of sight, and seeing that on one map
+    //!< is the point.
+    //!<
+    //!< Bins of 5 degrees, as the ADS-B one uses. The range is kept rather than the
+    //!< polygon: the polygon is derived, and a bin is a scalar that survives a change of
+    //!< receiver position.
+    static const int m_coverageBinDeg = 5;
+    static const int m_coverageBins = 360 / m_coverageBinDeg;
+    QVector<float> m_coverageRangeKm[AircraftReport::ProtocolCount];
+    //!< Where the receiver was when the bins were filled. Per protocol, because they can
+    //!< be different receivers - an HFDL dongle and an ADS-B one are not always in the
+    //!< same place, and a polygon drawn from the wrong centre is worse than none.
+    QGeoCoordinate m_coverageOrigin[AircraftReport::ProtocolCount];
+    bool m_coverageDirty[AircraftReport::ProtocolCount] = {};
+    //!< What is currently on the Map for each protocol. A list, because coverage is
+    //!< drawn as one shape per run of adjacent measured bearings and the number of
+    //!< them changes as the gaps fill in - so what to remove has to be remembered
+    //!< rather than derived.
+    QStringList m_coverageDrawnNames[AircraftReport::ProtocolCount];
+    bool m_coverageLoaded = false;
+    //!< Set when a bin grows or the user clears, so the next database save writes
+    //!< the table and an idle session does not
+    bool m_coverageChanged = false;
+    void updateCoverage(int protocol, const QGeoCoordinate& receiver, float azimuthDeg,
+                        float rangeKm);
+    void sendCoverageToMap(int protocol);
+    void sendCoverageToMap();
+    void removeCoverageFromMap();
+    static QRgb coverageColor(int protocol);
+    //!< Read a restored flight's track or profile in, if that has not happened already.
+    //!< Idempotent, so callers need not know which flights are which. MUST be called
+    //!< before appending to either: until the stored points are in memory, m_trackSaved
+    //!< counts rows the list does not yet hold, and the save would append nothing.
+    void ensureTrackLoaded(TrackedFlight *flight);
+    void ensureProfileLoaded(TrackedFlight *flight);
+    void ensureAllHistoryLoaded();
     void revertDatabaseFilename(const QString& path);
     // The stored track and profile no longer relate to what is in memory at all
-    void forgetSavedTracks();
+    void forgetSavedHistory();
+    bool saveMessageChanges();
+    void forgetPendingChanges();
+    void forgetAllTimeFigures();
+    bool moveMessages(bool aircraftId, quint64 from, quint64 to);
     void loadDatabase();
+
+public:
+    // Where the session database lives, given the settings - which is not simply the
+    // filename, since an empty one means the default under AppData. Public because the
+    // GUI names the file beside the database size it reports.
+    static QString databasePath(const AircraftSettings& settings);
+    int tableCount(const char *table);
+    // Set by deleteAll(), so that emptying the documents and ATC tables is something the
+    // user asked for rather than something saveDatabase() has to infer from memory being
+    // empty - which is exactly the state it must not act on. Cleared after the commit.
+    bool m_dbMessageWipe = false;
+    // Set when what is stored no longer relates to what is held, so the documents and ATC
+    // tables are emptied and everything in memory written again. Unlike m_dbMessageWipe,
+    // the ACARS archive is left alone: it is not held in memory to be written back.
+    bool m_dbMessageRewrite = false;
 
 private slots:
     void handleInputMessages();
@@ -763,7 +1130,6 @@ private slots:
     void setActive(TrackedAircraft *item, bool active);
     void discardOldAircraft();
     void changeDatabase(const QString& oldPath);
-    static QString databasePath(const AircraftSettings& settings);
     void updateChartCounts();
 };
 

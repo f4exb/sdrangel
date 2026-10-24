@@ -20,9 +20,21 @@
 #include <QColor>
 #include <QToolButton>
 #include <QFileDialog>
+#include <QDir>
+#include <QPointer>
+#include <QStandardItemModel>
+#include <QThread>
+
+#include "util/flightpathpalette.h"
+#include "maincore.h"
+#include "channel/channelapi.h"
 
 #include "mapsettingsdialog.h"
 #include "gui/messagedialog.h"
+#include "msfsassetconverter/batchconverter.h"
+
+// Shown in the palette column when the track is drawn in a single colour
+const QString NO_PALETTE = "None";
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
@@ -35,6 +47,10 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_point3D(table, row, MapSettingsDialog::COL_3D_POINT, !settings->m_display3DPoint, settings->m_3DPointColor),
     m_track3D(table, row, MapSettingsDialog::COL_3D_TRACK, !settings->m_display3DTrack, settings->m_3DTrackColor)
 {
+    m_trackPalette = new QComboBox(table);
+    m_trackPalette->addItem(NO_PALETTE);
+    m_trackPalette->addItems(FlightPathPalette::getPaletteNames());
+    m_trackPalette->setCurrentText(settings->m_2DTrackPalette.isEmpty() ? NO_PALETTE : settings->m_2DTrackPalette);
     m_minZoom = new QSpinBox(table);
     m_minZoom->setRange(0, 15);
     m_minZoom->setValue(settings->m_2DMinZoom);
@@ -62,6 +78,7 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_smoothingLambda->setRange(0, 1e9);
     m_smoothingLambda->setValue(settings->m_smoothingLambda);
     m_smoothingLambda->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    table->setCellWidget(row, MapSettingsDialog::COL_2D_TRACK_PALETTE, m_trackPalette);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
@@ -79,6 +96,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     m_fileIdx(0),
     m_downloadDialog(this),
     m_progressDialog(nullptr),
+    m_msfsWorker(nullptr),
     ui(new Ui::MapSettingsDialog)
 {
     ui->setupUi(this);
@@ -102,6 +120,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->osmURL->setText(settings->m_osmURL);
     ui->mapBoxStyles->setText(settings->m_mapBoxStyles);
     ui->map2DEnabled->setChecked(m_settings->m_map2DEnabled);
+    ui->useLiveryIcons->setChecked(m_settings->m_useLiveryIcons);
     ui->map3DEnabled->setChecked(m_settings->m_map3DEnabled);
     ui->defaultImagery->setCurrentIndex(ui->defaultImagery->findText(m_settings->m_defaultImagery));
     ui->terrain->setCurrentIndex(ui->terrain->findText(m_settings->m_terrain));
@@ -114,9 +133,39 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->msaa->setCurrentText(msaaToString(m_settings->m_msaa));
     ui->terrainLighting->setChecked(m_settings->m_terrainLighting);
     ui->water->setChecked(m_settings->m_water);
+    ui->googlePhotorealistic3DTiles->setChecked(m_settings->m_googlePhotorealistic3DTiles);
     ui->hdr->setChecked(m_settings->m_hdr);
     ui->fog->setChecked(m_settings->m_fog);
     ui->fps->setChecked(m_settings->m_fps);
+    ui->mapItemSoundVolume->setValue(m_settings->m_mapItemSoundVolume);
+    ui->cockpitSoundVolume->setValue(m_settings->m_cockpitSoundVolume);
+    ui->msfsNavigraphDirectory->setText(QDir::toNativeSeparators(m_settings->m_msfsNavigraphDir));
+    ui->msfsAircraftDirectory->setText(QDir::toNativeSeparators(m_settings->m_msfsAircraftDir));
+    ui->msfsOutputDirectory->setText(QDir::toNativeSeparators(QDir(m_settings->m_modelDir).filePath("MSFS")));
+    ui->cancelMSFS->setEnabled(false);
+
+    // The AM Demods the RMP's VHF channels can be linked to. The dialog is rebuilt each
+    // time it is opened, so the list is simply what exists now
+    std::vector<ChannelAPI*> amDemods = MainCore::instance()->getChannels("sdrangel.channel.amdemod");
+    for (QComboBox *combo : {ui->vhf1Channel, ui->vhf2Channel})
+    {
+        combo->addItem("None", "");
+        for (const auto channel : amDemods)
+        {
+            const QString id = QString("R%1:%2").arg(channel->getDeviceSetIndex()).arg(channel->getIndexInDeviceSet());
+            combo->addItem(id, id);
+        }
+    }
+    // A linked channel that no longer exists is kept, as it may be created later on
+    for (const auto& pair : {std::make_pair(ui->vhf1Channel, m_settings->m_vhf1Channel), std::make_pair(ui->vhf2Channel, m_settings->m_vhf2Channel)})
+    {
+        QComboBox *combo = pair.first;
+        const QString& id = pair.second;
+        if (!id.isEmpty() && (combo->findData(id) < 0)) {
+            combo->addItem(id, id);
+        }
+        combo->setCurrentIndex(combo->findData(id));
+    }
 
     // Sort groups in table alphabetically
     QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
@@ -180,7 +229,12 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadProgress, this, &MapSettingsDialog::downloadProgress);
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadError, this, &MapSettingsDialog::downloadError);
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadAirportInformationFinished, this, &MapSettingsDialog::downloadAirportInformationFinished);
+    connect(&m_waypoints, &Waypoints::downloadingURL, this, &MapSettingsDialog::downloadingURL);
+    connect(&m_waypoints, &Waypoints::downloadError, this, &MapSettingsDialog::downloadError);
     connect(&m_waypoints, &Waypoints::downloadWaypointsFinished, this, &MapSettingsDialog::downloadWaypointsFinished);
+    connect(&m_sidStar, &SidStar::downloadingURL, this, &MapSettingsDialog::downloadingURL);
+    connect(&m_sidStar, &SidStar::downloadError, this, &MapSettingsDialog::downloadError);
+    connect(&m_sidStar, &SidStar::downloadSidStarFinished, this, &MapSettingsDialog::downloadSidStarFinished);
 
 #ifndef QT_WEBENGINE_FOUND
     ui->map3DSettings->setVisible(false);
@@ -198,6 +252,12 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
 
 MapSettingsDialog::~MapSettingsDialog()
 {
+    if (m_msfsCancelRequested) {
+        m_msfsCancelRequested->store(true);
+    }
+    if (m_msfsWorker) {
+        m_msfsWorker->wait();
+    }
     delete ui;
     qDeleteAll(m_mapItemSettingsGUIs);
 }
@@ -212,6 +272,11 @@ void MapSettingsDialog::accept()
     QString maptilerAPIKey = ui->maptilerAPIKey->text();
     QString cesiumIonAPIKey = ui->cesiumIonAPIKey->text();
     QString arcGISAPIKey = ui->arcGISAPIKey->text();
+    QString msfsNavigraphDir = QDir::fromNativeSeparators(ui->msfsNavigraphDirectory->text().trimmed());
+    if (!msfsNavigraphDir.isEmpty()) {
+        msfsNavigraphDir = QDir::cleanPath(msfsNavigraphDir);
+    }
+    QString msfsAircraftDir = QDir::cleanPath(QDir::fromNativeSeparators(ui->msfsAircraftDirectory->text().trimmed()));
     m_osmURLChanged = osmURL != m_settings->m_osmURL;
     if ((mapProvider != m_settings->m_mapProvider)
         || (thunderforestAPIKey != m_settings->m_thunderforestAPIKey)
@@ -250,10 +315,25 @@ void MapSettingsDialog::accept()
         m_settings->m_map2DEnabled = ui->map2DEnabled->isChecked();
         m_settingsKeysChanged.append("map2DEnabled");
     }
+    if (m_settings->m_useLiveryIcons != ui->useLiveryIcons->isChecked())
+    {
+        m_settings->m_useLiveryIcons = ui->useLiveryIcons->isChecked();
+        m_settingsKeysChanged.append("useLiveryIcons");
+    }
     if (m_settings->m_map3DEnabled != ui->map3DEnabled->isChecked())
     {
         m_settings->m_map3DEnabled = ui->map3DEnabled->isChecked();
         m_settingsKeysChanged.append("map3DEnabled");
+    }
+    if (m_settings->m_msfsNavigraphDir != msfsNavigraphDir)
+    {
+        m_settings->m_msfsNavigraphDir = msfsNavigraphDir;
+        m_settingsKeysChanged.append("msfsNavigraphDir");
+    }
+    if (m_settings->m_msfsAircraftDir != msfsAircraftDir)
+    {
+        m_settings->m_msfsAircraftDir = msfsAircraftDir;
+        m_settingsKeysChanged.append("msfsAircraftDir");
     }
     if (m_settings->m_defaultImagery != ui->defaultImagery->currentText())
     {
@@ -305,6 +385,11 @@ void MapSettingsDialog::accept()
         m_settings->m_water = ui->water->isChecked();
         m_settingsKeysChanged.append("water");
     }
+    if (m_settings->m_googlePhotorealistic3DTiles != ui->googlePhotorealistic3DTiles->isChecked())
+    {
+        m_settings->m_googlePhotorealistic3DTiles = ui->googlePhotorealistic3DTiles->isChecked();
+        m_settingsKeysChanged.append("googlePhotorealistic3DTiles");
+    }
     if (m_settings->m_hdr != ui->hdr->isChecked())
     {
         m_settings->m_hdr = ui->hdr->isChecked();
@@ -320,6 +405,27 @@ void MapSettingsDialog::accept()
         m_settings->m_fps = ui->fps->isChecked();
         m_settingsKeysChanged.append("fps");
     }
+    if (m_settings->m_mapItemSoundVolume != ui->mapItemSoundVolume->value())
+    {
+        m_settings->m_mapItemSoundVolume = ui->mapItemSoundVolume->value();
+        m_settingsKeysChanged.append("mapItemSoundVolume");
+    }
+    if (m_settings->m_cockpitSoundVolume != ui->cockpitSoundVolume->value())
+    {
+        m_settings->m_cockpitSoundVolume = ui->cockpitSoundVolume->value();
+        m_settingsKeysChanged.append("cockpitSoundVolume");
+    }
+    // The 3D map need not be reloaded for these: the RMP is told its new channels
+    if (m_settings->m_vhf1Channel != ui->vhf1Channel->currentData().toString())
+    {
+        m_settings->m_vhf1Channel = ui->vhf1Channel->currentData().toString();
+        m_settingsKeysChanged.append("vhf1Channel");
+    }
+    if (m_settings->m_vhf2Channel != ui->vhf2Channel->currentData().toString())
+    {
+        m_settings->m_vhf2Channel = ui->vhf2Channel->currentData().toString();
+        m_settingsKeysChanged.append("vhf2Channel");
+    }
 
     for (int row = 0; row < ui->mapItemSettings->rowCount(); row++)
     {
@@ -331,6 +437,7 @@ void MapSettingsDialog::accept()
         itemSettings->m_display2DLabel = ui->mapItemSettings->item(row, COL_2D_LABEL)->checkState() == Qt::Checked;
         itemSettings->m_display2DTrack = !gui->m_track2D.m_noColor;
         itemSettings->m_2DTrackColor = gui->m_track2D.m_color;
+        itemSettings->m_2DTrackPalette = gui->m_trackPalette->currentText() == NO_PALETTE ? "" : gui->m_trackPalette->currentText();
         itemSettings->m_2DMinZoom = gui->m_minZoom->value();
         itemSettings->m_display3DModel = ui->mapItemSettings->item(row, COL_3D_MODEL)->checkState() == Qt::Checked;
         itemSettings->m_display3DLabel = ui->mapItemSettings->item(row, COL_3D_LABEL)->checkState() == Qt::Checked;
@@ -359,6 +466,7 @@ void MapSettingsDialog::on_map2DEnabled_clicked(bool checked)
         ui->mapItemSettings->showColumn(COL_2D_LABEL);
         ui->mapItemSettings->showColumn(COL_2D_MIN_ZOOM);
         ui->mapItemSettings->showColumn(COL_2D_TRACK);
+        ui->mapItemSettings->showColumn(COL_2D_TRACK_PALETTE);
     }
     else
     {
@@ -366,10 +474,12 @@ void MapSettingsDialog::on_map2DEnabled_clicked(bool checked)
         ui->mapItemSettings->hideColumn(COL_2D_LABEL);
         ui->mapItemSettings->hideColumn(COL_2D_MIN_ZOOM);
         ui->mapItemSettings->hideColumn(COL_2D_TRACK);
+        ui->mapItemSettings->hideColumn(COL_2D_TRACK_PALETTE);
     }
     ui->mapProvider->setEnabled(checked);
     ui->osmURL->setEnabled(checked);
     ui->mapBoxStyles->setEnabled(checked);
+    ui->useLiveryIcons->setEnabled(checked);
 }
 
 void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
@@ -396,12 +506,12 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->hideColumn(COL_SMOOTHING_WINDOW);
         ui->mapItemSettings->hideColumn(COL_SMOOTHING_LAMBDA);
     }
-    ui->terrain->setEnabled(checked);
-    ui->buildings->setEnabled(checked);
     ui->sunLightEnabled->setEnabled(checked);
     ui->eciCamera->setEnabled(checked);
     ui->fxaa->setEnabled(checked);
     ui->msaa->setEnabled(checked);
+    // Enables imagery, terrain and buildings, subject to Cesium Ion and Google 3D tiles
+    updateCesiumIonItems();
 }
 
 void MapSettingsDialog::on_terrain_currentIndexChanged(int index)
@@ -409,9 +519,84 @@ void MapSettingsDialog::on_terrain_currentIndexChanged(int index)
     (void) index;
 
     bool ellipsoid = ui->terrain->currentText() == "Ellipsoid";
+    bool googleTiles = ui->googlePhotorealistic3DTiles->isChecked();
 
-    ui->terrainLighting->setEnabled(!ellipsoid);
-    ui->water->setEnabled(!ellipsoid);
+    ui->terrainLighting->setEnabled(!ellipsoid && !googleTiles);
+    ui->water->setEnabled(!ellipsoid && !googleTiles);
+}
+
+void MapSettingsDialog::on_cesiumIonAPIKey_textChanged(const QString& text)
+{
+    (void) text;
+
+    updateCesiumIonItems();
+}
+
+void MapSettingsDialog::on_googlePhotorealistic3DTiles_toggled(bool checked)
+{
+    (void) checked;
+
+    updateCesiumIonItems();
+}
+
+// Grey out options that would use our Cesium Ion quota, unless the user has entered
+// their own Cesium Ion API key, and those that Google's 3D tiles override
+void MapSettingsDialog::updateCesiumIonItems()
+{
+    bool hasKey = !ui->cesiumIonAPIKey->text().trimmed().isEmpty();
+
+    ui->googlePhotorealistic3DTiles->setEnabled(hasKey && ui->map3DEnabled->isChecked());
+    ui->googlePhotorealistic3DTiles->setToolTip(hasKey ?
+          "Display Google Photorealistic 3D Tiles. This replaces the imagery, terrain and buildings settings and hides map layers drawn on the globe, such as rain and clouds"
+        : "Requires a Cesium Ion API key");
+    if (!hasKey) {
+        ui->googlePhotorealistic3DTiles->setChecked(false);
+    }
+
+    updateComboItems(ui->defaultImagery, MapSettings::m_cesiumIonImagery, hasKey, "ArcGIS world imagery");
+    updateComboItems(ui->terrain, MapSettings::m_cesiumIonTerrain, hasKey, "Ellipsoid");
+    updateComboItems(ui->buildings, MapSettings::m_cesiumIonBuildings, hasKey, "None");
+
+    // Google's 3D tiles include imagery, terrain and buildings, so those settings are unused
+    bool googleTiles = ui->googlePhotorealistic3DTiles->isChecked();
+    ui->defaultImagery->setEnabled(!googleTiles && ui->map3DEnabled->isChecked());
+    ui->terrain->setEnabled(!googleTiles && ui->map3DEnabled->isChecked());
+    ui->buildings->setEnabled(!googleTiles && ui->map3DEnabled->isChecked());
+    on_terrain_currentIndexChanged(ui->terrain->currentIndex());
+}
+
+void MapSettingsDialog::updateComboItems(QComboBox *combo, const QStringList& ionItems, bool enable, const QString& fallback)
+{
+    QStandardItemModel *model = qobject_cast<QStandardItemModel *>(combo->model());
+
+    if (!model)
+    {
+        qDebug() << "MapSettingsDialog::updateComboItems: Can't disable items in" << combo->objectName();
+        return;
+    }
+    for (const auto& ionItem : ionItems)
+    {
+        int idx = combo->findText(ionItem);
+
+        if (idx >= 0)
+        {
+            QStandardItem *item = model->item(idx);
+
+            item->setEnabled(enable);
+            item->setToolTip(enable ? "" : "Requires a Cesium Ion API key");
+            // Don't leave a disabled item selected
+            if (!enable && (combo->currentIndex() == idx))
+            {
+                int fallbackIdx = combo->findText(fallback);
+
+                if (fallbackIdx >= 0) {
+                    combo->setCurrentIndex(fallbackIdx);
+                } else {
+                    qDebug() << "MapSettingsDialog::updateComboItems: No" << fallback << "in" << combo->objectName();
+                }
+            }
+        }
+    }
 }
 
 // Models have individual licensing. See LICENSE on github
@@ -455,6 +640,159 @@ void MapSettingsDialog::unzip(const QString &filename)
         qWarning() << "MapSettingsDialog::unzip - Failed to extract files from " << filename << " to " << m_settings->m_modelDir;
     } else {
         qDebug() << "MapSettingsDialog::unzip - Unzipped " << filename << " to " << m_settings->m_modelDir;
+    }
+}
+
+void MapSettingsDialog::on_msfsBrowse_clicked()
+{
+    const QString directory = QFileDialog::getExistingDirectory(
+        this,
+        "Select the parent directory containing MSFS aircraft",
+        ui->msfsAircraftDirectory->text());
+    if (!directory.isEmpty()) {
+        ui->msfsAircraftDirectory->setText(QDir::toNativeSeparators(directory));
+    }
+}
+
+void MapSettingsDialog::on_msfsNavigraphBrowse_clicked()
+{
+    const QString directory = QFileDialog::getExistingDirectory(
+        this,
+        "Select the Navigraph BGL directory",
+        ui->msfsNavigraphDirectory->text());
+    if (!directory.isEmpty()) {
+        ui->msfsNavigraphDirectory->setText(QDir::toNativeSeparators(directory));
+    }
+}
+
+void MapSettingsDialog::on_convertMSFS_clicked()
+{
+    if (m_msfsWorker) {
+        return;
+    }
+
+    const QString aircraftDirectory = QFileInfo(
+        QDir::fromNativeSeparators(ui->msfsAircraftDirectory->text().trimmed())).absoluteFilePath();
+    if (!QFileInfo(aircraftDirectory).isDir())
+    {
+        QMessageBox::critical(this, "MSFS aircraft conversion",
+            QString("Aircraft directory does not exist: %1").arg(QDir::toNativeSeparators(aircraftDirectory)));
+        return;
+    }
+
+    const QString outputDirectory = QDir(m_settings->m_modelDir).filePath("MSFS");
+    ui->msfsOutputDirectory->setText(QDir::toNativeSeparators(outputDirectory));
+    ui->msfsLog->clear();
+    ui->msfsProgress->setRange(0, 0);
+    ui->convertMSFS->setEnabled(false);
+    ui->cancelMSFS->setEnabled(true);
+    ui->msfsBrowse->setEnabled(false);
+    ui->msfsAircraftDirectory->setEnabled(false);
+    ui->buttonBox->setEnabled(false);
+
+    m_msfsCancelRequested = std::make_shared<std::atomic_bool>(false);
+    const auto cancelRequested = m_msfsCancelRequested;
+    const QPointer<MapSettingsDialog> dialog(this);
+    m_msfsWorker = QThread::create([dialog, aircraftDirectory, outputDirectory, cancelRequested] {
+        MSFSBatchConversionSummary summary;
+        QString error;
+        const bool success = convertMSFSAircraftDirectory(
+            aircraftDirectory,
+            outputDirectory,
+            &summary,
+            &error,
+            [dialog](int current, int total, const QString& message) {
+                if (dialog) {
+                    QMetaObject::invokeMethod(dialog.data(), [dialog, current, total, message] {
+                        if (dialog) {
+                            dialog->updateMSFSProgress(current, total, message);
+                        }
+                    }, Qt::QueuedConnection);
+                }
+            },
+            [cancelRequested] { return cancelRequested->load(); });
+
+        if (dialog) {
+            QMetaObject::invokeMethod(dialog.data(), [dialog, success, summary, error] {
+                if (dialog) {
+                    dialog->msfsConversionFinished(success, summary, error);
+                }
+            }, Qt::QueuedConnection);
+        }
+    });
+    connect(m_msfsWorker, &QThread::finished, this, [this] { m_msfsWorker = nullptr; });
+    connect(m_msfsWorker, &QThread::finished, m_msfsWorker, &QObject::deleteLater);
+    m_msfsWorker->start();
+}
+
+void MapSettingsDialog::on_cancelMSFS_clicked()
+{
+    if (m_msfsCancelRequested)
+    {
+        m_msfsCancelRequested->store(true);
+        ui->cancelMSFS->setEnabled(false);
+        ui->msfsLog->appendPlainText("Cancelling after the current conversion step…");
+    }
+}
+
+void MapSettingsDialog::updateMSFSProgress(int current, int total, const QString& message)
+{
+    if (total <= 0) {
+        ui->msfsProgress->setRange(0, 0);
+    } else {
+        ui->msfsProgress->setRange(0, total);
+        ui->msfsProgress->setValue(current);
+    }
+    ui->msfsLog->appendPlainText(message);
+}
+
+void MapSettingsDialog::msfsConversionFinished(
+    bool success, const MSFSBatchConversionSummary& summary, const QString& error)
+{
+    m_msfsCancelRequested.reset();
+    ui->convertMSFS->setEnabled(true);
+    ui->cancelMSFS->setEnabled(false);
+    ui->msfsBrowse->setEnabled(true);
+    ui->msfsAircraftDirectory->setEnabled(true);
+    ui->buttonBox->setEnabled(true);
+
+    if (!success)
+    {
+        ui->msfsProgress->setRange(0, 1);
+        ui->msfsProgress->setValue(0);
+        ui->msfsLog->appendPlainText(QString("ERROR: %1").arg(error));
+        QMessageBox::critical(this, "MSFS aircraft conversion", error);
+        return;
+    }
+
+    ui->msfsProgress->setRange(0, qMax(1, summary.m_discovered));
+    ui->msfsProgress->setValue(summary.m_converted + summary.m_failed);
+    const QString result = summary.m_cancelled
+        ? QString("Conversion cancelled. %1 of %2 aircraft variants converted; %3 failed.")
+            .arg(summary.m_converted).arg(summary.m_discovered).arg(summary.m_failed)
+        : QString("Conversion complete. %1 of %2 aircraft variants converted; %3 failed. Restart SDRangel to make the new models available.")
+            .arg(summary.m_converted).arg(summary.m_discovered).arg(summary.m_failed);
+    const QString performance = QString(" Used %1 worker%2; %3 cached texture%4 reused; "
+                                        "%5 missing optional texture%6 replaced; "
+                                        "%7 missing fallback director%8 skipped.")
+        .arg(summary.m_workerCount)
+        .arg(summary.m_workerCount == 1 ? QString() : QStringLiteral("s"))
+        .arg(summary.m_reusedTextures)
+        .arg(summary.m_reusedTextures == 1 ? QString() : QStringLiteral("s"))
+        .arg(summary.m_synthesizedTextures)
+        .arg(summary.m_synthesizedTextures == 1 ? QString() : QStringLiteral("s"))
+        .arg(summary.m_skippedFallbackDirectories)
+        .arg(summary.m_skippedFallbackDirectories == 1
+            ? QStringLiteral("y") : QStringLiteral("ies"));
+    const QString resultWithPerformance = result + performance;
+    ui->msfsLog->appendPlainText(resultWithPerformance);
+
+    if (summary.m_cancelled) {
+        QMessageBox::information(this, "MSFS aircraft conversion", resultWithPerformance);
+    } else if (summary.m_failed > 0) {
+        QMessageBox::warning(this, "MSFS aircraft conversion", resultWithPerformance + " See the log for details.");
+    } else {
+        QMessageBox::information(this, "MSFS aircraft conversion", resultWithPerformance);
     }
 }
 
@@ -560,10 +898,31 @@ void MapSettingsDialog::on_getWaypoints_clicked()
     if (m_progressDialog == nullptr)
     {
         m_progressDialog = new QProgressDialog(this);
-        m_progressDialog->setMaximum(1);
+        // Two steps, not one: downloadingURL() advances the bar by one, and a
+        // QProgressDialog defaults to autoReset and autoClose, so a maximum of 1 would
+        // have it hide itself the moment the download started. Neither of these emits a
+        // byte level progress signal, so the second step is the download completing.
+        m_progressDialog->setMaximum(2);
         m_progressDialog->setCancelButton(nullptr);
         m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
         m_waypoints.downloadWaypoints();
+    }
+}
+
+void MapSettingsDialog::on_getSidStar_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        // Two steps, not one: downloadingURL() advances the bar by one, and a
+        // QProgressDialog defaults to autoReset and autoClose, so a maximum of 1 would
+        // have it hide itself the moment the download started. Neither of these emits a
+        // byte level progress signal, so the second step is the download completing.
+        m_progressDialog->setMaximum(2);
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_sidStar.downloadSidStar();
     }
 }
 
@@ -639,6 +998,21 @@ void MapSettingsDialog::downloadWaypointsFinished()
         m_progressDialog->setLabelText("Reading waypoints.");
     }
     emit waypointsUpdated();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void MapSettingsDialog::downloadSidStarFinished()
+{
+    // No sidStarUpdated() to go with this, unlike the databases above: the Map draws none
+    // of these itself. SIDs and STARs are read by the Aircraft feature when it expands a
+    // flight plan, and SidStar::getWaypoints() re-reads the file whenever its modification
+    // time has moved - so a fresh download is picked up on the next route drawn, with
+    // nothing here needing to say so.
     if (m_progressDialog)
     {
         m_progressDialog->close();

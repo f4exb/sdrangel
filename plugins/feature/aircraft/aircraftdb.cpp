@@ -33,11 +33,13 @@
 #include <QStandardPaths>
 
 #include "sqlite/sqlite3.h"
+#include "util/aircraft3dmodels.h"
 
 #include "aircrafttracker.h"
 
-// Current schema version. v2 added the aliases column to flights.
-#define AIRCRAFT_DB_VERSION 3
+// Current schema version. Only this version is read: an older database is started
+// over and a newer one is left alone.
+#define AIRCRAFT_DB_VERSION 5
 
 // Where the session is kept. The setting wins; otherwise the default location, whose
 // directory may not exist yet
@@ -54,6 +56,28 @@ QString AircraftTracker::databasePath(const AircraftSettings& settings)
     return locations[0] + "/aircraft.db";
 }
 
+// What the session database is costing on disk. SQLite is in WAL mode, so what has been
+// written most recently is in the -wal file rather than in the database itself, and a
+// figure that ignored it would sit still for a whole session and then jump on a checkpoint.
+void AircraftTracker::updateDatabaseSize()
+{
+    const QString path = databasePath(m_settings);
+    qint64 bytes = 0;
+
+    for (const QString& suffix : { QString(), QString("-wal"), QString("-shm") })
+    {
+        const QFileInfo info(path + suffix);
+        if (info.exists()) {
+            bytes += info.size();
+        }
+    }
+    if (bytes != m_statistics.m_databaseBytes)
+    {
+        m_statistics.m_databaseBytes = bytes;
+        m_statisticsDirty = true;
+    }
+}
+
 static bool execSQL(sqlite3 *db, const char *sql)
 {
     char *errMsg = nullptr;
@@ -64,6 +88,35 @@ static bool execSQL(sqlite3 *db, const char *sql)
         return false;
     }
     return true;
+}
+
+// Run a DELETE taking one flight id for each of the given flights, saying whether all
+// of them went through
+static bool deleteByFlight(sqlite3 *db, const char *sql, const QSet<quint64>& flightIds)
+{
+    if (flightIds.isEmpty()) {
+        return true;
+    }
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::saveDatabase: could not prepare" << sql << ":" << sqlite3_errmsg(db);
+        return false;
+    }
+    bool ok = true;
+    for (quint64 id : flightIds)
+    {
+        sqlite3_reset(stmt);
+        sqlite3_bind_int64(stmt, 1, (qint64) id);
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+        {
+            qWarning() << "AircraftTracker::saveDatabase:" << sql << "failed:" << sqlite3_errmsg(db);
+            ok = false;
+            break;
+        }
+    }
+    sqlite3_finalize(stmt);
+    return ok;
 }
 
 // Run a prepared INSERT and say whether the row went in.
@@ -131,6 +184,173 @@ static bool tableExists(sqlite3 *db, const char *table)
     return exists;
 }
 
+// The waypoint positions a message carried, as one string: "NAME@lat,lon" per waypoint
+// where it was placed, the bare name where it was not, separated by spaces. Waypoint
+// names hold neither a space nor an @, so nothing has to be escaped.
+//
+// They are stored rather than re-resolved from the names, because an oceanic clearance
+// names positions like 5730N020W that no database holds - the coordinates the message
+// itself gave are the only way to place them, and dropping them would lose exactly the
+// waypoints that make an oceanic route worth drawing.
+static QString encodeRoutePoints(const QList<AircraftReport::RouteWaypoint>& points)
+{
+    QStringList out;
+    for (const AircraftReport::RouteWaypoint& point : points)
+    {
+        if (point.m_positionValid)
+        {
+            // Six decimal places: enough for a tenth of a metre, where the default six
+            // SIGNIFICANT digits would round a three digit longitude to about 100 m
+            out.append(QString("%1@%2,%3").arg(point.m_name)
+                .arg(point.m_latitude, 0, 'f', 6).arg(point.m_longitude, 0, 'f', 6));
+        }
+        else
+        {
+            out.append(point.m_name);
+        }
+    }
+    return out.join(" ");
+}
+
+// Several short fields as one. The unit separator, which no ARINC field contains, and a
+// fixed order - so a part added later appends rather than shifting the ones before it,
+// and a database written before it simply has fewer.
+static const QChar RoutePartSeparator(0x1f);
+
+static QString encodeRouteParts(const QStringList& parts)
+{
+    for (const QString& part : parts)
+    {
+        if (!part.isEmpty()) {
+            return parts.join(RoutePartSeparator);
+        }
+    }
+    return QString();       // Nothing filed, so nothing to store
+}
+
+static void decodeRouteParts(const QString& text, const QList<QString *>& into)
+{
+    if (text.isEmpty()) {
+        return;
+    }
+    const QStringList parts = text.split(RoutePartSeparator);
+    for (int i = 0; (i < parts.size()) && (i < into.size()); i++) {
+        *into[i] = parts[i];
+    }
+}
+
+// Recover a plan's parts from the message that filed it, for rows written before those
+// parts were stored.
+//
+// The runway, SID, STAR, approach and alternate were only added to the flights table
+// part way through a session, so every plan filed before that has its document text and
+// its waypoints but none of the parts - the STAR is sitting in the message, in plain
+// sight, and the route drawn for that flight cannot use it. The text is this
+// application's own rendering of the plan, one "Label: value" a line, so reading the
+// parts back out of it is reliable rather than a guess at someone else's format.
+//
+// Takes the parts in the same order decodeRouteParts() does, and only ever fills one
+// that is empty - so a part an insert actually filed always wins over a parsed one, and
+// running this twice does nothing the first run did not. Once the flight is saved again
+// the parts are stored properly and this stops finding anything to do.
+static void recoverRoutePartsFromText(const QString& text, const QList<QString *>& into)
+{
+    if (text.isEmpty()) {
+        return;
+    }
+
+    // An airport is rendered with its name after it - "SBGR (Sao Paulo/Guarulhos...)" -
+    // and sometimes with a runway stuck to it, as "ESSA(19L)". The code is the leading
+    // run of letters and digits either way.
+    auto airport = [](const QString& value)
+    {
+        int end = 0;
+        while ((end < value.size()) && value[end].isLetterOrNumber()) {
+            end++;
+        }
+        return value.left(end);
+    };
+
+    struct Field {
+        const char *m_label;
+        int m_index;
+        bool m_isAirport;
+    };
+    static const Field fields[] {
+        { "Runway",    0, false },
+        { "SID",       1, false },
+        { "STAR",      2, false },
+        { "Approach",  3, false },
+        { "Alternate", 4, true  },
+        { "Departure", 5, true  },
+        { "Arrival",   6, true  },
+    };
+
+    const QStringList lines = text.split('\n');
+
+    for (const QString& line : lines)
+    {
+        const int colon = line.indexOf(':');
+
+        if (colon < 0) {
+            continue;
+        }
+
+        const QString label = line.left(colon).trimmed();
+        const QString value = line.mid(colon + 1).trimmed();
+
+        if (value.isEmpty()) {
+            continue;
+        }
+
+        for (const Field& field : fields)
+        {
+            if ((label != QLatin1String(field.m_label)) || (field.m_index >= into.size())) {
+                continue;
+            }
+            // Only what is missing, so a filed part always wins over a parsed one
+            if (into[field.m_index]->isEmpty()) {
+                *into[field.m_index] = field.m_isAirport ? airport(value) : value;
+            }
+            break;
+        }
+    }
+}
+
+static QList<AircraftReport::RouteWaypoint> decodeRoutePoints(const QString& text)
+{
+    QList<AircraftReport::RouteWaypoint> points;
+
+    for (const QString& field : text.split(" ", Qt::SkipEmptyParts))
+    {
+        AircraftReport::RouteWaypoint point;
+        const int at = field.indexOf('@');
+        if (at < 0)
+        {
+            point.m_name = field;
+        }
+        else
+        {
+            point.m_name = field.left(at);
+            const QStringList coords = field.mid(at + 1).split(',');
+            if (coords.size() == 2)
+            {
+                bool latOk = false, lonOk = false;
+                const float latitude = coords[0].toFloat(&latOk);
+                const float longitude = coords[1].toFloat(&lonOk);
+                if (latOk && lonOk)
+                {
+                    point.m_positionValid = true;
+                    point.m_latitude = latitude;
+                    point.m_longitude = longitude;
+                }
+            }
+        }
+        points.append(point);
+    }
+    return points;
+}
+
 static void ensureColumn(sqlite3 *db, const char *table, const char *column, const char *decl)
 {
     sqlite3_stmt *stmt = nullptr;
@@ -156,6 +376,30 @@ static void ensureColumn(sqlite3 *db, const char *table, const char *column, con
     }
 }
 
+// Whether a table has a column. Used to tell a database that merely SAYS it is the
+// current version from one that actually has the current version's shape.
+static bool columnExists(sqlite3 *db, const char *table, const char *column)
+{
+    sqlite3_stmt *stmt = nullptr;
+    bool found = false;
+    const QByteArray sql = QByteArray("PRAGMA table_info(") + table + ")";
+
+    if (sqlite3_prepare_v2(db, sql.constData(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const unsigned char *name = sqlite3_column_text(stmt, 1);
+            if (name && (qstrcmp((const char *) name, column) == 0))
+            {
+                found = true;
+                break;
+            }
+        }
+    }
+    sqlite3_finalize(stmt);
+    return found;
+}
+
 bool AircraftTracker::openDatabase()
 {
     QString path = databasePath(m_settings);
@@ -175,6 +419,72 @@ bool AircraftTracker::openDatabase()
     // never had one and so its existing aircraft have never been counted into it
     const bool seenIsNew = !tableExists(m_db, "seen");
 
+    // A database written by an older version is DROPPED here, before the tables below
+    // are created, rather than merely emptied.
+    //
+    // Emptying is not enough, because a version change can move the schema and not only
+    // the data: CREATE TABLE IF NOT EXISTS leaves an existing table exactly as it was, so
+    // a table that has gained a column is still the old shape and DELETE does nothing
+    // about that. That is not hypothetical - when documents gained its raw and source
+    // columns the insert could no longer be prepared, so every save failed and rolled
+    // back, and the next start found an empty database. Silently, because a save that
+    // rolls back looks like a save that had nothing to do.
+    //
+    // seen is deliberately left alone: it is the all time airframe count, and it is meant
+    // to survive everything else being thrown away.
+    if (tableExists(m_db, "meta"))
+    {
+        int existing = 0;
+        sqlite3_stmt *versionStmt = nullptr;
+        if (sqlite3_prepare_v2(m_db, "SELECT version FROM meta", -1, &versionStmt, nullptr) == SQLITE_OK)
+        {
+            if (sqlite3_step(versionStmt) == SQLITE_ROW) {
+                existing = sqlite3_column_int(versionStmt, 0);
+            }
+        }
+        sqlite3_finalize(versionStmt);
+
+        // What this build's inserts require, and therefore what makes a database the
+        // right SHAPE rather than merely the right version number.
+        //
+        // The version alone is not enough to trust. A database written by the code that
+        // emptied tables on a version change instead of recreating them ends up claiming
+        // the new version while still having the old columns - and then every save fails
+        // to prepare and rolls back, silently, for good. One did. Add a line here
+        // whenever a table gains a column, and such a database repairs itself on the next
+        // start rather than needing the version bumped to shift it.
+        const bool shapeIsCurrent = columnExists(m_db, "documents", "raw")
+                                 && columnExists(m_db, "documents", "source")
+                                 && tableExists(m_db, "acars_blocks");
+
+        // A newer build's database is left exactly as it is, rather than thrown away by
+        // a build that merely cannot read it
+        if (existing > AIRCRAFT_DB_VERSION)
+        {
+            qWarning() << "AircraftTracker::openDatabase:" << path << "is database version" << existing
+                       << "- this build only reads version" << AIRCRAFT_DB_VERSION << "- not using it";
+            sqlite3_close(m_db);
+            m_db = nullptr;
+            return false;
+        }
+
+        // 0 is a database with no version row yet. Only this version is read - older
+        // ones were only ever development databases - so anything else is started over.
+        if (((existing != 0) && (existing != AIRCRAFT_DB_VERSION)) || !shapeIsCurrent)
+        {
+            qDebug() << "AircraftTracker::openDatabase: Database version" << existing
+                     << (shapeIsCurrent ? "cannot be migrated" : "does not have this version's tables")
+                     << "- recreating its tables";
+            execSQL(m_db,
+                "DROP TABLE IF EXISTS aircraft; DROP TABLE IF EXISTS sources;"
+                "DROP TABLE IF EXISTS track; DROP TABLE IF EXISTS flight_sources;"
+                "DROP TABLE IF EXISTS stat_records; DROP TABLE IF EXISTS stat_counters;"
+                "DROP TABLE IF EXISTS flights; DROP TABLE IF EXISTS documents;"
+                "DROP TABLE IF EXISTS acars_blocks; DROP TABLE IF EXISTS profile;"
+                "DROP TABLE IF EXISTS atc; DROP TABLE IF EXISTS meta;");
+        }
+    }
+
     bool ok = execSQL(m_db,
         "CREATE TABLE IF NOT EXISTS meta (version INTEGER);"
         "CREATE TABLE IF NOT EXISTS aircraft ("
@@ -193,6 +503,25 @@ bool AircraftTracker::openDatabase()
         // IF NOT EXISTS creates it on the next open of an older database, where bumping
         // would send every existing database down the "starting afresh" branch and
         // delete everything in it.
+        // The all time statistics. They used to live in the preset, on the grounds that
+        // they describe the receiving setup rather than the traffic - but the database is
+        // the per setup file, and keeping the records in one place and the airframe count
+        // that belongs with them ("seen", below) in another meant switching databases
+        // gave one database's count with another's records. Like "seen", these are never
+        // touched by clearing the aircraft or by the retention period: they outlive the
+        // traffic they were measured from.
+        //
+        // One row per record: kind 0 is maximum range, and then protocol says which;
+        // kind 1 is fastest and kind 2 highest, neither of which is per protocol.
+        "CREATE TABLE IF NOT EXISTS stat_records ("
+            "kind INTEGER, protocol INTEGER, value REAL, aircraft TEXT, recorded INTEGER,"
+            "position_valid INTEGER, latitude REAL, longitude REAL,"
+            "altitude_valid INTEGER, altitude_ft REAL, frequency INTEGER,"
+            "PRIMARY KEY (kind, protocol));"
+        "CREATE TABLE IF NOT EXISTS stat_counters (name TEXT PRIMARY KEY, value INTEGER);"
+        "CREATE TABLE IF NOT EXISTS coverage ("
+        "  protocol INTEGER, bin INTEGER, range REAL, latitude REAL, longitude REAL,"
+        "  PRIMARY KEY (protocol, bin));"
         "CREATE TABLE IF NOT EXISTS flight_sources ("
             "flight_id INTEGER, protocol INTEGER, frequency INTEGER, count INTEGER);"
         "CREATE TABLE IF NOT EXISTS track ("
@@ -204,14 +533,26 @@ bool AircraftTracker::openDatabase()
             "aliases TEXT DEFAULT '', messages INTEGER DEFAULT 0,"
             "out_time INTEGER DEFAULT 0, off_time INTEGER DEFAULT 0,"
             "on_time INTEGER DEFAULT 0, in_time INTEGER DEFAULT 0);"
+        // text is what a document was LAST rendered as, and raw/source are what it was
+        // rendered from. A document our own parser produced is rendered again on load, so
+        // that a decoder fix reaches everything already stored rather than only what
+        // arrives after it; one that libacars or the ATN decoder produced has no raw and
+        // keeps its text, because neither of those is reachable from this feature.
         "CREATE TABLE IF NOT EXISTS documents ("
-            "flight_id INTEGER, kind INTEGER, title TEXT, text TEXT, received INTEGER);"
+            "flight_id INTEGER, kind INTEGER, title TEXT, text TEXT, received INTEGER,"
+            "raw BLOB, source TEXT);"
+        // Every ACARS block heard, exactly as it came off the air. Raw, and one row per
+        // BLOCK rather than per reassembled message, so that a later decoder can be run
+        // over the whole archive - see MainCore::MsgAcarsBlock. None of the metadata is
+        // in the block itself, so it is stored beside it.
+        "CREATE TABLE IF NOT EXISTS acars_blocks ("
+            "received INTEGER, frequency INTEGER, level REAL, protocol INTEGER, block BLOB);"
         "CREATE TABLE IF NOT EXISTS profile ("
             "flight_id INTEGER, time INTEGER, altitude REAL, speed REAL);"
         "CREATE TABLE IF NOT EXISTS atc ("
             "time INTEGER, protocol TEXT, uplink INTEGER,"
             "from_station TEXT, to_station TEXT, message TEXT, tooltip TEXT,"
-            "aircraft_id INTEGER, flight_id INTEGER, map_name TEXT);"
+            "aircraft_id INTEGER, flight_id INTEGER, map_name TEXT, link TEXT DEFAULT '');"
         // Every airframe ever heard, for the all time aircraft count. One row each, no
         // matter how often it comes back, which is the whole reason a count cannot do
         // the job. Kept out of every DELETE below: this is the one table that has to
@@ -248,6 +589,9 @@ bool AircraftTracker::openDatabase()
 
     // Columns added after a version bump, which the version chain below would miss on a
     // database already at the current version
+    // Messages stored before the link was recorded keep an empty one, which the table
+    // shows as a blank cell rather than guessing
+    ensureColumn(m_db, "atc", "link", "TEXT DEFAULT ''");
     ensureColumn(m_db, "flights", "messages", "INTEGER DEFAULT 0");
     ensureColumn(m_db, "flights", "out_time", "INTEGER DEFAULT 0");
     ensureColumn(m_db, "flights", "off_time", "INTEGER DEFAULT 0");
@@ -257,6 +601,40 @@ bool AircraftTracker::openDatabase()
     // replace them has to be stored with them - otherwise the first message after a
     // restart wins however delayed it is, which is the case the timestamp exists for
     ensureColumn(m_db, "flights", "route_filed", "INTEGER DEFAULT 0");
+    // The filed routes themselves. m_route above is only the route STRING shown in the
+    // tables; what the Map draws is the flight plan and the oceanic clearance, each with
+    // its own waypoints, the positions the message gave for them, the message text for
+    // the popup and when it was filed. None of it was stored, so a restored flight had
+    // nothing to draw and selecting an archived flight showed its track but no route.
+    // Appended after route_filed, and in this order, because the flights INSERT binds by
+    // position - so a database that predates them ends up with the same column order as
+    // one created now.
+    ensureColumn(m_db, "flights", "fp_waypoints", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "fp_points", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "fp_text", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "fp_filed", "INTEGER DEFAULT 0");
+    ensureColumn(m_db, "flights", "oc_waypoints", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "oc_points", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "oc_text", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "oc_filed", "INTEGER DEFAULT 0");
+    // What an insert carries besides the path - runway, SID, STAR, approach, alternate
+    // and the plan's own airports - as one field each. They are only ever read and
+    // written together, and a column apiece would be fourteen more on a table that
+    // already has two dozen.
+    ensureColumn(m_db, "flights", "fp_parts", "TEXT DEFAULT ''");
+    ensureColumn(m_db, "flights", "oc_parts", "TEXT DEFAULT ''");
+
+    // Without these, everything keyed on a flight is a full table scan - and track runs
+    // to millions of rows. It was tolerable while the whole table was read once at
+    // startup and never queried again, but a per flight DELETE on a merge or a prune
+    // scanned the lot, and fetching one flight's track on demand would too.
+    execSQL(m_db, "CREATE INDEX IF NOT EXISTS track_flight ON track (flight_id);");
+    execSQL(m_db, "CREATE INDEX IF NOT EXISTS profile_flight ON profile (flight_id);");
+    // And for the same reason the documents and ATC messages, now that a save deletes
+    // and moves them by flight and aircraft rather than replacing the tables
+    execSQL(m_db, "CREATE INDEX IF NOT EXISTS documents_flight ON documents (flight_id);");
+    execSQL(m_db, "CREATE INDEX IF NOT EXISTS atc_aircraft ON atc (aircraft_id);");
+    execSQL(m_db, "CREATE INDEX IF NOT EXISTS atc_flight ON atc (flight_id);");
     // A model is no use on its own: without the offsets it sits half underground, and
     // without knowing whether we chose it, the livery setting may not replace it
     ensureColumn(m_db, "aircraft", "model_altitude_offset", "REAL DEFAULT 0");
@@ -266,7 +644,8 @@ bool AircraftTracker::openDatabase()
     // from one that legitimately holds a zero offset
     ensureColumn(m_db, "aircraft", "model_is_ours", "INTEGER DEFAULT -1");
 
-    // Schema version, for future migrations
+    // Schema version. Anything other than this version had its tables dropped above,
+    // which leaves no version row, so the only case left is a new database.
     sqlite3_stmt *stmt = nullptr;
     int version = 0;
     if (sqlite3_prepare_v2(m_db, "SELECT version FROM meta", -1, &stmt, nullptr) == SQLITE_OK)
@@ -277,36 +656,6 @@ bool AircraftTracker::openDatabase()
     }
     sqlite3_finalize(stmt);
     if (version == 0) {
-        execSQL(m_db, "INSERT INTO meta (version) VALUES (" QT_STRINGIFY(AIRCRAFT_DB_VERSION) ")");
-    } else if ((version == 1) || (version == 2)) {
-        if (version == 1)
-        {
-            // v1 -> v2: flight name aliases
-            qDebug() << "AircraftTracker::openDatabase: Migrating database from version 1";
-            execSQL(m_db, "ALTER TABLE flights ADD COLUMN aliases TEXT DEFAULT ''");
-        }
-        // v2 -> v3: the track belongs to the flight rather than the airframe. The old
-        // rows are keyed by aircraft and cannot be divided between that aircraft's
-        // flights after the fact, so they are discarded - tracks re-accumulate from the
-        // next report, and they were only ever kept for m_retentionDays anyway
-        qDebug() << "AircraftTracker::openDatabase: Migrating database from version" << version
-                 << "- stored tracks are discarded";
-        // v2 -> v3 also gives the flight its own message count. The Past Flights table
-        // showed the document count under a "Msgs" heading, which reads as zero for any
-        // flight heard only on ADS-B
-        execSQL(m_db, "ALTER TABLE flights ADD COLUMN messages INTEGER DEFAULT 0");
-        execSQL(m_db,
-            "DROP TABLE IF EXISTS track;"
-            "CREATE TABLE track ("
-                "flight_id INTEGER, seq INTEGER, latitude REAL, longitude REAL, altitude REAL, time INTEGER);");
-        execSQL(m_db, "UPDATE meta SET version = " QT_STRINGIFY(AIRCRAFT_DB_VERSION));
-    } else if (version != AIRCRAFT_DB_VERSION) {
-        qDebug() << "AircraftTracker::openDatabase: Database version" << version << "- starting afresh";
-        execSQL(m_db,
-            "DELETE FROM aircraft; DELETE FROM sources; DELETE FROM track;"
-            "DELETE FROM flight_sources;"
-            "DELETE FROM flights; DELETE FROM documents; DELETE FROM profile;"
-            "DELETE FROM atc; DELETE FROM meta;");
         execSQL(m_db, "INSERT INTO meta (version) VALUES (" QT_STRINGIFY(AIRCRAFT_DB_VERSION) ")");
     }
 
@@ -325,6 +674,30 @@ void AircraftTracker::revertDatabaseFilename(const QString& path)
     m_settings.m_databaseFilename =
         (path == AircraftSettings::defaultDatabaseFilename()) ? QString() : path;
     emit databaseFilenameReverted(m_settings.m_databaseFilename);
+}
+
+// A consistent copy of a database, -wal and all, while anything else may have it open
+static bool copyDatabase(const QString& from, const QString& to)
+{
+    sqlite3 *db = nullptr;
+    if (sqlite3_open_v2(from.toUtf8().constData(), &db, SQLITE_OPEN_READWRITE, nullptr) != SQLITE_OK)
+    {
+        sqlite3_close(db);
+        return false;
+    }
+    sqlite3_stmt *stmt = nullptr;
+    bool ok = false;
+    if (sqlite3_prepare_v2(db, "VACUUM INTO ?", -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        bindText(stmt, 1, to);
+        ok = sqlite3_step(stmt) == SQLITE_DONE;
+        if (!ok) {
+            qWarning() << "AircraftTracker::changeDatabase: VACUUM INTO failed:" << sqlite3_errmsg(db);
+        }
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    return ok;
 }
 
 void AircraftTracker::changeDatabase(const QString& oldPath)
@@ -346,20 +719,58 @@ void AircraftTracker::changeDatabase(const QString& oldPath)
         revertDatabaseFilename(oldPath);
         return;
     }
+    // Everything into the main file before it moves. Only a checkpoint that completed
+    // says so: one that could not (another connection reading) leaves committed pages in
+    // the -wal file, which a rename would leave behind.
+    bool walFlushed = false;
+    if (m_db) {
+        walFlushed = sqlite3_wal_checkpoint_v2(m_db, nullptr, SQLITE_CHECKPOINT_TRUNCATE, nullptr, nullptr) == SQLITE_OK;
+    }
     closeDatabase();
 
     const bool haveExisting = QFileInfo::exists(newPath) && (QFileInfo(newPath).size() > 0);
 
+    // The session moves as the file it is, never as what memory can write back. Memory
+    // does not hold the ACARS archive or the all time airframe count, nor the track and
+    // profile of flights not yet looked at, which are read from the database on demand -
+    // and once the database was closed they were read from the new, empty one.
     bool moved = false;
+    bool copied = false;
     if (!haveExisting && QFileInfo::exists(oldPath))
     {
+        // An empty file at the target holds nothing, and on Windows a rename onto an
+        // existing file fails
+        if (QFileInfo::exists(newPath)) {
+            QFile::remove(newPath);
+        }
         // QFile::rename copies and removes when the paths are on different volumes
-        moved = QFile::rename(oldPath, newPath);
-        if (moved) {
+        moved = walFlushed && QFile::rename(oldPath, newPath);
+        if (moved)
+        {
             qDebug() << "AircraftTracker::changeDatabase: moved the session from" << oldPath << "to" << newPath;
-        } else {
-            qWarning() << "AircraftTracker::changeDatabase: could not move" << oldPath << "to" << newPath
-                       << "- the session stays in memory and will be written to the new file";
+        }
+        else
+        {
+            // A rename fails while anything else has the file open - a database browser,
+            // say. SQLite can still copy it, consistently and with the -wal included,
+            // and the original is left where it was.
+            copied = copyDatabase(oldPath, newPath);
+            if (copied)
+            {
+                qDebug() << "AircraftTracker::changeDatabase: could not move" << oldPath
+                         << "so copied it to" << newPath;
+            }
+            else
+            {
+                qWarning() << "AircraftTracker::changeDatabase: could neither move nor copy" << oldPath
+                           << "to" << newPath << "- staying with it";
+                revertDatabaseFilename(oldPath);
+                if (!openDatabase()) {
+                    qWarning() << "AircraftTracker::changeDatabase: could not reopen" << oldPath
+                               << "- the session is now in memory only";
+                }
+                return;
+            }
         }
     }
 
@@ -395,25 +806,59 @@ void AircraftTracker::changeDatabase(const QString& oldPath)
 
     if (haveExisting)
     {
-        // Their database, their contents: start again from what it holds
+        // Their database, their contents: start again from what it holds - the all time
+        // figures included, which are this database's and not the last one's
         deleteAll();
+        forgetAllTimeFigures();
         loadDatabase();
     }
-    else
+    else if (!moved && !copied)
     {
-        // Everything is still in memory; write it where it now belongs. The file may or
-        // may not have been moved successfully, so do not assume the points came with it
-        forgetSavedTracks();
+        // There was no file to bring: write what is held to the new one
+        forgetSavedHistory();
         m_dbDirty = true;
         saveDatabase();
     }
+    // Otherwise the file is the session as last saved, so what memory says is stored is
+    // still true, and nothing has to be read or written again
+}
+
+// The all time statistics and coverage belong to the database they were measured into,
+// so switching to another one starts from what that one holds. deleteAll() leaves them
+// alone - they are meant to outlive the traffic - and the loaders only fill in what the
+// new database has, so without this the last database's figures were kept wherever the
+// new one had none, and then saved into it.
+void AircraftTracker::forgetAllTimeFigures()
+{
+    m_statistics.m_allTime = AircraftStatistics::Scope();
+    m_allTimeSecondsBase = 0;
+    m_allTimeSince = QDateTime::currentDateTime();
+    m_statisticsLoaded = false;
+    m_statisticsDirty = true;
+
+    removeCoverageFromMap();
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++)
+    {
+        m_coverageRangeKm[i].fill(0.0f, m_coverageBins);
+        m_coverageOrigin[i] = QGeoCoordinate();
+        m_coverageDirty[i] = true;
+    }
+    m_coverageLoaded = false;
+    m_coverageChanged = false;
 }
 
 void AircraftTracker::closeDatabase()
 {
     if (m_db)
     {
-        sqlite3_close(m_db);
+        // Every statement is finalized where it is used, so this should not fail. If it
+        // does, the handle is left for SQLite to close when the last statement goes
+        // rather than leaked, and the reason is in the log.
+        if (sqlite3_close(m_db) != SQLITE_OK)
+        {
+            qWarning() << "AircraftTracker::closeDatabase: close failed:" << sqlite3_errmsg(m_db);
+            sqlite3_close_v2(m_db);
+        }
         m_db = nullptr;
     }
 }
@@ -430,9 +875,9 @@ void AircraftTracker::closeDatabase()
 // Track and profile only ever grow, so they are written incrementally: each flight
 // remembers how many of its points are already stored and the save appends the rest.
 // The three ways that can stop being true are all accounted for - a flight merged into
-// another has its arrays rebuilt (m_flightsToRewrite), a flight discarded by the
-// retention period has to take its rows with it (m_flightsToDelete), and clearing
-// everything invalidates the lot (m_dbTrackWipe).
+// another has its track or profile rebuilt (m_tracksToRewrite, m_profilesToRewrite), a
+// flight discarded by the retention period has to take its rows with it
+// (m_flightsToDelete), and clearing everything invalidates the lot (m_dbTrackWipe).
 bool AircraftTracker::saveDatabase()
 {
     // Nothing to do if nothing changed since the last save - which counts as saved.
@@ -444,7 +889,15 @@ bool AircraftTracker::saveDatabase()
         return true;
     }
 
-    // The save replaces the whole database, so a DELETE that fails after a BEGIN that
+    int documentsHeld = 0;
+    for (const TrackedAircraft *item : m_aircraft)
+    {
+        for (const TrackedFlight *flight : item->m_flights) {
+            documentsHeld += flight->m_documents.size();
+        }
+    }
+
+    // The small tables are replaced whole, so a DELETE that fails after a BEGIN that
     // succeeded would leave the old rows in place and the new ones appended to them
     if (!execSQL(m_db, "BEGIN"))
     {
@@ -453,8 +906,25 @@ bool AircraftTracker::saveDatabase()
     }
     if (!execSQL(m_db,
             "DELETE FROM aircraft; DELETE FROM sources; DELETE FROM flight_sources;"
-            "DELETE FROM flights; DELETE FROM documents;"
-            "DELETE FROM atc;"))
+            "DELETE FROM flights;"))
+    {
+        execSQL(m_db, "ROLLBACK");
+        return false;
+    }
+
+    // Documents and the ATC log are written incrementally, like the track. They used to
+    // be replaced whole, which was most of the time and most of the write ahead log of
+    // every save once a session had a few days in it - and it meant any moment memory
+    // was short of them lost the stored ones, with nothing said.
+    if (m_dbMessageWipe || m_dbMessageRewrite)
+    {
+        if (!execSQL(m_db, "DELETE FROM documents; DELETE FROM atc;"))
+        {
+            execSQL(m_db, "ROLLBACK");
+            return false;
+        }
+    }
+    else if (!saveMessageChanges())
     {
         execSQL(m_db, "ROLLBACK");
         return false;
@@ -468,41 +938,69 @@ bool AircraftTracker::saveDatabase()
             execSQL(m_db, "ROLLBACK");
             return false;
         }
-        // The flag is cleared after the COMMIT, not here. forgetSavedTracks() has already
+        // The flag is cleared after the COMMIT, not here. forgetSavedHistory() has already
         // set every flight's saved count to zero, so a save that rolls back after this
         // point leaves the old rows in the database and the wipe forgotten - and the next
         // save appends the whole of every track on top of them.
     }
-    else if (!m_flightsToDelete.isEmpty() || !m_flightsToRewrite.isEmpty())
+    else if (!m_flightsToDelete.isEmpty() || !m_tracksToRewrite.isEmpty()
+             || !m_profilesToRewrite.isEmpty())
     {
-        sqlite3_stmt *dropStmt = nullptr;
-        if (sqlite3_prepare_v2(m_db,
-                "DELETE FROM track WHERE flight_id = ?", -1, &dropStmt, nullptr) == SQLITE_OK)
+        // Checked, because the flights being rewritten have their saved counts at zero:
+        // a delete that failed while the save went on appended a second copy of the whole
+        // track on top of the first
+        if (!deleteByFlight(m_db, "DELETE FROM track WHERE flight_id = ?", m_flightsToDelete + m_tracksToRewrite)
+            || !deleteByFlight(m_db, "DELETE FROM profile WHERE flight_id = ?", m_flightsToDelete + m_profilesToRewrite))
         {
-            for (quint64 id : m_flightsToDelete + m_flightsToRewrite)
-            {
-                sqlite3_reset(dropStmt);
-                sqlite3_bind_int64(dropStmt, 1, (qint64) id);
-                sqlite3_step(dropStmt);
-            }
+            execSQL(m_db, "ROLLBACK");
+            return false;
         }
-        sqlite3_finalize(dropStmt);
-
-        dropStmt = nullptr;
-        if (sqlite3_prepare_v2(m_db,
-                "DELETE FROM profile WHERE flight_id = ?", -1, &dropStmt, nullptr) == SQLITE_OK)
-        {
-            for (quint64 id : m_flightsToDelete + m_flightsToRewrite)
-            {
-                sqlite3_reset(dropStmt);
-                sqlite3_bind_int64(dropStmt, 1, (qint64) id);
-                sqlite3_step(dropStmt);
-            }
-        }
-        sqlite3_finalize(dropStmt);
     }
 
     bool failed = false;
+
+    // The ACARS archive only ever grows, so only what has arrived since the last save is
+    // written - rewriting every block every save would make the save time grow with the
+    // session, and this is the one table with no upper bound on its size. Nor is it held
+    // in memory: m_acarsBlocks is just what is waiting to be written.
+    if (m_dbMessageWipe) {
+        if (!execSQL(m_db, "DELETE FROM acars_blocks"))
+        {
+            execSQL(m_db, "ROLLBACK");
+            return false;
+        }
+    }
+    if (!m_acarsBlocks.isEmpty())
+    {
+        sqlite3_stmt *blockStmt = nullptr;
+        if (sqlite3_prepare_v2(m_db,
+            "INSERT INTO acars_blocks (received, frequency, level, protocol, block)"
+            " VALUES (?, ?, ?, ?, ?)", -1, &blockStmt, nullptr) == SQLITE_OK)
+        {
+            for (int i = 0; i < m_acarsBlocks.size(); i++)
+            {
+                const AcarsBlockRecord& record = m_acarsBlocks[i];
+                sqlite3_reset(blockStmt);
+                sqlite3_bind_int64(blockStmt, 1, dateTimeValue(record.m_dateTime));
+                sqlite3_bind_int64(blockStmt, 2, record.m_frequency);
+                sqlite3_bind_double(blockStmt, 3, record.m_level);
+                sqlite3_bind_int(blockStmt, 4, record.m_protocol);
+                sqlite3_bind_blob(blockStmt, 5, record.m_block.constData(),
+                                  record.m_block.size(), SQLITE_TRANSIENT);
+                stepInsert(m_db, blockStmt, "acars_blocks", failed);
+            }
+            sqlite3_finalize(blockStmt);
+        }
+        else
+        {
+            // Failed, not skipped: the commit clears the queue, and these blocks are held
+            // nowhere else
+            qWarning() << "AircraftTracker::saveDatabase: could not prepare the acars_blocks insert:"
+                       << sqlite3_errmsg(m_db);
+            failed = true;
+        }
+    }
+
 
     sqlite3_stmt *aircraftStmt = nullptr;
     sqlite3_stmt *sourceStmt = nullptr;
@@ -515,23 +1013,41 @@ bool AircraftTracker::saveDatabase()
     sqlite3_prepare_v2(m_db,
         "INSERT INTO aircraft VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", -1, &aircraftStmt, nullptr);
     sqlite3_prepare_v2(m_db, "INSERT INTO sources VALUES (?,?,?,?)", -1, &sourceStmt, nullptr);
+    // The reason, read straight after the call that failed. sqlite3_errmsg reports the
+    // LAST call, so asking once at the end names whichever prepare happened to run after
+    // the broken one - which is how a documents insert that no longer matched its table
+    // reported "not an error" and took a while to find.
+    auto prepared = [this](sqlite3_stmt *stmt, const char *what)
+    {
+        if (!stmt) {
+            qWarning() << "AircraftTracker::saveDatabase: could not prepare the" << what
+                       << "insert:" << sqlite3_errmsg(m_db);
+        }
+        return stmt != nullptr;
+    };
     sqlite3_prepare_v2(m_db, "INSERT INTO flight_sources VALUES (?,?,?,?)", -1, &flightSourceStmt, nullptr);
     sqlite3_prepare_v2(m_db, "INSERT INTO track VALUES (?,?,?,?,?,?)", -1, &trackStmt, nullptr);
-    sqlite3_prepare_v2(m_db, "INSERT INTO flights VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", -1, &flightStmt, nullptr);
-    sqlite3_prepare_v2(m_db, "INSERT INTO documents VALUES (?,?,?,?,?)", -1, &documentStmt, nullptr);
+    sqlite3_prepare_v2(m_db,
+        "INSERT INTO flights VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        -1, &flightStmt, nullptr);
+    sqlite3_prepare_v2(m_db, "INSERT INTO documents VALUES (?,?,?,?,?,?,?)", -1, &documentStmt, nullptr);
     sqlite3_prepare_v2(m_db, "INSERT INTO profile VALUES (?,?,?,?)", -1, &profileStmt, nullptr);
-    sqlite3_prepare_v2(m_db, "INSERT INTO atc VALUES (?,?,?,?,?,?,?,?,?,?)", -1, &atcStmt, nullptr);
-    if (!aircraftStmt || !sourceStmt || !trackStmt || !flightStmt || !documentStmt
-        || !profileStmt || !atcStmt || !flightSourceStmt)
+    sqlite3_prepare_v2(m_db, "INSERT INTO atc VALUES (?,?,?,?,?,?,?,?,?,?,?)", -1, &atcStmt, nullptr);
+    // Every one of them reported, not just the first, so a schema change that has moved
+    // more than one table is fixed in one go rather than one restart at a time
+    bool allPrepared = true;
+    allPrepared &= prepared(aircraftStmt, "aircraft");
+    allPrepared &= prepared(sourceStmt, "sources");
+    allPrepared &= prepared(flightSourceStmt, "flight_sources");
+    allPrepared &= prepared(trackStmt, "track");
+    allPrepared &= prepared(flightStmt, "flights");
+    allPrepared &= prepared(documentStmt, "documents");
+    allPrepared &= prepared(profileStmt, "profile");
+    allPrepared &= prepared(atcStmt, "atc");
+
+    if (!allPrepared)
     {
-        // Name the one that failed. sqlite3_errmsg reports the LAST call, which is a
-        // successful prepare when an earlier one failed, and so said "not an error"
-        const char *which = !aircraftStmt ? "aircraft" : !sourceStmt ? "sources"
-                          : !trackStmt ? "track" : !flightStmt ? "flights"
-                          : !documentStmt ? "documents" : !profileStmt ? "profile"
-                          : !atcStmt ? "atc" : "flight_sources";
-        qWarning() << "AircraftTracker::saveDatabase: could not prepare the" << which << "insert";
-        qWarning() << "AircraftTracker::saveDatabase: Failed to prepare statements:" << sqlite3_errmsg(m_db);
+        qWarning() << "AircraftTracker::saveDatabase: nothing was saved";
         execSQL(m_db, "ROLLBACK");
         sqlite3_finalize(aircraftStmt);
         sqlite3_finalize(sourceStmt);
@@ -618,6 +1134,28 @@ bool AircraftTracker::saveDatabase()
             sqlite3_bind_int64(flightStmt, 14, dateTimeValue(flight->m_on));
             sqlite3_bind_int64(flightStmt, 15, dateTimeValue(flight->m_in));
             sqlite3_bind_int64(flightStmt, 16, dateTimeValue(flight->m_routeFiled));
+            // The two filed routes, in the column order added in openDatabase()
+            int column = 17;
+            for (const TrackedFlight::FiledRoute *route : { &flight->m_flightPlan, &flight->m_clearance })
+            {
+                bindText(flightStmt, column++, route->m_waypoints);
+                bindText(flightStmt, column++, encodeRoutePoints(route->m_points));
+                bindText(flightStmt, column++, route->m_text);
+                sqlite3_bind_int64(flightStmt, column++, dateTimeValue(route->m_filed));
+            }
+            // After all eight of those rather than beside each route, because that is
+            // where ALTER TABLE put them - see openDatabase()
+            for (const TrackedFlight::FiledRoute *route : { &flight->m_flightPlan, &flight->m_clearance })
+            {
+                bindText(flightStmt, column++, encodeRouteParts(
+                    { route->m_runway, route->m_sid, route->m_star, route->m_approach,
+                      route->m_alternate, route->m_departure, route->m_arrival,
+                      // The level and speed the route is flown at, stored with the rest
+                      // of it - the message that gave them is not heard again, so without
+                      // this a reloaded route goes back to lying on the ground
+                      route->m_flightLevel > 0 ? QString::number(route->m_flightLevel) : QString(),
+                      route->m_mach > 0.0f ? QString::number(route->m_mach, 'f', 2) : QString() }));
+            }
             stepInsert(m_db, flightStmt, "flights", failed);
 
             QHashIterator<QPair<int, qint64>, int> flightSourceIt(flight->m_sources);
@@ -632,14 +1170,22 @@ bool AircraftTracker::saveDatabase()
                 stepInsert(m_db, flightSourceStmt, "flight_sources", failed);
             }
 
-            for (const TrackedDocument *doc : flight->m_documents)
+            for (int d = flight->m_documentsSaved; d < flight->m_documents.size(); d++)
             {
+                const TrackedDocument *doc = flight->m_documents[d];
                 sqlite3_reset(documentStmt);
                 sqlite3_bind_int64(documentStmt, 1, (qint64) flight->m_id);
                 sqlite3_bind_int(documentStmt, 2, doc->m_kind);
                 bindText(documentStmt, 3, doc->m_title);
                 bindText(documentStmt, 4, doc->m_text);
                 sqlite3_bind_int64(documentStmt, 5, dateTimeValue(doc->m_received));
+                if (doc->m_raw.isEmpty()) {
+                    sqlite3_bind_null(documentStmt, 6);
+                } else {
+                    sqlite3_bind_blob(documentStmt, 6, doc->m_raw.constData(),
+                                      doc->m_raw.size(), SQLITE_TRANSIENT);
+                }
+                bindText(documentStmt, 7, doc->m_source);
                 stepInsert(m_db, documentStmt, "documents", failed);
             }
 
@@ -665,6 +1211,9 @@ bool AircraftTracker::saveDatabase()
 
     for (const AtcEvent& e : m_atcLog)
     {
+        if (e.m_stored) {
+            continue;
+        }
         sqlite3_reset(atcStmt);
         sqlite3_bind_int64(atcStmt, 1, dateTimeValue(e.m_received));
         bindText(atcStmt, 2, e.m_protocol);
@@ -676,6 +1225,7 @@ bool AircraftTracker::saveDatabase()
         sqlite3_bind_int64(atcStmt, 8, (qint64) e.m_aircraftId);
         sqlite3_bind_int64(atcStmt, 9, (qint64) e.m_flightId);
         bindText(atcStmt, 10, e.m_mapName);
+        bindText(atcStmt, 11, e.m_link);
         stepInsert(m_db, atcStmt, "atc", failed);
     }
 
@@ -687,6 +1237,21 @@ bool AircraftTracker::saveDatabase()
     sqlite3_finalize(profileStmt);
     sqlite3_finalize(atcStmt);
     sqlite3_finalize(flightSourceStmt);
+    // Inside the transaction, so a rollback takes the statistics with everything else
+    // The flag is cleared after the commit, like everything else: cleared here, a save
+    // that then rolled back left the coverage unsaved until the next bin grew
+    bool coverageWritten = false;
+    if (!failed && m_coverageChanged)
+    {
+        if (saveCoverage()) {
+            coverageWritten = true;
+        } else {
+            failed = true;
+        }
+    }
+    if (!failed && !saveStatistics()) {
+        failed = true;
+    }
     if (failed)
     {
         // Leave the previous contents alone and keep the dirty flag, so the next save
@@ -705,36 +1270,542 @@ bool AircraftTracker::saveDatabase()
     // Only now that the rows are really there. Doing this as they were written would
     // have a rolled back save leave every flight claiming points the database does not
     // hold, and the next save would append after them - a permanent hole in the track.
+    //
+    // And ONLY for flights whose history is actually in memory: a restored flight's
+    // track is loaded lazily, so until ensureTrackLoaded() runs, m_trackSaved counts
+    // rows the empty list does not hold. Overwriting it with the list length here
+    // claimed the stored rows did not exist - the flight's next append then restarted
+    // seq at 0 and the following save wrote a SECOND copy of the track on top of the
+    // stored one. Loaded back, the two generations interleave point by point (ORDER BY
+    // seq with duplicate seqs), which drew as tracks leaping back and forth between
+    // two paths on both maps.
     for (TrackedAircraft *item : m_aircraft)
     {
         for (TrackedFlight *flight : item->m_flights)
         {
-            flight->m_trackSaved = flight->m_track.size();
-            flight->m_profileSaved = flight->m_profileTimes.size();
+            if (flight->m_trackLoaded) {
+                flight->m_trackSaved = flight->m_track.size();
+            }
+            if (flight->m_profileLoaded) {
+                flight->m_profileSaved = flight->m_profileTimes.size();
+            }
+            flight->m_documentsSaved = flight->m_documents.size();
         }
     }
-    m_flightsToDelete.clear();
-    m_flightsToRewrite.clear();
+    for (AtcEvent& e : m_atcLog) {
+        e.m_stored = true;
+    }
+    forgetPendingChanges();
     m_dbTrackWipe = false;
+    m_dbMessageRewrite = false;
+    if (coverageWritten) {
+        m_coverageChanged = false;
+    }
+    // Only now that the rows are committed, or a rolled back save would drop blocks the
+    // database does not hold - they stay queued for the next save instead
+    m_acarsBlocks.clear();
+    const bool everythingDeleted = m_dbMessageWipe;
+    m_dbMessageWipe = false;
 
     m_dbDirty = false;
+
+    // Give the space back to the file system, which SQLite does not do on its own.
+    //
+    // Deleting every row leaves the pages on the database's free list, not with the
+    // operating system, so the file stays exactly the size it was - which is why
+    // clearing everything left the reported database size unchanged. VACUUM rebuilds the
+    // file without the free pages, and the checkpoint truncates the write ahead log,
+    // which is counted in that figure too and would otherwise still hold the deletes.
+    //
+    // Only after everything was deleted, never on an ordinary save: VACUUM rewrites the
+    // whole database, which on a session of any size is slow and needs as much free disk
+    // again. After a delete there is next to nothing left to rewrite, so it is quick.
+    if (everythingDeleted)
+    {
+        execSQL(m_db, "VACUUM");
+        execSQL(m_db, "PRAGMA wal_checkpoint(TRUNCATE)");
+    }
+
+    // The figure is only refreshed once a minute otherwise, so without this the size sits
+    // at its old value for up to a minute after a save that changed it - and after a
+    // delete, which is when it is looked at, that reads as nothing having happened
+    updateDatabaseSize();
+    qDebug() << "AircraftTracker::saveDatabase: wrote" << m_aircraft.size() << "aircraft,"
+             << tableCount("flights") << "flights," << documentsHeld << "documents,"
+             << m_atcLog.size() << "ATC messages";
     return true;
 }
 
-// Nothing stored relates to what is in memory any more, so the next save empties both
-// tables and writes every point again
-void AircraftTracker::forgetSavedTracks()
+// The changes a save has to make beyond appending - deletes, rewrites and moves - once
+// they no longer apply: they have been committed, the history is to be written out
+// whole, or memory has just been read from the database and matches it
+void AircraftTracker::forgetPendingChanges()
 {
-    m_dbTrackWipe = true;
     m_flightsToDelete.clear();
-    m_flightsToRewrite.clear();
+    m_tracksToRewrite.clear();
+    m_profilesToRewrite.clear();
+    m_documentsToRewrite.clear();
+    m_atcAircraftMoves.clear();
+    m_atcFlightMoves.clear();
+    m_atcAircraftToDelete.clear();
+    m_atcPrunedIds.clear();
+    m_atcPruneCutoff = QDateTime();
+}
+
+// What has changed in the documents and ATC tables since the last save, other than the
+// rows to append: messages that moved with a merge, and those that went with discarded
+// aircraft and flights or were cut down for a rewrite. Inside the caller's transaction.
+bool AircraftTracker::saveMessageChanges()
+{
+    // Run one statement for each pair of ids, in order: a later move can start from where
+    // an earlier one ended
+    auto forEach = [this](const char *sql, const QList<QPair<quint64, quint64>>& pairs, bool twoIds)
+    {
+        if (pairs.isEmpty()) {
+            return true;
+        }
+        sqlite3_stmt *stmt = nullptr;
+        if (sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+        {
+            qWarning() << "AircraftTracker::saveMessageChanges: could not prepare" << sql
+                       << ":" << sqlite3_errmsg(m_db);
+            return false;
+        }
+        bool ok = true;
+        for (const auto& pair : pairs)
+        {
+            sqlite3_reset(stmt);
+            sqlite3_bind_int64(stmt, 1, (qint64) pair.first);
+            if (twoIds) {
+                sqlite3_bind_int64(stmt, 2, (qint64) pair.second);
+            }
+            if (sqlite3_step(stmt) != SQLITE_DONE)
+            {
+                qWarning() << "AircraftTracker::saveMessageChanges:" << sql << "failed:"
+                           << sqlite3_errmsg(m_db);
+                ok = false;
+                break;
+            }
+        }
+        sqlite3_finalize(stmt);
+        return ok;
+    };
+    auto ids = [](const QSet<quint64>& set)
+    {
+        QList<QPair<quint64, quint64>> pairs;
+        for (quint64 id : set) {
+            pairs.append({id, 0});
+        }
+        return pairs;
+    };
+    // (to, from) for the UPDATEs, whose first parameter is the new id
+    auto swapped = [](const QList<QPair<quint64, quint64>>& moves)
+    {
+        QList<QPair<quint64, quint64>> pairs;
+        for (const auto& move : moves) {
+            pairs.append({move.second, move.first});
+        }
+        return pairs;
+    };
+
+    if (!forEach("UPDATE atc SET aircraft_id = ? WHERE aircraft_id = ?", swapped(m_atcAircraftMoves), true)
+        || !forEach("UPDATE atc SET flight_id = ? WHERE flight_id = ?", swapped(m_atcFlightMoves), true)
+        || !forEach("DELETE FROM documents WHERE flight_id = ?", ids(m_flightsToDelete + m_documentsToRewrite), false)
+        || !forEach("DELETE FROM atc WHERE aircraft_id = ?", ids(m_atcAircraftToDelete), false)) {
+        return false;
+    }
+    if (m_atcPruneCutoff.isValid())
+    {
+        QList<QPair<quint64, quint64>> pruned;
+        for (quint64 id : m_atcPrunedIds) {
+            pruned.append({id, (quint64) dateTimeValue(m_atcPruneCutoff)});
+        }
+        if (!forEach("DELETE FROM atc WHERE aircraft_id = ? AND time < ?", pruned, true)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// The all time records and counters, replaced wholesale - there are a few dozen rows at
+// most, so there is nothing to gain from working out which changed. Inside the caller's
+// transaction, so a rollback takes these with it.
+// The coverage bins, one row per protocol and bearing, with the receiver position they
+// were measured from.
+//
+// A table of its own, created with IF NOT EXISTS and WITHOUT touching the schema
+// version: an existing database gains it on the next run and keeps everything it already
+// holds. Bumping the version would have dropped every aircraft, flight and message
+// anyone had collected, to add a feature that starts empty anyway.
+bool AircraftTracker::saveCoverage()
+{
+    if (!execSQL(m_db, "DELETE FROM coverage")) {
+        return false;
+    }
+
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "INSERT INTO coverage VALUES (?,?,?,?,?)",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::saveCoverage:" << sqlite3_errmsg(m_db);
+        return false;
+    }
+
+    bool failed = false;
+    for (int protocol = 0; protocol < AircraftReport::ProtocolCount; protocol++)
+    {
+        if (!m_coverageOrigin[protocol].isValid()) {
+            continue;
+        }
+        for (int bin = 0; bin < m_coverageRangeKm[protocol].size(); bin++)
+        {
+            // Only the bins that hold something, so a fresh protocol costs no rows
+            if (m_coverageRangeKm[protocol][bin] <= 0.0f) {
+                continue;
+            }
+            sqlite3_reset(stmt);
+            sqlite3_bind_int(stmt, 1, protocol);
+            sqlite3_bind_int(stmt, 2, bin);
+            sqlite3_bind_double(stmt, 3, m_coverageRangeKm[protocol][bin]);
+            sqlite3_bind_double(stmt, 4, m_coverageOrigin[protocol].latitude());
+            sqlite3_bind_double(stmt, 5, m_coverageOrigin[protocol].longitude());
+            stepInsert(m_db, stmt, "coverage", failed);
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    return !failed;
+}
+
+bool AircraftTracker::loadCoverage()
+{
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "SELECT protocol, bin, range, latitude, longitude FROM coverage",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        // An older database that has not been opened by this build yet has no such
+        // table. Not an error - there is simply no coverage to restore.
+        return false;
+    }
+
+    bool any = false;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        const int protocol = sqlite3_column_int(stmt, 0);
+        const int bin = sqlite3_column_int(stmt, 1);
+        if ((protocol < 0) || (protocol >= AircraftReport::ProtocolCount)
+            || (bin < 0) || (bin >= m_coverageBins)) {
+            continue;
+        }
+        if (m_coverageRangeKm[protocol].isEmpty()) {
+            m_coverageRangeKm[protocol].fill(0.0f, m_coverageBins);
+        }
+        m_coverageRangeKm[protocol][bin] = (float) sqlite3_column_double(stmt, 2);
+        m_coverageOrigin[protocol] = QGeoCoordinate(sqlite3_column_double(stmt, 3),
+                                                    sqlite3_column_double(stmt, 4));
+        m_coverageDirty[protocol] = true;
+        any = true;
+    }
+    sqlite3_finalize(stmt);
+
+    m_coverageLoaded = any;
+    return any;
+}
+
+bool AircraftTracker::saveStatistics()
+{
+    if (!execSQL(m_db, "DELETE FROM stat_records; DELETE FROM stat_counters;")) {
+        return false;
+    }
+
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "INSERT INTO stat_records VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::saveStatistics:" << sqlite3_errmsg(m_db);
+        return false;
+    }
+
+    bool failed = false;
+    auto put = [&](int kind, int protocol, const AircraftStatistics::Record& r)
+    {
+        if (!r.m_valid) {
+            return;         // An unset record is an absent row, so a reset writes nothing
+        }
+        sqlite3_reset(stmt);
+        sqlite3_bind_int(stmt, 1, kind);
+        sqlite3_bind_int(stmt, 2, protocol);
+        sqlite3_bind_double(stmt, 3, r.m_value);
+        bindText(stmt, 4, r.m_aircraft);
+        sqlite3_bind_int64(stmt, 5, dateTimeValue(r.m_when));
+        sqlite3_bind_int(stmt, 6, r.m_positionValid ? 1 : 0);
+        sqlite3_bind_double(stmt, 7, r.m_latitude);
+        sqlite3_bind_double(stmt, 8, r.m_longitude);
+        sqlite3_bind_int(stmt, 9, r.m_altitudeValid ? 1 : 0);
+        sqlite3_bind_double(stmt, 10, r.m_altitudeFt);
+        sqlite3_bind_int64(stmt, 11, r.m_frequency);
+        stepInsert(m_db, stmt, "stat_records", failed);
+    };
+
+    const AircraftStatistics::Scope& all = m_statistics.m_allTime;
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++) {
+        put(0, i, all.m_maxRange[i]);
+    }
+    put(1, -1, all.m_fastest);
+    put(2, -1, all.m_highest);
+    sqlite3_finalize(stmt);
+
+    stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "INSERT INTO stat_counters VALUES (?,?)",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::saveStatistics:" << sqlite3_errmsg(m_db);
+        return false;
+    }
+    auto count = [&](const char *name, qint64 value)
+    {
+        sqlite3_reset(stmt);
+        bindText(stmt, 1, QString(name));
+        sqlite3_bind_int64(stmt, 2, value);
+        stepInsert(m_db, stmt, "stat_counters", failed);
+    };
+    count("maxConcurrent", all.m_maxConcurrent);
+    count("maxConcurrentWhen", dateTimeValue(all.m_maxConcurrentWhen));
+    count("totalMessages", (qint64) all.m_totalMessages);
+    for (int i = 0; i < AircraftReport::ProtocolCount; i++) {
+        count(qPrintable(QString("messages%1").arg(i)), (qint64) all.m_messagesByProtocol[i]);
+    }
+    count("seconds", all.m_seconds);
+    count("firstStart", dateTimeValue(m_statistics.m_firstStart));
+    sqlite3_finalize(stmt);
+
+    return !failed;
+}
+
+// Returns false when the database holds no statistics at all, which is what tells the
+// caller to look for a set in the preset to import - see applySettings()
+bool AircraftTracker::loadStatistics()
+{
+    AircraftStatistics::Scope& all = m_statistics.m_allTime;
+    bool any = false;
+
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "SELECT * FROM stat_records", -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const int kind = sqlite3_column_int(stmt, 0);
+            const int protocol = sqlite3_column_int(stmt, 1);
+            AircraftStatistics::Record r;
+            r.m_valid = true;
+            r.m_value = (float) sqlite3_column_double(stmt, 2);
+            r.m_aircraft = columnText(stmt, 3);
+            r.m_when = columnDateTime(stmt, 4);
+            r.m_positionValid = sqlite3_column_int(stmt, 5) != 0;
+            r.m_latitude = (float) sqlite3_column_double(stmt, 6);
+            r.m_longitude = (float) sqlite3_column_double(stmt, 7);
+            r.m_altitudeValid = sqlite3_column_int(stmt, 8) != 0;
+            r.m_altitudeFt = (float) sqlite3_column_double(stmt, 9);
+            r.m_frequency = sqlite3_column_int64(stmt, 10);
+
+            if ((kind == 0) && (protocol >= 0) && (protocol < AircraftReport::ProtocolCount)) {
+                all.m_maxRange[protocol] = r;
+            } else if (kind == 1) {
+                all.m_fastest = r;
+            } else if (kind == 2) {
+                all.m_highest = r;
+            } else {
+                continue;   // A kind this build does not know: leave it in the table
+            }
+            any = true;
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db, "SELECT name, value FROM stat_counters", -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const QString name = columnText(stmt, 0);
+            const qint64 value = sqlite3_column_int64(stmt, 1);
+            any = true;
+            if (name == "maxConcurrent") {
+                all.m_maxConcurrent = (int) value;
+            } else if (name == "maxConcurrentWhen") {
+                all.m_maxConcurrentWhen = value ? QDateTime::fromMSecsSinceEpoch(value) : QDateTime();
+            } else if (name == "totalMessages") {
+                all.m_totalMessages = (quint64) value;
+            } else if (name == "seconds") {
+                all.m_seconds = value;
+            } else if (name == "firstStart") {
+                m_statistics.m_firstStart = value ? QDateTime::fromMSecsSinceEpoch(value) : QDateTime();
+            } else if (name.startsWith("messages"))
+            {
+                const int protocol = name.mid(8).toInt();
+                if ((protocol >= 0) && (protocol < AircraftReport::ProtocolCount)) {
+                    all.m_messagesByProtocol[protocol] = (quint64) value;
+                }
+            }
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    return any;
+}
+
+
+// A restored flight's track, read the first time anything wants it. The index added in
+// openDatabase() is what makes this a lookup rather than a scan of the whole table.
+void AircraftTracker::ensureTrackLoaded(TrackedFlight *flight)
+{
+    if (!flight || flight->m_trackLoaded) {
+        return;
+    }
+    flight->m_trackLoaded = true;       // Set first, so a failure does not retry for ever
+
+    // What the table holds for this flight, counted when the database was opened
+    const int stored = flight->m_trackSaved;
+    if (!m_db || (stored == 0))
+    {
+        flight->m_trackSaved = flight->m_track.size();
+        return;
+    }
+
+    // ORDER BY time, not seq: a database written by a build where a save could reset a
+    // restored flight's saved count holds TWO generations of rows for one flight, both
+    // starting at seq 0 - ordered by seq they interleave point by point, and the track
+    // leaps back and forth between the two paths. Ordered by time (seq only as the
+    // tiebreak within one instant) the generations come back out end to end, which is
+    // the actual flight. For a healthy flight the two orders are identical.
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db,
+            "SELECT latitude, longitude, altitude, time, seq FROM track WHERE flight_id = ? ORDER BY time, seq",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::ensureTrackLoaded:" << sqlite3_errmsg(m_db);
+        return;
+    }
+    sqlite3_bind_int64(stmt, 1, (qint64) flight->m_id);
+
+    QList<QGeoCoordinate> track;
+    QList<QDateTime> times;
+    int rowCount = 0;
+    int maxSeq = -1;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        rowCount++;
+        maxSeq = std::max(maxSeq, sqlite3_column_int(stmt, 4));
+        // Exactly 0N 0E is a zeroed-out field saved before the filter for them existed,
+        // not a position
+        const double latitude = sqlite3_column_double(stmt, 0);
+        const double longitude = sqlite3_column_double(stmt, 1);
+        if ((latitude == 0.0) && (longitude == 0.0)) {
+            continue;
+        }
+        track.append(QGeoCoordinate(latitude, longitude, sqlite3_column_double(stmt, 2)));
+        times.append(columnDateTime(stmt, 3));
+    }
+    sqlite3_finalize(stmt);
+
+    // Anything received since the flight was restored is newer than everything stored, so
+    // the stored points go in front of it rather than replacing it
+    flight->m_track = track + flight->m_track;
+    flight->m_trackTimes = times + flight->m_trackTimes;
+    flight->m_trackSaved = track.size();
+
+    if ((track.size() != stored) || (rowCount != maxSeq + 1))
+    {
+        // Rows were dropped as zeroed positions - or the seq numbers are duplicated
+        // (two generations, see above) or have holes - so the table no longer matches
+        // what is in memory and the save cannot simply append to it. Rewriting the
+        // flight is the only thing that puts the two back in step - and it quietly
+        // cleans out the bad rows, which nothing else would.
+        m_tracksToRewrite.insert(flight->m_id);
+        flight->m_trackSaved = 0;
+        m_dbDirty = true;
+    }
+}
+
+void AircraftTracker::ensureProfileLoaded(TrackedFlight *flight)
+{
+    if (!flight || flight->m_profileLoaded) {
+        return;
+    }
+    flight->m_profileLoaded = true;
+
+    const int stored = flight->m_profileSaved;
+    if (!m_db || (stored == 0))
+    {
+        flight->m_profileSaved = flight->m_profileTimes.size();
+        return;
+    }
+
+    sqlite3_stmt *stmt = nullptr;
+    if (sqlite3_prepare_v2(m_db,
+            "SELECT time, altitude, speed FROM profile WHERE flight_id = ? ORDER BY time",
+            -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        qWarning() << "AircraftTracker::ensureProfileLoaded:" << sqlite3_errmsg(m_db);
+        return;
+    }
+    sqlite3_bind_int64(stmt, 1, (qint64) flight->m_id);
+
+    QList<qint64> times;
+    QList<float> altitude;
+    QList<float> speed;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        times.append(sqlite3_column_int64(stmt, 0));
+        altitude.append(sqlite3_column_type(stmt, 1) == SQLITE_NULL
+            ? std::numeric_limits<float>::quiet_NaN() : (float) sqlite3_column_double(stmt, 1));
+        speed.append(sqlite3_column_type(stmt, 2) == SQLITE_NULL
+            ? std::numeric_limits<float>::quiet_NaN() : (float) sqlite3_column_double(stmt, 2));
+    }
+    sqlite3_finalize(stmt);
+
+    flight->m_profileTimes = times + flight->m_profileTimes;
+    flight->m_profileAltFt = altitude + flight->m_profileAltFt;
+    flight->m_profileSpeedKts = speed + flight->m_profileSpeedKts;
+    flight->m_profileSaved = times.size();
+}
+
+// Everything at once, for the two places that genuinely need the whole history in memory:
+// writing the session into a different database, and wiping the stored points to write
+// them all again. Both are rare and deliberate; everything else takes one flight.
+void AircraftTracker::ensureAllHistoryLoaded()
+{
+    for (TrackedAircraft *item : m_aircraft)
+    {
+        for (TrackedFlight *flight : item->m_flights)
+        {
+            ensureTrackLoaded(flight);
+            ensureProfileLoaded(flight);
+        }
+    }
+}
+
+// Nothing stored relates to what is in memory any more, so the next save empties the
+// track, profile, documents and ATC tables and writes everything again. Everything has
+// to be read in first, or the points that were never read would be wiped without ever
+// having been written back.
+void AircraftTracker::forgetSavedHistory()
+{
+    ensureAllHistoryLoaded();
+    m_dbTrackWipe = true;
+    m_dbMessageRewrite = true;
+    forgetPendingChanges();
     for (TrackedAircraft *item : m_aircraft)
     {
         for (TrackedFlight *flight : item->m_flights)
         {
             flight->m_trackSaved = 0;
             flight->m_profileSaved = 0;
+            flight->m_documentsSaved = 0;
         }
+    }
+    for (AtcEvent& e : m_atcLog) {
+        e.m_stored = false;
     }
 }
 
@@ -751,6 +1822,26 @@ void AircraftTracker::loadDatabase()
     QHash<qint64, TrackedAircraft *> aircraftById;
     QHash<qint64, TrackedFlight *> flightsById;
     sqlite3_stmt *stmt = nullptr;
+
+    // Ids are never reused, so the next one has to clear every id still referenced -
+    // not only those of the aircraft and flights loaded below. ATC and document rows
+    // outlive the aircraft they were heard from, and taking the next id from the two
+    // tables alone handed their ids to new flights, which then claimed old messages.
+    if (sqlite3_prepare_v2(m_db,
+            "SELECT MAX(id) FROM ("
+                "SELECT MAX(id) AS id FROM aircraft UNION ALL SELECT MAX(id) FROM flights "
+                "UNION ALL SELECT MAX(aircraft_id) FROM atc UNION ALL SELECT MAX(flight_id) FROM atc "
+                "UNION ALL SELECT MAX(flight_id) FROM documents UNION ALL SELECT MAX(flight_id) FROM track "
+                "UNION ALL SELECT MAX(flight_id) FROM profile UNION ALL SELECT MAX(flight_id) FROM flight_sources "
+                "UNION ALL SELECT MAX(aircraft_id) FROM sources)",
+            -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if ((sqlite3_step(stmt) == SQLITE_ROW) && (sqlite3_column_type(stmt, 0) != SQLITE_NULL)) {
+            m_nextId = std::max(m_nextId, (quint64) sqlite3_column_int64(stmt, 0) + 1);
+        }
+    }
+    sqlite3_finalize(stmt);
+    stmt = nullptr;
 
     // Aircraft
     if (sqlite3_prepare_v2(m_db, "SELECT * FROM aircraft", -1, &stmt, nullptr) == SQLITE_OK)
@@ -791,6 +1882,11 @@ void AircraftTracker::loadDatabase()
             // goes with it, so the model is dropped and chosen again on the next report
             // rather than drawn at the wrong height and never replaced
             if (modelIsOurs < 0) {
+                item->m_model3D.clear();
+            }
+            // Nor is one that is no longer installed: the map would ask for a file that
+            // isn't there, and draw nothing at all for the aircraft
+            if (!item->m_model3D.isEmpty() && !Aircraft3DModels::instance().isInstalled(item->m_model3D)) {
                 item->m_model3D.clear();
             }
 
@@ -851,6 +1947,32 @@ void AircraftTracker::loadDatabase()
             flight->m_on = columnDateTime(stmt, 13);
             flight->m_in = columnDateTime(stmt, 14);
             flight->m_routeFiled = columnDateTime(stmt, 15);
+            int routeColumn = 16;
+            for (TrackedFlight::FiledRoute *route : { &flight->m_flightPlan, &flight->m_clearance })
+            {
+                route->m_waypoints = columnText(stmt, routeColumn++);
+                route->m_points = decodeRoutePoints(columnText(stmt, routeColumn++));
+                route->m_text = columnText(stmt, routeColumn++);
+                route->m_filed = columnDateTime(stmt, routeColumn++);
+            }
+            // decodeRouteParts writes into QStrings, so the two numeric parts land here
+            // first and are converted after
+            QString flightLevelText;
+            QString machText;
+            for (TrackedFlight::FiledRoute *route : { &flight->m_flightPlan, &flight->m_clearance })
+            {
+                const QList<QString *> parts {
+                    &route->m_runway, &route->m_sid, &route->m_star, &route->m_approach,
+                    &route->m_alternate, &route->m_departure, &route->m_arrival,
+                    &flightLevelText, &machText };
+                flightLevelText.clear();
+                machText.clear();
+                decodeRouteParts(columnText(stmt, routeColumn++), parts);
+                route->m_flightLevel = flightLevelText.toInt();
+                route->m_mach = machText.toFloat();
+                // Whatever the row could not carry, taken back out of the message
+                recoverRoutePartsFromText(route->m_text, parts);
+            }
             QString aliases = columnText(stmt, 9);
             if (!aliases.isEmpty()) {
                 flight->m_aliases = aliases.split(',');
@@ -882,27 +2004,42 @@ void AircraftTracker::loadDatabase()
     sqlite3_finalize(stmt);
     stmt = nullptr;
 
-    // Tracks. Keyed by flight, so this has to come after the flights are loaded.
-    // Exactly 0N 0E is a zeroed-out field saved before the filter for them existed,
-    // not a position.
-    if (sqlite3_prepare_v2(m_db, "SELECT * FROM track ORDER BY flight_id, seq", -1, &stmt, nullptr) == SQLITE_OK)
+    // Tracks and profiles are NOT read here, only how many rows each flight has - which
+    // is exactly what the incremental save needs in order to append. The rows themselves
+    // are fetched when something wants them, one flight at a time.
+    for (auto it = flightsById.cbegin(); it != flightsById.cend(); ++it)
     {
-        while (sqlite3_step(stmt) == SQLITE_ROW)
+        it.value()->m_trackLoaded = false;
+        it.value()->m_profileLoaded = false;
+    }
+    for (int pass = 0; pass < 2; pass++)
+    {
+        const char *query = pass == 0
+            ? "SELECT flight_id, COUNT(*) FROM track GROUP BY flight_id"
+            : "SELECT flight_id, COUNT(*) FROM profile GROUP BY flight_id";
+        if (sqlite3_prepare_v2(m_db, query, -1, &stmt, nullptr) == SQLITE_OK)
         {
-            TrackedFlight *flight = flightsById.value(sqlite3_column_int64(stmt, 0));
-            double latitude = sqlite3_column_double(stmt, 2);
-            double longitude = sqlite3_column_double(stmt, 3);
-            if (flight && ((latitude != 0.0) || (longitude != 0.0)))
+            while (sqlite3_step(stmt) == SQLITE_ROW)
             {
-                flight->m_track.append(QGeoCoordinate(latitude, longitude, sqlite3_column_double(stmt, 4)));
-                flight->m_trackTimes.append(columnDateTime(stmt, 5));
+                TrackedFlight *flight = flightsById.value(sqlite3_column_int64(stmt, 0));
+                if (!flight) {
+                    continue;
+                }
+                // Standing in for the points until they are read, so a flight nobody
+                // looks at is never rewritten
+                if (pass == 0) {
+                    flight->m_trackSaved = sqlite3_column_int(stmt, 1);
+                } else {
+                    flight->m_profileSaved = sqlite3_column_int(stmt, 1);
+                }
             }
         }
+        sqlite3_finalize(stmt);
+        stmt = nullptr;
     }
-    sqlite3_finalize(stmt);
-    stmt = nullptr;
 
     // Documents
+    int rerendered = 0;
     if (sqlite3_prepare_v2(m_db, "SELECT * FROM documents ORDER BY received", -1, &stmt, nullptr) == SQLITE_OK)
     {
         while (sqlite3_step(stmt) == SQLITE_ROW)
@@ -916,28 +2053,38 @@ void AircraftTracker::loadDatabase()
             doc->m_title = columnText(stmt, 2);
             doc->m_text = columnText(stmt, 3);
             doc->m_received = columnDateTime(stmt, 4);
+            const void *blob = sqlite3_column_blob(stmt, 5);
+            const int bytes = sqlite3_column_bytes(stmt, 5);
+            if (blob && (bytes > 0)) {
+                doc->m_raw = QByteArray((const char *) blob, bytes);
+            }
+            doc->m_source = columnText(stmt, 6);
+            // Rendered again by whatever the parser does now, rather than shown as it was
+            // written. The stored text is the fallback: a document with no raw came from a
+            // decoder this feature cannot run, and a raw that no longer decodes should not
+            // lose the text it once had.
+            if (!doc->m_raw.isEmpty())
+            {
+                const QString rendered = renderDocument(doc->m_raw, doc->m_source);
+                if (!rendered.isEmpty())
+                {
+                    if (rendered != doc->m_text) {
+                        rerendered++;
+                    }
+                    doc->m_text = rendered;
+                }
+            }
             flight->m_documents.append(doc);
         }
     }
     sqlite3_finalize(stmt);
     stmt = nullptr;
-
-    // Flight profiles
-    if (sqlite3_prepare_v2(m_db, "SELECT * FROM profile ORDER BY flight_id, time", -1, &stmt, nullptr) == SQLITE_OK)
-    {
-        while (sqlite3_step(stmt) == SQLITE_ROW)
-        {
-            TrackedFlight *flight = flightsById.value(sqlite3_column_int64(stmt, 0));
-            if (flight)
-            {
-                flight->m_profileTimes.append(sqlite3_column_int64(stmt, 1));
-                flight->m_profileAltFt.append(sqlite3_column_type(stmt, 2) == SQLITE_NULL
-                    ? std::numeric_limits<float>::quiet_NaN() : (float) sqlite3_column_double(stmt, 2));
-                flight->m_profileSpeedKts.append(sqlite3_column_type(stmt, 3) == SQLITE_NULL
-                    ? std::numeric_limits<float>::quiet_NaN() : (float) sqlite3_column_double(stmt, 3));
-            }
-        }
+    if (rerendered > 0) {
+        qDebug() << "AircraftTracker::loadDatabase:" << rerendered
+                 << "documents came out differently under the current decoder";
     }
+
+    // Flight profiles are fetched on demand as well - see the row counts read above
     sqlite3_finalize(stmt);
     stmt = nullptr;
 
@@ -957,6 +2104,8 @@ void AircraftTracker::loadDatabase()
             e.m_aircraftId = (quint64) sqlite3_column_int64(stmt, 7);
             e.m_flightId = (quint64) sqlite3_column_int64(stmt, 8);
             e.m_mapName = columnText(stmt, 9);
+            e.m_link = columnText(stmt, 10);
+            e.m_stored = true;
             m_atcLog.append(e);
         }
     }
@@ -965,24 +2114,352 @@ void AircraftTracker::loadDatabase()
     // Everything just read is, by definition, already in the database - without this the
     // first save would write the whole restored history out again.
     //
-    // Before EVERY merge below, not after: absorbAircraft() runs one of its own
-    // through mergeLoadedFlights(), so putting this between the two loops still
-    // erased what the first had recorded. merging two restored flights deletes one and
-    // rewrites the other, and says so through m_flightsToDelete, m_flightsToRewrite and a
-    // zeroed m_trackSaved. Doing this afterwards overwrote all three, so the next save
-    // left the merged-away flight's rows orphaned in the database and never wrote the
-    // combined track - and the merged history was gone by the restart after that.
+    // Before EVERY merge below, not after: absorbAircraft() runs one of its own through
+    // mergeLoadedFlights(), so putting this between the two loops still erased what the
+    // first had recorded - merging two restored flights deletes one and rewrites the
+    // other, and says so through m_flightsToDelete, m_tracksToRewrite and a zeroed
+    // m_trackSaved.
+    //
+    // The track and profile counts are NOT set from the lists here: the points have not
+    // been read, so the lists are empty while the table is full, and taking the sizes
+    // would tell the next save that the whole stored history had never been written. They
+    // come from the row counts read above instead.
+    forgetPendingChanges();
+    m_dbTrackWipe = false;
+    // Unlike the track, the documents were read in full, so the lists are what is stored
+    for (TrackedAircraft *item : m_aircraft)
+    {
+        for (TrackedFlight *flight : item->m_flights) {
+            flight->m_documentsSaved = flight->m_documents.size();
+        }
+    }
+    // Memory now reflects this file, so any pending clear belonged to the last one. It
+    // matters because changeDatabase() calls deleteAll() before opening the new database.
+    m_dbMessageWipe = false;
+    m_dbMessageRewrite = false;
+
+    // Flights stored before the airport fields were trimmed hold whatever the airline
+    // wrote after the code, because the field ran to the next : or / and a route holds
+    // neither: EGPD(34O)..AVANT.UM184.HEMEL.. is an airport, a landing runway and a whole
+    // route in what should be four characters. The demodulator splits them now, and this
+    // splits what was stored before it did - so the route it swallowed comes back rather
+    // than waiting for the aircraft to file again.
+    int airportsTrimmed = 0;
+    int routesRecovered = 0;
+    {
+        static const QRegularExpression airportRe(R"(^([A-Z0-9]{4})[^A-Z0-9])");
+        static const QRegularExpression bracketRe(R"(^\([^)]*\))");
+        static const QRegularExpression separatorRe("[ .]+");
+
+        for (auto it = flightsById.cbegin(); it != flightsById.cend(); ++it)
+        {
+            TrackedFlight *flight = it.value();
+
+            for (int end = 0; end < 2; end++)
+            {
+                QString& airport = (end == 0) ? flight->m_departure : flight->m_arrival;
+                const QRegularExpressionMatch match = airportRe.match(airport);
+                if (!match.hasMatch()) {
+                    continue;
+                }
+
+                QString tail = airport.mid(match.captured(1).size());
+                airport = match.captured(1);
+                airportsTrimmed++;
+
+                // The runway comes first where it is given at all, then the route, joined
+                // to the airport by the dots that mean "direct to"
+                const QRegularExpressionMatch bracket = bracketRe.match(tail);
+                if (bracket.hasMatch()) {
+                    tail = tail.mid(bracket.captured(0).size());
+                }
+                while (tail.startsWith('.')) {
+                    tail.remove(0, 1);
+                }
+                if ((end == 0) || tail.isEmpty()) {
+                    continue;       // Only the arrival carries the route, in this form
+                }
+
+                // Longer wins, counted in names rather than placed, so that this needs
+                // none of the databases - which are not what was being read here. It is
+                // what keeps a plan filed properly since from being replaced by the tail
+                // of an older message, while still replacing the "ILS 34" that an
+                // approach-only insert left behind.
+                const int recovered = tail.split(separatorRe, Qt::SkipEmptyParts).size();
+                if (recovered < 2) {
+                    continue;
+                }
+                if (flight->m_route.split(separatorRe, Qt::SkipEmptyParts).size() < recovered)
+                {
+                    flight->m_route = tail;
+                    routesRecovered++;
+                }
+                TrackedFlight::FiledRoute& plan = flight->m_flightPlan;
+                if (plan.m_waypoints.split(separatorRe, Qt::SkipEmptyParts).size() < recovered)
+                {
+                    plan.m_waypoints = tail;
+                    plan.m_points.clear();      // Names only; nothing placed them
+                }
+            }
+        }
+    }
+    // Position reports stored as OOOI events, from before a label 13 to 18 message had
+    // to carry an actual event to be filed as one. They are not documents under the
+    // current rules, so they are dropped from the list rather than left claiming to be
+    // something they are not. Nothing is lost: the messages themselves are in the ACARS
+    // block archive, and their positions are already in the track.
+    static const QRegularExpression poxShape("^POX,");
+    static const QRegularExpression companyShape(R"RX(^\d{6},\s*\d+,\d{4},)RX");
+    int positionsUnfiled = 0;
     for (TrackedAircraft *item : m_aircraft)
     {
         for (TrackedFlight *flight : item->m_flights)
         {
-            flight->m_trackSaved = flight->m_track.size();
-            flight->m_profileSaved = flight->m_profileTimes.size();
+            QList<TrackedDocument *> kept;
+            const int stored = flight->m_documents.size();
+            for (TrackedDocument *doc : flight->m_documents)
+            {
+                const bool misfiled = (doc->m_kind == AircraftReport::OooiEvent)
+                    && (poxShape.match(doc->m_source).hasMatch()
+                        || companyShape.match(doc->m_source).hasMatch());
+                if (misfiled)
+                {
+                    positionsUnfiled++;
+                    delete doc;
+                }
+                else
+                {
+                    kept.append(doc);
+                }
+            }
+            flight->m_documents = kept;
+            if (kept.size() != stored)
+            {
+                // Saved incrementally, so what was dropped has to be taken out of the table
+                flight->m_documentsSaved = 0;
+                m_documentsToRewrite.insert(flight->m_id);
+            }
         }
     }
-    m_flightsToDelete.clear();
-    m_flightsToRewrite.clear();
-    m_dbTrackWipe = false;
+    if (positionsUnfiled > 0)
+    {
+        m_dbDirty = true;
+        qDebug() << "AircraftTracker::loadDatabase: dropped" << positionsUnfiled
+                 << "position reports that had been stored as OOOI events";
+    }
+
+    // Pre-departure clearances stored before they had a kind of their own were filed as
+    // flight plans, which is what they are for drawing purposes but not for the Flights
+    // table's clearance column. Reclassified by their title, which is the only thing
+    // that distinguishes them, so the ones already held tick CL like new ones do.
+    int clearancesReclassified = 0;
+    for (TrackedAircraft *item : m_aircraft)
+    {
+        for (TrackedFlight *flight : item->m_flights)
+        {
+            for (TrackedDocument *doc : flight->m_documents)
+            {
+                if ((doc->m_kind == AircraftReport::FlightPlan)
+                    && (doc->m_title == "Pre-departure clearance"))
+                {
+                    doc->m_kind = AircraftReport::DepartureClearance;
+                    clearancesReclassified++;
+                }
+            }
+        }
+    }
+    if (clearancesReclassified > 0)
+    {
+        m_dbDirty = true;
+        qDebug() << "AircraftTracker::loadDatabase: reclassified" << clearancesReclassified
+                 << "stored pre-departure clearances";
+    }
+
+    // Destinations out of stored VDL-2 logons.
+    //
+    // The XID destination was not read until recently, so every flight heard before that
+    // has the logon text stored and nothing taken from it. In a week of traffic that is
+    // 662 flights whose arrival is empty while their own logons state it outright.
+    //
+    // It also replaces an arrival that matches the callsign to route database, because
+    // that is a guess rather than something anyone said: of 606 flights whose stored
+    // arrival disagreed with their own logons, 605 were holding exactly the database's
+    // answer. An arrival that differs from the database was set by a message, and is
+    // left alone - a logon does not outrank a filed plan.
+    int destinationsRecovered = 0;
+    for (TrackedAircraft *item : m_aircraft)
+    {
+        for (TrackedFlight *flight : item->m_flights)
+        {
+            // One destination across all of its logons, or none at all. An aircraft that
+            // named two is not a case to choose between here.
+            QString destination;
+            bool ambiguous = false;
+            for (const TrackedDocument *doc : flight->m_documents)
+            {
+                if (doc->m_kind != AircraftReport::Logon) {
+                    continue;
+                }
+                const QString found = xidDestinationAirport(doc->m_text);
+                if (found.isEmpty()) {
+                    continue;
+                }
+                if (destination.isEmpty()) {
+                    destination = found;
+                } else if (destination != found) {
+                    ambiguous = true;
+                    break;
+                }
+            }
+            if (ambiguous || destination.isEmpty() || (flight->m_arrival == destination)) {
+                continue;
+            }
+
+            if (!flight->m_arrival.isEmpty())
+            {
+                // Held already, so only a database guess may be overruled. Provenance is
+                // not stored, so it is recovered the only way it can be: a value equal to
+                // what the database says for this callsign either came from there or is
+                // indistinguishable from it, and either way the logon agrees or improves.
+                const AircraftRouteInformation *entry = nullptr;
+                QStringList names;
+                names.append(flight->m_flight);
+                names.append(flight->m_aliases);
+                for (const QString& name : names)
+                {
+                    if (!name.isEmpty() && m_routeInfo && m_routeInfo->contains(name))
+                    {
+                        entry = m_routeInfo->value(name);
+                        break;
+                    }
+                }
+                if (!entry || (entry->m_arr != flight->m_arrival)) {
+                    continue;       // A message set this; a logon does not outrank it
+                }
+            }
+
+            flight->m_arrival = destination;
+            flight->m_arrivalFromDatabase = false;
+            destinationsRecovered++;
+        }
+    }
+    if (destinationsRecovered > 0)
+    {
+        m_dbDirty = true;
+        qDebug() << "AircraftTracker::loadDatabase: took" << destinationsRecovered
+                 << "destinations from stored VDL-2 logons";
+    }
+
+    if (airportsTrimmed > 0)
+    {
+        m_dbDirty = true;
+        qDebug() << "AircraftTracker::loadDatabase: trimmed" << airportsTrimmed
+                 << "airport fields that had a runway or a route written after the code,"
+                 << "recovering" << routesRecovered << "routes";
+    }
+
+    // Flights saved before the filed routes had columns of their own kept only the route
+    // STRING and the document that filed it, so nothing could be drawn for them - the
+    // clearance was in the database and on screen, and the line was not. Both halves are
+    // stored, so the route is rebuilt from them: the waypoints from the string, the text
+    // and which of the two routes it is from the document, and the time from route_filed.
+    //
+    // Only where the flight has a route document, because m_route is also filled in from
+    // the callsign to route database, and what that holds is the airports rather than the
+    // waypoints. The positions a message gave for its waypoints are NOT recoverable, only
+    // their names - which for an oceanic route names them anyway.
+    //
+    // It runs once per flight in practice: the next save writes the columns, and a flight
+    // that has them is skipped.
+    int routesRebuilt = 0;
+    for (auto it = flightsById.cbegin(); it != flightsById.cend(); ++it)
+    {
+        TrackedFlight *flight = it.value();
+
+        if (flight->m_route.isEmpty()
+            || !flight->m_flightPlan.m_waypoints.isEmpty()
+            || !flight->m_clearance.m_waypoints.isEmpty()) {
+            continue;
+        }
+
+        // The most recent of them, because that is the one m_route came from
+        const TrackedDocument *filedBy = nullptr;
+        for (const TrackedDocument *doc : flight->m_documents)
+        {
+            if ((doc->m_kind != AircraftReport::FlightPlan)
+                && (doc->m_kind != AircraftReport::Clearance)) {
+                continue;
+            }
+            if (!filedBy || (doc->m_received > filedBy->m_received)) {
+                filedBy = doc;
+            }
+        }
+        if (!filedBy) {
+            continue;
+        }
+
+        TrackedFlight::FiledRoute& route = (filedBy->m_kind == AircraftReport::Clearance)
+                                         ? flight->m_clearance : flight->m_flightPlan;
+        route.m_waypoints = flight->m_route;
+        route.m_text = filedBy->m_text;
+        route.m_filed = flight->m_routeFiled.isValid() ? flight->m_routeFiled : filedBy->m_received;
+        routesRebuilt++;
+    }
+    if (routesRebuilt > 0)
+    {
+        m_dbDirty = true;       // So they are written into the columns they now have
+        qDebug() << "AircraftTracker::loadDatabase: rebuilt" << routesRebuilt
+                 << "filed routes from the route string and the document that filed it";
+    }
+
+    // What came back, against what is in the file. The two disagreeing is the only
+    // warning there will be that something is being dropped on the way in - and it is
+    // read back rather than counted as it goes, so a row the load skipped still shows.
+    {
+        int documentsRead = 0;
+        for (const TrackedAircraft *item : m_aircraft)
+        {
+            for (const TrackedFlight *flight : item->m_flights) {
+                documentsRead += flight->m_documents.size();
+            }
+        }
+        qDebug() << "AircraftTracker::loadDatabase: read" << m_aircraft.size() << "of"
+                 << tableCount("aircraft") << "aircraft," << flightsById.size() << "of"
+                 << tableCount("flights") << "flights," << documentsRead << "of"
+                 << tableCount("documents") << "documents," << m_atcLog.size() << "of"
+                 << tableCount("atc") << "ATC messages";
+    }
+
+    // The all time figures belong to this database, so they arrive with it. Where there
+    // are none, an older preset's blob is imported once - see applySettings().
+    loadCoverage();
+    if (loadStatistics())
+    {
+        m_statisticsLoaded = true;
+        // The stored seconds are what was listened to BEFORE now, and flush() reports the
+        // all time clock as that base plus the time since. Without setting the base here
+        // the loaded figure was overwritten on the very first flush by this session's own
+        // elapsed time - so the all time listening time read as the session's, and the all
+        // time messages per minute, a lifetime total of messages over a few seconds of
+        // clock, came out in the millions.
+        m_allTimeSecondsBase = m_statistics.m_allTime.m_seconds;
+        // From now rather than from the start of the session, because this also runs when
+        // the user switches to a different database part way through one, and that
+        // database has not been listening for the time already spent on the last
+        m_allTimeSince = QDateTime::currentDateTime();
+    }
+
+    // The ACARS archive stays on disk. It used to be read in whole here and then held for
+    // the life of the session, though nothing reads it back - the saves only ever append
+    // - so every launch paid for months of blocks in memory to no purpose. Not even
+    // counted here: COUNT(*) on a table this size is a scan of the whole thing.
+
+    updateDatabaseSize();
+    // The airframe count cannot be a running total, so it is counted from the table -
+    // and re-counted on every load, not only at startup, or switching databases would
+    // leave the previous one's figure beside this one's records
+    m_statistics.m_allTime.m_distinctAircraft = seenCount();
+    m_statisticsDirty = true;
 
     // Fold weak flight-only aircraft into the identified airframe flying the
     // same flight, and merge flights that are the same flight under its ACARS
@@ -1256,6 +2733,26 @@ int AircraftTracker::recordSeen(TrackedAircraft *item, int& countDelta)
 }
 
 // How many different airframes have ever been heard
+// How many rows a table holds. Used to compare what is stored against what is in
+// memory, which is the only way to notice that a save is about to destroy something.
+int AircraftTracker::tableCount(const char *table)
+{
+    if (!m_db) {
+        return 0;
+    }
+    const QString sql = QString("SELECT COUNT(*) FROM %1").arg(table);
+    sqlite3_stmt *stmt = nullptr;
+    int count = 0;
+    if (sqlite3_prepare_v2(m_db, sql.toUtf8().constData(), -1, &stmt, nullptr) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            count = sqlite3_column_int(stmt, 0);
+        }
+    }
+    sqlite3_finalize(stmt);
+    return count;
+}
+
 int AircraftTracker::seenCount()
 {
     if (!m_db) {

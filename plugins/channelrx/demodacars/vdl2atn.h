@@ -60,7 +60,17 @@ public:
         float m_longitude = 0.0f;
         bool m_hasAltitude = false; //!< Aircraft locations carry an altitude, ground stations do not
         int m_altitudeFt = 0;
+        //!< Where the aircraft told the ground station it was going, from the XID
+        //!< destination airport parameter. Frequently the only place a flight's
+        //!< destination is stated at all - a short sector may log on and land without
+        //!< ever filing a plan or sending a position report.
+        QString m_destinationAirport;
     };
+
+    //!< Pulled out of the formatted decode rather than the parameter tree, as the
+    //!< position is. Static and public so it can be tested on its own: the text is what
+    //!< libacars produces and the pattern is the part that can be wrong.
+    static QString xidDestinationAirport(const QString& decoded);
 
     // Decode the information field of one AVLC I frame
     Result decode(const QByteArray& info, quint32 srcAddr, quint32 dstAddr, bool fromAircraft);

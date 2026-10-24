@@ -54,6 +54,9 @@ public:
     qint32 getAeroChannel();
     void setAeroChannel(qint32 aero_channel);
 
+    qint32 getIridiumBandwidth();
+    void setIridiumBandwidth(qint32 iridium_bandwidth);
+
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
@@ -92,36 +95,6 @@ public:
 
     qint32 getLogEnabled();
     void setLogEnabled(qint32 log_enabled);
-
-    qint32 getFeedEnabled();
-    void setFeedEnabled(qint32 feed_enabled);
-
-    QString* getFeedStationId();
-    void setFeedStationId(QString* feed_station_id);
-
-    qint32 getFeedAirframes();
-    void setFeedAirframes(qint32 feed_airframes);
-
-    QString* getFeedAirframesHost();
-    void setFeedAirframesHost(QString* feed_airframes_host);
-
-    qint32 getFeedAirframesPort();
-    void setFeedAirframesPort(qint32 feed_airframes_port);
-
-    qint32 getFeedAirframesTcp();
-    void setFeedAirframesTcp(qint32 feed_airframes_tcp);
-
-    qint32 getFeedAvdelphi();
-    void setFeedAvdelphi(qint32 feed_avdelphi);
-
-    QString* getFeedAvdelphiHost();
-    void setFeedAvdelphiHost(QString* feed_avdelphi_host);
-
-    qint32 getFeedAvdelphiPort();
-    void setFeedAvdelphiPort(qint32 feed_avdelphi_port);
-
-    qint32 getFeedAvdelphiTcp();
-    void setFeedAvdelphiTcp(qint32 feed_avdelphi_tcp);
 
     qint32 getScopeCh1();
     void setScopeCh1(qint32 scope_ch1);
@@ -178,6 +151,9 @@ private:
     qint32 aero_channel;
     bool m_aero_channel_isSet;
 
+    qint32 iridium_bandwidth;
+    bool m_iridium_bandwidth_isSet;
+
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
 
@@ -216,36 +192,6 @@ private:
 
     qint32 log_enabled;
     bool m_log_enabled_isSet;
-
-    qint32 feed_enabled;
-    bool m_feed_enabled_isSet;
-
-    QString* feed_station_id;
-    bool m_feed_station_id_isSet;
-
-    qint32 feed_airframes;
-    bool m_feed_airframes_isSet;
-
-    QString* feed_airframes_host;
-    bool m_feed_airframes_host_isSet;
-
-    qint32 feed_airframes_port;
-    bool m_feed_airframes_port_isSet;
-
-    qint32 feed_airframes_tcp;
-    bool m_feed_airframes_tcp_isSet;
-
-    qint32 feed_avdelphi;
-    bool m_feed_avdelphi_isSet;
-
-    QString* feed_avdelphi_host;
-    bool m_feed_avdelphi_host_isSet;
-
-    qint32 feed_avdelphi_port;
-    bool m_feed_avdelphi_port_isSet;
-
-    qint32 feed_avdelphi_tcp;
-    bool m_feed_avdelphi_tcp_isSet;
 
     qint32 scope_ch1;
     bool m_scope_ch1_isSet;

@@ -12,6 +12,10 @@ The ADS-B plugin can send aircraft for display on the [Map Feature](../../featur
 
 ![ADS-B on 3D Map](../../../doc/img/ADSBDemod_plugin_map_3d.png)
 
+The ADS-B plugin can also send data to the [Aircraft feature](../../feature/aircraft/readme.md) to be combined with ACARS data.
+ 
+The ADS-B plugin can be run in server mode, with aircraft state accessible via SDRangel's API and received frames can be forwarded via IP to aggregators.
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
@@ -107,6 +111,7 @@ Map:
 * Whether NAVAIDs, such as VORs, are displayed on the map.
 * Whether callsigns as said by ATC (E.g. Speedbird) are used on the map instead of the airline ICAO designator (E.g. BAW).
 * The colour palette to use for aircraft flight paths.
+* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models, so require the 3D models to have been downloaded via the Map feature. Aircraft without a matching livery icon are displayed with a white version of the plain icon. Livery icons are sized proportionally to the real aircraft, so an A380 will appear larger than an A320.
 
 <h3>13: Display Flight Path</h3>
 
@@ -460,7 +465,17 @@ The Az/El row gives the azimuth and elevation of the airport from the location s
 
 ![RTL SDR Device Settings for ADS-B](../../../doc/img/ADSBDemod_plugin_rtlsdr.png)
 
+<h2>API</h2>
+
+Full details of the API can be found in the Swagger documentation.
+
+As a simple example, to get current aircraft state (callsign, position and groundspeed):
+
+   curl -X GET "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/report"
+
 <h2>Attribution</h2>
+
+Aircraft images are from [PlaneSpotters](https://www.planespotters.net/)
 
 Airline logos, sideviews and flags are by Steve Hibberd from [RadarSpotting](https://radarspotting.com)
 

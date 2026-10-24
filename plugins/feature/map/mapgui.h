@@ -28,6 +28,7 @@
 #ifdef QT_WEBENGINE_FOUND
 #include <QWebEngineFullScreenRequest>
 #include <QWebEnginePage>
+#include <QWebEngineProfile>
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #include <QWebEngineLoadingInfo>
 #endif
@@ -56,6 +57,7 @@
 #include "SWGDeviceSettings.h"
 
 #include "mapsettings.h"
+#include "mapviewcoordinator.h"
 #include "mapbeacondialog.h"
 #include "mapibpbeacondialog.h"
 #include "mapradiotimedialog.h"
@@ -77,6 +79,22 @@ namespace Ui {
 
 class MapGUI;
 struct Beacon;
+
+#ifdef QT_WEBENGINE_FOUND
+// A page of our own, so the 3D map's JavaScript console reaches sdrangel.log. The page
+// reports there what each frame and each message from SDRangel costs it (its "perf" line),
+// and Cesium reports its own errors there, none of which was visible without attaching a
+// browser debugger to it.
+class MapWebPage : public QWebEnginePage {
+public:
+    using QWebEnginePage::QWebEnginePage;   // Inherit the constructors
+
+protected:
+    void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message,
+                                  int lineNumber, const QString &sourceID) override;
+};
+#endif
+
 class QSvgWidget;
 
 struct RadioTimeTransmitter {
@@ -202,6 +220,7 @@ public:
     Q_INVOKABLE void supportedMapsChanged();
     MapSettings::MapItemSettings *getItemSettings(const QString &group);
     CesiumInterface *cesium() { return m_cesium; }
+    bool useLiveryIcons() const { return m_settings.m_useLiveryIcons; }
 
 private:
     Ui::MapGUI* ui;
@@ -212,6 +231,7 @@ private:
     RollupState m_rollupState;
     bool m_doApplySettings;
     AvailableChannelOrFeatureList m_availableChannelOrFeatures;
+    QHash<const QObject *, QString> m_pipeGroups;   // Group each source belongs to, so we don't search for it per map item
     QFileDialog m_fileDialog;
 
     Map* m_map;
@@ -234,7 +254,23 @@ private:
     OSMTemplateServer *m_templateServer;
     quint16 m_mapTileServerPort;
     MapTileServer *m_mapTileServer;
+    MapViewCoordinator m_viewCoordinator;
     QTimer m_redrawMapTimer;
+    QTimer m_flushTimer;        // Hands batched item changes to the map
+    QTimer m_rmpPollTimer;      // Re-reads the RMP's AM Demod frequencies, which can be changed from elsewhere
+    QJsonObject m_rmpState;     // What the RMP panel was last told, so the poll only sends changes
+    // Model updates are coalesced on to this period - a straight trade of CPU against
+    // how far behind real time the map is. Running it at 100 ms was measured at 7.10 s of
+    // flush time against 2.81 s, for 150 ms of latency, so it is only worth spending if
+    // something is actually waiting on it.
+    static const int m_flushPeriodMS = 250;
+    bool m_restoreMapPosition;
+    //!< The splitter's widgets are added as the 3D map and the NASA panel appear, and
+    //!< QSplitter::restoreState() only applies when the widget count matches what was
+    //!< saved - so the state is kept and re-applied as the composition changes, rather
+    //!< than restored once and lost.
+    QByteArray m_splitterStateToRestore;
+    void restoreSplitterState();  // Use the saved position next time the map is created, rather than where it is now
     GIRO *m_giro;
     QDateTime m_giroDateTime;
     QString m_giroRunId;
@@ -243,13 +279,20 @@ private:
     QSharedPointer<const QList<NavAid *>> m_navAids;
     QSharedPointer<const QList<Airspace *>> m_airspaces;
     QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo;
-    QSharedPointer<const QHash<QString, Waypoint *>> m_waypoints;
+    QSharedPointer<const QMultiHash<QString, Waypoint *>> m_waypoints;
     QGeoCoordinate m_lastFullUpdatePosition;
     KiwiSDRList m_kiwiSDRList;
     SpyServerList m_spyServerList;
     SDRangelServerList m_sdrangelServerList;
 
     CesiumInterface *m_cesium;
+#ifdef QT_WEBENGINE_FOUND
+    // One profile shared by every map, with a disk cache - see webEngineProfile()
+    static QWebEngineProfile *s_webEngineProfile;
+    static int s_webEngineProfileUsers;
+    static QWebEngineProfile *acquireWebEngineProfile();
+    static void releaseWebEngineProfile();
+#endif
     WebServer *m_webServer;
     quint16 m_webPort;
     RainViewer *m_rainViewer;
@@ -257,6 +300,13 @@ private:
     QList<NASAGlobalImagery::DataSet> m_nasaDataSets;
     QHash<QString, NASAGlobalImagery::DataSet> m_nasaDataSetsHash;
     NASAGlobalImagery::MetaData m_nasaMetaData;
+    // The cockpit-panels menu on the PFD toolbar button
+    QAction *m_displayPFDAction;
+    QAction *m_displayNDAction;
+    QAction *m_displayEFISAction;
+    QAction *m_displayRMPAction;
+    QAction *m_displayDCDUAction;
+
     QAction *m_displaySeaMarks;
     QAction *m_displayRailways;
     QAction *m_displayRain;
@@ -274,6 +324,7 @@ private:
     NASAGlobalImagery::Legend *m_legend;
     QWidget *m_nasaWidget;
     QSvgWidget *m_legendWidget;
+    QString m_loadedLegendUrl;      //!< So an unchanged legend is not fetched again
     QTableWidget *m_overviewWidget;
     QTextEdit *m_descriptionWidget;
 
@@ -290,7 +341,26 @@ private:
     void applySettings(const QStringList& settingsKeys, bool force = false);
     void applyAllSettings();
     void applyMap2DSettings(bool reloadMap);
+
+public:
+    // Called by MapViewCoordinator once it decides the view has moved enough to matter
+    void applyMapView(const QGeoRectangle& filterRect, const QGeoRectangle& visibleRect, double zoomLevel);
+
+private:
+    bool currentMapPosition(QGeoCoordinate& coords, double& zoom) const;
     void applyMap3DSettings(bool reloadMap);
+    void applyAudioVolume();
+    void sendAirportsToND();
+    void sendNavAidsToND();
+    void createCockpitPanelsMenu();
+    void applyCockpitPanels();
+    void createCameraModeMenu();
+    void displayCameraMode();
+    bool rmpReadActive(const QString& channelId, qint64& hz) const;
+    bool rmpTune(const QString& channelId, qint64 hz);
+    void sendRMPState(bool force);
+    void sendPanelGeometry();
+    void sendEFISState();
     QString osmCachePath();
     void clearOSMCache();
     void clearWikiMediaOSMCache();
@@ -300,7 +370,12 @@ private:
     QString thunderforestAPIKey() const;
     QString maptilerAPIKey() const;
     QString cesiumIonAPIKey() const;
+    QString effectiveImagery() const;
+    QString effectiveTerrain() const;
+    QString effectiveBuildings() const;
+    bool effectiveGoogleTiles() const;
     void redrawMap();
+    void flushModels();
     void makeUIConnections();
     void createLayersMenu();
     void displayToolbar();
@@ -336,8 +411,8 @@ private slots:
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
-    void on_viewFirstPerson_clicked(bool checked=false);
-    void on_displayPFD_clicked(bool checked=false);
+
+    void on_muteAudio_clicked(bool checked=false);
     void on_displayNames_clicked(bool checked=false);
     void on_displayAllGroundTracks_clicked(bool checked=false);
     void on_displaySelectedGroundTracks_clicked(bool checked=false);

@@ -23,6 +23,9 @@
 
 #include <QRegularExpression>
 
+// For xidDestinationAirport(), which the Aircraft feature reads too
+#include "util/aircraftreport.h"
+
 #include <libacars/libacars.h>
 #include <libacars/vstring.h>
 
@@ -281,6 +284,24 @@ Vdl2AtnDecoder::Result Vdl2AtnDecoder::decode(const QByteArray& info, quint32 sr
     }
 }
 
+// The XID VDL parameter set carries the destination as a four letter ICAO ident:
+//
+//    VDL params:
+//     Parameter set ID: V
+//     Connection management: 05
+//     ...
+//     Destination airport: EGCC
+//
+// Anchored to the end of the line so a longer value - the parameter is an octet string,
+// so nothing guarantees four characters - is rejected rather than truncated to its first
+// four. Only exactly four letters is an ICAO ident.
+QString Vdl2AtnDecoder::xidDestinationAirport(const QString& decoded)
+{
+    // One definition, in sdrbase, because the Aircraft feature reads the same field out
+    // of stored logons and cannot link this plugin
+    return ::xidDestinationAirport(decoded);
+}
+
 Vdl2AtnDecoder::Result Vdl2AtnDecoder::decodeXid(const QByteArray& info, bool cr, bool pf)
 {
     Result result;
@@ -306,6 +327,8 @@ Vdl2AtnDecoder::Result Vdl2AtnDecoder::decodeXid(const QByteArray& info, bool cr
     if (result.m_summary.isEmpty()) {
         result.m_summary = "XID";
     }
+
+    result.m_destinationAirport = xidDestinationAirport(result.m_decoded);
 
     // Pull the position out of a location parameter: "Aircraft location: 51.6N 2.7E
     // 37000 ft" (aircraft, with altitude) or "Ground station location: 51.6N 2.7E"
@@ -597,6 +620,12 @@ void Vdl2AtnDecoder::parseCotp(const uint8_t *buf, int len, quint32 srcAddr, qui
 // indented under "Message data:", which are the element text ("WILCO",
 // "REQUEST [level]") followed by any argument lines ("Flight level: 370"). This is the
 // ATN equivalent of the DO-219 expansion the ACARS path puts in the ATC column.
+//
+// The arguments are put into the element's own placeholders rather than listed after
+// it, so "NEXT DATA AUTHORITY ([facility designation])" with "Facility designation:
+// EDYY" under it reads "NEXT DATA AUTHORITY (EDYY)". Only the value is used: the
+// placeholder is usually an abbreviation of the argument's name rather than something
+// it adds to, so keeping both gives "PREFERRED LEVEL Flight level: 370"
 static QString extractCpdlcMessageData(const QString& decoded)
 {
     auto indentOf = [](const QString& line)
@@ -608,7 +637,7 @@ static QString extractCpdlcMessageData(const QString& decoded)
         return i;
     };
 
-    QStringList out;
+    QStringList elements;
     const QStringList lines = decoded.split('\n');
 
     for (int i = 0; i < lines.size(); i++)
@@ -616,15 +645,77 @@ static QString extractCpdlcMessageData(const QString& decoded)
         if (lines[i].trimmed() != "Message data:") {
             continue;
         }
-        int indent = indentOf(lines[i]);
-        while ((i + 1 < lines.size()) && (indentOf(lines[i+1]) > indent) && !lines[i+1].trimmed().isEmpty())
+        const int dataIndent = indentOf(lines[i]);
+
+        while ((i + 1 < lines.size()) && (indentOf(lines[i+1]) > dataIndent) && !lines[i+1].trimmed().isEmpty())
         {
             i++;
-            out.append(lines[i].trimmed());
+            const int elementIndent = indentOf(lines[i]);
+            QString element = lines[i].trimmed();
+
+            // Argument lines are indented under the element they belong to. If a decode
+            // ever puts them at the same level they are treated as elements of their
+            // own, which is what this did for every message before
+            QStringList names;
+            QStringList values;
+
+            while ((i + 1 < lines.size()) && (indentOf(lines[i+1]) > elementIndent) && !lines[i+1].trimmed().isEmpty())
+            {
+                i++;
+                const QString argument = lines[i].trimmed();
+                const int colon = argument.indexOf(':');
+
+                if (colon >= 0)
+                {
+                    names.append(argument.left(colon).trimmed());
+                    values.append(argument.mid(colon + 1).trimmed());
+                }
+                else
+                {
+                    names.append(QString());
+                    values.append(argument);
+                }
+            }
+
+            auto argumentText = [&names, &values](int index)
+            {
+                return names[index].isEmpty() ? values[index]
+                                              : names[index] + ": " + values[index];
+            };
+
+            // Placeholders are filled left to right, which is the order libacars lists
+            // the arguments in
+            int argument = 0;
+            int from = 0;
+
+            while (argument < names.size())
+            {
+                const int open = element.indexOf('[', from);
+                if (open < 0) {
+                    break;
+                }
+                const int close = element.indexOf(']', open);
+                if (close < 0) {
+                    break;
+                }
+                const QString& replacement = values[argument];
+
+                element.replace(open, close - open + 1, replacement);
+                from = open + replacement.size();
+                argument++;
+            }
+
+            // More arguments than placeholders, so the rest are listed as before rather
+            // than dropped
+            for (; argument < names.size(); argument++) {
+                element.append(", " + argumentText(argument));
+            }
+
+            elements.append(element.simplified());
         }
     }
 
-    return out.join(", ");
+    return elements.join(", ");
 }
 
 // The ICAO ULCS / application layer, decoded by the vendored dumpvdl2 ASN.1 decoder

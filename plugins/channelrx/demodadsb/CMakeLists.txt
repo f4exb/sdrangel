@@ -10,6 +10,9 @@ set(adsb_SOURCES
     adsbdemodbaseband.cpp
     adsbdemodreport.cpp
     adsbdemodworker.cpp
+    adsbdemodtracker.cpp
+    adsbdemodtrackerdecode.cpp
+    adsbaircraft.cpp
 )
 
 set(adsb_HEADERS
@@ -22,6 +25,8 @@ set(adsb_HEADERS
     adsbdemodbaseband.h
     adsbdemodreport.h
     adsbdemodworker.h
+    adsbdemodtracker.h
+    adsbaircraft.h
     adsbdemodstats.h
     adsb.h
 )
@@ -35,6 +40,7 @@ if(NOT SERVER_MODE)
         ${adsb_SOURCES}
         adsbdemodgui.cpp
         adsbdemodgui.ui
+        adsbaircrafttablemodel.cpp
         adsbdemodfeeddialog.cpp
         adsbdemodfeeddialog.ui
         adsbdemoddisplaydialog.cpp
@@ -43,6 +49,7 @@ if(NOT SERVER_MODE)
         adsbdemodnotificationdialog.ui
         adsbosmtemplateserver.cpp
         adsbdemodmap.qrc
+        adsbdemodmapliveries.qrc
         adsbdemodicons.qrc
         airlinelogos.qrc
         flags.qrc
@@ -51,12 +58,11 @@ if(NOT SERVER_MODE)
     set(adsb_HEADERS
         ${adsb_HEADERS}
         adsbdemodgui.h
+        adsbaircrafttablemodel.h
         adsbdemodfeeddialog.h
         adsbdemoddisplaydialog.h
         adsbdemodnotificationdialog.h
         adsbosmtemplateserver.h
-        ourairports.h
-        osndb.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demodadsb)
@@ -97,7 +103,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
-if(WIN32)
+if(WIN32 AND NOT SERVER_MODE)
     # Run deployqt for QtGraphicalEffects, which isn't used in other plugins
     include(DeployQt)
     windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/map)

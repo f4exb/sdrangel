@@ -39,8 +39,8 @@
 #include <libacars/reassembly.h>
 
 #include "acarsdemodsettings.h"
-#include "acarsmessage.h"
-#include "acarsmultipartassembler.h"
+#include "util/acarsmessage.h"
+#include "util/acarsmultipartassembler.h"
 #include "acarsvdl2.h"
 #include "acarshfdl.h"
 #include "acarsaero.h"
@@ -157,6 +157,39 @@ public:
         {}
     };
 
+    // The aircraft database has been downloaded again: pick up the new one
+    class MsgReloadAircraftDatabase : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgReloadAircraftDatabase* create() {
+            return new MsgReloadAircraftDatabase();
+        }
+    private:
+        MsgReloadAircraftDatabase() :
+            Message()
+        {}
+    };
+
+    // An ACARS block read back from a .csv log. Decoded and shown like a received one,
+    // but kept off the outputs - UDP, the "packets" pipes, the log and the aggregator
+    // feed - which would otherwise send old traffic out again as if it were new, and
+    // append to the very log being read.
+    class MsgReplayPacket : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QByteArray& getPacket() const { return m_packet; }
+        QDateTime getDateTime() const { return m_dateTime; }
+        static MsgReplayPacket* create(const QByteArray& packet, const QDateTime& dateTime) {
+            return new MsgReplayPacket(packet, dateTime);
+        }
+    private:
+        QByteArray m_packet;
+        QDateTime m_dateTime;
+        MsgReplayPacket(const QByteArray& packet, const QDateTime& dateTime) :
+            Message(), m_packet(packet), m_dateTime(dateTime)
+        {}
+    };
+
     explicit AcarsDemodWorker(AcarsDemod *acarsDemod);
     ~AcarsDemodWorker();
 
@@ -204,13 +237,6 @@ private:
     int m_hfdlNewestReportSecs = -1;    // Newest HFNPDU report time seen, for replay-aware freshness
 
     // Aggregator feeds (sockets created on the worker thread)
-    QUdpSocket *m_feedSocket = nullptr;
-    QTcpSocket *m_feedAirframesTcpSocket = nullptr;
-    QTcpSocket *m_feedAvdelphiTcpSocket = nullptr;
-    QHostAddress m_feedAirframesAddr;   // Cached DNS resolutions, for UDP
-    QString m_feedAirframesResolvedHost;
-    QHostAddress m_feedAvdelphiAddr;
-    QString m_feedAvdelphiResolvedHost;
 
     // Databases for message decode and flight paths
     QSharedPointer<const QHash<QString, AircraftInformation *>> m_aircraftInfo;
@@ -225,8 +251,10 @@ private:
     void applySettings(const AcarsDemodSettings& settings, bool force);
     void forwardToGui(Message *message);
 
-    void processPacket(const QByteArray& packet, QDateTime dateTime);
-    void processAcarsMessage(QByteArray messageBytes, QDateTime received);
+    //!< icao is the address the bearer knew, or 0 - see AcarsDemod::MsgAcarsPacket
+    //!< replay is true for a block read back from a .csv log - see MsgReplayPacket
+    void processPacket(const QByteArray& packet, QDateTime dateTime, quint32 icao = 0, bool replay = false);
+    void processAcarsMessage(QByteArray messageBytes, QDateTime received, quint32 icao = 0, bool replay = false);
     void processVdl2Frame(const AcarsVdl2Receiver::Frame& frame, QDateTime received);
     void processHfdlFrame(const AcarsHfdlReceiver::Frame& frame, QDateTime received);
     void processAeroFrame(const AcarsAeroReceiver::Frame& frame, QDateTime received);
@@ -237,10 +265,8 @@ private:
     // The protocol the packets currently in flight came off, stamped by the sink rather
     // than read from m_settings - see AcarsDemod::MsgProtocolChange
     int m_protocolMode = 0;   // AcarsDemodSettings::ACARS
-    void feedMessage(const AcarsMessage& message);
-    void updateFeedConnections();
+    void feedMessage(const QByteArray& block, const QDateTime& received);
     void sendAircraftReport(AircraftReport& report);
-    void sendGroundStationToMap(const QString& name, float latitude, float longitude, const QString& text, QDateTime dateTime);
     void emitAssemblyState(const QSharedPointer<AcarsMultipartAssembler::Assembly>& assembly);
 
 private slots:

@@ -224,7 +224,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Mode: ACARS (2400 baud MSK), VDL Mode 2 (10500 baud D8PSK), HFDL (1800 baud PSK; tune to the published channel frequency) or Aero (Inmarsat Classic Aero, L band satellite)</string>
+         <string>Mode: ACARS (2400 baud MSK), VDL Mode 2 (10500 baud D8PSK), HFDL (1800 baud PSK; tune to the published channel frequency) Aero (Inmarsat Classic Aero, L band satellite) or Iridium (L band satellite, burst DQPSK - prototype: ring alert and short burst data frames are decoded, ACARS reassembly untested)</string>
         </property>
         <item>
          <property name="text">
@@ -244,6 +244,11 @@
         <item>
          <property name="text">
           <string>Aero</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Iridium</string>
          </property>
         </item>
        </widget>
@@ -292,6 +297,39 @@
         <item>
          <property name="text">
           <string>1200 bps T</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="iridiumBandwidth">
+        <property name="minimumSize">
+         <size>
+          <width>85</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>How much of the band the Iridium scanner covers. Iridium assigns a duplex channel when a call is set up, out of about 240 across 7 MHz, so watching a single channel sees only a few percent of the traffic. The whole width is split into channels and a receiver run on each, which costs proportionally more CPU. There is no point choosing a width the device cannot supply.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>1 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 MHz</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8 MHz</string>
          </property>
         </item>
        </widget>
@@ -528,8 +566,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+         <iconset resource="acarsdemodicons.qrc">
+          <normaloff>:/icons/forward.png</normaloff>:/icons/forward.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -562,7 +600,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="acarsdemodicons.qrc">
           <normaloff>:/icons/chart.png</normaloff>:/icons/chart.png</iconset>
         </property>
         <property name="checkable">
@@ -579,38 +617,21 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="acarsdemodicons.qrc">
           <normaloff>:/icons/gs.png</normaloff>:/icons/gs.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="feed">
-        <property name="toolTip">
-         <string>Enable feeding of received ACARS messages to aggregators (airframes.io / avdelphi.com). Right click for settings.</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="getOSNDB">
         <property name="toolTip">
-         <string>Download the latest Opensky-Network aircraft database (130MB)</string>
+         <string>Download the latest aircraft database (45MB)</string>
         </property>
         <property name="text">
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="acarsdemodicons.qrc">
           <normaloff>:/icons/aircraft.png</normaloff>:/icons/aircraft.png</iconset>
         </property>
        </widget>
@@ -1122,7 +1143,7 @@
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="icons.qrc"/>
+  <include location="acarsdemodicons.qrc"/>
  </resources>
  <connections/>
 </ui>

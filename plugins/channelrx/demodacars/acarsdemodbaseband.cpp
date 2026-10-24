@@ -18,6 +18,8 @@
 
 #include <QDebug>
 
+#include <algorithm>
+
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
@@ -26,6 +28,21 @@
 
 MESSAGE_CLASS_DEFINITION(AcarsDemodBaseband::MsgConfigureAcarsDemodBaseband, Message)
 
+// Up to 16x the standard policy (10 s of nominal samples): a burst's decode chain
+// (multiple Viterbi attempts, turbo re-estimation, header repair) runs synchronously at
+// the end of the burst and can take tens of milliseconds - and clusters of bursts
+// compound it - which at accelerated file replay (10x and beyond) would overflow the
+// 0.64 s standard FIFO. But capped in samples, since the FIFO is allocated in full: at
+// 16x an 8 MS/s Iridium channel took 655 MB for its FIFO alone, and several channels on
+// a wideband device took gigabytes. The cap is 8M samples (64 MB with 24 bit samples), still over a
+// second at 8 MS/s.
+static unsigned int fifoSize(unsigned int sampleRate)
+{
+    const unsigned int standard = SampleSinkFifo::getSizePolicy(sampleRate);
+    const unsigned int maxSamples = 8 * 1024 * 1024;
+    return std::max(standard, std::min(standard * 16, maxSamples));
+}
+
 AcarsDemodBaseband::AcarsDemodBaseband(AcarsDemod *packetDemod) :
     m_sink(packetDemod),
     m_running(false)
@@ -33,12 +50,7 @@ AcarsDemodBaseband::AcarsDemodBaseband(AcarsDemod *packetDemod) :
     qDebug("AcarsDemodBaseband::AcarsDemodBaseband");
 
     m_sink.setScopeSink(&m_scopeSink);
-    // 16x the standard policy (10 s of nominal samples): a burst's decode chain
-    // (multiple Viterbi attempts, turbo re-estimation, header repair) runs
-    // synchronously at the end of the burst and can take tens of milliseconds -
-    // and clusters of bursts compound it - which at accelerated file replay (10x
-    // and beyond) would overflow the 0.64 s standard FIFO
-    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000) * 16);
+    m_sampleFifo.setSize(fifoSize(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 }
 
@@ -150,8 +162,7 @@ bool AcarsDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "AcarsDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         setBasebandSampleRate(notif.getSampleRate());
-        // 16x the standard policy - see the constructor
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()) * 16);
+        m_sampleFifo.setSize(fifoSize(notif.getSampleRate()));
 
         return true;
     }
@@ -163,12 +174,7 @@ bool AcarsDemodBaseband::handleMessage(const Message& cmd)
 
 void AcarsDemodBaseband::applySettings(const AcarsDemodSettings& settings, bool force)
 {
-    // An Aero submode change moves the channel rate exactly as a mode change does, so
-    // it has to count here too - otherwise switching rate leaves the channelizer where
-    // it was and the receiver runs at the wrong sample rate
-    bool modeChanged = (settings.m_mode != m_settings.m_mode)
-                    || ((settings.m_mode == AcarsDemodSettings::Aero)
-                        && (settings.m_aeroChannel != m_settings.m_aeroChannel));
+    bool modeChanged = AcarsDemodSettings::rateChanged(settings, m_settings);
 
     // The sink has to know the mode before the channelization moves, as the mode sets
     // the rate it resamples the channelizer output to

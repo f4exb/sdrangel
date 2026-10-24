@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QQmlContext>
 #include <QQmlProperty>
 #include <QGeoLocation>
@@ -25,9 +27,15 @@
 #include <QGeoServiceProvider>
 #include <QSettings>
 #include <QMenu>
+#include <QActionGroup>
+#include <QToolButton>
+#include <QIcon>
 #include <QScreen>
 #include <QSvgWidget>
 #include <QTableWidgetItem>
+#include <QDir>
+#include <QFileInfo>
+#include <QSet>
 
 #ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
@@ -36,14 +44,19 @@
 #endif
 
 #include "feature/featureuiset.h"
+// For aircraftSelect(), which is how an aircraft link in a popup reaches the
+// Aircraft feature - see linkClicked()
+#include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
+#include "maincore.h"
 #include "dsp/devicesamplesource.h"
 #include "device/deviceenumerator.h"
 #include "util/units.h"
+#include "util/profiler.h"
 #include "util/maidenhead.h"
 #include "util/morse.h"
 #include "util/navtex.h"
@@ -72,21 +85,84 @@ void MapGUI::destroy()
 
 void MapGUI::resetToDefaults()
 {
+    const QString oldMSFSNavigraphDir = m_settings.m_msfsNavigraphDir;
     m_settings.resetToDefaults();
+    if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
+        addWaypoints();
+    }
     displaySettings();
     applyAllSettings();
 }
 
 QByteArray MapGUI::serialize() const
 {
-    return m_settings.serialize();
+    // Save where the map is now, so it can be restored when next opened.
+    // We can't write to m_settings here, so serialize a copy - MapSettings can be
+    // copied safely, as it doesn't own the item settings it points at
+    MapSettings settings = m_settings;
+    QGeoCoordinate coords;
+    double zoom;
+
+    if (currentMapPosition(coords, zoom))
+    {
+        settings.m_mapCenterLatitude = coords.latitude();
+        settings.m_mapCenterLongitude = coords.longitude();
+        settings.m_mapZoomLevel = zoom;
+    }
+    settings.m_splitterState = ui->splitter->saveState();
+
+    return settings.serialize();
+}
+
+// Put the splitter back where it was. Kept rather than consumed: the 3D map and the
+// NASA panel are added to the splitter later and on their own schedule, and a state
+// saved with three widgets will not apply to a splitter that currently has one - so this
+// is called again each time the composition changes, and the first call that matches
+// wins. restoreState() reports whether it applied, so a state that never fits is simply
+// never used rather than half applied.
+void MapGUI::restoreSplitterState()
+{
+    if (m_splitterStateToRestore.isEmpty()) {
+        return;
+    }
+    if (ui->splitter->restoreState(m_splitterStateToRestore)) {
+        m_splitterStateToRestore.clear();
+    }
+}
+
+// Get the position and zoom level of the 2D map, if it has been created
+bool MapGUI::currentMapPosition(QGeoCoordinate& coords, double& zoom) const
+{
+    QQuickItem *item = ui->map->rootObject();
+
+    if (!item) {
+        return false;
+    }
+
+    QObject *object = item->findChild<QObject*>("map");
+
+    if (!object) {
+        return false;
+    }
+
+    coords = object->property("center").value<QGeoCoordinate>();
+    zoom = object->property("zoomLevel").value<double>();
+
+    return coords.isValid();
 }
 
 bool MapGUI::deserialize(const QByteArray& data)
 {
+    const QString oldMSFSNavigraphDir = m_settings.m_msfsNavigraphDir;
     if (m_settings.deserialize(data))
     {
+        if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
+            addWaypoints();
+        }
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
+        m_restoreMapPosition = true;
+        m_splitterStateToRestore = m_settings.m_splitterState;
+        restoreSplitterState();
         displaySettings();
         applyAllSettings();
         return true;
@@ -104,11 +180,16 @@ bool MapGUI::handleMessage(const Message& message)
     {
         qDebug("MapGUI::handleMessage: Map::MsgConfigureMap");
         const Map::MsgConfigureMap& cfg = (Map::MsgConfigureMap&) message;
+        const QString oldMSFSNavigraphDir = m_settings.m_msfsNavigraphDir;
 
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
         } else {
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
+        if (oldMSFSNavigraphDir != m_settings.m_msfsNavigraphDir) {
+            addWaypoints();
         }
 
         blockApplySettings(true);
@@ -121,6 +202,16 @@ bool MapGUI::handleMessage(const Message& message)
     {
         Map::MsgReportAvailableChannelOrFeatures& report = (Map::MsgReportAvailableChannelOrFeatures&) message;
         m_availableChannelOrFeatures = report.getItems();
+
+        // Work out which group each source belongs to now, rather than for every map
+        // item it sends us
+        m_pipeGroups.clear();
+        for (const auto& channelOrFeature : m_availableChannelOrFeatures)
+        {
+            if (MapSettings::m_pipeTypes.contains(channelOrFeature.m_type)) {
+                m_pipeGroups.insert(channelOrFeature.m_object, channelOrFeature.m_type);
+            }
+        }
 
         return true;
     }
@@ -140,26 +231,17 @@ bool MapGUI::handleMessage(const Message& message)
     }
     else if (MainCore::MsgMapItem::match(message))
     {
+        PROFILER_START()
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) message;
         SWGSDRangel::SWGMapItem *swgMapItem = msgMapItem.getSWGMapItem();
 
         // TODO: Could have this in SWGMapItem so plugins can create additional groups
-        QString group;
-
-        for (int i = 0; i < m_availableChannelOrFeatures.size(); i++)
-        {
-            if (m_availableChannelOrFeatures[i].m_object == msgMapItem.getPipeSource())
-            {
-                 for (int j = 0; j < MapSettings::m_pipeTypes.size(); j++)
-                 {
-                     if (m_availableChannelOrFeatures[i].m_type == MapSettings::m_pipeTypes[j]) {
-                         group = m_availableChannelOrFeatures[i].m_type;
-                     }
-                 }
-            }
-        }
+        const QString group = m_pipeGroups.value(msgMapItem.getPipeSource());
 
         update(msgMapItem.getPipeSource(), swgMapItem, group);
+        // The sender creates one of these per pipe and hands it over to us
+        delete swgMapItem;
+        PROFILER_STOP("Map message")
         return true;
     }
 
@@ -206,7 +288,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_nasaWidget(nullptr),
     m_legendWidget(nullptr),
     m_overviewWidget(nullptr),
-    m_descriptionWidget(nullptr)
+    m_descriptionWidget(nullptr),
+    m_restoreMapPosition(false),
+    m_viewCoordinator(this)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -270,6 +354,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_polygonMapFilter.setSourceModel(&m_polygonMapModel);
     m_polylineMapFilter.setSourceModel(&m_polylineMapModel);
 
+    ui->map->rootContext()->setContextProperty("viewCoordinator", &m_viewCoordinator);
     ui->map->rootContext()->setContextProperty("mapModelFiltered", &m_objectMapFilter);
     ui->map->rootContext()->setContextProperty("mapModel", &m_objectMapModel);
     ui->map->rootContext()->setContextProperty("imageModelFiltered", &m_imageMapFilter);
@@ -298,16 +383,21 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(&m_sdrangelServerList, &SDRangelServerList::dataUpdated, this, &MapGUI::sdrangelServerUpdated);
 
 #ifdef QT_WEBENGINE_FOUND
+    // Before settings() and the page() connections below, which would otherwise apply to
+    // the page this replaces
+    ui->web->setPage(new MapWebPage(acquireWebEngineProfile(), ui->web));
     QWebEngineSettings *settings = ui->web->settings();
     settings->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
+    // The DCDU's ring is played by the page without any user gesture, which Chromium's
+    // autoplay policy would otherwise block
+    settings->setAttribute(QWebEngineSettings::PlaybackRequiresUserGesture, false);
     connect(ui->web->page(), &QWebEnginePage::fullScreenRequested, this, &MapGUI::fullScreenRequested);
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     connect(ui->web->page(), &QWebEnginePage::loadingChanged, this, &MapGUI::loadingChanged);
     connect(ui->web, &QWebEngineView::renderProcessTerminated, this, &MapGUI::renderProcessTerminated);
 #endif
 
-    QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
-    connect(profile, &QWebEngineProfile::downloadRequested, this, &MapGUI::downloadRequested);
+    connect(s_webEngineProfile, &QWebEngineProfile::downloadRequested, this, &MapGUI::downloadRequested);
 #endif
 
     // Get station position
@@ -316,6 +406,12 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     float stationAltitude = MainCore::instance()->getSettings().getAltitude();
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
     QGeoCoordinate stationPosition(stationLatitude, stationLongitude, stationAltitude);
+    // The models work out how far each item is from the station, so the filters don't
+    // have to do it for every item every time the map moves
+    m_objectMapModel.setStationPosition(stationPosition);
+    m_imageMapModel.setStationPosition(stationPosition);
+    m_polygonMapModel.setStationPosition(stationPosition);
+    m_polylineMapModel.setStationPosition(stationPosition);
     m_objectMapFilter.setPosition(stationPosition);
     m_imageMapFilter.setPosition(stationPosition);
     m_polygonMapFilter.setPosition(stationPosition);
@@ -354,6 +450,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &MapGUI::preferenceChanged);
 
     // Read beacons, if they exist
+    PROFILER_START()
     QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
     if (beacons != nullptr) {
         setBeacons(beacons);
@@ -375,6 +472,11 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addKiwiSDR();
     addSpyServer();
     addSDRangelServer();
+    PROFILER_STOP("Map DB load")
+
+    // Before displaySettings(), which sets the menu actions' check states
+    createCockpitPanelsMenu();
+    createCameraModeMenu();
 
     displaySettings();
     applyAllSettings();
@@ -382,6 +484,15 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(&m_objectMapModel, &ObjectMapModel::linkClicked, this, &MapGUI::linkClicked);
 
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
+
+    // Items arrive far faster than the map can usefully be redrawn, so changes are
+    // collected and handed over at this rate instead
+    connect(&m_flushTimer, &QTimer::timeout, this, &MapGUI::flushModels);
+    m_flushTimer.start(m_flushPeriodMS);
+    // The AM Demods behind the RMP's VHF channels can be retuned from their own GUI or by
+    // the ADS-B plugin, so the panel is kept in step by polling rather than notification
+    connect(&m_rmpPollTimer, &QTimer::timeout, this, [this]() { sendRMPState(false); });
+    m_rmpPollTimer.start(1000);
     m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
 
@@ -417,8 +528,55 @@ MapGUI::~MapGUI()
     delete m_giro;
     delete m_aurora;
     qDeleteAll(m_ionosondeStations);
+#ifdef QT_WEBENGINE_FOUND
+    // The page is a child of the view, and the view a child of this widget - which
+    // QWidget's destructor deletes after this one, too late for the profile the page
+    // uses. So the view goes now, and the profile after it
+    delete ui->web;
+    ui->web = nullptr;
+#endif
     delete ui;
+#ifdef QT_WEBENGINE_FOUND
+    releaseWebEngineProfile();
+#endif
 }
+
+#ifdef QT_WEBENGINE_FOUND
+
+QWebEngineProfile *MapGUI::s_webEngineProfile = nullptr;
+int MapGUI::s_webEngineProfileUsers = 0;
+
+// Qt 6's default profile is off-the-record, so every run started with an empty cache
+// and fetched all of Cesium's assets, imagery, terrain and Google's 3D tiles again.
+// This one keeps them on disk, under the application's cache directory. It is shared
+// by every map open at once - two profiles with the same storage name would fight over
+// the directory - and has to outlive every page that uses it, so is counted rather
+// than owned by one map or left to the application's shutdown, which tears down
+// Qt WebEngine before it deletes the application's children.
+QWebEngineProfile *MapGUI::acquireWebEngineProfile()
+{
+    if (!s_webEngineProfile)
+    {
+        s_webEngineProfile = new QWebEngineProfile("Map");
+        s_webEngineProfile->setHttpCacheType(QWebEngineProfile::DiskHttpCache);
+        // Chromium's own limit is a few hundred MB, and a city of photorealistic tiles
+        // is that on its own
+        s_webEngineProfile->setHttpCacheMaximumSize(1024 * 1024 * 1024);
+    }
+    s_webEngineProfileUsers++;
+    return s_webEngineProfile;
+}
+
+void MapGUI::releaseWebEngineProfile()
+{
+    if (--s_webEngineProfileUsers == 0)
+    {
+        delete s_webEngineProfile;
+        s_webEngineProfile = nullptr;
+    }
+}
+
+#endif
 
 void MapGUI::setWorkspaceIndex(int index)
 {
@@ -427,17 +585,53 @@ void MapGUI::setWorkspaceIndex(int index)
 }
 
 // Update a map item
-void MapGUI::update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
+void MapGUI::update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &itemGroup)
 {
-    int type = swgMapItem->getType();
-    if (type == 0) {
-        m_objectMapModel.update(source, swgMapItem, group);
-    } else if (type == 1) {
-        m_imageMapModel.update(source, swgMapItem, group);
-    } else if (type == 2) {
-        m_polygonMapModel.update(source, swgMapItem, group);
-    } else if (type == 3) {
-        m_polylineMapModel.update(source, swgMapItem, group);
+    // The settings group is the sending plugin's, unless the item names one of its own -
+    // one plugin can want different settings for different things it draws. An unknown
+    // name falls back rather than failing: getItemSettings() returns nullptr for a group
+    // that does not exist, and every item holds that pointer for its lifetime.
+    QString group = itemGroup;
+    const QString *named = swgMapItem->getGroup();
+    if (named && !named->isEmpty() && m_settings.m_itemSettings.contains(*named)) {
+        group = *named;
+    }
+
+    MapModel *models[] = {
+        &m_objectMapModel,      // 0 - Object
+        &m_imageMapModel,       // 1 - Image
+        &m_polygonMapModel,     // 2 - Polygon
+        &m_polylineMapModel,    // 3 - Polyline
+        &m_polylineMapModel     // 4 - Track: a polyline coloured by the altitude of its points
+    };
+    const int count = (int) (sizeof(models) / sizeof(models[0]));
+
+    // An empty image means take the item off the map, and a sender removing something by
+    // name does not have to say what kind of item it was - an SWGMapItem built for the
+    // purpose carries type 0 whatever was drawn. Looked up under type, a line or a polygon
+    // would then be searched for among the objects, never found, and left on the map beside
+    // whatever replaced it. Removals are rare, so one can afford to be looked for in every
+    // model rather than only in the one the type names.
+    const QString *image = swgMapItem->getImage();
+    if (!image || !swgMapItem->getName()) {
+        return;         // Neither drawable nor removable
+    }
+    if (image->isEmpty())
+    {
+        const QString& name = *swgMapItem->getName();
+        for (int i = 0; i < count; i++)
+        {
+            // The same model appears twice, so only the first of them finds the item
+            if (models[i]->findMapItem(source, name)) {
+                models[i]->update(source, swgMapItem, group);
+            }
+        }
+        return;
+    }
+
+    const int type = swgMapItem->getType();
+    if ((type >= 0) && (type < count)) {
+        models[type]->update(source, swgMapItem, group);
     }
 }
 
@@ -1302,6 +1496,32 @@ void MapGUI::addNavAids()
         navAidMapItem.setAltitudeReference(1);
         update(m_map, &navAidMapItem, "NavAid");
     }
+
+    sendNavAidsToND();
+}
+
+// The VOR-family navaids for the ND's overlay, the same arrangement as the airports
+// in sendAirportsToND() below
+void MapGUI::sendNavAidsToND()
+{
+    if (!m_cesium || !m_navAids) {
+        return;
+    }
+
+    QJsonArray navAids;
+    for (const auto navAid : *m_navAids)
+    {
+        // VOR, VOR-DME and VORTAC; NDBs and bare DMEs would clutter more than help
+        if (!navAid->m_type.startsWith("VOR")) {
+            continue;
+        }
+        navAids.append(QJsonObject {
+            {"n", navAid->m_ident},
+            {"lat", navAid->m_latitude},
+            {"lon", navAid->m_longitude}
+        });
+    }
+    m_cesium->setNDNavAids(navAids);
 }
 
 void MapGUI::addAirspace(const Airspace *airspace, const QString& group, int cnt)
@@ -1400,19 +1620,32 @@ void MapGUI::addAirports()
     m_airportInfo = OurAirportsDB::getAirportsById();
     if (m_airportInfo)
     {
+        // One item, reused for every airport - see addWaypoints() for why. The strings
+        // have to be allocated before they can be assigned in place, as the default
+        // SWGMapItem constructor leaves every pointer null
+        SWGSDRangel::SWGMapItem airportMapItem;
+        airportMapItem.setName(new QString());
+        airportMapItem.setImage(new QString());
+        airportMapItem.setText(new QString());
+        airportMapItem.setLabel(new QString());
+        airportMapItem.setModel(new QString("airport.glb")); // No such model currently, but we don't really want one
+        airportMapItem.setImageRotation(0);
+        airportMapItem.setFixedPosition(true);
+        airportMapItem.setOrientation(0);
+        airportMapItem.setLabelAltitudeOffset(4.5);
+        airportMapItem.setAltitudeReference(1);
+
         QHashIterator<int, AirportInformation *> i(*m_airportInfo);
         while (i.hasNext())
         {
             i.next();
             AirportInformation *airport = i.value();
 
-            SWGSDRangel::SWGMapItem airportMapItem;
-            airportMapItem.setName(new QString(airport->m_ident));
+            *airportMapItem.getName() = airport->m_ident;
             airportMapItem.setLatitude(airport->m_latitude);
             airportMapItem.setLongitude(airport->m_longitude);
             airportMapItem.setAltitude(Units::feetToMetres(airport->m_elevation));
-            airportMapItem.setImage(new QString(airport->getImageName()));
-            airportMapItem.setImageRotation(0);
+            *airportMapItem.getImage() = airport->getImageName();
             QStringList list;
             list.append(QString("%1: %2").arg(airport->m_ident).arg(airport->m_name));
             for (int i = 0; i < airport->m_frequencies.size(); i++)
@@ -1420,13 +1653,8 @@ void MapGUI::addAirports()
                 const AirportInformation::FrequencyInformation *frequencyInfo = airport->m_frequencies[i];
                 list.append(QString("%1: %2 MHz").arg(frequencyInfo->m_type).arg(frequencyInfo->m_frequency));
             }
-            airportMapItem.setText(new QString(list.join("\n")));
-            airportMapItem.setModel(new QString("airport.glb")); // No such model currently, but we don't really want one
-            airportMapItem.setFixedPosition(true);
-            airportMapItem.setOrientation(0);
-            airportMapItem.setLabel(new QString(airport->m_ident));
-            airportMapItem.setLabelAltitudeOffset(4.5);
-            airportMapItem.setAltitudeReference(1);
+            *airportMapItem.getText() = list.join("\n");
+            *airportMapItem.getLabel() = airport->m_ident;
             QString group;
             if (airport->m_type == AirportInformation::Small) {
                 group = "Airport (Small)";
@@ -1439,38 +1667,140 @@ void MapGUI::addAirports()
             }
             update(m_map, &airportMapItem, group);
         }
+
+        sendAirportsToND();
     }
+}
+
+// The ND draws its own airport overlay - stars with idents - from a copy of the
+// airport database sent to the page once, rather than scraping map entities, which
+// come and go with the group settings. Re-sent when the database updates and when
+// the 3D map (re)connects
+void MapGUI::sendAirportsToND()
+{
+    if (!m_cesium || !m_airportInfo) {
+        return;
+    }
+
+    QJsonArray airports;
+    QHashIterator<int, AirportInformation *> i(*m_airportInfo);
+    while (i.hasNext())
+    {
+        i.next();
+        const AirportInformation *airport = i.value();
+        // Large airports only - the same classification the Map's groups use. The
+        // medium and small fields swamped the display; the type field is kept so the
+        // page's declutter logic still works if this is ever widened again
+        if (airport->m_type != AirportInformation::Large) {
+            continue;
+        }
+        airports.append(QJsonObject {
+            {"n", airport->m_ident},
+            {"lat", airport->m_latitude},
+            {"lon", airport->m_longitude},
+            {"t", 2}
+        });
+    }
+    m_cesium->setNDAirports(airports);
 }
 
 void MapGUI::addWaypoints()
 {
-    m_waypoints = Waypoints::getWaypoints();
     if (m_waypoints)
     {
-        QHashIterator<QString, Waypoint *> i(*m_waypoints);
-        while (i.hasNext())
+        QSet<QString> oldWaypointNames;
+        for (auto i = m_waypoints->constBegin(); i != m_waypoints->constEnd(); ++i) {
+            oldWaypointNames.insert(i.key());
+        }
+
+        SWGSDRangel::SWGMapItem removeWaypoint;
+        removeWaypoint.setName(new QString());
+        removeWaypoint.setImage(new QString());
+        for (const QString& name : oldWaypointNames)
         {
-            i.next();
+            *removeWaypoint.getName() = name;
+            update(m_map, &removeWaypoint, "Waypoints");
+        }
+    }
+
+    m_waypoints.reset();
+    const QString bglDirectory = m_settings.m_msfsNavigraphDir.trimmed();
+    if (!bglDirectory.isEmpty())
+    {
+        QStringList errors;
+        QString bglSourceDirectory = QDir::fromNativeSeparators(bglDirectory);
+
+        // Navigraph's standard nav-base package is a maintenance/exclusion
+        // layer. The actual navigation records are installed in its sibling
+        // nav-jepp package, so make the requested default package path useful
+        // without asking the user to know Navigraph's internal split.
+        if (QFileInfo(QDir::cleanPath(bglSourceDirectory)).fileName().compare(
+                QStringLiteral("navigraph-nav-base"), Qt::CaseInsensitive) == 0)
+        {
+            const QString navJeppDirectory = QFileInfo(QDir::cleanPath(bglSourceDirectory))
+                .dir().filePath(QStringLiteral("navigraph-nav-jepp"));
+            if (QFileInfo(navJeppDirectory).isDir()) {
+                bglSourceDirectory = navJeppDirectory;
+            }
+        }
+
+        QMultiHash<QString, Waypoint *> *waypoints = Waypoint::readBGL(bglSourceDirectory, &errors);
+        if (!waypoints->isEmpty())
+        {
+            m_waypoints = QSharedPointer<const QMultiHash<QString, Waypoint *>>(
+                waypoints,
+                [](const QMultiHash<QString, Waypoint *> *values) {
+                    qDeleteAll(*values);
+                    delete values;
+                });
+            qDebug() << "MapGUI::addWaypoints: Read" << waypoints->size()
+                     << "waypoints from Navigraph BGL directory" << bglSourceDirectory;
+        }
+        else
+        {
+            delete waypoints;
+            qWarning() << "MapGUI::addWaypoints: No waypoints read from Navigraph BGL directory"
+                       << bglDirectory << "- falling back to waypoints.csv";
+        }
+        if (!errors.isEmpty()) {
+            qWarning() << "MapGUI::addWaypoints:" << errors.size()
+                       << "Navigraph BGL read errors; first error:" << errors.first();
+        }
+    }
+    if (!m_waypoints) {
+        m_waypoints = Waypoints::getWaypoints();
+    }
+    if (m_waypoints)
+    {
+        // One item, reused for every waypoint. Building a fresh one per waypoint means a
+        // new QString for each field and a delete for each of them again straight after,
+        // so the strings are allocated once here and assigned in place below. Note the
+        // default SWGMapItem constructor leaves every pointer null - only the one that
+        // takes JSON allocates - so they have to be given something to point at first
+        SWGSDRangel::SWGMapItem waypointMapItem;
+        waypointMapItem.setName(new QString());
+        waypointMapItem.setImage(new QString("waypoint.png"));
+        waypointMapItem.setText(new QString());
+        waypointMapItem.setLabel(new QString());
+        waypointMapItem.setImageRotation(0);
+        waypointMapItem.setFixedPosition(true);
+        waypointMapItem.setOrientation(0);
+        waypointMapItem.setLabelAltitudeOffset(4.5);
+        waypointMapItem.setAltitude(Units::feetToMetres(25000));
+        waypointMapItem.setAltitudeReference(1);
+
+        QMultiHash<QString, Waypoint *>::const_iterator i = m_waypoints->constBegin();
+        while (i != m_waypoints->constEnd())
+        {
             const Waypoint *waypoint = i.value();
 
-            SWGSDRangel::SWGMapItem waypointMapItem;
-            waypointMapItem.setName(new QString(waypoint->m_name));
+            *waypointMapItem.getName() = waypoint->m_name;
             waypointMapItem.setLatitude(waypoint->m_latitude);
             waypointMapItem.setLongitude(waypoint->m_longitude);
-            waypointMapItem.setAltitude(0);
-            waypointMapItem.setImage(new QString("waypoint.png"));
-            waypointMapItem.setImageRotation(0);
-            QStringList list;
-            list.append(QString("Waypoint: %1").arg(waypoint->m_name));
-            waypointMapItem.setText(new QString(list.join("\n")));
-            //waypointMapItem.setModel(new QString("waypoint.glb")); // No such model currently
-            waypointMapItem.setFixedPosition(true);
-            waypointMapItem.setOrientation(0);
-            waypointMapItem.setLabel(new QString(waypoint->m_name));
-            waypointMapItem.setLabelAltitudeOffset(4.5);
-            waypointMapItem.setAltitude(Units::feetToMetres(25000));
-            waypointMapItem.setAltitudeReference(1);
+            *waypointMapItem.getText() = QString("Waypoint: %1").arg(waypoint->m_name);
+            *waypointMapItem.getLabel() = waypoint->m_name;
             update(m_map, &waypointMapItem, "Waypoints");
+            ++i;
         }
     }
 }
@@ -1605,6 +1935,7 @@ void MapGUI::createNASAGlobalImageryView()
 
     m_nasaWidget->setLayout(hbox);
     ui->splitter->addWidget(m_nasaWidget);
+    restoreSplitterState();
 
     // Limit size of widget, otherwise the splitter makes it bigger than the maps for some unknown reason
     m_nasaWidget->setMaximumHeight(m_overviewWidget->sizeHint().height());
@@ -1652,13 +1983,71 @@ void MapGUI::nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData&
     displayNASAMetaData();
 }
 
+// NASA's colormap legends are drawn by matplotlib, which writes every character of
+// every label as a <use> of a glyph defined in the file - including the spaces. A space
+// has no outline, so no path is ever defined for one, and Qt's SVG renderer warns about
+// the dangling reference every single time it meets it: 404 lines of log from two
+// legends, all of them about a glyph that would draw nothing.
+//
+// Defining the missing ids as empty paths satisfies the references and changes nothing
+// that is drawn. Done by finding what is referenced and not defined, rather than by
+// naming the space glyph, so any other character the generator leaves out is covered too.
+static QByteArray defineMissingGlyphs(const QByteArray& svg)
+{
+    const QString text = QString::fromUtf8(svg);
+
+    // Custom delimiter: the pattern ends in )" , which would close a plain R"( ... )"
+    static const QRegularExpression idRe(R"RX(\bid\s*=\s*"([^"]+)")RX");
+    QSet<QString> defined;
+    QRegularExpressionMatchIterator ids = idRe.globalMatch(text);
+    while (ids.hasNext()) {
+        defined.insert(ids.next().captured(1));
+    }
+
+    // Both spellings: SVG 1.1 writes xlink:href, SVG 2 writes href
+    static const QRegularExpression refRe(R"RX((?:xlink:)?href\s*=\s*"#([^"]+)")RX");
+    QStringList missing;
+    QRegularExpressionMatchIterator refs = refRe.globalMatch(text);
+    while (refs.hasNext())
+    {
+        const QString id = refs.next().captured(1);
+        if (!defined.contains(id) && !missing.contains(id)) {
+            missing.append(id);
+        }
+    }
+    if (missing.isEmpty()) {
+        return svg;
+    }
+
+    // After the opening <svg ...> tag, so the definitions precede every use of them
+    static const QRegularExpression svgTagRe(R"(<svg\b[^>]*>)");
+    const QRegularExpressionMatch svgTag = svgTagRe.match(text);
+    if (!svgTag.hasMatch()) {
+        return svg;
+    }
+
+    // With a "d", degenerate though it is. An empty <path id=...> registers nothing:
+    // Qt's SVG parser wants the d attribute and discards the element without one, so the
+    // id never enters its resolve map and every <use> of it still dangles - which is why
+    // the first attempt at this changed the warning count not at all. "M0,0" is a moveto
+    // and nothing else, so it draws exactly what a space should.
+    QString defs = "<defs>";
+    for (const QString& id : missing) {
+        defs += QString("<path id=\"%1\" d=\"M0,0\"/>").arg(id);
+    }
+    defs += "</defs>";
+
+    QString repaired = text;
+    repaired.insert(svgTag.capturedEnd(), defs);
+    return repaired.toUtf8();
+}
+
 void MapGUI::nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data)
 {
-    (void) url;
-
     if (m_legendWidget)
     {
-        m_legendWidget->load(data);
+        m_legendWidget->load(defineMissingGlyphs(data));
+        m_loadedLegendUrl = url;
         if (m_legend && (m_legend->m_height > 0))
         {
             m_legendWidget->setFixedSize(m_legend->m_width, m_legend->m_height);
@@ -1738,14 +2127,20 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
 
         QQuickItem *item = ui->map->rootObject();
 
-        QObject *object = item->findChild<QObject*>("map");
         QGeoCoordinate coords;
         double zoom;
-        if (object != nullptr)
+        if (m_restoreMapPosition && (m_settings.m_mapZoomLevel >= 0.0f))
         {
-            // Save existing position of map
-            coords = object->property("center").value<QGeoCoordinate>();
-            zoom = object->property("zoomLevel").value<double>();
+            // Restore the position the map was left in when it was last saved
+            m_restoreMapPosition = false;
+            coords.setLatitude(m_settings.m_mapCenterLatitude);
+            coords.setLongitude(m_settings.m_mapCenterLongitude);
+            zoom = m_settings.m_mapZoomLevel;
+        }
+        else if (currentMapPosition(coords, zoom))
+        {
+            // Keep the map where it is, as it's only being recreated
+            m_restoreMapPosition = false;
         }
         else
         {
@@ -1849,6 +2244,33 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
     }
 }
 
+// The filters get a rectangle bigger than the screen, so that small pans don't need them
+// re-run, while the tracks are split against what is actually visible
+void MapGUI::applyMapView(const QGeoRectangle& filterRect, const QGeoRectangle& visibleRect, double zoomLevel)
+{
+    const double topLeftLongitude = filterRect.topLeft().longitude();
+    const double topLeftLatitude = filterRect.topLeft().latitude();
+    const double bottomRightLongitude = filterRect.bottomRight().longitude();
+    const double bottomRightLatitude = filterRect.bottomRight().latitude();
+
+    m_objectMapFilter.viewChanged(topLeftLongitude, topLeftLatitude, bottomRightLongitude, bottomRightLatitude, zoomLevel);
+    m_imageMapFilter.viewChanged(topLeftLongitude, topLeftLatitude, bottomRightLongitude, bottomRightLatitude, zoomLevel);
+    m_polygonMapFilter.viewChanged(topLeftLongitude, topLeftLatitude, bottomRightLongitude, bottomRightLatitude, zoomLevel);
+    m_polylineMapFilter.viewChanged(topLeftLongitude, topLeftLatitude, bottomRightLongitude, bottomRightLatitude, zoomLevel);
+
+    m_objectMapModel.viewChanged(visibleRect.bottomLeft().longitude(), visibleRect.bottomRight().longitude());
+}
+
+void MapGUI::flushModels()
+{
+    PROFILER_START()
+    m_objectMapModel.flush();
+    m_imageMapModel.flush();
+    m_polygonMapModel.flush();
+    m_polylineMapModel.flush();
+    PROFILER_STOP("Map flush")
+}
+
 void MapGUI::redrawMap()
 {
     // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
@@ -1930,7 +2352,8 @@ void MapGUI::displayToolbar()
     ui->displayMagDec->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayMaidenheadGrid->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayPFD->setVisible(!narrow && m_settings.m_map3DEnabled);
-    ui->viewFirstPerson->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->muteAudio->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->cameraMode->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->save->setVisible(m_settings.m_map3DEnabled);
 }
 
@@ -2016,6 +2439,9 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_webServer->addSubstitution("/map/map/map3d.html", "$WS_PORT$", QString::number(m_cesium->serverPort()));
         m_webServer->addSubstitution("/map/map/map3d.html", "$CESIUM_ION_API_KEY$", cesiumIonAPIKey());
         m_webServer->addSubstitution("/map/map/map3d.html", "$ARCGIS_API_KEY$", m_settings.m_arcGISAPIKey);
+        // So the base layer picker doesn't offer imagery that would use our Cesium Ion quota
+        m_webServer->addSubstitution("/map/map/map3d.html", "$HAS_CESIUM_ION_USER_KEY$", m_settings.hasCesiumIonUserKey() ? "true" : "");
+        m_webServer->addSubstitution("/map/map/map3d.html", "$DEFAULT_IMAGERY$", effectiveImagery());
         //ui->web->page()->profile()->clearHttpCache();
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
         //ui->web->load(QUrl(QString("http://webglreport.com/")));
@@ -2031,18 +2457,20 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     ui->web->setVisible(m_settings.m_map3DEnabled);
     if (m_cesium && m_cesium->isConnected())
     {
-        m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
-        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
-        m_cesium->setBuildings(m_settings.m_buildings);
+        m_cesium->setDefaultImagery(effectiveImagery());
+        m_cesium->setTerrain(effectiveTerrain(), maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
+        m_cesium->setBuildings(effectiveBuildings());
+        m_cesium->setGooglePhotorealistic3DTiles(effectiveGoogleTiles());
         m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
         m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
         m_cesium->getDateTime();
-        m_cesium->setViewFirstPerson(m_settings.m_viewFirstPerson);
+        m_cesium->setCameraMode(m_settings.m_cameraMode);
         m_cesium->setHDR(m_settings.m_hdr);
         m_cesium->setFog(m_settings.m_fog);
         m_cesium->showFPS(m_settings.m_fps);
-        m_cesium->showPFD(m_settings.m_displayPFD);
+        applyCockpitPanels();
+        applyAudioVolume();
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
         m_cesium->showMagDec(m_settings.m_displayMagDec);
@@ -2096,6 +2524,28 @@ void MapGUI::statusChanged(QQuickWidget::Status status)
 
 #ifdef QT_WEBENGINE_FOUND
 
+// The page's console. Its "perf" line, every five seconds, is where the 3D map's frame and
+// message costs are reported - see the 3D map performance section of the plugin readme
+void MapWebPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString &message,
+                                          int lineNumber, const QString &sourceID)
+{
+    // sourceID is a URL, and only the file in it is worth the width of the log line
+    const QString source = QUrl(sourceID).fileName();
+
+    switch (level)
+    {
+    case ErrorMessageLevel:
+        qWarning() << "Map 3D:" << message << "-" << source << "line" << lineNumber;
+        break;
+    case WarningMessageLevel:
+        qWarning() << "Map 3D:" << message;
+        break;
+    default:
+        qInfo() << "Map 3D:" << message;
+        break;
+    }
+}
+
 void MapGUI::renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
 {
     qDebug() << "MapGUI::renderProcessTerminated: " << terminationStatus << "exitCode" << exitCode;
@@ -2129,9 +2579,10 @@ void MapGUI::init3DMap()
     float stationAltitude = MainCore::instance()->getSettings().getLongitude();
 
     m_cesium->setPosition(QGeoCoordinate(stationLatitude, stationLongitude, stationAltitude));
-    m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
-    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
-    m_cesium->setBuildings(m_settings.m_buildings);
+    m_cesium->setDefaultImagery(effectiveImagery());
+    m_cesium->setTerrain(effectiveTerrain(), maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
+    m_cesium->setBuildings(effectiveBuildings());
+    m_cesium->setGooglePhotorealistic3DTiles(effectiveGoogleTiles());
     m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
     m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
     m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
@@ -2153,8 +2604,14 @@ void MapGUI::init3DMap()
     m_cesium->showMagDec(m_settings.m_displayMagDec);
     m_cesium->showMaidenheadGrid(m_settings.m_displayMaidenheadGrid);
 
-    m_cesium->setViewFirstPerson(m_settings.m_viewFirstPerson);
-    m_cesium->showPFD(m_settings.m_displayPFD);
+    m_cesium->setCameraMode(m_settings.m_cameraMode);
+    applyCockpitPanels();
+    sendPanelGeometry();
+    sendEFISState();
+    sendAirportsToND();
+    sendRMPState(true);
+    sendNavAidsToND();
+    applyAudioVolume();
 
     m_cesium->showLayer("rain", m_settings.m_displayRain);
     m_cesium->showLayer("clouds", m_settings.m_displayClouds);
@@ -2179,8 +2636,14 @@ void MapGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->displayNames->setChecked(m_settings.m_displayNames);
-    ui->viewFirstPerson->setChecked(m_settings.m_viewFirstPerson);
-    ui->displayPFD->setChecked(m_settings.m_displayPFD);
+    displayCameraMode();
+    ui->displayPFD->setChecked(m_settings.m_displayCockpitPanels);
+    m_displayPFDAction->setChecked(m_settings.m_displayPFD);
+    m_displayNDAction->setChecked(m_settings.m_displayND);
+    m_displayEFISAction->setChecked(m_settings.m_displayEFIS);
+    m_displayRMPAction->setChecked(m_settings.m_displayRMP);
+    m_displayDCDUAction->setChecked(m_settings.m_displayDCDU);
+    ui->muteAudio->setChecked(m_settings.m_audioMuted);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
     ui->displayAllGroundTracks->setChecked(m_settings.m_displayAllGroundTracks);
     ui->displayRain->setChecked(m_settings.m_displayRain);
@@ -2299,22 +2762,126 @@ void MapGUI::on_maidenhead_clicked()
     dialog.exec();
 }
 
-void MapGUI::on_viewFirstPerson_clicked(bool checked)
+// The camera mode button is a menu of the three mutually exclusive ways the camera can
+// follow the tracked object; the button's icon shows which one is in use
+void MapGUI::createCameraModeMenu()
 {
-    m_settings.m_viewFirstPerson = checked;
-    if (m_cesium) {
-        m_cesium->setViewFirstPerson(checked);
-    }
-    applySetting("viewFirstPerson");
+    QMenu *menu = new QMenu(ui->cameraMode);
+    QActionGroup *group = new QActionGroup(menu);
+
+    auto addMode = [this, menu, group](const QString& text, int mode) {
+        QAction *action = menu->addAction(text);
+        action->setCheckable(true);
+        action->setData(mode);
+        group->addAction(action);
+        connect(action, &QAction::triggered, this, [this, mode]() {
+            m_settings.m_cameraMode = mode;
+            displayCameraMode();
+            if (m_cesium) {
+                m_cesium->setCameraMode(mode);
+            }
+            applySetting("cameraMode");
+        });
+        return action;
+    };
+
+    addMode("Third person", MapSettings::ThirdPerson);
+    addMode("First person", MapSettings::FirstPerson);
+    addMode("Fly-by", MapSettings::FlyBy);
+
+    ui->cameraMode->setMenu(menu);
+    ui->cameraMode->setPopupMode(QToolButton::InstantPopup);
 }
 
-void MapGUI::on_displayPFD_clicked(bool checked)
+void MapGUI::displayCameraMode()
 {
-    m_settings.m_displayPFD = checked;
-    if (m_cesium) {
-        m_cesium->showPFD(checked);
+    QMenu *menu = ui->cameraMode->menu();
+    if (!menu) {
+        return;
     }
-    applySetting("viewFirstPerson");
+    for (QAction *action : menu->actions())
+    {
+        if (action->data().toInt() == m_settings.m_cameraMode) {
+            action->setChecked(true);
+        }
+    }
+    QString icon;
+    if (m_settings.m_cameraMode == MapSettings::FirstPerson) {
+        icon = ":/map/icons/firstperson.png";
+    } else if (m_settings.m_cameraMode == MapSettings::FlyBy) {
+        icon = ":/map/icons/flyby.png";
+    } else {
+        icon = ":/map/icons/thirdperson.png";
+    }
+    ui->cameraMode->setIcon(QIcon(icon));
+}
+
+// Show the cockpit panels selected in the toolbar button's menu, or hide them all
+// when the button itself is off - it is the master switch for the selection
+void MapGUI::applyCockpitPanels()
+{
+    if (!m_cesium) {
+        return;
+    }
+    const bool on = m_settings.m_displayCockpitPanels;
+    m_cesium->showPFD(on && m_settings.m_displayPFD);
+    m_cesium->showND(on && m_settings.m_displayND);
+    m_cesium->showEFIS(on && m_settings.m_displayEFIS);
+    m_cesium->showRMP(on && m_settings.m_displayRMP);
+    m_cesium->showDCDU(on && m_settings.m_displayDCDU);
+}
+
+// The PFD toolbar button is a switch with a menu: the menu's checkboxes choose which
+// cockpit panels are wanted, and the button turns that whole selection on or off
+void MapGUI::createCockpitPanelsMenu()
+{
+    QMenu *menu = new QMenu(ui->displayPFD);
+
+    auto addPanel = [this, menu](const QString& text, bool MapSettings::*flag, const char *key) {
+        QAction *action = menu->addAction(text);
+        action->setCheckable(true);
+        connect(action, &QAction::triggered, this, [this, flag, key](bool checked) {
+            m_settings.*flag = checked;
+            applyCockpitPanels();
+            applySetting(key);
+        });
+        return action;
+    };
+
+    m_displayPFDAction = addPanel("PFD", &MapSettings::m_displayPFD, "displayPFD");
+    m_displayNDAction = addPanel("ND", &MapSettings::m_displayND, "displayND");
+    m_displayEFISAction = addPanel("EFIS", &MapSettings::m_displayEFIS, "displayEFIS");
+    m_displayRMPAction = addPanel("RMP", &MapSettings::m_displayRMP, "displayRMP");
+    m_displayDCDUAction = addPanel("DCDU", &MapSettings::m_displayDCDU, "displayDCDU");
+
+    ui->displayPFD->setMenu(menu);
+    // Clicking the button toggles; the arrow section opens the menu
+    ui->displayPFD->setPopupMode(QToolButton::MenuButtonPopup);
+    connect(ui->displayPFD, &ButtonSwitch::toggled, this, [this](bool checked) {
+        m_settings.m_displayCockpitPanels = checked;
+        applyCockpitPanels();
+        applySetting("displayCockpitPanels");
+    });
+}
+
+// The configured volumes with the toolbar mute applied on top - muting sends zero
+// volumes to the page rather than changing the stored settings, so unmuting restores
+// exactly what the sliders say
+void MapGUI::applyAudioVolume()
+{
+    if (m_cesium)
+    {
+        m_cesium->setAudioVolume(
+            m_settings.m_audioMuted ? 0 : m_settings.m_mapItemSoundVolume,
+            m_settings.m_audioMuted ? 0 : m_settings.m_cockpitSoundVolume);
+    }
+}
+
+void MapGUI::on_muteAudio_clicked(bool checked)
+{
+    m_settings.m_audioMuted = checked;
+    applyAudioVolume();
+    applySetting("audioMuted");
 }
 
 void MapGUI::on_displayNames_clicked(bool checked)
@@ -2488,7 +3055,13 @@ void MapGUI::applyNASAGlobalImagerySettings()
     if ((index >= 0) && (m_nasaDataSets[index].m_legends.size() > 0))
     {
         m_legend = &m_nasaDataSets[index].m_legends[0];
-        m_nasaGlobalImagery.downloadLegend(*m_legend);
+        // Only when it is not the one already shown. This runs on every 3D settings
+        // apply as well as on a change of dataset, and re-fetching an unchanged legend
+        // costs a request to NASA and a re-parse to arrive at the same picture - which
+        // is why the warnings above arrived in twos.
+        if (m_legend->m_url != m_loadedLegendUrl) {
+            m_nasaGlobalImagery.downloadLegend(*m_legend);
+        }
         m_descriptionWidget->setHtml("");
         if (m_nasaMetaData.m_layers.contains(m_settings.m_nasaGlobalImageryIdentifier))
         {
@@ -2746,6 +3319,46 @@ QString MapGUI::cesiumIonAPIKey() const
         : m_settings.m_cesiumIonAPIKey;
 }
 
+// The effective* methods coerce settings that would consume Cesium Ion quota to
+// free alternatives when the user hasn't entered their own Cesium Ion API key.
+// The settings themselves are left untouched, so a preference saved in a preset
+// comes back as soon as a key is entered.
+
+QString MapGUI::effectiveImagery() const
+{
+    if (!m_settings.hasCesiumIonUserKey() && MapSettings::m_cesiumIonImagery.contains(m_settings.m_defaultImagery)) {
+        return "ArcGIS world imagery";
+    }
+    return m_settings.m_defaultImagery;
+}
+
+QString MapGUI::effectiveTerrain() const
+{
+    if (effectiveGoogleTiles()) { // Google 3D tiles include terrain
+        return "Ellipsoid";
+    }
+    if (!m_settings.hasCesiumIonUserKey() && MapSettings::m_cesiumIonTerrain.contains(m_settings.m_terrain)) {
+        return "Ellipsoid";
+    }
+    return m_settings.m_terrain;
+}
+
+QString MapGUI::effectiveBuildings() const
+{
+    if (effectiveGoogleTiles()) { // Google 3D tiles include buildings
+        return "None";
+    }
+    if (!m_settings.hasCesiumIonUserKey() && MapSettings::m_cesiumIonBuildings.contains(m_settings.m_buildings)) {
+        return "None";
+    }
+    return m_settings.m_buildings;
+}
+
+bool MapGUI::effectiveGoogleTiles() const
+{
+    return m_settings.m_googlePhotorealistic3DTiles && m_settings.hasCesiumIonUserKey();
+}
+
 void MapGUI::find(const QString& target)
 {
     if (!target.isEmpty())
@@ -2873,6 +3486,7 @@ void MapGUI::on_displaySettings_clicked()
     connect(&dialog, &MapSettingsDialog::navAidsUpdated, this, &MapGUI::navAidsUpdated);
     connect(&dialog, &MapSettingsDialog::airspacesUpdated, this, &MapGUI::airspacesUpdated);
     connect(&dialog, &MapSettingsDialog::airportsUpdated, this, &MapGUI::airportsUpdated);
+    connect(&dialog, &MapSettingsDialog::waypointsUpdated, this, &MapGUI::waypointsUpdated);
     new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -2882,7 +3496,11 @@ void MapGUI::on_displaySettings_clicked()
         displayToolbar();
         applyMap2DSettings(dialog.m_map2DSettingsChanged);
         applyMap3DSettings(dialog.m_map3DSettingsChanged);
+        sendRMPState(true); // The VHF channel assignments may have changed
         applySettings(dialog.m_settingsKeysChanged);
+        if (dialog.m_settingsKeysChanged.contains("msfsNavigraphDir")) {
+            addWaypoints();
+        }
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
         m_polygonMapModel.allUpdated();
@@ -2965,10 +3583,199 @@ void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
             QString url = obj.value("url").toString();
             linkClicked(url);
         }
+        else if (event == "rmpTune")
+        {
+            // The RMP made a standby frequency active: retune the linked AM Demod
+            const int vhf = obj.value("vhf").toInt();
+            const qint64 hz = (qint64) obj.value("frequency").toDouble();
+            const QString& channelId = (vhf == 2) ? m_settings.m_vhf2Channel : m_settings.m_vhf1Channel;
+            if (!rmpTune(channelId, hz)) {
+                qDebug() << "MapGUI::receivedCesiumEvent - Failed to tune" << channelId << "to" << hz;
+            }
+            sendRMPState(true);
+        }
+        else if (event == "panelClosed")
+        {
+            // A cockpit panel's close button: remember it as closed, and untick it in
+            // the toolbar's panel menu
+            const QString panel = obj.value("panel").toString();
+            bool MapSettings::*flag = nullptr;
+            QAction *action = nullptr;
+            QString key;
+            if (panel == "pfd") {
+                flag = &MapSettings::m_displayPFD; action = m_displayPFDAction; key = "displayPFD";
+            } else if (panel == "nd") {
+                flag = &MapSettings::m_displayND; action = m_displayNDAction; key = "displayND";
+            } else if (panel == "efis") {
+                flag = &MapSettings::m_displayEFIS; action = m_displayEFISAction; key = "displayEFIS";
+            } else if (panel == "rmp") {
+                flag = &MapSettings::m_displayRMP; action = m_displayRMPAction; key = "displayRMP";
+            } else if (panel == "dcdu") {
+                flag = &MapSettings::m_displayDCDU; action = m_displayDCDUAction; key = "displayDCDU";
+            }
+            if (flag)
+            {
+                m_settings.*flag = false;
+                if (action) {
+                    action->setChecked(false);
+                }
+                // The page has hidden it already, but the show command also clears the
+                // page's own enable - without it a new datalink message reopens the DCDU
+                applyCockpitPanels();
+                applySetting(key);
+            }
+        }
+        else if (event == "efisState")
+        {
+            // The EFIS knobs and pushbuttons were changed
+            QJsonObject state = obj;
+            state.remove("event");
+            m_settings.m_efisState = QString::fromUtf8(QJsonDocument(state).toJson(QJsonDocument::Compact));
+            applySetting("efisState");
+        }
+        else if (event == "panelGeometry")
+        {
+            // A cockpit panel was dragged or resized: remember where it was left
+            const QString panel = obj.value("panel").toString();
+            if (!panel.isEmpty())
+            {
+                QJsonObject panels = QJsonDocument::fromJson(m_settings.m_cockpitPanelGeometry.toUtf8()).object();
+                panels.insert(panel, QJsonObject {
+                    {"l", obj.value("left").toInt()},
+                    {"t", obj.value("top").toInt()},
+                    {"w", obj.value("width").toInt()},
+                    {"h", obj.value("height").toInt()}
+                });
+                m_settings.m_cockpitPanelGeometry = QString::fromUtf8(QJsonDocument(panels).toJson(QJsonDocument::Compact));
+                applySetting("cockpitPanelGeometry");
+            }
+        }
+        else if (event == "rmpStandby")
+        {
+            // Standby frequencies are kept here so they survive a restart
+            const int vhf = obj.value("vhf").toInt();
+            const int hz = (int) obj.value("frequency").toDouble();
+            if (vhf == 2) {
+                m_settings.m_vhf2Standby = hz;
+            } else {
+                m_settings.m_vhf1Standby = hz;
+            }
+            applySetting((vhf == 2) ? "vhf2Standby" : "vhf1Standby");
+        }
     }
     else
     {
         qDebug() << "MapGUI::receivedCesiumEvent - Unexpected event: " << obj;
+    }
+}
+
+// The absolute frequency an AM Demod is tuned to: the device centre plus the channel
+// offset. False when the channel id no longer resolves (the channel was removed, or was
+// never assigned)
+bool MapGUI::rmpReadActive(const QString& channelId, qint64& hz) const
+{
+    unsigned int deviceSet, channelIndex;
+    if (channelId.isEmpty() || !MainCore::getDeviceAndChannelIndexFromId(channelId, deviceSet, channelIndex)) {
+        return false;
+    }
+    double centerFrequency;
+    int offset;
+    if (!ChannelWebAPIUtils::getCenterFrequency(deviceSet, centerFrequency)
+        || !ChannelWebAPIUtils::getFrequencyOffset(deviceSet, channelIndex, offset)) {
+        return false;
+    }
+    hz = (qint64) centerFrequency + offset;
+    return true;
+}
+
+// Tune an AM Demod to an absolute frequency. As ADSBDemodGUI::setFrequency: the device is
+// retuned when the target is outside the usable 75% of its passband, or when the channel
+// would straddle DC, in which case the channel is parked just above DC. Unlike ADS-B the
+// channel's own "frequency" setting is also patched, as the AM Demod GUI's dial shows
+// that rather than the offset in its Airband and Medium Wave modes
+bool MapGUI::rmpTune(const QString& channelId, qint64 hz)
+{
+    unsigned int deviceSet, channelIndex;
+    if (channelId.isEmpty() || !MainCore::getDeviceAndChannelIndexFromId(channelId, deviceSet, channelIndex)) {
+        return false;
+    }
+
+    double rfBandwidth;
+    if (!ChannelWebAPIUtils::getChannelSetting(deviceSet, channelIndex, "rfBandwidth", rfBandwidth) || (rfBandwidth <= 0)) {
+        rfBandwidth = 20000.0;
+    }
+    const qint64 halfChannelBW = (qint64) (rfBandwidth / 2);
+    const qint64 dcOffset = halfChannelBW;
+
+    double centerFrequency;
+    int sampleRate;
+    if (!ChannelWebAPIUtils::getCenterFrequency(deviceSet, centerFrequency)
+        || !ChannelWebAPIUtils::getDevSampleRate(deviceSet, sampleRate)) {
+        return false;
+    }
+    const qint64 usable = (qint64) (sampleRate * 0.75); // Keep clear of the guard bands
+    const qint64 centre = (qint64) centerFrequency;
+    const qint64 offset = hz - centre;
+
+    if (   ((hz - halfChannelBW) < (centre - usable / 2))
+        || ((hz + halfChannelBW) >= (centre + usable / 2))
+        || (std::abs(offset) < halfChannelBW))
+    {
+        ChannelWebAPIUtils::setCenterFrequency(deviceSet, (double) (hz - dcOffset));
+        ChannelWebAPIUtils::setFrequencyOffset(deviceSet, channelIndex, (int) dcOffset);
+    }
+    else
+    {
+        ChannelWebAPIUtils::setFrequencyOffset(deviceSet, channelIndex, (int) offset);
+    }
+    ChannelWebAPIUtils::patchChannelSetting(deviceSet, channelIndex, "frequency", (double) hz);
+    return true;
+}
+
+// Set the EFIS controls to what they were left on. Always sent, even when nothing has
+// been saved: the page only starts reporting changes once it has been told
+void MapGUI::sendEFISState()
+{
+    if (!m_cesium) {
+        return;
+    }
+    m_cesium->setEFISState(QJsonDocument::fromJson(m_settings.m_efisState.toUtf8()).object());
+}
+
+// Put the cockpit panels back where they were left when SDRangel last closed
+void MapGUI::sendPanelGeometry()
+{
+    if (!m_cesium || m_settings.m_cockpitPanelGeometry.isEmpty()) {
+        return;
+    }
+    m_cesium->setPanelGeometry(QJsonDocument::fromJson(m_settings.m_cockpitPanelGeometry.toUtf8()).object());
+}
+
+// Tell the RMP panel what its two VHF channels are tuned to. With force false, only when
+// something has changed since the last send - this is called from a 1 s poll
+void MapGUI::sendRMPState(bool force)
+{
+    if (!m_cesium) {
+        return;
+    }
+    QJsonObject state;
+    const QString* channels[2] = { &m_settings.m_vhf1Channel, &m_settings.m_vhf2Channel };
+    const int standbys[2] = { m_settings.m_vhf1Standby, m_settings.m_vhf2Standby };
+    for (int i = 0; i < 2; i++)
+    {
+        qint64 active;
+        const bool available = rmpReadActive(*channels[i], active);
+        QJsonObject vhf {
+            {"available", available},
+            {"standby", standbys[i]},
+            {"active", available ? QJsonValue((double) active) : QJsonValue()}
+        };
+        state.insert(QString("vhf%1").arg(i + 1), vhf);
+    }
+    if (force || (state != m_rmpState))
+    {
+        m_rmpState = state;
+        m_cesium->setRMPState(state);
     }
 }
 
@@ -2994,6 +3801,30 @@ void MapGUI::linkClicked(const QString& url)
     {
         QString sdrangelServerURL = url.mid(18);
         openSDRangelServer(sdrangelServerURL, false);
+    }
+    else if (url.startsWith("sdrangel-aircraft://"))
+    {
+        // sdrangel-aircraft://<icao|registration|flight>/<value>, written into an
+        // aircraft's popup by whatever put the aircraft on the Map. The Map has no idea
+        // what an aircraft is, so it hands the whole thing to the Aircraft feature.
+        const QString rest = url.mid(20);
+        const int slash = rest.indexOf('/');
+        if (slash <= 0)
+        {
+            qWarning() << "MapGUI::linkClicked: malformed aircraft link" << url;
+            return;
+        }
+        const QString kind = rest.left(slash);
+        const QString value = QUrl::fromPercentEncoding(rest.mid(slash + 1).toUtf8());
+        if (kind == "icao") {
+            FeatureWebAPIUtils::aircraftSelect("selectIcao", value);
+        } else if (kind == "registration") {
+            FeatureWebAPIUtils::aircraftSelect("selectRegistration", value);
+        } else if (kind == "flight") {
+            FeatureWebAPIUtils::aircraftSelect("selectFlight", value);
+        } else {
+            qWarning() << "MapGUI::linkClicked: unknown aircraft link kind" << kind;
+        }
     }
 }
 
@@ -3060,6 +3891,7 @@ void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
     else
     {
         ui->splitter->addWidget(ui->web);
+        restoreSplitterState();
     }
 }
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -3099,6 +3931,10 @@ void MapGUI::preferenceChanged(int elementType)
             m_antennaMapItem.setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
             update(m_map, &m_antennaMapItem, "Station");
 
+            m_objectMapModel.setStationPosition(stationPosition);
+            m_imageMapModel.setStationPosition(stationPosition);
+            m_polygonMapModel.setStationPosition(stationPosition);
+            m_polylineMapModel.setStationPosition(stationPosition);
             m_objectMapFilter.setPosition(stationPosition);
             m_imageMapFilter.setPosition(stationPosition);
             m_polygonMapFilter.setPosition(stationPosition);
@@ -3132,8 +3968,7 @@ void MapGUI::preferenceChanged(int elementType)
 void MapGUI::makeUIConnections()
 {
     QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
-    QObject::connect(ui->viewFirstPerson, &ButtonSwitch::clicked, this, &MapGUI::on_viewFirstPerson_clicked);
-    QObject::connect(ui->displayPFD, &ButtonSwitch::clicked, this, &MapGUI::on_displayPFD_clicked);
+    QObject::connect(ui->muteAudio, &ButtonSwitch::clicked, this, &MapGUI::on_muteAudio_clicked);
     QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
     QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
     QObject::connect(ui->displayRain, &ButtonSwitch::clicked, this, &MapGUI::on_displayRain_clicked);

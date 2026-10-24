@@ -32,7 +32,6 @@
 #include "util/units.h"
 #include "maincore.h"
 
-#include "SWGMapItem.h"
 
 #ifdef _MSC_VER
 // For libacars/asn1/asn_system.h
@@ -65,13 +64,14 @@
 
 #include "acarsdemod.h"
 #include "acarsdemodworker.h"
-#include "acarstextformat.h"
+#include "util/acarstextformat.h"
 
 // Airport information used by AcarsMessage decoders (file-scope in
 // acarsmessage.cpp); initialised in startWork()
-extern QSharedPointer<const QHash<QString, AirportInformation *>> m_airportInfo;
 
 MESSAGE_CLASS_DEFINITION(AcarsDemodWorker::MsgConfigureWorker, Message)
+MESSAGE_CLASS_DEFINITION(AcarsDemodWorker::MsgReloadAircraftDatabase, Message)
+MESSAGE_CLASS_DEFINITION(AcarsDemodWorker::MsgReplayPacket, Message)
 
 // Convert CPDCL altitude in to feet
 static int cpdlcAltitude(FANSAltitude_t altitude)
@@ -159,9 +159,6 @@ void AcarsDemodWorker::startWork()
 {
     // Sockets must be created on the thread that uses them
     m_udpSocket = new QUdpSocket(this);
-    m_feedSocket = new QUdpSocket(this);
-    m_feedAirframesTcpSocket = new QTcpSocket(this);
-    m_feedAvdelphiTcpSocket = new QTcpSocket(this);
 
     m_reasmCtx = la_reasm_ctx_new();
 
@@ -176,11 +173,13 @@ void AcarsDemodWorker::startWork()
     // the failure mode is a corrupted hash or a double free rather than merely doing the
     // work twice. The base label hashes are initialised at file scope, so only these
     // additions need guarding.
+    // The airport table is shared with the Aircraft feature as well, so it has its own
+    // process wide guard in the library
+    acarsInitAirportInfo();
+
     static std::once_flag sharedDataInit;
     std::call_once(sharedDataInit, []()
     {
-        m_airportInfo = OurAirportsDB::getAirportsByIdent();
-
         // Add user-defined labels
         for (int i = '1'; i <= '4'; i++)
         {
@@ -257,7 +256,14 @@ bool AcarsDemodWorker::handleMessage(const Message& message)
     if (MainCore::MsgPacket::match(message))
     {
         MainCore::MsgPacket& report = (MainCore::MsgPacket&) message;
-        processPacket(report.getPacket(), report.getDateTime());
+
+        // VDL-2 sends a subclass carrying the aircraft's address from the AVLC header.
+        // Every other bearer sends the packet itself, and matches here just the same
+        quint32 icao = 0;
+        if (AcarsDemod::MsgAcarsPacket::match(message)) {
+            icao = ((AcarsDemod::MsgAcarsPacket&) message).getIcao();
+        }
+        processPacket(report.getPacket(), report.getDateTime(), icao);
 
         // Forward to APRS and other packet features
         QList<ObjectPipe*> packetsPipes;
@@ -266,6 +272,8 @@ bool AcarsDemodWorker::handleMessage(const Message& message)
         for (const auto& pipe : packetsPipes)
         {
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            // Deliberately sliced to the base: APRS and the other packet features want
+            // the bytes, not whatever the bearer happened to know as well
             MainCore::MsgPacket *msg = new MainCore::MsgPacket(report);
             messageQueue->push(msg);
         }
@@ -289,6 +297,12 @@ bool AcarsDemodWorker::handleMessage(const Message& message)
                 << "\n";
         }
 
+        return true;
+    }
+    else if (MsgReplayPacket::match(message))
+    {
+        const MsgReplayPacket& replay = (const MsgReplayPacket&) message;
+        processPacket(replay.getPacket(), replay.getDateTime(), 0, true);
         return true;
     }
     else if (AcarsDemod::MsgVdl2Frame::match(message))
@@ -315,6 +329,14 @@ bool AcarsDemodWorker::handleMessage(const Message& message)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
+    else if (MsgReloadAircraftDatabase::match(message))
+    {
+        // The tables were taken once at construction, so without this a database
+        // downloaded later never reached the registration lookups
+        m_aircraftInfo = OsnDB::getAircraftInformationByReg();
+        m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
+        return true;
+    }
     else if (DSPSignalNotification::match(message))
     {
         const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
@@ -329,10 +351,10 @@ bool AcarsDemodWorker::handleMessage(const Message& message)
 
 void AcarsDemodWorker::applySettings(const AcarsDemodSettings& settings, bool force)
 {
+    // Anything that rebuilds the receivers is a clean break in the stream, so a part
+    // captured before it must not be joined to one captured after
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
-        || (settings.m_mode != m_settings.m_mode)
-        || ((settings.m_mode == AcarsDemodSettings::Aero)
-            && (settings.m_aeroChannel != m_settings.m_aeroChannel))) {
+        || AcarsDemodSettings::rateChanged(settings, m_settings)) {
         resetReassembly();
     }
 
@@ -367,16 +389,12 @@ void AcarsDemodWorker::applySettings(const AcarsDemodSettings& settings, bool fo
     }
 
     m_settings = settings;
-
-    if (m_feedAirframesTcpSocket) {
-        updateFeedConnections();
-    }
 }
 
 // Process an ACARS message from any of the three modes
-void AcarsDemodWorker::processPacket(const QByteArray& packet, QDateTime dateTime)
+void AcarsDemodWorker::processPacket(const QByteArray& packet, QDateTime dateTime, quint32 icao, bool replay)
 {
-    processAcarsMessage(packet, dateTime);
+    processAcarsMessage(packet, dateTime, icao, replay);
 }
 
 // Whether anything is going to look at what we format.
@@ -498,7 +516,12 @@ static QDateTime oooiDateTime(const QDateTime& received, int day, const QTime& t
 //   NOTAM  a series beginning with an exclamation mark or the word NOTAM
 //   PIREP  UA/ or UUA/ followed by /OV
 //   SIGMET ICAO SIGMET|AIRMET n VALID
-static int classifyWeather(const QString& label, const QString& text,
+//
+// uplink says which way the message went, which is what separates a report from a request
+// for one: the ground sends the weather, the aircraft asks for it. It is only consulted
+// where the label alone is doing the work - a body that actually contains a METAR or a
+// PIREP is weather whichever way it was going, and a PIREP is a downlink by definition.
+static int classifyWeather(const QString& label, const QString& text, bool uplink,
                            QString& airport, QString& body)
 {
     static const QRegularExpression metarRe(
@@ -559,6 +582,14 @@ static int classifyWeather(const QString& label, const QString& text,
     // Nothing matched on content. The label still says what the message was FOR, so a
     // terminal weather report is kept as weather even when its body is a format we do
     // not parse - better an unclassified row than a missing one.
+    //
+    // Uplinks only. These labels name a weather SERVICE, and the aircraft's half of it is
+    // the request: a downlink on 5U is a list of airports and a report type, such as
+    // "EGKK LFPO LFBD LFBO-SA", which says nothing whatever about the weather and has no
+    // business in a table of weather reports.
+    if (!uplink) {
+        return AircraftReport::WeatherNone;
+    }
     if ((label == "AB") || (label == "BB")) {
         return AircraftReport::Twip;
     }
@@ -571,8 +602,31 @@ static int classifyWeather(const QString& label, const QString& text,
     return AircraftReport::WeatherNone;
 }
 
-void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime received)
+// Registrations are written inconsistently: the databases use the ICAO form with the
+// nationality mark separated (9H-VCP, G-EZTA), while an ACARS address field has no room
+// for punctuation and carries it run together (9HVCP, .G-EZTA pads with a dot instead).
+// Comparing the two forms directly reports every aircraft as a mismatch, so compare only
+// the letters and digits.
+static QString registrationKey(const QString& registration)
 {
+    QString key;
+    for (const QChar& c : registration)
+    {
+        if (c.isLetterOrNumber()) {
+            key.append(c.toUpper());
+        }
+    }
+    return key;
+}
+
+void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime received, quint32 icao, bool replay)
+{
+    // The demodulators never produce an empty block, but a .csv row whose Data column is
+    // empty or not hex does, and everything below indexes the last byte
+    if (messageBytes.isEmpty()) {
+        return;
+    }
+
     // FIXME: Occasionally last byte is ff instead of 7f - correct, otherwise libacars wont parse
     // Should be fixed in sink
     if (messageBytes[messageBytes.size()-1] == (char)0xff) {
@@ -612,6 +666,11 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     multipartPart.m_text = message->m_text;
     multipartPart.m_more = message->m_multiBlock;
 
+    // What the document ends up being rendered from. The block's own text unless the
+    // message turns out to be one of several, in which case it is the assembled whole -
+    // which is what gets decoded below.
+    QString documentSource = message->m_text;
+
     AcarsMultipartAssembler::Result multipart = m_multipartAssembler.add(multipartPart);
     if (multipart.m_assembly)
     {
@@ -619,7 +678,20 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         // Once complete, earlier table rows get the same decode through the assembly.
         if (multipart.m_assembly->m_status == AcarsMultipartAssembler::Complete)
         {
-            message->decode(multipart.m_assembly->m_combinedText);
+            // A single block is already decoded on exactly this text. Several are decoded
+            // afresh on the whole: decoding the same object a second time doubled every
+            // list a decoder appends to - the route sent to the Aircraft feature among them.
+            if (multipart.m_assembly->m_combinedText != message->m_text)
+            {
+                AcarsMessage *whole = AcarsMessage::decode(messageBytes, multipart.m_assembly->m_combinedText);
+                if (whole)
+                {
+                    whole->m_dateTime = received;
+                    messageOwner.reset(whole);
+                    message = whole;
+                }
+            }
+            documentSource = multipart.m_assembly->m_combinedText;
             if (hasGui()) {
                 multipart.m_assembly->m_decodedText = message->toString();
             }
@@ -631,7 +703,9 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         }
     }
 
-    feedMessage(*message);
+    if (!replay) {
+        feedMessage(messageBytes, received);
+    }
 
     AcarsRowEvent e;
     e.m_frameType = 0;
@@ -666,7 +740,9 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     {
         label.append('/');
         label.append(message->m_subLabel);
-        e.m_labelDecode = m_subLabels[message->m_subLabel];
+        // value(), never operator[]: these hashes are static and shared by every
+        // demodulator's worker thread, and operator[] inserts on a miss
+        e.m_labelDecode = m_subLabels.value(message->m_subLabel);
     }
     else
     {
@@ -687,7 +763,12 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         break;
     case AcarsDemodSettings::Aero:
         e.m_protocol = "Aero";
-        e.m_bitRate = AcarsAeroReceiver::submodeRate(m_settings.m_aeroChannel);
+        // submodeRate() is the Rate enum; bitRate() turns it in to bits per second
+        e.m_bitRate = AcarsAeroReceiver::bitRate(AcarsAeroReceiver::submodeRate(m_settings.m_aeroChannel));
+        break;
+    case AcarsDemodSettings::Iridium:
+        e.m_protocol = "Iridium";
+        e.m_bitRate = 50000;        // 25000 symbols/s of DQPSK, two bits each
         break;
     default:
         e.m_protocol = "ACARS";
@@ -700,7 +781,7 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     e.m_blockId = QString("%1").arg(message->m_blockId);
 
     e.m_originator = message->m_originator;
-    e.m_originatorDecode = m_originators[message->m_originator];
+    e.m_originatorDecode = m_originators.value(message->m_originator);
     e.m_messageNumber = message->m_messageNumber;
     e.m_blockSequence = message->m_blockSequence;
     e.m_flight = message->m_flight;
@@ -723,6 +804,34 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     if (!message->m_address.isEmpty() && (message->m_address != "Unidentified")
         && !message->m_address.startsWith("AC ") && !message->m_address.startsWith("GS ")) {
         report.m_registration = message->m_address;
+    }
+
+    // The address of the aircraft that sent this, where the bearer carried one. VDL-2
+    // does, in the AVLC header of the same frame, and without it an aircraft heard only
+    // on VDL-2 is known by registration alone - so it collates with its own ADS-B only
+    // when the registration happens to be in the OpenSky database.
+    if (icao)
+    {
+        report.m_icao = icao;
+
+        // Both halves of the identity arrived off air in the same frame, which is the
+        // only time we can check the database rather than trust it. A disagreement is
+        // logged rather than acted on: it means the database has this address against
+        // the wrong airframe, or the registration has been reassigned, and which of
+        // those it is cannot be told from one message.
+        if (!report.m_registration.isEmpty() && m_aircraftInfoByIcao
+            && m_aircraftInfoByIcao->contains((int) icao))
+        {
+            const QString known = m_aircraftInfoByIcao->value((int) icao)->m_registration;
+            if (!known.isEmpty()
+                && (registrationKey(known) != registrationKey(report.m_registration)))
+            {
+                qWarning() << "AcarsDemodWorker: registration mismatch - address"
+                           << QString("%1").arg(icao, 6, 16, QChar('0')).toUpper()
+                           << "transmitted" << report.m_registration
+                           << "but the database says" << known;
+            }
+        }
     }
 
     // Get UNIX time message was received
@@ -755,6 +864,7 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         la_config_set_int("acars_bearer", LA_ACARS_BEARER_HFDL);
         break;
     case AcarsDemodSettings::Aero:
+    case AcarsDemodSettings::Iridium:
         la_config_set_int("acars_bearer", LA_ACARS_BEARER_SATCOM);
         break;
     default:
@@ -951,16 +1061,58 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             report.m_weatherText = atis->m_atisInformation.isEmpty()
                                  ? message->m_text : atis->m_atisInformation;
         }
+        else if (AcarsMeteorologicalReport *met =
+                     dynamic_cast<AcarsMeteorologicalReport *>(message))
+        {
+            // The aircraft as a weather station. Unlike everything else on this tab it
+            // is not about an airport, so none is named - the observations carry their
+            // own positions.
+            report.m_weatherKind = AircraftReport::AirReport;
+            report.m_weatherText = met->toString();
+        }
+        else if (dynamic_cast<AcarsWeatherRequest *>(message))
+        {
+            // Decoded as a request outright, so there is nothing to classify: it names
+            // the airports it wants and the report type, and holds no weather at all.
+            // Kept as a document though - the airports a crew asks the weather for are
+            // often the alternates they are weighing up, which is said nowhere else.
+            report.m_documentKind = AircraftReport::WeatherRequest;
+            report.m_documentTitle = "Weather request";
+        }
         else
         {
             const int kind = classifyWeather(message->m_label, message->m_text,
-                                             wxAirport, wxBody);
+                                             message->m_uplink, wxAirport, wxBody);
             if (kind != AircraftReport::WeatherNone)
             {
                 report.m_weatherKind = kind;
                 report.m_weatherAirport = wxAirport;
                 report.m_weatherText = wxBody;
             }
+        }
+    }
+
+    // Categories that no decoder claims, classified by label alone. Only where nothing
+    // more specific already applied, so a label 80 operational report stays what it is.
+    if (report.m_documentKind == AircraftReport::NoDocument)
+    {
+        const QString label = message->m_label;
+        if (label == "5Z")
+        {
+            report.m_documentKind = AircraftReport::AirlineDownlink;
+            report.m_documentTitle = "Airline downlink";
+        }
+        else if (label == "99")
+        {
+            report.m_documentKind = AircraftReport::EmergencyMessage;
+            report.m_documentTitle = "Emergency message";
+        }
+        else if ((label.size() == 2) && (label[0] == '8')
+                 && (((label[1] >= '0') && (label[1] <= '9'))
+                     || ((label[1] >= 'A') && (label[1] <= 'F'))))
+        {
+            report.m_documentKind = AircraftReport::AircrewMessage;
+            report.m_documentTitle = "Aircrew message";
         }
     }
 
@@ -977,32 +1129,220 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         {
             dep = ev->m_departureAirport;
             arr = ev->m_arrivalAirport;
-            report.m_documentKind = AircraftReport::OooiEvent;
 
-            // Labels 13 to 16 are the four events proper; 17 and 18 are follow-up
-            // reports of the same ones and carry no new time
+            // Only when one of the four events was actually read. Set unconditionally,
+            // EVERY message on labels 13 to 18 became a document titled "OOOI" whether
+            // it was one or not - and most are not: of 134 so titled here, 92 were
+            // position reports carrying no OOOI time at all, which is what made the
+            // Documents tab claim OOOI for flights that had never sent one.
             if ((ev->m_event >= AircraftReport::OooiOut)
                 && (ev->m_event <= AircraftReport::OooiIn))
             {
+                report.m_documentKind = AircraftReport::OooiEvent;
                 report.m_oooiEvent = ev->m_event;
                 report.m_oooiTime = oooiDateTime(report.m_received, ev->m_day, ev->m_eventTime);
+            }
+        }
+        else if (AcarsMeteorologicalReport *met =
+                     dynamic_cast<AcarsMeteorologicalReport *>(message))
+        {
+            dep = met->m_departureAirport;
+            arr = met->m_arrivalAirport;
+            // The last observation is where the aircraft is now; the earlier ones are a
+            // log of where it has been, sometimes three quarters of an hour back
+            if (!met->m_observations.isEmpty())
+            {
+                const AcarsMeteorologicalReport::Observation& last = met->m_observations.last();
+                report.m_positionValid = true;
+                report.m_latitude = last.m_latitude;
+                report.m_longitude = last.m_longitude;
+                report.m_altitudeValid = true;
+                report.m_altitudeFt = last.m_altitudeFt;
             }
         }
         else if (AcarsPositionReport *pr = dynamic_cast<AcarsPositionReport *>(message))
         {
             dep = pr->m_departureAirport;
             arr = pr->m_arrivalAirport;
+            // Altitude travels with the position below, through getPosition(), so a
+            // report that gives an altitude and NO position - the cruise report is one -
+            // would otherwise have it dropped
+            if (!pr->m_positionValid && (pr->m_altitudeFt > 0))
+            {
+                report.m_altitudeValid = true;
+                report.m_altitudeFt = pr->m_altitudeFt;
+            }
+        }
+        // The ARINC 620 four character movement reports on labels QP, QQ, QR, QS and QT.
+        // Every one of these was decoded and then dropped: only the three character form
+        // below had a branch, so 37 aircraft sent an off report here and not one of them
+        // ever showed an Off time.
+        //
+        // Unlike that three character form these name the airports in four character
+        // ICAO, which is what everything downstream works in, so the route is taken too.
+        //
+        // No day is carried, so the time is resolved against when the message arrived.
+        else if (AcarsOutReport *out = dynamic_cast<AcarsOutReport *>(message))
+        {
+            dep = out->m_departure;
+            arr = out->m_destination;
+            report.m_documentKind = AircraftReport::OooiEvent;
+            report.m_oooiEvent = AircraftReport::OooiOut;
+            report.m_oooiTime = oooiDateTime(report.m_received, -1,
+                QTime(out->m_outTimeHours, out->m_outTimeMinutes));
+        }
+        else if (AcarsOffReport *off = dynamic_cast<AcarsOffReport *>(message))
+        {
+            dep = off->m_departure;
+            arr = off->m_destination;
+            report.m_documentKind = AircraftReport::OooiEvent;
+            report.m_oooiEvent = AircraftReport::OooiOff;
+            report.m_oooiTime = oooiDateTime(report.m_received, -1,
+                QTime(off->m_offTimeHours, off->m_offTimeMinutes));
+        }
+        else if (AcarsOnReport *on = dynamic_cast<AcarsOnReport *>(message))
+        {
+            dep = on->m_departure;
+            arr = on->m_destination;
+            report.m_documentKind = AircraftReport::OooiEvent;
+            report.m_oooiEvent = AircraftReport::OooiOn;
+            report.m_oooiTime = oooiDateTime(report.m_received, -1,
+                QTime(on->m_onTimeHours, on->m_onTimeMinutes));
+        }
+        else if (AcarsInReport *in = dynamic_cast<AcarsInReport *>(message))
+        {
+            dep = in->m_departure;
+            arr = in->m_destination;
+            report.m_documentKind = AircraftReport::OooiEvent;
+            report.m_oooiEvent = AircraftReport::OooiIn;
+            report.m_oooiTime = oooiDateTime(report.m_received, -1,
+                QTime(in->m_inTimeHours, in->m_inTimeMinutes));
+        }
+        else if (AcarsOutReturnInReport *returned =
+                     dynamic_cast<AcarsOutReturnInReport *>(message))
+        {
+            // Out and back to the gate without flying. The return is what ends the
+            // movement, so that is the time recorded - as the QG case does below.
+            dep = returned->m_departure;
+            arr = returned->m_destination;
+            report.m_documentKind = AircraftReport::OooiEvent;
+            report.m_oooiEvent = AircraftReport::OooiIn;
+            report.m_oooiTime = oooiDateTime(report.m_received, -1,
+                QTime(returned->m_returnInTimeHours, returned->m_returnInTimeMinutes));
+        }
+        else if (AcarsShortOooiReport *oooi = dynamic_cast<AcarsShortOooiReport *>(message))
+        {
+            report.m_documentKind = AircraftReport::OooiEvent;
+            if (oooi->m_event != AircraftReport::OooiNone)
+            {
+                report.m_oooiEvent = oooi->m_event;
+                // QG reports leaving the gate and coming back to it; the return is the
+                // one that ends the movement, so that is the time recorded
+                const QTime when = ((oooi->m_label == "QG") && oooi->m_secondTime.isValid())
+                                 ? oooi->m_secondTime : oooi->m_time;
+                // No day is given, so it is resolved against when the message arrived
+                report.m_oooiTime = oooiDateTime(report.m_received, -1, when);
+            }
+            // The station and destination are deliberately NOT taken as the departure
+            // and arrival airports: these reports use three character IATA codes, and
+            // everything downstream - the route drawing, the airport lookups, the
+            // From and To columns - is four character ICAO. A three letter code put
+            // there would be shown as an airport and resolved as none.
         }
         else if (AcarsOpsReport *ops = dynamic_cast<AcarsOpsReport *>(message))
         {
             dep = ops->m_departureAirport;
             arr = ops->m_arrivalAirport;
         }
+        else if (AcarsRequestOceanicClearance *rcl =
+                     dynamic_cast<AcarsRequestOceanicClearance *>(message))
+        {
+            // "KLM701-OMOKO/2109 M083F320" - the entry point the crew asked for, when
+            // they expect to reach it, and the Mach and level they want to cross at.
+            // No route is filed from it: this is a request, and the fixes either side
+            // of the entry point are not in it.
+            (void) rcl;
+            report.m_documentKind = AircraftReport::ClearanceRequest;
+            report.m_documentTitle = "Oceanic clearance request";
+        }
+        else if (AcarsRequestATISReport *atisRequest =
+                     dynamic_cast<AcarsRequestATISReport *>(message))
+        {
+            (void) atisRequest;
+            report.m_documentKind = AircraftReport::AtisRequest;
+            report.m_documentTitle = "ATIS request";
+        }
+        else if (AcarsDepartureClearanceResponse *pdc =
+                     dynamic_cast<AcarsDepartureClearanceResponse *>(message))
+        {
+            // Nothing used to read this class at all, so a departure clearance told the
+            // Aircraft feature nothing - not where the flight was going, not which
+            // procedure it was cleared on. It was decoded and then only ever displayed.
+            //
+            // Filed as a flight plan rather than as a clearance: the tracker keeps oceanic
+            // clearances under that name and draws them as such, and this is the route the
+            // aircraft is cleared to fly from departure, which is the same thing as its
+            // plan. The plain language dialects carry a route; the two coded ones give
+            // the procedure and nothing to draw, which is enough on its own to file.
+            //
+            // A refusal - "NO DEPARTURE CLEARANCE MESSAGE ON FILE" - is still a clearance
+            // response and still worth showing, but it names nothing, so filing it would
+            // put an empty flight plan document over a real one.
+            if (pdc->m_clearanceAvailable)
+            {
+                dep = pdc->m_departureAirport;
+                arr = pdc->m_destination;
+                route = pdc->m_route;
+                report.m_routeSid = pdc->m_sid;
+                report.m_routeRunway = pdc->m_runway;
+                if (pdc->m_initialAltitudeFt > 0) {
+                    report.m_routeFlightLevel = pdc->m_initialAltitudeFt / 100;
+                }
+                report.m_documentKind = AircraftReport::DepartureClearance;
+                report.m_documentTitle = "Pre-departure clearance";
+            }
+        }
+        else if (AcarsLoadsheet *sheet = dynamic_cast<AcarsLoadsheet *>(message))
+        {
+            // A loadsheet writes its route in three letter IATA - VLC LHR - and everything
+            // downstream is four letter ICAO, so it is translated rather than passed on.
+            // Worth having because a loadsheet is often the ONLY message that says where a
+            // flight is going: it is sent on the ground before departure, when there is no
+            // position report and no filed plan to be heard yet.
+            auto icao = [](const QString& iata)
+            {
+                if (iata.size() != 3) {
+                    return QString();
+                }
+                QSharedPointer<const QHash<QString, AirportInformation *>> airports =
+                    OurAirportsDB::getAirportsByIata();
+                const AirportInformation *airport =
+                    airports ? airports->value(iata, nullptr) : nullptr;
+                return airport ? airport->m_ident : QString();
+            };
+            dep = icao(sheet->m_from);
+            arr = icao(sheet->m_to);
+        }
         else if (AcarsMessageFromSubsystem *sub = dynamic_cast<AcarsMessageFromSubsystem *>(message))
         {
             dep = sub->m_fpnDeparture;
             arr = sub->m_fpnArrival;
+            report.m_flightAlias = sub->m_icaoCallsign;
             route = sub->m_fpnRoute;
+            report.m_routeRunway = sub->m_fpnRunway;
+            report.m_routeSid = sub->m_fpnSid;
+            report.m_routeStar = sub->m_fpnStar;
+            report.m_routeApproach = sub->m_fpnApproach;
+            report.m_routeAlternate = sub->m_fpnAlternate;
+            // The level the plan is flown at, which is the same thing to the Map as the
+            // level an oceanic clearance clears an aircraft to - it is what the route's
+            // fixes are drawn at. Stamping it on the message's own waypoint list is not
+            // enough: most position reports name their route as a string and carry no
+            // waypoint list at all, so nothing reached the feature and the line was drawn
+            // along the ground.
+            if (sub->m_cruiseLevelValid) {
+                report.m_routeFlightLevel = sub->m_cruiseLevelFt / 100;
+            }
             for (const auto& waypoint : sub->m_fpnWaypoints)
             {
                 AircraftReport::RouteWaypoint point;
@@ -1010,9 +1350,17 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
                 point.m_positionValid = waypoint.m_hasPosition;
                 point.m_latitude = waypoint.m_latitude;
                 point.m_longitude = waypoint.m_longitude;
+                point.m_hasAltitude = waypoint.m_hasAltitude;
+                point.m_altitudeFt = waypoint.m_altitudeFt;
+                point.m_hasEta = waypoint.m_hasEta;
+                point.m_eta = waypoint.m_eta;
                 report.m_routeWaypoints.append(point);
             }
-            if (!route.isEmpty())
+            // The arrival end of a plan names no waypoints at all - only the STAR and
+            // the approach - so testing the route alone dropped it, and the plan could
+            // never be assembled from its parts
+            if (!route.isEmpty() || !report.m_routeSid.isEmpty() || !report.m_routeStar.isEmpty()
+                || !report.m_routeApproach.isEmpty())
             {
                 report.m_documentKind = AircraftReport::FlightPlan;
                 report.m_documentTitle = "Flight plan";
@@ -1022,6 +1370,8 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         {
             arr = ocr->m_destination;
             route = QStringList({ocr->m_entryPoint, ocr->m_route}).join(" ").trimmed();
+            report.m_routeFlightLevel = ocr->m_flightLevel;
+            report.m_routeMach = ocr->m_mach;
             report.m_documentKind = AircraftReport::Clearance;
             report.m_documentTitle = "Oceanic clearance readback";
         }
@@ -1029,6 +1379,8 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
         {
             arr = oc->m_destination;
             route = QStringList({oc->m_entryPoint, oc->m_route}).join(" ").trimmed();
+            report.m_routeFlightLevel = oc->m_flightLevel;
+            report.m_routeMach = oc->m_mach;
             report.m_documentKind = AircraftReport::Clearance;
             report.m_documentTitle = "Oceanic clearance";
         }
@@ -1077,6 +1429,16 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     if (report.m_documentText.isEmpty()) {
         report.m_documentText = message->m_text;
     }
+    // Kept so the document can be rendered again later rather than stored as finished
+    // text. Only where OUR parser produced it: libacars decodes the FANS-1/A and media
+    // advisory traffic, and that decoder is not reachable from the Aircraft feature, so
+    // those documents stay as they were rendered.
+    if (!e.m_useLibacars)
+    {
+        report.m_documentRaw = messageBytes;
+        report.m_documentSource = documentSource;
+        report.m_documentDerivable = true;
+    }
     if (!report.m_registration.isEmpty() || !report.m_flight.isEmpty()) {
         sendAircraftReport(report);
     }
@@ -1117,161 +1479,39 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
     }
 }
 
-// Feed a received ACARS message to the enabled aggregators, as one acarsdec-style
-// JSON object per UDP datagram - the format both airframes.io (port 5550) and
-// avdelphi.com (vdlm2dec JSON, port 5556) ingest. Messages from all three modes
-// pass through here, since VDL-2 and HFDL ACARS arrive on the same path.
-void AcarsDemodWorker::feedMessage(const AcarsMessage& message)
+// Hand a received ACARS block, exactly as it came off the air, to whatever is listening
+// on the "acarsfeed" pipe.
+//
+// Raw rather than decoded, and per block rather than per reassembled message, so that the
+// archive on the other side can be decoded again by a later decoder - see
+// MainCore::MsgAcarsBlock. Everything that used to be built here, the acarsdec style JSON
+// the aggregators ingest included, is built on that side now: the parser lives in the
+// library rather than in this plugin, so the feature can do it, and doing it there means
+// the feed is set up once for a station rather than once per demodulator.
+//
+// Blocks from all three bearers pass through here, since VDL-2 and HFDL ACARS arrive on
+// the same path.
+void AcarsDemodWorker::feedMessage(const QByteArray& block, const QDateTime& received)
 {
-    if (!m_settings.m_feedEnabled) {
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_acarsDemod, "acarsfeed", pipes);
+
+    if (pipes.isEmpty()) {
         return;
     }
 
-    QJsonObject json;
-    json.insert("timestamp", message.m_dateTime.toMSecsSinceEpoch() / 1000.0);
-    if (!m_settings.m_feedStationId.isEmpty()) {
-        json.insert("station_id", m_settings.m_feedStationId);
-    }
-    json.insert("channel", 0);
-    json.insert("freq", (m_centerFrequency + m_settings.m_inputFrequencyOffset) / 1e6);
-    json.insert("level", CalcDb::dbPower(m_acarsDemod->getMagSq()));
-    json.insert("error", 0);
-    json.insert("mode", message.m_mode);
-    json.insert("label", message.m_label);
-    json.insert("block_id", QString(message.m_blockId));
-    if ((message.m_ack == QChar(ASCII_NAK)) || message.m_ack.isNull()) {
-        json.insert("ack", false);
-    } else {
-        json.insert("ack", QString(message.m_ack));
-    }
-    json.insert("tail", message.m_address);
-    if (!message.m_flight.isEmpty()) {
-        json.insert("flight", message.m_flight);
-    }
-    QString msgNo = message.m_originator + message.m_messageNumber + message.m_blockSequence;
-    if (!msgNo.isEmpty()) {
-        json.insert("msgno", msgNo);
-    }
-    json.insert("text", message.m_text);
-    json.insert("end", !message.m_multiBlock);
-    // Identify the client, as the standalone decoders do - aggregators use this to
-    // recognise the source
-    QJsonObject app;
-    app.insert("name", "SDRangel");
-    app.insert("ver", QCoreApplication::applicationVersion());
-    json.insert("app", app);
+    const qint64 frequency = m_centerFrequency + m_settings.m_inputFrequencyOffset;
+    const double level = CalcDb::dbPower(m_acarsDemod->getMagSq());
+    // The protocol the block actually came off, stamped in stream order - see
+    // AcarsDemod::MsgProtocolChange. m_settings can already be on the next mode.
+    const int protocol = (int) AcarsDemodSettings::protocolForMode(m_protocolMode);
 
-    QByteArray datagram = QJsonDocument(json).toJson(QJsonDocument::Compact);
-    datagram.append('\n');
-
-    // UDP: host names are resolved once and cached; the cache invalidates when the
-    // setting changes, so a blocking DNS lookup happens at most once per host
-    auto sendUdp = [this, &datagram](const QString& host, int port, QHostAddress& cache, QString& cachedHost)
+    for (const auto& pipe : pipes)
     {
-        if (host.isEmpty()) {
-            return;
-        }
-        if (host != cachedHost)
-        {
-            cachedHost = host;
-            cache = QHostAddress(host);
-            if (cache.isNull())
-            {
-                QHostInfo info = QHostInfo::fromName(host);
-                cache = info.addresses().isEmpty() ? QHostAddress() : info.addresses().first();
-                if (cache.isNull()) {
-                    qWarning() << "AcarsDemodWorker: feed cannot resolve host" << host;
-                } else {
-                    qDebug() << "AcarsDemodWorker: feed sending UDP to" << host
-                             << "(" << cache.toString() << ") :" << port;
-                }
-            }
-        }
-        if (!cache.isNull()) {
-            m_feedSocket->writeDatagram(datagram, cache, port);
-        }
-    };
-
-    // TCP, as the airframes.io station wizard assigns: a newline-delimited JSON
-    // stream, exactly what vdlm2dec/acarsdec write in their -j network modes. The
-    // connection is made on demand and re-made after a drop or a settings change;
-    // a message arriving while unconnected starts the connect and is itself
-    // dropped, which matches how the standalone feeder clients behave.
-    auto sendTcp = [&datagram](QTcpSocket& socket, const QString& host, int port, const QString& service)
-    {
-        if (host.isEmpty()) {
-            return;
-        }
-        bool wrongPeer = (socket.peerName() != host) || (socket.peerPort() != port);
-        if ((socket.state() == QAbstractSocket::ConnectedState) && !wrongPeer)
-        {
-            qint64 written = socket.write(datagram);
-            qDebug() << "AcarsDemodWorker: feed sent" << written << "bytes to" << service;
-        }
-        else if ((socket.state() == QAbstractSocket::UnconnectedState) || wrongPeer)
-        {
-            qDebug() << "AcarsDemodWorker: feed not connected to" << service
-                     << "- reconnecting, message dropped";
-            socket.abort();
-            socket.connectToHost(host, port);
-        }
-        else
-        {
-            qDebug() << "AcarsDemodWorker: feed still connecting to" << service
-                     << "(state" << socket.state() << ") - message dropped";
-        }
-    };
-
-    if (m_settings.m_feedAirframes)
-    {
-        if (m_settings.m_feedAirframesTcp) {
-            sendTcp(*m_feedAirframesTcpSocket, m_settings.m_feedAirframesHost,
-                m_settings.m_feedAirframesPort, "airframes.io");
-        } else {
-            sendUdp(m_settings.m_feedAirframesHost, m_settings.m_feedAirframesPort,
-                m_feedAirframesAddr, m_feedAirframesResolvedHost);
-        }
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        messageQueue->push(MainCore::MsgAcarsBlock::create(
+            m_acarsDemod, block, received, frequency, level, protocol));
     }
-    if (m_settings.m_feedAvdelphi)
-    {
-        if (m_settings.m_feedAvdelphiTcp) {
-            sendTcp(*m_feedAvdelphiTcpSocket, m_settings.m_feedAvdelphiHost,
-                m_settings.m_feedAvdelphiPort, "avdelphi.com");
-        } else {
-            sendUdp(m_settings.m_feedAvdelphiHost, m_settings.m_feedAvdelphiPort,
-                m_feedAvdelphiAddr, m_feedAvdelphiResolvedHost);
-        }
-    }
-}
-
-// Open (or close) the aggregator connections to match the settings. Connections are
-// also re-made on demand when a message needs sending, but connecting eagerly here
-// means enabling the feed gives immediate feedback in the log rather than silently
-// waiting for the first ACARS message.
-void AcarsDemodWorker::updateFeedConnections()
-{
-    auto update = [this](QTcpSocket& socket, bool enabled, bool tcp, const QString& host, int port)
-    {
-        bool want = m_settings.m_feedEnabled && enabled && tcp && !host.isEmpty();
-        bool wrongPeer = (socket.peerName() != host) || (socket.peerPort() != port);
-        if (want)
-        {
-            if ((socket.state() == QAbstractSocket::UnconnectedState) || wrongPeer)
-            {
-                qDebug() << "AcarsDemodWorker: feed connecting to" << host << ":" << port;
-                socket.abort();
-                socket.connectToHost(host, port);
-            }
-        }
-        else if (socket.state() != QAbstractSocket::UnconnectedState)
-        {
-            socket.abort();
-        }
-    };
-    update(*m_feedAirframesTcpSocket, m_settings.m_feedAirframes, m_settings.m_feedAirframesTcp,
-        m_settings.m_feedAirframesHost, m_settings.m_feedAirframesPort);
-    update(*m_feedAvdelphiTcpSocket, m_settings.m_feedAvdelphi, m_settings.m_feedAvdelphiTcp,
-        m_settings.m_feedAvdelphiHost, m_settings.m_feedAvdelphiPort);
 }
 
 // Send one sighting of an aircraft to any Aircraft features listening on the
@@ -1286,7 +1526,7 @@ void AcarsDemodWorker::sendAircraftReport(AircraftReport& report)
         return;
     }
 
-    report.m_protocol = AcarsDemodSettings::protocolForMode(m_settings.m_mode);
+    report.m_protocol = AcarsDemodSettings::protocolForMode(m_protocolMode);   // As in feedMessage
     report.m_frequency = m_centerFrequency + m_settings.m_inputFrequencyOffset;
     report.m_deviceSetIndex = m_acarsDemod->getDeviceSetIndex();
     report.m_channelIndex = m_acarsDemod->getIndexInDeviceSet();
@@ -1295,33 +1535,6 @@ void AcarsDemodWorker::sendAircraftReport(AircraftReport& report)
     {
         MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
         messageQueue->push(MainCore::MsgAircraftReport::create(m_acarsDemod, report));
-    }
-}
-
-// Ground stations (HFDL squitters, VDL-2 GSIFs) go straight to the Map as fixed
-// antennas; aircraft go via the Aircraft feature
-void AcarsDemodWorker::sendGroundStationToMap(const QString& name, float latitude, float longitude, const QString& text, QDateTime dateTime)
-{
-    QList<ObjectPipe*> mapPipes;
-    MainCore::instance()->getMessagePipes().getMessagePipes(m_acarsDemod, "mapitems", mapPipes);
-
-    for (const auto& pipe : mapPipes)
-    {
-        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-        swgMapItem->setName(new QString(name));
-        swgMapItem->setLatitude(latitude);
-        swgMapItem->setLongitude(longitude);
-        swgMapItem->setAltitude(0.0f);
-        swgMapItem->setPositionDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
-        swgMapItem->setFixedPosition(true);
-        // The Map feature's antenna icon, as used for its own beacons
-        swgMapItem->setImage(new QString(QString("qrc:///map/map/antenna.png")));
-        swgMapItem->setText(new QString(text));
-        swgMapItem->setLabel(new QString(name));
-        swgMapItem->setOrientation(0);
-        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_acarsDemod, swgMapItem);
-        messageQueue->push(msg);
     }
 }
 
@@ -1378,7 +1591,6 @@ QHash<QString, QString> AcarsDemodWorker::m_labels = {
     {"AD", "Expected taxi clearance"},
     {"AE", "Unassigned"},
     {"AF", "CPC command response"},
-    {"AF", "Unassigned"},
     // B0-BZ ATS (Air Traffic Service) Messages - see ARINC 623
     {"B1", "Request Oceanic clearance"},
     {"B2", "Oceanic clearance readback"},
@@ -1492,7 +1704,7 @@ QHash<QString, QString> AcarsDemodWorker::m_subLabels = {
     {"EC", "Engine display system"},
     {"EI", "Engine indicating system"},
     {"F1", "Electronic flight bag #1"},
-    {"F1", "Electronic flight bag #2"},
+    {"F2", "Electronic flight bag #2"},
     {"H1", "HF data radio, left"},
     {"H2", "HF data radio, right"},
     {"HD", "HF data radio, selected"},
@@ -1763,7 +1975,10 @@ void AcarsDemodWorker::processVdl2Frame(const AcarsVdl2Receiver::Frame& frame, Q
         {
             e.m_textDecode = QString(atn.m_decoded).replace('\n', "; ");
             e.m_fullDecode = atn.m_decoded;
-            e.m_viewDecodeHtml = acarsDecodeToHtml(atn.m_decoded);
+            // Only the decode view reads the HTML
+            if (hasGui()) {
+                e.m_viewDecodeHtml = acarsDecodeToHtml(atn.m_decoded);
+            }
         }
         // Left blank for CPDLC messages with no message data (e.g. an ACSE release
         // wrapping an empty PDU)
@@ -1804,6 +2019,12 @@ void AcarsDemodWorker::processVdl2Frame(const AcarsVdl2Receiver::Frame& frame, Q
         else if (type == "XID")
         {
             report.m_documentKind = AircraftReport::Logon;
+            // Only from the aircraft: a ground station's XID describes the ground
+            // station, and an uplink carrying this parameter would not be stating where
+            // THIS aircraft is going.
+            if (frame.m_fromAircraft && !atn.m_destinationAirport.isEmpty()) {
+                report.m_arrival = atn.m_destinationAirport;
+            }
         }
     }
     else if (frame.m_infoLength > 0)
@@ -2340,7 +2561,10 @@ void AcarsDemodWorker::processHfdlFrame(const AcarsHfdlReceiver::Frame& frame, Q
     // The column keeps the single semicolon-separated line; the decode view and the
     // Map popup get the multi-line form
     e.m_fullDecode = QString(decode).replace("; ", "\n");
-    e.m_viewDecodeHtml = acarsDecodeToHtml(e.m_fullDecode);
+    // Only the decode view reads the HTML
+    if (hasGui()) {
+        e.m_viewDecodeHtml = acarsDecodeToHtml(e.m_fullDecode);
+    }
 
     QByteArray bytes((const char *) frame.m_bytes.data(), (int) frame.m_bytes.size());
     e.m_hex = bytes.toHex();

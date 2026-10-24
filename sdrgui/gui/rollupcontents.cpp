@@ -141,13 +141,28 @@ int RollupContents::arrangeRollups()
 
     // We use minimumSizeHint for auto-calculated width, so
     // minimumWidth can be set by user in .ui file
-    m_minimumSizeHint.setHeight(pos);
-    m_minimumSizeHint.setWidth(minWidthHint);
+    // A layout request that changes nothing has to stay free: anything updating a
+    // widget in a rollup, such as a QLabel showing a live value, invalidates the
+    // layout on every change, and that arrives here several times a second. Track
+    // whether this pass actually alters anything, so the propagation below can be
+    // skipped when it does not
+    bool changed = false;
+    const QSize newMinimumSizeHint(minWidthHint, pos);
+
+    if (newMinimumSizeHint != m_minimumSizeHint)
+    {
+        m_minimumSizeHint = newMinimumSizeHint;
+        changed = true;
+    }
 
     // However, we need to set minimumHeight, as the value in the .ui
     // files is typically set as the minimum height for when widget is unrolled
     // but when rolled-up, we want it to be smaller
-    setMinimumHeight(pos);
+    if (minimumHeight() != pos)
+    {
+        setMinimumHeight(pos);
+        changed = true;
+    }
 
     // Split extra space equally between widgets
     // If there's a remainder, we give it to the first widget
@@ -178,8 +193,6 @@ int RollupContents::arrangeRollups()
 
             if (!r->isHidden())
             {
-                r->move(2, pos + 3);
-
                 int h = 0;
                 if (r->hasHeightForWidth()) {
                     h = r->heightForWidth(width() - 4);
@@ -193,18 +206,32 @@ int RollupContents::arrangeRollups()
                     firstExtra = 0;
                 }
 
-                r->resize(width() - 4, h);
+                const QRect target(2, pos + 3, width() - 4, h);
+
+                if (r->geometry() != target)
+                {
+                    r->setGeometry(target);
+                    changed = true;
+                }
                 pos += r->height() + 5;
             }
         }
     }
 
-    if (expandingChildren == 0) {
-        setMaximumHeight(pos);
-    } else {
-        setMaximumHeight(16777215);
+    const int newMaximumHeight = (expandingChildren == 0) ? pos : 16777215;
+
+    if (maximumHeight() != newMaximumHeight)
+    {
+        setMaximumHeight(newMaximumHeight);
+        changed = true;
     }
-    updateGeometry();
+
+    // updateGeometry() posts a layout request to the parent, which comes back here, so
+    // calling it unconditionally turns one live value update into a repeating relayout
+    // of the whole channel window
+    if (changed) {
+        updateGeometry();
+    }
     return pos;
 }
 

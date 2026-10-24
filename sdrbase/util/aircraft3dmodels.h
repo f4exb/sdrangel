@@ -22,6 +22,9 @@
 #include <QStringList>
 #include <QHash>
 #include <QList>
+#include <QSet>
+#include <QMutex>
+#include <QElapsedTimer>
 #include <QRegularExpression>
 
 #include "export.h"
@@ -115,27 +118,93 @@ public:
     QString modelForTypeAndOperator(const QString &type, const QString &operatorICAO,
                                     bool verbose = false) const;
 
-    // Where a type's model has to sit so its undercarriage is not underground
-    void offsetsForType(const QString &type, float &altitudeOffset, float &labelOffset) const;
+    // Where a type's model has to sit so its undercarriage is not underground. The model
+    // matters as well as the type: the two model sets put the origin in different places
+    void offsetsForType(const QString &type, float &altitudeOffset, float &labelOffset,
+                        const QString &model = QString()) const;
 
     bool isEmpty() const { return m_3DModelsByType.isEmpty(); }
+
+    // Whether a model path, as modelFor() returns it, is one of the models installed
+    // now. A model chosen in an earlier session - and kept, as the Aircraft feature
+    // keeps them in its database - may since have been removed with its model pack
+    bool isInstalled(const QString &model) const { return m_installedModels.contains(model); }
+
+    // A cheaper model of the same aircraft and livery, for the 3D map to draw it with
+    // when it is only a few dozen pixels across. Empty when there is none: only the
+    // MSFS models converted with a second level of detail have one
+    QString lowDetailModel(const QString &model) const { return m_lowDetailModels.value(model); }
 
     // A stand-in for an aircraft the matcher has no model for. Only a fraction of the
     // types that fly have a model, so without this a Falcon 900, a King Air or anything
     // else outside the set shows as a flat billboard next to fully modelled airliners.
+    // With knownTypesOnly, false for a type it has no shape group for - so a caller that
+    // has something better to go on, such as an ADS-B emitter category, can use that
     bool defaultModel(const QString &icaoType, QString &model,
-                      float &altitudeOffset, float &labelOffset) const;
+                      float &altitudeOffset, float &labelOffset,
+                      bool knownTypesOnly = false) const;
 
     static QString dataDir();
 
+    // The 2D livery icon name for a model. The icons are named after the Bluebell
+    // models, <type>_<operator>; the models converted from FSLTL/MSFS are named
+    // FSLTL_<type>_<operator>_cesium, so neither the prefix nor the suffix belongs
+    // in an icon name and both are taken off
+    static QString liveryIconName(const QString &model);
+
+    // Whether a model has a named animation, so an animation is only asked for from a
+    // model that can play it. The models differ: 111 of the 183 A320 liveries have no
+    // engine animation and 72 do, and the category stand-ins have only some of the set.
+    // Read from the model's own glTF the first time a model is asked about, and
+    // remembered on disk, so each model is parsed once per machine rather than once per
+    // session - and never at start up, where reading 1,758 files would be felt.
+    // Unknown - no such file, or unreadable - answers true: asking is harmless, as the
+    // map declines what a model lacks, where wrongly suppressing is not.
+    bool hasAnimation(const QString &model, const QString &animation) const;
+
+    // Whether every texture a model refers to is installed. Some liveries in the model
+    // pack name an image that was never shipped, and Cesium draws nothing for such a
+    // model, so it is passed over when a model is chosen and the type's other liveries
+    // are used instead. Read from the glTF alongside the animations, and remembered
+    // the same way. Unknown answers true, as hasAnimation() does.
+    bool hasTextures(const QString &model) const;
+
 private:
+
+    // What is read from a model's own glTF: only worth having once, so kept on disk
+    struct ModelInfo {
+        bool readable = false;      // False for a model that could not be read
+        bool textures = true;
+        QSet<QString> animations;
+    };
+
     Aircraft3DModels(bool verbose);
     ~Aircraft3DModels();
 
+    ModelInfo modelInfo(const QString &model) const;
+    void loadModelInfoCache() const;
+    void saveModelInfoCache() const;
+    static QString modelInfoCachePath();
+
+    // Built on demand, from whichever worker thread asks first - hence mutable, and the
+    // mutex. Entries are stamped with the file's size and modification time, so a
+    // replaced model pack is re-read rather than trusted.
+    mutable QMutex m_modelInfoMutex;
+    mutable bool m_modelInfoLoaded = false;
+    mutable QHash<QString, ModelInfo> m_modelInfo;        // Model path to what its glTF says
+    mutable QHash<QString, QString> m_modelInfoStamp;     // Model path to the size/mtime it was read at    
+    mutable QHash<QString, qint64> m_modelInfoCheckedMs;  // When each model was last stat()ed.
+    mutable QElapsedTimer m_modelInfoClock;
+    static constexpr qint64 m_modelInfoRecheckMs = 30000;
+    mutable QSet<QString> m_unreadableModels;             // Not persisted: tried again next session
+
     QHash<QString, QString> m_3DModels;             // "TYPE_LIVERY" to model path
     QHash<QString, QStringList> m_3DModelsByType;   // Type to every livery of it
+    QHash<QString, QString> m_lowDetailModels;      // Model path to its low detail sibling
+    QSet<QString> m_installedModels;                // Every model path found
     QList<ModelMatch *> m_3DModelMatch;             // Database names to type designators
     QHash<QString, float> m_modelAltitudeOffset;
+    QHash<QString, float> m_msfsModelAltitudeOffset;    // For the models in MSFS/
     QHash<QString, float> m_labelAltitudeOffset;
 };
 
