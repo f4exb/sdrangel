@@ -1351,7 +1351,7 @@ private:
                 runSymbolLoop(tau0, available, preSymbols);
                 m_bitsConsumed = 0;
 
-                if (decodeSoftBits(tau0, available, preSymbols, true))
+                if (decodeSoftBits(available, preSymbols, true))
                 {
                     m_stats.m_timingTries += oi + 1;
                     if (m_suppressCorrection && m_repairAvailable) {
@@ -1386,7 +1386,7 @@ private:
                 runSymbolLoop(tau0, available, preSymbols);
                 m_bitsConsumed = 0;
 
-                if (decodeSoftBits(tau0, available, preSymbols, true))
+                if (decodeSoftBits(available, preSymbols, true))
                 {
                     m_reconstructInProgress = false;
                     m_stats.m_impulseReconstructRecovered++;
@@ -1782,7 +1782,7 @@ private:
         return accepted;
     }
 
-    bool decodeSoftBits(double tau0, int available, int preSymbols, bool allowReacquire)
+    bool decodeSoftBits(int available, int preSymbols, bool allowReacquire)
     {
         // Bit sync then character sync: '+' with odd parity, '*', SYN, SYN, each LSB first.
         // ARINC 618 section 4.2.2 says the + and * are there "to enable bit ambiguity
@@ -1858,7 +1858,7 @@ private:
                 m_stats.m_syncReacquired++;
                 runSymbolLoop(anchoredTau, available, preSymbols);
                 m_bitsConsumed = 0;
-                return decodeSoftBits(anchoredTau, available, preSymbols, false);
+                return decodeSoftBits(available, preSymbols, false);
             }
         }
 

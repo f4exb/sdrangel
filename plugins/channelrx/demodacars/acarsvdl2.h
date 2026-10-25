@@ -79,7 +79,7 @@
 // What an AVLC frame type abbreviation means, for the table's Label Decode column. The
 // abbreviations are the ones ISO 13239 and the VDL Mode 2 SARPs use, and are what appears
 // in the Label column.
-static const char *avlcFrameTypeName(const char *type)
+inline const char *avlcFrameTypeName(const char *type)
 {
     if (!type) {
         return "";

@@ -36,6 +36,7 @@
 #include "acarsaero.h"
 #include "acarsiridium.h"
 #include "acarsiridiumscanner.h"
+#include "acarsiridiumfftengine.h"
 
 #define ACARSDEMOD_CHANNEL_SAMPLE_RATE ACARSOQPSK_CHANNEL_SAMPLE_RATE
 
@@ -142,6 +143,9 @@ private:
     AcarsHfdlReceiver m_hfdlReceiver;
     AcarsAeroReceiver m_aeroReceiver;
     AcarsIridiumScanner m_iridiumScanner;
+    //!< SDRangel's FFT behind the channelizer, which is much faster than the one the
+    //!< scanner carries for the sake of the offline harnesses
+    AcarsIridiumFftEngine m_iridiumTransform;
     int m_iridiumChannels;      //!< What the scanner is currently configured for
 
     //!< Scanning the whole band decodes a dozen frames a second, so none of them are

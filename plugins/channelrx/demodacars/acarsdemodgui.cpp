@@ -70,14 +70,11 @@
 
 
 
-// Decode text conventions: the full decode is plain multi-line text with
-// "Label: value" lines. The Message Decode COLUMN shows it flattened to one
-// semicolon-separated line so more fits; the decode VIEW and Map popups show it
-// multi-line, with the label before each colon bolded.
-
-static QString decodeToColumn(const QString& decode) { return acarsDecodeToColumn(decode); }
-static QString decodeToPlain(const QString& decode) { return acarsDecodeToPlain(decode); }
-static QString decodeToHtml(const QString& plain) { return acarsDecodeToHtml(plain); }
+// Decode text conventions, as acarsDecodeToColumn, acarsDecodeToPlain and
+// acarsDecodeToHtml in util/acarstextformat.h apply them: the full decode is plain
+// multi-line text with "Label: value" lines. The Message Decode COLUMN shows it
+// flattened to one semicolon-separated line so more fits; the decode VIEW and Map
+// popups show it multi-line, with the label before each colon bolded.
 
 
 // ARINC 620-8 DATALINK GROUND SYSTEM STANDAR AND INTERFACE SPECIFICATION

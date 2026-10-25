@@ -263,6 +263,7 @@ void AcarsDemodSink::processOneSample(Complex &ci)
 
         if (channels != m_iridiumChannels)
         {
+            m_iridiumScanner.setTransform(&m_iridiumTransform);
             m_iridiumScanner.configure(channels);
             m_iridiumChannels = channels;
             m_iridiumCarrierCount = 0;

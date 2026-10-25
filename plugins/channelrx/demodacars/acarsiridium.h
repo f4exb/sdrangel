@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "acarsiridiumfft.h"
+#include "acarsiridiumdetector.h"
 
 // Iridium L band burst receiver, physical layer.
 //
@@ -140,6 +141,16 @@ public:
         std::vector<uint8_t> m_frameBits;
     };
 
+    // Detection thresholds, as ratios against the noise floor. The end one is lower than
+    // the start one so a fade within a burst does not chop it in two. Public because
+    // AcarsIridiumDetectorBank applies the same test across a bank of channels and has
+    // to be given the same numbers
+    static constexpr double StartThreshold = 8.0;
+    static constexpr double EndThreshold = 3.0;
+    static const int StartSamples = 8;
+    static const int EndSamples = 16;
+    static const int PreTriggerLength = 16;
+
     AcarsIridiumReceiver()
     {
         designRrc();
@@ -156,7 +167,7 @@ public:
         m_belowCount = 0;
         m_aboveCount = 0;
         m_smoothedPower = 0.0;
-        m_preTrigger.assign(m_preTriggerLength, Cd(0.0, 0.0));
+        m_preTrigger.assign(PreTriggerLength, Cd(0.0, 0.0));
         m_preTriggerWrite = 0;
         m_preTriggerCount = 0;
         m_burstSamples.clear();
@@ -204,11 +215,11 @@ public:
                 m_noiseFloor += (m_smoothedPower - m_noiseFloor) * 0.0001;
             }
 
-            if (m_smoothedPower > (m_noiseFloor * m_startThreshold))
+            if (m_smoothedPower > (m_noiseFloor * StartThreshold))
             {
                 m_aboveCount++;
 
-                if (m_aboveCount >= m_startSamples)
+                if (m_aboveCount >= StartSamples)
                 {
                     m_inBurst = true;
                     m_belowCount = 0;
@@ -220,8 +231,8 @@ public:
                     // Oldest first, which with a ring is wherever the next write would go
                     for (int i = 0; i < m_preTriggerCount; i++)
                     {
-                        const int index = (m_preTriggerWrite + m_preTriggerLength - m_preTriggerCount + i)
-                                        % m_preTriggerLength;
+                        const int index = (m_preTriggerWrite + PreTriggerLength - m_preTriggerCount + i)
+                                        % PreTriggerLength;
 
                         m_burstSamples.push_back(m_preTrigger[index]);
                     }
@@ -236,11 +247,11 @@ public:
         {
             m_burstSamples.push_back(sample);
 
-            if (m_smoothedPower < (m_noiseFloor * m_endThreshold))
+            if (m_smoothedPower < (m_noiseFloor * EndThreshold))
             {
                 m_belowCount++;
 
-                if (m_belowCount >= m_endSamples)
+                if (m_belowCount >= EndSamples)
                 {
                     endBurst();
                     m_inBurst = false;
@@ -265,15 +276,56 @@ public:
         }
 
         m_preTrigger[m_preTriggerWrite] = sample;
-        m_preTriggerWrite = (m_preTriggerWrite + 1) % m_preTriggerLength;
+        m_preTriggerWrite = (m_preTriggerWrite + 1) % PreTriggerLength;
 
-        if (m_preTriggerCount < m_preTriggerLength) {
+        if (m_preTriggerCount < PreTriggerLength) {
             m_preTriggerCount++;
         }
 
         m_sampleIndex++;
 
         return !m_bursts.empty();
+    }
+
+    // Burst handling driven by AcarsIridiumDetectorBank, which holds the detection
+    // state for a whole bank of channels instead of one receiver at a time. These do the
+    // same things, in the same order, as the branches of processSample() above - that
+    // path stays for a receiver watching a single channel, and for the tests
+
+    //! Begins a burst. The caller then seeds burstSamples() with the pre-trigger history
+    void beginBurst(qint64 burstStart)
+    {
+        m_burstStart = burstStart;
+        m_burstSamples.clear();
+    }
+
+    //! The samples this burst is made of, so the bank can seed it with the history it
+    //! holds rather than this keeping a ring of its own
+    std::vector<Cd>& burstSamples() { return m_burstSamples; }
+
+    //! Takes one more sample. Returns true when the burst has outgrown anything a burst
+    //! can be, which means something is transmitting continuously rather than in bursts
+    bool appendBurst(const Cd& sample)
+    {
+        m_burstSamples.push_back(sample);
+
+        if ((int) m_burstSamples.size() > (ACARSIRIDIUM_MAX_BURST_SYMBOLS * ACARSIRIDIUM_SAMPLES_PER_SYMBOL))
+        {
+            m_burstSamples.clear();
+            m_rejectedCount++;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    //! Decodes what has been collected. The noise floor comes from the bank, because
+    //! that is what tracked it, and the burst's signal to noise is measured against it
+    void finishBurst(double noiseFloor)
+    {
+        m_noiseFloor = noiseFloor;
+        endBurst();
     }
 
     bool hasBurst() const { return !m_bursts.empty(); }
@@ -816,13 +868,6 @@ private:
         m_burstSamples.clear();
     }
 
-    // Detection thresholds, as ratios against the noise floor. The end one is lower than
-    // the start one so a fade within a burst does not chop it in two
-    const double m_startThreshold = 8.0;
-    const double m_endThreshold = 3.0;
-    const int m_startSamples = 8;
-    const int m_endSamples = 16;
-    const int m_preTriggerLength = 16;
 
     std::vector<double> m_rrc;
     AcarsIridiumFft m_fft;

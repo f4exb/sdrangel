@@ -352,7 +352,7 @@ QString mirrorInsetPortholes(QJsonObject *root, QVector<QByteArray> *buffers)
             for (qint64 i = 0; i < count; i++)
             {
                 if (type == ComponentUnsignedByte) {
-                    indices[i] = static_cast<quint8>(elements[i]);
+                    indices[i] = static_cast<quint8>(elements.constData()[i]);
                 } else if (type == ComponentUnsignedShort) {
                     quint16 v;
                     std::memcpy(&v, elements.constData() + i * 2, 2);

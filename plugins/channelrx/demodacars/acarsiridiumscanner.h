@@ -31,6 +31,7 @@
 #include "acarsiridium.h"
 #include "acarsiridiumframe.h"
 #include "acarsiridiumchannelizer.h"
+#include "acarsiridiumdetector.h"
 
 // Watches the whole Iridium band at once.
 //
@@ -98,6 +99,13 @@ public:
         m_decimation = m_channelizer.decimation();
         m_receivers.clear();
         m_receivers.resize(channels);
+        m_detector.configure(channels,
+                             AcarsIridiumReceiver::StartThreshold,
+                             AcarsIridiumReceiver::EndThreshold,
+                             AcarsIridiumReceiver::StartSamples,
+                             AcarsIridiumReceiver::EndSamples,
+                             AcarsIridiumReceiver::PreTriggerLength);
+        m_changes.clear();
         m_pending.clear();
         m_detections.clear();
         m_sampleIndex = 0;
@@ -108,6 +116,10 @@ public:
         m_messageCount = 0;
         m_acarsCount = 0;
     }
+
+    //! Puts a different transform behind the channelizer. Must be called before
+    //! configure, and the caller keeps ownership
+    void setTransform(AcarsIridiumTransform *transform) { m_channelizer.setTransform(transform); }
 
     int channels() const { return m_channels; }
     double inputRate() const { return m_inputRate; }
@@ -123,11 +135,29 @@ public:
 
         const std::vector<Cd>& channelSamples = m_channelizer.channelSamples();
 
-        for (int c = 0; c < m_channels; c++)
+        // Detection for every channel in one pass over arrays rather than a receiver at
+        // a time - see the note on AcarsIridiumDetectorBank
+        m_changes.clear();
+        m_detector.processBlock(channelSamples.data(), m_changes,
+            [this](int channel, const Cd& sample) {
+                return m_receivers[channel].appendBurst(sample);
+            },
+            [this](int channel, qint64 burstStart) -> std::vector<Cd>& {
+                m_receivers[channel].beginBurst(burstStart);
+                return m_receivers[channel].burstSamples();
+            });
+
+        for (size_t i = 0; i < m_changes.size(); i++)
         {
-            if (!m_receivers[c].processSample(channelSamples[c])) {
+            const AcarsIridiumDetectorBank::Change& change = m_changes[i];
+            const int c = change.m_channel;
+
+            // A start has already been dealt with, inside the block
+            if (change.m_event == AcarsIridiumDetectorBank::Started) {
                 continue;
             }
+
+            m_receivers[c].finishBurst(m_detector.noiseFloor(c));
 
             while (m_receivers[c].hasBurst())
             {
@@ -142,7 +172,7 @@ public:
                 candidate.m_channel = c;
                 candidate.m_frequency = m_channelizer.channelOffset(c, m_inputRate)
                                       + burst.m_frequencyOffset;
-                // The receiver counts in its own channel samples
+                // The detector counts in channel samples
                 candidate.m_sampleIndex = burst.m_sampleIndex * m_decimation;
                 candidate.m_detectedAt = m_sampleIndex;
                 m_pending.push_back(candidate);
@@ -297,6 +327,8 @@ private:
     qint64 m_sampleIndex;
 
     AcarsIridiumChannelizer m_channelizer;
+    AcarsIridiumDetectorBank m_detector;
+    std::vector<AcarsIridiumDetectorBank::Change> m_changes;
     std::vector<AcarsIridiumReceiver> m_receivers;
     AcarsIridiumFrameDecoder m_decoder;
     AcarsIridiumReassembler m_reassembler;
