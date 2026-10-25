@@ -3,7 +3,6 @@ project(map)
 set(map_SOURCES
     map.cpp
     mapsettings.cpp
-    mapviewcoordinator.cpp
     mapplugin.cpp
     mapwebapiadapter.cpp
     osmtemplateserver.cpp
@@ -14,7 +13,6 @@ set(map_SOURCES
 set(map_HEADERS
     map.h
     mapsettings.h
-    mapviewcoordinator.h
     mapplugin.h
     mapreport.h
     mapwebapiadapter.h
@@ -84,6 +82,7 @@ if(NOT SERVER_MODE)
         mapitem.cpp
         mapwebsocketserver.cpp
         maptileserver.cpp
+        mapviewcoordinator.cpp
         cesiuminterface.cpp
         czml.cpp
         map.qrc
@@ -105,6 +104,7 @@ if(NOT SERVER_MODE)
         mapitem.h
         mapwebsocketserver.h
         maptileserver.h
+        mapviewcoordinator.h
         cesiuminterface.h
         czml.h
     )
