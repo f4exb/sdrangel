@@ -20,6 +20,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <QDebug>
 
 #include "util/profiler.h"
 
@@ -1179,6 +1180,19 @@ int Receiver::decodeLDPC(FEC& fec, LDPC& ldpc, int batch, int nbBlocks, DemapScr
 void Receiver::analyseBlock(FEC& fec, int block, const uint8_t *packed)
 {
     if (block >= (int) fec.m_analysisCells.size()) {
+        return;
+    }
+
+    switch (fec.m_constellation)
+    {
+    case Constellation::QPSK:
+    case Constellation::QAM16:
+    case Constellation::QAM64:
+    case Constellation::QAM256:
+        break;
+    default:
+        qWarning() << "Receiver::analyseBlock: Invalid constellation"
+                   << static_cast<int>(fec.m_constellation);
         return;
     }
 

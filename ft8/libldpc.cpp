@@ -409,7 +409,7 @@ void LDPC::gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], i
     {
         if (m[row][row] != 1)
         {
-            for (int row1 = row + 1; row1 < cols; row1++)
+            for (int row1 = row + 1; row1 < rows; row1++)
             {
                 if (m[row1][row] == 1)
                 {
@@ -436,7 +436,7 @@ void LDPC::gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], i
         // lazy creation of identity matrix in the upper-right quarter
         m[row][rows + row] = (m[row][rows + row] + 1) % 2;
         // now eliminate
-        for (int row1 = 0; row1 < cols; row1++)
+        for (int row1 = 0; row1 < rows; row1++)
         {
             if (row1 == row)
                 continue;

@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <QDebug>
 
 #include "dvbtinner.h"
 
@@ -88,6 +89,18 @@ float InnerDecoder::normalisation(Constellation constellation, Hierarchy hierarc
 
 void InnerDecoder::configure(Mode mode, Constellation constellation, CodeRate codeRate, Hierarchy hierarchy, bool lowPriority)
 {
+    switch (constellation)
+    {
+    case Constellation::QPSK:
+    case Constellation::QAM16:
+    case Constellation::QAM64:
+        break;
+    default:
+        qWarning() << "InnerDecoder::configure: Invalid constellation"
+                   << static_cast<int>(constellation);
+        return;
+    }
+
     const Tables& tables = Tables::get(mode);
 
     m_mode = mode;

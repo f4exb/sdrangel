@@ -26,6 +26,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <QDebug>
+
 #include "dvbt2fec.h"
 #include "dvbt2ldpc.h"
 
@@ -728,6 +730,19 @@ const int *CellMapper::demuxTable(CodeRate rate, Constellation constellation, FE
 
 void cellBitMap(FECType type, CodeRate rate, Constellation constellation, std::vector<int>& map)
 {
+    switch (constellation)
+    {
+    case Constellation::QPSK:
+    case Constellation::QAM16:
+    case Constellation::QAM64:
+    case Constellation::QAM256:
+        break;
+    default:
+        qWarning() << "cellBitMap: Invalid constellation" << static_cast<int>(constellation);
+        map.clear();
+        return;
+    }
+
     const int n = nldpc(type);
     const int k = kldpc(type, rate);
     const int qldpc = (n - k) / 360;
