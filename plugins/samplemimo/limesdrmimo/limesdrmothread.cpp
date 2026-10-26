@@ -25,7 +25,9 @@ LimeSDRMOThread::LimeSDRMOThread(lms_stream_t* stream0, lms_stream_t* stream1, Q
     m_running(false),
     m_stream0(stream0),
     m_stream1(stream1),
-    m_sampleFifo(nullptr)
+    m_buf(nullptr),
+    m_sampleFifo(nullptr),
+    m_log2Interp(0)
 {
     qDebug("LimeSDRMOThread::LimeSDRMOThread");
     m_buf = new qint16[2*DeviceLimeSDR::blockSize*2];
