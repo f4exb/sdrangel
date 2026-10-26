@@ -6193,6 +6193,11 @@ void MCPTools::registerIntentTools()
             return result;
         });
 
+    QJsonObject gainValuesList = prop("array", "For a device type this does not know: the gain values to try, in the key's own units, lowest first");
+    QJsonObject gainValuesItems;
+    gainValuesItems["type"] = "number";
+    gainValuesList["items"] = gainValuesItems;
+
     add("tune_gain",
         "Find the receiver gain that gives the best signal to noise ratio and apply it: steps the device through its gain range "
         "and at each step measures the noise floor and the strongest signal on the main spectrum. Too little gain leaves weak "
@@ -6212,7 +6217,7 @@ void MCPTools::registerIntentTools()
             {"apply", prop("boolean", "Apply the chosen gain. false measures and reports but puts the gain back as it was. Default true")},
             {"autoscale", prop("boolean", "Once the chosen gain is applied, set the main spectrum's reference level and range from what it then shows, as spectrum_action autoscale does, so the display suits the new gain. Default true")},
             {"gainKey", strProp("For a device type this does not know: the settings key of its gain, from describe_settings. Then give values too")},
-            {"values", prop("array", "For a device type this does not know: the gain values to try, in the key's own units, lowest first")},
+            {"values", gainValuesList},
             {"agcKey", strProp("For a device type this does not know: the settings key that turns its AGC off when set to 0")}
         }, {"deviceSetIndex"}),
         [this](const QJsonObject& args) { return tuneGain(args); });
