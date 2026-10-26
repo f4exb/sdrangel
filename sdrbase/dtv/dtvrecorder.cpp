@@ -27,6 +27,8 @@ DTVRecorder::DTVRecorder() :
     m_mode(Multiplex),
     m_serviceId(0),
     m_started(false),
+    m_patSections(),
+    m_pmtSections(),
     m_transportStreamId(-1),
     m_pmtPid(-1),
     m_pmtVersion(-1),
