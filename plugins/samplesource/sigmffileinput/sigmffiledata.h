@@ -93,7 +93,14 @@ public:
     unsigned int m_nbCaptures;
     unsigned int m_nbAnnotations;
 
-    SigMFFileMetaInfo()
+    SigMFFileMetaInfo() :
+        m_totalSamples(0),
+        m_totalTimeMs(0),
+        m_coreSampleRate(0.0),
+        m_offset(0),
+        m_rxBits(0),
+        m_nbCaptures(0),
+        m_nbAnnotations(0)
     {}
 
     SigMFFileMetaInfo(const SigMFFileMetaInfo& other) :
