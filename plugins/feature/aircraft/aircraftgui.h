@@ -146,8 +146,10 @@ private:
     static const int CHART_SERIES = AircraftReport::ProtocolCount + 1;
     QChart *m_chart = nullptr;
     QDateTimeAxis *m_chartXAxis = nullptr;
-    QValueAxis *m_chartYAxis = nullptr;
+    QValueAxis *m_chartYAxis = nullptr;     // Every protocol but ADS-B
+    QValueAxis *m_chartADSBYAxis = nullptr; // ADS-B and the total, which it dominates
     QLineSeries *m_chartSeries[CHART_SERIES];
+    bool m_chartYZoomed = false;            // The y axes stop fitting the data once zoomed
 
     // Flight profile chart, from the tracker's profile snapshots
     QChart *m_profileChart = nullptr;
@@ -166,6 +168,8 @@ private:
 
     explicit AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~AircraftGUI();
+
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
@@ -206,6 +210,11 @@ private:
     void selectFlightById(quint64 flightId);
     void selectAircraft(quint64 aircraftId);
     void plotChart();
+    static bool onADSBAxis(int series);
+    void fitChartYAxes();
+    void resetChartZoom();
+    void zoomChart(QWheelEvent *event);
+    void showInSplitter(QWidget *widget);
     void plotProfileChart();
     void watchFlight(quint64 flightId, const QString& title);
     void updatePhoto(const QString& registration, quint32 icao);

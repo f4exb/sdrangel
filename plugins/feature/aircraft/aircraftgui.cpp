@@ -40,6 +40,9 @@
 #include <QTableWidgetItem>
 #include <QSet>
 #include <QUrl>
+#include <QTimer>
+#include <QWheelEvent>
+#include <QMouseEvent>
 #ifdef QT_TEXTTOSPEECH_FOUND
 #include <QTextToSpeech>
 #endif
@@ -108,6 +111,32 @@ static void addColumnMenu(QTableView *view, int columns)
         {
             menu->popup(view->horizontalHeader()->viewport()->mapToGlobal(pos));
         });
+}
+
+// A width for a column that fits both the sample - the widest thing it is likely to show -
+// and its own heading, whichever is wider. A column narrower than its title reads as
+// truncated even when the data fits, and several numeric columns (Alt, Hdg, Spd) have
+// headings wider than their values.
+// A sorted column draws a sort arrow in its header, and the header lays that out BESIDE
+// the text rather than over it - so a width that only just fits the text hid the text
+// itself the moment the column was sorted on. The style knows how big the arrow is;
+// asking it is better than picking a number that is wrong on another theme.
+static int columnWidthFor(const QTableView *view, int column, const QString& sample)
+{
+    const QHeaderView *header = view->horizontalHeader();
+    const int sortArrow = header->style()->pixelMetric(QStyle::PM_HeaderMarkSize, nullptr, header)
+                        + 2 * header->style()->pixelMetric(QStyle::PM_HeaderMargin, nullptr, header);
+    const QString heading = view->model()->headerData(column, Qt::Horizontal).toString();
+    const int text = std::max(view->fontMetrics().horizontalAdvance(sample),
+                              header->fontMetrics().horizontalAdvance(heading));
+    return text + 12 + sortArrow;
+}
+
+// The widest a date and time gets in a given format: two digit day and month, and a time
+// late in the day so a 12 hour locale shows two digit hours too
+static QString dateTimeSample(const QString& format)
+{
+    return QDateTime(QDate(2026, 12, 28), QTime(23, 59, 59)).toString(format);
 }
 
 // Settings saved before that guard existed can still have everything hidden, so recover
@@ -500,8 +529,10 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     ui->photo->setVisible(false);
     ui->flightDetails->setVisible(false);
 
-    // Charts
+    // Charts. Wheel events and double clicks reach the view's viewport, in the
+    // coordinates the plot area is in.
     plotChart();
+    ui->chart->viewport()->installEventFilter(this);
     plotProfileChart();
 
     // Reuse the ADS-B demodulator's control tower icon (its resources are
@@ -824,61 +855,64 @@ void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
 
 void AircraftGUI::setDefaultColumnWidths()
 {
-
-    const QFontMetrics fm(font());
-    // A sorted column draws a sort arrow in its header, and the header lays that out
-    // BESIDE the text rather than over it - so a width that only just fits the text hid
-    // the text itself the moment the column was sorted on. The style knows how big the
-    // arrow is; asking it is better than picking a number that is wrong on another theme.
-    QHeaderView *anyHeader = ui->flights->horizontalHeader();
-    const int sortArrow = style()->pixelMetric(QStyle::PM_HeaderMarkSize, nullptr, anyHeader)
-                        + 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, nullptr, anyHeader);
-    auto width = [&fm, sortArrow](const char *sample) {
-        return fm.horizontalAdvance(sample) + 12 + sortArrow;
+    auto set = [](QTableView *view, int column, const QString& sample) {
+        view->setColumnWidth(column, columnWidthFor(view, column, sample));
     };
 
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_ICAO, width("ABCDEF"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_REG, width("G-ABCDEF"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_TYPE, width("B77W"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_FLIGHT, width("RYR33KQW"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_FLIGHT_NO, width("Flight No"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_AIRLINE, std::max(90, width("Airline name")));
+    // What a QDateTime cell shows (the delegate's own short format), and what the message
+    // tables show, which add the seconds
+    const QString shownDateTime = dateTimeSample(QLocale().dateTimeFormat(QLocale::ShortFormat));
+    const QString messageDateTime = dateTimeSample(QLocale().dateFormat(QLocale::ShortFormat) + " hh:mm:ss");
+    // A callsign is at most 8 characters, and a station address no longer
+    const QString callsign = "RYR33KQW";
+    const QString reg = "G-ABCDEF";
+    // A protocol and frequency, the longest of which is a satellite L band one
+    const QString link = "Iridium 1626.104";
+    const QString protocols = "ACARS 131.725; HFDL 10.081";
+
+    set(ui->aircraft, AircraftTableModel::COL_ICAO, "ABCDEF");
+    set(ui->aircraft, AircraftTableModel::COL_REG, reg);
+    set(ui->aircraft, AircraftTableModel::COL_TYPE, "B77W");
+    set(ui->aircraft, AircraftTableModel::COL_FLIGHT, callsign);
+    set(ui->aircraft, AircraftTableModel::COL_FLIGHT_NO, "BA1234");
+    // A logo where one is known (the icon size is 85 wide), otherwise the name
+    ui->aircraft->setColumnWidth(AircraftTableModel::COL_AIRLINE,
+        std::max(90, columnWidthFor(ui->aircraft, AircraftTableModel::COL_AIRLINE, "Airline name")));
     ui->aircraft->setColumnWidth(AircraftTableModel::COL_SIDEVIEW, 90);
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_COUNTRY, 45);
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_LATITUDE, width("-90.00000"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_LONGITUDE, width("-180.00000"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_DISTANCE, width("Dist (km)"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_ALTITUDE, width("40000"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_HEADING, width("360"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_SPEED, width("500"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_PROTOCOLS, width("ACARS 131.725; HFDL 10.081"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_MESSAGES, width("10000"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_LAST_SEEN, width("12/12/2026 12:00:00"));
-    ui->aircraft->setColumnWidth(AircraftTableModel::COL_SELCAL, width("SELCAL"));
+    // A flag, so the heading is what sets the width
+    set(ui->aircraft, AircraftTableModel::COL_COUNTRY, "");
+    set(ui->aircraft, AircraftTableModel::COL_LATITUDE, "-90.0000");
+    set(ui->aircraft, AircraftTableModel::COL_LONGITUDE, "-180.0000");
+    set(ui->aircraft, AircraftTableModel::COL_DISTANCE, "10000");
+    set(ui->aircraft, AircraftTableModel::COL_ALTITUDE, "40000");
+    set(ui->aircraft, AircraftTableModel::COL_HEADING, "360");
+    set(ui->aircraft, AircraftTableModel::COL_SPEED, "500");
+    set(ui->aircraft, AircraftTableModel::COL_PROTOCOLS, protocols);
+    set(ui->aircraft, AircraftTableModel::COL_MESSAGES, "10000");
+    set(ui->aircraft, AircraftTableModel::COL_LAST_SEEN, shownDateTime);
+    set(ui->aircraft, AircraftTableModel::COL_SELCAL, "AB-CD");
 
     // Every column, not just some: the ones left out took Qt's default and came out far
-    // wider than a tick or a time needs. Sized to the widest thing each actually shows,
-    // or to its own heading where that is wider - a column narrower than its title reads
-    // as truncated even when the data fits.
-    ui->flights->setColumnWidth(FlightTableModel::COL_FLIGHT, width("RYR33KQW"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_FLIGHT_NO, width("Flight No"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_REG, width("G-ABCDEF"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_FROM, width("WWWW"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_TO, width("WWWW"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_DOCS, width("Docs"));
+    // wider than a tick or a time needs
+    set(ui->flights, FlightTableModel::COL_FLIGHT, callsign);
+    set(ui->flights, FlightTableModel::COL_FLIGHT_NO, "BA1234");
+    set(ui->flights, FlightTableModel::COL_REG, reg);
+    set(ui->flights, FlightTableModel::COL_FROM, "WWWW");
+    set(ui->flights, FlightTableModel::COL_TO, "WWWW");
+    set(ui->flights, FlightTableModel::COL_DOCS, "99");
     // A tick, so the heading is what sets the width
-    ui->flights->setColumnWidth(FlightTableModel::COL_LS, width("LS"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_CL, width("CL"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_FP, width("FP"));
-    // Shown as hh:mm, and the headings are shorter than that
-    ui->flights->setColumnWidth(FlightTableModel::COL_OUT, width("00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_OFF, width("00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_ON, width("00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_IN, width("00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_FIRST_SEEN, width("12/12/2026 12:00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_LAST_SEEN, width("12/12/2026 12:00:00"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_PROTOCOLS, width("ACARS 131.725; HFDL 10.081"));
-    ui->flights->setColumnWidth(FlightTableModel::COL_ROUTE_SOURCE, width("Message <>DB"));
+    set(ui->flights, FlightTableModel::COL_LS, "");
+    set(ui->flights, FlightTableModel::COL_CL, "");
+    set(ui->flights, FlightTableModel::COL_FP, "");
+    // Shown as hh:mm
+    set(ui->flights, FlightTableModel::COL_OUT, "00:00");
+    set(ui->flights, FlightTableModel::COL_OFF, "00:00");
+    set(ui->flights, FlightTableModel::COL_ON, "00:00");
+    set(ui->flights, FlightTableModel::COL_IN, "00:00");
+    set(ui->flights, FlightTableModel::COL_FIRST_SEEN, shownDateTime);
+    set(ui->flights, FlightTableModel::COL_LAST_SEEN, shownDateTime);
+    set(ui->flights, FlightTableModel::COL_PROTOCOLS, protocols);
+    set(ui->flights, FlightTableModel::COL_ROUTE_SOURCE, "Message <>DB");
 
     // The archive views show the same columns, so give them the same widths
     for (auto pair : { qMakePair((QTableView *) ui->aircraft, (QTableView *) ui->oldAircraft),
@@ -889,12 +923,28 @@ void AircraftGUI::setDefaultColumnWidths()
         }
     }
 
-    // These carry a date and a time to the second now. Left at the default width they
-    // wrapped onto two lines, which they were already close to doing without the seconds.
-    ui->documents->setColumnWidth(DOCUMENT_COL_TIME, width("29/08/2026 13:41:22"));
-    ui->atcMessages->setColumnWidth(ATC_COL_TIME, width("29/08/2026 13:41:22"));
-    // Wide enough for a protocol and an HF frequency, which is the longest it gets
-    ui->atcMessages->setColumnWidth(ATC_COL_PROTOCOL, width("HFDL 11384.000"));
+    // The message tables. Each stretches its last column - the title, report or message
+    // text, which is what the space is wanted for - so that is left out here. Left at
+    // Qt's default, the short columns took as much room as the text did.
+    for (QTableWidget *table : {ui->documents, ui->logons})
+    {
+        set(table, DOCUMENT_COL_TIME, messageDateTime);
+        set(table, DOCUMENT_COL_FLIGHT, callsign);
+        set(table, DOCUMENT_COL_REG, reg);
+    }
+    set(ui->documents, DOCUMENT_COL_TYPE, "Departure clearance");
+    set(ui->logons, DOCUMENT_COL_TYPE, "Logon");
+
+    set(ui->atcMessages, ATC_COL_TIME, messageDateTime);
+    set(ui->atcMessages, ATC_COL_PROTOCOL, link);
+    set(ui->atcMessages, ATC_COL_DIR, QString(QChar(0x2191)));
+    set(ui->atcMessages, ATC_COL_FROM, callsign);
+    set(ui->atcMessages, ATC_COL_TO, callsign);
+
+    set(ui->weather, WEATHER_COL_TIME, shownDateTime);
+    set(ui->weather, WEATHER_COL_AIRPORT, "WWWW");
+    set(ui->weather, WEATHER_COL_TYPE, "Weather");
+    set(ui->weather, WEATHER_COL_VIA, callsign);
 }
 
 void AircraftGUI::displaySettings()
@@ -1985,13 +2035,26 @@ void AircraftGUI::updateHistoryTables()
         "When the aircraft was last heard",
         "Messages received from this aircraft" };
 
+    // QTableWidgetItem sorts on the display role, so the dates have to sort correctly as
+    // TEXT. This format does - year first, zero padded throughout - which is why it is
+    // used here rather than a friendlier local format.
+    const QString dateFormat = "yyyy-MM-dd hh:mm";
+    // The widest each column is likely to hold, for its initial width
+    const QStringList flightSamples = { "RYR33KQW", "WWWW", "WWWW",
+        dateTimeSample(dateFormat), dateTimeSample(dateFormat), "10000" };
+    const QStringList aircraftSamples = { "G-ABCDEF", "WWWW", "WWWW",
+        dateTimeSample(dateFormat), dateTimeSample(dateFormat), "10000" };
+
     auto prepare = [](QTableWidget *table, const QStringList& headings,
-                      const QStringList& tips)
+                      const QStringList& tips, const QStringList& samples)
     {
         if (table->columnCount() == 0)
         {
             table->setColumnCount(headings.size());
             table->setHorizontalHeaderLabels(headings);
+            for (int col = 0; (col < samples.size()) && (col < table->columnCount()); col++) {
+                table->setColumnWidth(col, columnWidthFor(table, col, samples[col]));
+            }
             for (int col = 0; (col < tips.size()) && (col < table->columnCount()); col++)
             {
                 if (QTableWidgetItem *header = table->horizontalHeaderItem(col)) {
@@ -2014,18 +2077,13 @@ void AircraftGUI::updateHistoryTables()
         }
     };
 
-    // QTableWidgetItem sorts on the display role, so the dates have to sort correctly as
-    // TEXT. This format does - year first, zero padded throughout - which is why it is
-    // used here rather than a friendlier local format.
-    const QString dateFormat = "yyyy-MM-dd hh:mm";
-
     // The tracker flushes every 300 ms and every flush that touches a flight rebuilds
     // these tables, so a selection the user has just made would be wiped within a frame
     // or two of making it. Remember it and put it back.
     const quint64 keepSelected = m_selectedFlightId;
 
     // Past Flights: everything this aircraft has operated
-    prepare(ui->pastFlights, flightHeadings, flightTips);
+    prepare(ui->pastFlights, flightHeadings, flightTips, flightSamples);
     if (m_selectedAircraftId != 0)
     {
         int row = 0;
@@ -2069,7 +2127,7 @@ void AircraftGUI::updateHistoryTables()
     }
 
     // Past Aircraft: everything that has operated this flight number
-    prepare(ui->pastAircraft, aircraftHeadings, aircraftTips);
+    prepare(ui->pastAircraft, aircraftHeadings, aircraftTips, aircraftSamples);
     if (!m_selectedFlightNumber.isEmpty())
     {
         int row = 0;
@@ -2849,11 +2907,17 @@ void AircraftGUI::plotChart()
 
     m_chartXAxis = new QDateTimeAxis();
     m_chartXAxis->setFormat("hh:mm:ss");
+    // ADS-B runs at hundreds of messages a second where the other protocols manage a few,
+    // so on a shared axis every other series lay flat along the bottom. It, and the
+    // total it dominates, get an axis of their own on the right.
     m_chartYAxis = new QValueAxis();
     m_chartYAxis->setTitleText("Msgs/s");
+    m_chartADSBYAxis = new QValueAxis();
+    m_chartADSBYAxis->setTitleText("ADS-B and total msgs/s");
 
     m_chart->addAxis(m_chartXAxis, Qt::AlignBottom);
     m_chart->addAxis(m_chartYAxis, Qt::AlignLeft);
+    m_chart->addAxis(m_chartADSBYAxis, Qt::AlignRight);
 
     for (int i = 0; i < CHART_SERIES; i++)
     {
@@ -2864,13 +2928,15 @@ void AircraftGUI::plotChart()
             ? AircraftTracker::protocolName(i) : QString("Total"));
         m_chart->addSeries(m_chartSeries[i]);
         m_chartSeries[i]->attachAxis(m_chartXAxis);
-        m_chartSeries[i]->attachAxis(m_chartYAxis);
+        m_chartSeries[i]->attachAxis(onADSBAxis(i) ? m_chartADSBYAxis : m_chartYAxis);
     }
 
     const QDateTime now = QDateTime::currentDateTime();
     m_chartXAxis->setMin(now.addSecs(-60));
     m_chartXAxis->setMax(now);
     m_chartYAxis->setRange(0.0, 10.0);
+    m_chartADSBYAxis->setRange(0.0, 10.0);
+    m_chartYZoomed = false;
 
     ui->chart->setChart(m_chart);
 
@@ -2890,7 +2956,181 @@ void AircraftGUI::legendMarkerClicked()
     {
         marker->series()->setVisible(!marker->series()->isVisible());
         marker->setVisible(true);
+        fitChartYAxes();
     }
+}
+
+bool AircraftGUI::onADSBAxis(int series)
+{
+    return (series == AircraftReport::ADSB) || (series == AircraftReport::ProtocolCount);
+}
+
+// Each axis fits what is plotted against it now, falling as well as rising. Only ever
+// growing left one burst flattening the chart for as long as the feature ran. Every
+// retained point counts, as the x axis normally starts at the oldest, and a series hidden
+// from the legend does not. Once the user zooms the y axes they are left where they are.
+void AircraftGUI::fitChartYAxes()
+{
+    if (m_chartYZoomed) {
+        return;
+    }
+
+    qreal maxRate = 0.0;
+    qreal maxADSBRate = 0.0;
+    for (int i = 0; i < CHART_SERIES; i++)
+    {
+        if (m_chartSeries[i]->isVisible())
+        {
+            qreal& max = onADSBAxis(i) ? maxADSBRate : maxRate;
+            for (int j = 0; j < m_chartSeries[i]->count(); j++) {
+                max = std::max(max, m_chartSeries[i]->at(j).y());
+            }
+        }
+    }
+    m_chartYAxis->setRange(0.0, std::ceil(maxRate) + 1.0);
+    m_chartADSBYAxis->setRange(0.0, std::ceil(maxADSBRate) + 1.0);
+}
+
+// Back to following the data: every retained point in view, the y axes fitted to them
+void AircraftGUI::resetChartZoom()
+{
+    m_chartYZoomed = false;
+    fitChartYAxes();
+    QLineSeries *series = m_chartSeries[0];
+    if (series->count() > 1)
+    {
+        m_chartXAxis->setMin(QDateTime::fromMSecsSinceEpoch((qint64) series->at(0).x()));
+        m_chartXAxis->setMax(QDateTime::fromMSecsSinceEpoch((qint64) series->at(series->count() - 1).x()));
+    }
+}
+
+// Scale the range [start, end] by a factor of two per wheel click, keeping the point at
+// centre (0 to 1 along the range) where it is
+static void scaleRange(qreal& start, qreal& end, qreal minRange, int delta, qreal centre)
+{
+    const qreal range = end - start;
+    const qreal factor = std::pow(2.0, delta / 120.0);
+    const qreal newRange = std::max(minRange, range / factor);
+    start = start + centre * (range - newRange);
+    end = start + newRange;
+}
+
+// The same controls as the ADS-B demodulator's chart: the wheel zooms the time axis about
+// the cursor, and with shift held the rate axes
+void AircraftGUI::zoomChart(QWheelEvent *event)
+{
+    // Some platforms turn a shifted vertical wheel into a horizontal one
+    const int delta = (event->angleDelta().y() != 0) ? event->angleDelta().y() : event->angleDelta().x();
+    const QPointF point = event->position();
+    const QRectF plotArea = m_chart->plotArea();
+
+    if (delta == 0) {
+        return;
+    }
+
+    if (event->modifiers() & Qt::ShiftModifier)
+    {
+        qreal y = (point.y() - plotArea.y()) / plotArea.height();
+        y = 1.0 - std::min(1.0, std::max(0.0, y));
+
+        for (QValueAxis *axis : {m_chartYAxis, m_chartADSBYAxis})
+        {
+            bool visible = false;
+            for (int i = 0; i < CHART_SERIES; i++) {
+                visible |= (onADSBAxis(i) == (axis == m_chartADSBYAxis)) && m_chartSeries[i]->isVisible();
+            }
+            if (visible)
+            {
+                qreal min = axis->min();
+                qreal max = axis->max();
+                scaleRange(min, max, 0.1, delta, y);
+                axis->setRange(std::max(0.0, min), std::min(1e6, max));
+            }
+        }
+        m_chartYZoomed = true;
+    }
+    else
+    {
+        QLineSeries *series = m_chartSeries[0];
+        if (series->count() > 1)
+        {
+            qreal x = (point.x() - plotArea.x()) / plotArea.width();
+            x = std::min(1.0, std::max(0.0, x));
+
+            qreal startMS = m_chartXAxis->min().toMSecsSinceEpoch();
+            qreal endMS = m_chartXAxis->max().toMSecsSinceEpoch();
+            // A sample comes every ten seconds, so a minute shows a handful
+            scaleRange(startMS, endMS, 60000.0, delta, x);
+            // Don't let the range exceed the data
+            startMS = std::max(series->at(0).x(), startMS);
+            endMS = std::min(series->at(series->count() - 1).x(), endMS);
+            m_chartXAxis->setMin(QDateTime::fromMSecsSinceEpoch((qint64) startMS));
+            m_chartXAxis->setMax(QDateTime::fromMSecsSinceEpoch((qint64) endMS));
+        }
+    }
+}
+
+bool AircraftGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if (m_chart && (obj == ui->chart->viewport()))
+    {
+        if (event->type() == QEvent::Wheel)
+        {
+            QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+            zoomChart(wheelEvent);
+            wheelEvent->accept();
+            return true;
+        }
+        else if (event->type() == QEvent::MouseButtonDblClick)
+        {
+            // Only in the plot area: a double click on the legend is two clicks there
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if ((mouseEvent->button() == Qt::LeftButton) && m_chart->plotArea().contains(mouseEvent->pos()))
+            {
+                resetChartZoom();
+                return true;
+            }
+        }
+    }
+    return FeatureGUI::eventFilter(obj, event);
+}
+
+// A pane shown again in the vertical splitter returns at the size it had when hidden,
+// which is nothing if it was dragged shut. Give it a share of the splitter then, taken
+// from the largest pane, or the button would seem to do nothing.
+void AircraftGUI::showInSplitter(QWidget *widget)
+{
+    widget->setVisible(true);
+    // The splitter lays the pane out once the show reaches it
+    QTimer::singleShot(0, this, [this, widget]() {
+        QSplitter *splitter = ui->splitter;
+        const int index = splitter->indexOf(widget);
+        if ((index < 0) || !widget->isVisible()) {
+            return;
+        }
+        QList<int> sizes = splitter->sizes();
+        const int minimum = std::max(widget->minimumSizeHint().height(), 50);
+        if (sizes[index] >= minimum) {
+            return;
+        }
+        int total = 0;
+        int largest = -1;
+        for (int i = 0; i < sizes.size(); i++)
+        {
+            total += sizes[i];
+            if ((i != index) && ((largest < 0) || (sizes[i] > sizes[largest]))) {
+                largest = i;
+            }
+        }
+        if (largest < 0) {
+            return;
+        }
+        const int wanted = std::max(minimum, total / 4);
+        const int take = std::min(wanted - sizes[index], sizes[largest] / 2);
+        sizes[index] += take;
+        sizes[largest] -= take;
+        splitter->setSizes(sizes);
+    });
 }
 
 void AircraftGUI::trackerMessageRates(const QList<float>& rates)
@@ -2904,11 +3144,15 @@ void AircraftGUI::trackerMessageRates(const QList<float>& rates)
         pruneOrphanMessageRows();
     }
 
-    // The axis fits what is plotted now, falling as well as rising. Only ever growing
-    // left one burst flattening the chart for as long as the feature ran. Every retained
-    // point is in view - the x axis starts at the oldest - and a series hidden from the
-    // legend does not count.
-    qreal maxRate = 0.0;
+    // The x axis follows the data at whichever ends it was showing: both when unzoomed,
+    // so every retained point stays in view, and only the newest when zoomed into the
+    // recent past, as the ADS-B demodulator's chart does
+    QLineSeries *first = m_chartSeries[0];
+    const bool xAtMax = (first->count() == 0)
+        || ((qint64) first->at(first->count() - 1).x() == m_chartXAxis->max().toMSecsSinceEpoch());
+    const bool xAtMin = (first->count() == 0)
+        || ((qint64) first->at(0).x() == m_chartXAxis->min().toMSecsSinceEpoch());
+
     for (int i = 0; (i < CHART_SERIES) && (i < rates.size()); i++)
     {
         m_chartSeries[i]->append(now.toMSecsSinceEpoch(), rates[i]);
@@ -2916,20 +3160,13 @@ void AircraftGUI::trackerMessageRates(const QList<float>& rates)
         if (m_chartSeries[i]->count() > 1000) {
             m_chartSeries[i]->removePoints(0, m_chartSeries[i]->count() - 1000);
         }
-        if (m_chartSeries[i]->isVisible())
-        {
-            for (int j = 0; j < m_chartSeries[i]->count(); j++) {
-                maxRate = std::max(maxRate, m_chartSeries[i]->at(j).y());
-            }
-        }
     }
-    const qreal yMax = std::ceil(maxRate) + 1.0;
-    if (m_chartYAxis->max() != yMax) {
-        m_chartYAxis->setMax(yMax);
+    fitChartYAxes();
+    if (xAtMax) {
+        m_chartXAxis->setMax(now);
     }
-    m_chartXAxis->setMax(now);
-    if (m_chartSeries[0]->count() > 0) {
-        m_chartXAxis->setMin(QDateTime::fromMSecsSinceEpoch((qint64) m_chartSeries[0]->at(0).x()));
+    if (xAtMin && (first->count() > 0)) {
+        m_chartXAxis->setMin(QDateTime::fromMSecsSinceEpoch((qint64) first->at(0).x()));
     }
 }
 
@@ -3140,7 +3377,11 @@ void AircraftGUI::statsContextMenu(const QPoint& pos)
 void AircraftGUI::on_stats_clicked(bool checked)
 {
     m_settings.m_displayStatistics = checked;
-    ui->statistics->setVisible(checked);
+    if (checked) {
+        showInSplitter(ui->statistics);
+    } else {
+        ui->statistics->setVisible(false);
+    }
     m_settingsKeys.append("displayStatistics");
     applySettings();
 }
@@ -3157,13 +3398,18 @@ void AircraftGUI::chartContextMenu(const QPoint& pos)
                 m_chartSeries[i]->clear();
             }
         }
+        m_chartYZoomed = false;
     }
 }
 
 void AircraftGUI::on_displayChart_clicked(bool checked)
 {
     m_settings.m_displayChart = checked;
-    ui->chart->setVisible(checked);
+    if (checked) {
+        showInSplitter(ui->chart);
+    } else {
+        ui->chart->setVisible(false);
+    }
     m_settingsKeys.append("displayChart");
     applySettings();
 }

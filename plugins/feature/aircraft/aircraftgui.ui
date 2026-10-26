@@ -1144,7 +1144,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Message rate per protocol. Click a legend entry to show/hide a series.</string>
+           <string>Message rate per protocol, with ADS-B and the total on the right hand axis. Click a legend entry to show/hide a series. Mouse wheel zooms the time axis, shift + wheel the rate axes; double click to reset.</string>
           </property>
          </widget>
      </widget>
