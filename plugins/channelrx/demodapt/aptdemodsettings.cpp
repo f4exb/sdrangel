@@ -50,6 +50,7 @@ void APTDemodSettings::resetToDefaults()
     m_saveCombined = true;
     m_saveSeparate = false;
     m_saveProjection = false;
+    m_northToSouth = false;
     m_scanlinesPerImageUpdate = 20;
     m_transparencyThreshold = 100;
     m_opacityThreshold = 200;
