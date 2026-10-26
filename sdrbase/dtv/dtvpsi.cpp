@@ -17,11 +17,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <QDebug>
 
 #include "dtv/dtvpsi.h"
 #include "dtv/dtvsections.h"
 
 DTVPSI::DTVPSI() :
+    m_pat(),
+    m_nit(),
     m_transportStreamId(-1)
 {
 }
@@ -44,9 +47,20 @@ const std::map<int, int>& DTVPSI::getChannels() const
 
 void DTVPSI::feed(const uint8_t *data, int length)
 {
+    if (!data || length <= 0) {
+        return;
+    }
+
     // Complete a packet split between feeds
     if (!m_partial.empty())
     {
+        if (m_partial.size() >= 188)
+        {
+            qWarning() << "DTVPSI::feed: m_partial size is unexpectedly"
+                       << m_partial.size();
+            return;
+        }
+
         int needed = std::min(188 - (int) m_partial.size(), length);
         m_partial.insert(m_partial.end(), data, data + needed);
         data += needed;
