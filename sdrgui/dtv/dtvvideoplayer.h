@@ -88,13 +88,13 @@ public:
         QString m_videoCodec;       //!< FFmpeg's long name
         QString m_videoDecoder;     //!< The GPU's (e.g. CUDA, D3D11VA), or empty if decoded in software
         QString m_audioCodec;
-        int m_width;
-        int m_height;
+        int m_width = 0;
+        int m_height = 0;
         uint64_t m_videoFrames;
-        uint64_t m_audioFrames;
+        uint64_t m_audioFrames = 0;
         uint64_t m_decodeErrors;
         uint64_t m_lateFrames;      //!< Not shown, as they were too late
-        bool m_audioDescription;    //!< Audio description is being mixed in
+        bool m_audioDescription = false; //!< Audio description is being mixed in
         uint64_t m_adFrames;        //!< Audio description frames decoded
         int m_adFade;               //!< Latest fade of the main audio, from the audio description (0 to 255)
         bool m_subtitles;           //!< A subtitle stream is being decoded
