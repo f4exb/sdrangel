@@ -24,7 +24,10 @@ LimeSDRMIThread::LimeSDRMIThread(lms_stream_t* stream0, lms_stream_t* stream1, Q
     m_running(false),
     m_stream0(stream0),
     m_stream1(stream1),
+    m_buf0{},
+    m_buf1{},
     m_sampleFifo(nullptr),
+    m_log2Decim(0),
     m_iqOrder(true)
 {
     setObjectName("LimeSDRMI");
