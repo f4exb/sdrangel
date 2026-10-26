@@ -114,6 +114,12 @@ int DVBDemodEPG::eitVersionKey(int sourceTable, int section)
 }
 
 DVBDemodEPG::DVBDemodEPG() :
+    m_nitSections{},
+    m_sdtSections{},
+    m_eitSections{},
+    m_timeSections{},
+    m_freesatSiSections{},
+    m_freesatEitSections{},
     m_freesatRegion(0),
     m_networkId(-1),
     m_transportStreamId(-1),
