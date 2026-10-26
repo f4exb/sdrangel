@@ -32,6 +32,7 @@ const QStringList MorseDecoderSettings::m_channelURIs = {
 };
 
 MorseDecoderSettings::MorseDecoderSettings() :
+    m_scopeGUI(nullptr),
     m_rollupState(nullptr)
 {
     resetToDefaults();
