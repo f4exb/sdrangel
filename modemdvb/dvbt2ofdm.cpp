@@ -108,7 +108,10 @@ OFDMDemod::OFDMDemod(int bandwidthHz, FFTFactory *fftFactory) :
     m_sampleRate(sampleRate(bandwidthHz)),
     m_p2Tables(nullptr),
     m_tables(nullptr),
-    m_interpolationSpacing(0)
+    m_interpolationSpacing(0),
+    m_gridSpacing(0),
+    m_gridOffset(0),
+    m_gridAmplitude(0.0f)
 {
     m_fft.m_factory = fftFactory;
     m_p1Fft.m_factory = fftFactory;
