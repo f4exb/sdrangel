@@ -198,7 +198,7 @@ bool getPassesThrough0Deg(const QString& tle0, const QString& tle1, const QStrin
 
         double timeStep = (losTime - aosTime).TotalSeconds() / steps;
 
-        double prevAz;
+        double prevAz = 0.0;
         for (int i = 0; i < steps; i++)
         {
             // Calculate satellite position
