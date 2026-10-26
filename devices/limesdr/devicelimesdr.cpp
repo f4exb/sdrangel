@@ -167,7 +167,7 @@ bool DeviceLimeSDR::SetRFELNA_dB(lms_device_t *device, std::size_t chan, int val
 {
     if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
     {
-        fprintf(stderr, "DeviceLimeSDR::SetRFELNA_dB: cannot set channel to #%lu\n", chan);
+        fprintf(stderr, "DeviceLimeSDR::SetRFELNA_dB: cannot set channel to #%zu\n", chan);
         return false;
     }
 
@@ -207,7 +207,7 @@ bool DeviceLimeSDR::SetRFETIA_dB(lms_device_t *device, std::size_t chan, int val
 {
     if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
     {
-        fprintf(stderr, "DeviceLimeSDR::SetRFETIA_dB: cannot set channel to #%lu\n", chan);
+        fprintf(stderr, "DeviceLimeSDR::SetRFETIA_dB: cannot set channel to #%zu\n", chan);
         return false;
     }
 
@@ -232,7 +232,7 @@ bool DeviceLimeSDR::SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float v
 {
     if (LMS_WriteParam(device, LMS7param(MAC), chan+1) < 0)
     {
-        fprintf(stderr, "DeviceLimeSDR::SetRBBPGA_dB: cannot set channel to #%lu\n", chan);
+        fprintf(stderr, "DeviceLimeSDR::SetRBBPGA_dB: cannot set channel to #%zu\n", chan);
         return false;
     }
 
