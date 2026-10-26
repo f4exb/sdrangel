@@ -315,6 +315,7 @@ Complex LMSEqualizer::processOneSample(Complex x, bool update, bool training)
 InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
     m_scopeSink(nullptr),
     m_inmarsatDemod(stdCDemod),
+    m_channel(nullptr),
     m_channelSampleRate(InmarsatDemodSettings::CHANNEL_SAMPLE_RATE),
     m_channelFrequencyOffset(0),
     m_magsqSum(0.0f),
@@ -329,6 +330,7 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
     m_costasLoop(10*2*M_PI/100.0, 2),
     m_locked(false),
     m_rrcBufferIndex(0),
+    m_bits{},
     m_sampleBufferIndexA(0),
     m_sampleBufferIndexB(0)
 {
