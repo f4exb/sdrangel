@@ -315,7 +315,7 @@ QString DSCMessage::formatSpecifier(bool shortString) const
         if (m_formatSpecifierShortStrings.contains(m_formatSpecifier)) {
             return m_formatSpecifierShortStrings[m_formatSpecifier];
         } else {
-            return QString("UNK/ERR").arg(m_formatSpecifier);
+            return QString("UNK/ERR %1").arg(m_formatSpecifier);
         }
     }
     else
@@ -336,7 +336,7 @@ QString DSCMessage::category(bool shortString) const
         if (m_categoryShortStrings.contains(m_category)) {
             return m_categoryShortStrings[m_category];
         } else {
-            return QString("UNK/ERR").arg(m_category);
+            return QString("UNK/ERR %1").arg(m_category);
         }
     }
     else
@@ -358,7 +358,7 @@ QString DSCMessage::telecommand1(FirstTelecommand telecommand, bool shortString)
         if (m_telecommand1ShortStrings.contains(telecommand)) {
             return m_telecommand1ShortStrings[telecommand];
         } else {
-            return QString("UNK/ERR").arg(telecommand);
+            return QString("UNK/ERR %1").arg(telecommand);
         }
     }
     else
@@ -378,7 +378,7 @@ QString DSCMessage::telecommand2(SecondTelecommand telecommand, bool shortString
         if (m_telecommand2ShortStrings.contains(telecommand)) {
             return m_telecommand2ShortStrings[telecommand];
         } else {
-            return QString("UNK/ERR").arg(telecommand);
+            return QString("UNK/ERR %1").arg(telecommand);
         }
     }
     else
@@ -407,7 +407,7 @@ QString DSCMessage::endOfSignal(EndOfSignal eos, bool shortString)
         if (m_endOfSignalShortStrings.contains(eos)) {
             return m_endOfSignalShortStrings[eos];
         } else {
-            return QString("UNK/ERR").arg(eos);
+            return QString("UNK/ERR %1").arg(eos);
         }
     }
     else

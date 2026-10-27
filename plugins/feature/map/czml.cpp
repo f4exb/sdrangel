@@ -102,7 +102,14 @@ void CZML::clear()
 
 QJsonObject CZML::init()
 {
-    // Start a few seconds in the past, to allow for data to be received
+    // Start a few seconds in the past, to allow for data to be received.
+    //
+    // Only the interval is read: the page creates its viewer with
+    // automaticallyTrackDataSourceClocks false, so the currentTime below is discarded and
+    // map3d.html gives the clock the same lag as its STARTING value instead. Left here
+    // because the interval has to begin at or before that time, and because a document
+    // packet without a clock would be odd - but do not change this expecting the map's
+    // clock to follow
     QString start = QDateTime::currentDateTimeUtc().addSecs(-4).toString(Qt::ISODate);
     QString stop = QDateTime::currentDateTimeUtc().addSecs(60*60).toString(Qt::ISODate);
     QString interval = QString("%1/%2").arg(start).arg(stop);
@@ -187,6 +194,15 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
 
     // Need to use perPositionHeight for vertical polygons
     bool perPosition = mapItem->m_extrudedHeight == 0;
+    // A flat polygon clamped to the ground is draped over it instead: terrain, 3D tiles
+    // and all. Given per position heights, Cesium neither subdivides a polygon nor
+    // projects it for its size - it fills between the vertices it was given with flat
+    // triangles. Sampling the ground at each vertex, as map3d.html does for
+    // altitudeReference, lifts the vertices and nothing between them, so the fill cut
+    // under the curve of the Earth as soon as the vertices were far apart. The Aircraft
+    // feature's coverage, spanning thousands of km, showed only as slivers along its
+    // outer edge, and HFDL's not at all.
+    const bool draped = perPosition && (mapItem->m_altitudeReference == 1);
 
     QJsonArray positions;
     for (const auto c : mapItem->m_points)
@@ -241,13 +257,18 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
         {"rgba", outlineColorRGBA}
     };
 
+    // Cesium cannot outline a polygon on the ground, and says so on the console if asked
     QJsonObject polygon {
         {"positions", positionList},
         {"material", material},
-        {"outline", perPosition},
+        {"outline", perPosition && !draped},
         {"outlineColor", outlineColor},
     };
-    if (perPosition)
+    if (draped)
+    {
+        polygon.insert("heightReference", m_heightReferences[mapItem->m_altitudeReference]);
+    }
+    else if (perPosition)
     {
         polygon.insert("perPositionHeight", true);
         if (mapItem->m_altitudeReference != 0) {
@@ -1543,7 +1564,10 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
             {
                 QJsonObject model {
                     {"gltf", modelGLTF},
-                    //{"incrementallyLoadTextures", false}, // Aircraft will flash as they appear without textures if this is the default of true
+                    // With the default of true an aircraft flashes untextured as it appears,
+                    // and every shader it has is built twice: once without its textures and
+                    // again when they arrive
+                    {"incrementallyLoadTextures", false},
                     {"heightReference", heightReferences[modelAltitudeReference]},
                     {"runAnimations", false},
                     {"show", modelShow},

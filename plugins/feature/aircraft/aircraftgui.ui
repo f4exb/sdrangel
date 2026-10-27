@@ -197,7 +197,7 @@
       <item>
        <widget class="ButtonSwitch" name="coverage">
         <property name="toolTip">
-         <string>Display the coverage of each protocol on the Map, one colour each. Right click to reset the coverage data.</string>
+         <string>Display the coverage of each protocol on the Map, one colour each. Right click to choose which protocols are displayed, or to reset the coverage data.</string>
         </property>
         <property name="text">
          <string/>

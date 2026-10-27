@@ -36,3 +36,10 @@ QSet<QString> readMsfsNeverVisibleNodes(const QString &xmlFile);
 // Removes those nodes' meshes, with their children's, and every frost primitive. Returns
 // a description of what went, or an empty string when nothing did
 QString dropHiddenParts(QJsonObject *root, const QSet<QString> &neverVisible);
+
+// The same removal, by node index rather than by name, for the animated parts of a low
+// detail model: they are known as indices, several of them share a name, and some carry a
+// mesh with no name at all, so matching on the name would both miss some and take nodes
+// that only happen to share a name. Children go with their parent, as above. Returns a
+// description of what went, or an empty string when nothing did
+QString dropNodeMeshes(QJsonObject *root, const QSet<int> &nodeIndices);

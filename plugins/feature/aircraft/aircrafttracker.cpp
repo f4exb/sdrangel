@@ -300,6 +300,7 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
     // bug - the aircraft would all announce themselves again.
     const QString notificationsBefore = notificationSignature(m_settings);
     const bool coverageWasShown = m_settings.m_displayCoverage;
+    const quint32 coverageWasHidden = m_settings.m_coverageHiddenProtocols;
     if (force) {
         m_settings = settings;
     } else {
@@ -315,6 +316,11 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
         } else {
             removeCoverageFromMap();
         }
+    }
+    else if (m_settings.m_displayCoverage && (m_settings.m_coverageHiddenProtocols != coverageWasHidden))
+    {
+        // Each protocol draws or takes off its own, so all of them is simplest
+        sendCoverageToMap();
     }
     if (notificationSignature(m_settings) != notificationsBefore)
     {
@@ -4073,6 +4079,7 @@ QRgb AircraftTracker::coverageColor(int protocol)
     case AircraftReport::VDL2: return qRgba( 70, 140, 255, 80);     // Blue
     case AircraftReport::HFDL: return qRgba(200,  80, 200, 80);     // Magenta
     case AircraftReport::AERO: return qRgba( 80, 220, 220, 80);     // Cyan
+    case AircraftReport::IRIDIUM: return qRgba(220,  60,  60, 80);  // Red
     default: return qRgba(200, 200, 200, 80);
     }
 }
@@ -4148,7 +4155,8 @@ void AircraftTracker::sendCoverageToMap(int protocol)
         }
     }
 
-    if (measured && m_settings.m_displayCoverage && m_coverageOrigin[protocol].isValid())
+    if (measured && m_settings.m_displayCoverage && m_settings.coverageShown(protocol)
+        && m_coverageOrigin[protocol].isValid())
     {
         int first = 0;
         if (measured < bins)
@@ -4244,38 +4252,63 @@ void AircraftTracker::sendCoverageToMap(int protocol)
             // receiver; one that goes all the way round is a ring and must not, or the
             // shape is slit open along one bearing.
             //
-            // The two radial edges are stepped rather than drawn as one straight run out
-            // from the receiver. A constant bearing over thousands of miles is a curve on
-            // the 2D map, which draws a straight line between consecutive vertices - so a
-            // single segment cut visibly across where the edge should lie, worst on the
-            // longest wedges. The 3D map was right all along because Cesium draws polygon
-            // edges as geodesics whatever it is given. One step per 250 km, which puts the
-            // error well under the width of the line.
+            // Every edge is stepped, at most 250 km a step: the radials, where one bin's
+            // range steps to the next, as well as each bin's arc. The 2D map draws a
+            // straight line between consecutive vertices, and a constant bearing over
+            // thousands of miles is a curve on it - HFDL's step from 2,000 km to 9,500 km
+            // on one bearing came out as a straight band across Asia where the bearing
+            // runs up over the Arctic. Only the two ends of a wedge used to be stepped,
+            // which left out every radial inside a run - and once every bearing has been
+            // heard, the whole pattern is one run.
             const bool wedge = (length < bins);
-            auto radial = [&](double bearing, float km, bool outward)
+            const float stepKm = 250.0f;
+            // From the point already added, along the bearing, to toKm
+            auto radial = [&](double bearing, float fromKm, float toKm, bool includeEnd)
             {
-                const int steps = qBound(1, (int) (km / 250.0f) + 1, 16);
-                for (int k = 0; k <= steps; k++)
-                {
-                    const int step = outward ? k : (steps - k);
-                    at(bearing, km * step / (float) steps);
+                if (fromKm == toKm) {
+                    return;
+                }
+                const int steps = std::max(1, (int) std::ceil(std::abs(toKm - fromKm) / stepKm));
+                const int last = includeEnd ? steps : (steps - 1);
+                for (int k = 1; k <= last; k++) {
+                    at(bearing, fromKm + (toKm - fromKm) * k / (float) steps);
+                }
+            };
+            // From the point already added, round one bin at constant range
+            auto arc = [&](double fromBearing, float km)
+            {
+                const double arcKm = km * m_coverageBinDeg * M_PI / 180.0;
+                const int steps = std::max(1, (int) std::ceil(arcKm / stepKm));
+                for (int k = 1; k <= steps; k++) {
+                    at(fromBearing + m_coverageBinDeg * k / (double) steps, km);
                 }
             };
 
-            if (wedge) {
-                radial(firstBin * m_coverageBinDeg, ranges[firstBin], true);
+            const double firstBearing = firstBin * m_coverageBinDeg;
+            if (wedge)
+            {
+                at(firstBearing, 0.0);
+                radial(firstBearing, 0.0f, ranges[firstBin], true);
+            }
+            else
+            {
+                at(firstBearing, ranges[firstBin]);
             }
             for (int i = 0; i < length; i++)
             {
                 const int bin = (firstBin + i) % bins;
-                // Both edges of the bin at its own range, so each bearing is a flat step
-                at(bin * m_coverageBinDeg, ranges[bin]);
-                at((bin + 1) * m_coverageBinDeg, ranges[bin]);
+                // A flat step at the bin's own range, so each bearing shows its own figure
+                if (i > 0) {
+                    radial(bin * m_coverageBinDeg, ranges[(bin + bins - 1) % bins], ranges[bin], true);
+                }
+                arc(bin * m_coverageBinDeg, ranges[bin]);
             }
-            if (wedge)
-            {
-                const int lastBin = (firstBin + length - 1) % bins;
-                radial((lastBin + 1) * m_coverageBinDeg, ranges[lastBin], false);
+            // Back to where it started, which the polygon closes onto itself
+            const int lastBin = (firstBin + length - 1) % bins;
+            if (wedge) {
+                radial((lastBin + 1) * m_coverageBinDeg, ranges[lastBin], 0.0f, false);
+            } else {
+                radial(firstBearing, ranges[lastBin], ranges[firstBin], false);
             }
 
             swgMapItem->setCoordinates(polygon);

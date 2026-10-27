@@ -455,6 +455,8 @@ public:
     //!< Public because the web API's report names each protocol, and the names belong
     //!< with the protocol enum rather than being written out a second time there
     static QString protocolName(int protocol);
+    //!< What each protocol's coverage is drawn in.
+    static QRgb coverageColor(int protocol);
     //!< A protocol and the frequency it was heard on, as "VDL2 136.975". The
     //!< frequency is left off when it is unknown, and for ADS-B, where it is always
     //!< the same and says nothing
@@ -1091,7 +1093,6 @@ private:
     void sendCoverageToMap(int protocol);
     void sendCoverageToMap();
     void removeCoverageFromMap();
-    static QRgb coverageColor(int protocol);
     //!< Read a restored flight's track or profile in, if that has not happened already.
     //!< Idempotent, so callers need not know which flights are which. MUST be called
     //!< before appending to either: until the stored points are in memory, m_trackSaved

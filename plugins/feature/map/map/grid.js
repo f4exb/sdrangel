@@ -120,11 +120,21 @@ function mod(n, m) {
     return ((n % m) + m) % m;
 }
 
+// Runs every frame, so the cartographic is scratch
+const gridCameraCartographic = new Cesium.Cartographic();
+
 function showGridByDistance() {
 
-    var cameraHeight = viewer.scene.ellipsoid.cartesianToCartographic(viewer.scene.camera.position).height;
+    // positionWC, not position: while the camera follows an entity, position is relative
+    // to that entity's frame, so treating it as a world position gave a height of about
+    // minus the Earth's radius, and the fine grid stayed on however far out the camera was.
+    // Undefined only at the centre of the Earth
+    const cartographic = viewer.scene.ellipsoid.cartesianToCartographic(viewer.scene.camera.positionWC, gridCameraCartographic);
+    if (cartographic === undefined) {
+        return;
+    }
 
-    const showFine = cameraHeight < 1500000;
+    const showFine = cartographic.height < 1500000;
 
     polylinesFine.show = showFine;
     labels.show = !showFine;

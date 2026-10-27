@@ -627,12 +627,10 @@ void AircraftGUI::makeUIConnections()
     CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
     connect(feedRightClickEnabler, &CRightClickEnabler::rightClick, this, &AircraftGUI::feedSelect);
 
-    // Same gesture the ADS-B demodulator uses for its own coverage map. Queued because
-    // the tracker lives on its own thread.
-    CRightClickEnabler *coverageRightClickEnabler = new CRightClickEnabler(ui->coverage);
-    connect(coverageRightClickEnabler, &CRightClickEnabler::rightClick, this, [this] (const QPoint&) {
-        QMetaObject::invokeMethod(m_aircraft->getTracker(), "clearCoverage", Qt::QueuedConnection);
-    });
+    // Which protocols to draw, and the reset the ADS-B demodulator offers on its own
+    // coverage button
+    ui->coverage->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(ui->coverage, &QWidget::customContextMenuRequested, this, &AircraftGUI::coverageContextMenu);
     QObject::connect(
         ui->notifications,
         &QToolButton::clicked,
@@ -3412,6 +3410,54 @@ void AircraftGUI::on_displayChart_clicked(bool checked)
     }
     m_settingsKeys.append("displayChart");
     applySettings();
+}
+
+void AircraftGUI::coverageContextMenu(const QPoint& pos)
+{
+    QMenu menu(this);
+
+    // Each in the colour it is drawn in, which doubles as the key to the Map. SELCAL is
+    // left out: it carries no position, so it never has any coverage to show.
+    QList<QPair<QAction *, int>> protocols;
+    for (int protocol : AircraftReport::displayOrder())
+    {
+        if (!AircraftReport::reportsPosition(protocol)) {
+            continue;
+        }
+        QPixmap swatch(12, 12);
+        swatch.fill(QColor::fromRgb(AircraftTracker::coverageColor(protocol)));   // Opaque, so it can be seen
+        QAction *action = menu.addAction(QIcon(swatch), AircraftTracker::protocolName(protocol));
+        action->setCheckable(true);
+        action->setChecked(m_settings.coverageShown(protocol));
+        protocols.append(qMakePair(action, protocol));
+    }
+    menu.addSeparator();
+    QAction *reset = menu.addAction("Reset coverage data");
+
+    QAction *chosen = menu.exec(ui->coverage->mapToGlobal(pos));
+    if (!chosen) {
+        return;
+    }
+    if (chosen == reset)
+    {
+        // Queued because the tracker lives on its own thread
+        QMetaObject::invokeMethod(m_aircraft->getTracker(), "clearCoverage", Qt::QueuedConnection);
+        return;
+    }
+    for (const auto& protocol : protocols)
+    {
+        if (chosen == protocol.first)
+        {
+            const quint32 bit = 1u << protocol.second;
+            if (chosen->isChecked()) {
+                m_settings.m_coverageHiddenProtocols &= ~bit;
+            } else {
+                m_settings.m_coverageHiddenProtocols |= bit;
+            }
+            m_settingsKeys.append("coverageHiddenProtocols");
+            applySettings();
+        }
+    }
 }
 
 void AircraftGUI::on_coverage_clicked(bool checked)

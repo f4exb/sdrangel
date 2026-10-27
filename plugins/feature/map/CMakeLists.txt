@@ -50,6 +50,8 @@ if(NOT SERVER_MODE)
         mapmaidenheaddialog.ui
         mapsettingsdialog.cpp
         mapsettingsdialog.ui
+        msfsassetconverter/attribstrip.cpp
+        msfsassetconverter/attribstrip.h
         msfsassetconverter/animationmapper.cpp
         msfsassetconverter/animationmapper.h
         msfsassetconverter/batchconverter.cpp

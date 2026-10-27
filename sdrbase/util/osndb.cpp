@@ -89,7 +89,7 @@ void OsnDB::downloadFinished(const QString& filename, bool success)
         else
         {
             qWarning() << "OsnDB::downloadFinished - Failed to extract files from " << filename;
-            emit downloadError(QString("Failed to extract files from ").arg(filename));
+            emit downloadError(QString("Failed to extract files from %1").arg(filename));
         }
     }
     else

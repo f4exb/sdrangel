@@ -101,6 +101,7 @@ void AircraftSettings::resetToDefaults()
     m_feedAvdelphiPort = 5556;
     m_feedAvdelphiTcp = false;
     m_displayCoverage = false;
+    m_coverageHiddenProtocols = 0;
     m_databaseFilename = "";
     m_disabledSources.clear();
     // Rules that speak and run commands are exactly the kind of thing a reset is asked
@@ -166,6 +167,7 @@ QByteArray AircraftSettings::serialize() const
     s.writeS32(54, m_feedAvdelphiPort);
     s.writeBool(55, m_feedAvdelphiTcp);
     s.writeBool(56, m_displayCoverage);
+    s.writeU32(57, m_coverageHiddenProtocols);
 
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
         s.writeS32(300 + i, m_columnIndexes[i]);
@@ -263,7 +265,8 @@ bool AircraftSettings::deserialize(const QByteArray& data)
             m_feedAvdelphiPort = 5556;
         }
         d.readBool(55, &m_feedAvdelphiTcp, false);
-    d.readBool(56, &m_displayCoverage, false);
+        d.readBool(56, &m_displayCoverage, false);
+        d.readU32(57, &m_coverageHiddenProtocols, 0);
 
         for (int i = 0; i < FLIGHT_COLUMNS; i++) {
             d.readS32(700 + i, &m_flightColumnIndexes[i], i);
@@ -343,6 +346,9 @@ void AircraftSettings::applySettings(const QStringList& settingsKeys, const Airc
     }
     if (settingsKeys.contains("displayCoverage")) {
         m_displayCoverage = settings.m_displayCoverage;
+    }
+    if (settingsKeys.contains("coverageHiddenProtocols")) {
+        m_coverageHiddenProtocols = settings.m_coverageHiddenProtocols;
     }
     if (settingsKeys.contains("favourLivery")) {
         m_favourLivery = settings.m_favourLivery;

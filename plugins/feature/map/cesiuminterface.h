@@ -19,6 +19,7 @@
 #define INCLUDE_FEATURE_CESIUMINTERFACE_H_
 
 #include <QJsonArray>
+#include <QTimer>
 
 #include "mapwebsocketserver.h"
 #include "czml.h"
@@ -112,7 +113,33 @@ public:
     void endBatch();
 
 private:
-    void flushPendingCommands();
+    // A batch is sent as several smaller messages rather than one, because one message
+    // makes a single frame in the page pay for the whole flush. Measured at ~135 aircraft:
+    // a batch is 61 packets and 108 KB, and 82.8% of the page's 17-33 ms frames landed
+    // within 20 ms of a message against 3.5% of its normal frames - so every flush showed
+    // as a stutter at the flush period.
+    //
+    // The cost is not the decoding, and chunking is not about the bytes: JSON.parse of a
+    // whole batch takes 0.42 ms of an 11 ms spike, and czmlStream.process() returns a
+    // promise, so almost nothing happens in the page's message handler. The time goes on
+    // the render that follows, where Cesium re-evaluates every model whose position or
+    // orientation the batch just changed. That work cannot be made cheaper from here, only
+    // spread - so this trades one long frame for several short ones and does not reduce
+    // the total.
+    static constexpr int m_batchChunkPackets = 15;  // ~2.7 ms of page time per chunk
+    static constexpr int m_batchChunkIntervalMS = 30;
+    // Beyond this the queue is drained in one go. A backlog means chunks are arriving
+    // faster than they drain, and past a few hundred milliseconds the delay to an aircraft
+    // moving is worse than the stutter being avoided
+    static constexpr int m_batchMaxQueuedMessages = 12;
+
+    // Chunks awaiting their turn, with the commands that follow each of them, in send
+    // order. One queue for both so a command cannot overtake the CZML it refers to, even
+    // when the batch that issued it is still draining
+    QList<QJsonObject> m_sendQueue;
+    QTimer *m_chunkTimer = nullptr;
+
+    void drainSendQueue();
 
 public:
 

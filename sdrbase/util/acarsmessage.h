@@ -78,7 +78,7 @@ public:
     bool m_multiBlock; // Indicates if this message has additional following blocks
     bool m_uplink;  // Indicates if uplink or downlink
     AcarsMessage(const QByteArray &message);
-    virtual bool decode(const QString &message) { return true; }
+    virtual bool decode(const QString &message) { (void) message; return true; }
     virtual QString toString();
     // Aircraft position carried in the message, for the table and Map. altitudeFt is
     // -1 when the message has a position but no altitude.

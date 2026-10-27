@@ -174,32 +174,43 @@
         return volume <= 0.0 ? 0.0 : Math.pow(10.0, (volume - 10000.0) / 2000.0);
     }
 
-    function estimateEngineState(property) {
+    function engineState(n1, n2, result) {
+        if (result === undefined) {
+            return { n1: n1, n2: n2 };
+        }
+        result.n1 = n1;
+        result.n2 = n2;
+        return result;
+    }
+
+    // Written into result when one is given, as this is called for every playing engine
+    // sound four times a second; otherwise a new object the caller may keep and smooth
+    function estimateEngineState(property, result) {
         const onSurface = property("pfdOnSurface");
         const groundspeedValue = property("pfdGroundspeed");
         const groundspeed = Number.isFinite(groundspeedValue) ? Math.max(0.0, groundspeedValue) : 0.0;
 
         if (Number.isFinite(onSurface) && (onSurface > 0)) {
             if (groundspeed > 60.0) {
-                return { n1: 0.98, n2: 0.98 }; // Take-off roll
+                return engineState(0.98, 0.98, result); // Take-off roll
             }
             if (groundspeed > 15.0) {
                 const fraction = clamp((groundspeed - 15.0) / 45.0, 0.0, 1.0);
-                return { n1: 0.28 + 0.32 * fraction, n2: 0.62 + 0.22 * fraction };
+                return engineState(0.28 + 0.32 * fraction, 0.62 + 0.22 * fraction, result);
             }
-            return { n1: 0.20, n2: 0.55 }; // Parked or taxi idle
+            return engineState(0.20, 0.55, result); // Parked or taxi idle
         }
 
         const verticalSpeed = property("pfdVerticalSpeed");
         if (Number.isFinite(verticalSpeed)) {
             if (verticalSpeed > 500.0) {
-                return { n1: 0.90, n2: 0.95 }; // Climb
+                return engineState(0.90, 0.95, result); // Climb
             }
             if (verticalSpeed < -500.0) {
-                return { n1: 0.34, n2: 0.68 }; // Descent or approach
+                return engineState(0.34, 0.68, result); // Descent or approach
             }
         }
-        return { n1: 0.78, n2: 0.90 }; // Cruise, or the best airborne estimate
+        return engineState(0.78, 0.90, result); // Cruise, or the best airborne estimate
     }
 
     function smoothEngineState(current, target, elapsedSeconds) {

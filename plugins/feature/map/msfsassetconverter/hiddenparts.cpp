@@ -194,3 +194,43 @@ QString dropHiddenParts(QJsonObject *root, const QSet<QString> &neverVisible)
         .arg(frostPrimitives)
         .arg(frostPrimitives == 1 ? QString() : QStringLiteral("s"));
 }
+
+QString dropNodeMeshes(QJsonObject *root, const QSet<int> &nodeIndices)
+{
+    if (nodeIndices.isEmpty()) {
+        return QString();
+    }
+    QJsonArray nodes = root->value("nodes").toArray();
+    int meshNodes = 0;
+    for (const QJsonValue &node : nodes)
+    {
+        if (node.toObject().contains("mesh")) {
+            meshNodes++;
+        }
+    }
+    int dropped = 0;
+    // visited makes this independent of the order the set comes out in: where one of these
+    // nodes is an ancestor of another, whichever is reached first takes the subtree with it
+    QSet<int> visited;
+    for (const int index : nodeIndices) {
+        dropMeshes(&nodes, index, &dropped, &visited);
+    }
+    if (dropped == 0) {
+        return QString();
+    }
+    // Whatever the animations say, a model is not reduced to nothing: one with no meshes
+    // left loads, draws nothing, and has no bounding sphere to judge its size by
+    if (dropped >= meshNodes) {
+        return QStringLiteral("WARNING: none dropped - the %1 animated node%2 would have taken "
+                              "all %3 meshes")
+            .arg(nodeIndices.size())
+            .arg(nodeIndices.size() == 1 ? QString() : QStringLiteral("s"))
+            .arg(meshNodes);
+    }
+    root->insert(QStringLiteral("nodes"), nodes);
+    return QStringLiteral("%1 mesh%2 off %3 animated node%4")
+        .arg(dropped)
+        .arg(dropped == 1 ? QString() : QStringLiteral("es"))
+        .arg(nodeIndices.size())
+        .arg(nodeIndices.size() == 1 ? QString() : QStringLiteral("s"));
+}

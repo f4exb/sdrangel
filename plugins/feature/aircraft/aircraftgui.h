@@ -235,6 +235,7 @@ private slots:
     void on_atcLabels_clicked(bool checked);
     void on_stats_clicked(bool checked);
     void statsContextMenu(const QPoint& pos);
+    void coverageContextMenu(const QPoint& pos);
     void updateHistoryTables();
     void trackerWeatherReports(const QList<WeatherEvent>& reports);
     void weatherSelectionChanged();

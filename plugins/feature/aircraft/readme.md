@@ -255,7 +255,11 @@ showing all the data, with the rate axes fitted to it.
 
 <h3>8: Coverage</h3>
 
-Check to display per protocol receiver coverage on the map, for this session.
+Check to display per protocol receiver coverage on the map: the furthest an aircraft has been
+heard on each bearing, drawn in a different colour for each protocol. The coverage is kept in
+the database, so it builds up across sessions.
+
+Right click to choose which protocols' coverage is displayed, or to reset the coverage data.
 
 ![Coverage](../../../doc/img/AircraftFeature_coverage.png)
 

@@ -1374,7 +1374,7 @@ protected:
         int dir = getBits(4);
         const QStringList dirs = {"L", "R", "L OR R", "N", "S", "E", "W", "NE", "NW", "SE", "SW"};
         if (dir >= dirs.size()) {
-            return QString("UNKNOWN DIRECTION $1").arg(dir);
+            return QString("UNKNOWN DIRECTION %1").arg(dir);
         } else { 
             return dirs[dir];
         }
@@ -1978,7 +1978,7 @@ protected:
     QString decodeSpeedMach()
     {
         int speed = getBits(5);
-        return QString("%M").arg((speed + 61) / 100.0f, 0, 'f', 2);
+        return QString("%1M").arg((speed + 61) / 100.0f, 0, 'f', 2);
     }
     
     QString decodeSpeedMachLarge()

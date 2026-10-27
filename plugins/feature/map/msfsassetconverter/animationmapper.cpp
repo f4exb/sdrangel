@@ -887,3 +887,114 @@ QString decimateAnimations(QJsonObject *root, QVector<QByteArray> *buffers, doub
     return QStringLiteral("%1 keyframes to %2 in %3 animation%4")
         .arg(before).arg(after).arg(changed).arg(changed == 1 ? QString() : QStringLiteral("s"));
 }
+
+QString dropAllAnimations(QJsonObject *root, bool recordNodeNamesForFarMode,
+                          QSet<int> *animatedNodes)
+{
+    const QJsonArray animations = root->value("animations").toArray();
+    if (animations.isEmpty()) {
+        return QString();
+    }
+    const QJsonArray accessors = root->value("accessors").toArray();
+    const QJsonArray nodes = root->value("nodes").toArray();
+
+    // The same walk map3d.html's animatedNodeNames does, so far mode hides exactly what it
+    // hides today: every node a channel targets, and then everything below it, because a
+    // child moves with its parent. Only the animations that are played, which are the ones
+    // the full detail model keeps and so the ones map3d.html walks. MSFS exports also carry
+    // an animation per node named after it - node0, node55 - and some target the scene root
+    // or the node everything hangs from: counted as animated, the whole aircraft was taken
+    // for a moving part, and m_dropAnimatedParts left 87 low detail models with nothing in
+    // them
+    QSet<int> animated;
+    for (const QJsonValue &animationValue : animations)
+    {
+        const QJsonObject animation = animationValue.toObject();
+        if (!isPlayedAnimation(animation.value("name").toString())) {
+            continue;
+        }
+        const QJsonArray channels = animation.value("channels").toArray();
+        for (const QJsonValue &channelValue : channels)
+        {
+            const QJsonObject target = channelValue.toObject().value("target").toObject();
+            if (target.contains(QStringLiteral("node"))) {
+                animated.insert(target.value("node").toInt());
+            }
+        }
+    }
+    QList<int> pending = animated.values();
+    while (!pending.isEmpty())
+    {
+        const int index = pending.takeLast();
+        if ((index < 0) || (index >= nodes.size())) {
+            continue;
+        }
+        const QJsonArray children = nodes.at(index).toObject().value("children").toArray();
+        for (const QJsonValue &childValue : children)
+        {
+            const int child = childValue.toInt();
+            if (!animated.contains(child))
+            {
+                animated.insert(child);
+                pending.append(child);
+            }
+        }
+    }
+
+    // Only a node that draws something is worth hiding, and only a named one can be found
+    // by Cesium's Model.getNode. Sorted so the file is the same whatever QSet's order
+    QList<int> ordered = animated.values();
+    std::sort(ordered.begin(), ordered.end());
+    QJsonArray names;
+    for (const int index : ordered)
+    {
+        if ((index < 0) || (index >= nodes.size())) {
+            continue;
+        }
+        const QJsonObject node = nodes.at(index).toObject();
+        const QString name = node.value("name").toString();
+        if (node.contains(QStringLiteral("mesh")) && !name.isEmpty()) {
+            names.append(name);
+        }
+    }
+
+    qint64 values = 0;
+    for (const QJsonValue &animationValue : animations) {
+        values += keyframeValues(accessors, animationValue.toObject());
+    }
+
+    if (animatedNodes != nullptr) {
+        *animatedNodes = animated;
+    }
+    if (recordNodeNamesForFarMode)
+    {
+        // sanitizeExtras keeps an extras that is an object, which this is
+        QJsonObject extras = root->value("extras").toObject();
+        if (names.isEmpty()) {
+            extras.remove(QStringLiteral("SDRANGEL_animatedNodes"));
+        } else {
+            extras.insert(QStringLiteral("SDRANGEL_animatedNodes"), names);
+        }
+        if (extras.isEmpty()) {
+            root->remove(QStringLiteral("extras"));
+        } else {
+            root->insert(QStringLiteral("extras"), extras);
+        }
+    }
+    // An animations array has to have something in it, so an empty one goes altogether.
+    // The accessors the samplers used are left orphaned, as decimateAnimations leaves its
+    // originals: only referenced accessors are unpacked at runtime, which is where the
+    // keyframe objects were costing anything
+    root->remove(QStringLiteral("animations"));
+
+    QString summary = QStringLiteral("%1 animation%2, %3 keyframe values")
+        .arg(animations.size())
+        .arg(animations.size() == 1 ? QString() : QStringLiteral("s"))
+        .arg(values);
+    if (recordNodeNamesForFarMode) {
+        summary += QStringLiteral("; kept %1 node name%2 for far mode")
+            .arg(names.size())
+            .arg(names.size() == 1 ? QString() : QStringLiteral("s"));
+    }
+    return summary;
+}

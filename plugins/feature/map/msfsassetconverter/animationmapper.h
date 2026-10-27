@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <QHash>
 #include <QJsonObject>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -67,3 +68,18 @@ QString dropUnplayedAnimations(QJsonObject *root);
 // each one, per model instance, which is what a major GC then has to trace. New keyframe
 // data is appended to buffers[0]. Returns what changed, or an empty string if nothing did
 QString decimateAnimations(QJsonObject *root, QVector<QByteArray> *buffers, double tolerance);
+
+// Removes every animation, for a level of detail never drawn big enough to show one.
+// The names of the mesh nodes the animations drove - and of their descendants, which move
+// with their parent - are written to the glTF's extras as SDRANGEL_animatedNodes first:
+// map3d.html hides those same nodes in far mode and reads them from the animations, so
+// without this it would find nothing left to hide and draw them instead.
+// Run AFTER mapMsfsAnimations, which bakes the nose wheel steering rest pose into the
+// nodes - many models' rest pose is full lock, and dropping that animation unbaked would
+// leave the wheel turned.
+// recordNodeNamesForFarMode writes those names to extras; pass false when the caller is
+// about to remove the parts themselves, since then there is nothing left to hide. The nodes
+// the animations drove, and their descendants, are returned through animatedNodes for that.
+// Returns what went, or an empty string if there was nothing to go
+QString dropAllAnimations(QJsonObject *root, bool recordNodeNamesForFarMode = true,
+                          QSet<int> *animatedNodes = nullptr);

@@ -46,6 +46,17 @@ struct ConversionOptions {
     // the animation still reproduces to within this much per component: about a quarter
     // of a degree of rotation, or two millimetres of travel, at the default
     double m_animationTolerance = 0.002;    // 0 to keep every keyframe
+    // For a level of detail that is never drawn big enough to show an animation at all,
+    // the keyframes go entirely rather than being thinned. The names of the nodes the
+    // animations drove are kept in the glTF's extras, because map3d.html hides exactly
+    // those nodes in far mode and finds them by reading the animations
+    bool m_dropAnimations = false;
+    // And the parts those animations drove, with them. A low detail model's gear and flaps
+    // only ever showed in their rest pose once the animations went, and beyond
+    // farModelDistance map3d.html was hiding them anyway, so the geometry is dead weight:
+    // fewer primitives to draw and fewer nodes for Cesium to walk every frame. Needs
+    // m_dropAnimations, and leaves the names out of extras since nothing is left to hide
+    bool m_dropAnimatedParts = false;
 #ifdef MSFS_CONVERTER_WITH_ZSTD
     // Lossless, and about 8x smaller for liveries, which are mostly flat colour
     bool m_zstdSupercompression = true;

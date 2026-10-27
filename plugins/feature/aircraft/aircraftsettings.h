@@ -111,6 +111,11 @@ struct AircraftSettings
     //!< Draw the polar coverage of each protocol on the Map - see
     //!< AircraftTracker::updateCoverage()
     bool m_displayCoverage;
+    //!< Protocols whose coverage is NOT drawn, one bit per AircraftReport::Protocol. Held
+    //!< as the ones hidden rather than the ones shown, so a protocol added later is drawn
+    //!< without anyone having to find the option.
+    quint32 m_coverageHiddenProtocols;
+    bool coverageShown(int protocol) const { return !(m_coverageHiddenProtocols & (1u << protocol)); }
     QString m_databaseFilename;     // Where the session is kept; empty means the default location
     QStringList m_disabledSources;  // Channel URIs not to accept reports from; empty accepts all
 

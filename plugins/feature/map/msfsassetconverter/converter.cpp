@@ -18,6 +18,7 @@
 
 #include "converter.h"
 #include "animationmapper.h"
+#include "attribstrip.h"
 #include "nodestrip.h"
 #include "hiddenparts.h"
 #include "portholes.h"
@@ -1368,13 +1369,35 @@ bool convertMsfsAsset(const ConversionOptions &options,
 
     // Whatever is left is either played or dead weight, and what is played was baked at a
     // keyframe per simulation frame
-    const QString unplayed = dropUnplayedAnimations(&root);
-    if (!unplayed.isEmpty()) {
-        emitLog(log, QStringLiteral("Unplayed animations: %1").arg(unplayed));
+    if (options.m_dropAnimations)
+    {
+        // After the mapping above, so the steering rest pose has already been baked in
+        QSet<int> animatedNodes;
+        const QString dropped = dropAllAnimations(&root, !options.m_dropAnimatedParts,
+                                                  &animatedNodes);
+        if (!dropped.isEmpty()) {
+            emitLog(log, QStringLiteral("Dropped animations: %1").arg(dropped));
+        }
+        if (options.m_dropAnimatedParts)
+        {
+            // Before stripRedundantNodes below, which clears up the nodes this empties -
+            // nothing protects them now that no animation drives them
+            const QString parts = dropNodeMeshes(&root, animatedNodes);
+            if (!parts.isEmpty()) {
+                emitLog(log, QStringLiteral("Dropped animated parts: %1").arg(parts));
+            }
+        }
     }
-    const QString thinned = decimateAnimations(&root, &buffers, options.m_animationTolerance);
-    if (!thinned.isEmpty()) {
-        emitLog(log, QStringLiteral("Thinned animation %1").arg(thinned));
+    else
+    {
+        const QString unplayed = dropUnplayedAnimations(&root);
+        if (!unplayed.isEmpty()) {
+            emitLog(log, QStringLiteral("Unplayed animations: %1").arg(unplayed));
+        }
+        const QString thinned = decimateAnimations(&root, &buffers, options.m_animationTolerance);
+        if (!thinned.isEmpty()) {
+            emitLog(log, QStringLiteral("Thinned animation %1").arg(thinned));
+        }
     }
 
     // What MSFS only shows some of the time, and Cesium would show all of it
@@ -1398,6 +1421,14 @@ bool convertMsfsAsset(const ConversionOptions &options,
     const QString mirroredWindows = mirrorInsetPortholes(&root, &buffers);
     if (!mirroredWindows.isEmpty()) {
         emitLog(log, QStringLiteral("Cabin %1").arg(mirroredWindows));
+    }
+
+    // Before the merge, so the concatenated buffers do not carry attributes nothing reads,
+    // and after the material passes, since what a TEXCOORD set is worth depends on whether
+    // a material still references it
+    const QString strippedAttributes = stripUnusedAttributes(&root, buffers);
+    if (!strippedAttributes.isEmpty()) {
+        emitLog(log, strippedAttributes);
     }
 
     // After the passes that look primitives up by material, since this concatenates them.

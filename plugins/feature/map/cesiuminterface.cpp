@@ -488,38 +488,85 @@ void CesiumInterface::endBatch()
 {
     m_batching = false;
 
-    // The CZML goes first, then anything that was issued while it was being collected -
-    // an animation must not arrive before the entity update it belongs to
-    if (m_batch.isEmpty())
-    {
-        flushPendingCommands();
-        return;
-    }
     // One packet is not worth an array
     if (m_batch.size() == 1)
     {
         QJsonObject obj = m_batch.first().toObject();
         obj.insert("command", "czml");
-        send(obj);
+        m_sendQueue.append(obj);
     }
-    else
+    else if (!m_batch.isEmpty())
     {
-        QJsonObject obj {
-            {"command", "czmlArray"},
-            {"packets", m_batch}
-        };
-        send(obj);
+        // Cut into chunks so the page pays for the flush over several frames rather than
+        // one - see m_batchChunkPackets
+        for (qsizetype i = 0; i < m_batch.size(); i += m_batchChunkPackets)
+        {
+            qsizetype count = m_batch.size() - i;
+            QJsonArray chunk;
+
+            if (count > m_batchChunkPackets) {
+                count = m_batchChunkPackets;
+            }
+            for (qsizetype j = 0; j < count; j++) {
+                chunk.append(m_batch.at(i + j));
+            }
+            m_sendQueue.append(QJsonObject {
+                {"command", "czmlArray"},
+                {"packets", chunk}
+            });
+        }
     }
     m_batch = QJsonArray();
-    flushPendingCommands();
+
+    // The CZML goes first, then anything that was issued while it was being collected -
+    // an animation must not arrive before the entity update it belongs to. Queued behind
+    // the chunks rather than sent here, which also keeps them behind the chunks of an
+    // earlier batch that has not finished draining
+    m_sendQueue.append(m_pendingCommands);
+    m_pendingCommands.clear();
+
+    drainSendQueue();
 }
 
-void CesiumInterface::flushPendingCommands()
+// Sends one chunk and the commands that follow it, then leaves the rest to the timer. The
+// commands go with their chunk rather than one per tick: they are small, and holding them
+// back would only delay the animation behind the entity update it belongs to.
+void CesiumInterface::drainSendQueue()
 {
-    for (auto& obj : m_pendingCommands) {
+    // Decided once, before anything is sent, so a drain that starts backlogged empties the
+    // whole queue instead of stopping as soon as it drops under the limit
+    const bool backlogged = m_sendQueue.size() > m_batchMaxQueuedMessages;
+    bool sentChunk = false;
+
+    while (!m_sendQueue.isEmpty())
+    {
+        const QJsonObject obj = m_sendQueue.first();
+        const QString command = obj.value("command").toString();
+        const bool isCZML = (command == "czmlArray") || (command == "czml");
+
+        if (isCZML && sentChunk && !backlogged) {
+            break;
+        }
+        m_sendQueue.removeFirst();
         send(obj);
+        sentChunk = sentChunk || isCZML;
     }
-    m_pendingCommands.clear();
+
+    if (m_sendQueue.isEmpty())
+    {
+        if (m_chunkTimer) {
+            m_chunkTimer->stop();
+        }
+        return;
+    }
+    if (!m_chunkTimer)
+    {
+        m_chunkTimer = new QTimer(this);
+        QObject::connect(m_chunkTimer, &QTimer::timeout, this, [this]() { drainSendQueue(); });
+    }
+    if (!m_chunkTimer->isActive()) {
+        m_chunkTimer->start(m_batchChunkIntervalMS);
+    }
 }
 
 void CesiumInterface::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)

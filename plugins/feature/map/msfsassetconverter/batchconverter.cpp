@@ -369,10 +369,17 @@ bool convertMSFSAircraftDirectory(
                             (lowDetailMaximumTextureSize > 0)
                                 ? qMin(lowDetailMaximumTextureSize, maximumTextureSize)
                                 : maximumTextureSize;
-                        // A low detail model is only drawn small, so its animations can be
-                        // thinned harder than the full one's: about a degree of rotation
-                        lowDetailOptions.m_animationTolerance =
-                            qMax(options.m_animationTolerance, 0.01);
+                        // A low detail model is never drawn big enough to show an
+                        // animation: at the top of its band a gear leg moves the
+                        // silhouette by a pixel or two, and at the 50 pixel floor the
+                        // retracted and extended states are indistinguishable. So the
+                        // keyframes go entirely rather than being thinned - they cost a
+                        // Quaternion object each, per model instance, for nothing
+                        lowDetailOptions.m_dropAnimations = true;
+                        // And the parts they drove. Past farModelDistance the map was
+                        // already hiding these, and below it they would now only ever be
+                        // drawn in their rest pose
+                        lowDetailOptions.m_dropAnimatedParts = true;
                         lowDetailOptions.m_outputFileSuffix = QStringLiteral("_lod1");
                         ConversionResult lowDetailConversion;
                         QString lowDetailError;
