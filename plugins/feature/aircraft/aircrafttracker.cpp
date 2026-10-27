@@ -1471,7 +1471,9 @@ void AircraftTracker::removeOldAircraft()
 
 // Archived aircraft are kept for a while so their history is still there, but not for
 // ever - the session database is rewritten in full on every save, so it has to be
-// bounded. A retention of zero means the user wants to keep everything.
+// bounded. A retention of zero means the user wants to keep everything. Flights have a
+// retention of their own, as they hold most of the history: the aircraft can be kept for
+// ever, with only their recent flights.
 // What the weather log's dedupe index is keyed on
 static size_t weatherKey(const WeatherEvent& e)
 {
@@ -1481,19 +1483,30 @@ static size_t weatherKey(const WeatherEvent& e)
 
 void AircraftTracker::discardOldAircraft()
 {
-    if (m_settings.m_retentionDays <= 0) {
+    const bool aircraftLimit = m_settings.m_retentionDays > 0;
+    const bool flightLimit = m_settings.m_flightRetentionDays > 0;
+    if (!aircraftLimit && !flightLimit) {
         return;
     }
 
-    const QDateTime cutoff = QDateTime::currentDateTime().addDays(-m_settings.m_retentionDays);
+    const QDateTime now = QDateTime::currentDateTime();
+    const QDateTime aircraftCutoff = now.addDays(-m_settings.m_retentionDays);
+    const QDateTime flightCutoff = now.addDays(-m_settings.m_flightRetentionDays);
+    // For what belongs to no aircraft or flight still kept, below
+    const QDateTime cutoff = m_settings.messageCutoff();
     QList<quint64> discardedAircraft;
     QList<quint64> discardedFlights;
+    QSet<quint64> discardedFlightIds;     // Of aircraft that are kept
 
     for (int i = m_aircraft.size() - 1; i >= 0; i--)
     {
         TrackedAircraft *item = m_aircraft[i];
 
-        if (item->m_active || !item->m_lastSeen.isValid() || (item->m_lastSeen >= cutoff)) {
+        if (!aircraftLimit || item->m_active || !item->m_lastSeen.isValid() || (item->m_lastSeen >= aircraftCutoff))
+        {
+            if (flightLimit) {
+                discardOldFlights(item, flightCutoff, discardedFlights, discardedFlightIds);
+            }
             continue;
         }
 
@@ -1521,11 +1534,11 @@ void AircraftTracker::discardOldAircraft()
         m_dbDirty = true;
     }
 
-    // The ATC and weather logs go by the same rule, or they grow for ever: a message goes
-    // with the aircraft it was from, and one with no aircraft once it is older than the
-    // retention period. That is an unattributed call (id 0), or a message from an aircraft
-    // that went before its messages were taken with it - which otherwise stayed for ever.
-    // A weather report is about an airport, so it goes by age alone.
+    // The ATC and weather logs go by the same rules, or they grow for ever: a message goes
+    // with the aircraft or flight it was from, and one with no aircraft once it is older
+    // than the shorter retention period. That is an unattributed call (id 0), or a message
+    // from an aircraft that went before its messages were taken with it - which otherwise
+    // stayed for ever. A weather report is about an airport, so it goes by age alone.
     const QSet<quint64> discardedIds(discardedAircraft.begin(), discardedAircraft.end());
     QSet<quint64> liveIds;
     for (const TrackedAircraft *item : m_aircraft) {
@@ -1537,6 +1550,11 @@ void AircraftTracker::discardOldAircraft()
     {
         if (discardedIds.contains(e.m_aircraftId))
         {
+            atcPruned = true;
+        }
+        else if (discardedFlightIds.contains(e.m_flightId))
+        {
+            m_atcFlightsToDelete.insert(e.m_flightId);
             atcPruned = true;
         }
         else if (!liveIds.contains(e.m_aircraftId) && e.m_received.isValid() && (e.m_received < cutoff))
@@ -1572,11 +1590,48 @@ void AircraftTracker::discardOldAircraft()
     if (!discardedFlights.isEmpty()) {
         emit flightsRemoved(discardedFlights);
     }
+    if (!discardedFlightIds.isEmpty())
+    {
+        qDebug() << "AircraftTracker::discardOldAircraft: discarded" << discardedFlightIds.size()
+                 << "flights not heard for" << m_settings.m_flightRetentionDays << "days";
+    }
     if (!discardedAircraft.isEmpty())
     {
         qDebug() << "AircraftTracker::discardOldAircraft: discarded" << discardedAircraft.size()
                  << "aircraft not heard for" << m_settings.m_retentionDays << "days";
         emit aircraftRemoved(discardedAircraft);
+    }
+}
+
+// An aircraft that is kept, with its flights older than the cutoff. Its most recent flight
+// stays, however old: it is the flight the aircraft tables show it as flying, and the one
+// a report from the aircraft would carry on. Everything a flight holds - its track,
+// profile and documents - goes with it in the database, through m_flightsToDelete.
+void AircraftTracker::discardOldFlights(TrackedAircraft *item, const QDateTime& cutoff,
+                                        QList<quint64>& discarded, QSet<quint64>& discardedIds)
+{
+    for (int j = item->m_flights.size() - 1; j >= 0; j--)
+    {
+        TrackedFlight *flight = item->m_flights[j];
+        if ((flight == item->m_currentFlight) || !flight->m_lastSeen.isValid() || (flight->m_lastSeen >= cutoff)) {
+            continue;
+        }
+
+        discarded.append(flight->m_id);
+        discardedIds.insert(flight->m_id);
+        m_flightsToDelete.insert(flight->m_id);
+        m_dirtyFlights.remove(flight);
+        m_routesPending.remove(flight->m_id);
+        // Before the flight is deleted, as for a discarded aircraft
+        removeRoutes(flight);
+        if (m_watchedFlight == flight->m_id) {
+            m_watchedFlight = 0;
+        }
+        item->m_flights.removeAt(j);
+        delete flight;
+        // Its flight count has changed
+        m_dirtyAircraft.insert(item);
+        m_dbDirty = true;
     }
 }
 
@@ -4389,6 +4444,31 @@ void AircraftTracker::clearCoverage()
     }
     removeCoverageFromMap();
     m_coverageChanged = true;
+}
+
+// A newly downloaded aircraft database. removeOldAircraft() would pick it up within the
+// minute, but the aircraft already tracked keep the model or icon they were given, and
+// one matched without the database - no type, no operator - was only ever a stand-in.
+// So those we chose are matched again now, from what the database says
+void AircraftTracker::reloadAircraftDatabase()
+{
+    m_aircraftInfo = OsnDB::getAircraftInformationByReg();
+    m_aircraftInfoByIcao = OsnDB::getAircraftInformation();
+    m_routeInfo = OsnDB::getAircraftRouteInformation();
+
+    for (TrackedAircraft *item : m_aircraft)
+    {
+        if (item->m_modelIsOurs || !item->m_liveryIcon.isEmpty())
+        {
+            if (item->m_modelIsOurs) {
+                item->m_model3D = "";
+            }
+            item->m_modelIsOurs = false;
+            item->m_liveryIcon = "";
+            update3DModel(item);
+        }
+        m_dirtyAircraft.insert(item);
+    }
 }
 
 

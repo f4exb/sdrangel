@@ -36,6 +36,8 @@ SWGAircraftSettings::SWGAircraftSettings() {
     m_acars_position_mins_isSet = false;
     retention_days = 0;
     m_retention_days_isSet = false;
+    flight_retention_days = 0;
+    m_flight_retention_days_isSet = false;
     atc_labels = 0;
     m_atc_labels_isSet = false;
     atc_callsigns = 0;
@@ -112,6 +114,8 @@ SWGAircraftSettings::init() {
     m_acars_position_mins_isSet = false;
     retention_days = 0;
     m_retention_days_isSet = false;
+    flight_retention_days = 0;
+    m_flight_retention_days_isSet = false;
     atc_labels = 0;
     m_atc_labels_isSet = false;
     atc_callsigns = 0;
@@ -248,6 +252,8 @@ SWGAircraftSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&retention_days, pJson["retentionDays"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&flight_retention_days, pJson["flightRetentionDays"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&atc_labels, pJson["atcLabels"], "qint32", "");
     
     ::SWGSDRangel::setValue(&atc_callsigns, pJson["atcCallsigns"], "qint32", "");
@@ -335,6 +341,9 @@ SWGAircraftSettings::asJsonObject() {
     }
     if(m_retention_days_isSet){
         obj->insert("retentionDays", QJsonValue(retention_days));
+    }
+    if(m_flight_retention_days_isSet){
+        obj->insert("flightRetentionDays", QJsonValue(flight_retention_days));
     }
     if(m_atc_labels_isSet){
         obj->insert("atcLabels", QJsonValue(atc_labels));
@@ -468,6 +477,16 @@ void
 SWGAircraftSettings::setRetentionDays(qint32 retention_days) {
     this->retention_days = retention_days;
     this->m_retention_days_isSet = true;
+}
+
+qint32
+SWGAircraftSettings::getFlightRetentionDays() {
+    return flight_retention_days;
+}
+void
+SWGAircraftSettings::setFlightRetentionDays(qint32 flight_retention_days) {
+    this->flight_retention_days = flight_retention_days;
+    this->m_flight_retention_days_isSet = true;
 }
 
 qint32
@@ -785,6 +804,9 @@ SWGAircraftSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_retention_days_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_flight_retention_days_isSet){
             isObjectUpdated = true; break;
         }
         if(m_atc_labels_isSet){

@@ -31,6 +31,7 @@ AircraftSettingsDialog::AircraftSettingsDialog(AircraftSettings *settings, QWidg
 
     ui->removal->setValue(m_settings->m_removalMins);
     ui->retention->setValue(m_settings->m_retentionDays);
+    ui->flightRetention->setValue(m_settings->m_flightRetentionDays);
     ui->adsbPosition->setValue(m_settings->m_adsbPositionMins);
     ui->acarsPosition->setValue(m_settings->m_acarsPositionMins);
     ui->atcCallsigns->setChecked(m_settings->m_atcCallsigns);
@@ -82,6 +83,11 @@ void AircraftSettingsDialog::accept()
     {
         m_settings->m_retentionDays = ui->retention->value();
         m_changed.append("retentionDays");
+    }
+    if (ui->flightRetention->value() != m_settings->m_flightRetentionDays)
+    {
+        m_settings->m_flightRetentionDays = ui->flightRetention->value();
+        m_changed.append("flightRetentionDays");
     }
     if (ui->adsbPosition->value() != m_settings->m_adsbPositionMins)
     {

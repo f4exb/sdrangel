@@ -43,6 +43,9 @@
 #include <QTimer>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <QMessageBox>
+#include <QApplication>
+#include <QProgressDialog>
 #ifdef QT_TEXTTOSPEECH_FOUND
 #include <QTextToSpeech>
 #endif
@@ -535,13 +538,6 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     ui->chart->viewport()->installEventFilter(this);
     plotProfileChart();
 
-    // Reuse the ADS-B demodulator's control tower icon (its resources are
-    // process wide); the "ATC" text shows if it isn't available
-    QIcon towerIcon(":/icons/controltower.png");
-    if (!towerIcon.isNull()) {
-        ui->atcLabels->setIcon(towerIcon);
-    }
-
     // Column select menu
     m_columnMenu = new QMenu(ui->aircraft);
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++)
@@ -622,6 +618,11 @@ void AircraftGUI::makeUIConnections()
         this,
         &AircraftGUI::on_settings_clicked
     );
+    QObject::connect(ui->getAircraftDB, &QToolButton::clicked, this, &AircraftGUI::on_getAircraftDB_clicked);
+    connect(&m_osnDB, &OsnDB::downloadingURL, this, &AircraftGUI::downloadingURL);
+    connect(&m_osnDB, &OsnDB::downloadError, this, &AircraftGUI::downloadError);
+    connect(&m_osnDB, &OsnDB::downloadProgress, this, &AircraftGUI::downloadProgress);
+    connect(&m_osnDB, &OsnDB::downloadAircraftInformationFinished, this, &AircraftGUI::downloadAircraftInformationFinished);
     QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &AircraftGUI::on_feed_clicked);
     // The settings are behind a right click, as they were on the demodulator's button
     CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
@@ -712,6 +713,7 @@ void AircraftGUI::showRowNumbers(QTableView *table)
 void AircraftGUI::trackerStatistics(const AircraftStatistics& statistics)
 {
     PROFILER_START()
+    m_databaseBytes = statistics.m_databaseBytes;
     QTableWidget *table = ui->statistics;
     const bool first = (table->columnCount() == 0);
     if (first)
@@ -1380,7 +1382,8 @@ void AircraftGUI::removeMessageRows(const std::function<bool(quint64 aircraftId,
 }
 
 // The tracker's retention sweep discards an ATC message that belongs to no aircraft it
-// still holds once the message is older than the retention period: an unattributed SELCAL
+// still holds once the message is older than the shorter retention period (see
+// AircraftSettings::messageCutoff()): an unattributed SELCAL
 // call, or a message from an aircraft that went before its messages were taken with it.
 // The tables here are only ever pruned by the aircraft and flights the tracker removes, so
 // without the same rule those rows stayed until the feature was restarted. Documents and
@@ -1389,11 +1392,11 @@ void AircraftGUI::removeMessageRows(const std::function<bool(quint64 aircraftId,
 // age alone as the tracker's do.
 void AircraftGUI::pruneOrphanMessageRows()
 {
-    if (m_settings.m_retentionDays <= 0) {
+    const QDateTime cutoff = m_settings.messageCutoff();
+    if (!cutoff.isValid()) {
         return;
     }
     m_orphansPrunedMs = QDateTime::currentMSecsSinceEpoch();
-    const QDateTime cutoff = QDateTime::currentDateTime().addDays(-m_settings.m_retentionDays);
     removeMessageRows([this](quint64 aircraftId, quint64 flightId) {
         return ((aircraftId == 0) || (m_aircraftModel->rowOf(aircraftId) < 0))
             && ((flightId == 0) || (m_flightModel->rowOf(flightId) < 0));
@@ -3237,8 +3240,28 @@ void AircraftGUI::plotProfileChart()
 
 // ---- Toolbar ----
 
+// Not just the tables: every aircraft the database holds, current and past, goes with its
+// flights, tracks, profiles, ACARS documents, ATC messages and weather reports. A database
+// that has grown large took days or weeks of listening to build up, which is too much to
+// lose to a stray click, so past a size like that it asks first.
 void AircraftGUI::on_deleteAircraft_clicked()
 {
+    const qint64 askAboveBytes = 100LL * 1024 * 1024;
+    if (m_databaseBytes > askAboveBytes)
+    {
+        const QMessageBox::StandardButton answer = QMessageBox::question(
+            this,
+            "Delete all aircraft",
+            QString("Delete every aircraft from the database, current and past, with all of their "
+                    "flights, tracks, messages and weather reports?\n\n"
+                    "The database is %1 MB. This cannot be undone. Statistics and coverage are kept.")
+                .arg(m_databaseBytes / (1024.0 * 1024.0), 0, 'f', 0),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+        if (answer != QMessageBox::Yes) {
+            return;
+        }
+    }
     tracker()->getInputMessageQueue()->push(AircraftTracker::MsgDeleteAll::create());
 }
 
@@ -3313,6 +3336,76 @@ void AircraftGUI::feedSelect(const QPoint& p)
                                "feedAirframesPort", "feedAirframesTcp", "feedAvdelphi",
                                "feedAvdelphiHost", "feedAvdelphiPort", "feedAvdelphiTcp"});
         applySettings();
+    }
+}
+
+// The same download the ADS-B and ACARS demodulators offer. Here as well, because this is
+// where most of what the database provides is shown - registrations, types, operators and
+// the 3D models and livery icons matched from them - and without it none of the other
+// protocols' aircraft can be told apart from one another by anything but address
+void AircraftGUI::on_getAircraftDB_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_osnDB.downloadAircraftInformation();
+    }
+}
+
+void AircraftGUI::downloadingURL(const QString& url)
+{
+    if (m_progressDialog)
+    {
+        m_progressDialog->setLabelText(QString("Downloading %1.").arg(url));
+        m_progressDialog->setValue(m_progressDialog->value() + 1);
+    }
+}
+
+void AircraftGUI::downloadError(const QString& error)
+{
+    QMessageBox::critical(this, "Aircraft", error);
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void AircraftGUI::downloadProgress(qint64 bytesRead, qint64 totalBytes)
+{
+    if (m_progressDialog)
+    {
+        m_progressDialog->setMaximum(totalBytes);
+        m_progressDialog->setValue(bytesRead);
+    }
+}
+
+void AircraftGUI::downloadAircraftInformationFinished()
+{
+    if (m_progressDialog)
+    {
+        delete m_progressDialog;
+        m_progressDialog = new QProgressDialog("Reading Aircraft Information.", "", 0, 1, this);
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_progressDialog->setWindowModality(Qt::WindowModal);
+        m_progressDialog->show();
+        QApplication::processEvents();
+    }
+    // Read here, under the dialog, rather than by the tracker on its own thread with
+    // nothing to say why the aircraft are not updating
+    OsnDB::getAircraftInformation();
+    OsnDB::getAircraftInformationByReg();
+    QMetaObject::invokeMethod(tracker(), "reloadAircraftDatabase", Qt::QueuedConnection);
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
     }
 }
 

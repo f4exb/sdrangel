@@ -436,6 +436,8 @@ public slots:
     // Invoked from the GUI thread by the coverage button's right click, so it has
     // to be a slot to cross to the tracker's own thread
     void clearCoverage();
+    // Invoked from the GUI thread once it has downloaded a new aircraft database
+    void reloadAircraftDatabase();
 
 public:
     //!< A snapshot of what is being tracked, for the web API's report. In a public
@@ -824,6 +826,7 @@ private:
     QList<QPair<quint64, quint64>> m_atcAircraftMoves;
     QList<QPair<quint64, quint64>> m_atcFlightMoves;
     QSet<quint64> m_atcAircraftToDelete;
+    QSet<quint64> m_atcFlightsToDelete;     //!< Messages that go with discarded flights
     //!< Messages from before m_atcPruneCutoff whose aircraft no longer exists - or never
     //!< did, id 0 being an unattributed call - by aircraft id
     QSet<quint64> m_atcPrunedIds;
@@ -1132,6 +1135,8 @@ private slots:
     void handleInputMessages();
     void flush();
     void removeOldAircraft();
+    void discardOldFlights(TrackedAircraft *item, const QDateTime& cutoff,
+                           QList<quint64>& discarded, QSet<quint64>& discardedIds);
     void setActive(TrackedAircraft *item, bool active);
     void discardOldAircraft();
     void changeDatabase(const QString& oldPath);

@@ -323,7 +323,7 @@ For the 2D map, the settings include:
   or [gdal2tiles](https://gdal.org/programs/gdal2tiles.html)
   or any other tool that creates map images compatible with Google Maps, OpenLayers and Leaflet.
 * When MapboxGL is used as the provider, custom styles can be specified. MapboxGL requires a Mapbox API key to be entered.
-* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models, so require the 3D models to have been downloaded. Aircraft without a matching livery icon are displayed with the plain icon sent by the source plugin.
+* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. The Map picks the icon that matches the aircraft's 3D model, so this requires the 3D models to have been downloaded. Otherwise, aircraft are displayed with the icon sent by the source plugin, which is a livery icon when the source plugin's own livery icons option is enabled.
 
 For the 3D map, the settings include:
 

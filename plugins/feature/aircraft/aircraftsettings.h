@@ -24,6 +24,7 @@
 #include <QList>
 #include <QSharedPointer>
 #include <QRegularExpression>
+#include <QDateTime>
 
 class Serializable;
 
@@ -75,6 +76,9 @@ struct AircraftSettings
     int m_adsbPositionMins;
     int m_acarsPositionMins;
     int m_retentionDays;    // Discard archived aircraft after this many days; 0 keeps them
+    // Discard flights that ended this many days ago; 0 keeps them. Separate, so the
+    // aircraft can be kept for ever without every flight they ever made going with them
+    int m_flightRetentionDays;
     bool m_atcLabels;       // Display route, altitude and speed in Map labels
     bool m_atcCallsigns;    // Map labels use the airline's callsign (SPEEDBIRD) not its code (BAW)
     // Keep the furthest aircraft ever heard on the Map, at the position it was in when
@@ -116,6 +120,10 @@ struct AircraftSettings
     //!< without anyone having to find the option.
     quint32 m_coverageHiddenProtocols;
     bool coverageShown(int protocol) const { return !(m_coverageHiddenProtocols & (1u << protocol)); }
+    // The age past which an ATC message or weather report belonging to no aircraft or
+    // flight still kept is discarded: the shorter of the two retention periods. Invalid
+    // when both keep everything
+    QDateTime messageCutoff() const;
     QString m_databaseFilename;     // Where the session is kept; empty means the default location
     QStringList m_disabledSources;  // Channel URIs not to accept reports from; empty accepts all
 

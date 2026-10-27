@@ -81,6 +81,7 @@ void AircraftSettings::resetToDefaults()
     m_adsbPositionMins = 1;
     m_acarsPositionMins = 10;
     m_retentionDays = 0;    // Keep everything until the user chooses a limit
+    m_flightRetentionDays = 0;
     m_atcLabels = true;
     m_displayMaxRangeOnMap = false;
     m_atcCallsigns = false;
@@ -168,6 +169,7 @@ QByteArray AircraftSettings::serialize() const
     s.writeBool(55, m_feedAvdelphiTcp);
     s.writeBool(56, m_displayCoverage);
     s.writeU32(57, m_coverageHiddenProtocols);
+    s.writeS32(58, m_flightRetentionDays);
 
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
         s.writeS32(300 + i, m_columnIndexes[i]);
@@ -234,6 +236,7 @@ bool AircraftSettings::deserialize(const QByteArray& data)
         d.readS32(41, &m_adsbPositionMins, 1);
         d.readS32(42, &m_acarsPositionMins, 10);
         d.readS32(36, &m_retentionDays, 0);
+        d.readS32(58, &m_flightRetentionDays, 0);
         d.readBlob(31, &bytetmp);
         deserializeNotificationSettings(bytetmp, m_notificationSettings);
         d.readBool(32, &m_atcLabels, true);
@@ -328,6 +331,9 @@ void AircraftSettings::applySettings(const QStringList& settingsKeys, const Airc
     }
     if (settingsKeys.contains("retentionDays")) {
         m_retentionDays = settings.m_retentionDays;
+    }
+    if (settingsKeys.contains("flightRetentionDays")) {
+        m_flightRetentionDays = settings.m_flightRetentionDays;
     }
     if (settingsKeys.contains("notificationSettings")) {
         m_notificationSettings = settings.m_notificationSettings;
@@ -496,6 +502,9 @@ QString AircraftSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("retentionDays") || force) {
         ostr << " m_retentionDays: " << m_retentionDays;
     }
+    if (settingsKeys.contains("flightRetentionDays") || force) {
+        ostr << " m_flightRetentionDays: " << m_flightRetentionDays;
+    }
     if (settingsKeys.contains("atcCallsigns") || force) {
         ostr << " m_atcCallsigns: " << m_atcCallsigns;
     }
@@ -507,4 +516,13 @@ QString AircraftSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
 
     return QString(ostr.str().c_str());
+}
+
+QDateTime AircraftSettings::messageCutoff() const
+{
+    int days = m_retentionDays;
+    if ((m_flightRetentionDays > 0) && ((days <= 0) || (m_flightRetentionDays < days))) {
+        days = m_flightRetentionDays;
+    }
+    return days > 0 ? QDateTime::currentDateTime().addDays(-days) : QDateTime();
 }

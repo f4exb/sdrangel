@@ -57,6 +57,9 @@ public:
     qint32 getRetentionDays();
     void setRetentionDays(qint32 retention_days);
 
+    qint32 getFlightRetentionDays();
+    void setFlightRetentionDays(qint32 flight_retention_days);
+
     qint32 getAtcLabels();
     void setAtcLabels(qint32 atc_labels);
 
@@ -162,6 +165,9 @@ private:
 
     qint32 retention_days;
     bool m_retention_days_isSet;
+
+    qint32 flight_retention_days;
+    bool m_flight_retention_days_isSet;
 
     qint32 atc_labels;
     bool m_atc_labels_isSet;

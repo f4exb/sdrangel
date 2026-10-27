@@ -30,6 +30,7 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "util/planespotters.h"
+#include "util/osndb.h"
 #include "settings/rollupstate.h"
 
 #include "aircraftsettings.h"
@@ -43,6 +44,7 @@ class QTableWidget;
 class QTableWidgetItem;
 class QTextToSpeech;
 class QSortFilterProxyModel;
+class QProgressDialog;
 
 namespace Ui {
     class AircraftGUI;
@@ -76,6 +78,9 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     AircraftSettings m_settings;
+    OsnDB m_osnDB;
+    QProgressDialog *m_progressDialog = nullptr;
+    qint64 m_databaseBytes = 0;     // From the tracker's statistics, for Delete all to warn on
     // All three splitters in one blob - see AircraftSettings::m_splitterStates
     QByteArray saveSplitters() const;
     void restoreSplitters(const QByteArray& data);
@@ -229,6 +234,11 @@ private slots:
     void handleInputMessages();
     void on_deleteAircraft_clicked();
     void on_settings_clicked();
+    void on_getAircraftDB_clicked();
+    void downloadingURL(const QString& url);
+    void downloadError(const QString& error);
+    void downloadProgress(qint64 bytesRead, qint64 totalBytes);
+    void downloadAircraftInformationFinished();
     void on_feed_clicked(bool checked);
     void feedSelect(const QPoint& p);
     void on_notifications_clicked();

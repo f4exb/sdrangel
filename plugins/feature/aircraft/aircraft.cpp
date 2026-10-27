@@ -447,6 +447,7 @@ void Aircraft::webapiFormatFeatureSettings(
     swg->setAdsbPositionMins(settings.m_adsbPositionMins);
     swg->setAcarsPositionMins(settings.m_acarsPositionMins);
     swg->setRetentionDays(settings.m_retentionDays);
+    swg->setFlightRetentionDays(settings.m_flightRetentionDays);
     swg->setAtcLabels(settings.m_atcLabels ? 1 : 0);
     swg->setAtcCallsigns(settings.m_atcCallsigns ? 1 : 0);
     swg->setDisplayMaxRangeOnMap(settings.m_displayMaxRangeOnMap ? 1 : 0);
@@ -560,6 +561,9 @@ void Aircraft::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("retentionDays")) {
         settings.m_retentionDays = swg->getRetentionDays();
+    }
+    if (featureSettingsKeys.contains("flightRetentionDays")) {
+        settings.m_flightRetentionDays = swg->getFlightRetentionDays();
     }
     if (featureSettingsKeys.contains("atcLabels")) {
         settings.m_atcLabels = swg->getAtcLabels() != 0;

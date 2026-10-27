@@ -122,7 +122,7 @@
       <item>
        <widget class="QToolButton" name="deleteAircraft">
         <property name="toolTip">
-         <string>Delete all aircraft from the table and the Map</string>
+         <string>Delete all aircraft, current and past, from the database, the tables and the Map, with their flights, tracks, messages and weather reports. Statistics and coverage are kept. Asks first if the database is over 100 MB.</string>
         </property>
         <property name="text">
          <string/>
@@ -153,7 +153,11 @@
          <string>Display route, altitude and speed in aircraft labels on the Map</string>
         </property>
         <property name="text">
-         <string>ATC</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="aircrafticons.qrc">
+          <normaloff>:/icons/controltower.png</normaloff>:/icons/controltower.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -169,7 +173,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="aircrafticons.qrc">
+         <iconset>
           <normaloff>:/icons/stats.png</normaloff>:/icons/stats.png</iconset>
         </property>
         <property name="checkable">
@@ -186,7 +190,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="aircrafticons.qrc">
+         <iconset>
           <normaloff>:/icons/chart.png</normaloff>:/icons/chart.png</iconset>
         </property>
         <property name="checkable">
@@ -203,7 +207,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="aircrafticons.qrc">
+         <iconset>
           <normaloff>:/icons/coverage.png</normaloff>:/icons/coverage.png</iconset>
         </property>
         <property name="checkable">
@@ -243,9 +247,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="getAircraftDB">
+        <property name="toolTip">
+         <string>Download the latest aircraft database (45MB)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>:/icons/aircraft.png</normaloff>:/icons/aircraft.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="toolbarSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -260,893 +278,893 @@
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
       <widget class="QSplitter" name="aircraftSplitter">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-      <widget class="QTabWidget" name="aircraftTabs">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="aircraftTab">
-       <attribute name="title">
-        <string>Aircraft</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="aircraftTabLayout">
-        <property name="spacing">
-         <number>2</number>
+       <widget class="QTabWidget" name="aircraftTabs">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="leftMargin">
-         <number>2</number>
+        <property name="currentIndex">
+         <number>0</number>
         </property>
-        <property name="topMargin">
-         <number>2</number>
+        <widget class="QWidget" name="aircraftTab">
+         <attribute name="title">
+          <string>Aircraft</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="aircraftTabLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QTableView" name="aircraft">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Aircraft heard across all demodulators. Select a row to filter the Documents and ATC tables.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="flightsTab">
+         <attribute name="title">
+          <string>Flights</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="flightsTabLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QTableView" name="flights">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Flights seen this session, current and past. Select a row to filter the Documents and ATC tables.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="oldAircraftTab">
+         <attribute name="title">
+          <string>Old Aircraft</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="oldAircraftTabLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QTableView" name="oldAircraft">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Aircraft heard across all demodulators. Select a row to filter the Documents and ATC tables.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="oldFlightsTab">
+         <attribute name="title">
+          <string>Old Flights</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="oldFlightsTabLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QTableView" name="oldFlights">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Flights that have finished, and those restored from the last session. Select a row to filter the Documents and ATC tables.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="weatherTab">
+         <attribute name="title">
+          <string>Weather</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="weatherTabLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QSplitter" name="weatherSplitter">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <widget class="QTableWidget" name="weather">
+             <property name="toolTip">
+              <string>Weather reports for airports, as carried by ACARS - METARs, TAFs, D-ATIS, TWIPs, NOTAMs, PIREPs and SIGMETs. They arrive through whichever aircraft requested them, but describe the airport rather than that aircraft, so they are kept for the session. Select a row to read the full report.</string>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>Time</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Airport</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Via</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Report</string>
+              </property>
+             </column>
+            </widget>
+            <widget class="AcarsMessageView" name="weatherText">
+             <property name="lineWrapMode">
+              <enum>QTextEdit::LineWrapMode::NoWrap</enum>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+       <widget class="QTableWidget" name="statistics">
+        <property name="toolTip">
+         <string>Records and counters. Ranges are measured from the position of the device each report arrived on, or My Position where the device does not know where it is. Right click to reset.</string>
         </property>
-        <property name="rightMargin">
-         <number>2</number>
+        <property name="editTriggers">
+         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
         </property>
-        <property name="bottomMargin">
-         <number>2</number>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
         </property>
-        <item>
-         <widget class="QTableView" name="aircraft">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Aircraft heard across all demodulators. Select a row to filter the Documents and ATC tables.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <attribute name="horizontalHeaderStretchLastSection">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="flightsTab">
-       <attribute name="title">
-        <string>Flights</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="flightsTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableView" name="flights">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Flights seen this session, current and past. Select a row to filter the Documents and ATC tables.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="oldAircraftTab">
-       <attribute name="title">
-        <string>Old Aircraft</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="oldAircraftTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableView" name="oldAircraft">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Aircraft heard across all demodulators. Select a row to filter the Documents and ATC tables.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <attribute name="horizontalHeaderStretchLastSection">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="oldFlightsTab">
-       <attribute name="title">
-        <string>Old Flights</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="oldFlightsTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableView" name="oldFlights">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Flights that have finished, and those restored from the last session. Select a row to filter the Documents and ATC tables.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="weatherTab">
-       <attribute name="title">
-        <string>Weather</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="weatherTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QSplitter" name="weatherSplitter">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <widget class="QTableWidget" name="weather">
+      <widget class="QTabWidget" name="messageTabs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="photoTab">
+        <attribute name="title">
+         <string>Aircraft</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="photoTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" name="photoLayout">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="photoHeaderLayout">
+             <property name="spacing">
+              <number>4</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="photoHeader">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="photoFlag">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="ClickableLabel" name="photo">
+             <property name="toolTip">
+              <string>Click to view the photo on planespotters.net</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="flightDetails">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::TextFormat::RichText</enum>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="photoVerticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="aircraftInfo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
-            <string>Weather reports for airports, as carried by ACARS - METARs, TAFs, D-ATIS, TWIPs, NOTAMs, PIREPs and SIGMETs. They arrive through whichever aircraft requested them, but describe the airport rather than that aircraft, so they are kept for the session. Select a row to read the full report.</string>
+            <string>Details of the selected aircraft from the aircraft database</string>
            </property>
            <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::SingleSelection</enum>
+            <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Property</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Value</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="documentsTab">
+        <attribute name="title">
+         <string>Documents</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="documentsTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="documentsSplitter">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QTableWidget" name="documents">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Documents for the selected aircraft or flight: flight plans, clearances, loadsheets, CPDLC, logons. Select a row to view the document below.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+            <column>
+             <property name="text">
+              <string>Time</string>
+             </property>
+             <property name="toolTip">
+              <string>Time the document was received</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Callsign</string>
+             </property>
+             <property name="toolTip">
+              <string>Callsign of the flight the document belongs to</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Reg</string>
+             </property>
+             <property name="toolTip">
+              <string>Aircraft registration or ICAO address</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Type</string>
+             </property>
+             <property name="toolTip">
+              <string>Kind of document</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Title</string>
+             </property>
+             <property name="toolTip">
+              <string>Document title</string>
+             </property>
+            </column>
+           </widget>
+           <widget class="AcarsMessageView" name="documentText">
+            <property name="toolTip">
+             <string>The selected document</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="logonsTab">
+        <attribute name="title">
+         <string>Logons</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="logonsTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="logonsSplitter">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QTableWidget" name="logons">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Datalink logons for the selected aircraft or flight. Kept apart from the documents because there are far more of them than of everything else together.</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+            </property>
+            <column>
+             <property name="text">
+              <string>Time</string>
+             </property>
+             <property name="toolTip">
+              <string>Time the logon was received</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Callsign</string>
+             </property>
+             <property name="toolTip">
+              <string>Callsign of the flight the logon belongs to</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Reg</string>
+             </property>
+             <property name="toolTip">
+              <string>Aircraft registration or ICAO address</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Type</string>
+             </property>
+             <property name="toolTip">
+              <string>Kind of logon</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Title</string>
+             </property>
+             <property name="toolTip">
+              <string>Logon title</string>
+             </property>
+            </column>
+           </widget>
+           <widget class="AcarsMessageView" name="logonText">
+            <property name="toolTip">
+             <string>The selected logon</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="atcTab">
+        <attribute name="title">
+         <string>ATC</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="atcTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QTableWidget" name="atcMessages">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Controller-pilot data link (CPDLC) messages for the selected aircraft or flight</string>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
            </property>
            <column>
             <property name="text">
              <string>Time</string>
             </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Airport</string>
+            <property name="toolTip">
+             <string>Time the message was received</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>Type</string>
+             <string>Protocol</string>
+            </property>
+            <property name="toolTip">
+             <string>Message protocol, e.g. CPDLC</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>Via</string>
+             <string>Dir</string>
+            </property>
+            <property name="toolTip">
+             <string>Message direction: up arrow for uplink (ATC to aircraft), down arrow for downlink</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>Report</string>
+             <string>From</string>
+            </property>
+            <property name="toolTip">
+             <string>Message source, when known</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>To</string>
+            </property>
+            <property name="toolTip">
+             <string>Message recipient, when known</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Message</string>
+            </property>
+            <property name="toolTip">
+             <string>The ATC message text</string>
             </property>
            </column>
           </widget>
-          <widget class="AcarsMessageView" name="weatherText">
-           <property name="readOnly">
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="pastFlightsTab">
+        <attribute name="title">
+         <string>Past Flights</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="pastFlightsTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QTableWidget" name="pastFlights">
+           <property name="toolTip">
+            <string>Every flight this aircraft has been seen operating, most recent first</string>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+           </property>
+           <property name="alternatingRowColors">
             <bool>true</bool>
            </property>
-           <property name="lineWrapMode">
-            <enum>QTextEdit::NoWrap</enum>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
            </property>
           </widget>
-         </widget>
-        </item>
-       </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="pastAircraftTab">
+        <attribute name="title">
+         <string>Past Aircraft</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="pastAircraftTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QTableWidget" name="pastAircraft">
+           <property name="toolTip">
+            <string>Every aircraft that has been seen operating this flight number, most recent first</string>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="profileTab">
+        <attribute name="title">
+         <string>Flight Profile</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="profileTabLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QChartView" name="profileChart">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Flight profile of the selected aircraft or flight: altitude and speed against time</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
+      <widget class="QChartView" name="chart">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Message rate per protocol, with ADS-B and the total on the right hand axis. Click a legend entry to show/hide a series. Mouse wheel zooms the time axis, shift + wheel the rate axes; double click to reset.</string>
+       </property>
       </widget>
-         <widget class="QTableWidget" name="statistics">
-          <property name="toolTip">
-           <string>Records and counters. Ranges are measured from the position of the device each report arrived on, or My Position where the device does not know where it is. Right click to reset.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-         </widget>
-      </widget>
-      <widget class="QTabWidget" name="messageTabs">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="photoTab">
-       <attribute name="title">
-        <string>Aircraft</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="photoTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <layout class="QVBoxLayout" name="photoLayout">
-          <property name="spacing">
-           <number>4</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="photoHeaderLayout">
-            <property name="spacing">
-             <number>4</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="photoHeader">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="photoFlag">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="ClickableLabel" name="photo">
-            <property name="toolTip">
-             <string>Click to view the photo on planespotters.net</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="flightDetails">
-            <property name="minimumSize">
-             <size>
-              <width>200</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="photoVerticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QTableWidget" name="aircraftInfo">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>1</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Details of the selected aircraft from the aircraft database</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <attribute name="horizontalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-          <attribute name="horizontalHeaderStretchLastSection">
-           <bool>true</bool>
-          </attribute>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-          <column>
-           <property name="text">
-            <string>Property</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Value</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="documentsTab">
-       <attribute name="title">
-        <string>Documents</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="documentsTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QSplitter" name="documentsSplitter">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="childrenCollapsible">
-           <bool>false</bool>
-          </property>
-          <widget class="QTableWidget" name="documents">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Documents for the selected aircraft or flight: flight plans, clearances, loadsheets, CPDLC, logons. Select a row to view the document below.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <column>
-           <property name="text">
-            <string>Time</string>
-           </property>
-           <property name="toolTip">
-            <string>Time the document was received</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Callsign</string>
-           </property>
-           <property name="toolTip">
-            <string>Callsign of the flight the document belongs to</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Reg</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft registration or ICAO address</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Type</string>
-           </property>
-           <property name="toolTip">
-            <string>Kind of document</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Title</string>
-           </property>
-           <property name="toolTip">
-            <string>Document title</string>
-           </property>
-          </column>
-         </widget>
-          <widget class="AcarsMessageView" name="documentText">
-          <property name="toolTip">
-           <string>The selected document</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     <widget class="QWidget" name="logonsTab">
-       <attribute name="title">
-        <string>Logons</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="logonsTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QSplitter" name="logonsSplitter">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="childrenCollapsible">
-           <bool>false</bool>
-          </property>
-          <widget class="QTableWidget" name="logons">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Datalink logons for the selected aircraft or flight. Kept apart from the documents because there are far more of them than of everything else together.</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <column>
-           <property name="text">
-            <string>Time</string>
-           </property>
-           <property name="toolTip">
-            <string>Time the logon was received</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Callsign</string>
-           </property>
-           <property name="toolTip">
-            <string>Callsign of the flight the logon belongs to</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Reg</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft registration or ICAO address</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Type</string>
-           </property>
-           <property name="toolTip">
-            <string>Kind of logon</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Title</string>
-           </property>
-           <property name="toolTip">
-            <string>Logon title</string>
-           </property>
-          </column>
-         </widget>
-          <widget class="AcarsMessageView" name="logonText">
-          <property name="toolTip">
-           <string>The selected logon</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="atcTab">
-       <attribute name="title">
-        <string>ATC</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="atcTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableWidget" name="atcMessages">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Controller-pilot data link (CPDLC) messages for the selected aircraft or flight</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <column>
-           <property name="text">
-            <string>Time</string>
-           </property>
-           <property name="toolTip">
-            <string>Time the message was received</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Protocol</string>
-           </property>
-           <property name="toolTip">
-            <string>Message protocol, e.g. CPDLC</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Dir</string>
-           </property>
-           <property name="toolTip">
-            <string>Message direction: up arrow for uplink (ATC to aircraft), down arrow for downlink</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>From</string>
-           </property>
-           <property name="toolTip">
-            <string>Message source, when known</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>To</string>
-           </property>
-           <property name="toolTip">
-            <string>Message recipient, when known</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Message</string>
-           </property>
-           <property name="toolTip">
-            <string>The ATC message text</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="pastFlightsTab">
-       <attribute name="title">
-        <string>Past Flights</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="pastFlightsTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableWidget" name="pastFlights">
-          <property name="toolTip">
-           <string>Every flight this aircraft has been seen operating, most recent first</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="pastAircraftTab">
-       <attribute name="title">
-        <string>Past Aircraft</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="pastAircraftTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QTableWidget" name="pastAircraft">
-          <property name="toolTip">
-           <string>Every aircraft that has been seen operating this flight number, most recent first</string>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="profileTab">
-       <attribute name="title">
-        <string>Flight Profile</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="profileTabLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QChartView" name="profileChart">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Flight profile of the selected aircraft or flight: altitude and speed against time</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      </widget>
-         <widget class="QChartView" name="chart">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Message rate per protocol, with ADS-B and the total on the right hand axis. Click a legend entry to show/hide a series. Mouse wheel zooms the time axis, shift + wheel the rate axes; double click to reset.</string>
-          </property>
-         </widget>
      </widget>
     </item>
    </layout>

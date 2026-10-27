@@ -11,7 +11,10 @@ AircraftSettings:
       description: "How long an ACARS, VDL-2, HFDL or Aero position stays believable, in minutes. Longer than the ADS-B figure because those protocols report far less often"
       type: integer
     retentionDays:
-      description: "Discard archived aircraft after this many days. 0 keeps them for ever"
+      description: "Discard archived aircraft, with their flights, after this many days. 0 keeps them for ever"
+      type: integer
+    flightRetentionDays:
+      description: "Discard flights this many days after they were last heard, keeping their aircraft. An aircraft's most recent flight is always kept. 0 keeps flights for as long as their aircraft"
       type: integer
     atcLabels:
       description: "Display route, altitude and speed in map labels (1 for yes, 0 for no)"

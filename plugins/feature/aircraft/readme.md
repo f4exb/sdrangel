@@ -81,7 +81,10 @@ nothing matches.
 
 <h3>3: Delete aircraft</h3>
 
-Deletes all aircraft from the tables and removes them from the Map.
+Deletes every aircraft from the database: current and past, with all of their flights,
+tracks, and associated data. They are also removed from the Map. This cannot be undone.
+
+The statistics and coverage are kept. Each has its own reset, on its button's context menu.
 
 <h3>4: Notifications</h3>
 
@@ -183,9 +186,14 @@ Click to open the settings dialog.
 
 * Archive after (mins) - how long without a report before an aircraft moves to the Old
   Aircraft table and comes off the Map.
-* Keep for (days) - how long archived aircraft and their flights are kept in the session
-  database before being discarded. Zero keeps them forever, at the cost of a database
-  that grows without limit
+* Keep aircraft for (days) - how long archived aircraft are kept in the database
+  before being discarded, with all of their flights. Zero keeps them forever, at the cost
+  of a database that grows without limit
+* Keep flights for (days) - how long a flight is kept after it was last heard.
+  This allows aircraft to be kept forever, but only their
+  recent flights - which hold the tracks, profiles and ACARS documents, so are most of the
+  database. An aircraft's most recent flight is always kept. Zero keeps flights for as long
+  as their aircraft. 
 * ADS-B position for (mins) - how long an aircraft stays on the Map after its last ADS-B
   position
 * ACARS position for (mins) - the same for a position from ACARS, VDL-2, HFDL, Aero or Iridium.
@@ -214,9 +222,19 @@ right type in the right livery, prefer a similar aircraft in the correct livery 
 exact type in the wrong one. 
 
 **Livery aircraft icons (2D map)** - display aircraft on the 2D map using icons showing
-their airline's livery, instead of black icons. The icon follows the aircraft's matched
-3D model, so this requires the 3D models to have been downloaded via the Map feature.
-Aircraft without a matching model are displayed with a white version of the plain icon.
+their airline's livery, instead of black icons.
+
+<h3>11: Download aircraft database</h3>
+
+Downloads the latest aircraft database (45MB). It maps ICAO addresses to registrations and
+gives each airframe's type, model, operator and owner, which fill in the Aircraft table.
+Without it, an aircraft heard by
+its ICAO address on one protocol and by its registration on another is only recognised as
+the same airframe where something else links them, such as a flight number (see Aircraft
+identity above).
+
+It is the same database the ADS-B and ACARS demodulators download, so it only
+needs downloading from one of them.
 
 <h3>Aircraft</h3>
 

@@ -1348,6 +1348,7 @@ void AircraftTracker::forgetPendingChanges()
     m_atcAircraftMoves.clear();
     m_atcFlightMoves.clear();
     m_atcAircraftToDelete.clear();
+    m_atcFlightsToDelete.clear();
     m_atcPrunedIds.clear();
     m_atcPruneCutoff = QDateTime();
 }
@@ -1411,7 +1412,8 @@ bool AircraftTracker::saveMessageChanges()
     if (!forEach("UPDATE atc SET aircraft_id = ? WHERE aircraft_id = ?", swapped(m_atcAircraftMoves), true)
         || !forEach("UPDATE atc SET flight_id = ? WHERE flight_id = ?", swapped(m_atcFlightMoves), true)
         || !forEach("DELETE FROM documents WHERE flight_id = ?", ids(m_flightsToDelete + m_documentsToRewrite), false)
-        || !forEach("DELETE FROM atc WHERE aircraft_id = ?", ids(m_atcAircraftToDelete), false)) {
+        || !forEach("DELETE FROM atc WHERE aircraft_id = ?", ids(m_atcAircraftToDelete), false)
+        || !forEach("DELETE FROM atc WHERE flight_id = ?", ids(m_atcFlightsToDelete), false)) {
         return false;
     }
     if (m_atcPruneCutoff.isValid())
