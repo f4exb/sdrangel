@@ -106,6 +106,14 @@ public:
     // only afterwards.
     static const Aircraft3DModels& instance();
 
+    // The same matching over the 2D livery icons built into the ADS-B demodulator, for
+    // when the model pack isn't installed and instance() matches nothing. The icons are
+    // named after the models they were rendered from, so what this picks is the icon the
+    // model that would have been picked has - its "models" are icon names, A320_BAW, to
+    // look up under :/map/liveries/, and never anything to send to the 3D map. Empty
+    // without the ADS-B demodulator, whose resources the icons are
+    static const Aircraft3DModels& liveryIcons();
+
     // A model for an aircraft in the OpenSky database, preferring the operator's livery.
     // False when nothing matches: no model pack, or a type with no model.
     bool modelFor(const AircraftInformation *info, bool favourLivery, bool verbose,
@@ -178,7 +186,9 @@ private:
         QSet<QString> animations;
     };
 
-    Aircraft3DModels(bool verbose);
+    Aircraft3DModels(bool verbose, bool liveryIcons = false);
+    void findModels(bool verbose);
+    void findLiveryIcons();
     ~Aircraft3DModels();
 
     ModelInfo modelInfo(const QString &model) const;
@@ -198,6 +208,7 @@ private:
     static constexpr qint64 m_modelInfoRecheckMs = 30000;
     mutable QSet<QString> m_unreadableModels;             // Not persisted: tried again next session
 
+    bool m_liveryIcons;                             // Built from the icons rather than the models
     QHash<QString, QString> m_3DModels;             // "TYPE_LIVERY" to model path
     QHash<QString, QStringList> m_3DModelsByType;   // Type to every livery of it
     QHash<QString, QString> m_lowDetailModels;      // Model path to its low detail sibling

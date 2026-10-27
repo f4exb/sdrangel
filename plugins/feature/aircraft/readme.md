@@ -15,7 +15,7 @@ continuous positions in VHF range, VDL-2 sees logons and CPDLC near airports, an
 can report an aircraft's position from thousands of kilometres away, hours after it left
 ADS-B range. The feature merges these into one aircraft with one track.
 
-<h2>Aircraft identity</h2>
+<h3>Aircraft identity</h3>
 
 Reports may identify an aircraft by any of:
 
@@ -27,126 +27,13 @@ The feature merges reports under whichever identities it has seen, cross referen
 registration and ICAO address through the aircraft database. A flight number is
 remembered as the aircraft's most recent flight (flights change; the airframe does not).
 
-<h2>Tables and tabs</h2>
-
-The upper half of the window holds the traffic:
-
-* **Aircraft** - every airframe currently being heard, one row each. See the column list
-  under Interface below
-* **Old Aircraft** - airframes that have gone quiet for longer than the archive timeout.
-  They are not forgotten, only no longer current, and they come off the Map
-
-![Aircraft Table](../../../doc/img/AircraftFeature_aircraft_table.png)
-
-* **Flights** - the flights seen this session, current and past: flight number, aircraft,
-  departure and arrival, the four OOOI times, when it was first and last heard, which
-  documents it has produced, and which protocols heard it
-* **Old Flights** - flights that have finished, and those restored from the last session
-
-![Flights Table](../../../doc/img/AircraftFeature_flights_table.png)
-
-* **Weather** - METARs, TAFs, D-ATIS, TWIPs, NOTAMs, PIREPs and SIGMETs carried by ACARS.
-  Selecting a row shows the full report.
-
-The lower half describes whatever is selected above:
-
-<h3 id="aircraft">Aircraft</h3>
-
-Shows a photograph of the selected
-aircraft from [planespotters.net](https://www.planespotters.net/) headed by its
-registration and the country flag, with the airline's logo beneath it and a table of what
-the aircraft database knows about the airframe beside it. Clicking the photograph opens it
-on planespotters.net
-
-![Aircraft Tab](../../../doc/img/AircraftFeature_aircraft_tab.png)
-
-<h3>Documents</h3>
-
-Flight plans, oceanic clearances, loadsheets, logons and OOOI events,
-collected against the flight number. Selecting one displays its full text
-below the table. Plain ACARS messages are not collected.
-
-![Flight plan](../../../doc/img/AircraftFeature_flight_plan.png)
-
-![Loadsheet](../../../doc/img/AircraftFeature_loadsheet.png)
-
-![Clearance](../../../doc/img/AircraftFeature_clearance.png)
-
-<h3>ATC</h3>
-
-CPDLC (controller-pilot data link) messages across all channels, with the
-protocol, direction (uplink from ATC, downlink from the aircraft), source and
-recipient where known, and the concise message text (e.g. "WILCO"). SELCAL calls are
-listed here too, with the frequency they were heard on as the source - see
-[SELCAL](#selcal) below. With nothing selected, the table shows the SELCAL calls that
-could not be attributed to an aircraft
-
-![ATC Tab](../../../doc/img/AircraftFeature_atc_tab.png)
-
-<h3>Past Aircraft</h3>
-
-Every airframe that has operated the selected **flight number**.
-Shown only while a flight is selected.
-
-<h3>Past Flights</h3>
-
-Every flight the selected **aircraft** has operated.
-Shown only while an aircraft is selected.
-Selecting one of its rows charts that flight's profile and draws its track.
-
-<h3>Flight profile</h3>
-
-The Flight Profile tab charts the selected flight's altitude (left axis) and speed
-(right axis) against time, showing the flight profile - climb, cruise and descent - built
-from all protocols.
-
-![Flight Profile Tab](../../../doc/img/AircraftFeature_flight_profile.png)
-
-<h3 id="selcal">SELCAL</h3>
-
-A SELCAL call is a ground station calling an aircraft on an HF or VHF voice channel. It
-carries only a code, and a code can be shared by several aircraft.
-
-An attributed call counts as a message from the aircraft: it adds "SELCAL" and the
-frequency to the aircraft's protocols and updates when it was last seen. It carries no
-position, so nothing moves on the Map. Every call, attributed or not, is listed in the ATC
-tab.
-
-<h2>Session persistence</h2>
+<h3>Session persistence</h3>
 
 The collated aircraft, flights, documents and ATC log are saved to a SQLite database
 (aircraft.db in the application data directory) every minute and on exit, and restored
 when the feature is next opened.
 
-Tracks and flight profiles are **not** read at startup - only how many points each flight
-has, which is what lets the save go on appending to them. The points themselves are
-fetched a flight at a time, when something wants to draw or chart one. 
-On restore, aircraft that have not been heard within
-the removal timeout are pruned, while the document and ATC logs are restored in full;
-restored aircraft with positions reappear on the Map with their full tracks. 
-
-Right clicking the statistics button offers to reset either half. Resetting the session
-starts it again from that moment without touching the all time figures. Resetting all
-time also clears the record of which airframes have been heard.
-
-<h2>Finding things</h2>
-
-The Find box highlights the next row matching what is typed, stepping through the matches
-on each press of Enter. It searches the ICAO address, registration, type, flight number,
-airline and departure and arrival airports at once, or a single one of them when the
-column selector beside it is set to something other than All. The text turns red when
-nothing matches.
-
-<h2>Context menus</h2>
-
-Right clicking a cell in any of the tables offers, as they apply to that cell:
-
-* **Copy** the cell's contents to the clipboard
-* **Find on map** - centre the Map on that aircraft
-* **Display flight** - jump to that flight in the Flights table, from the aircraft flying it
-* **Display aircraft** - jump the other way, to the airframe operating a flight
-
-<h2>Map</h2>
+<h3>Map</h3>
 
 Aircraft with a position are sent to the [Map feature](../map/readme.md), named by registration when known.
 
@@ -190,11 +77,15 @@ without a report.
 
 <h3>1: Find column</h3>
 
-Which field the Find box looks in - All, ICAO, Reg, Type or Flight.
+Which field the Find box (2) looks in - All, ICAO, Reg, Type or Flight.
 
 <h3>2: Find</h3>
 
-Highlights the next row matching the text. See Finding things above.
+The Find box highlights the next row matching what is typed, stepping through the matches
+on each press of Enter. It searches the ICAO address, registration, type, flight number,
+airline and departure and arrival airports at once, or a single one of them when the
+column selector (1) is set to something other than All. The text turns red when
+nothing matches.
 
 <h3>3: Delete aircraft</h3>
 
@@ -331,9 +222,13 @@ their airline's livery, instead of black icons. The icon follows the aircraft's 
 3D model, so this requires the 3D models to have been downloaded via the Map feature.
 Aircraft without a matching model are displayed with a white version of the plain icon.
 
-<h3>Aircraft table</h3>
+<h3>Aircraft</h3>
 
-The table shows one row per aircraft:
+* **Aircraft** - every airframe currently being heard, one row each.
+* **Old Aircraft** - airframes that have gone quiet for longer than the archive timeout.
+  They are not forgotten, only no longer current, and they come off the Map
+
+![Aircraft Table](../../../doc/img/AircraftFeature_aircraft_table.png)
 
 * ICAO - 24-bit ICAO address, when known
 * Reg - Aircraft registration
@@ -364,10 +259,14 @@ The table shows one row per aircraft:
   SELCAL database assigns it, which can be more than one. The database is downloaded
   from the SELCAL demodulator
 
-<h3>Flights table</h3>
+<h3>Flights</h3>
 
-The table shows one row per flight, and the Old Flights table the same columns for
-flights that have finished:
+* **Flights** - the flights seen this session, current and past: flight number, aircraft,
+  departure and arrival, the four OOOI times, when it was first and last heard, which
+  documents it has produced, and which protocols heard it
+* **Old Flights** - flights that have finished, and those restored from the last session
+
+![Flights Table](../../../doc/img/AircraftFeature_flights_table.png)
 
 * Callsign - The ICAO form, as the transponder broadcasts it (e.g. TOM7BD). Where the
   flight has only ever been heard under its IATA number, that is shown here instead, so
@@ -388,6 +287,82 @@ flights that have finished:
 Columns in either table can be reordered by dragging, hidden via the right-click header
 menu, and either table sorted by clicking a header. Widths and order are saved with the
 preset.
+
+<h3>Weather</h3>
+
+The Weather table shows METARs, TAFs, D-ATIS, TWIPs, NOTAMs, PIREPs and SIGMETs carried by ACARS.
+Selecting a row shows the full report below.
+
+<h3 id="aircraft">Aircraft</h3>
+
+Shows a photograph of the selected
+aircraft from [planespotters.net](https://www.planespotters.net/) headed by its
+registration and the country flag, with the airline's logo beneath it and a table of what
+the aircraft database knows about the airframe beside it. Clicking the photograph opens it
+on planespotters.net
+
+![Aircraft Tab](../../../doc/img/AircraftFeature_aircraft_tab.png)
+
+<h3>Documents</h3>
+
+Flight plans, oceanic clearances, loadsheets, logons and OOOI events,
+collected against the flight number. Selecting one displays its full text
+below the table. Plain ACARS messages are not collected.
+
+![Flight plan](../../../doc/img/AircraftFeature_flight_plan.png)
+
+![Loadsheet](../../../doc/img/AircraftFeature_loadsheet.png)
+
+![Clearance](../../../doc/img/AircraftFeature_clearance.png)
+
+<h3>ATC</h3>
+
+CPDLC (controller-pilot data link) messages across all channels, with the
+protocol, direction (uplink from ATC, downlink from the aircraft), source and
+recipient where known, and the concise message text (e.g. "WILCO"). SELCAL calls are
+listed here too, with the frequency they were heard on as the source - see
+[SELCAL](#selcal) below. With nothing selected, the table shows the SELCAL calls that
+could not be attributed to an aircraft
+
+![ATC Tab](../../../doc/img/AircraftFeature_atc_tab.png)
+
+<h3>Past Aircraft</h3>
+
+Every airframe that has operated the selected **flight number**.
+Shown only while a flight is selected.
+
+<h3>Past Flights</h3>
+
+Every flight the selected **aircraft** has operated.
+Shown only while an aircraft is selected.
+Selecting one of its rows charts that flight's profile and draws its track.
+
+<h3>Flight profile</h3>
+
+The Flight Profile tab charts the selected flight's altitude (left axis) and speed
+(right axis) against time, showing the flight profile - climb, cruise and descent - built
+from all protocols.
+
+![Flight Profile Tab](../../../doc/img/AircraftFeature_flight_profile.png)
+
+<h3 id="selcal">SELCAL</h3>
+
+A SELCAL call is a ground station calling an aircraft on an HF or VHF voice channel. It
+carries only a code, and a code can be shared by several aircraft.
+
+An attributed call counts as a message from the aircraft: it adds "SELCAL" and the
+frequency to the aircraft's protocols and updates when it was last seen. It carries no
+position, so nothing moves on the Map. Every call, attributed or not, is listed in the ATC
+tab.
+
+<h3>Context menus</h3>
+
+Right clicking a cell in any of the tables offers, as they apply to that cell:
+
+* **Copy** the cell's contents to the clipboard
+* **Find on map** - centre the Map on that aircraft
+* **Display flight** - jump to that flight in the Flights table, from the aircraft flying it
+* **Display aircraft** - jump the other way, to the airframe operating a flight
 
 <h2>Web API</h2>
 

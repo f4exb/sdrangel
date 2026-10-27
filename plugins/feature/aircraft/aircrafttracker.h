@@ -726,6 +726,10 @@ private:
         // be thrown away and chosen again when the livery preference changes - replacing
         // a pass-through model with our own would fight the demodulator for it.
         bool m_modelIsOurs = false;
+        // With no model pack installed, the 2D livery icon chosen in place of a model, by
+        // the same matching (see Aircraft3DModels::liveryIcons()) - or the one the ADS-B
+        // pass-through brought. An icon name, such as A320_BAW
+        QString m_liveryIcon;
         bool m_mapTrackChanged = true;
         //!< The track has only grown since it was last sent. The ADS-B pass-through sends
         //!< it at most every few seconds for that (see forwardMapItem()), where a change

@@ -149,6 +149,10 @@ struct ADSBAircraft {
     AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
     QString m_aircraft3DModel;    // 3D model for map based on aircraft type
     QString m_aircraftCat3DModel; // 3D model based on aircraft category
+    // The same two choices made from the 2D livery icons, when there is no model pack to
+    // choose from: icon names, such as A320_BAW (see Aircraft3DModels::liveryIcons())
+    QString m_liveryIcon;
+    QString m_catLiveryIcon;
     float m_modelAltitudeOffset;  // Altitude adjustment so aircraft model doesn't go underground
     float m_labelAltitudeOffset;  // How height to position label above aircraft
     QString m_flagName;         // Country flag, for the GUI to resolve an icon from

@@ -814,13 +814,21 @@ ADSBAircraft *ADSBDemodTracker::getAircraft(int icao, bool &newAircraft)
             }
         }
 
-        if (aircraft->m_aircraft3DModel.isEmpty())
+        if (aircraft->m_aircraft3DModel.isEmpty() && aircraft->m_liveryIcon.isEmpty())
         {
-            // Default to A320 until we get some more info
-            aircraft->m_aircraftCat3DModel = Aircraft3DModels::instance().modelForType("A320");
-            Aircraft3DModels::instance().offsetsForType("A320",
-                aircraft->m_modelAltitudeOffset, aircraft->m_labelAltitudeOffset,
-                aircraft->m_aircraftCat3DModel);
+            // Default to A320 until we get some more info - its icon, with no model pack
+            // (see get3DModel())
+            if (Aircraft3DModels::instance().isEmpty())
+            {
+                aircraft->m_catLiveryIcon = Aircraft3DModels::liveryIcons().modelForType("A320");
+            }
+            else
+            {
+                aircraft->m_aircraftCat3DModel = Aircraft3DModels::instance().modelForType("A320");
+                Aircraft3DModels::instance().offsetsForType("A320",
+                    aircraft->m_modelAltitudeOffset, aircraft->m_labelAltitudeOffset,
+                    aircraft->m_aircraftCat3DModel);
+            }
         }
 
         // Check to see if we need to emit a notification about this new aircraft
@@ -1159,8 +1167,9 @@ void ADSBDemodTracker::handleADSB(
             }
 
             // Select 3D model based on category, if we don't already have one based on ICAO
-            if (   aircraft->m_aircraft3DModel.isEmpty()
-                && (   aircraft->m_aircraftCat3DModel.isEmpty()
+            // (or its icon, with no model pack - chosen again each time, it would change)
+            if (   aircraft->m_aircraft3DModel.isEmpty() && aircraft->m_liveryIcon.isEmpty()
+                && (   (aircraft->m_aircraftCat3DModel.isEmpty() && aircraft->m_catLiveryIcon.isEmpty())
                     || (prevEmitterCategory != aircraft->m_emitterCategory)
                    )
                )
@@ -4660,7 +4669,12 @@ void ADSBDemodTracker::get3DModel(ADSBAircraft *aircraft)
     float altitudeOffset = aircraft->m_modelAltitudeOffset;
     float labelOffset = aircraft->m_labelAltitudeOffset;
 
-    const Aircraft3DModels &models = Aircraft3DModels::instance();
+    const Aircraft3DModels &installed = Aircraft3DModels::instance();
+    // With no model pack installed nothing matches, but the 2D livery icons are built in
+    // and named after the models, so the same choice is made from those - for the icon
+    // alone, as there is no model to send the map
+    const bool iconsOnly = installed.isEmpty();
+    const Aircraft3DModels &models = iconsOnly ? Aircraft3DModels::liveryIcons() : installed;
     // Failing a model of its own type, a stand-in of the right shape for the type it is -
     // a business jet for a Premier, a twin turboprop for a King Air. That knows more than
     // the emitter category, so it is kept in preference to one: a category stand-in
@@ -4670,9 +4684,16 @@ void ADSBDemodTracker::get3DModel(ADSBAircraft *aircraft)
         || models.defaultModel(aircraft->m_aircraftInfo->m_type.trimmed().toUpper(),
                                model, altitudeOffset, labelOffset, true))
     {
-        aircraft->m_aircraft3DModel = model;
-        aircraft->m_modelAltitudeOffset = altitudeOffset;
-        aircraft->m_labelAltitudeOffset = labelOffset;
+        if (iconsOnly)
+        {
+            aircraft->m_liveryIcon = model;
+        }
+        else
+        {
+            aircraft->m_aircraft3DModel = model;
+            aircraft->m_modelAltitudeOffset = altitudeOffset;
+            aircraft->m_labelAltitudeOffset = labelOffset;
+        }
     }
 }
 
@@ -4681,6 +4702,12 @@ void ADSBDemodTracker::get3DModelBasedOnCategory(ADSBAircraft *aircraft)
     QString aircraftType;
     QStringList candidateTypes;     // Any of these will do, for Heavy and Large
     static const QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739", "A20N", "A21N"};
+
+    // As in get3DModel(): with no model pack, the choice is made from the icons, for the icon
+    const Aircraft3DModels &installed = Aircraft3DModels::instance();
+    const bool iconsOnly = installed.isEmpty();
+    const Aircraft3DModels &models = iconsOnly ? Aircraft3DModels::liveryIcons() : installed;
+    aircraft->m_catLiveryIcon = "";
 
     if (!aircraft->m_emitterCategory.compare("Heavy"))
     {
@@ -4702,11 +4729,18 @@ void ADSBDemodTracker::get3DModelBasedOnCategory(ADSBAircraft *aircraft)
         float altitudeOffset = aircraft->m_modelAltitudeOffset;
         float labelOffset = aircraft->m_labelAltitudeOffset;
         aircraft->m_aircraftCat3DModel = "";
-        if (Aircraft3DModels::instance().defaultModel(light ? "C172" : "LJ45", model, altitudeOffset, labelOffset))
+        if (models.defaultModel(light ? "C172" : "LJ45", model, altitudeOffset, labelOffset))
         {
-            aircraft->m_aircraftCat3DModel = model;
-            aircraft->m_modelAltitudeOffset = altitudeOffset;
-            aircraft->m_labelAltitudeOffset = labelOffset;
+            if (iconsOnly)
+            {
+                aircraft->m_catLiveryIcon = model;
+            }
+            else
+            {
+                aircraft->m_aircraftCat3DModel = model;
+                aircraft->m_modelAltitudeOffset = altitudeOffset;
+                aircraft->m_labelAltitudeOffset = labelOffset;
+            }
         }
     }
     else if (!aircraft->m_emitterCategory.compare("Rotorcraft"))
@@ -4767,7 +4801,6 @@ void ADSBDemodTracker::get3DModelBasedOnCategory(ADSBAircraft *aircraft)
         // and a 737-800 drawn, gave another airline's 737. An aircraft the database doesn't
         // know still has its operator in its callsign: the first three letters of an airline
         // callsign are its ICAO code
-        const Aircraft3DModels& models = Aircraft3DModels::instance();
         QStringList operators;
         if (aircraft->m_aircraftInfo && !aircraft->m_aircraftInfo->m_operatorICAO.isEmpty()) {
             operators.append(aircraft->m_aircraftInfo->m_operatorICAO);
@@ -4802,9 +4835,17 @@ void ADSBDemodTracker::get3DModelBasedOnCategory(ADSBAircraft *aircraft)
                 aircraftType = type;
             }
         }
-        aircraft->m_aircraftCat3DModel = model;
-        if (!model.isEmpty()) {
-            models.offsetsForType(aircraftType, aircraft->m_modelAltitudeOffset, aircraft->m_labelAltitudeOffset, model);
+        if (iconsOnly)
+        {
+            aircraft->m_aircraftCat3DModel = "";
+            aircraft->m_catLiveryIcon = model;
+        }
+        else
+        {
+            aircraft->m_aircraftCat3DModel = model;
+            if (!model.isEmpty()) {
+                models.offsetsForType(aircraftType, aircraft->m_modelAltitudeOffset, aircraft->m_labelAltitudeOffset, model);
+            }
         }
     }
 }

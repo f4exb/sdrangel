@@ -113,8 +113,9 @@ QString ADSBAircraft::getLiveryImage() const
 {
     // The 3D model matcher has already picked a model such as
     // BB_Airbus_png/A320/A320_BAW.gltf from the type and operator, and the livery icons
-    // are named after the models, so the icon just follows the model's basename
-    for (const QString& model : {m_aircraft3DModel, m_aircraftCat3DModel})
+    // are named after the models, so the icon just follows the model's basename. Without
+    // the model pack, the matcher has picked from the icons themselves instead
+    for (const QString& model : {m_aircraft3DModel, m_liveryIcon, m_aircraftCat3DModel, m_catLiveryIcon})
     {
         if (!model.isEmpty())
         {

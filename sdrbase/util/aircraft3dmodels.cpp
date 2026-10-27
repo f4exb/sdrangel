@@ -52,6 +52,12 @@ const Aircraft3DModels& Aircraft3DModels::instance()
     return models;
 }
 
+const Aircraft3DModels& Aircraft3DModels::liveryIcons()
+{
+    static Aircraft3DModels icons(verboseFromEnvironment(), true);
+    return icons;
+}
+
 QString Aircraft3DModels::modelInfoCachePath()
 {
     return dataDir() + "/3d_model_info.json";
@@ -83,7 +89,7 @@ static QJsonObject gltfJson(const QString &path)
 
 bool Aircraft3DModels::hasAnimation(const QString &model, const QString &animation) const
 {
-    if (model.isEmpty()) {
+    if (model.isEmpty() || m_liveryIcons) {
         return true;
     }
     const ModelInfo info = modelInfo(model);
@@ -92,7 +98,8 @@ bool Aircraft3DModels::hasAnimation(const QString &model, const QString &animati
 
 bool Aircraft3DModels::hasTextures(const QString &model) const
 {
-    if (model.isEmpty()) {
+    // An icon has no glTF to read, and is always complete
+    if (model.isEmpty() || m_liveryIcons) {
         return true;
     }
     const ModelInfo info = modelInfo(model);
@@ -264,14 +271,45 @@ Aircraft3DModels::~Aircraft3DModels()
     qDeleteAll(m_3DModelMatch);
 }
 
-Aircraft3DModels::Aircraft3DModels(bool verbose)
+// The ICAO type and operator a model converted from FSLTL/MSFS is named after, with the
+// FSLTL_ prefix and _cesium suffix already off: A20N_AAN, Asobo_208B_ACN, B744F_CLX. The
+// operator is empty for a model of the type in no particular livery. False for a name
+// that doesn't read as a type
+static bool typeAndOperator(const QString &name, QString &type, QString &operatorICAO)
 {
-    // Timed and logged unconditionally: it runs once per session, reads a directory tree
-    // that can be well over a gigabyte, and is the first thing to suspect when start up
-    // is slow. A silent multi-second pause is precisely what makes that hard to find.
-    QElapsedTimer timer;
-    timer.start();
+    const QStringList parts = name.split('_');
 
+    int typeIndex = 0;
+    if ((parts[typeIndex].compare("Asobo", Qt::CaseInsensitive) == 0) && (parts.size() > 1)) {
+        ++typeIndex;
+    }
+    type = parts[typeIndex].toUpper();
+    // The Asobo aircraft FSLTL reuses are named after the product, not the designator
+    static const QHash<QString, QString> asoboTypes = {
+        {"208B", "C208"}, {"TBM930", "TBM9"}, {"C172SP", "C172"}, {"G36", "BE36"}, {"DR400", "DR40"}
+    };
+    type = asoboTypes.value(type, type);
+    if ((type.size() == 5) && type.endsWith('F')) {
+        type.chop(1); // FSLTL freighter suffix; the ICAO type remains four characters
+    }
+    if ((type.size() < 3) || (type.size() > 4)) {
+        return false;
+    }
+
+    operatorICAO.clear();
+    if (parts.size() > typeIndex + 1)
+    {
+        const QString candidate = parts[typeIndex + 1].toUpper();
+        if (candidate.size() == 3) {
+            operatorICAO = candidate;
+        }
+    }
+    return true;
+}
+
+// The installed 3D models: the downloadable Bluebell set and any converted from FSLTL/MSFS
+void Aircraft3DModels::findModels(bool verbose)
+{
     // Look for all aircraft gltfs in 3d directory
     QString modelDir = dataDir() + "/3d";
     static const QStringList subDirs = {"BB_Airbus_png", "BB_Boeing_png", "BB_Jets_png", "BB_Props_png", "BB_GA_png", "BB_Mil_png", "BB_Heli_png"};
@@ -327,25 +365,11 @@ Aircraft3DModels::Aircraft3DModels(bool verbose)
     {
         const QString gltf = msfsModels.next();
         const QString aircraft = QFileInfo(gltf).completeBaseName().chopped(QString("_cesium").size());
-        const QStringList parts = aircraft.split('_');
-        if ((parts.size() < 2) || (parts[0].compare("FSLTL", Qt::CaseInsensitive) != 0)) {
-            continue;
-        }
-
-        int typeIndex = 1;
-        if ((parts[typeIndex].compare("Asobo", Qt::CaseInsensitive) == 0) && (parts.size() > 2)) {
-            ++typeIndex;
-        }
-        QString type = parts[typeIndex].toUpper();
-        // The Asobo aircraft FSLTL reuses are named after the product, not the designator
-        static const QHash<QString, QString> asoboTypes = {
-            {"208B", "C208"}, {"TBM930", "TBM9"}, {"C172SP", "C172"}, {"G36", "BE36"}, {"DR400", "DR40"}
-        };
-        type = asoboTypes.value(type, type);
-        if ((type.size() == 5) && type.endsWith('F')) {
-            type.chop(1); // FSLTL freighter suffix; the ICAO type remains four characters
-        }
-        if ((type.size() < 3) || (type.size() > 4)) {
+        static const QString prefix = QStringLiteral("FSLTL_");
+        QString type;
+        QString operatorICAO;
+        if (!aircraft.startsWith(prefix, Qt::CaseInsensitive)
+            || !typeAndOperator(aircraft.mid(prefix.size()), type, operatorICAO)) {
             continue;
         }
 
@@ -355,13 +379,51 @@ Aircraft3DModels::Aircraft3DModels(bool verbose)
         if (lowDetailFiles.contains(lowDetail)) {
             m_lowDetailModels.insert(filename, QDir(modelDir).relativeFilePath(lowDetail));
         }
-        if (parts.size() > typeIndex + 1)
-        {
-            const QString operatorICAO = parts[typeIndex + 1].toUpper();
-            if (operatorICAO.size() == 3) {
-                m_3DModels.insert(type + "_" + operatorICAO, filename);
-            }
+        if (!operatorICAO.isEmpty()) {
+            m_3DModels.insert(type + "_" + operatorICAO, filename);
         }
+    }
+}
+
+// The 2D livery icons built into the ADS-B demodulator, standing in for the models. They
+// were rendered from the models and are named after them (see liveryIconName()) -
+// Bluebell's A320_BAW and FSLTL's A20N_AAN and Asobo_208B_ACN alike, all of which the
+// FSLTL naming rules read - so the tables come out as if every model were installed,
+// with an icon's name where a model's path would be. Of the plain stand-ins
+// (aircraft_large, helicopter and the rest) only fire_truck passes for a type, as FIRE,
+// which no aircraft is, so it is never asked for. Empty when the ADS-B demodulator,
+// whose resources these are, isn't loaded
+void Aircraft3DModels::findLiveryIcons()
+{
+    const QStringList icons = QDir(":/map/liveries").entryList({"*.png"}, QDir::Files);
+    for (const QString &icon : icons)
+    {
+        const QString name = QFileInfo(icon).completeBaseName();
+        QString type;
+        QString operatorICAO;
+        if (!typeAndOperator(name, type, operatorICAO)) {
+            continue;
+        }
+        m_3DModelsByType[type].append(name);
+        if (!operatorICAO.isEmpty()) {
+            m_3DModels.insert(type + "_" + operatorICAO, name);
+        }
+    }
+}
+
+Aircraft3DModels::Aircraft3DModels(bool verbose, bool liveryIcons) :
+    m_liveryIcons(liveryIcons)
+{
+    // Timed and logged unconditionally: it runs once per session, reads a directory tree
+    // that can be well over a gigabyte, and is the first thing to suspect when start up
+    // is slow. A silent multi-second pause is precisely what makes that hard to find.
+    QElapsedTimer timer;
+    timer.start();
+
+    if (liveryIcons) {
+        findLiveryIcons();
+    } else {
+        findModels(verbose);
     }
 
     const QHash<QString, QStringList> &modelsByType = m_3DModelsByType;
@@ -686,8 +748,8 @@ Aircraft3DModels::Aircraft3DModels(bool verbose)
     m_3DModelMatch.append(new ModelMatch("SAAB.2000.*", "SB20"));
     m_3DModelMatch.append(new ManufacturerModelMatch(".*340.*", "Saab.*", "SF34"));
 
-    qDebug() << "Aircraft3DModels: scanned" << dataDir() + "/3d" << "in" << timer.elapsed()
-             << "ms -" << m_3DModelsByType.size() << "types," << m_3DModels.size()
+    qDebug() << "Aircraft3DModels: scanned" << (liveryIcons ? QString(":/map/liveries") : dataDir() + "/3d")
+             << "in" << timer.elapsed() << "ms -" << m_3DModelsByType.size() << "types," << m_3DModels.size()
              << "liveries," << m_3DModelMatch.size() << "name matches";
     (void) verbose;
 }

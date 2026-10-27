@@ -405,10 +405,13 @@ void AircraftTracker::applySettings(const AircraftSettings& settings, const QLis
     {
         for (TrackedAircraft *item : m_aircraft)
         {
-            if (item->m_modelIsOurs)
+            if (item->m_modelIsOurs || !item->m_liveryIcon.isEmpty())
             {
-                item->m_model3D = "";
+                if (item->m_modelIsOurs) {
+                    item->m_model3D = "";
+                }
                 item->m_modelIsOurs = false;
+                item->m_liveryIcon = "";
                 update3DModel(item);
             }
         }
@@ -3166,11 +3169,17 @@ AircraftStatistics AircraftTracker::deserializeStatistics(const QByteArray& data
 //
 // Chosen ONCE and kept. The livery is picked at random where there is a choice, so asking
 // again on every report would change the aircraft's appearance as it flew.
+//
+// With no model pack installed nothing matches, but the 2D livery icons are built in and
+// named after the models, so the same matching is done over those - for the icon alone,
+// as there is no model to send the map. It is kept the same way.
 void AircraftTracker::update3DModel(TrackedAircraft *item)
 {
-    if (!item->m_model3D.isEmpty()) {
+    const bool iconsOnly = Aircraft3DModels::instance().isEmpty();
+    if (!(iconsOnly ? item->m_liveryIcon : item->m_model3D).isEmpty()) {
         return;
     }
+    const Aircraft3DModels &models = iconsOnly ? Aircraft3DModels::liveryIcons() : Aircraft3DModels::instance();
 
     const AircraftInformation *info = nullptr;
     if (m_aircraftInfo && !item->m_registration.isEmpty())
@@ -3184,7 +3193,7 @@ void AircraftTracker::update3DModel(TrackedAircraft *item)
     QString model;
     float altitudeOffset = 0.0f;
     float labelOffset = 0.0f;
-    bool matched = info && Aircraft3DModels::instance().modelFor(
+    bool matched = info && models.modelFor(
         info, m_settings.m_favourLivery, false, model, altitudeOffset, labelOffset);
 
     if (!matched)
@@ -3192,11 +3201,15 @@ void AircraftTracker::update3DModel(TrackedAircraft *item)
         // Only a fraction of types have a model of their own, and an aircraft we know
         // nothing about has none either. Rather than leave it as a flat billboard among
         // modelled aircraft, stand in something of about the right shape and size
-        matched = Aircraft3DModels::instance().defaultModel(
+        matched = models.defaultModel(
             info ? info->m_type : QString(), model, altitudeOffset, labelOffset);
     }
 
-    if (matched)
+    if (matched && iconsOnly)
+    {
+        item->m_liveryIcon = model;
+    }
+    else if (matched)
     {
         item->m_model3D = model;
         item->m_modelAltitudeOffset = altitudeOffset;
@@ -3474,7 +3487,7 @@ QString AircraftTracker::atcLabel(const TrackedAircraft *item) const
 // resources are process wide)
 QString AircraftTracker::aircraftImage(const TrackedAircraft *item) const
 {
-    return aircraftImage(item->m_registration, item->m_model3D);
+    return aircraftImage(item->m_registration, item->m_model3D.isEmpty() ? item->m_liveryIcon : item->m_model3D);
 }
 
 QString AircraftTracker::aircraftImage(const QString& registration, const QString& model3D) const
@@ -3952,6 +3965,22 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
         item->m_modelAltitudeOffset = swgMapItem->getModelAltitudeOffset();
         item->m_labelAltitudeOffset = swgMapItem->getLabelAltitudeOffset();
         item->m_modelIsOurs = false;
+    }
+    else if (swgMapItem->getImage())
+    {
+        // With no model pack, ADS-B picks a livery icon in place of a model, and that is
+        // remembered the same way - otherwise the icon would switch to the one picked
+        // here whenever the pass-through went quiet. Not the plain icons in white, which
+        // are what it sends when it found nothing
+        static const QString liveries = QStringLiteral("qrc:///map/liveries/");
+        const QString &image = *swgMapItem->getImage();
+        if (image.startsWith(liveries))
+        {
+            const QString icon = QFileInfo(image).completeBaseName();
+            if (!icon.startsWith("aircraft_")) {
+                item->m_liveryIcon = icon;
+            }
+        }
     }
     item->m_mapName = name;
     item->m_mapResync = false;
