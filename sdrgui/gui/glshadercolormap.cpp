@@ -126,7 +126,11 @@ void GLShaderColorMap::initColorMapTextureImmutable(const QString &colorMapName)
 
     GLfloat *colorMap = (GLfloat *)ColorMap::getColorMap(colorMapName);
     if (colorMap) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+        m_colorMapTexture->setData(QOpenGLTexture::RGB, QOpenGLTexture::Float32, static_cast<const void *>(colorMap));
+#else
         m_colorMapTexture->setData(QOpenGLTexture::RGB, QOpenGLTexture::Float32, colorMap);
+#endif
     } else {
         qDebug() << "GLShaderColorMap::initColorMapTextureImmutable: colorMap " << colorMapName << " not supported";
     }
