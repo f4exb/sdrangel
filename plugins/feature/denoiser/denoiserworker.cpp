@@ -46,7 +46,11 @@ DenoiserWorker::DenoiserWorker(QObject *parent) :
     m_recordSilenceNbSamples(0),
     m_recordSilenceCount(0),
     m_nbBytes(0),
+    m_rnnoiseIn{},
+    m_rnnoiseOut{},
     m_rnnoiseFill(0),
+    m_nvidiaIn{},
+    m_nvidiaOut{},
     m_nvidiaFill(0),
     m_nvidiaInitAttempted(false),
     m_nvidiaReady(false),
@@ -54,8 +58,12 @@ DenoiserWorker::DenoiserWorker(QObject *parent) :
     m_nvidiaStatusReported(false),
     m_nvidiaGeneration(0),
     m_vst3Effect(nullptr),
+    m_vst3Input{},
+    m_vst3Output{},
     m_vst3Fill(0),
-    m_vst3FailureReported(false)
+    m_vst3FailureReported(false),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0)
 {
 	m_audioBuffer.resize(4800);
 	m_audioBufferFill = 0;

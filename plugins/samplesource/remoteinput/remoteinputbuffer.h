@@ -136,7 +136,17 @@ private:
         int                     m_recoveryCount;      //!< number of recovery blocks received
         bool                    m_decoded;            //!< true if decoded
         bool                    m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
-        DecoderSlot() {}
+        DecoderSlot() :
+            m_blockZero{},
+            m_originalBlocks{},
+            m_recoveryBlocks{},
+            m_cm256DescriptorBlocks{},
+            m_blockCount(0),
+            m_originalCount(0),
+            m_recoveryCount(0),
+            m_decoded(false),
+            m_metaRetrieved(false)
+        {}
     };
 
     RemoteMetaDataFEC m_currentMeta;             //!< Stored current meta data

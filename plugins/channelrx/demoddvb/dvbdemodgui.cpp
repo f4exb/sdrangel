@@ -2801,7 +2801,7 @@ QString DVBDemodGUI::shortCodecName(const QString& name)
 // The codecs and picture size in the table, the A/V problems, and the mute button green while audio is playing
 void DVBDemodGUI::displayPlayerInfo(uint64_t tsOverflows)
 {
-    DTVVideoPlayer::Info info;
+    DTVVideoPlayer::Info info{};
 
     if (m_player) {
         info = m_player->getInfo();

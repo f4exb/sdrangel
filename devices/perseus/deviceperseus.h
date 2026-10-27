@@ -34,8 +34,8 @@ public:
 
 protected:
     DevicePerseus();
-    DevicePerseus(const DevicePerseus&) : m_nbDevices(0) {}
-    DevicePerseus& operator=(const DevicePerseus& other) { (void) other; return *this; }
+    DevicePerseus(const DevicePerseus&) = delete;
+    DevicePerseus& operator=(const DevicePerseus&) = delete;
     ~DevicePerseus();
 
 private:

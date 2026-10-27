@@ -39,6 +39,7 @@ Modulator::Modulator(Mode mode, Constellation constellation, CodeRate codeRate, 
     m_tables(Tables::get(mode)),
     m_hierarchy(constellation == Constellation::QPSK ? Hierarchy::None : hierarchy),
     m_lpCodeRate(lpCodeRate),
+    m_tpsBits{},
     m_symbolIndex(0),
     m_frameNumber(0)
 {

@@ -45,6 +45,8 @@ class APTDemod;
 class APTDemodSink : public ChannelSampleSink {
 public:
     APTDemodSink();
+    APTDemodSink(const APTDemodSink&) = delete;
+    APTDemodSink& operator=(const APTDemodSink&) = delete;
     ~APTDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

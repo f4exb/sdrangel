@@ -293,12 +293,20 @@ void DTVCarousel::dii(const uint8_t *m, int length, uint32_t transactionId)
         const int userInfoLength = ri.u8();
         const uint8_t *userInfo = ri.bytes(userInfoLength);
 
-        for (int d = 0; userInfo && (d + 2 <= userInfoLength); d += 2 + userInfo[d + 1])
+        for (int d = 0; userInfo && (d + 2 <= userInfoLength); )
         {
+            const int descriptorLength = userInfo[d + 1];
+
+            if (descriptorLength > userInfoLength - d - 2) {
+                break;
+            }
+
             // compressed_module_descriptor: compression_method (zlib), original_size
             if ((userInfo[d] == m_compressedModuleDescriptor) && (userInfo[d + 1] >= 5) && (d + 7 <= userInfoLength)) {
                 originalSize = (int) std::min<uint32_t>(0x7FFFFFFF, ((uint32_t) userInfo[d + 3] << 24) | (userInfo[d + 4] << 16) | (userInfo[d + 5] << 8) | userInfo[d + 6]);
             }
+
+            d += 2 + descriptorLength;
         }
 
         if ((moduleSize > m_maxModuleSize) || (originalSize > m_maxModuleSize)) {

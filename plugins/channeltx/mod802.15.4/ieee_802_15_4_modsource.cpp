@@ -519,7 +519,7 @@ int IEEE_802_15_4_ModSource::getChip()
         m_symbol = getSymbol();
 
     if (m_settings.m_bitRate <= 40000) {
-        chip = IEEE_802_15_4_PHY::m_chipsBPSK[m_symbol][m_chipIdx];
+        chip = IEEE_802_15_4_PHY::m_chipsBPSK[m_symbol & 1][m_chipIdx];
     } else if (m_settings.m_subGHzBand) {
         chip = IEEE_802_15_4_PHY::m_chipsSubGHzOQPSK[m_symbol][m_chipIdx];
     } else {

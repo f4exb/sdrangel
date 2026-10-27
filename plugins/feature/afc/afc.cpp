@@ -317,6 +317,8 @@ void AFC::updateDeviceSetLists()
 
     if (getMessageQueueToGUI()) {
         getMessageQueueToGUI()->push(msg);
+    } else {
+        delete msg;
     }
 }
 

@@ -18,7 +18,11 @@
 #include "remotesinkfifo.h"
 
 RemoteSinkFifo::RemoteSinkFifo(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_size(0),
+    m_readHead(0),
+    m_servedHead(0),
+    m_writeHead(0)
 {}
 
 RemoteSinkFifo::RemoteSinkFifo(unsigned int size, QObject *parent) :

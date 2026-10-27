@@ -101,9 +101,9 @@ DABFrontEnd::DABFrontEnd() :
     m_exportCarriers(false),
     m_filterFFT(FilterFFTSize, false),
     m_filterIFFT(FilterFFTSize, true),
+    m_haveCarrierPower(false),
     m_haveCarrierNoise(false),
-    m_noiseFrames(0),
-    m_haveCarrierPower(false)
+    m_noiseFrames(0)
 {
     // Kaiser windowed sinc (beta 7.86 for about 80 dB of stop band attenuation)
     std::vector<std::complex<float>> taps(FilterFFTSize, 0.0f);

@@ -232,7 +232,14 @@ OFDMDemod::OFDMDemod(int bandwidthHz, FFTFactory *fftFactory) :
     m_guardSize(0),
     m_symbolSize(0),
     m_kMax(0),
-    m_backoff(0)
+    m_backoff(0),
+    m_ring{},
+    m_smoothingCutoff(0.0),
+    m_noiseConstellation(Constellation::QPSK),
+    m_lastSPPhase(0),
+    m_spPhaseRun(0),
+    m_tpsSync(0),
+    m_tpsBits{}
 {
     m_fft.m_factory = fftFactory;
     m_cirFft.m_factory = fftFactory;

@@ -610,8 +610,8 @@ bool StarTrackerWorker::getRAFromHorizons(const QDateTime &dateTime, RADec &rdJ2
 
 void StarTrackerWorker::update()
 {
-    AzAlt aa, sunAA, moonAA;
-    RADec rdJnow, sunRD, moonRD;
+    AzAlt aa{}, sunAA{}, moonAA;
+    RADec rdJnow, sunRD{}, moonRD;
     bool rdJnowValid = false;
     double l, b;
     bool lbTarget = false;
@@ -988,7 +988,7 @@ void StarTrackerWorker::update()
 
                 for (int step = 0; step <= 24*60*60/timestep; step++)
                 {
-                    AzAlt aa;
+                    AzAlt aa{};
                     RADec rdJnow, rdJ2000;
 
                     // Calculate elevation of desired object

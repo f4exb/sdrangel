@@ -144,6 +144,7 @@ public:
 
         MsgLine() :
             Message(),
+            m_line{},
             m_size(APT_PROW_WIDTH)
         {}
     };

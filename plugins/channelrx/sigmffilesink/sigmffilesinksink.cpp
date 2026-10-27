@@ -29,6 +29,10 @@
 #include "sigmffilesinksink.h"
 
 SigMFFileSinkSink::SigMFFileSinkSink() :
+    m_channelSampleRate(0),
+    m_channelFrequencyOffset(0),
+    m_sinkSampleRate(0),
+    m_centerFrequency(0),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
     m_spectrumSink(nullptr),
@@ -37,6 +41,7 @@ SigMFFileSinkSink::SigMFFileSinkSink() :
     m_record(false),
     m_squelchOpen(false),
     m_postSquelchCounter(0),
+    m_deviceUId(0),
     m_msCount(0),
     m_byteCount(0)
 {}

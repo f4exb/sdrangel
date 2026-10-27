@@ -734,9 +734,9 @@ int APTDemod::webapiActionsPost(
         {
             SWGSDRangel::SWGAPTDemodActions_aos* aos = swgAPTDemodActions->getAos();
             QString *satelliteName = aos->getSatelliteName();
-            qDebug() << "APTDemod::webapiActionsPost - AOS " << *satelliteName;
             if (satelliteName != nullptr)
             {
+                qDebug() << "APTDemod::webapiActionsPost - AOS " << *satelliteName;
                 if (matchSatellite(*satelliteName))
                 {
                     // Reset for new pass
@@ -775,10 +775,10 @@ int APTDemod::webapiActionsPost(
         {
             SWGSDRangel::SWGAPTDemodActions_los* los = swgAPTDemodActions->getLos();
             QString *satelliteName = los->getSatelliteName();
-            qDebug() << "APTDemod::webapiActionsPost - LOS " << *satelliteName;
 
             if (satelliteName != nullptr)
             {
+                qDebug() << "APTDemod::webapiActionsPost - LOS " << *satelliteName;
                 if (matchSatellite(*satelliteName))
                 {
                     // Save image
