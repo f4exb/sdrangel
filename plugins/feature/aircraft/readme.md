@@ -50,6 +50,8 @@ The map item carries:
   departure/arrival airports and the route where messages have revealed them, and the
   protocols and frequencies the **current flight** has been heard on. 
 
+![Aircraft on the Map](../../../doc/img/AircraftFeature_map.jpg)
+
 The routes an aircraft has been given are drawn too, but only for the aircraft or flight
 **selected** in the tables - a filed flight plan and an oceanic clearance alike - as a
 line through the waypoints with a marker at each one.
