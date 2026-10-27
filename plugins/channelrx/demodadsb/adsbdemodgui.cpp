@@ -2360,6 +2360,11 @@ void ADSBDemodGUI::applyMapSettings()
     }
     else if (mapProvider == "mapboxgl")
     {
+        if (!m_settings.m_mapBoxAPIKey.isEmpty()) {
+            parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
+        } else {
+            qWarning() << "ADSBDemodGUI::applyMapSettings - mapboxgl map provider requires a Mapbox API key";
+        }
         switch (m_settings.m_mapType)
         {
         case ADSBDemodSettings::AVIATION_LIGHT:
@@ -2907,6 +2912,7 @@ void ADSBDemodGUI::displaySettings(const QStringList& settingsKeys, bool force)
     enableSpeechIfNeeded();
 
     if (settingsKeys.contains("mapProvider")
+        || settingsKeys.contains("mapBoxAPIKey")
         || settingsKeys.contains("aircraftMinZoom")
         || settingsKeys.contains("mapType")
         || force)

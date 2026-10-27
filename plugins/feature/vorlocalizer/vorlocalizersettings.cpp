@@ -44,11 +44,12 @@ void VORLocalizerSettings::resetToDefaults()
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_workspaceIndex = 0;
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
 #endif
+    m_mapBoxAPIKey = "";
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++)
     {
@@ -79,6 +80,7 @@ QByteArray VORLocalizerSettings::serialize() const
     s.writeS32(20, m_workspaceIndex);
     s.writeBlob(21, m_geometryBytes);
     s.writeString(22, m_mapProvider);
+    s.writeString(23, m_mapBoxAPIKey);
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -117,7 +119,7 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
         d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(16, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -136,10 +138,15 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
 
         d.readS32(20, &m_workspaceIndex, 0);
         d.readBlob(21, &m_geometryBytes);
-#ifdef LINUX
+        d.readString(23, &m_mapBoxAPIKey, "");
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
         d.readString(22, &m_mapProvider, "mapboxgl");
 #else
         d.readString(22, &m_mapProvider, "osm");
+        // mapboxgl doesn't work without a key, as Mapbox rejects Qt's development token
+        if ((m_mapProvider == "mapboxgl") && m_mapBoxAPIKey.isEmpty()) {
+            m_mapProvider = "osm";
+        }
 #endif
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
@@ -209,6 +216,9 @@ void VORLocalizerSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("mapProvider")) {
         m_mapProvider = settings.m_mapProvider;
     }
+    if (settingsKeys.contains("mapBoxAPIKey")) {
+        m_mapBoxAPIKey = settings.m_mapBoxAPIKey;
+    }
 
     if (settingsKeys.contains("columnIndexes"))
     {
@@ -264,6 +274,9 @@ QString VORLocalizerSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (settingsKeys.contains("mapProvider") || force) {
         ostr << " m_mapProvider: " << m_mapProvider.toStdString();
+    }
+    if (settingsKeys.contains("mapBoxAPIKey") || force) {
+        ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
     }
 
     if (settingsKeys.contains("columnIndexes"))

@@ -198,6 +198,7 @@ struct ADSBDemodSettings
     QString m_checkWXAPIKey;            //!< checkwxapi.com API key
     QString m_maptilerAPIKey;           //!< maptiler.com API key (for osm/satellite map)
     QString m_cartoDBAPIKey;            //!< carto.com API key (for the aviation maps, which use CartoDB tiles without labels)
+    QString m_mapBoxAPIKey;             //!< mapbox.com API key (for mapboxgl map provider)
 
     QString m_logFilename;
     bool m_logEnabled;

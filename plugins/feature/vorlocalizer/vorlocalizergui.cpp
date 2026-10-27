@@ -29,6 +29,9 @@
 #include <QQmlProperty>
 #include <QMessageBox>
 #include <QAction>
+#ifdef QT_LOCATION_FOUND
+#include <QGeoServiceProvider>
+#endif
 
 #include "feature/featureuiset.h"
 #include "dsp/dspcommands.h"
@@ -46,6 +49,7 @@
 #include "vorlocalizerreport.h"
 #include "vorlocalizersettings.h"
 #include "vorlocalizergui.h"
+#include "vorlocalizerdisplaydialog.h"
 
 #include "SWGMapItem.h"
 
@@ -990,6 +994,21 @@ void VORLocalizerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     rollupContents->saveState(m_rollupState);
 }
 
+void VORLocalizerGUI::on_displaySettings_clicked()
+{
+    VORLocalizerDisplayDialog dialog(&m_settings);
+    new DialogPositioner(&dialog, true);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settingsKeys.append(dialog.getSettingsKeys());
+        applySettings();
+        if (dialog.getSettingsKeys().contains("mapProvider") || dialog.getSettingsKeys().contains("mapBoxAPIKey")) {
+            applyMapSettings();
+        }
+    }
+}
+
 void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuType::ContextMenuChannelSettings)
@@ -1065,14 +1084,34 @@ void VORLocalizerGUI::applyMapSettings()
         zoom = 10.0;
     }
 
+    // Check requested map provider is available - if not, try the other
+    QString mapProvider = m_settings.m_mapProvider;
+#ifdef QT_LOCATION_FOUND
+    QStringList mapProviders = QGeoServiceProvider::availableServiceProviders();
+    if ((mapProvider == "osm") && (!mapProviders.contains(mapProvider))) {
+        mapProvider = "mapboxgl";
+    }
+    if ((mapProvider == "mapboxgl") && (!mapProviders.contains(mapProvider))) {
+        mapProvider = "osm";
+    }
+#endif
+
     // Create the map using the specified provider
-    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
+    QQmlProperty::write(item, "mapProvider", mapProvider);
     QVariantMap parameters;
     QString mapType;
 
-    if (m_settings.m_mapProvider == "osm") {
+    if (mapProvider == "osm")
+    {
         mapType = "Street Map";
-    } else if (m_settings.m_mapProvider == "mapboxgl") {
+    }
+    else if (mapProvider == "mapboxgl")
+    {
+        if (!m_settings.m_mapBoxAPIKey.isEmpty()) {
+            parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
+        } else {
+            qWarning() << "VORLocalizerGUI::applyMapSettings - mapboxgl map provider requires a Mapbox API key";
+        }
         mapType = "mapbox://styles/mapbox/streets-v10";
     }
 
@@ -1423,6 +1462,7 @@ void VORLocalizerGUI::makeUIConnections()
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_startStop_toggled);
     QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORLocalizerGUI::on_getOpenAIPVORDB_clicked);
     QObject::connect(ui->magDecAdjust, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_magDecAdjust_toggled);
+    QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &VORLocalizerGUI::on_displaySettings_clicked);
     QObject::connect(ui->rrTime, &QDial::valueChanged, this, &VORLocalizerGUI::on_rrTime_valueChanged);
     QObject::connect(ui->centerShift, &QDial::valueChanged, this, &VORLocalizerGUI::on_centerShift_valueChanged);
 }

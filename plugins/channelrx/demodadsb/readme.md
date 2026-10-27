@@ -99,9 +99,10 @@ Map:
 
 ![ADS-B Demodulator map display settings](../../../doc/img/ADSBDemod_plugin_displaysettings_map.png)
 
-* The map provider. This can be osm for OpenStreetMaps or mapboxgl for Mapbox. mapboxgl is not supported on Windows. mapboxgl should be used on Linux with Qt 5.15.3, as osm maps will cause SDRangel to hang, due to a bug in Qt.
+* The map provider. This can be osm for OpenStreetMaps or mapboxgl for Mapbox. mapboxgl is not supported on Windows. mapboxgl should be used on Linux with Qt versions earlier than 5.15.13, as osm maps will cause SDRangel to hang, due to a bug in Qt. mapboxgl requires a Mapbox API key.
 * The type of map that will be displayed. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
 * A [Maptiler](https://www.maptiler.com/) API key can be entered in order to use satellite map imagery. Although you may be able to view satellite imagery without entering a key, if too many users do this, we may exceed our usage quota and then the imagery will be unavailable for all.
+* A [Mapbox](https://www.mapbox.com/) API key must be entered in order to use the mapboxgl map provider.
 * The minimum zoom level (0 min zoom - 15 max zoom) at which aircraft icons will be scaled.
 * The minimum size airport that will be displayed on the map: small, medium or large. Use small to display GA airfields, medium for regional airports and large for international airports.
 * Whether or not to display heliports.

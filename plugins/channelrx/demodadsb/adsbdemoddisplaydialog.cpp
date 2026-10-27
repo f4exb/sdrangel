@@ -70,6 +70,7 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
     ui->maptilerAPIKey->setText(m_settings->m_maptilerAPIKey);
     ui->cartoDBAPIKey->setText(m_settings->m_cartoDBAPIKey);
+    ui->mapBoxAPIKey->setText(m_settings->m_mapBoxAPIKey);
     ui->navAids->setChecked(settings->m_displayNavAids);
     ui->atcCallsigns->setChecked(settings->m_atcCallsigns);
     ui->photos->setChecked(settings->m_displayPhotos);
@@ -170,6 +171,11 @@ void ADSBDemodDisplayDialog::accept()
     {
         m_settings->m_cartoDBAPIKey = ui->cartoDBAPIKey->text();
         m_settingsKeys.append("cartoDBAPIKey");
+    }
+    if (m_settings->m_mapBoxAPIKey != ui->mapBoxAPIKey->text())
+    {
+        m_settings->m_mapBoxAPIKey = ui->mapBoxAPIKey->text();
+        m_settingsKeys.append("mapBoxAPIKey");
     }
     if (m_settings->m_displayNavAids != ui->navAids->isChecked())
     {

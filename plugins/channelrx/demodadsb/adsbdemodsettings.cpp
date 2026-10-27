@@ -84,6 +84,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_checkWXAPIKey = "";
     m_maptilerAPIKey = "";
     m_cartoDBAPIKey = "";
+    m_mapBoxAPIKey = "";
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -93,7 +94,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_logEnabled = false;
     m_airspaces = QStringList({"CTR"});
     m_airspaceRange = 500.0f;
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
@@ -219,6 +220,7 @@ QByteArray ADSBDemodSettings::serialize() const
 
     s.writeString(78, m_maptilerAPIKey);
     s.writeString(80, m_cartoDBAPIKey);
+    s.writeString(81, m_mapBoxAPIKey);
     s.writeBool(79, m_useLiveryIcons);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
@@ -368,13 +370,19 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(78, &m_maptilerAPIKey, "");
         d.readString(80, &m_cartoDBAPIKey, "");
+        d.readString(81, &m_mapBoxAPIKey, "");
         d.readBool(79, &m_useLiveryIcons, true);
 
         applyPalette();
 
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
+        }
+#else
+        // mapboxgl doesn't work without a key
+        if ((m_mapProvider == "mapboxgl") && m_mapBoxAPIKey.isEmpty()) {
+            m_mapProvider = "osm";
         }
 #endif
 
@@ -602,6 +610,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("cartoDBAPIKey")) {
         m_cartoDBAPIKey = settings.m_cartoDBAPIKey;
     }
+    if (settingsKeys.contains("mapBoxAPIKey")) {
+        m_mapBoxAPIKey = settings.m_mapBoxAPIKey;
+    }
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
     }
@@ -813,6 +824,9 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("cartoDBAPIKey") || force) {
         ostr << " m_cartoDBAPIKey: " << m_cartoDBAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("mapBoxAPIKey") || force) {
+        ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
     }
     if (settingsKeys.contains("logFilename") || force) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();
