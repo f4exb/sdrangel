@@ -160,11 +160,14 @@ static void unknown_proto_format_text(la_vstring *vstr, void const *data, int in
     EOL(vstr);
 }
 
+// Designated, as the descriptors in icao.c and xid.c are: la_type_descriptor ends
+// in eight reserved function pointers, and positional initialisers leave those
+// unmentioned, which -Wmissing-field-initializers reports
 static la_type_descriptor const proto_DEF_unknown = {
-    unknown_proto_format_text,  // format_text
-    NULL,                       // destroy
-    NULL,                       // format_json
-    "unknown_proto"             // json_key
+    .format_text = unknown_proto_format_text,
+    .destroy     = NULL,
+    .format_json = NULL,
+    .json_key    = "unknown_proto"
 };
 
 la_proto_node *unknown_proto_pdu_new(void *buf, size_t len)

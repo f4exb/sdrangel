@@ -139,6 +139,13 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
+    // Qt 6.10 brought these, deprecating invalidateFilter() in their favour. On
+    // anything older they stand in for it - see acarsmessagemodel.cpp
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange();
+    void endFilterChange();
+#endif
+
 private:
     bool m_hideNoInfo;
     int m_filterColumn;

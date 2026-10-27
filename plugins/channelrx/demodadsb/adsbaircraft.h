@@ -296,7 +296,6 @@ struct ADSBAircraft {
         m_minCorrelation(INFINITY),
         m_maxCorrelation(-INFINITY),
         m_correlation(0.0f),
-        m_tcasAlert(false),
         m_aircraftInfo(nullptr),
         m_modelAltitudeOffset(0.0f),
         m_labelAltitudeOffset(5.0f),
@@ -317,7 +316,8 @@ struct ADSBAircraft {
         m_isNew(true),
         m_positionChanged(false),
         m_trailCleared(false),
-        m_mapTrailResetPending(false)
+        m_mapTrailResetPending(false),
+        m_tcasAlert(false)
     {
         for (int i = 0; i < 2; i++) {
             m_cprValid[i] = false;

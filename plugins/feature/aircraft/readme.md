@@ -5,7 +5,7 @@
 The Aircraft feature collates aircraft data from multiple demodulators into a single
 aircraft list, and sends the combined aircraft to the [Map feature](../map/readme.md).
 
-Sightings are received from the [ADS-B demodulator](../../channelrx/demodadsb/readme.md),
+Reports are received from the [ADS-B demodulator](../../channelrx/demodadsb/readme.md),
 the [ACARS demodulator](../../channelrx/demodacars/readme.md) (VHF ACARS, VDL Mode 2
 HFDL, Aero and Iridium modes) and the [SELCAL demodulator](../../channelrx/demodselcal/readme.md),
 from any number of channels in any device set.
@@ -69,7 +69,7 @@ without a report.
 
 <h3>1: Find column</h3>
 
-Which field the Find box (2) looks in - All, ICAO, Reg, Type or Flight.
+Which field the Find box (2) looks in - All, ICAO, Reg, Type, Callsign or SELCAL.
 
 <h3>2: Find</h3>
 
@@ -93,10 +93,14 @@ a rule, the rule's speech text is read aloud and/or its command is executed, wit
 ${icao} ${reg} ${flight} ${type} ${protocol} substituted. Each rule fires at most once
 per aircraft.
 
+![Notifications dialog](../../../doc/img/ADSBDemod_plugin_notifications.png)
+
 <h3>5: ATC</h3>
 
-When checked, aircraft labels on the Map show route, flight level, speed and type in
-an ATC style; when unchecked just the flight number or registration is shown.
+When checked, aircraft labels on the Map show callsign, flight level, speed and type in
+an ATC style; when unchecked just the callsign or registration is shown.
+
+![ATC Labels](../../../doc/img/AircraftFeature_atc_labels.png)
 
 <h3>6: Statistics</h3>
 

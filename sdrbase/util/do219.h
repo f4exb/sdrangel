@@ -1338,8 +1338,8 @@ protected:
     
     QString decodeTp4Table()
     {
-        int t = getBits(1);
-        return ""; // Nothing to display
+        getBits(1); // Consumed to keep the bit position right; nothing to display
+        return "";
     }
     
     QString decodeTrackDetailMsg()

@@ -864,7 +864,6 @@ void ADSBDemodTracker::atcCallsign(ADSBAircraft *aircraft)
         if (!aircraft->m_aircraftInfo)
         {
             // Airline logo
-            QIcon *icon = nullptr;
             const QString airlinePath = AircraftInformation::getAirlineIconPath(airline->m_icao);
             if (!airlinePath.isEmpty())
             {
@@ -4914,7 +4913,10 @@ void ADSBDemodTracker::sendAircraftReport()
             aircraft->m_latitude,
             aircraft->m_longitude,
             aircraft->m_altitude,
-            aircraft->m_groundspeed
+            aircraft->m_groundspeed,
+            aircraft->m_positionValid,
+            aircraft->m_altitudeValid,
+            aircraft->m_groundspeedValid
         };
 
         report.append(aircraftReport);

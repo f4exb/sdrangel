@@ -43,13 +43,13 @@ AcarsDemodSink::AcarsDemodSink(AcarsDemod *acarsDemod) :
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_messageQueueToChannel(nullptr),
-        m_scopeBufferIndex(0),
-        m_demodBufferFill(0),
         m_iridiumChannels(0),       // Configured on the first Iridium sample
         m_iridiumLogCount(0),
         m_iridiumCarrierCount(0),
         m_demodPipesPresent(false),
-        m_demodPipeCheck(1)
+        m_demodPipeCheck(1),
+        m_scopeBufferIndex(0),
+        m_demodBufferFill(0)
 {
     m_demodBuffer.resize(1<<12);
     m_scopeBuffer.resize(m_scopeBufferSize);

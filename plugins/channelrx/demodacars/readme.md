@@ -59,6 +59,8 @@ the combo box next to the Mode selector:
 | 4 MHz      | 128      | 4 MS/s      | about half the band                       |
 | 8 MHz      | 256      | 8 MS/s      | all of it, tuned to 1623 MHz              |
 
+Received messages are forwarded to the [Aircraft feature](../../feature/aircraft/readme.md) for display on the [Map feature](../../feature/map/readme.md).
+
 <h2>Interface</h2>
 
 ![ACARS Demodulator plugin GUI](../../../doc/img/AcarsDemod_plugin.png)

@@ -97,7 +97,9 @@ public:
     static AcarsMessage *decode(const QByteArray &message, const QString &text);
 protected:
     static AcarsMessage *decodeBlock(const QByteArray &message, const QString *text);
-    static AcarsMessage *decode(const QByteArray &message, const QString &label, const QString &text, bool uplink);
+    // The direction is not passed: each AcarsMessage reads the block identifier in
+    // parse() and sets m_uplink itself
+    static AcarsMessage *decode(const QByteArray &message, const QString &label, const QString &text);
     static bool isUplink(QChar blockId);
 };
 

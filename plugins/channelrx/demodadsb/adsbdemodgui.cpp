@@ -2445,10 +2445,11 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_basicSettingsShown(false),
     m_doApplySettings(true),
     m_tickCount(0),
+    m_trackAircraft(nullptr),
     m_aircraftInfo(nullptr),
+    m_loadingData(false),
     m_airportModel(this),
     m_airspaceModel(this),
-    m_trackAircraft(nullptr),
     m_highlightAircraft(nullptr),
     m_chart(nullptr),
     m_adsbFrameRateSeries(nullptr),
@@ -2459,8 +2460,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_aircraftYAxis(nullptr),
     m_speech(nullptr),
     m_progressDialog(nullptr),
-    m_networkManager(nullptr),
-    m_loadingData(false)
+    m_networkManager(nullptr)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodadsb/readme.md";

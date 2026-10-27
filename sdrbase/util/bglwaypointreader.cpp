@@ -160,6 +160,11 @@ QList<QFileInfo> sourceFiles(const QFileInfo& source)
 QByteArray sourceFingerprint(const QList<QFileInfo>& files, const QString& rootPath)
 {
     QCryptographicHash hash(QCryptographicHash::Sha256);
+    // A field separator, so a name ending in digits cannot run into the size
+    // that follows it. addData(const char *, qsizetype) is deprecated in Qt 6.3;
+    // the QByteArray overload is present in both Qt 5 and Qt 6, and the other
+    // calls in this loop already use it
+    static const QByteArray separator(1, '\0');
 
     for (const QFileInfo& file : files)
     {
@@ -168,11 +173,11 @@ QByteArray sourceFingerprint(const QList<QFileInfo>& files, const QString& rootP
             filename = filename.mid(rootPath.size());
         }
         hash.addData(filename.toUtf8());
-        hash.addData("\0", 1);
+        hash.addData(separator);
         hash.addData(QByteArray::number(file.size()));
-        hash.addData("\0", 1);
+        hash.addData(separator);
         hash.addData(QByteArray::number(file.lastModified().toMSecsSinceEpoch()));
-        hash.addData("\0", 1);
+        hash.addData(separator);
     }
 
     return hash.result().toHex();

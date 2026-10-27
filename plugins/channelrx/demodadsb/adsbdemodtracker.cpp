@@ -40,11 +40,6 @@ ADSBDemodTracker::ADSBDemodTracker(ADSBDemod *adsbDemod) :
     m_basebandSampleRate(0),
     m_flushTimer(nullptr),
     m_tickTimer(nullptr),
-    m_importNetworkManager(nullptr),
-    m_importTimer(nullptr),
-    m_flightInformation(nullptr),
-    m_importRequestGeneration(0),
-    m_importAuthenticationRetry(false),
     m_statsChanged(false),
     m_trackAircraft(nullptr),
     m_qnhReported(0),
@@ -56,7 +51,12 @@ ADSBDemodTracker::ADSBDemodTracker(ADSBDemod *adsbDemod) :
     m_maxRangeStat(0.0f),
     m_maxAltitudeStat(0.0f),
     m_maxRateState(0.0f),
-    m_loadingData(false)
+    m_loadingData(false),
+    m_importNetworkManager(nullptr),
+    m_importTimer(nullptr),
+    m_importRequestGeneration(0),
+    m_importAuthenticationRetry(false),
+    m_flightInformation(nullptr)
 {
     qRegisterMetaType<ADSBAircraftUpdate>("ADSBAircraftUpdate");
     qRegisterMetaType<QList<ADSBAircraftUpdate>>("QList<ADSBAircraftUpdate>");

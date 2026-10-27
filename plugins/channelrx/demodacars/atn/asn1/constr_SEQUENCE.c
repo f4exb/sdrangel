@@ -437,6 +437,7 @@ SEQUENCE_decode_ber(asn_codec_ctx_t *opt_codec_ctx, asn_TYPE_descriptor_t *td,
 
 	phase3:
 		ctx->phase = 3;
+		/* Fall through */
 	case 3:	/* 00 and other tags expected */
 	case 4:	/* only 00's expected */
 

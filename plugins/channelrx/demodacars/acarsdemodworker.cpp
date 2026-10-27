@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QJsonObject>
+#include <QTimeZone>
 #include <QJsonDocument>
 #include <QHostInfo>
 
@@ -485,7 +486,7 @@ static QDateTime oooiDateTime(const QDateTime& received, int day, const QTime& t
     }
     const QDate base = received.toUTC().date();
     if ((day < 1) || (day > 31)) {
-        return QDateTime(base, time, Qt::UTC);
+        return QDateTime(base, time, QTimeZone::utc());
     }
     for (int offset = 0; offset <= 2; offset++)
     {
@@ -493,14 +494,14 @@ static QDateTime oooiDateTime(const QDateTime& received, int day, const QTime& t
         {
             const QDate d = base.addDays(sign * offset);
             if (d.day() == day) {
-                return QDateTime(d, time, Qt::UTC);
+                return QDateTime(d, time, QTimeZone::utc());
             }
             if (offset == 0) {
                 break;
             }
         }
     }
-    return QDateTime(base, time, Qt::UTC);
+    return QDateTime(base, time, QTimeZone::utc());
 }
 
 // Recognise a weather report inside an ACARS message, and say which airport it is about.

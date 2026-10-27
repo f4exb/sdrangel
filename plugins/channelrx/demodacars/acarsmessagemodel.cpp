@@ -258,6 +258,22 @@ void AcarsMessageModel::setShowDate(bool showDate)
 
 
 
+// beginFilterChange() was added in Qt 6.9 and endFilterChange() in Qt 6.10, and
+// invalidateFilter() is deprecated in favour of the pair. Bracketing the change is
+// what newer Qt wants - beginFilterChange() before the filter state is touched - so
+// the call sites are written that way and these stand in on older Qt, where a single
+// invalidateFilter() after the change is the whole operation.
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+void AcarsMessageFilter::beginFilterChange()
+{
+}
+
+void AcarsMessageFilter::endFilterChange()
+{
+    invalidateFilter();
+}
+#endif
+
 AcarsMessageFilter::AcarsMessageFilter(QObject *parent) :
     QSortFilterProxyModel(parent),
     m_hideNoInfo(true),
@@ -271,19 +287,21 @@ void AcarsMessageFilter::setHideNoInfo(bool hide)
     if (hide == m_hideNoInfo) {
         return;
     }
+    beginFilterChange();
     m_hideNoInfo = hide;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void AcarsMessageFilter::setFilter(int column, const QString& pattern)
 {
+    beginFilterChange();
     m_filterColumn = column;
     // Anchored, as the table's filter has always been - the pattern has to match the
     // whole cell rather than appear somewhere in it
     m_filterRe = QRegularExpression(QRegularExpression::anchoredPattern(pattern));
     m_filterValid = !pattern.isEmpty() && m_filterRe.isValid()
                  && (column >= 0) && (column < MESSAGE_COL_COUNT);
-    invalidateFilter();
+    endFilterChange();
 }
 
 // The base class would map a vertical section back to its source row, which with a

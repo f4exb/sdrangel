@@ -101,6 +101,8 @@ RELATIVE_OID__xer_body_decode(asn_TYPE_descriptor_t *td, void *sptr, const void 
 	int ret;
 
 	(void)td;
+	/* Only read by the assert below, which NDEBUG compiles away */
+	(void)chunk_end;
 
 	arcs_count = OBJECT_IDENTIFIER_parse_arcs(
 		(const char *)chunk_buf, chunk_size,

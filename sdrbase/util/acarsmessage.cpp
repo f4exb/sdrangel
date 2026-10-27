@@ -240,7 +240,7 @@ AcarsMessage *AcarsMessage::decodeBlock(const QByteArray &message, const QString
             text = ascii.mid(start, textSize);
         }
 
-        return decode(ascii, label, textOverride ? *textOverride : text, uplink);
+        return decode(ascii, label, textOverride ? *textOverride : text);
     }
     else
     {
@@ -388,7 +388,7 @@ QString AcarsLoadsheet::toString()
     return lines.join("<br>");
 }
 
-AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &label, const QString &text, bool uplink)
+AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &label, const QString &text)
 {
     AcarsMessage *acarsMessage;
     // Before the label dispatch: a loadsheet arrives under whatever label the airline

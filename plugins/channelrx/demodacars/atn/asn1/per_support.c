@@ -302,6 +302,8 @@ int uper_put_constrained_whole_number_s(asn_per_outp_t *po, long v, int nbits) {
 	         long svalue  = uvalue1;
 	unsigned long uvalue2 = svalue;
 	assert(uvalue1 == uvalue2);
+	/* Only read by the assert above, which NDEBUG compiles away */
+	(void)uvalue2;
 	return uper_put_constrained_whole_number_u(po, v, nbits);
 }
 
