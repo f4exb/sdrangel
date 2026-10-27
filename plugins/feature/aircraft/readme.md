@@ -25,7 +25,7 @@ Reports may identify an aircraft by any of:
 
 The feature merges reports under whichever identities it has seen, cross referencing
 registration and ICAO address through the aircraft database. A flight number is
-remembered as the aircraft's most recent flight (flights change; the airframe does not).
+remembered as the aircraft's most recent flight.
 
 <h3>Session persistence</h3>
 
@@ -39,33 +39,23 @@ Aircraft with a position are sent to the [Map feature](../map/readme.md), named 
 
 The map item carries:
 
-* An icon matching the aircraft type, rotated to point along the track,
-* The full track accumulated across all protocols - the whole history survives coverage
-  gaps, so a flight tracked on ADS-B and picked up again hours later on HFDL shows one
-  continuous track,
-* A popup whose ICAO address, registration and flight number are **links**: clicking one
-  selects that aircraft or flight in this feature.
+* An icon matching the aircraft type & livery.
+* The full track accumulated across all protocols - so a flight tracked on ADS-B and
+  picked up again hours later on HFDL shows one continuous track.
 * A popup headed by a side view of the type in the operator's livery and the country
-  flag, followed by registration, flight, aircraft type,
-  departure/arrival airports and the route where messages have revealed them, and the
-  protocols and frequencies the **current flight** has been heard on. 
+  flag, followed by registration and flight number, that are **links** to select that aircraft or flight in this feature,
+  aircraft type, departure/arrival airports, route if available, and the
+  protocols and frequencies the current flight has been heard on.
+* PFD and ND data from ADS-B (speed, altitude, heading etc) and ACARS data (waypoints).
 
 ![Aircraft on the Map](../../../doc/img/AircraftFeature_map.jpg)
 
-The routes an aircraft has been given are drawn too, but only for the aircraft or flight
-**selected** in the tables - a filed flight plan and an oceanic clearance alike - as a
-line through the waypoints with a marker at each one.
-Selecting an aircraft draws the flight it is on now. A flight
-plan comes from an FPN message or a position report's route insert; a clearance from an
-oceanic clearance or its readback. Both are bookended with the departure and arrival
-airports so the line starts and finishes somewhere recognisable, and the route's popup
-carries the message that filed it, which is where the clearance number, entry time,
-flight level and Mach are.
+The routes an aircraft has been given are [drawn](#documents) for the aircraft or flight
+selected in the tables.
 
-Routes are drawn in the Map's **Aircraft Routes** item group rather than the Aircraft one,
+Routes are drawn in the Map's **Aircraft Routes** item group rather than the **Aircraft** group,
 so that their colour, labels and above all their minimum zoom can be set independently of
-the aircraft icons. An icon has to be decluttered away when the map is zoomed out, where a
-route drawn across an ocean is exactly what you want to see at that zoom.
+the aircraft icons.
 
 Selecting one of an aircraft's past flights draws that flight's track instead of the one
 it is on now.
@@ -305,7 +295,7 @@ on planespotters.net
 
 ![Aircraft Tab](../../../doc/img/AircraftFeature_aircraft_tab.png)
 
-<h3>Documents</h3>
+<h3 id="documents">Documents</h3>
 
 Flight plans, oceanic clearances, loadsheets, logons and OOOI events,
 collected against the flight number. Selecting one displays its full text
