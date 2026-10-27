@@ -118,6 +118,7 @@ std::vector<uint8_t> OuterDecoder::makePRBS()
 }
 
 OuterDecoder::OuterDecoder() :
+    m_packet{},
     m_prbs(makePRBS())
 {
     for (int j = 0; j < m_interleaverI; j++) {

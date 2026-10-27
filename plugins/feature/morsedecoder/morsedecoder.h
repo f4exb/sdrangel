@@ -171,6 +171,10 @@ public:
         QString m_text;
 
         MsgReportText(const QString& text) :
+            m_estimatedPitchHz(0.0f),
+            m_estimatedSpeedWPM(0.0f),
+            m_signalThreshold(0.0f),
+            m_costFunction(0.0f),
             m_text(text)
         {}
     };

@@ -85,7 +85,7 @@ void DABFFT::transform(const std::complex<float> *in, std::complex<float> *out)
     // Through the plan's aligned buffers, so any input and output can be used
     std::memcpy(m_implementation->in, in, sizeof(fftwf_complex) * m_size);
     fftwf_execute(m_implementation->plan);
-    std::memcpy(out, m_implementation->out, sizeof(fftwf_complex) * m_size);
+    std::memcpy(static_cast<void*>(out), m_implementation->out, sizeof(fftwf_complex) * m_size);
 }
 
 const char *DABFFT::backend()

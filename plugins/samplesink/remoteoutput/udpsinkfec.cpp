@@ -37,6 +37,7 @@ UDPSinkFEC::UDPSinkFEC() :
     m_txBlockIndex(0),
     m_frameCount(0),
     m_sampleIndex(0),
+    m_deviceIndex(0),
     m_remoteOutputSender(nullptr),
     m_senderThread(nullptr),
     m_remoteAddress("127.0.0.1"),

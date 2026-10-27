@@ -30,8 +30,8 @@ DABSubchannelDecoder::DABSubchannelDecoder() :
     m_filled(0),
     m_lastDamaged(false),
     m_bitErrors(0),
-    m_countErrors(true),
-    m_comparedBits(0)
+    m_comparedBits(0),
+    m_countErrors(true)
 {
     reset();
 }

@@ -56,6 +56,11 @@ struct SDRBASE_API AircraftInformation {
     QString m_operatorICAO;
     QString m_registered;
 
+    AircraftInformation() :
+        m_icao(0)
+    {
+    }
+
     static void init()
     {
         QMutexLocker locker(&m_mutex);

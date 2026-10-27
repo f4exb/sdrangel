@@ -968,6 +968,10 @@ void DABEnsemble::fig2(const uint8_t *data, int length)
         field.insert(field.end(), label.segments[i].begin(), label.segments[i].end());
     }
 
+    if (field.size() < 3) {
+        return;
+    }
+
     const bool ucs2 = (field[0] & 0x80) != 0;
     const uint16_t flags = static_cast<uint16_t>((field[1] << 8) | field[2]);
     const int charset = ucs2 ? 6 : 15;

@@ -178,9 +178,15 @@ bool JournalineDecoder::push(const std::vector<std::uint8_t>& dataUnit)
 
     if (crcPresent)
     {
+        if (end < 4U)
+        {
+            ++m_invalidDataUnits;
+            return false;
+        }
+
         const std::uint16_t crc = static_cast<std::uint16_t>((dataUnit[end - 2U] << 8) | dataUnit[end - 1U]);
 
-        if (end < 4U || CRC::crc16(dataUnit.data(), end - 2U) != crc)
+        if (CRC::crc16(dataUnit.data(), end - 2U) != crc)
         {
             ++m_invalidDataUnits;
             return false;
@@ -229,6 +235,10 @@ bool JournalineDecoder::push(const std::vector<std::uint8_t>& dataUnit)
             if (entry->first != 0 && (oldest == m_received.end() || entry->second < oldest->second)) {
                 oldest = entry;
             }
+        }
+
+        if (oldest == m_received.end()) {
+            break;
         }
 
         m_objects.erase(oldest->first);

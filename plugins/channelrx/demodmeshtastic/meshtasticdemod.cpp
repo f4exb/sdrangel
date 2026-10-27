@@ -82,14 +82,14 @@ MeshtasticDemod::MeshtasticDemod(DeviceAPI* deviceAPI) :
         m_lastMsgHeaderParityStatus(0),
         m_lastMsgPayloadCRC(false),
         m_lastMsgPayloadParityStatus(0),
-        m_udpSink(this, 256)
+        m_udpSink(this, 256),
+        m_networkManager(new QNetworkAccessManager())
 {
 	setObjectName(m_channelId);
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
-    m_networkManager = new QNetworkAccessManager();
 
     QObject::connect(
         this,

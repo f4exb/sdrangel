@@ -25,6 +25,7 @@
 
 DTVUDP::DTVUDP() :
     m_port(5004),
+    m_datagram{},
     m_datagramFill(0),
     m_datagrams(0),
     m_address(QHostAddress::LocalHost),

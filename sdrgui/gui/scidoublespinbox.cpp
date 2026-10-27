@@ -35,7 +35,7 @@ QValidator::State SciDoubleSpinBox::validate(QString &input, int &pos) const
     (void) pos;
 
     bool ok;
-    input.toDouble(&ok);
+    (void) input.toDouble(&ok);
     if (ok) {
         return QValidator::Acceptable;
     }

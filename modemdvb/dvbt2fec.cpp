@@ -1045,7 +1045,8 @@ int L1Codec::postTableIndex(L1Constellation constellation)
 L1Codec::L1Codec() :
     m_preLDPC(FECType::Short, CodeRate::R1_4),
     m_postLDPC(FECType::Short, CodeRate::R1_2),
-    m_bch(FECType::Short, 12)
+    m_bch(FECType::Short, 12),
+    m_postBlock()
 {
     layout(m_preKsig, m_preKbch, m_preKldpc, 16200 - m_preKldpc, m_preNpunc, m_preGroups, m_preParity, m_preBlock);
 }
