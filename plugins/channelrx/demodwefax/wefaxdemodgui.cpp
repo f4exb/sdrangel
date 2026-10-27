@@ -695,7 +695,7 @@ bool WefaxDemodGUI::eventFilter(QObject *watched, QEvent *event)
             }
             if (delta != 0)
             {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
                 const QPoint anchor = wheelEvent->position().toPoint();
 #else
                 const QPoint anchor = wheelEvent->pos();
