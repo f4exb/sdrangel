@@ -103,6 +103,8 @@ void Receiver::reset()
     m_ofdm.reset();
     m_clockUpdateSymbols = 0;
 
+    std::vector<double> notches;
+    double inputRate;
     {
         std::lock_guard<std::mutex> lock(m_ofdmMutex);
         m_ofdmStatus = m_ofdm.getStatus();
@@ -120,9 +122,11 @@ void Receiver::reset()
         }
 
         m_notchesQueued = m_notchFrequencies;
+        notches = m_notchesQueued;
+        inputRate = m_inputRate;
     }
 
-    m_ofdm.setNotches(m_notchesQueued, m_inputRate); // The demodulator thread isn't running
+    m_ofdm.setNotches(notches, inputRate); // The demodulator thread isn't running
 
     if (m_threaded)
     {
@@ -334,7 +338,12 @@ void Receiver::correctClock()
 
         m_resampling = true;
         m_resampler.setRatioCorrection(1.0);
-        m_resampler.configure(m_inputRate, m_outputRate, 0.4165 * m_outputRate);
+        double inputRate;
+        {
+            std::lock_guard<std::mutex> lock(m_ofdmMutex);
+            inputRate = m_inputRate;
+        }
+        m_resampler.configure(inputRate, m_outputRate, 0.4165 * m_outputRate);
         m_resampler.prime(m_lastInput);
         setRatioCorrection(1.0 - ppm * 1e-6); // The measurement is accurate, so start with all of it
         return;
