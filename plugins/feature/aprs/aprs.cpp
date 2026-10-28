@@ -896,7 +896,7 @@ void APRS::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, 
             swgAPRSSettings->setMessagesTableColumnIndexes(new QList<int>());
         }
 
-        swgAPRSSettings->getStatusTableColumnSizes()->clear();
+        swgAPRSSettings->getMessagesTableColumnIndexes()->clear();
 
         for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
             swgAPRSSettings->getMessagesTableColumnIndexes()->push_back(settings.m_messagesTableColumnIndexes[i]);
