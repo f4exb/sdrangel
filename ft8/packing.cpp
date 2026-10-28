@@ -380,7 +380,7 @@ std::string Packing::unpack_5(int a77[], std::string& call1str, std::string& cal
     int x22 = un64(a77, 12, 22);
 
     if (hashes22.count(x22) > 0) {
-        ocall = hashes12[x22];
+        ocall = hashes22[x22];
     } else {
         ocall = "<...22>";
     }
