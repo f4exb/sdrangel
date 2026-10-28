@@ -1948,11 +1948,12 @@ void RemoteTCPInputTCPHandler::processCommands()
 
                     case RemoteTCPProtocol::sendMessage:
                     {
-                        char *buf = new char[m_commandLength];
+                        char *buf = new char[m_commandLength + 1];
                         qint64 bytesRead = m_dataSocket->read(buf, m_commandLength);
 
                         if (bytesRead == m_commandLength)
                         {
+                            buf[m_commandLength] = '\0';
                             bool broadcast = (bool) buf[0];
                             int i;
                             for (i = 1; i < (int) m_commandLength; i++)
@@ -1962,7 +1963,9 @@ void RemoteTCPInputTCPHandler::processCommands()
                                 }
                             }
                             QString callsign = QString::fromUtf8(&buf[1]);
-                            QString text = QString::fromUtf8(&buf[i+1]);
+                            QString text = (i < (int) m_commandLength)
+                                ? QString::fromUtf8(&buf[i+1])
+                                : QString();
 
                             qDebug() << "RemoteTCPInputTCPHandler::processCommands: Message " << m_dataSocket->peerAddress() << m_dataSocket->peerPort() << callsign << broadcast << text;
                             if (m_messageQueueToGUI) {
