@@ -97,7 +97,7 @@ void WefaxToneMeter::evaluate()
         const double halfWidth = 0.25 * m_shiftHz;
         for (double hz = centreHz - halfWidth; hz <= centreHz + halfWidth; hz += binHz)
         {
-            const int bin = binOf(hz);
+            const int bin = std::clamp(binOf(hz), 0, FFTSize - 1);
             const double power = m_spectrum[bin];
             if ((power > 10.0 * median)
                 && (power > m_spectrum[(bin + FFTSize - 1) % FFTSize])
@@ -140,7 +140,7 @@ void WefaxToneMeter::evaluate()
 
     // Parabolic interpolation on log power refines each peak within a bin.
     const auto refine = [&](double hz) {
-        const int bin = binOf(hz);
+        const int bin = std::clamp(binOf(hz), 0, FFTSize - 1);
         const double left = std::log(m_spectrum[(bin + FFTSize - 1) % FFTSize]);
         const double centre = std::log(m_spectrum[bin]);
         const double right = std::log(m_spectrum[(bin + 1) % FFTSize]);

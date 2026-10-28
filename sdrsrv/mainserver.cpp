@@ -289,6 +289,10 @@ void MainServer::addSinkDevice()
 
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
+    if (fileSinkDeviceIndex < 0) {
+        qWarning("MainServer::addSinkDevice: File Output is not available");
+        return;
+    }
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -328,6 +332,10 @@ void MainServer::addSourceDevice()
 
     // Create a file source instance by default
     int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
+    if (fileSourceDeviceIndex < 0) {
+       qWarning("MainServer::addSourceDevice: File Input device is not available");
+       return;
+    }
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -365,6 +373,10 @@ void MainServer::addMIMODevice()
 
     // create a test MIMO by default
     int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+    if (testMIMODeviceIndex < 0) {
+        qWarning("MainServer::addMIMODevice: Test MIMO device is not available");
+        return;
+    }
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -467,6 +479,10 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         {
             qDebug("MainServer::changeSampleSource: non existent device replaced by File Input");
             int  deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
+            if (deviceIndex < 0) {
+                qWarning("MainServer::changeSampleSource: File Input is not available");
+                return;
+            }
             samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -547,6 +563,10 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         {
             qDebug("MainServer::changeSampleSink: non existent device replaced by File Sink");
             int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
+            if (fileSinkDeviceIndex < 0) {
+                qWarning("MainServer::changeSampleSink: File Sink is not available");
+                return;
+            }
             samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -626,6 +646,10 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         {
             qDebug("MainServer::changeSampleMIMO: non existent device replaced by Test MIMO");
             int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+            if (testMIMODeviceIndex < 0) {
+                qWarning("MainServer::changeSampleMIMO: Test MIMO device is not available");
+                return;
+            }
             samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);

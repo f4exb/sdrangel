@@ -123,6 +123,11 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
 {
     QString url = reply->url().toEncoded().constData();
     int idx = m_downloads.indexOf(reply);
+    if (idx < 0) {
+        qWarning("HttpDownloadManager::downloadFinished: reply not found in downloads");
+        reply->deleteLater();
+        return;
+    }
     QString filename = m_filenames[idx];
     bool success = false;
     bool retry = false;

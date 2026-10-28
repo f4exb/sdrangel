@@ -187,6 +187,11 @@ void BasicChannelSettingsDialog::on_presets_clicked()
         return;
     }
     ChannelAPI *channel = MainCore::instance()->getChannel(channelGUI->getDeviceSetIndex(), channelGUI->getIndex());
+    if (!channel)
+    {
+        qDebug() << "BasicChannelSettingsDialog::on_presets_clicked: not a valid channel";
+        return;
+    }
     const QString& id = channel->getURI();
 
     PluginPresetsDialog dialog(id);

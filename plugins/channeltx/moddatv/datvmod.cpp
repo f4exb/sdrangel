@@ -561,12 +561,12 @@ void DATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
 void DATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    response.getDatvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
     int tsBitrate = 0, tsSize = 0, channelSampleRate = 0, dataRate = 0;
     int64_t udpBytes = 0;
 
     if (m_basebandSource)
     {
+        response.getDatvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
         channelSampleRate = m_basebandSource->getChannelSampleRate();
         m_basebandSource->geTsFileInfos(tsBitrate, tsSize);
         udpBytes = m_basebandSource->getUdpByteCount();

@@ -544,6 +544,9 @@ HttpRequest::~HttpRequest()
     foreach(QByteArray key, uploadedFiles.keys())
     {
         QTemporaryFile* file=uploadedFiles.value(key);
+        if (!file) {
+            continue;
+        }
         if (file->isOpen())
         {
             file->close();

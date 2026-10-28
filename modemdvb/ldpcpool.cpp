@@ -156,6 +156,7 @@ void LDPCPool::run(Job& job, Context& context)
     }
 }
 
+// Caller must hold m_mutex.
 void LDPCPool::cancel(Job& job)
 {
     job.m_done += job.m_batches - job.m_next;

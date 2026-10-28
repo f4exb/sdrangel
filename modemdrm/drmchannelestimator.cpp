@@ -1578,6 +1578,9 @@ bool ChannelEstimationContext::estimateFrameWiener(
     const auto& fftFrames = *m_frames;
     const ModeParameters& parameters = Parameters::forMode(mode);
     const SpectrumParameters* spectrum = Parameters::forSpectrum(mode, occupancy);
+    if (!spectrum) {
+        return false;
+    }
     const int carrierCount = spectrum->maximumCarrier - spectrum->minimumCarrier + 1;
     const float temporalCorrelation = m_temporalCorrelation;
     const TemporalWeights weights = temporalWeights(temporalCorrelation);

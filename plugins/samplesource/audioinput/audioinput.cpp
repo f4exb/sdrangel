@@ -297,7 +297,7 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
     {
         forwardChange = true;
 
-        if (m_running) {
+        if (m_running && m_worker) {
             m_worker->setIQMapping(settings.m_iqMapping);
         }
     }

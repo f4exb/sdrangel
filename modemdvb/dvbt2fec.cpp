@@ -951,7 +951,7 @@ CellInterleaver::CellInterleaver(int ncells) :
             r = (r >> 1) | (bit << (m_nd - 2));
         }
 
-        int value = (int) (((i & 1) << (m_nd - 1)) | r);
+        int value = m_nd > 0 ? (int) (((i & 1) << (m_nd - 1)) | r) : (int) r;
 
         if (value < ncells) {
             m_l0[q++] = value;

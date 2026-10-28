@@ -1213,10 +1213,11 @@ void RemoteTCPSinkSink::processCommand()
                 quint32 msgLen = RemoteTCPProtocol::extractUInt32(&cmd[1]);
                 try
                 {
-                    char *buf = new char[msgLen];
+                    char *buf = new char[msgLen + 1];
                     len = client->read((char *)buf, msgLen);
                     if (len == (int) msgLen && msgLen)
                     {
+                        buf[msgLen] = '\0';
                         bool broadcast = (bool) buf[0];
                         int i;
                         for (i = 1; i < (int) msgLen; i++)

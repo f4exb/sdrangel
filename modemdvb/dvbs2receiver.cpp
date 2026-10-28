@@ -948,6 +948,7 @@ void Receiver::deframe(FrameSlot& slot)
 
             // Not from a frame of before a reset (still being decoded when it came): the front end's set for the
             // signal since
+            std::lock_guard<std::mutex> lock(m_mutex);
             if (slot.m_epoch == m_resetEpoch) {
                 m_matypeRollOff = header.rollOff() + (m_lowRollOffs ? 4 : 0);
             }
