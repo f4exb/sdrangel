@@ -256,7 +256,9 @@ void write(std::ostream& os, const ax25_frame& frame)
 
     if (frame.pid())
     {
+        std::ios_base::fmtflags flags = os.flags();
         os << "PID: " << std::setbase(16) << int(frame.pid()) << std::endl;
+        os.flags(flags);
     }
     os << "Info: " << std::endl << frame.info() << std::endl;
 }
