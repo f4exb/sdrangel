@@ -75,7 +75,7 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 		if (m_pixelCount == m_pixelsPerFrame)
 		{
             int rows, cols;
-            m_tvScreen->getSize(rows, cols);
+            m_tvScreen->getSize(cols, rows);
 
             if ((rows != m_rows) || (cols != m_cols))
             {
