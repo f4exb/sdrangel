@@ -391,7 +391,7 @@ QVariant WebsiteBrowser::loadResource(int type, const QUrl& name)
         m_used[url.toString(QUrl::RemoveFragment)] = use(*m_website, url);
     }
 
-    if (!found.empty())
+    if (m_website && !found.empty())
     {
         const auto file = m_website->files.find(found);
 
