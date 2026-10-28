@@ -549,7 +549,7 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
     {
         forwardRxChange = true;
 
-        if (m_rxRunning) {
+        if (m_rxRunning && m_inputWorker) {
             m_inputWorker->setIQMapping(settings.m_rxIQMapping);
         }
     }
