@@ -645,6 +645,9 @@ void SIDSettings::getChannels(QStringList& ids, QStringList& titles)
             if (ChannelWebAPIUtils::getChannelReportValue(deviceSetIndex, channelIndex, "channelPowerDB", power))
             {
                 ChannelAPI *channel = mainCore->getChannel(deviceSetIndex, channelIndex);
+                if (!channel) {
+                    continue;
+                }
 
                 QString id = mainCore->getChannelId(channel);
 
