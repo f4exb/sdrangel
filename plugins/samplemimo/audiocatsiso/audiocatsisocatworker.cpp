@@ -226,11 +226,10 @@ void AudioCATSISOCATWorker::catConnect()
             );
             m_inputMessageQueueToGUI->push(msg);
         }
+        return;
     }
-    else
-    {
-        qDebug("AudioCATSISOCATWorker::catConnect: rig initialized with num: %u", m_settings.m_hamlibModel);
-    }
+
+    qDebug("AudioCATSISOCATWorker::catConnect: rig initialized with num: %u", m_settings.m_hamlibModel);
 
     m_rig->state.rigport.type.rig = RIG_PORT_SERIAL;
     m_rig->state.rigport.parm.serial.rate = AudioCATSISOSettings::m_catSpeeds[m_settings.m_catSpeedIndex];
