@@ -65,7 +65,7 @@ void FFTFactory::preallocate(
             {
                 invFFTEngines.push_back(AllocatedEngine());
                 invFFTEngines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
-                fftEngines.back().m_engine->setReuse(false);
+                invFFTEngines.back().m_engine->setReuse(false);
                 invFFTEngines.back().m_engine->configure(fftSize, true);
             }
         }

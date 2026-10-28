@@ -344,7 +344,7 @@ bool M17DemodProcessor::decode_packet(modemm17::M17FrameDecoder::packet_buffer_t
         }
 
         uint16_t calcChecksum = crc16.get_bytes()[1] + (crc16.get_bytes()[0]<<8);
-        uint16_t xmitChecksum = m_currentPacket.back() + (m_currentPacket.end()[-2]<<8);
+        uint16_t xmitChecksum = m_currentPacket.back() + (m_currentPacket[m_currentPacket.size() - 2] << 8);
 
         if (calcChecksum == xmitChecksum) // (checksum == 0x0f47)
         {

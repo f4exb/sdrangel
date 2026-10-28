@@ -736,7 +736,7 @@ bool DABFrontEnd::processFrame()
     for (int n = ModeI::NullSize; n < ModeI::FrameSize; n += 7) {
         symbolPower += std::norm(m_mixed[Margin + shift + n]);
     }
-    symbolPower /= (ModeI::FrameSize - ModeI::NullSize) / 7;
+    symbolPower /= ((ModeI::FrameSize - ModeI::NullSize + 6) / 7.0);
 
     m_frame.startSample = frameStart + shift;
     m_frame.frequencyOffsetHz = static_cast<float>(m_frequency);

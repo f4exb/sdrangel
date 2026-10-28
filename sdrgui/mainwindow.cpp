@@ -413,6 +413,10 @@ void AddSampleSourceFSM::addDevice()
     // Create a file source instance by default if requested device was not enumerated (index = -1)
     if (m_deviceIndex < 0) {
         m_deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
+        if (m_deviceIndex < 0) {
+            qWarning("AddSampleSourceFSM::addDevice: File Input is not available");
+            return;
+        }
     }
 
     m_mainWindow->sampleSourceCreate(m_deviceSetIndex, m_deviceIndex, m_deviceUISet);
@@ -528,6 +532,10 @@ void AddSampleSinkFSM::addDevice()
     // Create a file sink instance by default if requested device was not enumerated (index = -1)
     if (m_deviceIndex < 0) {
         m_deviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
+        if (m_deviceIndex < 0) {
+            qWarning("AddSampleSinkFSM::addDevice: File Output is not available");
+            return;
+        }
     }
 
     m_mainWindow->sampleSinkCreate(m_deviceSetIndex, m_deviceIndex, m_deviceUISet);
@@ -650,6 +658,10 @@ void AddSampleMIMOFSM::addDevice()
     // Create a Test MIMO instance by default if requested device was not enumerated (index = -1)
     if (m_deviceIndex < 0) {
         m_deviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+        if (m_deviceIndex < 0) {
+            qWarning("AddSampleMIMOFSM::addDevice: Test MIMO device is not available");
+            return;
+        }
     }
 
     m_mainWindow->sampleMIMOCreate(m_deviceSetIndex, m_deviceIndex, m_deviceUISet);
@@ -1340,6 +1352,10 @@ void MainWindow::sampleSourceCreate(
     {
         qDebug("MainWindow::sampleSourceCreate: non existent device replaced by File Input");
         int fileInputDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
+        if (fileInputDeviceIndex < 0) {
+            qWarning("MainWindow::sampleSourceCreate: File Input is not available");
+            return;
+        }
         deviceIndex = fileInputDeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileInputDeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -1498,6 +1514,10 @@ void MainWindow::sampleSinkCreate(
     {
         qDebug("MainWindow::sampleSinkCreate: non existent device replaced by File Sink");
         int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
+        if (fileSinkDeviceIndex < 0) {
+            qWarning("MainWindow::sampleSinkCreate: File Sink is not available");
+            return;
+        }
         deviceIndex = fileSinkDeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -1656,6 +1676,10 @@ void MainWindow::sampleMIMOCreate(
     {
         qDebug("MainWindow::sampleMIMOCreate: non existent device replaced by Test MIMO");
         int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+        if (testMIMODeviceIndex < 0) {
+            qWarning("MainWindow::sampleMIMOCreate: Test MIMO device is not available");
+            return;
+        }
         deviceIndex = testMIMODeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -3885,6 +3909,11 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             BasebandSampleSink *rxChannel = nullptr;
             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
             gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+            if (!gui)
+            {
+                qWarning("MainWindow::channelAddClicked: RxChannelGUI not available");
+                return;
+            }
             deviceUI->registerRxChannelInstance(channelAPI, gui);
             gui->setDeviceType(ChannelGUI::DeviceType::DeviceRx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
@@ -3897,6 +3926,11 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             BasebandSampleSource *txChannel = nullptr;
             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
             gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+            if (!gui)
+            {
+                qWarning("MainWindow::channelAddClicked: TxChannelGUI not available");
+                return;
+            }
             deviceUI->registerTxChannelInstance(channelAPI, gui);
             gui->setDeviceType(ChannelGUI::DeviceType::DeviceTx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
@@ -3917,6 +3951,11 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 MIMOChannel *mimoChannel = nullptr;
                 pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
                 gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+                if (!gui)
+                {
+                    qWarning("MainWindow::channelAddClicked: MIMOChannelGUI not available");
+                    return;
+                }
                 deviceUI->registerChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
                 gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
@@ -3928,6 +3967,11 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 BasebandSampleSink *rxChannel = nullptr;
                 pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
                 gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+                if (!gui)
+                {
+                    qWarning("MainWindow::channelAddClicked: RxChannelGUI not available");
+                    return;
+                }
                 deviceUI->registerRxChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
                 gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
@@ -3939,6 +3983,11 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 BasebandSampleSource *txChannel = nullptr;
                 pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
                 gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+                if (!gui)
+                {
+                    qWarning("MainWindow::channelAddClicked: TxChannelGUI not available");
+                    return;
+                }
                 deviceUI->registerTxChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
                 gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
@@ -3955,35 +4004,32 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             return;
         }
 
-        if (gui)
-        {
-            QObject::connect(
-                gui,
-                &ChannelGUI::moveToWorkspace,
-                this,
-                [this, gui](int wsIndexDest){ this->channelMove(gui, wsIndexDest); }
-            );
-            QObject::connect(
-                gui,
-                &ChannelGUI::duplicateChannelEmitted,
-                this,
-                [this, gui](){ this->channelDuplicate(gui); }
-            );
-            QObject::connect(
-                gui,
-                &ChannelGUI::moveToDeviceSet,
-                this,
-                [this, gui](int dsIndexDest){ this->channelMoveToDeviceSet(gui, dsIndexDest); }
-            );
+        QObject::connect(
+            gui,
+            &ChannelGUI::moveToWorkspace,
+            this,
+            [this, gui](int wsIndexDest){ this->channelMove(gui, wsIndexDest); }
+        );
+        QObject::connect(
+            gui,
+            &ChannelGUI::duplicateChannelEmitted,
+            this,
+            [this, gui](){ this->channelDuplicate(gui); }
+        );
+        QObject::connect(
+            gui,
+            &ChannelGUI::moveToDeviceSet,
+            this,
+            [this, gui](int dsIndexDest){ this->channelMoveToDeviceSet(gui, dsIndexDest); }
+        );
 
-            gui->setDeviceSetIndex(deviceSetIndex);
+        gui->setDeviceSetIndex(deviceSetIndex);
             gui->setIndexToolTip(deviceAPI->getSamplingDeviceDisplayName());
             gui->setWorkspaceIndex(workspace->getIndex());
             qDebug("MainWindow::channelAddClicked: adding %s to workspace #%d",
                 qPrintable(gui->getTitle()), workspace->getIndex());
             workspace->addToMdiArea((QMdiSubWindow*) gui);
             loadDefaultPreset(channelAPI->getURI(), gui);
-        }
     }
 }
 

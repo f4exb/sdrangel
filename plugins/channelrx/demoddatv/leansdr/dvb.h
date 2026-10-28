@@ -260,9 +260,11 @@ struct deconvol_sync : runnable
             if (parity(prefix & response[b]) != ((exp >> b) & 1))
             {
                 // Current candidate does not solve this column.
-                if ((response[b] >> nprefix) == 0)
+                if (nprefix >= sizeof(iq_t) * 8 || (response[b] >> nprefix) == 0)
+                {
                     // No more bits to trace back.
                     return;
+                }
                 solved = 0;
             }
         }

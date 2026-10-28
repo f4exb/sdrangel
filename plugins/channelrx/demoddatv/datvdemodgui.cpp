@@ -547,39 +547,48 @@ void DATVDemodGUI::ldpcToolSelect(const QPoint& p)
 
 void DATVDemodGUI::tick()
 {
-    if (m_datvDemod)
+    if((m_intLastDecodedData - m_intPreviousDecodedData)>=0)
     {
-        m_objMagSqAverage(m_datvDemod->getMagSq());
-        double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
-        ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
-
-        if ((m_modcodModulationIndex != m_datvDemod->getModcodModulation()) || (m_modcodCodeRateIndex != m_datvDemod->getModcodCodeRate()))
-        {
-            m_modcodModulationIndex = m_datvDemod->getModcodModulation();
-            m_modcodCodeRateIndex = m_datvDemod->getModcodCodeRate();
-            DATVDemodSettings::DATVModulation modulation = DATVDemodSettings::getModulationFromLeanDVBCode(m_modcodModulationIndex);
-            DATVDemodSettings::DATVCodeRate rate = DATVDemodSettings::getCodeRateFromLeanDVBCode(m_modcodCodeRateIndex);
-            QString modcodModulationStr = DATVDemodSettings::getStrFromModulation(modulation);
-            QString modcodCodeRateStr = DATVDemodSettings::getStrFromCodeRate(rate);
-            ui->statusText->setText(tr("MCOD %1 %2").arg(modcodModulationStr).arg(modcodCodeRateStr));
-        }
-
-        if (m_cstlnSetByModcod != m_datvDemod->isCstlnSetByModcod())
-        {
-            m_cstlnSetByModcod = m_datvDemod->isCstlnSetByModcod();
-
-            if (m_cstlnSetByModcod) {
-                ui->statusText->setStyleSheet("QLabel { background-color : green; }");
-            } else {
-                ui->statusText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            }
-        }
+        m_intLastSpeed = 8 * (m_intLastDecodedData - m_intPreviousDecodedData);
+        ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
     }
 
-    if((m_intLastDecodedData-m_intPreviousDecodedData)>=0)
+    if (!m_datvDemod)
     {
-        m_intLastSpeed = 8*(m_intLastDecodedData-m_intPreviousDecodedData);
-        ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
+        ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->videoMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
+        ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
+        ui->channePowerText->setText("---");
+        ui->statusText->setText("---");
+        ui->statusText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        return;
+    }
+
+    m_objMagSqAverage(m_datvDemod->getMagSq());
+    double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
+    ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
+
+    if ((m_modcodModulationIndex != m_datvDemod->getModcodModulation()) || (m_modcodCodeRateIndex != m_datvDemod->getModcodCodeRate()))
+    {
+        m_modcodModulationIndex = m_datvDemod->getModcodModulation();
+        m_modcodCodeRateIndex = m_datvDemod->getModcodCodeRate();
+        DATVDemodSettings::DATVModulation modulation = DATVDemodSettings::getModulationFromLeanDVBCode(m_modcodModulationIndex);
+        DATVDemodSettings::DATVCodeRate rate = DATVDemodSettings::getCodeRateFromLeanDVBCode(m_modcodCodeRateIndex);
+        QString modcodModulationStr = DATVDemodSettings::getStrFromModulation(modulation);
+        QString modcodCodeRateStr = DATVDemodSettings::getStrFromCodeRate(rate);
+        ui->statusText->setText(tr("MCOD %1 %2").arg(modcodModulationStr).arg(modcodCodeRateStr));
+    }
+
+    if (m_cstlnSetByModcod != m_datvDemod->isCstlnSetByModcod())
+    {
+        m_cstlnSetByModcod = m_datvDemod->isCstlnSetByModcod();
+
+        if (m_cstlnSetByModcod) {
+            ui->statusText->setStyleSheet("QLabel { background-color : green; }");
+        } else {
+            ui->statusText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        }
     }
 
     if (m_datvDemod->audioActive())

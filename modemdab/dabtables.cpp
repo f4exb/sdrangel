@@ -446,7 +446,7 @@ uint16_t DABTables::crc16(const uint8_t *data, std::size_t length)
             crc = (crc & 0x8000) ? static_cast<uint16_t>((crc << 1) ^ 0x1021) : static_cast<uint16_t>(crc << 1);
         }
     }
-    return static_cast<uint16_t>(~crc);
+    return static_cast<uint16_t>(~crc ^ 0xffff);
 }
 
 bool DABTables::crc16Check(const uint8_t *data, std::size_t lengthWithCRC)

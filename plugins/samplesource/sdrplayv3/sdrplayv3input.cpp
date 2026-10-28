@@ -474,7 +474,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
 
         forwardChange = true;
 
-        if (m_running)
+        if (m_running && m_sdrPlayThread)
         {
             if (setDeviceCenterFrequency(deviceCenterFrequency)) {
                 qDebug() << "SDRPlayV3Input::applySettings: center freq: " << settings.m_centerFrequency << " Hz";

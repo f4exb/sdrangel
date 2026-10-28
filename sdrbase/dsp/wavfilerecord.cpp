@@ -220,13 +220,13 @@ void addString(QByteArray& buffer, const QString& type, const QString text)
         s.append('\0');
     }
 
-    quint16 textSize = s.size();
+    quint32 textSize = s.size();
     buffer.append(textSize & 0xff);
     buffer.append((textSize >> 8) & 0xff);
     buffer.append((textSize >> 16) & 0xff);
     buffer.append((textSize >> 24) & 0xff);
 
-    buffer.append(s, textSize);
+    buffer.append(s);
 }
 
 void addTag(QByteArray& buffer, const QString& id, const QString text)
