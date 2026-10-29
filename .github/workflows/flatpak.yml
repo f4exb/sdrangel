@@ -1,9 +1,9 @@
 name: SDRangel Flatpak Build
 
 on:
+  schedule:
+    - cron: '23 6 * * 1'  # Mondays at 06:23 UTC; periodically check code and flatpack infrastructure
   push:
-    branches:
-      - flatpak
     tags:
       - 'v*'
   workflow_dispatch:
@@ -29,8 +29,6 @@ jobs:
         run: |
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
             version="${GITHUB_REF_NAME#v}"
-          elif [[ "$GITHUB_REF_NAME" == "flatpak" ]]; then
-            version="${GITHUB_SHA::8}"
           else
             version="${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::8}"
           fi
@@ -43,6 +41,7 @@ jobs:
           manifest-path: flatpak/org.sdrangel.SDRangel.yaml
           cache-key: flatpak-builder-${{ hashFiles('flatpak/**') }}
       - name: Upload artifact
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.get_version.outputs.bundle }}
@@ -52,3 +51,96 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.get_version.outputs.bundle }}
+
+  notify_flatpak_failure:
+    needs: build_flatpak
+    # Notify only for scheduled failures, not tag releases or manual runs.
+    # Ignore reruns to avoid duplicate issues.
+    if: ${{ failure() && github.event_name == 'schedule' && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      issues: write
+
+    steps:
+      - name: Check SDRangel CI/CD status
+        id: health
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          deadline=$((SECONDS + 2 * 60 * 60))
+          conclusion=unknown
+
+          # Wait up to two hours for CI/CD to finish for this exact commit.
+          # Any successful run takes precedence over failed runs for the same SHA.
+          # If no completed run exists, keep waiting; timeout leaves "unknown".
+          while (( SECONDS < deadline )); do
+            conclusion=$(gh api \
+              "repos/$GH_REPO/actions/workflows/sdrangel.yml/runs?branch=master&head_sha=$COMMIT_SHA&per_page=100" \
+              --jq '[
+                .workflow_runs[]
+                | select(.conclusion == "success" or .conclusion == "failure")
+                | .conclusion
+              ] | if any(.[]; . == "success") then "success"
+                  elif any(.[]; . == "failure") then "failure"
+                  else "unknown" end') || {
+                    echo "Failed to query SDRangel CI/CD; retrying in 5 minutes..." >&2
+                    sleep 300
+                    continue
+                  }
+
+            if [[ "$conclusion" != "unknown" ]]; then
+              break
+            fi
+
+            echo "CI/CD has not completed for $COMMIT_SHA; waiting 5 minutes..."
+            sleep 300
+          done
+
+          echo "Latest SDRangel CI/CD conclusion: $conclusion"
+          echo "conclusion=$conclusion" >> "$GITHUB_OUTPUT"
+      - name: Check previous scheduled build
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          # Find the most recent completed scheduled Flatpak run, excluding
+          # this run. Only a success -> failure transition should open an issue.
+          previous=$(gh api \
+            "repos/$GH_REPO/actions/workflows/flatpak.yml/runs?branch=master&event=schedule&per_page=20" \
+            --jq "([.workflow_runs[]
+              | select(.id != $CURRENT_RUN_ID)
+              | select(.conclusion != null)]
+              | sort_by(.created_at)
+              | last
+              | .conclusion) // \"unknown\"")
+
+          echo "Previous scheduled build: $previous"
+          echo "conclusion=$previous" >> "$GITHUB_OUTPUT"
+
+      - name: Notify on passing-to-failing transition
+        # Require both a previously successful Flatpak build and healthy CI/CD
+        # on the current commit before reporting a regression.
+        if: steps.previous.outputs.conclusion == 'success' && steps.health.outputs.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          gh issue create \
+            --repo "$GH_REPO" \
+            --title "Flatpak build regressed" \
+            --body "$(cat <<EOF
+          The Flatpak build on master is now failing.
+
+          - Commit: $COMMIT_SHA
+          - Failed run: $RUN_URL
+
+          Please investigate the build failure.
+          EOF
+          )"
