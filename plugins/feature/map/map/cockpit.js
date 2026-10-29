@@ -39,11 +39,11 @@ var previousTcasRA = 0;
 // updates only the lowest - the most urgent - is called
 const radioAltCallouts = [5, 10, 30, 40, 50, 100, 500, 1000, 2500];
 
-// The audio files are served from the qrc audio directory, a sibling of the
-// directory map3d.html is in
+// The callouts are served from the user models directory, alongside the engine sound
+// sets - AircraftAudio.soundURL knows where
 function pfdPlayAudio(name) {
     try {
-        const audio = new Audio("../audio/" + name);
+        const audio = new Audio(AircraftAudio.soundURL(name));
         // The cockpit volume slider in Map Display Settings - map3d.html holds the value
         audio.volume = (typeof cockpitSoundVolume !== "undefined") ? cockpitSoundVolume : 1.0;
         // play() returns a promise, which rejects rather than throws on failure
@@ -449,6 +449,55 @@ function panelSaveGeometry(name, canvas) {
     });
 }
 
+// How much of a panel has to stay inside the window. The point is to keep it reachable
+// rather than tidy: a panel is dragged from anywhere on its face, so this is enough to
+// take hold of one and pull it back, and no particular handle has to be on screen
+const panelMinVisible = 60;
+
+// A length from a style, in CSS pixels, or fallback where the style doesn't give one
+function panelStylePixels(value, fallback) {
+    const px = parseFloat(value);
+    return isFinite(px) ? px : fallback;
+}
+
+// Brings a panel back inside the window if it would otherwise be drawn entirely outside
+// it - the window is not the size it was when the position was saved, and it can since
+// have been made smaller than it was when the panel was last dragged. A panel left off
+// the edge can't be reached to drag back, so it would be lost for good.
+// Only a panel that is actually out of bounds is moved, and only as far as it takes, so
+// one deliberately parked part way off an edge stays where it was put.
+// Safe to call on a hidden panel, which has no box of its own to measure: the geometry is
+// read from its style, so a panel can be checked before it is shown
+function panelEnsureVisible(canvas) {
+    if ((canvas === null) || (canvas === undefined)) {
+        return;
+    }
+    // Computed rather than inline: a panel whose size comes from the stylesheet and has
+    // never been resized has nothing in style.width at all. For a hidden element this is
+    // the computed value, not the used one, which is what is wanted here
+    const style = window.getComputedStyle(canvas);
+    const w = panelStylePixels(style.width, canvas.offsetWidth);
+    const h = panelStylePixels(style.height, canvas.offsetHeight);
+    const left = panelStylePixels(canvas.style.left !== "" ? canvas.style.left : style.left, NaN);
+    const top = panelStylePixels(canvas.style.top !== "" ? canvas.style.top : style.top, NaN);
+    if (!isFinite(left) || !isFinite(top) || !(w > 0) || !(h > 0)) {
+        // Either never positioned, so wherever the stylesheet puts it is where it belongs,
+        // or no size to go on - and a panel of unknown size can't be judged against the
+        // window at all, so it is left where it is rather than moved on a guess
+        return;
+    }
+    // A panel smaller than the margin has to be wholly visible, hence the min
+    const keepX = Math.min(panelMinVisible, w);
+    const keepY = Math.min(panelMinVisible, h);
+    const newLeft = Math.max(keepX - w, Math.min(left, window.innerWidth - keepX));
+    const newTop = Math.max(keepY - h, Math.min(top, window.innerHeight - keepY));
+    if ((newLeft !== left) || (newTop !== top)) {
+        canvas.style.position = "absolute";
+        canvas.style.left = newLeft + "px";
+        canvas.style.top = newTop + "px";
+    }
+}
+
 function panelApplyGeometry(canvas, g) {
     if ((canvas === null) || (canvas === undefined) || (g === undefined) || (g === null)) {
         return;
@@ -458,11 +507,14 @@ function panelApplyGeometry(canvas, g) {
         canvas.style.height = g.h + "px";
     }
     if ((g.l !== undefined) && (g.t !== undefined)) {
-        // Clamped, so a panel saved against a larger window is still reachable
         canvas.style.position = "absolute";
-        canvas.style.left = Math.max(0, Math.min(g.l, window.innerWidth - 80)) + "px";
-        canvas.style.top = Math.max(0, Math.min(g.t, window.innerHeight - 40)) + "px";
+        canvas.style.left = g.l + "px";
+        canvas.style.top = g.t + "px";
     }
+    // The window is very unlikely to be the size it was when this was saved, and the
+    // panel's own size has just changed with it, so both are taken into account here
+    // rather than clamped against a guess at how big a panel is
+    panelEnsureVisible(canvas);
 }
 
 function setPFDData(forward, newICAO, newCallsign, newAircraftType, newOnSurface, newWasOnSurface60SecsAgo, newRunwayAltitudeEstimate,

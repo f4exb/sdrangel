@@ -110,7 +110,7 @@
         }
 
         function getSpatialAudioBuffer(name) {
-            const url = name.startsWith("/") || name.includes("://") ? name : "../audio/" + name;
+            const url = AircraftAudio.soundURL(name);
             if (!spatialAudioBuffers.has(url)) {
                 spatialAudioBuffers.set(url,
                     fetch(url)
@@ -166,7 +166,7 @@
                     })
                     .catch((e) => {
                         console.log(`Spatial audio ${name} failed: ${e}`);
-                        const url = name.startsWith("/") || name.includes("://") ? name : "../audio/" + name;
+                        const url = AircraftAudio.soundURL(name);
                         spatialAudioBuffers.delete(url); // So a transient fetch failure can be retried
                     });
             } catch (e) {
@@ -175,8 +175,9 @@
         }
 
         // Sounds looped at entities that have a loopSound property. A value ending in
-        // an audio extension is a legacy single recording; any other value names a
-        // directory below /3d/Sounds containing engine.json and its OGG layers.
+        // an audio extension is a single recording from /3d/Sounds/aircraft; any other
+        // value names a directory below /3d/Sounds containing engine.json and its OGG
+        // layers.
         const loopSounds = new Map();
         const loopSoundErrors = new Set();
         const loopSoundRange = 20000;
@@ -293,7 +294,9 @@
                     }
                 })
                 .catch((e) => {
-                    const url = "../audio/" + entry.name;
+                    // The same URL getSpatialAudioBuffer cached it under, whatever the
+                    // name resolved to, or the failure would never be retried
+                    const url = AircraftAudio.soundURL(entry.name);
                     spatialAudioBuffers.delete(url);
                     entry.failed = true;
                     entry.retryAfter = performance.now() + loopSoundRetryMilliseconds;
@@ -1093,14 +1096,34 @@
         });
         const terrainHeightsRectangle = new Cesium.Rectangle();
 
+        // Asked for every vertex of every track segment, each time the segment is re-sent -
+        // 800 a second while tracking - and Cesium's lookup is ~1.2 us: for a rectangle
+        // it walks every level of its tile pyramid testing all four corners, then builds
+        // a string key. For a point the answer is always the deepest level's tile holding
+        // it, so it is kept per tile: 128 x 64 of them at most, 0.014 us a lookup, and
+        // checked identical at 200,000 random points and on every tile edge
+        const terrainHeightsScheme = new Cesium.GeographicTilingScheme();
+        const terrainHeightsTile = new Cesium.Cartesian2();
+        const maxSurfaceHeightByTile = new Map();
+
         function maxSurfaceHeightAt(cartographic) {
             if (!terrainHeightsLoaded) {
                 return maxSurfaceHeight;
             }
-            terrainHeightsRectangle.west = terrainHeightsRectangle.east = cartographic.longitude;
-            terrainHeightsRectangle.south = terrainHeightsRectangle.north = cartographic.latitude;
-            const heights = Cesium.ApproximateTerrainHeights.getMinimumMaximumHeights(terrainHeightsRectangle);
-            return Math.min(maxSurfaceHeight, heights.maximumTerrainHeight + maxBuildingHeight);
+            const level = Cesium.ApproximateTerrainHeights._terrainHeightsMaxLevel;
+            if (!terrainHeightsScheme.positionToTileXY(cartographic, level, terrainHeightsTile)) {
+                return maxSurfaceHeight;
+            }
+            const key = terrainHeightsTile.y * 4096 + terrainHeightsTile.x;
+            let height = maxSurfaceHeightByTile.get(key);
+            if (height === undefined) {
+                terrainHeightsRectangle.west = terrainHeightsRectangle.east = cartographic.longitude;
+                terrainHeightsRectangle.south = terrainHeightsRectangle.north = cartographic.latitude;
+                const heights = Cesium.ApproximateTerrainHeights.getMinimumMaximumHeights(terrainHeightsRectangle);
+                height = Math.min(maxSurfaceHeight, heights.maximumTerrainHeight + maxBuildingHeight);
+                maxSurfaceHeightByTile.set(key, height);
+            }
+            return height;
         }
 
         // Height of the surface below a position, from what is already loaded or drawn, so it
@@ -1413,7 +1436,7 @@
         // ---- frame pacing ----
         // Cesium honours targetFrameRate by RETURNING WITHOUT DRAWING when too little time
         // has passed since the last render. That is fine when requestAnimationFrame is paced
-        // to the display, but app/main.cpp passes --disable-frame-rate-limit to lift the map
+        // to the display, but --disable-frame-rate-limit (in QTWEBENGINE_CHROMIUM_FLAGS) lifts the map
         // off QtWebEngine's 60 fps, and without that limiter rAF free-runs at 700-850 Hz. So
         // nearly every callback is refused - and a frame that draws nothing produces no
         // damage, which Chromium's scheduler reads as an idle page and answers by dropping to
@@ -3798,6 +3821,9 @@
                     const pfdCanvas = document.getElementById("pfdCanvas");
                     if (command.show == true) {
                         startPFDUpdates();
+                        // Checked every time it is shown, not just when a saved position
+                        // is applied: the window may have been made smaller since
+                        panelEnsureVisible(pfdCanvas);
                         canvas.removeAttribute("hidden");
                     } else {
                         canvas.setAttribute("hidden", "hidden");
@@ -3812,6 +3838,7 @@
                     cockpitSoundVolume = command.cockpit;
                 } else if (command.command == "showND") {
                     if (command.show == true) {
+                        panelEnsureVisible(ndCanvas);
                         ndCanvas.removeAttribute("hidden");
                     } else {
                         ndCanvas.setAttribute("hidden", "hidden");
@@ -3823,6 +3850,7 @@
                         if (efisTimer === undefined) {
                             efisTimer = setInterval(drawEFIS, 100);
                         }
+                        panelEnsureVisible(efisCanvas);
                         efisCanvas.removeAttribute("hidden");
                     } else {
                         efisCanvas.setAttribute("hidden", "hidden");
@@ -3834,6 +3862,7 @@
                         if (rmpTimer === undefined) {
                             rmpTimer = setInterval(updateRMP, 250);
                         }
+                        panelEnsureVisible(rmpCanvas);
                         rmpCanvas.removeAttribute("hidden");
                     } else {
                         rmpCanvas.setAttribute("hidden", "hidden");
@@ -3858,6 +3887,7 @@
                     // Unchecked suppresses the pop-on-message behaviour too
                     dcduEnabled = command.show == true;
                     if (dcduEnabled) {
+                        panelEnsureVisible(dcduCanvas);
                         dcduCanvas.removeAttribute("hidden");
                         drawDCDU();
                     } else {
@@ -4648,6 +4678,18 @@
         // The DCDU above the PFD, their left edges aligned
         dcduCanvas.style.left = "10px";
         dcduCanvas.style.top = Math.max(cockpitDisplayTop - 228 - 6, 0) + "px";
+
+        // A panel does not move with the window: one left near an edge ends up outside it
+        // when the window is made smaller, and once it is off the edge there is nothing
+        // left to grab to drag it back. Hidden panels are checked as well, so one is
+        // already somewhere sensible by the time it is asked for
+        window.addEventListener("resize", function () {
+            panelEnsureVisible(pfdCanvas);
+            panelEnsureVisible(ndCanvas);
+            panelEnsureVisible(efisCanvas);
+            panelEnsureVisible(rmpCanvas);
+            panelEnsureVisible(dcduCanvas);
+        });
 
         function getPropertyValue(entity, propertyName) {
             const property = entity.properties[propertyName];

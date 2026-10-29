@@ -129,7 +129,9 @@ function showDCDUMessage(message, playSound) {
         return;
     }
     // Unhidden first: a hidden canvas has no size, and the backing store is matched
-    // to the displayed size when it is drawn
+    // to the displayed size when it is drawn. A message pops the panel up wherever it
+    // was last left, which may be outside a window that has since been made smaller
+    panelEnsureVisible(dcduCanvas);
     dcduCanvas.removeAttribute("hidden");
     setDCDUMessage(message);
     // The ring's volume - and whether it is heard at all - is the cockpit volume
@@ -139,11 +141,11 @@ function showDCDUMessage(message, playSound) {
     }
 }
 
-// Ring for an incoming message. The audio files are served from the qrc audio
-// directory, a sibling of the directory map3d.html is in
+// Ring for an incoming message. The recording is served from the user models
+// directory, alongside the engine sound sets - AircraftAudio.soundURL knows where
 function dcduRing() {
     try {
-        const audio = new Audio("../audio/ATC.wav");
+        const audio = new Audio(AircraftAudio.soundURL("ATC.wav"));
         // The cockpit volume slider in Map Display Settings - map3d.html holds the value
         audio.volume = (typeof cockpitSoundVolume !== "undefined") ? cockpitSoundVolume : 1.0;
         // play() returns a promise, which rejects rather than throws on failure

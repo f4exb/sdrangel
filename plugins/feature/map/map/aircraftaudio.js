@@ -11,6 +11,14 @@
     const defaultFullScaleDistance = 50.0;
     const configCache = new Map();
 
+    // Every recording the 3D map plays for an aircraft is in the user models directory,
+    // which the page is served as /3d. An engine sound set is a directory of its own
+    // below Sounds, holding engine.json and its OGG layers; the single recordings - the
+    // cockpit callouts, the gear and flap movements, and the propeller and helicopter
+    // loops - are together in Sounds/aircraft
+    const soundsBaseURL = "/3d/Sounds/";
+    const aircraftSoundsBaseURL = soundsBaseURL + "aircraft/";
+
     function finiteNumber(value, fallback) {
         return (typeof value === "number") && Number.isFinite(value) ? value : fallback;
     }
@@ -112,7 +120,24 @@
         if (!safePathComponent(name)) {
             throw new Error("Unsafe engine sound set name " + name);
         }
-        return "/3d/Sounds/" + encodeURIComponent(name) + "/";
+        return soundsBaseURL + encodeURIComponent(name) + "/";
+    }
+
+    // Where a single recording is played from, given the bare file name the rest of
+    // SDRangel names it by. A name that is already a path or a full URL is taken as
+    // given, so a caller that knows exactly what it wants is not second guessed
+    function soundURL(name) {
+        if ((typeof name !== "string") || (name.length === 0)
+            || name.startsWith("/") || name.includes("://")) {
+            return name;
+        }
+        if (!safePathComponent(name)) {
+            // Returned unresolved rather than thrown: the callers turn a name that will
+            // not load into a logged failure and carry on, and one bad name must not
+            // stop the sounds around it from playing
+            return name;
+        }
+        return aircraftSoundsBaseURL + name;
     }
 
     function loadConfiguration(name) {
@@ -231,6 +256,7 @@
     global.AircraftAudio = Object.freeze({
         defaultFullScaleDistance: defaultFullScaleDistance,
         configurationBaseURL: configurationBaseURL,
+        soundURL: soundURL,
         loadConfiguration: loadConfiguration,
         normalizeConfiguration: normalizeConfiguration,
         interpolateCurve: interpolateCurve,
