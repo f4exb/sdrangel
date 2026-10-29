@@ -766,7 +766,7 @@
            <property name="childrenCollapsible">
             <bool>false</bool>
            </property>
-           <widget class="QTableWidget" name="documents">
+           <widget class="QTableView" name="documents">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -785,46 +785,6 @@
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
             </property>
-            <column>
-             <property name="text">
-              <string>Time</string>
-             </property>
-             <property name="toolTip">
-              <string>Time the document was received</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Callsign</string>
-             </property>
-             <property name="toolTip">
-              <string>Callsign of the flight the document belongs to</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Reg</string>
-             </property>
-             <property name="toolTip">
-              <string>Aircraft registration or ICAO address</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Type</string>
-             </property>
-             <property name="toolTip">
-              <string>Kind of document</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Title</string>
-             </property>
-             <property name="toolTip">
-              <string>Document title</string>
-             </property>
-            </column>
            </widget>
            <widget class="AcarsMessageView" name="documentText">
             <property name="toolTip">
@@ -866,7 +826,7 @@
            <property name="childrenCollapsible">
             <bool>false</bool>
            </property>
-           <widget class="QTableWidget" name="logons">
+           <widget class="QTableView" name="logons">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -885,46 +845,6 @@
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
             </property>
-            <column>
-             <property name="text">
-              <string>Time</string>
-             </property>
-             <property name="toolTip">
-              <string>Time the logon was received</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Callsign</string>
-             </property>
-             <property name="toolTip">
-              <string>Callsign of the flight the logon belongs to</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Reg</string>
-             </property>
-             <property name="toolTip">
-              <string>Aircraft registration or ICAO address</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Type</string>
-             </property>
-             <property name="toolTip">
-              <string>Kind of logon</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Title</string>
-             </property>
-             <property name="toolTip">
-              <string>Logon title</string>
-             </property>
-            </column>
            </widget>
            <widget class="AcarsMessageView" name="logonText">
             <property name="toolTip">
@@ -959,7 +879,7 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="QTableWidget" name="atcMessages">
+          <widget class="QTableView" name="atcMessages">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -978,54 +898,6 @@
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
            </property>
-           <column>
-            <property name="text">
-             <string>Time</string>
-            </property>
-            <property name="toolTip">
-             <string>Time the message was received</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Protocol</string>
-            </property>
-            <property name="toolTip">
-             <string>Message protocol, e.g. CPDLC</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Dir</string>
-            </property>
-            <property name="toolTip">
-             <string>Message direction: up arrow for uplink (ATC to aircraft), down arrow for downlink</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>From</string>
-            </property>
-            <property name="toolTip">
-             <string>Message source, when known</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>To</string>
-            </property>
-            <property name="toolTip">
-             <string>Message recipient, when known</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Message</string>
-            </property>
-            <property name="toolTip">
-             <string>The ATC message text</string>
-            </property>
-           </column>
           </widget>
          </item>
         </layout>

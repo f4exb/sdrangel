@@ -20,6 +20,8 @@
 #include <cmath>
 #include <functional>
 #include <QColor>
+#include <QDateTime>
+#include <QLocale>
 #include "util/airlines.h"
 #include "util/osndb.h"
 #include "util/ourairportsdb.h"
@@ -177,6 +179,68 @@ void AircraftTableModel::resolveIcons(Row& row) const
     }
 }
 
+// How long ago, coarsely - the tooltip says how stale a figure is, not when exactly
+static QString ageText(qint64 secs)
+{
+    if (secs < 90) {
+        return QString("%1 s").arg(secs);
+    } else if (secs < 90 * 60) {
+        return QString("%1 min").arg((secs + 30) / 60);
+    } else if (secs < 48 * 60 * 60) {
+        return QString("%1 h %2 min").arg(secs / 3600).arg((secs % 3600) / 60);
+    } else {
+        return QString("%1 days").arg(secs / 86400);
+    }
+}
+
+// The age in seconds of a figure in a column that no longer describes where the aircraft
+// is, or -1 when it is current. The table keeps a position for the whole flight, but the
+// Map drops it after "ADS-B position for" or "ACARS position for", and Find on map then
+// has nothing to find - so a row would show as current a position the Map has given up
+// on. Lat, Lon and Dist go with the position. An altitude, heading or speed can have
+// arrived after it - a Mode S altitude reply carries no position - so each of those is
+// judged by its own time against the same window, which makes one that came with the
+// position stale with it and leaves a later one alone while it is still fresh.
+// Only for aircraft being heard: an archived one is off the Map by definition.
+static qint64 staleAge(const AircraftDisplay& d, int column)
+{
+    if (!d.m_active || !d.m_positionValid
+        || !d.m_mapAvailableUntil.isValid() || !d.m_positionDateTime.isValid()) {
+        return -1;
+    }
+    // Milliseconds since the epoch throughout: the times are UTC, so none of this touches
+    // the time zone code, which is behind a lock shared by every thread
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 until = d.m_mapAvailableUntil.toMSecsSinceEpoch();
+    if (until > now) {
+        return -1;
+    }
+    const qint64 positionTime = d.m_positionDateTime.toMSecsSinceEpoch();
+    const qint64 window = until - positionTime;
+
+    // A value with no time of its own is taken to have come with the position
+    auto valueAge = [&](bool valid, const QDateTime& when) -> qint64 {
+        if (!valid) {
+            return -1;
+        }
+        const qint64 time = when.isValid() ? when.toMSecsSinceEpoch() : positionTime;
+        return (time + window <= now) ? (now - time) / 1000 : -1;
+    };
+
+    switch (column)
+    {
+    case AircraftTableModel::COL_LATITUDE:
+    case AircraftTableModel::COL_LONGITUDE:
+        return (now - positionTime) / 1000;
+    case AircraftTableModel::COL_DISTANCE:
+        return d.m_distanceValid ? (now - positionTime) / 1000 : -1;
+    case AircraftTableModel::COL_ALTITUDE: return valueAge(d.m_altitudeValid, d.m_altitudeDateTime);
+    case AircraftTableModel::COL_HEADING: return valueAge(d.m_headingValid, d.m_headingDateTime);
+    case AircraftTableModel::COL_SPEED: return valueAge(d.m_speedValid, d.m_speedDateTime);
+    default: return -1;
+    }
+}
+
 QVariant AircraftTableModel::data(const QModelIndex& index, int role) const
 {
 
@@ -207,6 +271,29 @@ QVariant AircraftTableModel::data(const QModelIndex& index, int role) const
         case COL_SIDEVIEW: return row.m_sideview.isNull() ? QVariant() : row.m_sideview;
         default: return QVariant();
         }
+    }
+
+    // Greyed and explained rather than hidden: where the aircraft was is still worth
+    // knowing, as long as it does not read as where it is
+    if ((role == Qt::ForegroundRole) || (role == Qt::ToolTipRole))
+    {
+        const qint64 age = staleAge(d, index.column());
+        if (age < 0) {
+            return QVariant();
+        }
+        if (role == Qt::ForegroundRole) {
+            return QColor(128, 128, 128);
+        }
+        QString what;
+        switch (index.column())
+        {
+        case COL_ALTITUDE: what = "Altitude"; break;
+        case COL_HEADING: what = "Heading"; break;
+        case COL_SPEED: what = "Speed"; break;
+        default: what = "Position"; break;
+        }
+        return QString("%1 last updated %2 ago - the aircraft is no longer on the map")
+            .arg(what, ageText(age));
     }
 
     if (role != Qt::DisplayRole) {
@@ -671,4 +758,207 @@ const FlightDisplay *FlightTableModel::flightAt(int row) const
 int FlightTableModel::rowOf(quint64 id) const
 {
     return m_rowById.value(id, -1);
+}
+
+MessageTableModel::MessageTableModel(const QStringList& headings, const QStringList& tooltips, QObject *parent) :
+    QAbstractTableModel(parent),
+    m_headings(headings),
+    m_tooltips(tooltips)
+{
+}
+
+int MessageTableModel::rowCount(const QModelIndex& parent) const
+{
+    return parent.isValid() ? 0 : m_rows.size();
+}
+
+int MessageTableModel::columnCount(const QModelIndex& parent) const
+{
+    return parent.isValid() ? 0 : m_headings.size();
+}
+
+QVariant MessageTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if ((orientation != Qt::Horizontal) || (section < 0) || (section >= m_headings.size())) {
+        return QVariant();
+    }
+    if (role == Qt::DisplayRole) {
+        return m_headings[section];
+    }
+    if (role == Qt::ToolTipRole) {
+        return m_tooltips.value(section);
+    }
+    return QVariant();
+}
+
+QVariant MessageTableModel::data(const QModelIndex& index, int role) const
+{
+    if (!index.isValid() || (index.row() >= m_rows.size())) {
+        return QVariant();
+    }
+    const MessageRow& row = m_rows[index.row()];
+    const int column = index.column();
+
+    if (role == Qt::DisplayRole)
+    {
+        if (column == 0)
+        {
+            // Local time, worked out only for the rows being drawn. The date keeps the
+            // locale's own format so the column looks as it always has; the time is
+            // spelled out to the second
+            static const QString format = QLocale().dateFormat(QLocale::ShortFormat) + " hh:mm:ss";
+            return row.m_receivedMs ? QDateTime::fromMSecsSinceEpoch(row.m_receivedMs).toString(format) : QString();
+        }
+        return row.m_cells.value(column - 1);
+    }
+    if ((role == Qt::ToolTipRole) && (column == m_headings.size() - 1) && !row.m_tooltip.isEmpty()) {
+        return row.m_tooltip;
+    }
+    return QVariant();
+}
+
+void MessageTableModel::append(const QList<MessageRow>& rows)
+{
+    if (rows.isEmpty()) {
+        return;
+    }
+    beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size() + rows.size() - 1);
+    m_rows.append(rows);
+    endInsertRows();
+}
+
+void MessageTableModel::clear()
+{
+    beginResetModel();
+    m_rows.clear();
+    endResetModel();
+}
+
+const MessageRow *MessageTableModel::rowAt(int row) const
+{
+    return ((row >= 0) && (row < m_rows.size())) ? &m_rows[row] : nullptr;
+}
+
+void MessageTableModel::retagAircraft(quint64 from, quint64 to)
+{
+    for (MessageRow& row : m_rows)
+    {
+        if (row.m_aircraftId == from) {
+            row.m_aircraftId = to;
+        }
+    }
+}
+
+void MessageTableModel::retagFlight(quint64 from, quint64 to)
+{
+    for (MessageRow& row : m_rows)
+    {
+        if (row.m_flightId == from) {
+            row.m_flightId = to;
+        }
+    }
+}
+
+// From the bottom up and a run of adjacent rows at a time, so each removal moves only the
+// rows below it once
+void MessageTableModel::removeIf(const std::function<bool(const MessageRow& row)>& matches, qint64 olderThanMs)
+{
+    auto rowMatches = [this, &matches, olderThanMs](int i) {
+        const MessageRow& row = m_rows[i];
+        if (olderThanMs && (!row.m_receivedMs || (row.m_receivedMs >= olderThanMs))) {
+            return false;
+        }
+        return matches(row);
+    };
+    int i = m_rows.size() - 1;
+    while (i >= 0)
+    {
+        if (!rowMatches(i))
+        {
+            i--;
+            continue;
+        }
+        const int last = i;
+        while ((i >= 0) && rowMatches(i)) {
+            i--;
+        }
+        beginRemoveRows(QModelIndex(), i + 1, last);
+        m_rows.erase(m_rows.begin() + i + 1, m_rows.begin() + last + 1);
+        endRemoveRows();
+    }
+}
+
+MessageFilterProxy::MessageFilterProxy(QObject *parent) :
+    QSortFilterProxyModel(parent),
+    m_aircraftId(0),
+    m_flightId(0)
+{
+    // Row numbers count what is displayed, as in ActiveFilterProxy
+    auto renumber = [this]()
+    {
+        if (rowCount() > 0) {
+            emit headerDataChanged(Qt::Vertical, 0, rowCount() - 1);
+        }
+    };
+    connect(this, &QAbstractItemModel::rowsInserted, this, renumber);
+    connect(this, &QAbstractItemModel::rowsRemoved, this, renumber);
+    connect(this, &QAbstractItemModel::layoutChanged, this, renumber);
+    connect(this, &QAbstractItemModel::modelReset, this, renumber);
+}
+
+void MessageFilterProxy::setSelection(quint64 aircraftId, quint64 flightId)
+{
+    beginFilterChange();
+    m_aircraftId = aircraftId;
+    m_flightId = flightId;
+    endFilterChange();
+}
+
+const MessageRow *MessageFilterProxy::rowAt(const QModelIndex& index) const
+{
+    const MessageTableModel *model = qobject_cast<const MessageTableModel *>(sourceModel());
+    return (model && index.isValid()) ? model->rowAt(mapToSource(index).row()) : nullptr;
+}
+
+QVariant MessageFilterProxy::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Vertical) {
+        return (role == Qt::DisplayRole) ? QVariant(section + 1) : QVariant();
+    }
+    return QSortFilterProxyModel::headerData(section, orientation, role);
+}
+
+bool MessageFilterProxy::filterAcceptsRow(int row, const QModelIndex& parent) const
+{
+    (void) parent;
+    const MessageRow *r = static_cast<const MessageTableModel *>(sourceModel())->rowAt(row);
+    if (!r) {
+        return false;
+    }
+    if (m_flightId) {
+        return r->m_flightId == m_flightId;
+    }
+    if (m_aircraftId) {
+        return r->m_aircraftId == m_aircraftId;
+    }
+    // Nothing else is ever logged without an aircraft, and these would otherwise have
+    // nowhere to be seen
+    return r->m_aircraftId == 0;
+}
+
+// Equal times go in arrival order, which is the order of the source rows
+bool MessageFilterProxy::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
+    if (left.column() == 0)
+    {
+        const MessageTableModel *model = static_cast<const MessageTableModel *>(sourceModel());
+        const MessageRow *l = model->rowAt(left.row());
+        const MessageRow *r = model->rowAt(right.row());
+        if (l && r)
+        {
+            return (l->m_receivedMs < r->m_receivedMs)
+                || ((l->m_receivedMs == r->m_receivedMs) && (left.row() < right.row()));
+        }
+    }
+    return QSortFilterProxyModel::lessThan(left, right);
 }

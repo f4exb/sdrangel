@@ -112,7 +112,7 @@ Map:
 * Whether NAVAIDs, such as VORs, are displayed on the map.
 * Whether callsigns as said by ATC (E.g. Speedbird) are used on the map instead of the airline ICAO designator (E.g. BAW).
 * The colour palette to use for aircraft flight paths.
-* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models, so require the 3D models to have been downloaded via the Map feature. Aircraft without a matching livery icon are displayed with a white version of the plain icon. Livery icons are sized proportionally to the real aircraft, so an A380 will appear larger than an A320.
+* Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models. Aircraft without a matching livery icon are displayed with a white version of the plain icon. Livery icons are sized proportionally to the real aircraft, so an A380 will appear larger than an A320.
 
 <h3>13: Display Flight Path</h3>
 

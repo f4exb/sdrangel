@@ -19,6 +19,7 @@
 #ifndef INCLUDE_FEATURE_AIRCRAFTTABLEMODELS_H_
 #define INCLUDE_FEATURE_AIRCRAFTTABLEMODELS_H_
 
+#include <functional>
 #include <QAbstractTableModel>
 #include <QSortFilterProxyModel>
 #include <QIcon>
@@ -219,6 +220,90 @@ private:
     QHash<quint64, int> m_rowById;
 
     void reindex(int from);
+};
+
+// One row of the Documents, Logons or ATC table
+struct MessageRow {
+    quint64 m_aircraftId = 0;
+    quint64 m_flightId = 0;
+    qint64 m_receivedMs = 0;    //!< Since the epoch; 0 when not known
+    QString m_mapName;
+    QString m_text;             //!< The document shown in the pane under the table
+    QString m_tooltip;          //!< On the last column
+    QStringList m_cells;        //!< The columns after the time
+};
+
+// Model/view for the Documents, Logons and ATC tables. Each holds every message the
+// tracker has logged - a long session's database restores well over a hundred thousand -
+// and a MessageFilterProxy shows the few belonging to the selected aircraft or flight.
+//
+// These were QTableWidgets, with a row of items per message and the filter hiding the
+// rest. Opening the feature then built ~1.5 million items, formatting a local time for
+// every one, which blocked the GUI for half a minute. Here a message is a plain struct
+// until it is on screen, and its time is only turned into text when it is drawn.
+class MessageTableModel : public QAbstractTableModel
+{
+    Q_OBJECT
+
+public:
+    //!< Column 0 is the time; the headings and tooltips are for every column
+    MessageTableModel(const QStringList& headings, const QStringList& tooltips, QObject *parent = nullptr);
+
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+    void append(const QList<MessageRow>& rows);
+    void clear();
+    const MessageRow *rowAt(int row) const;
+    //!< Re-points rows tagged with one aircraft id (or flight id) at another. Nothing shown
+    //!< changes, so no dataChanged: the caller refilters
+    void retagAircraft(quint64 from, quint64 to);
+    void retagFlight(quint64 from, quint64 to);
+    //!< Removes the rows the test picks - and, when olderThanMs is not 0, only those
+    //!< received before it
+    void removeIf(const std::function<bool(const MessageRow& row)>& matches, qint64 olderThanMs = 0);
+
+private:
+    QStringList m_headings;
+    QStringList m_tooltips;
+    QList<MessageRow> m_rows;
+};
+
+// Shows the rows of a MessageTableModel that belong to the selected aircraft or flight.
+// Sorting is by the time underneath the column, not its text - the text has the locale's
+// date first, so by text the 2nd of a month came before the 29th of the one before it
+class MessageFilterProxy : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+public:
+    explicit MessageFilterProxy(QObject *parent = nullptr);
+
+    //!< A flight id wins over an aircraft id. With neither, what belongs to no aircraft at
+    //!< all is shown: the SELCAL calls that could not be pinned on one. Filters again even
+    //!< when the ids are the ones it had, as those under the rows may have changed - a
+    //!< merge retags them
+    void setSelection(quint64 aircraftId, quint64 flightId);
+    const MessageRow *rowAt(const QModelIndex& index) const;
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+protected:
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+
+    // Qt 6.10 brought these, deprecating invalidateFilter() in their favour. On anything
+    // older they stand in for it, as in AcarsMessageFilter
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange() {}
+    void endFilterChange() { invalidateFilter(); }
+#endif
+
+private:
+    quint64 m_aircraftId;
+    quint64 m_flightId;
 };
 
 #endif // INCLUDE_FEATURE_AIRCRAFTTABLEMODELS_H_

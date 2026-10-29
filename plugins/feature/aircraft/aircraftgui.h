@@ -40,8 +40,10 @@
 class PluginAPI;
 class FeatureUISet;
 class Aircraft;
+class QTableView;
 class QTableWidget;
 class QTableWidgetItem;
+class AcarsMessageView;
 class QTextToSpeech;
 class QSortFilterProxyModel;
 class QProgressDialog;
@@ -113,6 +115,14 @@ private:
     FlightTableModel *m_flightModel;
     ActiveFilterProxy *m_flightProxy;
     ActiveFilterProxy *m_oldFlightProxy;
+
+    // Every logged message, each table showing the selected aircraft's or flight's
+    MessageTableModel *m_documentModel;
+    MessageFilterProxy *m_documentProxy;
+    MessageTableModel *m_logonModel;
+    MessageFilterProxy *m_logonProxy;
+    MessageTableModel *m_atcModel;
+    MessageFilterProxy *m_atcProxy;
 
     QMenu *m_columnMenu;
     QMenu *m_flightColumnMenu;
@@ -186,10 +196,7 @@ private:
     void setDefaultColumnWidths();
     void showRowNumbers(QTableView *table);
     void trackerStatistics(const AircraftStatistics& statistics);
-    bool messageRowVisible(const QTableWidgetItem *firstItem) const;
     void applyMessageFilter();
-    bool filterAppendedRows(QTableWidget *table, int firstNewRow, const QSet<const QTableWidgetItem *>& added);
-    void retagMessageRows(int role, quint64 from, quint64 to);
     void removeMessageRows(const std::function<bool(quint64 aircraftId, quint64 flightId)>& matches,
                            const QDateTime& olderThan = QDateTime());
     void pruneOrphanMessageRows();
@@ -205,6 +212,8 @@ private:
     void dropSelection();
     void clearSelectionState();
     void tableContextMenu(QTableWidget *table, QPoint pos);
+    void messageContextMenu(QTableView *view, MessageFilterProxy *proxy, QPoint pos);
+    void messageSelectionChanged(QTableView *view, MessageFilterProxy *proxy, AcarsMessageView *pane);
     void viewContextMenu(QTableView *view, bool aircraftView, QPoint pos);
     void showContextMenu(QWidget *parent, const QString& cellText, const QString& mapName,
                          QPoint globalPos, const QString& showFlight = QString(),
@@ -288,7 +297,8 @@ private slots:
     void trackerDatabaseFilenameReverted(const QString& filename);
     void trackerSelectRequested(int kind, const QString& value);
 
-    // Column enums for the Documents and ATC tables (still QTableWidgets)
+    // Column enums for the Documents and ATC tables, and the Weather table (still a
+    // QTableWidget)
 private:
     enum DocumentCol {
         DOCUMENT_COL_TIME,

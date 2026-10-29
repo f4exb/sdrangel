@@ -31,6 +31,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QTimeZone>
 
 #include "sqlite/sqlite3.h"
 #include "util/aircraft3dmodels.h"
@@ -156,6 +157,17 @@ static QDateTime columnDateTime(sqlite3_stmt *stmt, int idx)
 {
     qint64 ms = sqlite3_column_int64(stmt, idx);
     return ms ? QDateTime::fromMSecsSinceEpoch(ms) : QDateTime();
+}
+
+// Track times are kept in UTC - see AircraftTracker's mapDateTime()
+static QDateTime columnDateTimeUtc(sqlite3_stmt *stmt, int idx)
+{
+    qint64 ms = sqlite3_column_int64(stmt, idx);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    return ms ? QDateTime::fromMSecsSinceEpoch(ms, QTimeZone::UTC) : QDateTime();
+#else
+    return ms ? QDateTime::fromMSecsSinceEpoch(ms, Qt::UTC) : QDateTime();
+#endif
 }
 
 static qint64 dateTimeValue(const QDateTime& dateTime)
@@ -1089,7 +1101,7 @@ bool AircraftTracker::saveDatabase()
         sqlite3_bind_int(aircraftStmt, 24, item->m_modelIsOurs ? 1 : 0);
         stepInsert(m_db, aircraftStmt, "aircraft", failed);
 
-        QHashIterator<QPair<int, qint64>, int> sourceIt(item->m_sources);
+        QMapIterator<QPair<int, qint64>, int> sourceIt(item->m_sources);
         while (sourceIt.hasNext())
         {
             sourceIt.next();
@@ -1158,7 +1170,7 @@ bool AircraftTracker::saveDatabase()
             }
             stepInsert(m_db, flightStmt, "flights", failed);
 
-            QHashIterator<QPair<int, qint64>, int> flightSourceIt(flight->m_sources);
+            QMapIterator<QPair<int, qint64>, int> flightSourceIt(flight->m_sources);
             while (flightSourceIt.hasNext())
             {
                 flightSourceIt.next();
@@ -1706,7 +1718,7 @@ void AircraftTracker::ensureTrackLoaded(TrackedFlight *flight)
             continue;
         }
         track.append(QGeoCoordinate(latitude, longitude, sqlite3_column_double(stmt, 2)));
-        times.append(columnDateTime(stmt, 3));
+        times.append(columnDateTimeUtc(stmt, 3));
     }
     sqlite3_finalize(stmt);
 
@@ -2054,7 +2066,10 @@ void AircraftTracker::loadDatabase()
             doc->m_kind = sqlite3_column_int(stmt, 1);
             doc->m_title = columnText(stmt, 2);
             doc->m_text = columnText(stmt, 3);
-            doc->m_received = columnDateTime(stmt, 4);
+            // In UTC, as is the ATC log's below: the GUI sorts and filters on the epoch
+            // time, and getting that from a local time is a time zone lookup each - over a
+            // hundred thousand of them for a long session's history, on the GUI thread
+            doc->m_received = columnDateTimeUtc(stmt, 4);
             const void *blob = sqlite3_column_blob(stmt, 5);
             const int bytes = sqlite3_column_bytes(stmt, 5);
             if (blob && (bytes > 0)) {
@@ -2096,7 +2111,7 @@ void AircraftTracker::loadDatabase()
         while (sqlite3_step(stmt) == SQLITE_ROW)
         {
             AtcEvent e;
-            e.m_received = columnDateTime(stmt, 0);
+            e.m_received = columnDateTimeUtc(stmt, 0);
             e.m_protocol = columnText(stmt, 1);
             e.m_uplink = sqlite3_column_int(stmt, 2) != 0;
             e.m_from = columnText(stmt, 3);

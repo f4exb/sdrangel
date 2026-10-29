@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QHash>
+#include <QMap>
 #include <QSet>
 #include <QJsonObject>
 #include <QUdpSocket>
@@ -88,6 +89,13 @@ struct AircraftDisplay {
     //!< sweep that takes a stale aircraft off the Map does not refresh the tables.
     //!< Invalid when there is no position, i.e. it was never placed at all.
     QDateTime m_mapAvailableUntil;
+    //!< When each value was observed, in UTC so the table's per-cell staleness test never
+    //!< goes near the local time zone code. Invalid where the tracker has no time for it,
+    //!< e.g. an altitude restored from the database.
+    QDateTime m_positionDateTime;
+    QDateTime m_altitudeDateTime;
+    QDateTime m_headingDateTime;
+    QDateTime m_speedDateTime;
     QString m_mapName;
     quint64 m_currentFlightId = 0;
     bool m_active = false;      // Data is arriving for this aircraft
@@ -495,6 +503,12 @@ signals:
 private:
     struct TrackedAircraft;
 
+    // Times heard per (protocol, frequency). A QMap rather than a QHash: there is one for
+    // every flight and every airframe, ~88,000 of them, mostly holding one to three entries -
+    // and a QHash allocates a whole span for its first entry, ~1.3 KB, where an empty QMap
+    // allocates nothing and each entry is one small node. Iterates in key order, too
+    typedef QMap<QPair<int, qint64>, int> SourceCounts;
+
     struct TrackedDocument {
         int m_kind;
         QString m_title;
@@ -582,7 +596,7 @@ private:
         //!< airframe keeps but bounded to one flight. The Map shows this one: an
         //!< airframe heard on HFDL over the Atlantic last month is not being heard on
         //!< HFDL now, so naming it beside the aircraft on the Map is simply wrong.
-        QHash<QPair<int, qint64>, int> m_sources;
+        SourceCounts m_sources;
         QList<TrackedDocument *> m_documents;
         QList<qint64> m_profileTimes;
         QList<float> m_profileAltFt;
@@ -717,7 +731,7 @@ private:
         // as long as the airframe is. The flight has its own, which is what the Map
         // shows: an airframe heard on HFDL over the Atlantic last month is not being
         // heard on HFDL now, and saying so on the Map is simply wrong.
-        QHash<QPair<int, qint64>, int> m_sources;
+        SourceCounts m_sources;
         int m_messages = 0;
         QString m_mapName;
         QDateTime m_lastMapItemTime;
@@ -1004,8 +1018,8 @@ private:
     QDateTime m_devicePositionsRefreshed;
     // Taking the tally rather than its owner, because both the airframe and the
     // flight it is on keep one
-    QStringList sourcesList(const QHash<QPair<int, qint64>, int>& sources) const;
-    QString sourcesText(const QHash<QPair<int, qint64>, int>& sources) const;
+    QStringList sourcesList(const SourceCounts& sources) const;
+    QString sourcesText(const SourceCounts& sources) const;
     QString mapItemName(const TrackedAircraft *item) const;
     QString flightLabel(const QString& flight) const;
     QString atcLabel(const TrackedAircraft *item) const;
@@ -1017,6 +1031,7 @@ private:
     QDateTime mapAvailableUntil(const TrackedAircraft *item) const;
     int positionTimeoutSecs(const TrackedAircraft *item) const;
     bool positionStale(const TrackedAircraft *item, const QDateTime& now) const;
+    void clearPositionAndMotion(TrackedAircraft *item);
     static float altitudeAt(const TrackedAircraft *item, const QDateTime& when, float fallbackFt);
     // Which of an aircraft's flights the map should draw the track of - the one it is
     // flying now, unless the GUI is looking at one of its past flights

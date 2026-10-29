@@ -651,27 +651,7 @@ void AircraftTracker::processReport(AircraftReport& report)
         item->m_departure.clear();
         item->m_arrival.clear();
         item->m_route.clear();
-
-        item->m_positionValid = false;
-        item->m_positionDateTime = QDateTime();
-        item->m_positionRank = PositionRanks;
-        for (QDateTime& time : item->m_positionRankTimes) {
-            time = QDateTime();
-        }
-
-        item->m_altitudeValid = false;
-        item->m_altitudeDateTime = QDateTime();
-        item->m_prevAltitudeDateTime = QDateTime();
-        for (QDateTime& time : item->m_altitudeRankTimes) {
-            time = QDateTime();
-        }
-
-        item->m_headingValid = false;
-        item->m_headingDateTime = QDateTime();
-        item->m_speedValid = false;
-        item->m_speedDateTime = QDateTime();
-        item->m_distanceValid = false;
-        item->m_mapTrackChanged = true;
+        clearPositionAndMotion(item);
     }
 
     // Receiving data makes it active, which puts it in the active tables and on the map
@@ -958,7 +938,7 @@ void AircraftTracker::processReport(AircraftReport& report)
                     }
                 }
                 flown->m_track.append(coordinate);
-                flown->m_trackTimes.append(posTime);
+                flown->m_trackTimes.append(posTime.toUTC());   // UTC, so sending the track to the Map converts nothing
                 item->m_mapTrackAppended = true;
 
             }
@@ -1196,7 +1176,11 @@ AircraftDisplay AircraftTracker::displayFor(const TrackedAircraft *item) const
     d.m_protocols = sourcesText(item->m_sources);
     d.m_messages = item->m_messages;
     d.m_lastSeen = item->m_lastSeen;
-    d.m_mapAvailableUntil = mapAvailableUntil(item);
+    d.m_mapAvailableUntil = mapAvailableUntil(item).toUTC();
+    d.m_positionDateTime = item->m_positionDateTime.toUTC();
+    d.m_altitudeDateTime = item->m_altitudeDateTime.toUTC();
+    d.m_headingDateTime = item->m_headingDateTime.toUTC();
+    d.m_speedDateTime = item->m_speedDateTime.toUTC();
     d.m_mapName = item->m_mapName.isEmpty() ? mapItemName(item) : item->m_mapName;
     d.m_currentFlightId = item->m_currentFlight ? item->m_currentFlight->m_id : 0;
     d.m_active = item->m_active;
@@ -1664,7 +1648,7 @@ void AircraftTracker::setActive(TrackedAircraft *item, bool active)
 void AircraftTracker::absorbAircraft(TrackedAircraft *item, TrackedAircraft *weak)
 {
     item->m_messages += weak->m_messages;
-    QHashIterator<QPair<int, qint64>, int> sourceIt(weak->m_sources);
+    QMapIterator<QPair<int, qint64>, int> sourceIt(weak->m_sources);
     while (sourceIt.hasNext())
     {
         sourceIt.next();
@@ -2140,7 +2124,7 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
         // that whichever route dst kept was filed when src's was
         dst->m_routeFiled = src->m_routeFiled;
     }
-    QHashIterator<QPair<int, qint64>, int> flightSourceIt(src->m_sources);
+    QMapIterator<QPair<int, qint64>, int> flightSourceIt(src->m_sources);
     while (flightSourceIt.hasNext())
     {
         flightSourceIt.next();
@@ -2288,6 +2272,33 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
     delete src;
 }
 
+// Forget where the aircraft is and what it is doing, for when what we hold describes
+// an earlier operation rather than this one. The next report starts afresh, with no
+// held position for its own to be judged against.
+void AircraftTracker::clearPositionAndMotion(TrackedAircraft *item)
+{
+    item->m_positionValid = false;
+    item->m_positionDateTime = QDateTime();
+    item->m_positionRank = PositionRanks;
+    for (QDateTime& time : item->m_positionRankTimes) {
+        time = QDateTime();
+    }
+
+    item->m_altitudeValid = false;
+    item->m_altitudeDateTime = QDateTime();
+    item->m_prevAltitudeDateTime = QDateTime();
+    for (QDateTime& time : item->m_altitudeRankTimes) {
+        time = QDateTime();
+    }
+
+    item->m_headingValid = false;
+    item->m_headingDateTime = QDateTime();
+    item->m_speedValid = false;
+    item->m_speedDateTime = QDateTime();
+    item->m_distanceValid = false;
+    item->m_mapTrackChanged = true;     // A different operation, a different track
+}
+
 // The flight a report belongs to
 AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *item, const AircraftReport& report)
 {
@@ -2310,8 +2321,18 @@ AircraftTracker::TrackedFlight *AircraftTracker::updateFlight(TrackedAircraft *i
             m_dirtyFlights.insert(flight);
             item->m_currentFlight = nullptr;
             flight = nullptr;
-            item->m_mapTrackChanged = true;     // A different flight, a different track
+            // Nor does where it was, or what it was doing. A position from the last
+            // flight was shown in the Aircraft table as current - days old after a
+            // restart - with that flight's altitude, heading and speed beside it.
+            clearPositionAndMotion(item);
         }
+    }
+    // An aircraft restored with no current flight, its flights having been discarded
+    // sooner than the aircraft, has only the position's own time to go by
+    else if (!flight && item->m_positionDateTime.isValid() && report.m_received.isValid()
+             && (item->m_positionDateTime.secsTo(report.m_received) > (qint64) m_settings.m_removalMins * 60))
+    {
+        clearPositionAndMotion(item);
     }
 
     if (!flight)
@@ -3464,11 +3485,11 @@ QString AircraftTracker::sourceText(int protocol, qint64 frequency)
     return text;
 }
 
-QStringList AircraftTracker::sourcesList(const QHash<QPair<int, qint64>, int>& sources) const
+QStringList AircraftTracker::sourcesList(const SourceCounts& sources) const
 {
     QStringList parts;
-    QList<QPair<int, qint64>> keys = sources.keys();
-    std::sort(keys.begin(), keys.end());
+    // In key order already - SourceCounts is a QMap
+    const QList<QPair<int, qint64>> keys = sources.keys();
     for (const auto& key : keys)
     {
         QString part = sourceText(key.first, key.second);
@@ -3479,7 +3500,7 @@ QStringList AircraftTracker::sourcesList(const QHash<QPair<int, qint64>, int>& s
     return parts;
 }
 
-QString AircraftTracker::sourcesText(const QHash<QPair<int, qint64>, int>& sources) const
+QString AircraftTracker::sourcesText(const SourceCounts& sources) const
 {
     return sourcesList(sources).join("; ");
 }
@@ -3678,6 +3699,15 @@ const AircraftTracker::TrackedFlight *AircraftTracker::trackFlight(const Tracked
     return item->m_currentFlight;
 }
 
+// Times for the Map are sent in UTC. The Map keeps them in UTC, and a string with no
+// offset is local time, which it then has to convert - a call into the C runtime's time
+// zone code, under a lock Qt shares between all threads, for every item on its GUI
+// thread. Free for a time that is already UTC, as track times are
+static QString mapDateTime(const QDateTime& dateTime)
+{
+    return dateTime.toUTC().toString(Qt::ISODateWithMs);
+}
+
 QList<SWGSDRangel::SWGMapCoordinate *> *AircraftTracker::buildTrack(const TrackedFlight *flight) const
 {
     QList<SWGSDRangel::SWGMapCoordinate *> *track = new QList<SWGSDRangel::SWGMapCoordinate *>();
@@ -3693,7 +3723,7 @@ QList<SWGSDRangel::SWGMapCoordinate *> *AircraftTracker::buildTrack(const Tracke
         // WithMs, not Qt::ISODate: that is whole seconds, and two positions in the
         // same second then reach the Map with identical times - which the Map's
         // Whittaker-Eilers smoother divides by, giving inf and then nan
-        coord->setDateTime(new QString(flight->m_trackTimes[i].toString(Qt::ISODateWithMs)));
+        coord->setDateTime(new QString(mapDateTime(flight->m_trackTimes[i])));
         track->append(coord);
     }
     return track;
@@ -3833,13 +3863,13 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
         swgMapItem->setLatitude(item->m_latitude);
         swgMapItem->setLongitude(item->m_longitude);
         swgMapItem->setAltitude(item->m_altitudeValid ? Units::feetToMetres(item->m_altitudeFt) : 0.0f);
-        swgMapItem->setPositionDateTime(new QString(item->m_positionDateTime.toString(Qt::ISODateWithMs)));
+        swgMapItem->setPositionDateTime(new QString(mapDateTime(item->m_positionDateTime)));
         const QDateTime until = mapAvailableUntil(item);
         if (until.isValid()) {
-            swgMapItem->setAvailableUntil(new QString(until.toString(Qt::ISODateWithMs)));
+            swgMapItem->setAvailableUntil(new QString(mapDateTime(until)));
         }
         if (item->m_altitudeDateTime.isValid()) {
-            swgMapItem->setAltitudeDateTime(new QString(item->m_altitudeDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setAltitudeDateTime(new QString(mapDateTime(item->m_altitudeDateTime)));
         }
         swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraftImage(item))));
         if (item->m_headingValid) {
@@ -3898,7 +3928,7 @@ void AircraftTracker::sendToMap(TrackedAircraft *item)
             {
                 aircraftState->setAltitude(item->m_altitudeFt);
                 if (item->m_altitudeDateTime.isValid()) {
-                    aircraftState->setAltitudeDateTime(new QString(item->m_altitudeDateTime.toString(Qt::ISODateWithMs)));
+                    aircraftState->setAltitudeDateTime(new QString(mapDateTime(item->m_altitudeDateTime)));
                 }
             }
             if (item->m_headingValid) {
@@ -4052,9 +4082,9 @@ void AircraftTracker::forwardMapItem(TrackedAircraft *item, SWGSDRangel::SWGMapI
     if (until.isValid())
     {
         if (swgMapItem->getAvailableUntil()) {
-            *swgMapItem->getAvailableUntil() = until.toString(Qt::ISODateWithMs);
+            *swgMapItem->getAvailableUntil() = mapDateTime(until);
         } else {
-            swgMapItem->setAvailableUntil(new QString(until.toString(Qt::ISODateWithMs)));
+            swgMapItem->setAvailableUntil(new QString(mapDateTime(until)));
         }
     }
 

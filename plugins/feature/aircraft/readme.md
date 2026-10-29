@@ -185,7 +185,9 @@ Click to open the settings dialog.
 **Timeouts**
 
 * Archive after (mins) - how long without a report before an aircraft moves to the Old
-  Aircraft table and comes off the Map.
+  Aircraft table and comes off the Map. It is also where one flight ends: an aircraft
+  heard again after a longer gap is on a new flight, and its last position, altitude,
+  heading, speed and distance are cleared rather than shown as current.
 * Keep aircraft for (days) - how long archived aircraft are kept in the database
   before being discarded, with all of their flights. Zero keeps them forever, at the cost
   of a database that grows without limit
@@ -254,7 +256,9 @@ needs downloading from one of them.
 * Airline - Airline logo, or operator name when no logo is available
 * Sideview - Aircraft silhouette, coloured per airline where available
 * Country - Flag of the country of registration
-* Lat, Lon - Latest position in degrees
+* Lat, Lon - Latest position from the current flight in degrees. If the aircraft has been
+  removed from the map, this position will be shown in grey, and its tooltip says
+  how old it is. Alt, Hdg and Spd are greyed too when they are as old as that
 * Dist (km) - Great circle distance from the receiver to the aircraft. Measured from
   the position of the device the report arrived on when that device knows where it
   is - a remote SDR reports the position of the server, not of you - and from

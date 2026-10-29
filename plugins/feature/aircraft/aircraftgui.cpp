@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <tuple>
 
 #include <QTableView>
 #include <QAction>
@@ -426,17 +427,53 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
             this, &AircraftGUI::flightSelectionChanged);
     }
 
-    setDefaultColumnWidths();
+    // Documents, Logons and ATC log tables. Before the column widths, which are worked
+    // out from the headings
+    auto documentModel = [this](const QString& what) {
+        return new MessageTableModel(
+            { "Time", "Callsign", "Reg", "Type", "Title" },
+            { QString("Time the %1 was received").arg(what),
+              QString("Callsign of the flight the %1 belongs to").arg(what),
+              "Aircraft registration or ICAO address",
+              QString("Kind of %1").arg(what),
+              QString("%1 title").arg(what.left(1).toUpper() + what.mid(1)) },
+            this);
+    };
+    m_documentModel = documentModel("document");
+    m_logonModel = documentModel("logon");
+    m_atcModel = new MessageTableModel(
+        { "Time", "Protocol", "Dir", "From", "To", "Message" },
+        { "Time the message was received",
+          "Message protocol, e.g. CPDLC",
+          "Message direction: up arrow for uplink (ATC to aircraft), down arrow for downlink",
+          "Message source, when known",
+          "Message recipient, when known",
+          "The ATC message text" },
+        this);
+    m_documentProxy = new MessageFilterProxy(this);
+    m_logonProxy = new MessageFilterProxy(this);
+    m_atcProxy = new MessageFilterProxy(this);
+    for (auto view : { std::make_tuple(ui->documents, m_documentModel, m_documentProxy),
+                       std::make_tuple(ui->logons, m_logonModel, m_logonProxy),
+                       std::make_tuple(ui->atcMessages, m_atcModel, m_atcProxy) })
+    {
+        QTableView *table = std::get<0>(view);
+        MessageFilterProxy *proxy = std::get<2>(view);
+        proxy->setSourceModel(std::get<1>(view));
+        table->setModel(proxy);
+        table->setSortingEnabled(true);
+        table->horizontalHeader()->setSectionsMovable(true);
+        table->horizontalHeader()->setStretchLastSection(true);
+        table->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(table, &QTableView::customContextMenuRequested, this,
+            [this, table, proxy](QPoint pos) { messageContextMenu(table, proxy, pos); });
+    }
+    connect(ui->documents->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &AircraftGUI::documentSelectionChanged);
+    connect(ui->logons->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &AircraftGUI::logonSelectionChanged);
 
-    // Documents and ATC log tables
-    ui->documents->setSortingEnabled(true);
-    ui->documents->horizontalHeader()->setSectionsMovable(true);
-    ui->documents->horizontalHeader()->setStretchLastSection(true);
-    ui->logons->setSortingEnabled(true);
-    ui->logons->horizontalHeader()->setSectionsMovable(true);
-    ui->logons->horizontalHeader()->setStretchLastSection(true);
-    connect(ui->documents, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::documentSelectionChanged);
-    connect(ui->logons, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::logonSelectionChanged);
+    setDefaultColumnWidths();
     connect(ui->weather, &QTableWidget::itemSelectionChanged, this, &AircraftGUI::weatherSelectionChanged);
     ui->weather->setSortingEnabled(true);
     ui->weather->horizontalHeader()->setSectionsMovable(true);
@@ -476,19 +513,6 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     // Changing which column to look in searches again from the top
     connect(ui->findColumn, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this](int) { on_find_textChanged(ui->find->text()); });
-    ui->atcMessages->setSortingEnabled(true);
-    ui->atcMessages->horizontalHeader()->setSectionsMovable(true);
-    ui->atcMessages->horizontalHeader()->setStretchLastSection(true);
-
-    // A row's hidden flag belongs to the view's row number, not to the row's items, so a
-    // sort the user asks for leaves the flags where they were while the rows move. New
-    // messages only filter the rows they add, so nothing else would put that right.
-    // Queued, so that it runs after the view's own handler has done the sort.
-    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
-    {
-        connect(table->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this,
-            [this](int, Qt::SortOrder) { applyMessageFilter(); }, Qt::QueuedConnection);
-    }
 
     // Selecting an aircraft or a flight filters the Documents and ATC tables
     connect(ui->aircraftTabs, &QTabWidget::currentChanged, this, [this](int) {
@@ -517,12 +541,9 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
         connect(view, &QTableView::customContextMenuRequested, this,
             [this, view, isAircraft](QPoint pos) { viewContextMenu(view, isAircraft, pos); });
     }
-    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages, ui->statistics})
-    {
-        table->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(table, &QTableWidget::customContextMenuRequested, this,
-            [this, table](QPoint pos) { tableContextMenu(table, pos); });
-    }
+    ui->statistics->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->statistics, &QTableWidget::customContextMenuRequested, this,
+        [this](QPoint pos) { tableContextMenu(ui->statistics, pos); });
 
     // Aircraft photos from planespotters.net, shown for the selected aircraft
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &AircraftGUI::aircraftPhoto);
@@ -926,7 +947,7 @@ void AircraftGUI::setDefaultColumnWidths()
     // The message tables. Each stretches its last column - the title, report or message
     // text, which is what the space is wanted for - so that is left out here. Left at
     // Qt's default, the short columns took as much room as the text did.
-    for (QTableWidget *table : {ui->documents, ui->logons})
+    for (QTableView *table : {ui->documents, ui->logons})
     {
         set(table, DOCUMENT_COL_TIME, messageDateTime);
         set(table, DOCUMENT_COL_FLIGHT, callsign);
@@ -1181,7 +1202,9 @@ void AircraftGUI::trackerFlightsUpdated(const QList<FlightDisplay>& flights)
 // intermittent rather than broken.
 void AircraftGUI::trackerFlightsMerged(quint64 from, quint64 to)
 {
-    retagMessageRows(Qt::UserRole + 2, from, to);
+    for (MessageTableModel *model : {m_documentModel, m_logonModel, m_atcModel}) {
+        model->retagFlight(from, to);
+    }
     // The selection follows the flight rather than being dropped with the id it was
     // made under. Done here, before flightsRemoved is delivered, so that its own test
     // for the selected flight no longer matches.
@@ -1212,7 +1235,9 @@ void AircraftGUI::trackerFlightsMerged(quint64 from, quint64 to)
 // flights keep their ids, so only what is held against the aircraft id has to move.
 void AircraftGUI::trackerAircraftMerged(quint64 from, quint64 to)
 {
-    retagMessageRows(Qt::UserRole + 1, from, to);
+    for (MessageTableModel *model : {m_documentModel, m_logonModel, m_atcModel}) {
+        model->retagAircraft(from, to);
+    }
     if (m_selectedAircraftId == from)
     {
         m_selectedAircraftId = to;
@@ -1274,54 +1299,58 @@ void AircraftGUI::trackerFlightsRemoved(const QList<quint64>& ids)
     }
 }
 
-// A time cell that shows seconds and still sorts chronologically. A QDateTime in the
-// display role sorts correctly but Qt renders it in the locale's SHORT format, which has
-// no seconds; a formatted string shows what we want but sorts by its first character, so
-// the 2nd of a month would come before the 29th of the one before it. The two therefore
-// have to be separated - the text is what is shown, the date what is compared.
+// Inserts a new row into the Weather table, which stays sorted throughout, where it
+// belongs.
 //
-// The date part keeps the locale's own format so the column looks as it did; only the
-// time is spelled out.
-class DateTimeTableItem : public QTableWidgetItem
+// Turning sorting off for a batch and back on after it sorts the WHOLE table, with a
+// layout change that updates every persistent index - for a few new rows. Leaving sorting
+// on and appending rows is no better: setting the item in the sort column then MOVES the
+// row to where it belongs, and tables sort newest first by default, so that was every
+// new row, moved from the bottom to the top.
+//
+// So the row is inserted where it belongs in the first place, found with the same
+// search Qt uses, std::lower_bound with its comparators. When the sort item is set,
+// last, Qt searches the rows above the first empty sort cell - this one - finds the
+// same place, and moves nothing.
+static void insertSortedRow(QTableWidget *table, std::initializer_list<std::pair<int, QTableWidgetItem *>> items)
 {
-public:
-    explicit DateTimeTableItem(const QDateTime& when) :
-        QTableWidgetItem(when.toString(format())),
-        m_when(when)
+    const QHeaderView *header = table->horizontalHeader();
+    const int sortColumn = table->isSortingEnabled() ? header->sortIndicatorSection() : -1;
+    const bool ascending = header->sortIndicatorOrder() == Qt::AscendingOrder;
+    QTableWidgetItem *sortItem = nullptr;
+    for (const auto& columnItem : items)
     {
+        if (columnItem.first == sortColumn) {
+            sortItem = columnItem.second;
+        }
     }
-
-    bool operator<(const QTableWidgetItem& other) const override
+    int row = table->rowCount();
+    if (sortItem)
     {
-        const DateTimeTableItem *item = dynamic_cast<const DateTimeTableItem *>(&other);
-        return item ? (m_when < item->m_when) : QTableWidgetItem::operator<(other);
-    }
-
-    const QDateTime& when() const { return m_when; }
-
-private:
-    static const QString& format()
-    {
-        static const QString f = QLocale().dateFormat(QLocale::ShortFormat) + " hh:mm:ss";
-        return f;
-    }
-
-    QDateTime m_when;
-};
-
-// Re-points the Documents, Logons and ATC rows tagged with one aircraft or flight id
-// (the role says which) at another
-void AircraftGUI::retagMessageRows(int role, quint64 from, quint64 to)
-{
-    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
-    {
-        for (int row = 0; row < table->rowCount(); row++)
+        int low = 0;
+        int high = row;
+        while (low < high)
         {
-            QTableWidgetItem *item = table->item(row, 0);
-            if (item && (item->data(role).toULongLong() == from)) {
-                item->setData(role, (qulonglong) to);
+            const int mid = low + (high - low) / 2;
+            const QTableWidgetItem *other = table->item(mid, sortColumn);
+            const bool before = other && (ascending ? (*other < *sortItem) : (*sortItem < *other));
+            if (before) {
+                low = mid + 1;
+            } else {
+                high = mid;
             }
         }
+        row = low;
+    }
+    table->insertRow(row);
+    for (const auto& columnItem : items)
+    {
+        if (columnItem.second != sortItem) {
+            table->setItem(row, columnItem.first, columnItem.second);
+        }
+    }
+    if (sortItem) {
+        table->setItem(row, sortColumn, sortItem);
     }
 }
 
@@ -1329,55 +1358,15 @@ void AircraftGUI::retagMessageRows(int role, quint64 from, quint64 to)
 // row's aircraft and flight ids - and, when olderThan is valid, only those received before
 // it. Unattributed SELCAL calls carry neither id, so a test for the ids of something that
 // has gone never picks them; only pruneOrphanMessageRows() does, by age.
-//
-// From the bottom up and a run of adjacent rows at a time, so each removal moves only
-// the rows below it once. The header keeps the hidden flags of the rows that remain in
-// step with them, so nothing needs refiltering afterwards.
 void AircraftGUI::removeMessageRows(const std::function<bool(quint64 aircraftId, quint64 flightId)>& matches,
                                     const QDateTime& olderThan)
 {
-    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
+    const qint64 olderThanMs = olderThan.isValid() ? olderThan.toMSecsSinceEpoch() : 0;
+    for (MessageTableModel *model : {m_documentModel, m_logonModel, m_atcModel})
     {
-        auto rowMatches = [table, &matches, &olderThan](int row) {
-            const QTableWidgetItem *item = table->item(row, 0);
-            if (!item) {
-                return false;
-            }
-            if (olderThan.isValid())
-            {
-                // Every row's first item is one of these - trackerDocumentsAdded() and
-                // trackerAtcMessages() are what fill the tables
-                const DateTimeTableItem *timeItem = dynamic_cast<const DateTimeTableItem *>(item);
-                if (!timeItem || !timeItem->when().isValid() || (timeItem->when() >= olderThan)) {
-                    return false;
-                }
-            }
-            return matches(item->data(Qt::UserRole + 1).toULongLong(),
-                           item->data(Qt::UserRole + 2).toULongLong());
-        };
-        bool updatesSuspended = false;
-        int row = table->rowCount() - 1;
-        while (row >= 0)
-        {
-            if (!rowMatches(row))
-            {
-                row--;
-                continue;
-            }
-            const int last = row;
-            while ((row >= 0) && rowMatches(row)) {
-                row--;
-            }
-            if (!updatesSuspended)
-            {
-                table->setUpdatesEnabled(false);
-                updatesSuspended = true;
-            }
-            table->model()->removeRows(row + 1, last - row);
-        }
-        if (updatesSuspended) {
-            table->setUpdatesEnabled(true);
-        }
+        model->removeIf([&matches](const MessageRow& row) {
+            return matches(row.m_aircraftId, row.m_flightId);
+        }, olderThanMs);
     }
 }
 
@@ -1422,65 +1411,36 @@ void AircraftGUI::pruneOrphanMessageRows()
     }
 }
 
+// A batch can be the whole history the tracker hands over when the GUI opens, which on a
+// long session is over a hundred thousand rows. Rows are appended to the model as they
+// are, with no per-row work beyond copying the strings, which are shared with the event
 void AircraftGUI::trackerDocumentsAdded(const QList<DocumentEvent>& documents)
 {
     PROFILER_START()
-    // Size and repaint each table once for the batch. The rows are split between two
-    // tables, so count them before sizing rather than growing a row at a time
-    int logonCount = 0;
-    for (const DocumentEvent& e : documents) {
-        logonCount += (e.m_kind == "Logon") ? 1 : 0;
-    }
-    ui->documents->setUpdatesEnabled(false);
-    ui->logons->setUpdatesEnabled(false);
-    int nextDocumentRow = ui->documents->rowCount();
-    int nextLogonRow = ui->logons->rowCount();
-    ui->documents->setRowCount(nextDocumentRow + documents.size() - logonCount);
-    ui->logons->setRowCount(nextLogonRow + logonCount);
-    ui->documents->setSortingEnabled(false);
-    ui->logons->setSortingEnabled(false);
-    const int firstDocumentRow = nextDocumentRow;
-    const int firstLogonRow = nextLogonRow;
-    QSet<const QTableWidgetItem *> addedDocuments;
-    QSet<const QTableWidgetItem *> addedLogons;
+    QList<MessageRow> documentRows;
+    QList<MessageRow> logonRows;
     for (const DocumentEvent& e : documents)
     {
+        MessageRow row;
+        row.m_aircraftId = e.m_aircraftId;
+        row.m_flightId = e.m_flightId;
+        // Free for the history, which the database hands over in UTC; a local time costs
+        // a time zone lookup
+        row.m_receivedMs = e.m_received.isValid() ? e.m_received.toMSecsSinceEpoch() : 0;
+        row.m_mapName = e.m_mapName;
+        row.m_text = e.m_text;
+        row.m_cells = { e.m_flight, e.m_reg, e.m_kind, e.m_title };
         // Logons go to their own tab. There are far more of them than of everything else
         // together - 6610 against 700 in a week here - so left in with the flight plans
         // and clearances they buried them.
-        const bool logon = (e.m_kind == "Logon");
-        QTableWidget *table = logon ? ui->logons : ui->documents;
-        const int row = logon ? nextLogonRow++ : nextDocumentRow++;
-        QTableWidgetItem *timeItem = new DateTimeTableItem(e.m_received);
-        timeItem->setData(Qt::UserRole, e.m_text);
-        timeItem->setData(Qt::UserRole + 1, (qulonglong) e.m_aircraftId);
-        timeItem->setData(Qt::UserRole + 2, (qulonglong) e.m_flightId);
-        timeItem->setData(Qt::UserRole + 3, e.m_mapName);
-        table->setItem(row, DOCUMENT_COL_TIME, timeItem);
-        (logon ? addedLogons : addedDocuments).insert(timeItem);
-        table->setItem(row, DOCUMENT_COL_FLIGHT, new QTableWidgetItem(e.m_flight));
-        table->setItem(row, DOCUMENT_COL_REG, new QTableWidgetItem(e.m_reg));
-        table->setItem(row, DOCUMENT_COL_TYPE, new QTableWidgetItem(e.m_kind));
-        table->setItem(row, DOCUMENT_COL_TITLE, new QTableWidgetItem(e.m_title));
+        if (e.m_kind == "Logon") {
+            logonRows.append(row);
+        } else {
+            documentRows.append(row);
+        }
     }
-    // setSortingEnabled(true) sorts immediately, and a row's hidden flag belongs to the
-    // VIEW's row number rather than to the item, so it does not travel with the row.
-    // Hiding inside the loop above therefore left the flags on whichever rows the sort
-    // happened to move into those positions - documents vanishing or being replaced by
-    // unrelated ones, with nothing touched.
-    ui->documents->setSortingEnabled(true);
-    ui->logons->setSortingEnabled(true);
-    // Usually the new rows have sorted to the end and nothing else moved, and then only
-    // they need filtering. Both are tried, so neither is left unfiltered when the other
-    // falls back to the full pass.
-    const bool documentsFiltered = filterAppendedRows(ui->documents, firstDocumentRow, addedDocuments);
-    const bool logonsFiltered = filterAppendedRows(ui->logons, firstLogonRow, addedLogons);
-    if (!documentsFiltered || !logonsFiltered) {
-        applyMessageFilter();
-    }
-    // After the filter: hiding rows repaints too, so keep both suppressed until the end
-    ui->documents->setUpdatesEnabled(true);
-    ui->logons->setUpdatesEnabled(true);
+    m_documentModel->append(documentRows);
+    m_logonModel->append(logonRows);
     PROFILER_STOP("Aircraft table: documents")
 }
 
@@ -1489,24 +1449,21 @@ void AircraftGUI::trackerDocumentsAdded(const QList<DocumentEvent>& documents)
 void AircraftGUI::trackerWeatherReports(const QList<WeatherEvent>& reports)
 {
     PROFILER_START()
-    ui->weather->setSortingEnabled(false);
     for (const WeatherEvent& e : reports)
     {
-        int row = ui->weather->rowCount();
-        ui->weather->setRowCount(row + 1);
-
         QTableWidgetItem *timeItem = new QTableWidgetItem();
         timeItem->setData(Qt::DisplayRole, e.m_received);
         timeItem->setData(Qt::UserRole, e.m_text);      // Read back by the detail pane
-        ui->weather->setItem(row, WEATHER_COL_TIME, timeItem);
-        ui->weather->setItem(row, WEATHER_COL_AIRPORT, new QTableWidgetItem(e.m_airport));
-        ui->weather->setItem(row, WEATHER_COL_TYPE, new QTableWidgetItem(e.m_kind));
-        ui->weather->setItem(row, WEATHER_COL_VIA, new QTableWidgetItem(e.m_from));
         QTableWidgetItem *reportItem = new QTableWidgetItem(e.m_summary);
         reportItem->setToolTip(e.m_text);
-        ui->weather->setItem(row, WEATHER_COL_REPORT, reportItem);
+        insertSortedRow(ui->weather, {
+            {WEATHER_COL_TIME, timeItem},
+            {WEATHER_COL_AIRPORT, new QTableWidgetItem(e.m_airport)},
+            {WEATHER_COL_TYPE, new QTableWidgetItem(e.m_kind)},
+            {WEATHER_COL_VIA, new QTableWidgetItem(e.m_from)},
+            {WEATHER_COL_REPORT, reportItem}
+        });
     }
-    ui->weather->setSortingEnabled(true);
     ui->weather->scrollToBottom();
     PROFILER_STOP("Aircraft table: weather")
 }
@@ -1530,42 +1487,24 @@ void AircraftGUI::weatherSelectionChanged()
 void AircraftGUI::trackerAtcMessages(const QList<AtcEvent>& messages)
 {
     PROFILER_START()
-    // Size and repaint once for the batch, not once per message
-    ui->atcMessages->setUpdatesEnabled(false);
-    int nextRow = ui->atcMessages->rowCount();
-    const int firstRow = nextRow;
-    QSet<const QTableWidgetItem *> added;
-    ui->atcMessages->setRowCount(nextRow + messages.size());
-    ui->atcMessages->setSortingEnabled(false);
+    QList<MessageRow> rows;
+    rows.reserve(messages.size());
     for (const AtcEvent& e : messages)
     {
-        const int row = nextRow++;
-        QTableWidgetItem *timeItem = new DateTimeTableItem(e.m_received);
-        timeItem->setData(Qt::UserRole + 1, (qulonglong) e.m_aircraftId);
-        timeItem->setData(Qt::UserRole + 2, (qulonglong) e.m_flightId);
-        timeItem->setData(Qt::UserRole + 3, e.m_mapName);
-        ui->atcMessages->setItem(row, ATC_COL_TIME, timeItem);
-        added.insert(timeItem);
+        MessageRow row;
+        row.m_aircraftId = e.m_aircraftId;
+        row.m_flightId = e.m_flightId;
+        row.m_receivedMs = e.m_received.isValid() ? e.m_received.toMSecsSinceEpoch() : 0;
+        row.m_mapName = e.m_mapName;
+        row.m_tooltip = e.m_tooltip;
         // The link it arrived on, not e.m_protocol: every ATC message is CPDLC by
-        // definition - addAtcMessage() returns early for anything else - so that
-        // column held the same word in every row
-        ui->atcMessages->setItem(row, ATC_COL_PROTOCOL, new QTableWidgetItem(e.m_link));
-        ui->atcMessages->setItem(row, ATC_COL_DIR,
-            new QTableWidgetItem(QString("%1").arg(QChar(e.m_uplink ? 0x2191 : 0x2193))));
-        ui->atcMessages->setItem(row, ATC_COL_FROM, new QTableWidgetItem(e.m_from));
-        ui->atcMessages->setItem(row, ATC_COL_TO, new QTableWidgetItem(e.m_to));
-        QTableWidgetItem *messageItem = new QTableWidgetItem(e.m_message);
-        messageItem->setToolTip(e.m_tooltip);
-        ui->atcMessages->setItem(row, ATC_COL_MESSAGE, messageItem);
+        // definition - addAtcMessage() returns early for anything else - so that column
+        // held the same word in every row
+        row.m_cells = { e.m_link, QString(QChar(e.m_uplink ? 0x2191 : 0x2193)), e.m_from, e.m_to, e.m_message };
+        rows.append(row);
     }
-    // As in trackerDocumentsAdded: hide after the sort, not before, and only the new
-    // rows where nothing else moved
-    ui->atcMessages->setSortingEnabled(true);
-    if (!filterAppendedRows(ui->atcMessages, firstRow, added)) {
-        applyMessageFilter();
-    }
+    m_atcModel->append(rows);
     ui->atcMessages->scrollToBottom();
-    ui->atcMessages->setUpdatesEnabled(true);
     PROFILER_STOP("Aircraft table: ATC messages")
 }
 
@@ -1639,11 +1578,11 @@ void AircraftGUI::trackerAllCleared()
 {
     m_aircraftModel->clear();
     m_flightModel->clear();
-    ui->documents->setRowCount(0);
-    ui->logons->setRowCount(0);
+    m_documentModel->clear();
+    m_logonModel->clear();
     ui->documentText->clear();
     ui->logonText->clear();
-    ui->atcMessages->setRowCount(0);
+    m_atcModel->clear();
     ui->weather->setRowCount(0);
     ui->weatherText->clear();
     clearSelectionState();
@@ -1692,85 +1631,27 @@ void AircraftGUI::trackerSpeechNotification(const QString& speech)
 
 // ---- Selection, filtering, photo and profile ----
 
-// Whether a Documents/ATC row matches the selected aircraft (Aircraft tab
-// active) or flight (Flights tab active); everything shows with no selection
-bool AircraftGUI::messageRowVisible(const QTableWidgetItem *firstItem) const
-{
-    if (m_selectedFlightId) {
-        return firstItem->data(Qt::UserRole + 2).toULongLong() == m_selectedFlightId;
-    }
-    if (m_selectedAircraftId) {
-        return firstItem->data(Qt::UserRole + 1).toULongLong() == m_selectedAircraftId;
-    }
-    // With nothing selected, what belongs to no aircraft at all: the SELCAL calls that
-    // could not be pinned on one. Nothing else is ever logged without an aircraft, and
-    // these would otherwise have nowhere to be seen.
-    return firstItem->data(Qt::UserRole + 1).toULongLong() == 0;
-}
-
-// Filters only the rows a batch has just added, when that is enough: the table has to be
-// sorted again once they are in, and a row's hidden flag stays with the view's row number
-// rather than travelling with the row, so if the sort put any new row among the old ones
-// the old rows below it have moved under their flags and everything needs doing. Usually
-// - sorted by time, which is the default - the new rows all land at the end. Returns false
-// when the caller must fall back to applyMessageFilter().
-bool AircraftGUI::filterAppendedRows(QTableWidget *table, int firstNewRow, const QSet<const QTableWidgetItem *>& added)
-{
-    // All the rows from where the new ones were added must be new ones, which can only
-    // be if every old row is where it was
-    for (int row = firstNewRow; row < table->rowCount(); row++)
-    {
-        if (!added.contains(table->item(row, 0))) {
-            return false;
-        }
-    }
-    for (int row = firstNewRow; row < table->rowCount(); row++)
-    {
-        const bool visible = messageRowVisible(table->item(row, 0));
-        if (table->isRowHidden(row) == visible) {
-            table->setRowHidden(row, !visible);
-        }
-    }
-    return true;
-}
-
+// The Documents and ATC tables show the selected aircraft (Aircraft tab active) or flight
+// (Flights tab active) - see MessageFilterProxy::filterAcceptsRow()
 void AircraftGUI::applyMessageFilter()
 {
     PROFILER_START()
     int shown = 0;
-    for (QTableWidget *table : {ui->documents, ui->logons, ui->atcMessages})
+    for (MessageFilterProxy *proxy : {m_documentProxy, m_logonProxy, m_atcProxy})
     {
-        for (int row = 0; row < table->rowCount(); row++)
-        {
-            const bool visible = messageRowVisible(table->item(row, 0));
-            // Only where it changes. setRowHidden() is itself O(rows) in QHeaderView, and
-            // this runs on every batch of new messages over every row ever logged - the
-            // trap AcarsMessageModel describes, quadratic in a log that is never pruned
-            // by default. Asking is cheap; it is the change that costs.
-            if (table->isRowHidden(row) == visible) {
-                table->setRowHidden(row, !visible);
-            }
-            shown += visible ? 1 : 0;
-        }
+        proxy->setSelection(m_selectedAircraftId, m_selectedFlightId);
+        shown += proxy->rowCount();
     }
 
-    // Hiding a row keeps its selection and emits no selection change, so the pane below
-    // went on showing a message whose row was no longer on screen - and with nothing
-    // selected at all it showed the last message the user had happened to click, which
-    // reads as though it belonged to whatever is selected now.
-    auto clearWhenNothingShown = [](QTableWidget *table, AcarsMessageView *pane)
-    {
-        const QList<QTableWidgetItem *> selected = table->selectedItems();
-        for (const QTableWidgetItem *item : selected)
-        {
-            if (!table->isRowHidden(item->row())) {
-                return;     // Still showing the row it describes
-            }
-        }
-        pane->clear();
-    };
-    clearWhenNothingShown(ui->documents, ui->documentText);
-    clearWhenNothingShown(ui->logons, ui->logonText);
+    // A row filtered out takes its selection with it, but the pane below is only cleared
+    // by the selection change that causes, so make sure it does not go on showing a
+    // message whose row is no longer on screen
+    if (!ui->documents->selectionModel()->hasSelection()) {
+        ui->documentText->clear();
+    }
+    if (!ui->logons->selectionModel()->hasSelection()) {
+        ui->logonText->clear();
+    }
 
     // Only when what it filters on has moved, so this is a handful of lines around a
     // selection change rather than one on every message. The Documents and ATC tables
@@ -1789,7 +1670,7 @@ void AircraftGUI::applyMessageFilter()
         qDebug() << "AircraftGUI::applyMessageFilter: flight" << lastFlight << "->"
                  << m_selectedFlightId << " aircraft" << lastAircraft << "->"
                  << m_selectedAircraftId << " showing" << shown << "rows of"
-                 << (ui->documents->rowCount() + ui->atcMessages->rowCount());
+                 << (m_documentModel->rowCount() + m_logonModel->rowCount() + m_atcModel->rowCount());
         lastFlight = m_selectedFlightId;
         lastAircraft = m_selectedAircraftId;
     }
@@ -2572,38 +2453,30 @@ void AircraftGUI::trackerProfileUpdated(quint64 flightId, const QList<qint64>& t
     plotProfileChart();
 }
 
+// Selecting a row shows its document in the pane underneath. With nothing selected the
+// pane is cleared: the previous message is not the selected one, and leaving it there
+// reads as though it is
+void AircraftGUI::messageSelectionChanged(QTableView *view, MessageFilterProxy *proxy, AcarsMessageView *pane)
+{
+    const QModelIndexList selected = view->selectionModel()->selectedRows();
+    const MessageRow *row = selected.isEmpty() ? nullptr : proxy->rowAt(selected.first());
+    if (row) {
+        pane->setPlainText(row->m_text);
+    } else {
+        pane->clear();
+    }
+}
+
 // The Logons tab is the Documents tab over a different set of rows, so it behaves the
-// same way - selecting a row shows the logon underneath it
+// same way
 void AircraftGUI::logonSelectionChanged()
 {
-    QList<QTableWidgetItem *> selected = ui->logons->selectedItems();
-    for (const auto *selItem : selected)
-    {
-        QTableWidgetItem *timeItem = ui->logons->item(selItem->row(), DOCUMENT_COL_TIME);
-        if (timeItem)
-        {
-            ui->logonText->setPlainText(timeItem->data(Qt::UserRole).toString());
-            return;
-        }
-    }
-    ui->logonText->clear();
+    messageSelectionChanged(ui->logons, m_logonProxy, ui->logonText);
 }
 
 void AircraftGUI::documentSelectionChanged()
 {
-    QList<QTableWidgetItem *> selected = ui->documents->selectedItems();
-    for (const auto *selItem : selected)
-    {
-        QTableWidgetItem *timeItem = ui->documents->item(selItem->row(), DOCUMENT_COL_TIME);
-        if (timeItem)
-        {
-            ui->documentText->setPlainText(timeItem->data(Qt::UserRole).toString());
-            return;
-        }
-    }
-    // Nothing selected - the previous message is not the selected one, and leaving it
-    // there reads as though it is
-    ui->documentText->clear();
+    messageSelectionChanged(ui->documents, m_documentProxy, ui->documentText);
 }
 
 // Fetch and display the planespotters.net photo for an aircraft
@@ -2877,6 +2750,17 @@ void AircraftGUI::viewContextMenu(QTableView *view, bool aircraftView, QPoint po
     }
     showContextMenu(view, cellText, mapName, view->viewport()->mapToGlobal(pos),
                     showFlight, showAircraftId, mapAircraftId);
+}
+
+void AircraftGUI::messageContextMenu(QTableView *view, MessageFilterProxy *proxy, QPoint pos)
+{
+    const QModelIndex index = view->indexAt(pos);
+    const MessageRow *row = proxy->rowAt(index);
+    if (!row) {
+        return;
+    }
+    showContextMenu(view, index.data().toString(), row->m_mapName, view->viewport()->mapToGlobal(pos),
+                    QString(), 0, row->m_aircraftId);
 }
 
 void AircraftGUI::tableContextMenu(QTableWidget *table, QPoint pos)
