@@ -330,18 +330,6 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
 int main(int argc, char* argv[])
 {
-    // Chromium (in QtWebEngine) is limited to 60 FPS - disable that, so we can run at monitor's refresh rate
-    if (qgetenv("SDRANGEL_FRAME_RATE_LIMIT") != "1")
-    {
-        const QByteArray flags = qgetenv("QTWEBENGINE_CHROMIUM_FLAGS");
-
-        if (!flags.contains("disable-frame-rate-limit")) 
-        {
-            qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
-                    flags.isEmpty() ? QByteArray("--disable-frame-rate-limit")
-                                    : flags + " --disable-frame-rate-limit");
-        }
-    }
 
 #ifdef __APPLE__
     // Request OpenGL 3.3 context, needed for glspectrum and 3D Map feature
