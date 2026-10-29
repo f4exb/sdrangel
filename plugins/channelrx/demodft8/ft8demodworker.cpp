@@ -380,7 +380,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                     swgMapItem->setLongitude(longitude);
                     swgMapItem->setAltitude(0);
                     swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
-                    swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+                    swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)));
                     swgMapItem->setImageRotation(0);
                     swgMapItem->setText(new QString(text));
                     swgMapItem->setImage(new QString("antenna.png"));

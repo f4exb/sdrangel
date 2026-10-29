@@ -1016,9 +1016,9 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
 
         if (positionDateTime.isValid())
         {
-            swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
-            swgMapItem->setOrientationDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
-            swgMapItem->setAvailableUntil(new QString(positionDateTime.addSecs(10*60).toString(Qt::ISODateWithMs)));
+            swgMapItem->setPositionDateTime(new QString(positionDateTime.toUTC().toString(Qt::ISODateWithMs)));
+            swgMapItem->setOrientationDateTime(new QString(positionDateTime.toUTC().toString(Qt::ISODateWithMs)));
+            swgMapItem->setAvailableUntil(new QString(positionDateTime.toUTC().addSecs(10*60).toString(Qt::ISODateWithMs)));
         }
 
         swgMapItem->setImageRotation(heading);

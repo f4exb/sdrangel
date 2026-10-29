@@ -215,7 +215,7 @@ void Aircraft::addCoordinate(const ADSBAircraftPosition& position, AircraftModel
         {
             QVariantList& prevList = m_coordinates.back();
             prevList.push_back(QVariant::fromValue(coord));
-            m_coordinateDateTimes.push_back(position.m_dateTime);
+            m_coordinateDateTimes.push_back(position.m_dateTime.toUTC());
             if (showFullPath) {
                 model->aircraftCoordsUpdated(this);
             }
@@ -267,11 +267,13 @@ void Aircraft::addCoordinate(const ADSBAircraftPosition& position, AircraftModel
             }
         }
     }
-    m_coordinateDateTimes.push_back(position.m_dateTime);
+    m_coordinateDateTimes.push_back(position.m_dateTime.toUTC());
     m_lastColor = color;
 
-    // Prune recent list so only last 25 seconds of coordinates
-    QDateTime cutoff = QDateTime::currentDateTime().addSecs(-25);
+    // Prune recent list so only last 25 seconds of coordinates. In UTC, as the times are
+    // kept: comparing local QDateTimes works out both offsets again every time, under a
+    // lock Qt shares between all threads
+    QDateTime cutoff = QDateTime::currentDateTimeUtc().addSecs(-25);
     int keepCount = 0;
     for (int i = m_coordinateDateTimes.size() - 1; i >= 0; i--)
     {
@@ -2974,7 +2976,7 @@ void ADSBDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    if (m_tickCount % 4 == 0) {
+    if ((m_tickCount % 4 == 0) && !ui->channelPower->visibleRegion().isEmpty()) {
         ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
     }
 
@@ -3088,15 +3090,22 @@ void ADSBDemodGUI::averageSeries(QLineSeries *series, const QDateTime& startTime
     int startIdx = 0;
     int endIdx = -1;
 
+    // The points are epoch milliseconds, so compare them as such. Making a QDateTime of
+    // each meant a local time zone lookup per point, under a lock Qt shares between all
+    // threads, walking back over 10 minutes of points in every series every minute - the
+    // same code in the ACARS demodulator was a ~450 ms GUI stall
+    const qint64 startMs = startTime.toMSecsSinceEpoch();
+    const qint64 endMs = endTime.toMSecsSinceEpoch();
+
     for (int i = series->count() - 1; i >= 0; i--)
     {
-        QDateTime dt = QDateTime::fromMSecsSinceEpoch(series->at(i).x());
+        const qint64 ms = (qint64) series->at(i).x();
 
-        if ((endIdx == -1) && (dt <= endTime))
+        if ((endIdx == -1) && (ms <= endMs))
         {
             endIdx = i;
         }
-        else if (dt < startTime)
+        else if (ms < startMs)
         {
             startIdx = i + 1;
             break;

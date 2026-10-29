@@ -339,6 +339,14 @@ QList<SWGSDRangel::SWGMapAnimation *> *ADSBDemodTracker::copyAnimations(QList<SW
     return copy;
 }
 
+// Times for the Map are sent in UTC. The Map keeps them in UTC, and a string with no
+// offset is local time, which it then has to convert - a call into the C runtime's time
+// zone code, under a lock Qt shares between all threads, for every item on its GUI thread
+static QString mapDateTime(const QDateTime& dateTime)
+{
+    return dateTime.toUTC().toString(Qt::ISODateWithMs);
+}
+
 void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
                                 QList<SWGSDRangel::SWGMapAnimation *> *animations,
                                 const QDateTime& aircraftStateDateTime)
@@ -404,6 +412,11 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
             aircraft->m_mapTrailResetPending = false;
         }
 
+        // Converted once for all the pipes
+        const QDateTime positionDateTime = aircraft->m_positionDateTime.toUTC();
+        const QString positionDateTimeString = positionDateTime.toString(Qt::ISODateWithMs);
+        const QString altitudeDateTimeString = mapDateTime(aircraft->m_altitudeDateTime);
+
         for (const auto& pipe : (reportPipes.size() > 0 ? reportPipes : mapPipes))
         {
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
@@ -412,10 +425,10 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
             swgMapItem->setLatitude(aircraft->m_latitude);
             swgMapItem->setLongitude(aircraft->m_longitude);
             swgMapItem->setAltitude(altitudeM);
-            swgMapItem->setPositionDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
-            swgMapItem->setAltitudeDateTime(new QString(aircraft->m_altitudeDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setPositionDateTime(new QString(positionDateTimeString));
+            swgMapItem->setAltitudeDateTime(new QString(altitudeDateTimeString));
             swgMapItem->setFixedPosition(false);
-            swgMapItem->setAvailableUntil(new QString(aircraft->m_positionDateTime.addSecs(61).toString(Qt::ISODateWithMs))); // Changed from 60 to 61 due to https://github.com/CesiumGS/cesium/issues/12426
+            swgMapItem->setAvailableUntil(new QString(positionDateTime.addSecs(61).toString(Qt::ISODateWithMs))); // Changed from 60 to 61 due to https://github.com/CesiumGS/cesium/issues/12426
             QString image;
             if (m_settings.m_useLiveryIcons) {
                 image = aircraft->getLiveryImage();
@@ -446,7 +459,7 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
             QDateTime labelDateTime;
             swgMapItem->setLabel(new QString(aircraft->getLabel(&m_settings, labelDateTime)));
             if (labelDateTime.isValid()) {
-                swgMapItem->setLabelDateTime(new QString(labelDateTime.toString(Qt::ISODateWithMs)));
+                swgMapItem->setLabelDateTime(new QString(mapDateTime(labelDateTime)));
             }
 
             if (aircraft->m_trackValid)
@@ -459,7 +472,7 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
                 } else {
                     swgMapItem->setRoll(aircraft->m_rollEst);
                 }
-                swgMapItem->setOrientationDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
+                swgMapItem->setOrientationDateTime(new QString(positionDateTimeString));
             }
             else
             {
@@ -491,7 +504,7 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
                 // Present only for unthrottled log replay. The Map uses this both as the
                 // CZML sample time and as the instruction not to coalesce this state with
                 // the next frame before it reaches the 3D display.
-                aircraftState->setDateTime(new QString(aircraftStateDateTime.toString(Qt::ISODateWithMs)));
+                aircraftState->setDateTime(new QString(mapDateTime(aircraftStateDateTime)));
             }
             aircraftState->setIcao(new QString(QString::number(aircraft->m_icao, 16)));
             if (!aircraft->m_callsign.isEmpty()) {
@@ -508,7 +521,7 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
             if (aircraft->m_indicatedAirspeedValid)
             {
                 aircraftState->setAirspeed(aircraft->m_indicatedAirspeed);
-                aircraftState->setAirspeedDateTime(new QString(aircraft->m_indicatedAirspeedDateTime.toString(Qt::ISODateWithMs)));
+                aircraftState->setAirspeedDateTime(new QString(mapDateTime(aircraft->m_indicatedAirspeedDateTime)));
             }
             else
             {
@@ -532,7 +545,7 @@ void ADSBDemodTracker::sendToMap(ADSBAircraft *aircraft,
             if (aircraft->m_pressureAltitudeValid)
             {
                 aircraftState->setAltitude(aircraft->m_pressureAltitude);
-                aircraftState->setAltitudeDateTime(new QString(aircraft->m_altitudeDateTime.toString(Qt::ISODateWithMs)));
+                aircraftState->setAltitudeDateTime(new QString(altitudeDateTimeString));
             }
             else
             {
@@ -4353,12 +4366,12 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::gearAnimation(QDateTime startDat
     // Gear up (0.0) / down (1.0)
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_GEAR));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(up);
     animation->setLoop(0);
     animation->setDuration(5);
     animation->setMultiplier(0.2f);
-    animation->setSound(new QString("A320_gear.wav"));
+    animation->setSound(new QString("gear.wav"));
     return animation;
 }
 
@@ -4367,7 +4380,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::gearAngle(QDateTime startDateTim
     // Gear deflection - on ground it should be flat (0.0) in the air at an angle (1.0)
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_GEAR_ANGLE));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(flat);
     animation->setLoop(0);
     animation->setDuration(1);
@@ -4381,7 +4394,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::flapsAnimation(QDateTime startDa
     bool retract = flaps < currentFlaps;
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_FLAPS));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(retract);
     animation->setLoop(0);
     animation->setDuration(5*std::abs(flaps-currentFlaps));
@@ -4391,7 +4404,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::flapsAnimation(QDateTime startDa
     } else {
         animation->setStartOffset(currentFlaps);
     }
-    animation->setSound(new QString("A320_flaps.wav"));
+    animation->setSound(new QString("flaps.wav"));
     return animation;
 }
 
@@ -4400,7 +4413,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::slatsAnimation(QDateTime startDa
     // Extend / retract slats
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_SLATS));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(retract);
     animation->setLoop(0);
     animation->setDuration(5);
@@ -4413,7 +4426,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::rotorAnimation(QDateTime startDa
     // Turn rotors in helicopter.glb model
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_ROTOR));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(false);
     animation->setLoop(true);
     animation->setMultiplier(1);
@@ -4428,7 +4441,7 @@ SWGSDRangel::SWGMapAnimation *ADSBDemodTracker::engineAnimation(QDateTime startD
     // to look like a turning propellor - 720 is two revolutions a second
     SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
     animation->setName(new QString(ANIMATION_ENGINE.arg(engine)));
-    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setStartDateTime(new QString(mapDateTime(startDateTime)));
     animation->setReverse(false);
     animation->setLoop(true);
     animation->setMultiplier(720);
