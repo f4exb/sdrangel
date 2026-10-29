@@ -148,7 +148,7 @@ private:
     QValueAxis *m_aircraftYAxis;
     int m_frameRateCount[CHART_FRAME_SERIES];
     QDateTime m_frameRateTime;
-    QHash<QString, QDateTime> m_aircraftLastSeen;   // For the aircraft-seen series
+    QHash<QString, qint64> m_aircraftLastSeen;      // For the aircraft-seen series: epoch ms
     QDateTime m_averageTime;                        // Up to when old chart data has been averaged
     QPoint m_chartPanPos;
     bool m_chartPanning;

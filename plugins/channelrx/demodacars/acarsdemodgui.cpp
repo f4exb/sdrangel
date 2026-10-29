@@ -244,7 +244,7 @@ void AcarsDemodGUI::sendGroundStationToMap(const QString& name, float latitude, 
         swgMapItem->setLatitude(latitude);
         swgMapItem->setLongitude(longitude);
         swgMapItem->setAltitude(0.0f);
-        swgMapItem->setPositionDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+        swgMapItem->setPositionDateTime(new QString(dateTime.toUTC().toString(Qt::ISODateWithMs)));
         swgMapItem->setFixedPosition(true);
         // The Map feature's antenna icon, as used for its own beacons
         swgMapItem->setImage(new QString(QString("qrc:///map/map/antenna.png")));
@@ -265,7 +265,7 @@ void AcarsDemodGUI::rowReady(const AcarsRowEvent& e)
         m_frameRateCount[e.m_frameType]++;
     }
     if (!e.m_chartAircraftId.isEmpty()) {
-        m_aircraftLastSeen.insert(e.m_chartAircraftId, e.m_received);
+        m_aircraftLastSeen.insert(e.m_chartAircraftId, e.m_received.toMSecsSinceEpoch());
     }
 
     // HFDL ground stations heard, for the ground stations dialog
@@ -865,6 +865,17 @@ void AcarsDemodGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+// Every demodulator's tick() hangs off the one master timer, so work done on a fixed tick
+// count - the chart update once a second, the averaging once a minute - landed in the same
+// timer event for all of them, and with 25 demodulators that added up to a 40-65 ms GUI
+// stall once a second. Starting each count somewhere different puts each demodulator's
+// share of that work in a different timer event
+static uint32_t staggeredTickStart()
+{
+    static uint32_t next = 0;   // Only ever used on the GUI thread
+    return next++;
+}
+
 AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
     ChannelGUI(parent),
     ui(new Ui::AcarsDemodGUI),
@@ -874,7 +885,7 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_doApplySettings(true),
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
-    m_tickCount(0),
+    m_tickCount(staggeredTickStart()),
     m_progressDialog(nullptr),
     m_tableTimer(nullptr),
     m_scrollPending(false),
@@ -884,7 +895,7 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_fpsYAxis(nullptr),
     m_aircraftYAxis(nullptr),
 
-    m_frameRateTime(QDateTime::currentDateTime()),
+    m_frameRateTime(QDateTime::currentDateTimeUtc()),
     m_chartPanning(false)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -1012,18 +1023,7 @@ AcarsDemodGUI::AcarsDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     ui->scopeContainer->setVisible(false);
 
-    // Add airport acronyms to decoder as tool tips
-    QSharedPointer<const QHash<QString, AirportInformation *>> airportsByIdent = OurAirportsDB::getAirportsByIdent();
-    if (airportsByIdent)
-    {
-        QHashIterator<QString, AirportInformation *> itr(*airportsByIdent);
-        while (itr.hasNext())
-        {
-            itr.next();
-            const AirportInformation *info = itr.value();
-            ui->decode->addAcronym(info->m_ident, info->m_name);
-        }
-    }
+    // Airport idents in the decode get their names as tooltips from AcarsMessageView itself
 
     AircraftInformation::init();
     connect(&m_osnDB, &OsnDB::downloadingURL, this, &AcarsDemodGUI::downloadingURL);
@@ -1371,13 +1371,17 @@ void AcarsDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    if (m_tickCount % 4 == 0) {
-        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    // Only update labels that can be seen, to avoid unncessary compositing
+    if (m_tickCount % 4 == 0) 
+    {
+        if (!ui->channelPower->visibleRegion().isEmpty()) {
+            ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+        }
 
         // Aero is the one protocol with a continuous carrier to measure, so it is the only
         // one where a live quality figure means anything. A burst mode would be showing
         // whatever the last burst happened to look like.
-        if (m_settings.m_mode == AcarsDemodSettings::Aero)
+        if ((m_settings.m_mode == AcarsDemodSettings::Aero) && !ui->quality->visibleRegion().isEmpty())
         {
             double evm, suRate;
             m_acarsDemod->getAeroQuality(evm, suRate);
@@ -1396,7 +1400,10 @@ void AcarsDemodGUI::tick()
     const int ticksPerSecond = 20;
     if ((m_tickCount % ticksPerSecond) == 0)
     {
-        QDateTime currentDateTime = QDateTime::currentDateTime();
+        // UTC, as m_frameRateTime is: a local QDateTime works its offset out again for
+        // every difference and conversion below, a time zone lookup under a lock Qt shares
+        // between all threads - about half of what this cost, in every demodulator
+        QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
         qint64 ms = m_frameRateTime.msecsTo(currentDateTime);
 
         if (ms > 0)
@@ -1440,11 +1447,12 @@ void AcarsDemodGUI::tick()
             // Aircraft heard from in the last 5 minutes. ADS-B uses a 10 second window,
             // but ACARS and VDL-2 aircraft only transmit every so often.
             const qint64 activeSeconds = 5 * 60;
-            QMutableHashIterator<QString, QDateTime> itr(m_aircraftLastSeen);
+            const qint64 nowMs = currentDateTime.toMSecsSinceEpoch();
+            QMutableHashIterator<QString, qint64> itr(m_aircraftLastSeen);
             while (itr.hasNext())
             {
                 itr.next();
-                if (itr.value().secsTo(currentDateTime) > activeSeconds) {
+                if ((nowMs - itr.value()) / 1000 > activeSeconds) {
                     itr.remove();
                 }
             }
@@ -1472,7 +1480,7 @@ void AcarsDemodGUI::tick()
             }
             else
             {
-                endTime = QDateTime::currentDateTime().addSecs(-ageMins*60);
+                endTime = QDateTime::currentDateTimeUtc().addSecs(-ageMins*60);
                 startTime = endTime.addSecs(-averagePeriodMins*60);
             }
 
@@ -1560,15 +1568,23 @@ void AcarsDemodGUI::averageSeries(QLineSeries *series, const QDateTime& startTim
     int startIdx = 0;
     int endIdx = -1;
 
+    // The points are epoch milliseconds, so compare them as such. Making a QDateTime of
+    // each meant a local time zone lookup per point, under a lock Qt shares between all
+    // threads - and this walks back over 10 minutes of points in every series, in every
+    // ACARS demodulator at once, since they share the master timer: a ~450 ms GUI stall
+    // every minute
+    const qint64 startMs = startTime.toMSecsSinceEpoch();
+    const qint64 endMs = endTime.toMSecsSinceEpoch();
+
     for (int i = series->count() - 1; i >= 0; i--)
     {
-        QDateTime dt = QDateTime::fromMSecsSinceEpoch(series->at(i).x());
+        const qint64 ms = (qint64) series->at(i).x();
 
-        if ((endIdx == -1) && (dt <= endTime))
+        if ((endIdx == -1) && (ms <= endMs))
         {
             endIdx = i;
         }
-        else if (dt < startTime)
+        else if (ms < startMs)
         {
             startIdx = i + 1;
             break;
