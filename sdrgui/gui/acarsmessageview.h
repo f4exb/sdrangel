@@ -25,13 +25,15 @@
 
 class SDRGUI_API AcarsMessageView : public QTextEdit {
 
-    QHash<QString, QString> m_acronym;
+    QHash<QString, QString> m_acronym;  //!< Added to this view, on top of the built-in ones and airports
+
+    QString explanation(const QString& text) const;
 
 public:
 
     AcarsMessageView(QWidget *parent=nullptr);
     bool event(QEvent *event);
-    void addAcronym(const QString &acronym, const QString &explanation);        
+    void addAcronym(const QString &acronym, const QString &explanation);
 
 };
 

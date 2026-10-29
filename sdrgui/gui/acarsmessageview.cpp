@@ -20,11 +20,15 @@
 #include <QToolTip>
 #include <QDebug>
 
+#include "util/ourairportsdb.h"
+
 #include "acarsmessageview.h"
 
-AcarsMessageView::AcarsMessageView(QWidget *parent) :
-    QTextEdit(parent),
-    m_acronym({
+// Explanations common to every view. One table for all of them, rather than a copy in
+// each: there is a view in every ACARS demodulator and more in the Aircraft feature
+static const QHash<QString, QString>& builtInAcronyms()
+{
+    static const QHash<QString, QString> acronyms({
         {"ACARS", "Aircraft Communications Addressing and Reporting System"},
         {"ACK", "Acknowledge"},
         {"ADS", "Automatic Dependent Surveillance"},
@@ -270,7 +274,12 @@ AcarsMessageView::AcarsMessageView(QWidget *parent) :
         {"STAB", "Stabilizer"},
 
 
-    })
+    });
+    return acronyms;
+}
+
+AcarsMessageView::AcarsMessageView(QWidget *parent) :
+    QTextEdit(parent)
 {
     setMouseTracking(true);
 }
@@ -287,9 +296,10 @@ bool AcarsMessageView::event(QEvent *event)
         while (text.size() > 0 && text.right(1)[0].isDigit()) {
             text = text.left(text.size() - 1);
         }
-        if (!text.isEmpty() && m_acronym.contains(text))
+        const QString meaning = explanation(text);
+        if (!meaning.isEmpty())
         {
-            QToolTip::showText(helpEvent->globalPos(), QString("%1 - %2").arg(text).arg(m_acronym.value(text)));
+            QToolTip::showText(helpEvent->globalPos(), QString("%1 - %2").arg(text).arg(meaning));
         }
         else
         {
@@ -305,5 +315,35 @@ bool AcarsMessageView::event(QEvent *event)
 
 void AcarsMessageView::addAcronym(const QString &acronym, const QString &explanation)
 {
-    m_acronym.insert(acronym, explanation);    
+    m_acronym.insert(acronym, explanation);
+}
+
+// Airports are looked up in the shared airport database when a tooltip is wanted. Copying
+// every ICAO ident in to each view's table cost ~4.5 MB a view, ~117 MB with 26 views
+QString AcarsMessageView::explanation(const QString& text) const
+{
+    if (text.isEmpty()) {
+        return QString();
+    }
+
+    auto it = m_acronym.constFind(text);
+    if (it != m_acronym.constEnd()) {
+        return it.value();
+    }
+
+    it = builtInAcronyms().constFind(text);
+    if (it != builtInAcronyms().constEnd()) {
+        return it.value();
+    }
+
+    QSharedPointer<const QHash<QString, AirportInformation *>> airportsByIdent = OurAirportsDB::getAirportsByIdent();
+    if (airportsByIdent)
+    {
+        const AirportInformation *airport = airportsByIdent->value(text);
+        if (airport) {
+            return airport->m_name;
+        }
+    }
+
+    return QString();
 }        
