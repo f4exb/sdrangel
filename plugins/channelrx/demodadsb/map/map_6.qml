@@ -77,25 +77,31 @@ Item {
                 parent: mapView.map
             }
 
+            // Explicit z, as Qt 6 stacks sibling MapItemViews in reverse declaration order,
+            // which would draw airspaces, navaids and airports on top of aircraft
             MapItemView {
+                z: 1
                 model: airspaceModel
                 delegate: airspaceComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 2
                 model: navAidModel
                 delegate: navAidComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 3
                 model: airspaceModel
                 delegate: airspaceNameComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 4
                 model: airportModel
                 delegate: airportComponent
                 parent: mapView.map
@@ -103,12 +109,14 @@ Item {
 
             // This needs to be before aircraftComponent MapItemView, so it's drawn underneath
             MapItemView {
+                z: 5
                 model: aircraftModel
                 delegate: aircraftPathComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 6
                 model: aircraftModel
                 delegate: aircraftComponent
                 parent: mapView.map
