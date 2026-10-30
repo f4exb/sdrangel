@@ -247,7 +247,7 @@ AcarsMessage *AcarsMessage::decodeBlock(const QByteArray &message, const QString
         if (!uplink) {
             start += 10; // Skip msg num and flight
         }
-        
+
         QString text;
         qsizetype textSize = message.length() - start - 1 - 2 - 1;
         if (textSize > 0) {

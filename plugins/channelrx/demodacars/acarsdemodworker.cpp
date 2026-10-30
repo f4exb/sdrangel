@@ -37,7 +37,7 @@
 #ifdef _MSC_VER
 // For libacars/asn1/asn_system.h
 #define ASSUMESTDTYPES
-#define	ssize_t		SSIZE_T
+#define ssize_t     SSIZE_T
 #endif
 
 #include <libacars/asn1/FANSATCDownlinkMessage.h>
@@ -77,58 +77,58 @@ MESSAGE_CLASS_DEFINITION(AcarsDemodWorker::MsgReplayPacket, Message)
 // Convert CPDCL altitude in to feet
 static int cpdlcAltitude(FANSAltitude_t altitude)
 {
-	switch(altitude.present)
+    switch(altitude.present)
     {
-	case FANSAltitude_PR_altitudeQNH:
-		return altitude.choice.altitudeQNH * 10;
-	case FANSAltitude_PR_altitudeQNHMeters:
-		return Units::metresToIntegerFeet(altitude.choice.altitudeQNHMeters);
-	case FANSAltitude_PR_altitudeQFE:
-		return altitude.choice.altitudeQFE * 10;
-	case FANSAltitude_PR_altitudeQFEMeters:
-		return Units::metresToIntegerFeet(altitude.choice.altitudeQFEMeters);
-	case FANSAltitude_PR_altitudeGNSSFeet:
-		return altitude.choice.altitudeGNSSFeet;
-	case FANSAltitude_PR_altitudeGNSSMeters:
-		return Units::metresToIntegerFeet(altitude.choice.altitudeGNSSMeters);
-	case FANSAltitude_PR_altitudeFlightLevel:
-		return altitude.choice.altitudeFlightLevel * 100;
-	case FANSAltitude_PR_altitudeFlightLevelMetric:
-		return Units::metresToIntegerFeet(altitude.choice.altitudeFlightLevelMetric * 10.0);
-	case FANSAltitude_PR_NOTHING:        /* No components present */
-	default:
+    case FANSAltitude_PR_altitudeQNH:
+        return altitude.choice.altitudeQNH * 10;
+    case FANSAltitude_PR_altitudeQNHMeters:
+        return Units::metresToIntegerFeet(altitude.choice.altitudeQNHMeters);
+    case FANSAltitude_PR_altitudeQFE:
+        return altitude.choice.altitudeQFE * 10;
+    case FANSAltitude_PR_altitudeQFEMeters:
+        return Units::metresToIntegerFeet(altitude.choice.altitudeQFEMeters);
+    case FANSAltitude_PR_altitudeGNSSFeet:
+        return altitude.choice.altitudeGNSSFeet;
+    case FANSAltitude_PR_altitudeGNSSMeters:
+        return Units::metresToIntegerFeet(altitude.choice.altitudeGNSSMeters);
+    case FANSAltitude_PR_altitudeFlightLevel:
+        return altitude.choice.altitudeFlightLevel * 100;
+    case FANSAltitude_PR_altitudeFlightLevelMetric:
+        return Units::metresToIntegerFeet(altitude.choice.altitudeFlightLevelMetric * 10.0);
+    case FANSAltitude_PR_NOTHING:        /* No components present */
+    default:
         return -1;
-	}
+    }
 }
 
 static double cpdlcCoordinate(long degrees, long *tenthsofminutes)
 {
-	double result = (double)degrees;
-	if(tenthsofminutes != NULL) {
-		result += (double)(*tenthsofminutes) / 10.0f / 60.0f;
-	}
-	return result;
+    double result = (double)degrees;
+    if(tenthsofminutes != NULL) {
+        result += (double)(*tenthsofminutes) / 10.0f / 60.0f;
+    }
+    return result;
 }
 
 // Extract lat, lon, alt from FANSPositionReport
 static bool cpdlcExtractPosition(FANSPositionReport_t rpt, double &latitude, double &longitude, int &altitude)
 {
-	// FANSPositionCurrent_t can contain various types of position data (fix name, navaid, etc).
-	// We want only latitude/longitude coordinates.
-	FANSPositionCurrent_t pos = rpt.positioncurrent;
-	if(pos.present != FANSPosition_PR_latitudeLongitude) {
-		return false;
-	}
-	FANSLatitudeLongitude_t latlon = pos.choice.latitudeLongitude;
-	latitude = cpdlcCoordinate(latlon.latitude.latitudeDegrees, latlon.latitude.minutesLatLon);
-	if(latlon.latitude.latitudeDirection == FANSLatitudeDirection_south) {
-		latitude = -latitude;
-	}
-	longitude = cpdlcCoordinate(latlon.longitude.longitudeDegrees, latlon.longitude.minutesLatLon);
-	if(latlon.longitude.longitudeDirection == FANSLongitudeDirection_west) {
-		longitude = -longitude;
-	}
-	altitude = cpdlcAltitude(rpt.altitude);
+    // FANSPositionCurrent_t can contain various types of position data (fix name, navaid, etc).
+    // We want only latitude/longitude coordinates.
+    FANSPositionCurrent_t pos = rpt.positioncurrent;
+    if(pos.present != FANSPosition_PR_latitudeLongitude) {
+        return false;
+    }
+    FANSLatitudeLongitude_t latlon = pos.choice.latitudeLongitude;
+    latitude = cpdlcCoordinate(latlon.latitude.latitudeDegrees, latlon.latitude.minutesLatLon);
+    if(latlon.latitude.latitudeDirection == FANSLatitudeDirection_south) {
+        latitude = -latitude;
+    }
+    longitude = cpdlcCoordinate(latlon.longitude.longitudeDegrees, latlon.longitude.minutesLatLon);
+    if(latlon.longitude.longitudeDirection == FANSLongitudeDirection_west) {
+        longitude = -longitude;
+    }
+    altitude = cpdlcAltitude(rpt.altitude);
 
     return true;
 }
@@ -960,16 +960,16 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             la_adsc_msg_t *adsc = (la_adsc_msg_t *)adscNode->data;
             if (adsc && !adsc->err)
             {
-            	la_list *l = adsc->tag_list;
-            	la_adsc_basic_report_t *rpt = NULL;
-            	while(l != NULL)
+                la_list *l = adsc->tag_list;
+                la_adsc_basic_report_t *rpt = NULL;
+                while(l != NULL)
                 {
-            		la_adsc_tag_t *tag_struct = (la_adsc_tag_t *)l->data;
-            		uint8_t t = tag_struct->tag;
-            		// Look for a Basic Report
-            		if(t == 7 || t == 9 || t == 10 || t == 18 || t == 19 || t == 20)
+                    la_adsc_tag_t *tag_struct = (la_adsc_tag_t *)l->data;
+                    uint8_t t = tag_struct->tag;
+                    // Look for a Basic Report
+                    if(t == 7 || t == 9 || t == 10 || t == 18 || t == 19 || t == 20)
                     {
-            			rpt = (la_adsc_basic_report_t *)tag_struct->data;
+                        rpt = (la_adsc_basic_report_t *)tag_struct->data;
                         e.m_hasPosition = true;
                         e.m_hasAltitude = true;
                         e.m_latitude = rpt->lat;
@@ -982,9 +982,9 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
                         report.m_altitudeValid = true;
                         report.m_altitudeFt = rpt->alt;
                         report.m_documentKind = AircraftReport::PositionReport;
-            			break;
-            		}
-            		l = la_list_next(l);
+                        break;
+                    }
+                    l = la_list_next(l);
                 }
             }
         }
@@ -1006,7 +1006,7 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
                         int altitudeFt;
                         if(dm->aTCDownlinkmsgelementid.present == FANSATCDownlinkMsgElementId_PR_dM48PositionReport)
                         {
-                    		positionValid = cpdlcExtractPosition(dm->aTCDownlinkmsgelementid.choice.dM48PositionReport, latitude, longitude, altitudeFt);
+                            positionValid = cpdlcExtractPosition(dm->aTCDownlinkmsgelementid.choice.dM48PositionReport, latitude, longitude, altitudeFt);
                         }
                         else
                         {
@@ -1044,8 +1044,8 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             }
         }
 
-    	la_proto_tree_destroy(node);
-	}
+        la_proto_tree_destroy(node);
+    }
     else
     {
         e.m_textDecode = "Failed to la_acars_parse_and_reassemble";

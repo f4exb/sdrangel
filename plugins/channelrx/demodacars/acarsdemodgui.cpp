@@ -1372,7 +1372,7 @@ void AcarsDemodGUI::tick()
             nbMagsqSamples);
 
     // Only update labels that can be seen, to avoid unncessary compositing
-    if (m_tickCount % 4 == 0) 
+    if (m_tickCount % 4 == 0)
     {
         if (!ui->channelPower->visibleRegion().isEmpty()) {
             ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));

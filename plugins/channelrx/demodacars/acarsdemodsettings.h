@@ -37,7 +37,7 @@ struct AcarsDemodSettings
         VDL2 = 1,       //!< VDL Mode 2: 10500 baud D8PSK, ACARS over AVLC
         HFDL = 2,       //!< HFDL: 1800 baud M-PSK on a 1440 Hz subcarrier, ACARS over MPDU/LPDU
         Aero = 3,       //!< Inmarsat Classic Aero: L band satellite, ACARS over signal units
-        Iridium = 4,    //!< Iridium: L band satellite, burst DQPSK from low earth orbit.               
+        Iridium = 4,    //!< Iridium: L band satellite, burst DQPSK from low earth orbit.
         ModeCount
     };
 

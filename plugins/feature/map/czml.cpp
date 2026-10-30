@@ -34,7 +34,7 @@
 const QStringList CZML::m_heightReferences = {"NONE", "CLAMP_TO_GROUND", "RELATIVE_TO_GROUND", "CLIP_TO_GROUND"};
 
 // Using CLAMP_TO_GROUND on a label, billboard or point, results in all of them being visible through the globe.
-// So use CLIP_TO_GROUND instead. 
+// So use CLIP_TO_GROUND instead.
 // A single CLAMP_TO_GROUND label, billboard or point latches _shaderDisableDepthDistance
 // on the Cesium collection it lands in, which recompiles every item in that collection
 // onto Cesium's manual globe-depth path. That path discards nothing beyond

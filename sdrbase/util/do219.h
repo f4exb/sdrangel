@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #ifndef INCLUDE_DO219_H
-#define INCLUDE_DO219_H 
+#define INCLUDE_DO219_H
 
 // RCTA DO-219 / CPDLC decoder
 class DO219Decoder {
@@ -28,7 +28,7 @@ class DO219Decoder {
 public:
     QString m_msgIdentificationNumber;
     QString m_msgReferenceNumber;
-    QTime m_timeStamp; 
+    QTime m_timeStamp;
 
     DO219Decoder() :
         m_byteIndex(0),
@@ -49,7 +49,7 @@ public:
             s.append("\n(message truncated)");
         }
         return s;
-    }    
+    }
 
 protected:
     int getBit()
@@ -72,31 +72,31 @@ protected:
             m_bitIndex = 0;
             m_byteIndex++;
         }
-        return bit; 
+        return bit;
     }
-    
+
     int getBits(int numberOfBits)
     {
         int bits = 0;
-        for (int i = 0; i < numberOfBits; i++) 
+        for (int i = 0; i < numberOfBits; i++)
         {
             bits <<= 1;
             bits |= getBit();
         }
         return bits;
-    }    
-    
+    }
+
     QString decodeATCDownlinkMessage()
     {
         bool flag = getBits(1);
-        
+
         QString s;
         decodeATCMessageHeader();
         s.append(decodeATCDownlinkMsgElementId());
         if (flag)
         {
             int size = getBits(2) + 1;
-            for (int i = 0; i < size; i++) {        
+            for (int i = 0; i < size; i++) {
                 s.append("\n" + decodeATCDownlinkMsgElementId());
             }
         }
@@ -111,13 +111,13 @@ protected:
         if (flag)
         {
             int size = getBits(2) + 1;
-            for (int i = 0; i < size; i++) {        
+            for (int i = 0; i < size; i++) {
                 s.append("\n" + decodeATCUplinkMsgElementId());
             }
         }
         return s;
     }
-    
+
     void decodeATCMessageHeader()
     {
         bool flag = getBits(1);
@@ -133,21 +133,21 @@ protected:
             m_timeStamp = QTime::fromString(decodeTimeHHMMSS());
         }
     }
-    
+
     QString decodeTimeHHMMSS()
     {
         QString hours = decodeTimeHours();
         QString minutes = decodeTimeMinutes();
-        QString seconds = decodeTimeSeconds();   
-        return hours + ":" + minutes + ":" + seconds;    
+        QString seconds = decodeTimeSeconds();
+        return hours + ":" + minutes + ":" + seconds;
     }
-    
+
     QString decodeMsgIdentificationNumber()
     {
         int num = getBits(6);
         return QString::number(num);
     }
-    
+
     QString decodeMsgReferenceNumber()
     {
         int num = getBits(6);
@@ -188,13 +188,13 @@ protected:
         case 13:
         {
             QString time = decodeTime();
-            QString altitude = decodeAltitude(); 
+            QString altitude = decodeAltitude();
             return "AT " + time + " EXPECT CLIMB TO " + altitude;
         }
         case 14:
         {
             QString position = decodePosition();
-            QString altitude = decodeAltitude();  
+            QString altitude = decodeAltitude();
             return "AT " + position + " EXPECT CLIMB TO " + altitude;
         }
         case 15:
@@ -218,7 +218,7 @@ protected:
         case 18:
         {
             QString position = decodePosition();
-            QString altitude = decodeAltitude();  
+            QString altitude = decodeAltitude();
             return "AT " + position + " EXPECT CRUISE CLIMB TO " + altitude;
         }
         case 19:
@@ -229,68 +229,68 @@ protected:
         {
             QString time = decodeTime();
             QString altitude = decodeAltitude();
-            return "AT " + time + " CLIMB AND MAINTAIN " + altitude; 
+            return "AT " + time + " CLIMB AND MAINTAIN " + altitude;
         }
         case 22:
         {
             QString position = decodePosition();
-            QString altitude = decodeAltitude();  
-            return "AT " + position + " CLIMB AND MAINTAIN " + altitude; 
+            QString altitude = decodeAltitude();
+            return "AT " + position + " CLIMB AND MAINTAIN " + altitude;
         }
         case 23:
             return "DESCEND AND MAINTAIN " + decodeAltitude();
         case 24:
         {
             QString time = decodeTime();
-            QString altitude = decodeAltitude();  
-            return "AT " + time + " DESCEND AND MAINTAIN " + altitude; 
+            QString altitude = decodeAltitude();
+            return "AT " + time + " DESCEND AND MAINTAIN " + altitude;
         }
         case 25:
         {
             QString position = decodePosition();
-            QString altitude = decodeAltitude();  
+            QString altitude = decodeAltitude();
             return "AT " + position + " DESCEND AND MAINTAIN " + altitude;
         }
         case 26:
         {
-            QString altitude = decodeAltitude(); 
+            QString altitude = decodeAltitude();
             QString time = decodeTime();
             return "CLIMB TO REACH " + altitude + " BY " + time;
         }
         case 27:
         {
             QString altitude = decodeAltitude();
-            QString position = decodePosition(); 
+            QString position = decodePosition();
             return "CLIMB TO REACH " + altitude + " BY " + position;
         }
         case 28:
         {
             QString altiutude = decodeAltitude();
-            QString time = decodeTime(); 
+            QString time = decodeTime();
             return "DESCEND TO REACH " + altiutude + " BY " + time;
         }
         case 29:
         {
             QString altiutude = decodeAltitude();
-            QString position = decodePosition(); 
+            QString position = decodePosition();
             return "DESCEND TO REACH " + altiutude + " BY " + position;
         }
         case 30:
         {
             QString altiutude1 = decodeAltitude();
-            QString altiutude2 = decodeAltitude(); 
+            QString altiutude2 = decodeAltitude();
             return "MAINTAIN BLOCK " + altiutude1 + " TO " + altiutude2;
         }
         case 31:
         {
             QString altiutude1 = decodeAltitude();
-            QString altiutude2 = decodeAltitude(); 
+            QString altiutude2 = decodeAltitude();
             return "CLIMB TO MAINTAIN BLOCK " + altiutude1 + " TO " + altiutude2;
         }
         case 32:
         {
             QString altiutude1 = decodeAltitude();
-            QString altiutude2 = decodeAltitude(); 
+            QString altiutude2 = decodeAltitude();
             return "DESCEND TO MAINTAIN BLOCK " + altiutude1 + " TO " + altiutude2;
         }
         case 33:
@@ -496,7 +496,7 @@ protected:
             QString position = decodePosition();
             return "AT " + time + " PROCEED DIRECT TO " + position;
         }
-        case 77:    
+        case 77:
         {
             QString position1 = decodePosition();
             QString position2 = decodePosition();
@@ -650,9 +650,9 @@ protected:
         case 107:
             return "MAINTAIN PRESENT SPEED";
         case 108:
-            return "MAINTAIN " + decodeSpeed() + " OR GREATER";     
+            return "MAINTAIN " + decodeSpeed() + " OR GREATER";
         case 109:
-            return "MAINTAIN " + decodeSpeed() + " OR LESS"; 
+            return "MAINTAIN " + decodeSpeed() + " OR LESS";
         case 110:
         {
             QString speed1 = decodeSpeed();
@@ -662,7 +662,7 @@ protected:
         case 111:
             return "INCREASE SPEED TO " + decodeSpeed();
         case 112:
-            return "INCREASE SPEED TO " + decodeSpeed() + " OR GREATER";    
+            return "INCREASE SPEED TO " + decodeSpeed() + " OR GREATER";
         case 113:
             return "REDUCE SPEED TO " + decodeSpeed();
         case 114:
@@ -674,41 +674,41 @@ protected:
         case 117:
         {
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "CONTACT " + icaoUnitName + " " + frequency;
         }
         case 118:
         {
             QString position = decodePosition();
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "AT " + position + " CONTACT " + icaoUnitName + " " + frequency;
         }
         case 119:
         {
             QString time = decodeTime();
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "AT " + time + " CONTACT " + icaoUnitName + " " + frequency;
         }
         case 120:
         {
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "MONITOR " + icaoUnitName + " " + frequency;
         }
         case 121:
         {
             QString position = decodePosition();
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "AT " + position + " MONITOR " + icaoUnitName + " " + frequency;
         }
         case 122:
         {
             QString time = decodeTime();
             QString icaoUnitName = decodeICAOUnitName();
-            QString frequency = decodeFrequency(); 
+            QString frequency = decodeFrequency();
             return "AT " + time + " MONITOR " + icaoUnitName + " " + frequency;
         }
         case 123:
@@ -768,7 +768,7 @@ protected:
             QString altitude = decodeAltitude();
             QString position = decodePosition();
             return "CAN YOU ACCEPT " + altitude + " AT " + position;
-        } 
+        }
         case 150:
         {
             QString altitude = decodeAltitude();
@@ -800,7 +800,7 @@ protected:
         case 160:
             return "NEXT DATA AUTHORITY " + decodeICAOFacilityDesignation();
         case 161:
-            return "END SERVICE";                                                   
+            return "END SERVICE";
         case 162:
             return "SERVICE UNAVAILABLE";
         case 163:
@@ -850,16 +850,16 @@ protected:
         case 181:
         {
             QString toFrom = decodeToFrom();
-            QString position = decodePosition(); 
+            QString position = decodePosition();
             return "REPORT DISTANCE " + toFrom + " " + position;
         }
         case 182:
-            return "CONFIRM ATIS CODE";        
+            return "CONFIRM ATIS CODE";
         default:
-            return "UNKNOWN ATCUplinkMsgElementId: " + QString::number(id);                               
+            return "UNKNOWN ATCUplinkMsgElementId: " + QString::number(id);
         }
     }
-        
+
     QString decodeATCDownlinkMsgElementId()
     {
         int id = getBits(8);
@@ -947,7 +947,7 @@ protected:
             return "REQUEST VOICE CONTACT";
         case 21:
             return "REQUEST VOICE CONTACT " + decodeFrequency();
-        case 22:         
+        case 22:
             return "REQUEST DIRECT TO " + decodePosition();
         case 23:
             return "REQUEST " + decodeProcedureName();
@@ -964,7 +964,7 @@ protected:
         case 27:
         {
             QString distanceOffset = decodeDistanceOffset();
-            QString direction = decodeDirection();            
+            QString direction = decodeDirection();
             return "REQUEST WEATHER DEVIATION UP TO " + distanceOffset + " " + direction + " OF ROUTE";
         }
         case 28:
@@ -1046,8 +1046,8 @@ protected:
         case 60:
         {
             QString distanceOffset = decodeDistanceOffset();
-            QString direction = decodeDirection();            
-            return "OFFSETING " + distanceOffset + " " + direction + " OF ROUTE";            
+            QString direction = decodeDirection();
+            return "OFFSETING " + distanceOffset + " " + direction + " OF ROUTE";
         }
         case 61:
             return "DESCENDING TO ALTITUDE " + decodeAltitude();
@@ -1069,7 +1069,7 @@ protected:
             return "REQUEST VMC DESCENT";
         case 70:
             return "REQUEST HEADING " + decodeDegrees();
-        case 71: 
+        case 71:
             return "REQUEST GROUND TRACK " + decodeDegrees();
         case 72:
             return "REACHING ALTITUDE " + decodeAltitude();
@@ -1080,7 +1080,7 @@ protected:
         case 75:
             return "AT PILOTS DISCRETION";
         case 76:
-        {    
+        {
             QString altitude1 = decodeAltitude();
             QString altitude2 = decodeAltitude();
             return "REACHING BLOCK " + altitude1 + " TO " + altitude2;
@@ -1102,14 +1102,14 @@ protected:
         case 79:
             return "ATIS " + decodeATISCode();
         default:
-            return "UNKNOWN ATCDownlinkMsgElementId: " + QString::number(id);                               
+            return "UNKNOWN ATCDownlinkMsgElementId: " + QString::number(id);
         }
     }
-    
-    QString decodeAltitude() 
+
+    QString decodeAltitude()
     {
         int type = getBits(3);
-        switch (type) 
+        switch (type)
         {
         case 0:
             return decodeAltitudeQNH();
@@ -1129,9 +1129,9 @@ protected:
             return decodeAltitudeFlightLevelMetric();
         default:
             return QString("UNKOWNN ALTITUDE TYPE %1").arg(type);
-        }            
+        }
     }
-    
+
     QString decodeAltitudeQNH()
     {
         int v = getBits(12);
@@ -1170,21 +1170,21 @@ protected:
 
     QString decodeAltitudeFlightLevel()
     {
-        int v = getBits(10);        
+        int v = getBits(10);
         return QString("F%1").arg((v+30), 3, 10, QChar('0'));
     }
 
     QString decodeAltitudeFlightLevelMetric()
     {
-        int v = getBits(11);        
+        int v = getBits(11);
         return QString("S%1").arg((v+10), 3, 10, QChar('0'));
     }
-    
+
     QString decodeATISCode()
-    {   
+    {
         return decodeIA5String(5);
     }
-    
+
     QString decodeAltimeter()
     {
         bool flag = getBits(1);
@@ -1194,7 +1194,7 @@ protected:
             return decodeAltimeterMetric();
         }
     }
-    
+
     QString decodeAltimeterEnglish()
     {
         bool alt = getBits(10);
@@ -1206,7 +1206,7 @@ protected:
         bool alt = getBits(13);
         return QString("%1 HPA").arg((alt+7500)/10.0, 0, 'f', 1);
     }
-    
+
     QString decodePredepartureClearance()
     {
         bool flag0 = getBits(1);
@@ -1229,47 +1229,47 @@ protected:
         s.append(" " + decodePDCRevision());
         return s;
     }
-    
+
     QString decodeFrequencyDeparture()
     {
         return decodeFrequencyVHF();
     }
-    
+
     QString decodePDCRevision()
     {
         int rev = getBits(4);
         return QString::number(rev + 1);
     }
-    
+
     QString decodeAircraftFlightIdentification()
     {
         int size = getBits(3) + 2;
         return decodeIA5String(size);
     }
-    
+
     QString decodeAircraftType()
     {
         int size = getBits(3) + 2;
         return decodeIA5String(size);
     }
-    
+
     QString decodeAircraftEquipmentCode()
     {
         QString s = decodeComNavApproachEquipmentAvailable();
         int size = getBits(4) + 1;
         for (int i = 0; i < size; i++) {
-            s.append(" " + decodeComNavEquipmentStatus()); 
+            s.append(" " + decodeComNavEquipmentStatus());
         }
         s.append(" " + decodeSSREquipmentAvailable());
         return s;
     }
-    
+
     QString decodeComNavApproachEquipmentAvailable()
     {
         int d = getBits(1);
         return d == 0 ? "Y" : "N";
     }
-    
+
     QString decodeComNavEquipmentStatus()
     {
         int d = getBits(4);
@@ -1300,7 +1300,7 @@ protected:
         case 11:
             return "P"; // Doppler
         case 12:
-            return "R"; // RNAV 
+            return "R"; // RNAV
         case 13:
             return "T"; // TACAN
         case 14:
@@ -1309,9 +1309,9 @@ protected:
             return "V"; // VHF RTF
         default:
             return QString("UNKNOWN EQUIPMENT STATUS %1").arg(d);
-        }    
+        }
     }
-    
+
     QString decodeSSREquipmentAvailable()
     {
         int d = getBits(3);
@@ -1335,18 +1335,18 @@ protected:
             return QString("UNKNOWN SSR EQUIPMENT %1").arg(d);
         }
     }
-    
+
     QString decodeTp4Table()
     {
         getBits(1); // Consumed to keep the bit position right; nothing to display
         return "";
     }
-    
+
     QString decodeTrackDetailMsg()
     {
         return ""; // FIMXE
-    }    
-    
+    }
+
     QString decodeDegrees()
     {
         int choice = getBits(1);
@@ -1354,31 +1354,31 @@ protected:
             return decodeDegreesMagnetic();
         } else {
             return decodeDegreesTrue();
-        }        
+        }
     }
-    
+
     QString decodeDegreesMagnetic()
     {
         int degrees = getBits(9);
         return QString("%1").arg(degrees, 3, 10, QChar('0'));
     }
-    
+
     QString decodeDegreesTrue()
     {
         int degrees = getBits(9);
         return QString("%1 T").arg(degrees, 3, 10, QChar('0'));
     }
-    
+
     QString decodeDirection()
     {
         int dir = getBits(4);
         const QStringList dirs = {"L", "R", "L OR R", "N", "S", "E", "W", "NE", "NW", "SE", "SW"};
         if (dir >= dirs.size()) {
             return QString("UNKNOWN DIRECTION %1").arg(dir);
-        } else { 
+        } else {
             return dirs[dir];
         }
-    } 
+    }
     QString decodeDistance()
     {
         int unit = getBits(1);
@@ -1388,7 +1388,7 @@ protected:
             return decodeDistanceKM();
         }
     }
-    
+
     QString decodeDistanceNM()
     {
         int d = getBits(14);
@@ -1400,7 +1400,7 @@ protected:
         int d = getBits(10);
         return QString("%1 KM").arg(d + 1);
     }
-    
+
     QString decodeDistanceOffset()
     {
         int unit = getBits(1);
@@ -1410,7 +1410,7 @@ protected:
             return decodeDistanceOffsetKM();
         }
     }
-    
+
     QString decodeDistanceOffsetNM()
     {
         int d = getBits(7);
@@ -1422,7 +1422,7 @@ protected:
         int d = getBits(8);
         return QString("%1 KM").arg(d + 1);
     }
-    
+
     QString decodeErrorInformation()
     {
         int error = getBits(5);
@@ -1445,19 +1445,19 @@ protected:
             return errors[error];
         }
     }
-    
+
     QString decodeFixName()
     {
         int size = getBits(3) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodeFreeText()
     {
         int size = getBits(8) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodeFrequency()
     {
         int choice = getBits(2);
@@ -1475,13 +1475,13 @@ protected:
             return QString("UNKNOWN FREQUENCY %1").arg(choice);
         }
     }
-    
+
     QString decodeFrequencyHF()
     {
         int f = getBits(15);
         return QString("%1 KHZ").arg(f + 2850);
     }
-    
+
     QString decodeFrequencyVHF()
     {
         int f = getBits(15);
@@ -1495,16 +1495,16 @@ protected:
         float freq = (225000.0f + f) / 1000.0f;
         return QString("%1").arg(freq, 7, 'f', 3);
     }
-    
+
     QString decodeFrequencySatChannel()
     {
-        QString channel;        
+        QString channel;
         for (int i = 0; i < 12; i++) {
             channel = channel + decodeDigit();
         }
         return channel;
     }
-    
+
     QString decodeIA5String(int size)
     {
         QString s;
@@ -1530,22 +1530,22 @@ protected:
     {
         return decodeIA5String(4);
     }
-    
+
     QString decodeBeaconCode()
     {
         QString s;
         for (int i = 0; i < 4; i++) {
             s.append(decodeBeaconOctalDigit());
         }
-        return s;        
+        return s;
     }
-    
+
     QString decodeBeaconOctalDigit()
     {
         int bits = getBits(3);
         return QString::number(bits);
     }
-    
+
     QString decodeICAOUnitName()
     {
         // DO-219 spec is inconsistent in it's description of this element - page 22 appears to be wrong
@@ -1553,7 +1553,7 @@ protected:
         QString icaoFacilityFunction = decodeICAOFacilityFunction();
         return icaoFacilityIndentification + " " + icaoFacilityFunction;
     }
-    
+
     QString decodeICAOFacilityIdentification()
     {
         int type = getBits(1);
@@ -1563,18 +1563,18 @@ protected:
             return decodeICAOFacilityName();
         }
     }
-    
+
     QString decodeICAOFacilityDesignation()
     {
         return decodeIA5String(4);
     }
-    
+
     QString decodeICAOFacilityName()
     {
         int size = getBits(4) + 3;
         return decodeIA5String(size);
     }
-    
+
     QString decodeICAOFacilityFunction()
     {
         int func = getBits(3);
@@ -1590,14 +1590,14 @@ protected:
         };
         return funcs[func];
     }
-    
+
     QString decodeLatitudeLongitude()
     {
         QString latitude = decodeLatitude();
         QString longitude = decodeLongitude();
         return latitude + " " + longitude;
     }
-    
+
     QString decodeLatitude()
     {
         bool flag = getBits(1);
@@ -1608,25 +1608,25 @@ protected:
         s.append(" " + decodeLatitudeDirection());
         return s;
     }
-    
+
     QString decodeLatitudeDegrees()
     {
         int degrees = getBits(7);
         return QString::number(degrees);
     }
-    
+
     QString decodeMinutesLatLon()
     {
         int minutes = getBits(10);
         return QString::number(minutes / 10.0f, 'f', 1);
     }
-    
+
     QString decodeLatitudeDirection()
     {
         int dir = getBits(1);
         return dir == 0 ? "N" : "S";
     }
-    
+
     QString decodeLongitude()
     {
         bool flag = getBits(1);
@@ -1637,19 +1637,19 @@ protected:
         s.append(" " + decodeLongitudeDirection());
         return s;
     }
-    
+
     QString decodeLongitudeDegrees()
     {
         int degrees = getBits(8);
         return QString::number(degrees);
     }
-    
+
     QString decodeLongitudeDirection()
     {
         int dir = getBits(1);
         return dir == 0 ? "E" : "W";
     }
-    
+
     QString decodePlaceBearingDistance()
     {
         bool flag = getBits(1);
@@ -1661,7 +1661,7 @@ protected:
         s.append(" " + decodeDistance());
         return s;
     }
-   
+
     QString decodeProcedureName()
     {
         bool flag0 = getBits(1);
@@ -1671,9 +1671,9 @@ protected:
         if (flag0) {
             s.append(decodeProcedureTransistion());
         }
-        return s;        
+        return s;
     }
-    
+
     QString decodeProcedureType()
     {
         int type = getBits(2);
@@ -1684,19 +1684,19 @@ protected:
             return types[type];
         }
     }
-    
+
     QString decodeProcedure()
     {
         int size = getBits(3) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodeProcedureTransistion()
     {
         int size = getBits(3) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodePosition()
     {
         int type = getBits(3);
@@ -1722,7 +1722,7 @@ protected:
         int size = getBits(2) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodePositionReport()
     {
         bool flag0 = getBits(1);
@@ -1792,9 +1792,9 @@ protected:
         if (flag15) {
             s.append("\nSupplementaryInformation: " + decodeSupplementaryInformation());
         }
-        return s;                    
+        return s;
     }
-    
+
     QString decodeTemperature()
     {
         bool scale = getBits(1);
@@ -1804,7 +1804,7 @@ protected:
             return decodeTemperatureF();
         }
     }
-    
+
     QString decodeTemperatureC()
     {
         int temp = getBits(7);
@@ -1816,20 +1816,20 @@ protected:
         int temp = getBits(8);
         return QString("%1 F").arg(temp - 105);
     }
-    
+
     QString decodeWinds()
     {
         QString windDirection = decodeWindDirection();
         QString windSpeed = decodeWindSpeed();
         return windDirection + windSpeed;
     }
-    
+
     QString decodeWindDirection()
     {
         int dir = getBits(9);
         return QString("%1/").arg(dir + 1);
     }
-    
+
     QString decodeWindSpeed()
     {
         int units = getBits(1);
@@ -1839,19 +1839,19 @@ protected:
             return decodeWindSpeedMetric();
         }
     }
-    
+
     QString decodeWindSpeedEnglish()
     {
         int speed = getBits(8);
         return QString("%1 KNTS").arg(speed);
     }
-    
+
     QString decodeWindSpeedMetric()
     {
         int speed = getBits(9);
         return QString("%1 KPH").arg(speed);
     }
-    
+
     QString decodeTurbulence()
     {
         int turb = getBits(2);
@@ -1862,7 +1862,7 @@ protected:
             return turbs[turb];
         }
     }
-    
+
     QString decodeIcing()
     {
         int icing = getBits(2);
@@ -1873,14 +1873,14 @@ protected:
             return icings[icing];
         }
     }
-    
+
     QString decodeVerticalChange()
     {
         QString verticalDirection = decodeVerticalDirection();
         QString verticalRate = decodeVerticalRate();
         return verticalDirection + " " + verticalRate;
     }
-    
+
     QString decodeVerticalDirection()
     {
         int dir = getBits(1);
@@ -1888,9 +1888,9 @@ protected:
             return "UP";
         } else {
             return "DOWN";
-        }        
+        }
     }
-    
+
     QString decodeVerticalRate()
     {
         int units = getBits(1);
@@ -1900,19 +1900,19 @@ protected:
             return decodeVerticalRateMetric();
         }
     }
-        
+
     QString decodeVerticalRateEnglish()
     {
         int rate = getBits(6);
         return QString("%1 FT/MIN").arg(rate * 100);
     }
-    
+
     QString decodeVerticalRateMetric()
     {
         int rate = getBits(8);
         return QString("%1 M/MIN").arg(rate * 10);
     }
-    
+
     QString decodeSpeed()
     {
         int type = getBits(3);
@@ -1938,62 +1938,62 @@ protected:
             return QString("UKNOWN SPEED TYPE %1").arg(type);
         }
     }
-    
+
     QString decodeSpeedIndicated()
     {
         int speed = getBits(5);
         return QString("%1 IAS").arg((speed + 7) * 10);
     }
-    
+
     QString decodeSpeedIndicatedMetric()
     {
         int speed = getBits(7);
         return QString("%1 KMIAS").arg((speed + 10) * 10);
     }
-    
+
     QString decodeSpeedTrue()
     {
         int speed = getBits(6);
         return QString("%1 TAS").arg((speed + 7) * 10);
     }
-    
+
     QString decodeSpeedTrueMetric()
     {
         int speed = getBits(7);
         return QString("%1 KMTAS").arg((speed + 10) * 10);
     }
-    
+
     QString decodeSpeedGround()
     {
         int speed = getBits(6);
         return QString("%1 GS").arg((speed + 7) * 10);
     }
-    
+
     QString decodeSpeedGroundMetric()
     {
         int speed = getBits(8);
         return QString("%1 KMGS").arg((speed + 10) * 10);
     }
-    
+
     QString decodeSpeedMach()
     {
         int speed = getBits(5);
         return QString("%1M").arg((speed + 61) / 100.0f, 0, 'f', 2);
     }
-    
+
     QString decodeSpeedMachLarge()
     {
         int speed = getBits(9);
         return QString("%1M").arg((speed + 93) / 100.0f, 0, 'f', 2);
     }
-    
+
     QString decodeTime()
     {
         QString timeHours = decodeTimeHours();
         QString timeMinutes = decodeTimeMinutes();
-        return timeHours + ":" + timeMinutes;    
-    }  
-    
+        return timeHours + ":" + timeMinutes;
+    }
+
     QString decodeTimeHours()
     {
         int h = getBits(5);
@@ -2005,30 +2005,30 @@ protected:
         int m = getBits(6);
         return QString("%1").arg(m, 2, 10, QChar('0'));
     }
-    
+
     QString decodeTimeSeconds()
     {
         int s = getBits(6);
         return QString("%1").arg(s, 2, 10, QChar('0'));
     }
-        
+
     QString decodeToFrom()
     {
         int dir = getBits(1);
-        if (dir == 0) { 
+        if (dir == 0) {
             return "TO";
         } else {
             return "FROM";
         }
     }
-    
+
     QString decodeRemainingFuel()
     {
         QString timeHours = decodeTimeHours();
         QString timeMinutes = decodeTimeMinutes();
-        return timeHours + ":" + timeMinutes;    
+        return timeHours + ":" + timeMinutes;
     }
-    
+
     QString decodeRouteClearance()
     {
         bool flag0 = getBits(1);
@@ -2042,7 +2042,7 @@ protected:
         bool flag8 = getBits(1);
         bool flag9 = getBits(1);
         QString s;
-        if (flag0) { 
+        if (flag0) {
             s.append("\nAirportDeparture: " + decodeAirport());
         }
         if (flag1) {
@@ -2059,7 +2059,7 @@ protected:
         }
         if (flag5) {
             s.append("\nProcedureApproach: " + decodeProcedureName());
-        }    
+        }
         if (flag6) {
             s.append("\nProcedureArrival: " + decodeProcedureName());
         }
@@ -2078,7 +2078,7 @@ protected:
         }
         return s;
     }
-    
+
     QString decodePublishedIdentifier()
     {
         bool flag = getBits(1);
@@ -2094,39 +2094,39 @@ protected:
         int souls = getBits(10);
         return QString::number(souls + 1);
     }
-    
+
     QString decodeVersionNumber()
     {
         int version = getBits(4);
         return QString::number(version);
     }
-    
+
     QString decodeRunway()
     {
         QString runwayDirection = decodeRunwayDirection();
         QString runwayConfiguration = decodeRunwayConfiguration();
         return runwayDirection + runwayConfiguration;
     }
-    
+
     QString decodeRunwayDirection()
     {
         int dir = getBits(6);
         return QString::number(dir);
     }
-    
+
     QString decodeRunwayConfiguration()
     {
         int cfg = getBits(2);
         QStringList cfgs = {"L", "R", "C", ""};
         return cfgs[cfg];
     }
-    
+
     QString decodeAirwayIntercept()
     {
         int size = getBits(3) + 1;
         return decodeIA5String(size);
     }
-    
+
     QString decodeRouteInformation()
     {
         int type = getBits(3);
@@ -2148,38 +2148,38 @@ protected:
             return QString("UNKOWN ROUTE INFORMATION TYPE %1").arg(type);
         }
     }
-    
+
     QString decodePlaceBearing()
     {
         bool flag = getBits(1);
         QString s = decodeFixName();
-        if (flag) { 
+        if (flag) {
             s.append(" " + decodeLatitudeLongitude());
         }
         s.append(" " + decodeDegrees());
         return s;
     }
-    
+
     QString decodePlaceBearingPlaceBearing()
     {
         QString placeBearing1 = decodePlaceBearing();
         QString placeBearing2 = decodePlaceBearing();
         return placeBearing1 + " " + placeBearing2;
     }
-    
+
     QString decodeAirwayIdentifier()
     {
         int size = getBits(3) + 1;
         return decodeIA5String(size);
     }
-        
+
     QString decodeTrackDetail()
     {
         int size = getBits(7) + 1;
         QString s;
         for (int i = 0; i < size; i++) {
             s.append(" " + decodeLatitudeLongitude());
-        }        
+        }
         return s;
     }
 
@@ -2188,7 +2188,7 @@ protected:
         int size = getBits(2) + 3;
         return decodeIA5String(size);
     }
-    
+
     QString decodeSupplementaryInformation()
     {
         return "";
@@ -2198,7 +2198,7 @@ protected:
     {
         return "";
     }
-    
+
 };
 
 #endif // INCLUDE_DO219_H

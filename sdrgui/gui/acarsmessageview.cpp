@@ -78,7 +78,7 @@ static const QHash<QString, QString>& builtInAcronyms()
         {"SDU", "Satellite Data Unit"},
         {"SID", "Standard Instrument Departure"},
         {"SMI", "Standard Message Identifier"},
-        {"STAR", "Standard Terminal Arrival Route"}, 
+        {"STAR", "Standard Terminal Arrival Route"},
         {"SITA", "Society Internationale de Telecommunications Aeronautiques"},
         {"TCAS", "Traffic Alert/Collision Avoidance System"},
         {"TEI", "Text Element Identifier"},
@@ -90,7 +90,7 @@ static const QHash<QString, QString>& builtInAcronyms()
         {"VFR", "Visual Flight Rules"},
         {"WILCO", "Will Comply"},
         {"WXRQ", "Weather Request"},
-        
+
         // METAR
         {"SKC", "No Cloud/Sky Clear"},
         {"NCD", "No Cloud Detected"},
@@ -113,7 +113,7 @@ static const QHash<QString, QString>& builtInAcronyms()
         {"KT", "Knots"},
         {"CAVOK", "Ceiling and Visibilty OK"},
         {"NR", "Not Reported"},
-        
+
         // TEI codes from ARINC 620 Append B
         {"AC", "Estimated time approach clearance"},
         {"AD", "Aerodrome of concern or arrival"},
@@ -179,8 +179,8 @@ static const QHash<QString, QString>& builtInAcronyms()
         {"WX", "Weather report"},
         {"WI", "Weather"},
         {"ZW", "Zero fuel weight"},
-        
-        // SMIs from ARINC 620 Table C-2        
+
+        // SMIs from ARINC 620 Table C-2
         {"HJK", "Hijack Situation Report"},
         {"AVR", "Voice Contact Request"},
         {"GVR", "Voice Go-ahead"},
@@ -248,11 +248,11 @@ static const QHash<QString, QString>& builtInAcronyms()
         {"APR", "LRU Configuration Report/Request"},
         {"MED", "Media Advisory"},
         {"TEB", "Turbulence Event Report"},
-        
+
         // HFDL
         {"GS", "Ground Station"},
 
-        // Loadsheet        
+        // Loadsheet
         {"DOW", "Dry Operating Weight"},
         {"ZFW", "Zero Fuel Weight"},
         {"ZFWT", "Zero Fuel Weight Total"},
@@ -283,7 +283,7 @@ AcarsMessageView::AcarsMessageView(QWidget *parent) :
 {
     setMouseTracking(true);
 }
-    
+
 bool AcarsMessageView::event(QEvent *event)
 {
     if (event->type() == QEvent::ToolTip)
@@ -346,4 +346,4 @@ QString AcarsMessageView::explanation(const QString& text) const
     }
 
     return QString();
-}        
+}

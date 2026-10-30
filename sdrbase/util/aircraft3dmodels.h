@@ -202,7 +202,7 @@ private:
     mutable QMutex m_modelInfoMutex;
     mutable bool m_modelInfoLoaded = false;
     mutable QHash<QString, ModelInfo> m_modelInfo;        // Model path to what its glTF says
-    mutable QHash<QString, QString> m_modelInfoStamp;     // Model path to the size/mtime it was read at    
+    mutable QHash<QString, QString> m_modelInfoStamp;     // Model path to the size/mtime it was read at
     mutable QHash<QString, qint64> m_modelInfoCheckedMs;  // When each model was last stat()ed.
     mutable QElapsedTimer m_modelInfoClock;
     static constexpr qint64 m_modelInfoRecheckMs = 30000;

@@ -30,7 +30,7 @@ ProfileDialog::ProfileDialog(QWidget* parent) :
     ui(new Ui::ProfileDialog)
 {
     ui->setupUi(this);
-    
+
     ui->table->setItemDelegate(new FastItemDelegate(ui->table));
 
     ui->table->setItemDelegateForColumn(COL_TOTAL, new NanoSecondsDelegate());

@@ -107,11 +107,11 @@ an ATC style; when unchecked just the callsign or registration is shown.
 
 <h3>6: Statistics</h3>
 
-The statistics table can be shown and hidden with the statistic button. 
+The statistics table can be shown and hidden with the statistic button.
 Right click the button to reset the records.
 
 Every figure is given twice, side by side: for this session and for all time, each with
-who set it and when. 
+who set it and when.
 
 * **Maximum range**, one row per protocol - the furthest aircraft heard on ADS-B, ACARS,
   VDL-2, HFDL and Aero. Per protocol rather than as one figure because the protocols are
@@ -195,7 +195,7 @@ Click to open the settings dialog.
   This allows aircraft to be kept forever, but only their
   recent flights - which hold the tracks, profiles and ACARS documents, so are most of the
   database. An aircraft's most recent flight is always kept. Zero keeps flights for as long
-  as their aircraft. 
+  as their aircraft.
 * ADS-B position for (mins) - how long an aircraft stays on the Map after its last ADS-B
   position
 * ACARS position for (mins) - the same for a position from ACARS, VDL-2, HFDL, Aero or Iridium.
@@ -210,7 +210,7 @@ Unticked ones are ignored.
 
 **Use airline callsigns in Map labels** - writes the flight on the Map the way it is
 spoken on the radio rather than the way it is transmitted: SPEEDBIRD 123 instead of
-BAW123, using the airline's radio callsign from the airline database. 
+BAW123, using the airline's radio callsign from the airline database.
 
 **Show the maximum range record on the Map** - keeps the aircraft that set the all time
 maximum range record permanently on the Map, drawn at the position it was in when it set
@@ -221,7 +221,7 @@ reset, or this is turned off.
 
 **Favour airline livery over aircraft type (3D map)** - when no 3D model exists of the
 right type in the right livery, prefer a similar aircraft in the correct livery over an
-exact type in the wrong one. 
+exact type in the wrong one.
 
 **Livery aircraft icons (2D map)** - display aircraft on the 2D map using icons showing
 their airline's livery, instead of black icons.

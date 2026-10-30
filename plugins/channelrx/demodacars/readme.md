@@ -8,10 +8,10 @@ These packets can contain flight plans and other operational data as well as sta
 ACARS uses MSK modulation at 2,400 baud, which is then AM modulated on to the VHF carrier.
 In Europe, the main ACARS frequencies are:
 
-  - 131.525 MHz (SITA - Europe secondary) 
+  - 131.525 MHz (SITA - Europe secondary)
   - 131.725 MHz (SITA - Europe primary)
   - 131.825 MHz (ARINC/Collins)
- 
+
 VDL Mode 2 uses D8PSK modulation at 10,500 baud (bit rate 31,500 bps). It can contain ACARS or ATN packets.
 VDL Mode 2 frequencies in Europe are:
 
@@ -24,7 +24,7 @@ VDL Mode 2 frequencies in Europe are:
   - 136.900 MHz
   - 136.975 MHz (SITA & ARINC, the common signalling channel)
 
-HFDL uses M-PSK at 1,800 baud and frequencies are between 2 and 21 MHz. The active frequencies vary with propagation, and the 
+HFDL uses M-PSK at 1,800 baud and frequencies are between 2 and 21 MHz. The active frequencies vary with propagation, and the
 frequencies in use are reported in squitters transmitted by the ground stations. These are combined by the demodulator and
 displayed in the Ground Station Table dialog. You can find an initial frequency to try on: https://hfdl.observer/
 
@@ -82,7 +82,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 <h3>4: Mode and Aero rate</h3>
 
 Selects the demodulator: ACARS, VDL-2, HFDL, Aero or Iridium - and, in Aero mode
-only, the rate and channel selector appears beside it. 
+only, the rate and channel selector appears beside it.
 
 Changing either resets the demodulator and sets a default RF bandwidth.
 Each demodulator runs at its own fixed channel sample rate, which the channelizer is
@@ -100,7 +100,7 @@ set to when the mode is selected.
 
 <h3>5: RF Bandwidth</h3>
 
-This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth. 
+This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth.
 A default value is automatically set when selecting the Mode, and in Aero mode the rate
 and channel, from the combo boxes (4):
 
@@ -227,7 +227,7 @@ parts have arrived - and the selected block.
 * Block Seq. - For multipart downlinks, the block sequence character used to order the blocks.
 * Flight - For downlinks, the six-character flight identifier carried in the message text header.
 * Message - The ACARS message payload after the standard downlink header fields and any recognized sublabel have been removed.
-* Message Decode - A structured, human-readable decode of the message payload. 
+* Message Decode - A structured, human-readable decode of the message payload.
   Selecting the row displays the full multi-line
   decode below the table.
 * ATC - Air Traffic Control communication extracted from supported ARINC 622/CPDLC messages.
@@ -246,7 +246,7 @@ have no ACARS header, so only the following columns are used:
 
 * Date/Time - The receiver's local date and time when the frame was received.
 * Dir - The transmission direction. An up arrow is an uplink to an aircraft; a down arrow is a downlink from an aircraft.
-* GS - Ground Station Id. 
+* GS - Ground Station Id.
 * GS Decode - Ground Station name.
 * Registration - The aircraft side of the link. VDL-2 link frames identify aircraft by their 24-bit ICAO address (the same address the aircraft transmits in Mode S / ADS-B) rather than by registration, so the registration is looked up from the OpenSky database (14); when the address is not in the database, the address itself is shown in hexadecimal. Frames between ground stations show `GS` followed by the ground station's address, and broadcasts show `All`.
 * Label - The AVLC frame type: `I` (information), `UI`, `XID` (link management, including GSIF ground station broadcasts), `TEST`, or the supervisory types `RR`, `RNR`, `REJ`, `SREJ`, `DM`, `DISC`, `UA`, `FRMR`.
@@ -260,7 +260,7 @@ have no ACARS header, so only the following columns are used:
 
 <h3>HFDL Frames</h3>
 
-HFDL frames that are not carrying an ACARS message use the same columns as the VDL-2 link frames. 
+HFDL frames that are not carrying an ACARS message use the same columns as the VDL-2 link frames.
 
 <h3>Aero Signal Units</h3>
 
@@ -271,7 +271,7 @@ units that are not carrying an ACARS message use only the following columns:
 * Dir - The transmission direction. An up arrow is a transmission from the ground earth
   station on a P channel; a down arrow is a transmission from an aircraft on an R or T
   channel.
-* GS - Ground Earth Station (GES) Id. 
+* GS - Ground Earth Station (GES) Id.
 * GS Decode - Satellite name, for example 'AOR-E'. See frequency table above.
 * Registration - The aircraft, when the signal unit names one. The AES ID is the
   aircraft's 24-bit ICAO address - the same address it transmits in Mode S / ADS-B.

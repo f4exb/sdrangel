@@ -1488,10 +1488,10 @@ void ADSBDemodTracker::handleADSB(
             }
         }
         else if (tc == 29)
-        {            
+        {
             if (aircraft->m_adsbVersionValid && (aircraft->m_adsbVersion == 0))
             {
-                // Trajectory Change Point - according to the spec this shouldn't be transmitted 
+                // Trajectory Change Point - according to the spec this shouldn't be transmitted
             }
             else if (aircraft->m_adsbVersionValid && (aircraft->m_adsbVersion == 1))
             {
@@ -1499,7 +1499,7 @@ void ADSBDemodTracker::handleADSB(
             }
             else if (aircraft->m_adsbVersionValid && (aircraft->m_adsbVersion == 2))
             {
-                // Target state and status                
+                // Target state and status
                 //bool selAltitudeType = (data[5] >> 7) & 0x1;
                 int selAltitudeFix = ((data[5] & 0x7f) << 4) | ((data[6] >> 4) & 0xf);
                 if (selAltitudeFix != 0)
@@ -3983,7 +3983,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodTracker::animate(QDateTime date
 
     const int gearDownHeight = 2000;            // Above the runway, as most operators fly it
     const int gearDownAirspeed = 180;           // Indicated, which is what a crew flies to
-    const int gearDownSpeed = 150;              // Groundspeed, the last resort    
+    const int gearDownSpeed = 150;              // Groundspeed, the last resort
     const int gearDownVerticalRate = -300;      // A settled descent.
     const int gearUpAltitude = 200;
     const int gearUpVerticalRate = 1000;

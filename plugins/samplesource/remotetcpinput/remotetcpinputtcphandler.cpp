@@ -270,23 +270,23 @@ void RemoteTCPInputTCPHandler::cleanup(bool threadStopped)
     {
         if (m_webSocket)
         {
-            if (threadStopped) {   
-                delete m_webSocket; 
-            } else { 
-                m_webSocket->deleteLater(); 
+            if (threadStopped) {
+                delete m_webSocket;
+            } else {
+                m_webSocket->deleteLater();
             }
             m_webSocket = nullptr;
         }
         if (m_tcpSocket)
         {
-            if (threadStopped) { 
-                delete m_tcpSocket; 
-            } else { 
-                m_tcpSocket->deleteLater(); 
+            if (threadStopped) {
+                delete m_tcpSocket;
+            } else {
+                m_tcpSocket->deleteLater();
             }
             m_tcpSocket = nullptr;
         }
-    }   
+    }
 
     m_compressedData.clear();
     m_uncompressedData.clear();
@@ -919,7 +919,7 @@ FLAC__StreamDecoderWriteStatus RemoteTCPInputTCPHandler::flacWrite(const FLAC__S
     int nbSamples = frame->header.blocksize;
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) 
+        if (m_converterBuffer)
         {
             delete[] m_converterBuffer;
             m_converterBuffer = nullptr;
@@ -1049,7 +1049,7 @@ void RemoteTCPInputTCPHandler::processDecompressedZlibData(const char *inBuf, in
     // Ensure conversion buffer is large enough - FIXME: Don't use this buffer - just write in to FIFO
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) 
+        if (m_converterBuffer)
         {
             delete[] m_converterBuffer;
             m_converterBuffer = nullptr;
@@ -2323,7 +2323,7 @@ void RemoteTCPInputTCPHandler::processUncompressedData(const char *inBuf, int nb
     // Ensure conversion buffer is large enough
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) 
+        if (m_converterBuffer)
         {
             delete[] m_converterBuffer;
             m_converterBuffer = nullptr;

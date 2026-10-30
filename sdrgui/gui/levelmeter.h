@@ -96,7 +96,7 @@ protected slots:
     void redrawTimerExpired();
 
 protected:
-    /** Repaint only if the meter would actually look different. */    
+    /** Repaint only if the meter would actually look different. */
     void requestUpdate();
 
     /** Position of a level in pixels, as the renders below compute it */

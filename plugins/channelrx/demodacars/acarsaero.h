@@ -44,7 +44,7 @@
 #include "acarshfdl.h"
 
 // Inmarsat Classic Aero (aviation SATCOM) receiver, ICAO Annex 10 Volume III and
-// ARINC 741. 
+// ARINC 741.
 //
 // Aero is the L band satellite protocol for ACARS, the complement to HFDL for oceanic
 // aircraft. Three data rates are in scope:
