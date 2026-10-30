@@ -80,6 +80,9 @@ AircraftTracker::AircraftTracker(Feature *feature) :
     qRegisterMetaType<QList<quint64>>("QList<quint64>");
     qRegisterMetaType<QList<qint64>>("QList<qint64>");
     qRegisterMetaType<QList<float>>("QList<float>");
+    // Qt 6 registers the types of signal arguments itself; Qt 5 drops a queued signal
+    // whose argument type was never registered, which left the statistics table empty
+    qRegisterMetaType<AircraftStatistics>("AircraftStatistics");
 
     for (int i = 0; i < CHART_COUNTS; i++) {
         m_chartCounts[i] = 0;
