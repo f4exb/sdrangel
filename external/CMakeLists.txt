@@ -1075,7 +1075,7 @@ if(ENABLE_CHANNELRX_DEMODACARS AND (NOT LIBACARS_FOUND))
     if (LINUX)
         set(LIBACARS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     elseif (APPLE)
-        set(LIBACARS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/libacars/src/libacars-build/libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(LIBACARS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/libacars/src/libacars-build/libacars/libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(libacars
         GIT_REPOSITORY https://github.com/szpajder/libacars
@@ -1092,9 +1092,9 @@ if(ENABLE_CHANNELRX_DEMODACARS AND (NOT LIBACARS_FOUND))
     set(LIBACARS_EXTERNAL ON CACHE INTERNAL "")
     set(LIBACARS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libacars/src/libacars" CACHE INTERNAL "")
     if (APPLE)
-        install(DIRECTORY "${binary_dir}" DESTINATION "${INSTALL_LIB_DIR}"
-                FILES_MATCHING PATTERN "libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
+        install(DIRECTORY "${binary_dir}/libacars" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libacars-2*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libacars")
     endif ()
 endif()
 # For DRM demodulator AAC/xHE-AAC audio
