@@ -252,7 +252,7 @@ modules:
   - name: faad2
     sources:
       - type: archive
-        url: https://sourceforge.net/projects/faac/files/faad2-src/faad2-2.8.0/faad2-2.8.8.tar.gz
+        url: https://ftp2.osuosl.org/pub/blfs/conglomeration/faad2/faad2-2.8.8.tar.gz
         sha256: 985c3fadb9789d2815e50f4ff714511c79c2710ac27a4aaaf5c0c2662141426d
 
   - name: fdk-aac
