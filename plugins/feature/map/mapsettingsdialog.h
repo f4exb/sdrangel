@@ -22,6 +22,7 @@
 #define INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 
 #include <QComboBox>
+#include <QPushButton>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QMessageBox>
@@ -34,6 +35,7 @@
 
 #include "gui/httpdownloadmanagergui.h"
 #include "gui/tablecolorchooser.h"
+#include "util/asset3dmanifest.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
 #include "util/waypoints.h"
@@ -66,8 +68,14 @@ class MapSettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit MapSettingsDialog(MapSettings *settings, QWidget* parent = 0);
+    // The asset list comes from the Map GUI, which fetches the manifest once a session.
+    // Empty falls back to the list built in to Asset3DManifest, which has no versions
+    explicit MapSettingsDialog(MapSettings *settings, const QList<Asset3D>& assets = QList<Asset3D>(), QWidget* parent = 0);
     ~MapSettingsDialog();
+
+    // Download everything the manifest says is out of date. For the prompt that offers
+    // an update and then opens this dialog, so the user doesn't have to find the button
+    void startAssetUpdate();
 
     enum Columns {
         COL_ENABLED,
@@ -98,6 +106,11 @@ private:
     MapSettings *m_settings;
     QList<MapItemSettingsGUI *> m_mapItemSettingsGUIs;
     HttpDownloadManagerGUI m_dlm;
+    // Every asset the 3D map can download, with the versions the manifest gives
+    QList<Asset3D> m_assets;
+    // What the download in progress is working through, and how far it has got. The
+    // buttons download different sets, so the list is whichever one was started
+    QList<Asset3D> m_downloadAssets;
     int m_fileIdx;
     QMessageBox m_downloadDialog;
     QProgressDialog *m_progressDialog;
@@ -109,6 +122,11 @@ private:
     std::shared_ptr<std::atomic_bool> m_msfsCancelRequested;
 
     void unzip(const QString &filename);
+    void startDownloads(const QString& text, const QList<Asset3D>& assets);
+    void downloadGroup(const QString& group, const QString& text);
+    void downloadsFinished();
+    void updateDownloadButtons();
+    void updateDownloadButton(QPushButton *button, const QString& group, const QString& label);
     QString msaaToString(int msaa) const;
     int stringToMSAA(const QString& string) const;
     void updateCesiumIonItems();
@@ -124,6 +142,7 @@ private slots:
     void on_cesiumIonAPIKey_textChanged(const QString& text);
     void on_googlePhotorealistic3DTiles_toggled(bool checked);
     void on_downloadModels_clicked();
+    void on_downloadSounds_clicked();
     void on_msfsNavigraphBrowse_clicked();
     void on_msfsBrowse_clicked();
     void on_convertMSFS_clicked();

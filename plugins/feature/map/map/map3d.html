@@ -4923,16 +4923,23 @@
             setNDTraffic(traffic);
         }
 
-        // The DCDU pops up when a datalink message arrives for the selected aircraft,
-        // so unlike the PFD and ND it is watched for all the time
+        // The DCDU pops up when a datalink message arrives for the selected aircraft, or
+        // the one being followed, whichever was chosen last - following is what Find does,
+        // which is how the Aircraft feature brings up an aircraft a message has arrived
+        // for. Unlike the PFD and ND it is watched for all the time
         var dcduEntity;
         const dcduLastSeenIds = new Map(); // Entity id -> last dcduMessage id seen
+        const dcduRecentMs = 60 * 1000;
 
-        function updateDCDU() {
-            const entity = viewer.selectedEntity;
+        function setDCDUEntity(entity) {
             if (Cesium.defined(entity) && Cesium.defined(entity.properties) && ((entity.properties.hasProperty("pfdAltitude") || entity.properties.hasProperty("pfdOnSurface")))) {
                 dcduEntity = entity;
             }
+        }
+        viewer.selectedEntityChanged.addEventListener(setDCDUEntity);
+        viewer.trackedEntityChanged.addEventListener(setDCDUEntity);
+
+        function updateDCDU() {
             if (!Cesium.defined(dcduEntity) || !dcduEntity.properties.hasProperty("dcduMessage")) {
                 return;
             }
@@ -4947,9 +4954,16 @@
                 return;
             }
             if (!dcduLastSeenIds.has(dcduEntity.id)) {
-                // First sight of this aircraft: note its current message silently, so
-                // selecting an aircraft does not pop up a historical message
+                // First sight of this aircraft: an old message is noted silently, so
+                // selecting an aircraft does not pop up a historical one. One that has only
+                // just arrived is shown, as it would have been had the aircraft been chosen
+                // a moment sooner - which is what happens when the Map is asked to find the
+                // aircraft because of the message, and the two can arrive in either order
                 dcduLastSeenIds.set(dcduEntity.id, message.id);
+                const received = (message.rx !== undefined) ? Date.parse(message.rx) : NaN;
+                if (!isNaN(received) && ((Date.now() - received) < dcduRecentMs)) {
+                    showDCDUMessage(message, true);
+                }
                 return;
             }
             if (message.id !== dcduLastSeenIds.get(dcduEntity.id)) {

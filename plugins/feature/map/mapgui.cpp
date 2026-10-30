@@ -36,6 +36,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSet>
+#include <QPushButton>
+#include <QMessageBox>
 
 #ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
@@ -441,8 +443,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
     m_antennaMapItem.setModel(new QString("antenna.glb"));
     m_antennaMapItem.setFixedPosition(false);
-    m_antennaMapItem.setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
-    m_antennaMapItem.setAvailableUntil(new QString(QDateTime::currentDateTime().addDays(365).toString(Qt::ISODateWithMs)));
+    m_antennaMapItem.setPositionDateTime(new QString(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)));
+    m_antennaMapItem.setAvailableUntil(new QString(QDateTime::currentDateTimeUtc().addDays(365).toString(Qt::ISODateWithMs)));
     m_antennaMapItem.setOrientation(0);
     m_antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
     m_antennaMapItem.setLabelAltitudeOffset(4.5);
@@ -515,6 +517,12 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->map->installEventFilter(this);
 
     makeUIConnections();
+
+    // Delayed, so that a prompt about new assets doesn't land in the middle of SDRangel
+    // starting up, when this feature is restored from a saved configuration
+    connect(&m_asset3DManifest, &Asset3DManifest::dataUpdated, this, &MapGUI::asset3DAssetsUpdated);
+    QTimer::singleShot(5000, this, [this]() { m_asset3DManifest.getData(); });
+
     new DialogPositioner(&m_beaconDialog, true);
     new DialogPositioner(&m_ibpBeaconDialog, true);
     new DialogPositioner(&m_radioTimeDialog, true);
@@ -1156,8 +1164,8 @@ void MapGUI::giroDataUpdated(const GIRO::GIROStationData& data)
         ionosondeStationMapItem.setLabel(new QString(station->m_label));
         ionosondeStationMapItem.setLabelAltitudeOffset(4.5);
         ionosondeStationMapItem.setAltitudeReference(1);
-        ionosondeStationMapItem.setAvailableFrom(new QString(data.m_dateTime.toString(Qt::ISODateWithMs)));
-        ionosondeStationMapItem.setAvailableUntil(new QString(data.m_dateTime.addDays(3).toString(Qt::ISODateWithMs))); // Remove after data is too old
+        ionosondeStationMapItem.setAvailableFrom(new QString(data.m_dateTime.toUTC().toString(Qt::ISODateWithMs)));
+        ionosondeStationMapItem.setAvailableUntil(new QString(data.m_dateTime.toUTC().addDays(3).toString(Qt::ISODateWithMs))); // Remove after data is too old
         update(m_map, &ionosondeStationMapItem, "Ionosonde Stations");
     }
 }
@@ -3339,6 +3347,93 @@ void MapGUI::on_displayAurora_clicked(bool checked)
     applySetting("displayAurora");
 }
 
+void MapGUI::asset3DAssetsUpdated(const QList<Asset3D>& assets)
+{
+    (void) assets;
+
+#ifdef QT_WEBENGINE_FOUND
+    // Only the 3D map uses them, and only it can be told to reload after a download
+    if (m_settings.m_map3DEnabled) {
+        checkAsset3DUpdates();
+    }
+#endif
+}
+
+// Mention a new version of an asset once, and only to users who already have that asset:
+// an empty model directory is a choice, and the buttons in Map Settings are there for
+// anyone who changes their mind. What has been mentioned is recorded with the assets, so
+// deleting the model directory starts again
+void MapGUI::checkAsset3DUpdates()
+{
+    Asset3DInstalled installed(m_settings.m_modelDir);
+    QList<Asset3D> outOfDate;
+
+    for (const auto& asset : installed.stale(m_asset3DManifest.assets()))
+    {
+        if (!installed.isInstalled(asset)) {
+            continue;
+        }
+        if (installed.notifiedVersion(asset.m_name) == asset.m_version) {
+            continue;
+        }
+        outOfDate.append(asset);
+    }
+
+    if (outOfDate.isEmpty()) {
+        return;
+    }
+
+    QStringList details;
+    // Nothing in the archives themselves says which version they are, so an asset that
+    // was installed before versions were recorded could already be the current one.
+    // Worth offering, but not worth claiming
+    bool anyUnknown = false;
+
+    for (const auto& asset : outOfDate)
+    {
+        details.append(asset.m_notes.isEmpty()
+            ? QString("- %1 (%2)").arg(asset.m_description).arg(asset.m_version)
+            : QString("- %1 (%2): %3").arg(asset.m_description).arg(asset.m_version).arg(asset.m_notes));
+
+        if (installed.version(asset.m_name).isEmpty()) {
+            anyUnknown = true;
+        }
+    }
+
+    const QString size = Asset3DManifest::sizeString(outOfDate);
+    QString text = anyUnknown
+        ? QString("Your 3D map assets may be out of date: they were installed before SDRangel kept "
+                  "a record of asset versions. The versions currently available are:\n\n%1").arg(details.join("\n"))
+        : QString("Newer 3D map assets are available:\n\n%1").arg(details.join("\n"));
+
+    if (!size.isEmpty()) {
+        text += QString("\n\nThe download is %1.").arg(size);
+    }
+
+    QMessageBox box(QMessageBox::Information, "3D map assets", text, QMessageBox::NoButton, this);
+    QPushButton *download = box.addButton("Download", QMessageBox::AcceptRole);
+    box.addButton("Later", QMessageBox::RejectRole);
+    QPushButton *skip = box.addButton("Skip This Version", QMessageBox::DestructiveRole);
+    box.setDefaultButton(download);
+    new DialogPositioner(&box, true);
+    box.exec();
+
+    // Later says nothing, so it is offered again next time. Only Skip is remembered -
+    // and Download doesn't need to be, as a download that works makes it current, and
+    // one that fails is worth mentioning again
+    if (box.clickedButton() == skip)
+    {
+        for (const auto& asset : outOfDate) {
+            installed.setNotifiedVersion(asset.m_name, asset.m_version);
+        }
+        installed.save();
+    }
+    else if (box.clickedButton() == download)
+    {
+        showDisplaySettings(true);
+    }
+}
+
 void MapGUI::on_displayMagDec_clicked(bool checked)
 {
     if (this->sender() != ui->displayMagDec) {
@@ -3518,10 +3613,16 @@ QString MapGUI::cesiumIonAPIKey() const
 // The settings themselves are left untouched, so a preference saved in a preset
 // comes back as soon as a key is entered.
 
-// Chromium's frame rate limiter is disabled, as under QtWebEngine it is stuck at 60fps
-// whatever the display does (see main.cpp), so the map has to limit itself. A setting of
-// 0 means use the refresh rate of the display the map is on, which the page cannot
-// determine for itself
+// The page renders from its own timer, so the map has to limit itself. A setting of 0
+// means use the refresh rate of the display the map is on, which the page cannot
+// determine for itself.
+// Under QtWebEngine, Chromium's frame rate limiter puts at most 60 frames a second on
+// screen whatever the display does (see main.cpp). Rendering faster than that only
+// throws frames away: measured on a 119 Hz display, the page rendered 119 fps and 59
+// distinct frames a second reached the screen, unevenly, with an older frame shown
+// again ~12 times a minute. Capped at 60 the same 59 reached the screen, evenly, with
+// none shown again. So the display rate only applies when the limiter has been lifted
+// with --disable-frame-rate-limit in QTWEBENGINE_CHROMIUM_FLAGS
 int MapGUI::effectiveFrameRate() const
 {
     if (m_settings.m_frameRate > 0) {
@@ -3529,8 +3630,10 @@ int MapGUI::effectiveFrameRate() const
     }
 
     const QScreen *mapScreen = screen();
+    const int refreshRate = mapScreen && (mapScreen->refreshRate() > 0.0) ? qRound(mapScreen->refreshRate()) : 60;
+    static const bool frameRateLimited = !qgetenv("QTWEBENGINE_CHROMIUM_FLAGS").contains("disable-frame-rate-limit");
 
-    return mapScreen && (mapScreen->refreshRate() > 0.0) ? qRound(mapScreen->refreshRate()) : 60;
+    return frameRateLimited ? qMin(refreshRate, 60) : refreshRate;
 }
 
 QString MapGUI::effectiveImagery() const
@@ -3691,12 +3794,22 @@ void MapGUI::on_deleteAll_clicked()
 
 void MapGUI::on_displaySettings_clicked()
 {
-    MapSettingsDialog dialog(&m_settings);
+    showDisplaySettings(false);
+}
+
+void MapGUI::showDisplaySettings(bool startAssetUpdate)
+{
+    MapSettingsDialog dialog(&m_settings, m_asset3DManifest.assets());
     connect(&dialog, &MapSettingsDialog::navAidsUpdated, this, &MapGUI::navAidsUpdated);
     connect(&dialog, &MapSettingsDialog::airspacesUpdated, this, &MapGUI::airspacesUpdated);
     connect(&dialog, &MapSettingsDialog::airportsUpdated, this, &MapGUI::airportsUpdated);
     connect(&dialog, &MapSettingsDialog::waypointsUpdated, this, &MapGUI::waypointsUpdated);
     new DialogPositioner(&dialog, true);
+    if (startAssetUpdate)
+    {
+        // Once the dialog is up, so its progress box has something to sit on
+        QTimer::singleShot(0, &dialog, &MapSettingsDialog::startAssetUpdate);
+    }
     if (dialog.exec() == QDialog::Accepted)
     {
         if (dialog.m_osmURLChanged) {
@@ -4142,7 +4255,7 @@ void MapGUI::preferenceChanged(int elementType)
             m_antennaMapItem.setLongitude(stationLongitude);
             m_antennaMapItem.setAltitude(stationAltitude);
             delete m_antennaMapItem.getPositionDateTime();
-            m_antennaMapItem.setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+            m_antennaMapItem.setPositionDateTime(new QString(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)));
             update(m_map, &m_antennaMapItem, "Station");
 
             m_objectMapModel.setStationPosition(stationPosition);

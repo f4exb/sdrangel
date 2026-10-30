@@ -50,6 +50,7 @@
 #include "util/nasaglobalimagery.h"
 #include "util/kiwisdrlist.h"
 #include "util/spyserverlist.h"
+#include "util/asset3dmanifest.h"
 #include "util/sdrangelserverlist.h"
 #include "settings/rollupstate.h"
 #include "availablechannelorfeaturehandler.h"
@@ -298,6 +299,9 @@ private:
     KiwiSDRList m_kiwiSDRList;
     SpyServerList m_spyServerList;
     SDRangelServerList m_sdrangelServerList;
+    // The versions of the downloadable 3D models, textures and sounds, fetched once a
+    // session so that a new release can be offered to users who have an old one
+    Asset3DManifest m_asset3DManifest;
 
     CesiumInterface *m_cesium;
     //!< How many times the 3D map's renderer has died without lasting long enough in
@@ -460,6 +464,7 @@ private slots:
     void on_save_clicked();
     void on_deleteAll_clicked();
     void on_displaySettings_clicked();
+    void asset3DAssetsUpdated(const QList<Asset3D>& assets);
     void on_mapTypes_currentIndexChanged(int index);
     void on_beacons_clicked();
     void on_ibpBeacons_clicked();
@@ -498,6 +503,8 @@ private slots:
     void spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs);
     void sdrangelServerUpdated(const QList<SDRangelServerList::SDRangelServer>& sdrs);
     void linkClicked(const QString& url);
+    void showDisplaySettings(bool startAssetUpdate);
+    void checkAsset3DUpdates();
 };
 
 #endif // INCLUDE_FEATURE_MAPGUI_H_

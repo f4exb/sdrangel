@@ -89,7 +89,6 @@ if(NOT SERVER_MODE)
         czml.cpp
         map.qrc
         mapicons.qrc
-        mapaudio.qrc
         cesium.qrc
         mapdata.qrc
     )

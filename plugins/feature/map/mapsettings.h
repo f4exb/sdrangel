@@ -150,7 +150,7 @@ struct MapSettings
     bool m_hdr;
     bool m_fog;
     bool m_fps;
-    int m_frameRate;            //!< Frame rate to render the 3D map at,
+    int m_frameRate;            //!< Frame rate to render the 3D map at, or 0 for the display's refresh rate
 
     bool m_displayMUF;          // Plot MUF contours
     bool m_displayfoF2;         // Plot foF2 contours

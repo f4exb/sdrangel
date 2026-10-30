@@ -29,6 +29,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
+#include <QCoreApplication>
 
 #include "SWGMapItem.h"
 #include "SWGMapCoordinate.h"
@@ -42,6 +43,7 @@
 #include "util/airlines.h"
 #include "util/sidstar.h"
 #include "channel/channelwebapiutils.h"
+#include "feature/featurewebapiutils.h"
 #include "util/aircraft3dmodels.h"
 #include "util/aircraftenginesound.h"
 #include "util/selcaldb.h"
@@ -5799,6 +5801,21 @@ void AircraftTracker::recordDcduMessage(TrackedAircraft *item, const AircraftRep
     item->m_dcduMessage = message;
 
     sendToMap(item);
+
+    // The DCDU only shows the messages of the aircraft the 3D map has selected or is
+    // following, so to watch them arrive the Map is asked to find each aircraft one is
+    // for. The order the find and the message reach the map in doesn't matter: the DCDU
+    // shows a message that is still recent when it first looks at an aircraft. The name
+    // is only set while the aircraft is on the Map, which is the only time it can be found.
+    // Through the main thread, which is where the GUI's own Find calls this from
+    if (m_settings.m_findDatalinkAircraft && !item->m_mapName.isEmpty()
+        && m_settings.datalinkFinds(message.m_text))
+    {
+        const QString name = item->m_mapName;
+        QMetaObject::invokeMethod(QCoreApplication::instance(), [name]() {
+            FeatureWebAPIUtils::mapFind(name);
+        }, Qt::QueuedConnection);
+    }
 }
 
 // Build the datalink message attached to the aircraft's own map item, which the 3D

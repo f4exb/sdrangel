@@ -1262,7 +1262,9 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             // they expect to reach it, and the Mach and level they want to cross at.
             // No route is filed from it: this is a request, and the fixes either side
             // of the entry point are not in it.
-            (void) rcl;
+            // The oceanic centre it is sent to is the station, which the DCDU names
+            // ("1130Z TO EGGX"), as it does in the other two
+            report.m_station = rcl->m_atcCenter;
             report.m_documentKind = AircraftReport::ClearanceRequest;
             report.m_documentTitle = "Oceanic clearance request";
         }
@@ -1373,6 +1375,7 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             route = QStringList({ocr->m_entryPoint, ocr->m_route}).join(" ").trimmed();
             report.m_routeFlightLevel = ocr->m_flightLevel;
             report.m_routeMach = ocr->m_mach;
+            report.m_station = ocr->m_atcCenter;
             report.m_documentKind = AircraftReport::Clearance;
             report.m_documentTitle = "Oceanic clearance readback";
         }
@@ -1382,6 +1385,7 @@ void AcarsDemodWorker::processAcarsMessage(QByteArray messageBytes, QDateTime re
             route = QStringList({oc->m_entryPoint, oc->m_route}).join(" ").trimmed();
             report.m_routeFlightLevel = oc->m_flightLevel;
             report.m_routeMach = oc->m_mach;
+            report.m_station = oc->m_atcCenter;
             report.m_documentKind = AircraftReport::Clearance;
             report.m_documentTitle = "Oceanic clearance";
         }

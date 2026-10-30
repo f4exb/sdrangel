@@ -87,12 +87,13 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     table->setCellWidget(row, MapSettingsDialog::COL_SMOOTHING_LAMBDA, m_smoothingLambda);
 }
 
-MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
+MapSettingsDialog::MapSettingsDialog(MapSettings *settings, const QList<Asset3D>& assets, QWidget* parent) :
     QDialog(parent),
     m_map2DSettingsChanged(false),
     m_map3DSettingsChanged(false),
     m_osmURLChanged(false),
     m_settings(settings),
+    m_assets(assets.isEmpty() ? Asset3DManifest::builtInAssets() : assets),
     m_fileIdx(0),
     m_downloadDialog(this),
     m_progressDialog(nullptr),
@@ -243,9 +244,12 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     connect(&m_sidStar, &SidStar::downloadError, this, &MapSettingsDialog::downloadError);
     connect(&m_sidStar, &SidStar::downloadSidStarFinished, this, &MapSettingsDialog::downloadSidStarFinished);
 
+    updateDownloadButtons();
+
 #ifndef QT_WEBENGINE_FOUND
     ui->map3DSettings->setVisible(false);
     ui->downloadModels->setVisible(false);
+    ui->downloadSounds->setVisible(false);
     ui->mapItemSettings->hideColumn(COL_3D_MODEL);
     ui->mapItemSettings->hideColumn(COL_3D_MIN_PIXELS);
     ui->mapItemSettings->hideColumn(COL_3D_LABEL);
@@ -636,40 +640,6 @@ void MapSettingsDialog::updateComboItems(QComboBox *combo, const QStringList& io
     }
 }
 
-// Models have individual licensing. See LICENSE on github
-#define SDRANGEL_3D_MODELS "https://github.com/srcejon/sdrangel-3d-models/releases/latest/download/sdrangel3dmodels.zip"
-// Textures from Bluebell CSL - https://github.com/oktal3700/bluebell
-// These are Copyrighted by their authors and shouldn't be uploaded to any other sites
-#define BB_AIRBUS_PNG   "https://drive.google.com/uc?export=download&id=10fFhflgWXCu7hmd8wqNdXw1qHJ6ecz9Z"
-#define BB_BOEING_PNG   "https://drive.google.com/uc?export=download&id=1OA3pmAp5jqrjP7kRS1z_zNNyi_iLu9z_"
-#define BB_GA_PNG       "https://drive.google.com/uc?export=download&id=1TZsvlLqT5x3KLkiqtN8LzAzoLxeYTA-1"
-#define BB_HELI_PNG     "https://drive.google.com/uc?export=download&id=1qB2xDVHdooLeLKCPyVnVDDHRlhPVpUYs"
-#define BB_JETS_PNG     "https://drive.google.com/uc?export=download&id=1v1fzTpyjjfcXyoT7vHjnyvuwqrSQzPrg"
-#define BB_MIL_PNG      "https://drive.google.com/uc?export=download&id=1lI-2bAVVxhKvel7_suGVdkky4BQDQE9n"
-#define BB_PROPS_PNG    "https://drive.google.com/uc?export=download&id=1fD8YxKsa9P_z2gL1aM97ZEN-HoI28SLE"
-
-static QStringList urls = {
-    SDRANGEL_3D_MODELS,
-    BB_AIRBUS_PNG,
-    BB_BOEING_PNG,
-    BB_GA_PNG,
-    BB_HELI_PNG,
-    BB_JETS_PNG,
-    BB_MIL_PNG,
-    BB_PROPS_PNG
-};
-
-static QStringList files = {
-    "sdrangel3dmodels.zip",
-    "bb_airbus_png.zip",
-    "bb_boeing_png.zip",
-    "bb_ga_png.zip",
-    "bb_heli_png.zip",
-    "bb_jets_png.zip",
-    "bb_mil_png.zip",
-    "bb_props_png.zip"
-};
-
 void MapSettingsDialog::unzip(const QString &filename)
 {
     QZipReader reader(filename);
@@ -854,33 +824,174 @@ void MapSettingsDialog::msfsConversionFinished(
     }
 }
 
-void MapSettingsDialog::on_downloadModels_clicked()
+// Download a set of archives one after another, each unzipped into the model directory
+// as it arrives. downloadComplete works through the list from here, so only one set can
+// be in progress at a time - hence the buttons being disabled while it runs
+void MapSettingsDialog::startDownloads(const QString& text, const QList<Asset3D>& assets)
 {
-    m_downloadDialog.setText("Downloading 3D models");
+    if (assets.isEmpty()) {
+        return;
+    }
+    m_downloadAssets = assets;
+    m_fileIdx = 0;
+
+    ui->downloadModels->setEnabled(false);
+    ui->downloadSounds->setEnabled(false);
+
+    m_downloadDialog.setText(text);
     m_downloadDialog.setStandardButtons(QMessageBox::NoButton);
     Qt::WindowFlags flags = m_downloadDialog.windowFlags();
     flags |= Qt::CustomizeWindowHint;
     flags &= ~Qt::WindowCloseButtonHint;
     m_downloadDialog.setWindowFlags(flags);
     m_downloadDialog.open();
-    m_fileIdx = 0;
 
-    QUrl url(urls[m_fileIdx]);
-    QString filename = HttpDownloadManager::downloadDir() + "/" + files[m_fileIdx];
+    QUrl url(m_downloadAssets.at(m_fileIdx).m_url);
+    QString filename = HttpDownloadManager::downloadDir() + "/" + m_downloadAssets.at(m_fileIdx).m_file;
 
     m_dlm.download(url, filename, this);
+}
+
+// Fetch what is out of date, or - when there is nothing to update - everything, which is
+// also how someone who has deleted the directory gets it back
+void MapSettingsDialog::downloadGroup(const QString& group, const QString& text)
+{
+    const Asset3DInstalled installed(m_settings->m_modelDir);
+    const QList<Asset3D> all = Asset3DManifest::group(m_assets, group);
+    const QList<Asset3D> stale = installed.stale(all);
+
+    if (all.isEmpty()) {
+        return;
+    }
+
+    if (stale.isEmpty())
+    {
+        bool allInstalled = true;
+
+        for (const auto& asset : all)
+        {
+            if (!installed.isInstalled(asset))
+            {
+                allInstalled = false;
+                break;
+            }
+        }
+
+        // Up to date and all there, so the press can only mean download it again - and
+        // these are big enough that it shouldn't happen on a mis-click
+        if (allInstalled)
+        {
+            const QString size = Asset3DManifest::sizeString(all);
+            const QString question = QString("The %1 are up to date. Download them again%2?")
+                .arg(text)
+                .arg(size.isEmpty() ? QString() : QString(" (%1)").arg(size));
+
+            if (QMessageBox::question(this, QString("Download %1").arg(text), question) != QMessageBox::Yes) {
+                return;
+            }
+        }
+
+        startDownloads(QString("Downloading %1").arg(text), all);
+    }
+    else
+    {
+        startDownloads(QString("Downloading %1").arg(text), stale);
+    }
+}
+
+void MapSettingsDialog::on_downloadModels_clicked()
+{
+    downloadGroup("models", "3D models");
+}
+
+// The 3D map plays nothing without these, as they are not installed with SDRangel
+void MapSettingsDialog::on_downloadSounds_clicked()
+{
+    downloadGroup("sounds", "sounds");
+}
+
+// Whatever is out of date, models and sounds together, as the update prompt offers it
+void MapSettingsDialog::startAssetUpdate()
+{
+    const Asset3DInstalled installed(m_settings->m_modelDir);
+
+    startDownloads("Updating 3D map assets", installed.stale(m_assets));
+}
+
+// The buttons say what pressing them will do, and how much it will cost. The archives
+// change size with each release, so the sizes come from the manifest rather than the .ui
+void MapSettingsDialog::updateDownloadButtons()
+{
+    updateDownloadButton(ui->downloadModels, "models", "3D Models");
+    updateDownloadButton(ui->downloadSounds, "sounds", "Sounds");
+}
+
+void MapSettingsDialog::updateDownloadButton(QPushButton *button, const QString& group, const QString& label)
+{
+    const Asset3DInstalled installed(m_settings->m_modelDir);
+    const QList<Asset3D> all = Asset3DManifest::group(m_assets, group);
+    const QList<Asset3D> stale = installed.stale(all);
+    // An update only if what is out of date is actually on disk. Otherwise it has never
+    // been downloaded, whatever the manifest says about it
+    bool update = false;
+
+    for (const auto& asset : stale)
+    {
+        if (installed.isInstalled(asset))
+        {
+            update = true;
+            break;
+        }
+    }
+
+    const QList<Asset3D>& toDownload = stale.isEmpty() ? all : stale;
+    const QString size = Asset3DManifest::sizeString(toDownload);
+    QString text = QString("%1 %2").arg(update ? "Update" : "Download").arg(label);
+
+    if (!size.isEmpty()) {
+        text += QString(" (%1)").arg(size);
+    }
+    button->setText(text);
+
+    // The tooltip from the .ui is what the button does in general; what a new version
+    // brings goes after it
+    if (!button->property("baseToolTip").isValid()) {
+        button->setProperty("baseToolTip", button->toolTip());
+    }
+
+    QString toolTip = button->property("baseToolTip").toString();
+    QStringList notes;
+
+    for (const auto& asset : stale)
+    {
+        if (!asset.m_notes.isEmpty()) {
+            notes.append(QString("%1: %2").arg(asset.m_description).arg(asset.m_notes));
+        }
+    }
+    if (!notes.isEmpty()) {
+        toolTip += QString("\n\n") + notes.join(QString("\n"));
+    }
+    button->setToolTip(toolTip);
 }
 
 void MapSettingsDialog::downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage)
 {
     if (success)
     {
+        const bool haveAsset = (m_fileIdx >= 0) && (m_fileIdx < m_downloadAssets.size());
+        const Asset3D asset = haveAsset ? m_downloadAssets.at(m_fileIdx) : Asset3D();
+
         // Unzip
         if (filename.endsWith(".zip"))
         {
+            // Before extracting, so that a path this version drops isn't deleted again
+            // straight after being written. Only the paths the manifest names go, so
+            // models the user has added themselves are left alone
+            Asset3DInstalled::applyRemoves(m_settings->m_modelDir, asset);
+
             unzip(filename);
 
-            if (filename.endsWith("bb_boeing_png.zip"))
+            if (asset.m_name == "bb_boeing")
             {
                 // Copy missing textures
                 // These are wrong, but prevents cesium from stopping rendering
@@ -903,26 +1014,46 @@ void MapSettingsDialog::downloadComplete(const QString &filename, bool success, 
             }
         }
 
+        // Recorded as each asset lands, rather than at the end, so that an interrupted
+        // set doesn't leave the rest of the group looking up to date
+        if (haveAsset)
+        {
+            Asset3DInstalled installed(m_settings->m_modelDir);
+
+            installed.setVersion(asset.m_name, asset.m_version);
+            installed.save();
+        }
+
         m_fileIdx++;
 
         // Download next file
-        if (m_fileIdx < urls.size())
+        if (m_fileIdx < m_downloadAssets.size())
         {
-            QUrl url(urls[m_fileIdx]);
-            QString filename = HttpDownloadManager::downloadDir() + "/" + files[m_fileIdx];
+            QUrl url(m_downloadAssets.at(m_fileIdx).m_url);
+            QString filename = HttpDownloadManager::downloadDir() + "/" + m_downloadAssets.at(m_fileIdx).m_file;
 
             m_dlm.download(url, filename, this);
         }
         else
         {
-            m_downloadDialog.reject();
+            downloadsFinished();
         }
     }
     else
     {
-        m_downloadDialog.reject();
+        downloadsFinished();
         MessageDialog::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
     }
+}
+
+// However it ended, the progress dialog goes and the buttons come back - saying what
+// is left to do, as some of the set may have been installed before it stopped
+void MapSettingsDialog::downloadsFinished()
+{
+    m_downloadDialog.reject();
+    ui->downloadModels->setEnabled(true);
+    ui->downloadSounds->setEnabled(true);
+    updateDownloadButtons();
 }
 
 void MapSettingsDialog::on_getAirportDB_clicked()

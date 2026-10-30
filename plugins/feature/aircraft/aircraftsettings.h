@@ -80,6 +80,13 @@ struct AircraftSettings
     // aircraft can be kept for ever without every flight they ever made going with them
     int m_flightRetentionDays;
     bool m_atcLabels;       // Display route, altitude and speed in Map labels
+    bool m_findDatalinkAircraft;    // Find an aircraft on the Map when a datalink message arrives for it
+    // CPDLC message elements that don't find their aircraft: a message made up only of
+    // these is still sent to the Map, but isn't worth turning the view for
+    QStringList m_datalinkNoFindElements;
+    static const QStringList m_datalinkNoFindChoices;   // What the right click dialog offers
+    static const QStringList m_datalinkNoFindDefaults;  // Which of those are checked to start with
+    bool datalinkFinds(const QString& text) const;
     bool m_atcCallsigns;    // Map labels use the airline's callsign (SPEEDBIRD) not its code (BAW)
     // Keep the furthest aircraft ever heard on the Map, at the position it was in when
     // it set the record. Serialised at key 44.

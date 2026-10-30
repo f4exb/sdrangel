@@ -322,7 +322,7 @@ void MapSettings::resetToDefaults()
     m_hdr = true;
     m_fog = true;
     m_fps = false;
-    m_frameRate = 0;
+    m_frameRate = 60;
     m_displayMUF = false;
     m_displayfoF2 = false;
     m_displayRain = false;
@@ -567,7 +567,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(55, &m_hdr, true);
         d.readBool(56, &m_fog, true);
         d.readBool(57, &m_fps, false);
-        d.readS32(85, &m_frameRate, 0);
+        d.readS32(85, &m_frameRate, 60);
         d.readBool(58, &m_fxaa, false);
         d.readS32(59, &m_msaa, 1);
         d.readFloat(60, &m_mapCenterLatitude, 0.0f);

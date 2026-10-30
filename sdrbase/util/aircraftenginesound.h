@@ -33,7 +33,8 @@ class AircraftEngineSound
 public:
     // Returns a directory below the Map's 3d/Sounds directory. Its engine.json
     // describes the N1/N2 OGG layers, volume and pitch curves, and spatial cones.
-    // Propeller aircraft and helicopters retain their single bundled recording.
+    // Propeller aircraft and helicopters keep their single recording, which is in
+    // the Sounds/aircraft directory beside the sound sets.
     // The model is the database's model designation (e.g. "A320 232"), which for
     // Airbus can identify the engine variant.
     static QString engineSound(const QString& type, const QString& emitterCategory = QString(),

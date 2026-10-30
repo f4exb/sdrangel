@@ -238,6 +238,20 @@ identity above).
 It is the same database the ADS-B and ACARS demodulators download, so it only
 needs downloading from one of them.
 
+<h3>12: Find datalink aircraft</h3>
+
+When checked, each time a datalink ATC message (CPDLC, pre-departure clearance or oceanic
+clearance) arrives for an aircraft that is on the Map, the aircraft is found on the Map, as
+if Find had been chosen for it. The 3D map follows the aircraft, and its DCDU pops up with
+the message. This is a way of watching datalink traffic as it happens, but with a lot of
+traffic the view will jump from aircraft to aircraft.
+
+Right click to choose messages that are sent to the Map without finding their aircraft:
+WILCO, ROGER, LOGICAL ACKNOWLEDGEMENT and CURRENT DATA AUTHORITY. All but ROGER are checked
+by default. A
+message made up only of checked messages still appears on the DCDU of an aircraft that is
+already selected or followed, but doesn't turn the view to its own aircraft.
+
 <h3>Aircraft</h3>
 
 * **Aircraft** - every airframe currently being heard, one row each.

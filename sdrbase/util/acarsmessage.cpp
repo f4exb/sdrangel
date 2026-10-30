@@ -22,6 +22,7 @@
 #include <mutex>
 
 #include <QDebug>
+#include <QTimeZone>
 #include <QRegularExpression>
 
 #include "util/do219.h"
@@ -86,6 +87,10 @@ static QString icaoAndAirportName(const QString &icao)
         return QString("%1 (%2)").arg(icao).arg(airportName);
     }
 }
+
+// Defined with the position report formats, and used by message types before them
+static QString positionString(float latitude, float longitude);
+static float arincCoordinate(const QString& hemisphere, const QString& degrees, const QString& minuteTenths);
 
 AcarsMessage::AcarsMessage(const QByteArray &message)
 {
@@ -182,6 +187,15 @@ AcarsMessage::AcarsMessage(const QByteArray &message)
             {
                 m_subLabel = m_text.mid(3, 2);
                 m_text = m_text.mid(5);
+                // Most uplinks to an FMS put the body on a line of its own - "- #MD\r\n
+                // FPN/RI:..." - and that line break belongs to the prefix, not the body.
+                // Left on, nothing recognised the body: off air, 158 of the 197 flight plan
+                // uplinks heard whole but never decoded were written this way, and not
+                // one of the 159 that were decoded. Every block of a multi block uplink
+                // repeats the prefix, so it comes off each block before reassembly
+                if (m_text.startsWith("\r\n")) {
+                    m_text = m_text.mid(2);
+                }
             }
         }
     }
@@ -396,6 +410,12 @@ AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &lab
     // "173442,19231,2010, 23200,N 51.892,..." - see decodeCompanyPosition()
     static const QRegularExpression poxOrCompanyPosition(
         R"RX(^\d{6},\s*\d+,\d{4},[- \d]+,[NS][ \d.]+,[EW][ \d.]+,)RX");
+    // "OFF012011DIA02EGLLLFMN2142BAP8110326136725R" - see AcarsOffReport::decode()
+    static const QRegularExpression label12Off(R"RX(^OFF01\d{4}DIA\d{2}[A-Z]{8})RX");
+    // "01CLERAIC118/302042EGBBVIAR" and the rest of its family - see decodeCruiseReport()
+    static const QRegularExpression cruiseReport(R"RX(01[A-Z]{4}\s*\S+?\s*/\d{6}[A-Z]{8})RX");
+    // "N 51.590,W  0.259, 8012, 07.6,259.4" - see decodeOperatorPosition()
+    static const QRegularExpression bareLabel18Position(R"RX(^[NS][ \d.]+,[EW][ \d.]+,\s*\d+,)RX");
     if (text.contains("LOADSHEET")) {
         acarsMessage = new AcarsLoadsheet(message);
     } else if (AcarsDepartureClearanceResponse::isPlainLanguage(text)) {
@@ -403,6 +423,9 @@ AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &lab
         // least five labels - RA, C1, 21, 4P and 3T were all seen in one week of real
         // traffic - and under none of the two the coded dialects use.
         acarsMessage = new AcarsDepartureClearanceResponse(message);
+    } else if ((label == "12") && label12Off.match(text).hasMatch()) {
+        // Label 12 is otherwise a position report label - see AcarsOffReport::decode()
+        acarsMessage = new AcarsOffReport(message);
     } else if (label == "H2") {
         acarsMessage = new AcarsMeteorologicalReport(message);
     } else if (label == "SA") {
@@ -420,11 +443,16 @@ AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &lab
                // formats simply falls through to being shown as it came.
                || (label == "11") || (label == "21") || (label == "36") || (label == "45")
                || (label == "8H") || (label == "4N") || (label == "32")
-               || (label == "83") || (label == "30")) {
+               || (label == "83") || (label == "30")
+               // And the operator formats in decodeOperatorPosition() and the label 23
+               // form of label 24's report. 20 and 4A carry other traffic as well.
+               || (label == "23") || (label == "31") || (label == "58") || (label == "2F")
+               || (label == "38") || (label == "4T") || (label == "1P") || (label == "33")
+               || (label == "2P") || (label == "3P") || (label == "20") || (label == "4A")) {
         acarsMessage = new AcarsPositionReport(message);
     } else if (label == "80") {
         acarsMessage = new AcarsOpsReport(message);
-    } else if (((label == "17") || (label == "49")) && text.contains("01CLER")) {
+    } else if (((label == "17") || (label == "49")) && cruiseReport.match(text).hasMatch()) {
         // The cruise report, which names both airports - see decodeCruiseReport(). Label
         // 49 is not otherwise decoded at all, and 17's other traffic is handled below.
         acarsMessage = new AcarsPositionReport(message);
@@ -432,7 +460,7 @@ AcarsMessage *AcarsMessage::decode(const QByteArray &message, const QString &lab
         // Label 17 carries a company position report as well as event reports, and is
         // chosen on the text for the same reason label 18 is just below
         acarsMessage = new AcarsPositionReport(message);
-    } else if ((label == "18") && text.startsWith("POX,")) {
+    } else if ((label == "18") && (text.startsWith("POX,") || bareLabel18Position.match(text).hasMatch())) {
         // Label 18 carries an airline position report as well as event reports, so it is
         // chosen on the text - as labels 15 and 16 already are. Filed as an event it was
         // titled "OOOI" in the documents while carrying no OOOI time at all, and its
@@ -1148,6 +1176,18 @@ bool AcarsATSFacilitiesNotification::decode(const QString &text)
 
         int offset = match.capturedStart(0) + match.captured(0).length() + 1; // Skip matched string and /
         m_mti = text.mid(offset, 3);
+
+        // The contact (FPO) gives the aircraft's position, in ARINC 702A degrees and
+        // minutes. 649 off air, 1.5 km from the airframe's ADS-B at the median.
+        //   /EGTT.AFN/FMHBAW119,.G-ZBJD,406891,135632/FPON51225W000018,1/FCOATC,01/...
+        static const QRegularExpression positionRe(R"(/FPO([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3}))");
+        const QRegularExpressionMatch position = positionRe.match(text);
+        if (position.hasMatch())
+        {
+            m_latitude = arincCoordinate(position.captured(1), position.captured(2), position.captured(3));
+            m_longitude = arincCoordinate(position.captured(4), position.captured(5), position.captured(6));
+            m_positionValid = true;
+        }
         return true;
     }
     else
@@ -1180,7 +1220,21 @@ QString AcarsATSFacilitiesNotification::toString()
         };
         s.append(QString("<br><b>MTI:</b> %1 (%2)").arg(m_mti).arg(mtis[m_mti]));
     }
+    if (m_positionValid) {
+        s.append(QString("<br><b>Position:</b> %1").arg(positionString(m_latitude, m_longitude)));
+    }
     return s;
+}
+
+bool AcarsATSFacilitiesNotification::getPosition(float& latitude, float& longitude, int& altitudeFt) const
+{
+    if (!m_positionValid) {
+        return false;
+    }
+    latitude = m_latitude;
+    longitude = m_longitude;
+    altitudeFt = -1;
+    return true;
 }
 
 AcarsRequestOceanicClearance::AcarsRequestOceanicClearance(const QByteArray &message) :
@@ -1195,6 +1249,13 @@ bool AcarsRequestOceanicClearance::decode(const QString &text)
     QRegularExpressionMatch match = re.match(text.simplified());
     if (match.hasMatch())
     {
+        // Who it is to is the ARINC 620 ground address in front of the message type:
+        // "/EGGX.OC1/RCL ..." goes to Shanwick
+        static const QRegularExpression address(R"(^\s*\/(\w+)\.\w+\/)");
+        const QRegularExpressionMatch addressMatch = address.match(text);
+        if (addressMatch.hasMatch()) {
+            m_atcCenter = addressMatch.captured(1);
+        }
         m_avionicsIndicator = match.captured(1);
         m_aircraft = match.captured(2);
         m_entryPoint = match.captured(3);
@@ -1215,7 +1276,11 @@ bool AcarsRequestOceanicClearance::decode(const QString &text)
 
 QString AcarsRequestOceanicClearance::toString()
 {
-    QString s = QString("<b>Avionics rows:</b> %1<br><b>Aircraft:</b> %2<br><b>Entry point:</b> %3<br><b>Time:</b> %4<br><b>Mach:</b> %5<br><b>Flight level:</b> %6")
+    QString s;
+    if (!m_atcCenter.isEmpty()) {
+        s.append(QString("<b>ATC center:</b> %1<br>").arg(m_atcCenter));
+    }
+    s += QString("<b>Avionics rows:</b> %1<br><b>Aircraft:</b> %2<br><b>Entry point:</b> %3<br><b>Time:</b> %4<br><b>Mach:</b> %5<br><b>Flight level:</b> %6")
                     .arg(m_avionicsIndicator)
                     .arg(m_aircraft)
                     .arg(m_entryPoint)
@@ -1547,6 +1612,22 @@ bool AcarsFlightStatus::decode(const QString &text)
     QRegularExpressionMatch match = re.match(text);
     if (!match.hasMatch())
     {
+        // Sent on the ground, before there is a position to give, the position and most
+        // of the fixed width fields are blanks:
+        //   FST01EGLLENGM 00             5  67         17              21401948
+        // 1647 of these over two months, and nothing was taken from any of them. The
+        // airports are worth having, and the message time closes it as usual - it was
+        // within five minutes of when it was heard in all 300 checked. The four digits
+        // before it are left alone: on the ground they are not an ETA.
+        static const QRegularExpression groundRe(R"(^FST01([A-Z]{4})([A-Z]{4})\s.*\d{4}(\d\d)(\d\d)\s*$)");
+        const QRegularExpressionMatch ground = groundRe.match(text);
+        if (ground.hasMatch())
+        {
+            m_departureAirport = ground.captured(1);
+            m_arrivalAirport = ground.captured(2);
+            m_time = QTime(ground.captured(3).toInt(), ground.captured(4).toInt());
+            return true;
+        }
         qDebug() << "AcarsFlightStatus: Failed to match " << text;
         return false;
     }
@@ -1686,11 +1767,14 @@ QString AcarsFlightStatus::toString()
     QStringList lines;
     lines.append(QString("<b>Departure:</b> %1").arg(icaoAndAirportName(m_departureAirport)));
     lines.append(QString("<b>Arrival:</b> %1").arg(icaoAndAirportName(m_arrivalAirport)));
-    lines.append(QString("<b>Position:</b> %1%2 %3%4")
-                    .arg(std::abs(m_latitude), 0, 'f', 4)
-                    .arg(m_latitude < 0.0f ? "S" : "N")
-                    .arg(std::abs(m_longitude), 0, 'f', 4)
-                    .arg(m_longitude < 0.0f ? "W" : "E"));
+    if (m_positionValid)
+    {
+        lines.append(QString("<b>Position:</b> %1%2 %3%4")
+                        .arg(std::abs(m_latitude), 0, 'f', 4)
+                        .arg(m_latitude < 0.0f ? "S" : "N")
+                        .arg(std::abs(m_longitude), 0, 'f', 4)
+                        .arg(m_longitude < 0.0f ? "W" : "E"));
+    }
     if (m_altitudeFt >= 0) {
         lines.append(QString("<b>Altitude:</b> %1 ft").arg(m_altitudeFt));
     }
@@ -1780,20 +1864,67 @@ static bool decodeDegreesMinutes(const QString& field, bool isLongitude, float& 
     return true;
 }
 
-// "N 51.410" or "-83.764" - decimal degrees, with the hemisphere either as a letter in
-// front or as the sign
-static bool decodeDecimalDegrees(const QString& field, float& out)
+// A number as many operators write it: blank padded, with a blank standing for a zero
+// and the sign allowed to stand apart from the digits. "  .848" is 0.848, ". 73" is
+// 0.073, "-   .55" is -0.55 and "+ 51.66" is 51.66 - see decodeCompanyPosition() for
+// why a blank is a zero and not something missing.
+//
+// Near the Greenwich meridian it is the whole of the longitude's integer part that comes
+// out as blanks, so every format that did not allow for this decoded nothing within a
+// degree of it - which, off air in the south of England, is most of what is heard. Over
+// two months of stored traffic that was 1155 label 36 reports and 751 on label 83.
+static bool decodeBlankPadded(const QString& field, float& out)
 {
-    static const QRegularExpression re(R"(^([NSEW])?\s*(-?\d+(?:\.\d+)?)$)");
-    const QRegularExpressionMatch match = re.match(field.trimmed());
-    if (!match.hasMatch()) {
+    QString s = field.trimmed();
+    bool negative = false;
+    if (s.startsWith('-') || s.startsWith('+'))
+    {
+        negative = s.startsWith('-');
+        s = s.mid(1).trimmed();
+    }
+    s.replace(' ', '0');
+    static const QRegularExpression re(R"(^(?:\d+\.?\d*|\.\d+)$)");
+    if (!re.match(s).hasMatch()) {
         return false;
     }
-    out = match.captured(2).toFloat();
-    if ((match.captured(1) == "S") || (match.captured(1) == "W")) {
+    out = s.toFloat();
+    if (negative) {
         out = -out;
     }
     return true;
+}
+
+// "N 51.410", "-83.764" or "E   .848" - decimal degrees, with the hemisphere either as a
+// letter in front or as the sign, and blank padded as decodeBlankPadded() describes
+static bool decodeDecimalDegrees(const QString& field, float& out)
+{
+    QString t = field.trimmed();
+    QChar hemisphere;
+    if (!t.isEmpty() && QString("NSEW").contains(t[0]))
+    {
+        hemisphere = t[0];
+        t = t.mid(1);
+    }
+    if (!decodeBlankPadded(t, out)) {
+        return false;
+    }
+    if ((hemisphere == 'S') || (hemisphere == 'W')) {
+        out = -out;
+    }
+    return true;
+}
+
+// The ARINC 702A coordinate, N51377 or W000497: degrees, then minutes to a tenth with no
+// point - two digits of degrees for latitude and three for longitude. So N51377 is
+// N51 37.7, 51.628 degrees, and NOT 51.377, which is how the H1 position report and the
+// label 80 reports both read it. Checked against ADS-B for the same airframes within
+// two minutes: read as thousandths, 400 H1 reports were 27.8 km out at the median and
+// always to the same side; read as minutes, 6.0 km, the distance flown in the time the
+// report takes to arrive.
+static float arincCoordinate(const QString& hemisphere, const QString& degrees, const QString& minuteTenths)
+{
+    const float value = degrees.toFloat() + minuteTenths.toFloat() / 600.0f;
+    return ((hemisphere == "S") || (hemisphere == "W")) ? -value : value;
 }
 
 // "28AUG26" - the month as the usual three letter abbreviation, 0 when it is not one
@@ -1963,26 +2094,49 @@ bool AcarsPositionReport::decodeAirlinePosition(const QString &text)
 // give the airports and the runways as well.
 bool AcarsPositionReport::decodeInRangePosition(const QString &text)
 {
-    const QStringList lines = text.split(QRegularExpression("[\r\n]+"), Qt::SkipEmptyParts);
+    // Trimmed, and blank lines dropped: label 36 sends this with a line holding a single
+    // space in front, which made that space the "first line" and matched nothing
+    const QStringList lines = text.trimmed().split(QRegularExpression(R"(\s*[\r\n]+\s*)"), Qt::SkipEmptyParts);
 
     // ---- Three lines: date and tail, then position and altitude, then fuel
     //      28AUG26,141148,EI-DVG
     //      N 49.041,W  4.957,36022
     //      ------,  401250
+    //
+    //      Label 12 has the same middle line between a header naming both airports and
+    //      a last line with the arrival runway and the flight:
+    //      EBBR,EGCC,03SEP26,2020,205012
+    //      N 51.726,E   . 10,34015
+    //      EGCC23R,SN2183
+    //      The figure after the date is not the time - that is the field after it - nor
+    //      an ETA, being earlier than the time, and is left alone.
     if (lines.size() >= 2)
     {
         static const QRegularExpression dateRe(R"(^(\d{2})([A-Z]{3})(\d{2}),(\d{6}),(\S+)$)");
-        const QRegularExpressionMatch head = dateRe.match(lines[0].trimmed());
+        static const QRegularExpression routeRe(R"(^([A-Z]{4}),([A-Z]{4}),(\d{2})([A-Z]{3})(\d{2}),\d{4},(\d{6})$)");
+        const QRegularExpressionMatch head = dateRe.match(lines[0]);
+        const QRegularExpressionMatch route = routeRe.match(lines[0]);
         const QStringList second = lines[1].split(',');
         float latitude = 0.0f, longitude = 0.0f;
-        if (head.hasMatch() && (second.size() >= 3)
+        if ((head.hasMatch() || route.hasMatch()) && (second.size() >= 3)
             && decodeDecimalDegrees(second[0], latitude)
             && decodeDecimalDegrees(second[1], longitude))
         {
-            m_day = head.captured(1).toInt();
-            m_month = monthFromName(head.captured(2));
-            m_time = decodeHms(head.captured(4));
-            m_tail = head.captured(5);
+            if (head.hasMatch())
+            {
+                m_day = head.captured(1).toInt();
+                m_month = monthFromName(head.captured(2));
+                m_time = decodeHms(head.captured(4));
+                m_tail = head.captured(5);
+            }
+            else
+            {
+                m_departureAirport = route.captured(1);
+                m_arrivalAirport = route.captured(2);
+                m_day = route.captured(3).toInt();
+                m_month = monthFromName(route.captured(4));
+                m_time = decodeHms(route.captured(6));
+            }
             m_latitude = latitude;
             m_longitude = longitude;
             m_positionValid = true;
@@ -1991,7 +2145,17 @@ bool AcarsPositionReport::decodeInRangePosition(const QString &text)
             if (lines.size() >= 3)
             {
                 const QStringList third = lines[2].split(',');
-                if ((third.size() >= 2) && !third[1].contains('-')) {
+                static const QRegularExpression runwayRe(R"(^[A-Z]{4}(\d{2}[LRC]?)$)");
+                const QRegularExpressionMatch runway = runwayRe.match(third[0].trimmed());
+                if (route.hasMatch() && runway.hasMatch())
+                {
+                    m_arrivalRunway = runway.captured(1);
+                    if (third.size() >= 2) {
+                        m_reportFlight = third[1].trimmed();
+                    }
+                }
+                else if ((third.size() >= 2) && !third[1].contains('-'))
+                {
                     m_fuelOnBoard = third[1].trimmed();
                 }
             }
@@ -2149,32 +2313,39 @@ bool AcarsPositionReport::decodeWaypointPosition(const QString &text)
 // own OOOI message, and this report at 10:10 has it at 5231 feet, three minutes into the
 // climb. The two figures after the altitude are left alone - around 250 to 300 and -28 to
 // +22, so heading and an ISA deviation would fit, but nothing in the samples says so.
+//
+// CLER is one of a family that share the layout - ERDC, DCAP, ICCL and TOIC as well, on
+// label 4A too - which read nothing until the code was allowed to vary. 1881 of them over
+// two months; the altitude was within 1500 ft of the airframe's ADS-B in 147 of 150. What
+// the codes stand for is not established, so they are shown as sent.
+//   01DCAP    THY9PG/031956LTFMEGLL
+//   + 3086178.8+ 20.0
 bool AcarsPositionReport::decodeCruiseReport(const QString &text)
 {
     static const QRegularExpression re(
-        R"RX(01CLER\s*(\S+?)\s*/(\d{2})(\d{2})(\d{2})([A-Z]{4})([A-Z]{4})\s*[\r\n]+\s*(?:([+-])([ \d]{5})|(\d{4,5})[ ]))RX");
+        R"RX(01([A-Z]{4})\s*(\S+?)\s*/(\d{2})(\d{2})(\d{2})([A-Z]{4})([A-Z]{4})\s*[\r\n]+\s*(?:([+-])([ \d]{5})|(\d{4,5})[ ]))RX");
     const QRegularExpressionMatch match = re.match(text);
     if (!match.hasMatch()) {
         return false;
     }
 
-    m_reportFlight = match.captured(1);
-    m_day = match.captured(2).toInt();
-    m_time = QTime(match.captured(3).toInt(), match.captured(4).toInt());
-    m_departureAirport = match.captured(5);
-    m_arrivalAirport = match.captured(6);
+    m_reportFlight = match.captured(2);
+    m_day = match.captured(3).toInt();
+    m_time = QTime(match.captured(4).toInt(), match.captured(5).toInt());
+    m_departureAirport = match.captured(6);
+    m_arrivalAirport = match.captured(7);
 
     // The packed form pads with blanks where a leading zero would be
-    if (!match.captured(8).isEmpty())
+    if (!match.captured(9).isEmpty())
     {
-        const int feet = QString(match.captured(8)).replace(' ', '0').toInt();
-        m_altitudeFt = (match.captured(7) == "-") ? -feet : feet;
+        const int feet = QString(match.captured(9)).replace(' ', '0').toInt();
+        m_altitudeFt = (match.captured(8) == "-") ? -feet : feet;
     }
     else
     {
-        m_altitudeFt = match.captured(9).toInt();
+        m_altitudeFt = match.captured(10).toInt();
     }
-    m_reportType = "CRZ";
+    m_reportType = (match.captured(1) == "CLER") ? QString("CRZ") : match.captured(1);
 
     return true;
 }
@@ -2367,20 +2538,26 @@ bool AcarsPositionReport::decodeLabel83Position(const QString &text)
         return true;
     }
 
+    // Blank padded as well: within a degree of the meridian the longitude is "-   .55",
+    // with nothing at all before the point, and the 751 reports of that kind here had all
+    // gone undecoded
     static const QRegularExpression routedRe(
-        R"(^([A-Z]{4}),([A-Z]{4}),(\d{2})(\d{2})(\d{2}),\s*(-?\s*\d+\.\d+),\s*(-?\s*\d+\.\d+),\s*(\d+),\s*(\d+),)");
+        R"(^([A-Z]{4}),([A-Z]{4}),(\d{2})(\d{2})(\d{2}),([-+]?[ \d]*\.[ \d]+),([-+]?[ \d]*\.[ \d]+),\s*(\d+),\s*(\d+),)");
     const QRegularExpressionMatch routed = routedRe.match(text);
-    if (routed.hasMatch())
+    float latitude = 0.0f, longitude = 0.0f;
+    if (routed.hasMatch()
+        && decodeBlankPadded(routed.captured(6), latitude)
+        && decodeBlankPadded(routed.captured(7), longitude))
     {
         m_departureAirport = routed.captured(1);
         m_arrivalAirport = routed.captured(2);
         m_day = routed.captured(3).toInt();
         m_time = QTime(routed.captured(4).toInt(), routed.captured(5).toInt());
-        // "- 71.07" - the minus sign is separated from the digits, so the spaces have to
-        // go before the conversion, which would otherwise read it as +71.07 and put the
-        // aircraft on the wrong side of the Greenwich meridian
-        m_latitude = QString(routed.captured(6)).remove(' ').toFloat();
-        m_longitude = QString(routed.captured(7)).remove(' ').toFloat();
+        // "- 71.07" - the minus sign is separated from the digits, which no ordinary
+        // conversion accepts, and read as +71.07 it put the aircraft on the wrong side of
+        // the Greenwich meridian
+        m_latitude = latitude;
+        m_longitude = longitude;
         m_positionValid = true;
         m_altitudeFt = routed.captured(8).toInt();
         m_trackDeg = routed.captured(9).toInt();
@@ -2524,9 +2701,542 @@ bool AcarsPositionReport::decodeRoutedPosition(const QString &text)
     return true;
 }
 
+// Position reports in operator formats on labels this decoder read nothing from before.
+// Each is one of the formats seen most often in two months of stored traffic (September
+// and October 2026), and each was checked against the same airframe's ADS-B track within
+// two minutes of the report being heard. The distance given with each is the median
+// between the two, most of which is how far the aircraft flies while the report is on its
+// way; "altitude agrees" counts reports within 1500 ft of ADS-B. Times were checked the
+// same way, against when the message was heard. Fields that nothing in the samples
+// identifies are left alone, because a mislabelled number is worse than an absent one.
+bool AcarsPositionReport::decodeOperatorPosition(const QString &text)
+{
+    auto place = [this](float latitude, float longitude, int altitudeFt)
+    {
+        m_latitude = latitude;
+        m_longitude = longitude;
+        m_altitudeFt = altitudeFt;
+        m_positionValid = true;
+        m_reportType = "POS";
+    };
+    float latitude = 0.0f, longitude = 0.0f;
+
+    // ---- Label 31: the position, then the altitude, a figure, the destination and the
+    //      date as day and month. 1024 messages, 4.3 km, altitude agrees in 130 of 150.
+    //      The aircraft are climbing out of Heathrow towards the named airport.
+    //        N 51.304,W   0.881
+    //        10454, 103,KMCO,0409
+    // ---- Labels 18 and 1P: the position and the altitude on one line, label 1P with
+    //      the time in front. 31 and 95 messages, 7.1 and 2.8 km, altitude agrees in 17
+    //      of 21 and in all 94.
+    //        N 51.590,W  0.259, 8012, 07.6,259.4
+    //        032442,N 50.584,W   .605,38994,246,490.250,0430,11.0T,MS59,264,063,
+    // ---- Label 30: nothing but a position. 191 messages, 1.6 km.
+    //        N 51.483,W   0.152
+    {
+        static const QRegularExpression re31(
+            R"(^([NS][ \d.]+),([EW][ \d.]+)\s*[\r\n]+\s*(\d+),\s*\d+,([A-Z]{4}),(\d{2})(\d{2}))");
+        static const QRegularExpression re18(R"(^(?:(\d{6}),)?([NS][ \d.]+),([EW][ \d.]+),\s*(\d+),)");
+        static const QRegularExpression re30(R"(^([NS][ \d.]+),([EW][ \d.]+)\s*$)");
+        const QRegularExpressionMatch m31 = re31.match(text);
+        const QRegularExpressionMatch m18 = re18.match(text);
+        const QRegularExpressionMatch m30 = re30.match(text);
+        if ((m_label == "31") && m31.hasMatch()
+            && decodeDecimalDegrees(m31.captured(1), latitude) && decodeDecimalDegrees(m31.captured(2), longitude))
+        {
+            place(latitude, longitude, m31.captured(3).toInt());
+            m_arrivalAirport = m31.captured(4);
+            m_day = m31.captured(5).toInt();
+            m_month = m31.captured(6).toInt();
+            return true;
+        }
+        if (((m_label == "18") || (m_label == "1P")) && m18.hasMatch()
+            && ((m_label == "1P") == !m18.captured(1).isEmpty())
+            && decodeDecimalDegrees(m18.captured(2), latitude) && decodeDecimalDegrees(m18.captured(3), longitude))
+        {
+            place(latitude, longitude, m18.captured(4).toInt());
+            if (!m18.captured(1).isEmpty()) {
+                m_time = decodeHms(m18.captured(1));
+            }
+            return true;
+        }
+        if ((m_label == "30") && m30.hasMatch()
+            && decodeDecimalDegrees(m30.captured(1), latitude) && decodeDecimalDegrees(m30.captured(2), longitude))
+        {
+            place(latitude, longitude, -1);
+            return true;
+        }
+    }
+
+    // ---- Label 58: flight, day, time, position, altitude in feet, and a flag.
+    //      939 messages, 3.6 km, altitude agrees in 142 of 150, time within five minutes
+    //      of being heard in all 300 checked.
+    //        LS02VM/06/004942/N51.350/E0.620/37988/N/
+    if (m_label == "58")
+    {
+        static const QRegularExpression re(R"(^(\w+)/(\d{2})/(\d{6})/([NS]\d+\.\d+)/([EW]\d+\.\d+)/(\d+)/)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch()
+            && decodeDecimalDegrees(match.captured(4), latitude) && decodeDecimalDegrees(match.captured(5), longitude))
+        {
+            place(latitude, longitude, match.captured(6).toInt());
+            m_reportFlight = match.captured(1);
+            m_day = match.captured(2).toInt();
+            m_time = decodeHms(match.captured(3));
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 38: flight, date, then the LONGITUDE before the latitude, both blank
+    //      padded, then the altitude in feet. 295 messages, 2.4 km, altitude agrees in
+    //      131 of 150.
+    //        /AY1340/191026/W   . 33/N 51.778/9643/-------/      /-  4/14195/ 34/
+    if (m_label == "38")
+    {
+        static const QRegularExpression re(R"(^/(\w+)/(\d{2})(\d{2})\d{2}/([EW][ \d.]+)/([NS][ \d.]+)/(\d+)/)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch()
+            && decodeDecimalDegrees(match.captured(5), latitude) && decodeDecimalDegrees(match.captured(4), longitude))
+        {
+            place(latitude, longitude, match.captured(6).toInt());
+            m_reportFlight = match.captured(1);
+            m_day = match.captured(2).toInt();
+            m_month = match.captured(3).toInt();
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 16, two more forms beside the company report decodeCompanyPosition()
+    //      reads. A slash separated one: position, altitude in feet, the date as day and
+    //      month, the time, and two figures not identified. 468 messages, 2.6 km,
+    //      altitude agrees in 127 of 150, the time in 296 of 300.
+    //        /N 51.391/E  1.171/20329/0409/0631/09215/0933/
+    //      And Gulf Air's, with both airports in the header. The position is ARINC 702A
+    //      degrees and minutes (1.8 km; read as thousandths, 29.8 km). 394 messages,
+    //      altitude agrees in 141 of 150.
+    //        POS02    AIC111/22230959VIDPEGLL
+    //        N51487E002092,29461,095924,-105,-127,19,370,1021,-1425,250,0.660,-47,9.4
+    //      And a third whose coordinates ARE thousandths of a degree - N51693 is 51.693,
+    //      which no reading as minutes allows - with the longitude blank padded: 539
+    //      messages, 5.5 km (as minutes, 42.3 km), the flight level agreeing in nearly all.
+    //      The fix passed and the time over it, then the flight level and the next fix.
+    //        POSA1N51693W   615,SOPIT  ,131424,89 ,BNN    ,132345,,-4, 26, 393,397
+    if (m_label == "16")
+    {
+        static const QRegularExpression slashRe(R"(^/([NS][ \d.]+)/([EW][ \d.]+)/(\d+)/(\d{2})(\d{2})/(\d{4})/)");
+        const QRegularExpressionMatch slash = slashRe.match(text.trimmed());
+        if (slash.hasMatch()
+            && decodeDecimalDegrees(slash.captured(1), latitude) && decodeDecimalDegrees(slash.captured(2), longitude))
+        {
+            place(latitude, longitude, slash.captured(3).toInt());
+            m_day = slash.captured(4).toInt();
+            m_month = slash.captured(5).toInt();
+            m_time = decodeHms(slash.captured(6));
+            return true;
+        }
+        static const QRegularExpression pos02Re(
+            R"(^POS02\s+(\S+)/\d{4}\d{4}([A-Z]{4})([A-Z]{4})\s*[\r\n]+\s*([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3}),(\d+),(\d{6}),)");
+        const QRegularExpressionMatch pos02 = pos02Re.match(text);
+        if (pos02.hasMatch())
+        {
+            place(arincCoordinate(pos02.captured(4), pos02.captured(5), pos02.captured(6)),
+                  arincCoordinate(pos02.captured(7), pos02.captured(8), pos02.captured(9)),
+                  pos02.captured(10).toInt());
+            m_reportFlight = pos02.captured(1);
+            m_departureAirport = pos02.captured(2);
+            m_arrivalAirport = pos02.captured(3);
+            m_time = decodeHms(pos02.captured(11));
+            return true;
+        }
+        static const QRegularExpression posA1Re(
+            R"(^POSA1([NS])(\d{2})(\d{3})([EW])([ \d]{3})(\d{3}),\s*([^,]*?)\s*,(\d{6}),\s*(\d+)\s*,\s*([^,]*?)\s*,)");
+        const QRegularExpressionMatch posA1 = posA1Re.match(text);
+        if (posA1.hasMatch())
+        {
+            // The degrees are all blanks within a degree of the meridian
+            latitude = posA1.captured(2).toFloat() + posA1.captured(3).toFloat() / 1000.0f;
+            longitude = QString(posA1.captured(5)).replace(' ', '0').toFloat() + posA1.captured(6).toFloat() / 1000.0f;
+            place((posA1.captured(1) == "S") ? -latitude : latitude,
+                  (posA1.captured(4) == "W") ? -longitude : longitude,
+                  posA1.captured(9).toInt() * 100);
+            m_lastWaypoint = posA1.captured(7);
+            m_time = decodeHms(posA1.captured(8));
+            m_nextWaypoint = posA1.captured(10);
+            return true;
+        }
+
+        // Six smaller ones. The fix just passed, the position and the altitude in feet:
+        // 975 messages, 4.0 km, altitude agrees in 143 of 150.
+        //   D161J  ,N 51.424,W 0.534,03884,210,0014,095\TS180434,030926
+        static const QRegularExpression fixRe(R"(^([A-Z0-9-]+)\s*,([NS][ \d.]+),([EW][ \d.]+),(\d+),)");
+        const QRegularExpressionMatch fix = fixRe.match(text);
+        if (fix.hasMatch()
+            && decodeDecimalDegrees(fix.captured(2), latitude) && decodeDecimalDegrees(fix.captured(3), longitude))
+        {
+            place(latitude, longitude, fix.captured(4).toInt());
+            m_lastWaypoint = fix.captured(1);
+            return true;
+        }
+        // The slash separated form above with signed coordinates: 111 messages, 5.7 km,
+        // altitude agrees in 97 of 104.
+        //   /+51.397/-0.043/6407/0309/1952/7000/1958/
+        static const QRegularExpression signedRe(R"(^/([+-]\d+\.\d+)/([+-]\d+\.\d+)/(\d+)/(\d{2})(\d{2})/(\d{4})/)");
+        const QRegularExpressionMatch signedSlash = signedRe.match(text);
+        if (signedSlash.hasMatch())
+        {
+            place(signedSlash.captured(1).toFloat(), signedSlash.captured(2).toFloat(), signedSlash.captured(3).toInt());
+            m_day = signedSlash.captured(4).toInt();
+            m_month = signedSlash.captured(5).toInt();
+            m_time = decodeHms(signedSlash.captured(6));
+            return true;
+        }
+        // The company report decodeCompanyPosition() reads, with the flight, date and
+        // time in front and the first figure the altitude in feet: 332 messages, 2.9 km,
+        // altitude agrees in 142 of 150.
+        //   PC86MR/03SEP26 18:21:06,4111,2131, 219,N 51.826 E   .289
+        static const QRegularExpression flightRe(
+            R"(^(\w+)/(\d{2})([A-Z]{3})\d{2} (\d{2}:\d{2}:\d{2}),(\d+),\d{4},\s*\d+,([NS][ \d.]+?) ([EW][ \d.]+))");
+        const QRegularExpressionMatch flight = flightRe.match(text);
+        if (flight.hasMatch()
+            && decodeDecimalDegrees(flight.captured(6), latitude) && decodeDecimalDegrees(flight.captured(7), longitude))
+        {
+            place(latitude, longitude, flight.captured(5).toInt());
+            m_reportFlight = flight.captured(1);
+            m_day = flight.captured(2).toInt();
+            m_month = monthFromName(flight.captured(3));
+            m_time = QTime::fromString(flight.captured(4), "hh:mm:ss");
+            return true;
+        }
+        // The company report again with the position in degrees and decimal minutes:
+        // 115 messages, 2.2 km.
+        //   181856,27708,1853,444.4, 3030,N5123.85 W00025.76
+        static const QRegularExpression minutesRe(
+            R"(^(\d{6}),\d+,\d{4},[ \d.]+,\s*\d+,([NS])(\d{2})(\d{2}\.\d+) ([EW])(\d{3})(\d{2}\.\d+))");
+        const QRegularExpressionMatch minutes = minutesRe.match(text);
+        if (minutes.hasMatch())
+        {
+            latitude = minutes.captured(3).toFloat() + minutes.captured(4).toFloat() / 60.0f;
+            longitude = minutes.captured(6).toFloat() + minutes.captured(7).toFloat() / 60.0f;
+            place((minutes.captured(2) == "S") ? -latitude : latitude,
+                  (minutes.captured(5) == "W") ? -longitude : longitude, -1);
+            m_time = decodeHms(minutes.captured(1));
+            return true;
+        }
+        // Two in degrees, minutes and SECONDS - not minutes to a hundredth, which reads
+        // within half a kilometre of it: the last pair never goes above 59 in 296
+        // coordinates, which hundredths would do two times in five. One gives the time
+        // and the altitude in feet, 99 messages, 2.8 km, altitude agrees in 96 of 97.
+        //   1842,20696,8520,N 501955,W  11026
+        // The other is self describing. 49 messages, 8.5 km, altitude agrees in 36 of 49.
+        //   035809/AUTPOS/LLD N513439 W0001425
+        //   /ALT 13670/SAT -001 ... /DAT 260903/TIM 191642
+        auto dms = [](const QString& hemisphere, const QString& degrees, const QString& minutes, const QString& seconds)
+        {
+            const float value = QString(degrees).replace(' ', '0').toFloat() + minutes.toFloat() / 60.0f
+                + seconds.toFloat() / 3600.0f;
+            return ((hemisphere == "S") || (hemisphere == "W")) ? -value : value;
+        };
+        static const QRegularExpression shortRe(
+            R"(^(\d{4}),(\d+),\d+,([NS]) ?(\d{2})(\d{2})(\d{2}),([EW])([ \d]{3})(\d{2})(\d{2})\s*$)");
+        const QRegularExpressionMatch shortDms = shortRe.match(text);
+        if (shortDms.hasMatch())
+        {
+            place(dms(shortDms.captured(3), shortDms.captured(4), shortDms.captured(5), shortDms.captured(6)),
+                  dms(shortDms.captured(7), shortDms.captured(8), shortDms.captured(9), shortDms.captured(10)),
+                  shortDms.captured(2).toInt());
+            m_time = decodeHms(shortDms.captured(1));
+            return true;
+        }
+        static const QRegularExpression autoRe(
+            R"(AUTPOS/LLD ([NS])(\d{2})(\d{2})(\d{2})\s*([EW])(\d{3})(\d{2})(\d{2})\s*[\r\n]+\s*/ALT (\d+))");
+        const QRegularExpressionMatch autoPos = autoRe.match(text);
+        if (autoPos.hasMatch())
+        {
+            place(dms(autoPos.captured(1), autoPos.captured(2), autoPos.captured(3), autoPos.captured(4)),
+                  dms(autoPos.captured(5), autoPos.captured(6), autoPos.captured(7), autoPos.captured(8)),
+                  autoPos.captured(9).toInt());
+            static const QRegularExpression timeRe(R"(/TIM (\d{6}))");
+            const QRegularExpressionMatch time = timeRe.match(text);
+            if (time.hasMatch()) {
+                m_time = decodeHms(time.captured(1));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 2F: the time, then the latitude and longitude in hundredths of a degree
+    //      with their signs, and the airports and altitude on a second line where there
+    //      is one. 570 messages, 2.7 km; time within five minutes in all 300 checked.
+    //      The longitude is hundredths too, though it has only three digits: read as
+    //      tenths, -122 put the aircraft at 12.2 W, a thousand kilometres out.
+    //        1504+5327-122/36512
+    //        LFPG/KDTW/36000/ -31/ -52/0.83/223153/172005/34.0/HAL-05 /MAM-04 /-106/  134
+    if (m_label == "2F")
+    {
+        static const QRegularExpression re(
+            R"(^(\d{4})([+-]\d{4})([+-]\d{3,5})/\d+(?:\s*[\r\n]+\s*([A-Z]{4})/([A-Z]{4})/(\d+)/)?)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            place(match.captured(2).toFloat() / 100.0f, match.captured(3).toFloat() / 100.0f,
+                  match.captured(6).isEmpty() ? -1 : match.captured(6).toInt());
+            m_time = decodeHms(match.captured(1));
+            m_departureAirport = match.captured(4);
+            m_arrivalAirport = match.captured(5);
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 32, Cathay Pacific's approach report: flight, date, then the position as
+    //      signed decimal degrees and the flight level. 146 messages, 5.7 km. The figure
+    //      after the flight level is not a time or an altitude and is left alone.
+    //        APR,V04,CX 255 20260903 1,0+51.465,-000.265,020,010500
+    if (m_label == "32")
+    {
+        static const QRegularExpression re(
+            R"(^APR,V\d+,([A-Z0-9]{2}) ?(\d+) (\d{4})(\d{2})(\d{2}) \d,\d([+-]\d+\.\d+),([+-]\d+\.\d+),(\d+),)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            place(match.captured(6).toFloat(), match.captured(7).toFloat(), match.captured(8).toInt() * 100);
+            m_reportFlight = match.captured(1) + match.captured(2);
+            m_month = match.captured(4).toInt();
+            m_day = match.captured(5).toInt();
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 2P, three forms from the same operator group. FM3: time, a second time,
+    //      position, altitude in feet. 103 messages, 3.7 km, altitude agrees in 92 of 99.
+    //        FM3 1250,2112,+051.64,-000.63, 36000, 511,    62
+    //      FM4: both airports, day and time, a time, position, altitude and track - label
+    //      83's routed report with that extra time in it.
+    //        FM4KBOS,OMAA,060320,0943, 51.52,-  2.07,37000,277,  99.3, 37900
+    //      FM5: both airports, then position and altitude after two figures. Only six
+    //      messages, 14.9 km, altitude agrees in five.
+    //        FM5 OMAA,EIDW,051116,0609,+51.487,  +0.842,35998,-79.20,444 ,16300,ETD72W    ,
+    //      The second time in FM3 and FM4 is always later than the first, so may be an
+    //      ETA, but nothing establishes it.
+    if (m_label == "2P")
+    {
+        static const QRegularExpression fm3Re(R"(^FM3 (\d{4}),\d{4},([-+][ \d]*\.[ \d]+),([-+][ \d]*\.[ \d]+),\s*(\d+),)");
+        static const QRegularExpression fm4Re(
+            R"(^FM4([A-Z]{4}),([A-Z]{4}),(\d{2})(\d{4}),\d{4},([-+ \d]*\.[ \d]+),([-+ \d]*\.[ \d]+),\s*(\d+),\s*(\d+),)");
+        static const QRegularExpression fm5Re(
+            R"(^FM5 ([A-Z]{4}),([A-Z]{4}),\d{6},\d{4},([-+ \d]*\.[ \d]+),([-+ \d]*\.[ \d]+),\s*(\d+),)");
+        const QRegularExpressionMatch fm3 = fm3Re.match(text);
+        const QRegularExpressionMatch fm4 = fm4Re.match(text);
+        const QRegularExpressionMatch fm5 = fm5Re.match(text);
+        if (fm3.hasMatch() && decodeBlankPadded(fm3.captured(2), latitude) && decodeBlankPadded(fm3.captured(3), longitude))
+        {
+            place(latitude, longitude, fm3.captured(4).toInt());
+            m_time = decodeHms(fm3.captured(1));
+            return true;
+        }
+        if (fm4.hasMatch() && decodeBlankPadded(fm4.captured(5), latitude) && decodeBlankPadded(fm4.captured(6), longitude))
+        {
+            place(latitude, longitude, fm4.captured(7).toInt());
+            m_departureAirport = fm4.captured(1);
+            m_arrivalAirport = fm4.captured(2);
+            m_day = fm4.captured(3).toInt();
+            m_time = decodeHms(fm4.captured(4));
+            m_trackDeg = fm4.captured(8).toInt();
+            return true;
+        }
+        if (fm5.hasMatch() && decodeBlankPadded(fm5.captured(3), latitude) && decodeBlankPadded(fm5.captured(4), longitude))
+        {
+            place(latitude, longitude, fm5.captured(5).toInt());
+            m_departureAirport = fm5.captured(1);
+            m_arrivalAirport = fm5.captured(2);
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 4T, Air Canada's flight status: flight, two days, the airports as IATA,
+    //      the time, a figure, position in degrees and decimal minutes with the
+    //      longitude's three digits of degrees blank padded - all blanks within a degree
+    //      of the meridian - and the flight level. 200 messages, 9.3 km, the level
+    //      agreeing in 142 of 150 and the time in all 200 checked.
+    //        AGFSR AC0861/04/04/LHRYVR/1441Z/739/5241.1N00048.5W/246/CLIMB /0773/0055/M24/...
+    //        AGFSR AC0836/03/04/YYZMUC/0405Z/941/5159.4N   53.3W/370/      /0149/0375/M54/...
+    //      AOIPT has the same layout, but only one was heard, so it is not read.
+    if (m_label == "4T")
+    {
+        static const QRegularExpression re(
+            R"(^AGFSR (\w+)/(\d{2})/\d{2}/([A-Z]{3})([A-Z]{3})/(\d{4})Z/\d+/(\d{2})(\d{2}\.\d)([NS])([ \d]{3})(\d{2}\.\d)([EW])/(\d+)/)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            latitude = match.captured(6).toFloat() + match.captured(7).toFloat() / 60.0f;
+            longitude = QString(match.captured(9)).replace(' ', '0').toFloat() + match.captured(10).toFloat() / 60.0f;
+            place((match.captured(8) == "S") ? -latitude : latitude,
+                  (match.captured(11) == "W") ? -longitude : longitude,
+                  match.captured(12).toInt() * 100);
+            m_reportFlight = match.captured(1);
+            m_day = match.captured(2).toInt();
+            const QString from = icaoFromIata(match.captured(3));
+            const QString to = icaoFromIata(match.captured(4));
+            m_departureAirport = from.isEmpty() ? match.captured(3) : from;
+            m_arrivalAirport = to.isEmpty() ? match.captured(4) : to;
+            m_time = decodeHms(match.captured(5));
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Label 33: date and time, both airports, a figure, the position in ARINC 702A
+    //      degrees and minutes, a figure, and the flight level. 57 messages, 2.2 km,
+    //      the level agreeing in all 54 checked.
+    //        2026-09-03,20:59:02,KJFK,LLBG,0004,N51298W000034,546,FL390,0265,-59,272, 65,KOK    ,...
+    if (m_label == "33")
+    {
+        static const QRegularExpression re(
+            R"(^\d{4}-(\d{2})-(\d{2}),(\d{2}):(\d{2}):(\d{2}),([A-Z]{4}),([A-Z]{4}),\d+,([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3}),\d+,FL(\d+),)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            place(arincCoordinate(match.captured(8), match.captured(9), match.captured(10)),
+                  arincCoordinate(match.captured(11), match.captured(12), match.captured(13)),
+                  match.captured(14).toInt() * 100);
+            m_month = match.captured(1).toInt();
+            m_day = match.captured(2).toInt();
+            m_time = QTime(match.captured(3).toInt(), match.captured(4).toInt(), match.captured(5).toInt());
+            m_departureAirport = match.captured(6);
+            m_arrivalAirport = match.captured(7);
+            return true;
+        }
+        return false;
+    }
+
+    // ---- Labels 3P, 20 and 4A: the ARINC 702A position report that is normally sent on
+    //      H1 - see AcarsMessageFromSubsystem - sent on a label of its own. About a
+    //      hundred messages; the same reading checked there. 4A also sends it without the
+    //      POS and with the time and the flight level run together, 101 messages, 10.5
+    //      km, the level agreeing in all 82 checked:
+    //        POSN52516W000475,RESNO,042651,370,DIXAT,045926,LIPMI,M54,258100,329FAKE
+    //        N53247W000593EDU35  ,042444389LAM36  ,042603,M58,253105190,84105221
+    if ((m_label == "3P") || (m_label == "20") || (m_label == "4A"))
+    {
+        static const QRegularExpression posRe(
+            R"(^POS([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3}),\s*([^,]*?)\s*,(\d{6})?,(\d+),\s*([^,]*?)\s*,)");
+        static const QRegularExpression bareRe(
+            R"(^([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3})(\w+?)\s*,(\d{6})(\d{3})(\w+?)\s*,)");
+        const QRegularExpressionMatch pos = posRe.match(text);
+        const QRegularExpressionMatch bare = (m_label == "4A") ? bareRe.match(text) : QRegularExpressionMatch();
+        const QRegularExpressionMatch& match = pos.hasMatch() ? pos : bare;
+        if (match.hasMatch())
+        {
+            place(arincCoordinate(match.captured(1), match.captured(2), match.captured(3)),
+                  arincCoordinate(match.captured(4), match.captured(5), match.captured(6)),
+                  match.captured(9).toInt() * 100);
+            m_lastWaypoint = match.captured(7);
+            m_time = decodeHms(match.captured(8));
+            m_nextWaypoint = match.captured(10);
+            return true;
+        }
+        return false;
+    }
+
+    return false;
+}
+
+// Reports that carry no position but name the flight's airports, which is what the
+// Aircraft feature draws a route between. Times were checked against when each message
+// was heard.
+bool AcarsPositionReport::decodeRouteReport(const QString &text)
+{
+    // ---- Label 20, TUI's: departure, destination, ETA and flight, then the date and
+    //      time. 382 messages; the time within five minutes of being heard in all 300
+    //      checked, and the ETA always later.
+    //        DA LTBS/DS EGNX/ETA 0114/FN TOM255
+    //        04SEP26/UTC 005401/CLI
+    if (m_label == "20")
+    {
+        static const QRegularExpression re(
+            R"(^DA ([A-Z]{4})/DS ([A-Z]{4})/ETA (\d{4})/FN (\w+)(?:\s*[\r\n]+\s*(\d{2})([A-Z]{3})\d{2}/UTC (\d{6}))?)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            m_departureAirport = match.captured(1);
+            m_arrivalAirport = match.captured(2);
+            m_eta = decodeHms(match.captured(3));
+            m_reportFlight = match.captured(4);
+            if (!match.captured(5).isEmpty())
+            {
+                m_day = match.captured(5).toInt();
+                m_month = monthFromName(match.captured(6));
+                m_time = decodeHms(match.captured(7));
+            }
+            m_reportType = "ETA";
+            return true;
+        }
+    }
+
+    // ---- Labels 20 and 10, KLM's: a report code, the day and time, the flight and both
+    //      airports, and for the ETA report on label 10 the day and ETA. 366 messages on
+    //      label 20, the time within five minutes in all 300 checked. What the RST codes
+    //      stand for is not established, so they are shown as sent.
+    //        RST31A25160803KLC85F  EHAMEICK
+    //        ETA31A26165640KLC1093 EHAMEGFF261721EGFF  26
+    if ((m_label == "20") || (m_label == "10"))
+    {
+        static const QRegularExpression re(
+            R"(^(RST|ETA)(\d{2})A(\d{2})(\d{6})(\w+)\s+([A-Z]{4})([A-Z]{4})(?:(\d{2})(\d{4})[A-Z]{4})?)");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch() && ((match.captured(1) == "RST") == (m_label == "20")))
+        {
+            m_reportType = match.captured(1) + match.captured(2);
+            m_day = match.captured(3).toInt();
+            m_time = decodeHms(match.captured(4));
+            m_reportFlight = match.captured(5);
+            m_departureAirport = match.captured(6);
+            m_arrivalAirport = match.captured(7);
+            if (match.captured(1) == "ETA")
+            {
+                m_reportType = "ETA";
+                m_eta = decodeHms(match.captured(9));
+            }
+            return true;
+        }
+    }
+
+    // ---- Label 10, British Airways' initialisation: both airports, then four digits
+    //      that are not a time - 1:35 for Heathrow to Nice, so probably the planned
+    //      flight time - and the SID's first fix. 1372 messages; only the airports read.
+    //        INI03  EGLLLFMN0135STAMP  ----
+    if (m_label == "10")
+    {
+        static const QRegularExpression re(R"(^INI\d{2}..([A-Z]{4})([A-Z]{4})\d{4})");
+        const QRegularExpressionMatch match = re.match(text);
+        if (match.hasMatch())
+        {
+            m_departureAirport = match.captured(1);
+            m_arrivalAirport = match.captured(2);
+            m_reportType = "INI";
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool AcarsPositionReport::decode(const QString &text)
 {
     if (decodeAirlinePosition(text)) {
+        return true;
+    }
+
+    if (decodeOperatorPosition(text)) {
+        return true;
+    }
+
+    if (decodeRouteReport(text)) {
         return true;
     }
 
@@ -2614,6 +3324,44 @@ bool AcarsPositionReport::decode(const QString &text)
             }
             return true;
         }
+
+        // The same report from another operator, in decimal degrees and with the day in
+        // front of the time:
+        //   POS161158,N51.475,E000.581,2104,  762745,14334,129966
+        // The day and time are the 16th at 11:58 - all 115 off air are within five
+        // minutes of when they were heard, and read as hhmmss none of them are. Within 3.3
+        // km of the airframe's ADS-B at the median; the figures after it are left alone.
+        static const QRegularExpression decimalRe(R"(^POS(\d{2})(\d{2})(\d{2}),([NS])(\d+\.\d+),([EW])(\d+\.\d+),)");
+        const QRegularExpressionMatch decimal = decimalRe.match(text);
+        if (decimal.hasMatch())
+        {
+            m_day = decimal.captured(1).toInt();
+            m_time = QTime(decimal.captured(2).toInt(), decimal.captured(3).toInt());
+            m_latitude = decimal.captured(5).toFloat() * (decimal.captured(4) == "S" ? -1.0f : 1.0f);
+            m_longitude = decimal.captured(7).toFloat() * (decimal.captured(6) == "W" ? -1.0f : 1.0f);
+            m_positionValid = true;
+            m_reportType = "POS";
+            return true;
+        }
+
+        // A slash separated form whose coordinates look like decimal degrees and are
+        // not: N51.146 is N51 14.6, degrees and then minutes to a tenth. Read that way 150
+        // of them were 1.4 km from ADS-B at the median; read as decimals, 27.6 km.
+        //   /N51.146/E000.557/10/0.62/110/198/LYTV/1436/0070/00036/DVR  /KONAN/1211/KOK  /1212/
+        // Then a figure, the Mach number, another figure and the flight level, which is
+        // within 1500 ft of ADS-B in 117 of the 150. The airport and the times after it
+        // are not identified by anything in the samples, so are not read.
+        static const QRegularExpression slashRe(R"(^/([NS])(\d+)\.(\d{3})/([EW])(\d+)\.(\d{3})/\d+/[\d.]+/\d+/(\d+)/)");
+        const QRegularExpressionMatch slash = slashRe.match(text);
+        if (slash.hasMatch())
+        {
+            m_latitude = arincCoordinate(slash.captured(1), slash.captured(2), slash.captured(3));
+            m_longitude = arincCoordinate(slash.captured(4), slash.captured(5), slash.captured(6));
+            m_altitudeFt = slash.captured(7).toInt() * 100;
+            m_positionValid = true;
+            m_reportType = "POS";
+            return true;
+        }
     }
     else if (m_label == "22")
     {
@@ -2650,7 +3398,9 @@ bool AcarsPositionReport::decode(const QString &text)
         // Coordinates are degrees then minutes x10 (38 degrees 17.1 minutes);
         // altitude is in flight levels; then departure and arrival airports, the
         // date as MMDD, the time and ETA as HHMM, and fuel in tonnes
-        QRegularExpression re(R"(^(?:00)?(POS|ETA|IN|OFF|ON)(\d{2}),([NS])(\d\d)(\d{3})([EW])(\d{3})(\d{3}),(\d{1,3}),(\w{4}),(\w{4}),(\d{4}),(\d{4}),(\d{4}),(\d+\.?\d*))");
+        // The fuel is "*****" when the aircraft does not report it, which is not a number
+        // and failed the whole message rather than just that field
+        QRegularExpression re(R"(^(?:00)?(POS|ETA|IN|OFF|ON)(\d{2}),([NS])(\d\d)(\d{3})([EW])(\d{3})(\d{3}),(\d{1,3}),(\w{4}),(\w{4}),(\d{4}),(\d{4}),(\d{4}),(\d+\.?\d*|\*+))");
         QRegularExpressionMatch match = re.match(text);
         if (match.hasMatch())
         {
@@ -2671,25 +3421,37 @@ bool AcarsPositionReport::decode(const QString &text)
             m_day = match.captured(12).mid(2, 2).toInt();
             m_time = QTime(match.captured(13).mid(0, 2).toInt(), match.captured(13).mid(2, 2).toInt());
             m_eta = QTime(match.captured(14).mid(0, 2).toInt(), match.captured(14).mid(2, 2).toInt());
-            m_fuelTons = match.captured(15).toFloat();
+            if (!match.captured(15).startsWith('*')) {
+                m_fuelTons = match.captured(15).toFloat();
+            }
             return true;
         }
     }
-    else if (m_label == "24")
+    else if ((m_label == "24") || (m_label == "23"))
     {
         // E.g: /241710/1021/04WM/34962/N53.13/E001.33/3374/1056/
-        // Day and time, then flight, altitude in feet, position and ETA
-        QRegularExpression re(R"(^/24(\d{4})/(\d+)/(\w+)/(\d+)/([NS])(\d{1,2}\.\d+)/([EW])(\d{1,3}\.\d+)/(\d+)/(\d{4})/?)");
+        //      /260309/1530/THY2XW/31500/N 51.619/E  1.396/04263/1608/      (24)
+        //      /261610/1949/5150/20005/N51.35/E001.41/11446/                (23)
+        // Day and time, then flight, altitude in feet, position and ETA. The day was
+        // matched as the literal "24" - the one in the example - so this decoded only on
+        // the 24th of the month; and the position is blank padded like label 17's.
+        QRegularExpression re(R"(^/(\d{2})(\d{4})/(\d+)/(\w+)/(\d+)/([NS])([ \d]*\.[ \d]+)/([EW])([ \d]*\.[ \d]+)/(\d+)/(?:(\d{4})/?)?)");
         QRegularExpressionMatch match = re.match(text);
-        if (match.hasMatch())
+        float latitude = 0.0f, longitude = 0.0f;
+        if (match.hasMatch()
+            && decodeBlankPadded(match.captured(7), latitude)
+            && decodeBlankPadded(match.captured(9), longitude))
         {
-            m_time = QTime(match.captured(1).mid(0, 2).toInt(), match.captured(1).mid(2, 2).toInt());
-            m_reportFlight = match.captured(3);
-            m_altitudeFt = match.captured(4).toInt();
-            m_latitude = match.captured(6).toFloat() * (match.captured(5) == "S" ? -1.0f : 1.0f);
-            m_longitude = match.captured(8).toFloat() * (match.captured(7) == "W" ? -1.0f : 1.0f);
+            m_day = match.captured(1).toInt();
+            m_time = QTime(match.captured(2).mid(0, 2).toInt(), match.captured(2).mid(2, 2).toInt());
+            m_reportFlight = match.captured(4);
+            m_altitudeFt = match.captured(5).toInt();
+            m_latitude = latitude * (match.captured(6) == "S" ? -1.0f : 1.0f);
+            m_longitude = longitude * (match.captured(8) == "W" ? -1.0f : 1.0f);
             m_positionValid = true;
-            m_eta = QTime(match.captured(10).mid(0, 2).toInt(), match.captured(10).mid(2, 2).toInt());
+            if (!match.captured(11).isEmpty()) {
+                m_eta = QTime(match.captured(11).mid(0, 2).toInt(), match.captured(11).mid(2, 2).toInt());
+            }
             return true;
         }
     }
@@ -2699,7 +3461,10 @@ bool AcarsPositionReport::decode(const QString &text)
 
 QString AcarsPositionReport::toString()
 {
-    if (!m_positionValid) {
+    // The cruise report family places nothing - see decodeCruiseReport() - but still has
+    // its airports and altitude to show. Requiring a position, the decode view showed
+    // none of it for any of the 1900 here.
+    if (!m_positionValid && m_reportType.isEmpty()) {
         return "";
     }
     const QHash<QString, QString> reportTypes = {
@@ -2722,12 +3487,17 @@ QString AcarsPositionReport::toString()
     if (!m_arrivalAirport.isEmpty()) {
         lines.append(QString("<b>Arrival:</b> %1").arg(icaoAndAirportName(m_arrivalAirport)));
     }
-    lines.append(QString("<b>Position:</b> %1").arg(positionString(m_latitude, m_longitude)));
+    if (m_positionValid) {
+        lines.append(QString("<b>Position:</b> %1").arg(positionString(m_latitude, m_longitude)));
+    }
     if (m_altitudeFt >= 0) {
         lines.append(QString("<b>Altitude:</b> %1 ft").arg(m_altitudeFt));
     }
-    if (m_day >= 0) {
+    // Many of these give the day of the month and no month
+    if ((m_day >= 0) && (m_month > 0)) {
         lines.append(QString("<b>Date:</b> %1/%2").arg(m_day, 2, 10, QChar('0')).arg(m_month, 2, 10, QChar('0')));
+    } else if (m_day >= 0) {
+        lines.append(QString("<b>Day:</b> %1").arg(m_day));
     }
     if (m_time.isValid()) {
         lines.append(QString("<b>Time:</b> %1").arg(m_time.toString(m_time.second() ? "hh:mm:ss" : "hh:mm")));
@@ -2949,20 +3719,18 @@ AcarsOpsReport::AcarsOpsReport(const QByteArray &message) :
 {
 }
 
-// Coordinates in label 80 reports appear as N29395 (degrees x1000) or N3539.2
-// (degrees then decimal minutes)
+// Coordinates in label 80 reports appear as N29395 or N3539.2. Both are degrees and
+// minutes: the first is the ARINC 702A form - see arincCoordinate() - with the minutes to
+// a tenth and no point, N29 39.5. It was read as thousandths of a degree, which put the
+// aircraft up to half a degree out - 17 km at the median against ADS-B, against 1.0 km
+// read as minutes.
 static bool parseOpsCoordinate(const QString& s, float& value)
 {
-    QRegularExpression plainRe(R"(^([NSEW])(\d+)$)");
+    QRegularExpression plainRe(R"(^([NSEW])(\d+)(\d{3})$)");
     QRegularExpressionMatch match = plainRe.match(s);
     if (match.hasMatch())
     {
-        int degDigits = match.captured(2).size() - 3;
-        value = match.captured(2).left(degDigits).toFloat()
-                + match.captured(2).mid(degDigits).toFloat() / 1000.0f;
-        if ((match.captured(1) == "S") || (match.captured(1) == "W")) {
-            value = -value;
-        }
+        value = arincCoordinate(match.captured(1), match.captured(2), match.captured(3));
         return true;
     }
     QRegularExpression minRe(R"(^([NSEW])(\d+)(\d\d\.\d)$)");
@@ -2983,9 +3751,18 @@ static bool parseOpsCoordinate(const QString& s, float& value)
 // /POS N29395W095133/ALT +15608/MCH 558/FOB 0100/ETA 0410
 // with OPNORM and INRANG variants, and optional /FL /TAS /SAT /HDG /NWYP /SPD /UTC
 // keyed fields. Formats per airframes.io's decoder test vectors.
+//
+// The same header carries other report types, which were all refused for not being one
+// of those three - 860 messages over two months, nine tenths of them TUI's ETA report:
+//   3401 ETA    23ML/19 LGIR/EGCC .G-SUNU
+//   /ETA 1432/FOB 0030
+//   1101 OFFRP  UAE32     /03 EGLL/OMDB .A6-EOZ
+//   /OUT 1841/OFF 1905/FOB 0895/ETA 0155
+// and DSPTCH, OPSCTL and NLINFO, the last two free text after the header. The flight
+// is padded with blanks on the off report.
 bool AcarsOpsReport::decode(const QString &text)
 {
-    QRegularExpression hdrRe(R"(^3\w0\d\s+(POSRPT|OPNORM|INRANG)\s+(\w+)/(\d{1,2})\s+([A-Z0-9]{4})/([A-Z0-9]{4})\s+\.([A-Z0-9-]+))");
+    QRegularExpression hdrRe(R"(^\w{2}0\d\s+([A-Z]{3,6})\s+(\w+)\s*/(\d{1,2})\s+([A-Z0-9]{4})/([A-Z0-9]{4})\s+\.([A-Z0-9-]+))");
     QRegularExpressionMatch match = hdrRe.match(text);
     if (!match.hasMatch())
     {
@@ -3059,6 +3836,17 @@ bool AcarsOpsReport::decode(const QString &text)
         QRegularExpressionMatch etaMatch = etaRe.match(text);
         m_eta = QTime(etaMatch.captured(1).toInt(), etaMatch.captured(2).toInt());
     }
+    m_outTime = decodeHms(keyed(R"(/OUT\s+(\d{4}))"));
+    m_offTime = decodeHms(keyed(R"(/OFF\s+(\d{4}))"));
+    // The free text of an OPSCTL or NLINFO, which is whatever follows the header that is
+    // not one of the keyed fields
+    if ((m_reportType == "OPSCTL") || (m_reportType == "NLINFO"))
+    {
+        QStringList lines = text.split(QRegularExpression("[\r\n]+"), Qt::SkipEmptyParts).mid(1);
+        lines.erase(std::remove_if(lines.begin(), lines.end(),
+                                   [](const QString& line) { return line.startsWith('/'); }), lines.end());
+        m_freeText = lines.join(" ").simplified();
+    }
     return true;
 }
 
@@ -3070,7 +3858,11 @@ QString AcarsOpsReport::toString()
     const QHash<QString, QString> reportTypes = {
         {"POSRPT", "Position report"},
         {"OPNORM", "Operations normal"},
-        {"INRANG", "In range"}
+        {"INRANG", "In range"},
+        {"ETA", "ETA report"},
+        {"OFFRP", "Off report"},
+        {"DSPTCH", "Dispatch"},
+        {"OPSCTL", "Operations control"}
     };
     QStringList lines;
     lines.append(QString("<b>Report:</b> %1").arg(reportTypes.value(m_reportType, m_reportType)));
@@ -3105,8 +3897,17 @@ QString AcarsOpsReport::toString()
     if (m_time.isValid()) {
         lines.append(QString("<b>Time:</b> Day %1 %2").arg(m_day).arg(m_time.toString("hh:mm:ss")));
     }
+    if (m_outTime.isValid()) {
+        lines.append(QString("<b>Out:</b> %1").arg(m_outTime.toString("hh:mm")));
+    }
+    if (m_offTime.isValid()) {
+        lines.append(QString("<b>Off:</b> %1").arg(m_offTime.toString("hh:mm")));
+    }
     if (m_eta.isValid()) {
         lines.append(QString("<b>ETA:</b> %1").arg(m_eta.toString("hh:mm")));
+    }
+    if (!m_freeText.isEmpty()) {
+        lines.append(QString("<b>Text:</b> %1").arg(m_freeText));
     }
     return lines.join("<br>");
 }
@@ -3457,14 +4258,26 @@ bool AcarsMessageFromSubsystem::decode(const QString &text)
     // #M1BFPN/RP:DA:KSFO:AA:KEWR:R:...
     // Field meanings per airframes.io's acars-message-documentation research
     QString t = text;
+    // An uplink to a subsystem has "- #MD" in front, usually with a line break after it.
+    // A single block arrives here with both still on - only the reassembled text of
+    // several has had them taken off, block by block, in the constructor - and nothing
+    // below looked for them, so not one single block flight plan uplink was decoded: off
+    // air, 41 of 356 plans heard whole came out as plans, all of them multi block
+    static const QRegularExpression uplinkRe(R"(^- #(\w\w)(\r\n)?)");
+    const QRegularExpressionMatch uplinkMatch = uplinkRe.match(t);
     QRegularExpression subRe(R"(^#(\w{2}[A-Z]?))");
     QRegularExpressionMatch subMatch = subRe.match(t);
-    if (subMatch.hasMatch())
+    if (uplinkMatch.hasMatch())
+    {
+        m_fmsSublabel = uplinkMatch.captured(1);
+        t = t.mid(uplinkMatch.capturedLength());
+    }
+    else if (subMatch.hasMatch())
     {
         m_fmsSublabel = subMatch.captured(1);
         t = t.mid(subMatch.capturedLength());
     }
-    else if (!t.startsWith("POS") && !t.startsWith("FPN/")
+    else if (!t.startsWith("POS") && !t.startsWith("FPN/") && !t.isEmpty() && t.at(0).isLetterOrNumber()
              && (t.mid(1).startsWith("POS") || t.mid(1).startsWith("FPN/")))
     {
         // The header parse strips a #xx sublabel from the text, which can leave just
@@ -3493,8 +4306,16 @@ bool AcarsMessageFromSubsystem::decode(const QString &text)
     // "." separates a fix from the airway to the next one and ".." is a direct leg, and
     // a fix may be followed by its position. R used to be read as the route, which is
     // why a plan only ever plotted as its two airports: it is the runway.
-    auto extractFlightPlan = [this](const QString& s)
+    auto extractFlightPlan = [this](const QString& wrapped)
     {
+        // The message is broken into lines at a fixed width, wherever that falls - in
+        // the middle of a fix as often as not: "..AKU\r\nPA.T420" is AKUPA, and was
+        // read as two fixes, AKU and PA. No field of the format runs over a line break
+        // of its own, so they all come out
+        QString s = wrapped;
+        s.remove(QChar('\r'));
+        s.remove(QChar('\n'));
+
         // Read within the /RP: block where there is one, so the /RA: alternate block's
         // own DA and AA are not taken for this flight's
         auto block = [](const QString& text, const QString& tag) -> QString
@@ -3596,6 +4417,35 @@ bool AcarsMessageFromSubsystem::decode(const QString &text)
                 if (rest.startsWith('.')) {
                     path = rest;
                 }
+            }
+        }
+        if (path.isEmpty())
+        {
+            // Or off the departure airport, the same way:
+            //
+            //   FPN/RP:DA:EGLL..BPK,N51450W000064.Q295..BRAIN.M197..REDFA,N52069E002293:AA:EHAM
+            const QString departureField = field(rp, "DA");
+            if (departureField.startsWith(m_fpnDeparture) && !m_fpnDeparture.isEmpty())
+            {
+                const QString rest = departureField.mid(m_fpnDeparture.size());
+                if (rest.startsWith('.')) {
+                    path = rest;
+                }
+            }
+        }
+        if (path.isEmpty())
+        {
+            // Or straight off the block's own tag, with the airports after it - every
+            // Turkish Airlines plan heard, nine of the eleven of 356 that still decoded no
+            // route once the rest were read:
+            //
+            //   FPN/FNTHY4RN/RP..DET.L6..DVR.UL9..KONAN.UL607..KOK ... ..RILEX:DA:EGLL:AA:LTFM
+            const int at = s.indexOf("/RP.");
+            if (at >= 0)
+            {
+                const int start = at + 3;
+                const int end = s.indexOf(':', start);
+                path = s.mid(start, ((end >= 0) ? end : s.size()) - start);
             }
         }
         // N51450 is 51 degrees 45.0 minutes north and W000064 is 0 degrees 6.4 minutes
@@ -3708,28 +4558,38 @@ bool AcarsMessageFromSubsystem::decode(const QString &text)
 
     // Position report: position, last waypoint and time over it, altitude in flight
     // levels, next waypoint and its ETA, the waypoint after, and the static air
-    // temperature. Latitude and longitude are degrees x1000.
-    QRegularExpression posRe(R"(^POS([NS])(\d{4,5})([EW])(\d{5,6}),([^,]*),(\d{6}),(\d+),([^,]*),(\d{6}),([^,]*),([MP])\s?(\d+)(.*)$)");
+    // temperature. The position is ARINC 702A degrees and minutes - see arincCoordinate()
+    // - and not thousandths of a degree, which is how it was read until it was checked
+    // against ADS-B: every H1 position report was placed up to half a degree out.
+    //
+    // The times can be empty, when there is no next waypoint to give an ETA for:
+    //   POSN51435W000328,BNN,135311,107,,,,P4,27248,279/TS135311,030926
+    // Requiring them lost 635 reports here, most of them on approach to Heathrow.
+    QRegularExpression posRe(R"(^POS([NS])(\d{2})(\d{3})([EW])(\d{3})(\d{3}),([^,]*),(\d{6})?,(\d+),([^,]*),(\d{6})?,([^,]*),([MP])\s?(\d+)(.*)$)");
     QRegularExpressionMatch posMatch = posRe.match(t);
     if (posMatch.hasMatch())
     {
-        m_latitude = posMatch.captured(2).toFloat() / 1000.0f * (posMatch.captured(1) == "S" ? -1.0f : 1.0f);
-        m_longitude = posMatch.captured(4).toFloat() / 1000.0f * (posMatch.captured(3) == "W" ? -1.0f : 1.0f);
+        m_latitude = arincCoordinate(posMatch.captured(1), posMatch.captured(2), posMatch.captured(3));
+        m_longitude = arincCoordinate(posMatch.captured(4), posMatch.captured(5), posMatch.captured(6));
         m_positionValid = true;
-        m_lastWaypoint = posMatch.captured(5);
-        QString ts = posMatch.captured(6);
-        m_timeOver = QTime(ts.mid(0, 2).toInt(), ts.mid(2, 2).toInt(), ts.mid(4, 2).toInt());
-        m_altitudeFt = posMatch.captured(7).toInt() * 100;
-        m_nextWaypoint = posMatch.captured(8);
-        ts = posMatch.captured(9);
-        m_etaNext = QTime(ts.mid(0, 2).toInt(), ts.mid(2, 2).toInt(), ts.mid(4, 2).toInt());
-        m_nextPlus1Waypoint = posMatch.captured(10);
-        m_temperatureC = posMatch.captured(12).toInt();
-        if (posMatch.captured(11) == "M") {
+        m_lastWaypoint = posMatch.captured(7);
+        QString ts = posMatch.captured(8);
+        if (!ts.isEmpty()) {
+            m_timeOver = QTime(ts.mid(0, 2).toInt(), ts.mid(2, 2).toInt(), ts.mid(4, 2).toInt());
+        }
+        m_altitudeFt = posMatch.captured(9).toInt() * 100;
+        m_nextWaypoint = posMatch.captured(10);
+        ts = posMatch.captured(11);
+        if (!ts.isEmpty()) {
+            m_etaNext = QTime(ts.mid(0, 2).toInt(), ts.mid(2, 2).toInt(), ts.mid(4, 2).toInt());
+        }
+        m_nextPlus1Waypoint = posMatch.captured(12);
+        m_temperatureC = posMatch.captured(14).toInt();
+        if (posMatch.captured(13) == "M") {
             m_temperatureC = -m_temperatureC;
         }
         m_temperatureValid = true;
-        QString additional = posMatch.captured(13);
+        QString additional = posMatch.captured(15);
         if (additional.startsWith(",")) {
             additional = additional.mid(1);
         }
@@ -3751,10 +4611,265 @@ bool AcarsMessageFromSubsystem::decode(const QString &text)
         return true;
     }
 
+    // The progress and performance reports, 13,000 messages here and the largest block of
+    // H1 traffic nothing was made of. They carry the same tagged blocks a position report
+    // does after its fields - see extractAdditionalBlocks() - but no position:
+    //
+    //   PRG/FNRAM800F/DTEGLL,27R,84,154053,29949A
+    //   PRG/DTLFPG,27R,64,194305/PR1144,305,210,88,,0,0,,M15,60,,,P41,M7,42690,,1056,305/RP:DA:EGKK:AA:LFPG:...
+    //   PER/TS070644,261026/PR1591,228,,108,,0,26,,,180,,,P33,P0,48583,,1483,244763A
+    //
+    // So the destination, its runway and ETA, the cruise level and the flight's ICAO
+    // callsign, and the route where one is appended. The checksum is taken off the end
+    // first, as for a flight plan, or it is read as part of the last field.
+    if (t.startsWith("PRG/") || t.startsWith("PER/"))
+    {
+        QString report = t;
+        report.remove(QChar('\r'));
+        report.remove(QChar('\n'));
+        static const QRegularExpression checksumRe("[0-9A-F]{4}$");
+        report.remove(checksumRe);
+        m_fmsReport = t.startsWith("PRG/") ? "Progress report" : "Performance report";
+        if (report.contains("/RP:")) {
+            extractFlightPlan(report);
+        }
+        // From the slash, so that the first block is not taken for the untagged wind and
+        // fuel block a position report starts its additional data with
+        extractAdditionalBlocks(report.mid(3));
+        if (m_fpnArrival.isEmpty()) {
+            m_fpnArrival = m_destination;
+        }
+        return !m_destination.isEmpty() || m_cruiseLevelValid || !m_icaoCallsign.isEmpty()
+            || !m_fpnRoute.isEmpty();
+    }
+
+    // Three more position reports that come on H1 from other subsystems, each checked
+    // against the airframe's ADS-B track within two minutes of being heard - the median
+    // distance is given, most of it the distance flown while the report is on its way -
+    // and the time against when it was heard.
+    //
+    // The Airbus DMU's, which ends with the flight level. 738 messages, 3.2 km, the level
+    // within 1500 ft of ADS-B nearly always; the figure before it falls steadily through
+    // a flight and is probably fuel, so is left alone.
+    //   A320,260018,1,1,TB000000/REP033,00,00,1/POSDMU,194048, 50.224,-  1.969,  5770,348
+    //
+    // The ICAO position report, written as it would be on voice, with the flight level.
+    // 385 messages, 4.3 km.
+    //   (POS-KLM41U  -5113N00014W/192548 F410
+    //   RMK/FUEL   6.9 M0.80)
+    //
+    // And one that gives the month, day and time, then the position in whole minutes.
+    // 186 messages, 3.8 km.
+    //   *POS
+    //   10161858N5205W00035135317022538M1730238
+    {
+        static const QRegularExpression dmuRe(
+            R"(/POSDMU,(\d{6}),([-+ \d]*\.[ \d]+),([-+ \d]*\.[ \d]+),\s*\d+,\s*(\d+))");
+        const QRegularExpressionMatch dmu = dmuRe.match(t);
+        float latitude = 0.0f, longitude = 0.0f;
+        if (dmu.hasMatch() && decodeBlankPadded(dmu.captured(2), latitude)
+            && decodeBlankPadded(dmu.captured(3), longitude))
+        {
+            m_latitude = latitude;
+            m_longitude = longitude;
+            m_altitudeFt = dmu.captured(4).toInt() * 100;
+            m_positionValid = true;
+            m_positionTime = decodeHms(dmu.captured(1));
+            m_fmsReport = "DMU position report";
+            return true;
+        }
+
+        static const QRegularExpression icaoRe(
+            R"(\(POS-(\w+)\s+-(\d{2})(\d{2})([NS])(\d{3})(\d{2})([EW])/(\d{6})\s+F(\d{3}))");
+        const QRegularExpressionMatch icao = icaoRe.match(text);
+        if (icao.hasMatch())
+        {
+            m_latitude = (icao.captured(2).toFloat() + icao.captured(3).toFloat() / 60.0f)
+                * (icao.captured(4) == "S" ? -1.0f : 1.0f);
+            m_longitude = (icao.captured(5).toFloat() + icao.captured(6).toFloat() / 60.0f)
+                * (icao.captured(7) == "W" ? -1.0f : 1.0f);
+            m_altitudeFt = icao.captured(9).toInt() * 100;
+            m_positionValid = true;
+            m_positionTime = decodeHms(icao.captured(8));
+            m_icaoCallsign = icao.captured(1);
+            m_fmsReport = "ICAO position report";
+            return true;
+        }
+
+        static const QRegularExpression starRe(
+            R"(\*POS\s*[\r\n]+\d{2}\d{2}(\d{4})([NS])(\d{2})(\d{2})([EW])(\d{3})(\d{2}))");
+        const QRegularExpressionMatch star = starRe.match(text);
+        if (star.hasMatch())
+        {
+            m_latitude = (star.captured(3).toFloat() + star.captured(4).toFloat() / 60.0f)
+                * (star.captured(2) == "S" ? -1.0f : 1.0f);
+            m_longitude = (star.captured(6).toFloat() + star.captured(7).toFloat() / 60.0f)
+                * (star.captured(5) == "W" ? -1.0f : 1.0f);
+            m_positionValid = true;
+            m_positionTime = decodeHms(star.captured(1));
+            m_fmsReport = "Position report";
+            return true;
+        }
+    }
+
+    // The maintenance system's fault (FLR) and warning (WRN) reports, 2487 over two months:
+    //
+    //   FLR/PNRC12860AA08/FR26101620360038310006MOTOR START RELAY (36MG)
+    //   /IDTOILET
+    //   WRN/WN26102716090034580006NAV GPS1 FAULT
+    //
+    // An optional part number, then the date and time to the minute - within ten minutes
+    // of when the report was heard in 2395 of them - and two characters that are always
+    // 00; then the ATA chapter, section and subject, which agree with the text (34-58 is
+    // GPS, 38-31 the toilet waste system), then the flight phase, then the text and the
+    // system that reported it.
+    //
+    // The phase is the Airbus one, checked against the airframe's ADS-B altitude at the
+    // time of the fault: phase 6 was at a median of 11,800 ft and up to 39,000, while
+    // phases 2 to 5 and 7, all around take-off and landing, were all below about 3000.
+    // A ground fault can have blanks where the ATA reference would be.
+    //
+    // A second layout, 323 of them, has .1/ in front and blanks for the 00, and writes the
+    // system, the suspect parts and the class of fault as a comma list. Its warnings have
+    // an extra digit before the phase, which is not identified.
+    //   .1/FLR/FR2610220508  46213406AFS    1,FWS,,,,,,ATSU(1TX1)/MCDU1(2CA1),HARD
+    //   .1/WRN/WN2610260649  308105506MAINTENANCE STATUS      ICE D1
+    {
+        static const QRegularExpression faultRe(
+            R"(^(FLR|WRN)/(?:PN(\w+)/)?(?:FR|WN)(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})00(.{6})(\d{2})(.*?)(?:/ID([^\r\n/]*))?\s*$)",
+            QRegularExpression::DotMatchesEverythingOption);
+        static const QRegularExpression listedRe(
+            R"(^\.1/(FLR|WRN)/(?:FR|WN)(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})  (\d{6})\d?(\d{2})(.*)$)",
+            QRegularExpression::DotMatchesEverythingOption);
+        const QRegularExpressionMatch fault = faultRe.match(t);
+        const QRegularExpressionMatch listed = fault.hasMatch() ? QRegularExpressionMatch() : listedRe.match(t);
+        const QRegularExpressionMatch& match = fault.hasMatch() ? fault : listed;
+        if (match.hasMatch())
+        {
+            m_fmsReport = (match.captured(1) == "FLR") ? "Fault report" : "Warning report";
+            m_maintenanceTime = QDateTime(QDate(2000 + match.captured(fault.hasMatch() ? 3 : 2).toInt(),
+                                                match.captured(fault.hasMatch() ? 4 : 3).toInt(),
+                                                match.captured(fault.hasMatch() ? 5 : 4).toInt()),
+                                          QTime(match.captured(fault.hasMatch() ? 6 : 5).toInt(),
+                                                match.captured(fault.hasMatch() ? 7 : 6).toInt()),
+                                          QTimeZone::utc());
+            const QString ata = match.captured(fault.hasMatch() ? 8 : 7);
+            static const QRegularExpression ataRe("^\\d{6}$");
+            if (ataRe.match(ata).hasMatch()) {
+                m_ataReference = QString("%1-%2-%3").arg(ata.left(2)).arg(ata.mid(2, 2)).arg(ata.mid(4, 2));
+            } else if (!ata.trimmed().isEmpty()) {
+                m_ataReference = ata.trimmed();
+            }
+            m_flightPhase = match.captured(fault.hasMatch() ? 9 : 8).toInt();
+            if (fault.hasMatch())
+            {
+                m_partNumber = fault.captured(2);
+                m_maintenanceText = fault.captured(10).simplified();
+                m_reportingSystem = fault.captured(11).trimmed();
+            }
+            else
+            {
+                const QString rest = listed.captured(9);
+                QStringList fields = rest.split(',');
+                if ((listed.captured(1) == "FLR") && (fields.size() >= 2))
+                {
+                    m_reportingSystem = fields.takeFirst().simplified();
+                    const QString faultClass = fields.last().simplified();
+                    if ((faultClass == "HARD") || (faultClass == "INTERMITTENT"))
+                    {
+                        m_faultClass = faultClass;
+                        fields.removeLast();
+                    }
+                    fields.removeAll(QString());
+                    m_maintenanceText = fields.join(" ").simplified();
+                }
+                else
+                {
+                    m_maintenanceText = rest.simplified();
+                }
+            }
+            return true;
+        }
+    }
+
+    // The FMS's answers to uplinks: a response, the type of uplink it answers, and AK, AC
+    // or RJ - acknowledged, accepted or rejected - then a figure and sometimes a
+    // timestamp. 5827 of these:
+    //
+    //   RESREQ/AK,1158AF6                     a report request, acknowledged
+    //   RESPWI/AC,085/TS215651,2610265075      a predicted wind uplink, accepted
+    //
+    // And outright rejections, 615, whose fields after the type are not identified - the
+    // first looks like a time, but it is not when the message was sent:
+    //
+    //   REJPWI,175819,A,70,BIG,9.A,70,SANDY,93CF3
+    //
+    // The four hex digit checksum is taken off the end of both. Some put a timestamp
+    // first, leave out the comma, or put a ground address in front - "/." or
+    // "/MLBSDCR." - which is taken off along with the line breaks.
+    {
+        QString answer = t;
+        answer.remove(QChar('\r'));
+        answer.remove(QChar('\n'));
+        static const QRegularExpression addressRe(R"(^/[A-Z0-9 ]*\.)");
+        answer.remove(addressRe);
+        static const QRegularExpression checksumRe("[0-9A-F]{4}$");
+        static const QRegularExpression responseRe(R"(^RES([A-Z]{3})/(?:TS[\d,]+/)?([A-Z]{2}),?)");
+        static const QRegularExpression rejectRe(R"(^REJ([A-Z]{3}),(.*)$)");
+        const QRegularExpressionMatch response = responseRe.match(answer);
+        if (response.hasMatch())
+        {
+            m_fmsReport = "Response to uplink";
+            m_responseTo = response.captured(1);
+            m_responseStatus = response.captured(2);
+            return true;
+        }
+        answer.remove(checksumRe);
+        const QRegularExpressionMatch reject = rejectRe.match(answer);
+        if (reject.hasMatch())
+        {
+            m_fmsReport = "Uplink rejected";
+            m_responseTo = reject.captured(1);
+            m_responseData = reject.captured(2).section("/TS", 0, 0);
+            return true;
+        }
+    }
+
+    // A request for the predicted winds at the given levels over the fixes ahead, which
+    // are the route the FMS still has to fly. 708 of these.
+    //
+    //   REQPWI/WQ370.390.410:SISGA.RITAX.BANUX.VEKIR.LATLO/DQ410/WRLTFM.LTFD/TS163846,2110268A75
+    //
+    // The DQ and WR blocks are left alone. It can have a timestamp or a ground address in
+    // front, as the responses above can.
+    {
+        static const QRegularExpression windRe(R"(^(?:/[A-Z0-9 ]*\.)?REQPWI/(?:TS[\d,]+/)?WQ([\d.]+):([A-Z0-9.]+))");
+        const QRegularExpressionMatch wind = windRe.match(t);
+        if (wind.hasMatch())
+        {
+            m_fmsReport = "Wind request";
+            for (const QString& level : wind.captured(1).split('.', Qt::SkipEmptyParts)) {
+                m_windRequestLevels.append("FL" + level);
+            }
+            m_windRequestWaypoints = wind.captured(2).split('.', Qt::SkipEmptyParts);
+            return true;
+        }
+    }
+
     // Flight plan
     if (t.startsWith("FPN/"))
     {
-        extractFlightPlan(t);
+        // The message ends with the FMS's four hex digit checksum, written straight onto
+        // whatever field comes last - which is usually the final fix of the route, so it
+        // read ELVOSE36E for ELVOS. Taken off the whole first, rather than field by field
+        // as the airports and the last coordinate are: off air, every one of 356 plans
+        // heard whole ended with one
+        QString plan = t;
+        plan.remove(QChar('\r'));
+        plan.remove(QChar('\n'));
+        static const QRegularExpression checksumRe("[0-9A-F]{4}$");
+        plan.remove(checksumRe);
+        extractFlightPlan(plan);
         return !m_fpnDeparture.isEmpty() || !m_fpnArrival.isEmpty() || !m_fpnRoute.isEmpty()
             || !m_fpnRunway.isEmpty() || !m_fpnSid.isEmpty() || !m_fpnStar.isEmpty();
     }
@@ -3777,11 +4892,21 @@ QString AcarsMessageFromSubsystem::toString()
         if (m_altitudeFt >= 0) {
             lines.append(QString("<b>Altitude:</b> %1 ft").arg(m_altitudeFt));
         }
-        if (!m_lastWaypoint.isEmpty()) {
-            lines.append(QString("<b>Last waypoint:</b> %1 at %2").arg(m_lastWaypoint).arg(m_timeOver.toString("hh:mm:ss")));
+        if (m_positionTime.isValid()) {
+            lines.append(QString("<b>Time:</b> %1").arg(m_positionTime.toString("hh:mm:ss")));
         }
-        if (!m_nextWaypoint.isEmpty()) {
-            lines.append(QString("<b>Next waypoint:</b> %1 ETA %2").arg(m_nextWaypoint).arg(m_etaNext.toString("hh:mm:ss")));
+        // Either time can be missing - there is no ETA without a next waypoint
+        if (!m_lastWaypoint.isEmpty())
+        {
+            lines.append(m_timeOver.isValid()
+                ? QString("<b>Last waypoint:</b> %1 at %2").arg(m_lastWaypoint).arg(m_timeOver.toString("hh:mm:ss"))
+                : QString("<b>Last waypoint:</b> %1").arg(m_lastWaypoint));
+        }
+        if (!m_nextWaypoint.isEmpty())
+        {
+            lines.append(m_etaNext.isValid()
+                ? QString("<b>Next waypoint:</b> %1 ETA %2").arg(m_nextWaypoint).arg(m_etaNext.toString("hh:mm:ss"))
+                : QString("<b>Next waypoint:</b> %1").arg(m_nextWaypoint));
         }
         if (!m_nextPlus1Waypoint.isEmpty()) {
             lines.append(QString("<b>Then:</b> %1").arg(m_nextPlus1Waypoint));
@@ -3844,8 +4969,66 @@ QString AcarsMessageFromSubsystem::toString()
     if (m_positionValid && !m_posAdditionalData.isEmpty()) {
         lines.append(QString("<b>Additional data:</b> %1").arg(m_posAdditionalData));
     }
+    if (!m_icaoCallsign.isEmpty() && !m_fmsReport.isEmpty()) {
+        lines.append(QString("<b>Callsign:</b> %1").arg(m_icaoCallsign));
+    }
+    if (!m_maintenanceText.isEmpty()) {
+        lines.append(QString("<b>Message:</b> %1").arg(m_maintenanceText));
+    }
+    if (m_maintenanceTime.isValid()) {
+        lines.append(QString("<b>Time:</b> %1").arg(m_maintenanceTime.toString("yyyy-MM-dd hh:mm")));
+    }
+    if (!m_ataReference.isEmpty()) {
+        lines.append(QString("<b>ATA reference:</b> %1").arg(m_ataReference));
+    }
+    if (m_flightPhase >= 0) {
+        lines.append(QString("<b>Flight phase:</b> %1").arg(m_flightPhase));
+    }
+    if (!m_reportingSystem.isEmpty()) {
+        lines.append(QString("<b>Reported by:</b> %1").arg(m_reportingSystem));
+    }
+    if (!m_faultClass.isEmpty()) {
+        lines.append(QString("<b>Class:</b> %1").arg(m_faultClass));
+    }
+    if (!m_partNumber.isEmpty()) {
+        lines.append(QString("<b>Part number:</b> %1").arg(m_partNumber));
+    }
+    if (!m_responseTo.isEmpty())
+    {
+        const QHash<QString, QString> uplinks = {
+            {"REQ", "report request"},
+            {"PWI", "predicted winds"},
+            {"FPN", "flight plan"}
+        };
+        const QString uplink = uplinks.contains(m_responseTo)
+            ? QString("%1 (%2)").arg(m_responseTo).arg(uplinks.value(m_responseTo)) : m_responseTo;
+        lines.append(QString("<b>Uplink:</b> %1").arg(uplink));
+    }
+    if (!m_responseStatus.isEmpty())
+    {
+        const QHash<QString, QString> statuses = {
+            {"AK", "acknowledged"},
+            {"AC", "accepted"},
+            {"RJ", "rejected"}
+        };
+        const QString status = statuses.contains(m_responseStatus)
+            ? QString("%1 (%2)").arg(m_responseStatus).arg(statuses.value(m_responseStatus)) : m_responseStatus;
+        lines.append(QString("<b>Status:</b> %1").arg(status));
+    }
+    if (!m_responseData.isEmpty()) {
+        lines.append(QString("<b>Data:</b> %1").arg(m_responseData));
+    }
+    if (!m_windRequestLevels.isEmpty()) {
+        lines.append(QString("<b>Levels:</b> %1").arg(m_windRequestLevels.join(" ")));
+    }
+    if (!m_windRequestWaypoints.isEmpty()) {
+        lines.append(QString("<b>Waypoints:</b> %1").arg(m_windRequestWaypoints.join(" ")));
+    }
     if (lines.isEmpty()) {
         return "";
+    }
+    if (!m_fmsReport.isEmpty()) {
+        lines.prepend(QString("<b>Report:</b> %1").arg(m_fmsReport));
     }
     if (!m_fmsSublabel.isEmpty()) {
         lines.prepend(QString("<b>Subsystem:</b> %1").arg(m_fmsSublabel));
@@ -3903,6 +5086,25 @@ AcarsOffReport::AcarsOffReport(const QByteArray &message) :
 
 bool AcarsOffReport::decode(const QString &text)
 {
+    // British Airways' off report on label 12, 1804 of them over two months:
+    //   OFF012011DIA02EGLLLFMN2142BAP8110326136725R
+    // The off time, then both airports. The time was within five minutes of when the
+    // message was heard in all 300 checked. The four digits after the airports are
+    // always later - by about the length of the flight - so are probably the ETA, but
+    // are not read; nor is the rest.
+    if (m_label == "12")
+    {
+        static const QRegularExpression offRe(R"(^OFF01(\d{2})(\d{2})DIA\d{2}([A-Z]{4})([A-Z]{4}))");
+        const QRegularExpressionMatch off = offRe.match(text);
+        if (!off.hasMatch()) {
+            return false;
+        }
+        m_offTimeHours = off.captured(1).toInt();
+        m_offTimeMinutes = off.captured(2).toInt();
+        m_departure = off.captured(3);
+        m_destination = off.captured(4);
+        return true;
+    }
     m_departure = text.mid(0, 4);
     m_destination = text.mid(4, 4);
     m_offTimeHours = text.mid(8, 2).toInt();

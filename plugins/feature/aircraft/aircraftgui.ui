@@ -261,6 +261,23 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="findDatalink">
+        <property name="toolTip">
+         <string>Find an aircraft on the Map when a datalink message (CPDLC, PDC or oceanic clearance) arrives for it, so the 3D map's DCDU shows the message. Right click to choose messages that don't find their aircraft.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="aircrafticons.qrc">
+          <normaloff>:/icons/datalink.png</normaloff>:/icons/datalink.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="toolbarSpacer">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>

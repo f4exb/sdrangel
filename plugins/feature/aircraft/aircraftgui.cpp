@@ -36,6 +36,7 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QLabel>
 #include <QSpinBox>
 #include <QComboBox>
 #include <QTableWidgetItem>
@@ -665,6 +666,9 @@ void AircraftGUI::makeUIConnections()
         this,
         &AircraftGUI::on_atcLabels_clicked
     );
+    QObject::connect(ui->findDatalink, &ButtonSwitch::clicked, this, &AircraftGUI::on_findDatalink_clicked);
+    CRightClickEnabler *findDatalinkRightClickEnabler = new CRightClickEnabler(ui->findDatalink);
+    connect(findDatalinkRightClickEnabler, &CRightClickEnabler::rightClick, this, &AircraftGUI::findDatalinkSelect);
     // The statistics sit to the right of the tables. Give the tables the bulk of the
     // width by default - the statistics are two narrow columns and a date - while still
     // letting the handle be dragged.
@@ -976,6 +980,7 @@ void AircraftGUI::displaySettings()
     blockApplySettings(true);
 
     ui->atcLabels->setChecked(m_settings.m_atcLabels);
+    ui->findDatalink->setChecked(m_settings.m_findDatalinkAircraft);
     ui->stats->setChecked(m_settings.m_displayStatistics);
     ui->statistics->setVisible(m_settings.m_displayStatistics);
     ui->displayChart->setChecked(m_settings.m_displayChart);
@@ -3449,6 +3454,54 @@ void AircraftGUI::on_atcLabels_clicked(bool checked)
     m_settings.m_atcLabels = checked;
     m_settingsKeys.append("atcLabels");
     applySettings();    // The tracker refreshes the Map labels
+}
+
+void AircraftGUI::on_findDatalink_clicked(bool checked)
+{
+    m_settings.m_findDatalinkAircraft = checked;
+    m_settingsKeys.append("findDatalinkAircraft");
+    applySettings();
+}
+
+// Which messages are sent to the Map without finding their aircraft - the routine
+// replies, which would otherwise turn the view for every WILCO
+void AircraftGUI::findDatalinkSelect(const QPoint& p)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("Find Datalink Aircraft");
+
+    QFormLayout *form = new QFormLayout(&dialog);
+    form->addRow(new QLabel("Send these messages to the Map without finding the aircraft:"));
+    QList<QCheckBox *> checkBoxes;
+    for (const QString& element : AircraftSettings::m_datalinkNoFindChoices)
+    {
+        QCheckBox *checkBox = new QCheckBox(element);
+        checkBox->setChecked(m_settings.m_datalinkNoFindElements.contains(element));
+        checkBox->setToolTip(QString("A message that is only %1, or only that and other checked messages,"
+                                     " is shown on the DCDU of an aircraft already selected or followed,"
+                                     " but does not find its aircraft").arg(element));
+        form->addRow(checkBox);
+        checkBoxes.append(checkBox);
+    }
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.move(p);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        QStringList elements;
+        for (const QCheckBox *checkBox : checkBoxes)
+        {
+            if (checkBox->isChecked()) {
+                elements.append(checkBox->text());
+            }
+        }
+        m_settings.m_datalinkNoFindElements = elements;
+        m_settingsKeys.append("datalinkNoFindElements");
+        applySettings();
+    }
 }
 
 // ---- Column management ----

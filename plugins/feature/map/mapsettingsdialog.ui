@@ -411,7 +411,7 @@
              <item row="14" column="3">
               <widget class="QSpinBox" name="frameRate">
                <property name="toolTip">
-                <string>Frame rate to render the 3D map at. Lower rates use less CPU and GPU. Display uses the refresh rate of the display the map is on</string>
+                <string>Frame rate to render the 3D map at. Lower rates use less CPU and GPU. Display uses the refresh rate of the display the map is on, up to 60 fps. More than 60 fps requires QTWEBENGINE_CHROMIUM_FLAGS=--disable-frame-rate-limit</string>
                </property>
                <property name="specialValueText">
                 <string>Display</string>
@@ -682,7 +682,17 @@
                <string>Download 3D models. It is recommended to restart SDRangel after download.</string>
               </property>
               <property name="text">
-               <string>Download 3D Models (1.6GB)</string>
+               <string>Download 3D Models</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="downloadSounds">
+              <property name="toolTip">
+               <string>Download the aircraft sounds - engine sound sets, cockpit callouts and gear and flap movements - used by the 3D map.</string>
+              </property>
+              <property name="text">
+               <string>Download Sounds</string>
               </property>
              </widget>
             </item>
@@ -1264,6 +1274,7 @@
   <tabstop>sunLightEnabled</tabstop>
   <tabstop>eciCamera</tabstop>
   <tabstop>downloadModels</tabstop>
+  <tabstop>downloadSounds</tabstop>
   <tabstop>msfsNavigraphDirectory</tabstop>
   <tabstop>msfsNavigraphBrowse</tabstop>
   <tabstop>msfsAircraftDirectory</tabstop>

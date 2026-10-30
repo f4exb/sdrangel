@@ -83,6 +83,8 @@ void AircraftSettings::resetToDefaults()
     m_retentionDays = 0;    // Keep everything until the user chooses a limit
     m_flightRetentionDays = 0;
     m_atcLabels = true;
+    m_findDatalinkAircraft = false;
+    m_datalinkNoFindElements = m_datalinkNoFindDefaults;
     m_displayMaxRangeOnMap = false;
     m_atcCallsigns = false;
     m_statistics = QByteArray();
@@ -170,6 +172,8 @@ QByteArray AircraftSettings::serialize() const
     s.writeBool(56, m_displayCoverage);
     s.writeU32(57, m_coverageHiddenProtocols);
     s.writeS32(58, m_flightRetentionDays);
+    s.writeBool(59, m_findDatalinkAircraft);
+    s.writeList(60, m_datalinkNoFindElements);
 
     for (int i = 0; i < AIRCRAFT_COLUMNS; i++) {
         s.writeS32(300 + i, m_columnIndexes[i]);
@@ -237,6 +241,8 @@ bool AircraftSettings::deserialize(const QByteArray& data)
         d.readS32(42, &m_acarsPositionMins, 10);
         d.readS32(36, &m_retentionDays, 0);
         d.readS32(58, &m_flightRetentionDays, 0);
+        d.readBool(59, &m_findDatalinkAircraft, false);
+        d.readList(60, &m_datalinkNoFindElements, m_datalinkNoFindDefaults);
         d.readBlob(31, &bytetmp);
         deserializeNotificationSettings(bytetmp, m_notificationSettings);
         d.readBool(32, &m_atcLabels, true);
@@ -340,6 +346,12 @@ void AircraftSettings::applySettings(const QStringList& settingsKeys, const Airc
     }
     if (settingsKeys.contains("atcLabels")) {
         m_atcLabels = settings.m_atcLabels;
+    }
+    if (settingsKeys.contains("findDatalinkAircraft")) {
+        m_findDatalinkAircraft = settings.m_findDatalinkAircraft;
+    }
+    if (settingsKeys.contains("datalinkNoFindElements")) {
+        m_datalinkNoFindElements = settings.m_datalinkNoFindElements;
     }
     if (settingsKeys.contains("displayMaxRangeOnMap")) {
         m_displayMaxRangeOnMap = settings.m_displayMaxRangeOnMap;
@@ -505,6 +517,12 @@ QString AircraftSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("flightRetentionDays") || force) {
         ostr << " m_flightRetentionDays: " << m_flightRetentionDays;
     }
+    if (settingsKeys.contains("findDatalinkAircraft") || force) {
+        ostr << " m_findDatalinkAircraft: " << m_findDatalinkAircraft;
+    }
+    if (settingsKeys.contains("datalinkNoFindElements") || force) {
+        ostr << " m_datalinkNoFindElements: " << m_datalinkNoFindElements.join(", ").toStdString();
+    }
     if (settingsKeys.contains("atcCallsigns") || force) {
         ostr << " m_atcCallsigns: " << m_atcCallsigns;
     }
@@ -525,4 +543,38 @@ QDateTime AircraftSettings::messageCutoff() const
         days = m_flightRetentionDays;
     }
     return days > 0 ? QDateTime::currentDateTime().addDays(-days) : QDateTime();
+}
+
+// The routine replies and housekeeping, as the two decoders spell them: WILCO and ROGER
+// on both paths, and the ATN-only logical acknowledgement and data authority reports.
+// ROGER is offered but not checked to start with: it acknowledges a message without
+// complying with it, so it can be the end of an exchange worth seeing
+const QStringList AircraftSettings::m_datalinkNoFindChoices = {
+    "WILCO",
+    "ROGER",
+    "LOGICAL ACKNOWLEDGEMENT",
+    "CURRENT DATA AUTHORITY"
+};
+
+const QStringList AircraftSettings::m_datalinkNoFindDefaults = {
+    "WILCO",
+    "LOGICAL ACKNOWLEDGEMENT",
+    "CURRENT DATA AUTHORITY"
+};
+
+// Whether a datalink message should find its aircraft: not when every element of it is one
+// of those chosen not to. The elements are separated by new lines in the ACARS (FANS-1/A)
+// decode and by commas in the VDL-2 ATN one. An element with a comma of its own splits into
+// pieces that match nothing, so finds, which is the safe way round
+bool AircraftSettings::datalinkFinds(const QString& text) const
+{
+    static const QRegularExpression separators("\\n|, ");
+    const QStringList elements = text.split(separators, Qt::SkipEmptyParts);
+    for (const QString& element : elements)
+    {
+        if (!m_datalinkNoFindElements.contains(element.trimmed(), Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return elements.isEmpty();
 }

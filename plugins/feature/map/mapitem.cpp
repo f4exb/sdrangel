@@ -26,6 +26,17 @@
 // For TrackColorModel, which mapitem.h only forward declares
 #include "mapmodel.h"
 
+// Map item times are held in UTC. A local QDateTime works its offset out afresh on every
+// comparison and difference: a call into the C runtime's time zone code under a lock Qt
+// shares between all threads. The map makes thousands a second - CZML's secsTo alone was
+// 15% of the GUI thread. SDRangel's own senders write UTC, which parses with no lookup
+// and makes toUTC() free; a string with no offset (an older sender, or the web API) is
+// local time and is converted once, here
+static QDateTime parseDateTime(const QString& dateTime, Qt::DateFormat format = Qt::ISODateWithMs)
+{
+    return QDateTime::fromString(dateTime, format).toUTC();
+}
+
 // These have to live here rather than in the header, where TrackColorModel is an
 // incomplete type. "delete m_trackColorModel" there compiled, but freed the memory
 // without running ~QObject, so QQmlData::destroyed() never fired and QML kept a wrapper
@@ -75,7 +86,7 @@ void MapItem::update(SWGSDRangel::SWGMapItem *mapItem)
         m_changed |= ChangedLabel;
     }
     if (mapItem->getLabelDateTime()) {
-        m_labelDateTime = QDateTime::fromString(*mapItem->getLabelDateTime(), Qt::ISODateWithMs);
+        m_labelDateTime = parseDateTime(*mapItem->getLabelDateTime());
     } else {
         m_labelDateTime = QDateTime();
     }
@@ -115,12 +126,14 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     PROFILER_START()
     MapItem::update(mapItem);
     if (mapItem->getPositionDateTime()) {
-        m_positionDateTime = QDateTime::fromString(*mapItem->getPositionDateTime(), Qt::ISODateWithMs);
+        m_positionDateTime = parseDateTime(*mapItem->getPositionDateTime());
+        m_positionDateTimeString = *mapItem->getPositionDateTime();
     } else {
         m_positionDateTime = QDateTime();
+        m_positionDateTimeString.clear();
     }
     if (mapItem->getAltitudeDateTime()) {
-        m_altitudeDateTime = QDateTime::fromString(*mapItem->getAltitudeDateTime(), Qt::ISODateWithMs);
+        m_altitudeDateTime = parseDateTime(*mapItem->getAltitudeDateTime());
     } else {
         m_altitudeDateTime = QDateTime();
     }
@@ -129,7 +142,7 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     m_pitch = mapItem->getPitch();
     m_roll = mapItem->getRoll();
     if (mapItem->getOrientationDateTime()) {
-        m_orientationDateTime = QDateTime::fromString(*mapItem->getOrientationDateTime(), Qt::ISODateWithMs);
+        m_orientationDateTime = parseDateTime(*mapItem->getOrientationDateTime());
     } else {
         m_orientationDateTime = QDateTime();
     }
@@ -204,12 +217,12 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     // Anything else in here is only of interest to the 3D map
     m_changed |= Changed3D;
     if (mapItem->getAvailableFrom()) {
-        m_availableFrom = QDateTime::fromString(*mapItem->getAvailableFrom(), Qt::ISODateWithMs);
+        m_availableFrom = parseDateTime(*mapItem->getAvailableFrom());
     } else {
         m_availableFrom = QDateTime();
     }
     if (mapItem->getAvailableUntil()) {
-        m_availableUntil = QDateTime::fromString(*mapItem->getAvailableUntil(), Qt::ISODateWithMs);
+        m_availableUntil = parseDateTime(*mapItem->getAvailableUntil());
     } else {
         m_availableUntil = QDateTime();
     }
@@ -222,7 +235,7 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
         }
         SWGSDRangel::SWGMapAircraftState *as = mapItem->getAircraftState();
         if (as->getDateTime()) {
-            m_aircraftState->m_dateTime = QDateTime::fromString(*as->getDateTime(), Qt::ISODateWithMs);
+            m_aircraftState->m_dateTime = parseDateTime(*as->getDateTime());
         } else {
             m_aircraftState->m_dateTime = QDateTime();
         }
@@ -802,14 +815,19 @@ void ObjectMapItem::updateProvisionalTrackPoint()
 
     const QGeoCoordinate live(m_latitude, m_longitude, m_altitude);
     const QDateTime when = m_positionDateTime.isValid() ? m_positionDateTime
-                                                        : QDateTime::currentDateTime();
+                                                        : QDateTime::currentDateTimeUtc();
+    // The sender's own string, not when.toString(): updateTrack() compares the strings
+    // to recognise the sender's point replacing this one, and when is held in UTC while
+    // a sender may write local time
+    const QString whenString = m_positionDateTime.isValid() ? m_positionDateTimeString
+                                                            : when.toString(Qt::ISODateWithMs);
     if (m_trackProvisional)
     {
         if ((*m_takenTrackCoords[last] != live) || (*m_takenTrackDateTimes[last] != when))
         {
             *m_takenTrackCoords[last] = live;
             *m_takenTrackDateTimes[last] = when;
-            m_takenTrackDateTimeStrings[last] = when.toString(Qt::ISODateWithMs);
+            m_takenTrackDateTimeStrings[last] = whenString;
             m_takenTrack[last] = QVariant::fromValue(live);
             m_takenTrackRevision++;
         }
@@ -818,7 +836,7 @@ void ObjectMapItem::updateProvisionalTrackPoint()
     {
         m_takenTrackCoords.push_back(new QGeoCoordinate(live));
         m_takenTrackDateTimes.push_back(new QDateTime(when));
-        m_takenTrackDateTimeStrings.push_back(when.toString(Qt::ISODateWithMs));
+        m_takenTrackDateTimeStrings.push_back(whenString);
         m_takenTrackPositionExtrapolated.push_back(false);
         m_takenTrackAltitudeExtrapolated.push_back(false);
         m_takenTrack.push_back(QVariant::fromValue(live));
@@ -968,7 +986,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
             SWGSDRangel::SWGMapCoordinate* p = track->at(i);
             QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
             const QString dateTime = p->getDateTime() ? *p->getDateTime() : QString();
-            QDateTime *d = new QDateTime(QDateTime::fromString(dateTime, Qt::ISODateWithMs));
+            QDateTime *d = new QDateTime(parseDateTime(dateTime));
             m_takenTrackCoords.push_back(c);
             m_takenTrackDateTimes.push_back(d);
             m_takenTrackDateTimeStrings.push_back(dateTime);
@@ -1011,7 +1029,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
             } else if (m_altitudeDateTime.isValid()) {
                 m_takenTrackDateTimes.push_back(new QDateTime(m_altitudeDateTime));
             } else {
-                m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTime()));
+                m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTimeUtc()));
             }
             m_takenTrackPositionExtrapolated.push_back(false);
             m_takenTrackAltitudeExtrapolated.push_back(false);
@@ -1106,7 +1124,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
             }
             else
             {
-                m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTime()));
+                m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTimeUtc()));
                 m_takenTrackPositionExtrapolated.push_back(false);
                 m_takenTrackAltitudeExtrapolated.push_back(false);
                 m_takenTrackCoords.push_back(new QGeoCoordinate(c));
@@ -1145,7 +1163,7 @@ void ObjectMapItem::updatePredictedTrack(QList<SWGSDRangel::SWGMapCoordinate *> 
         {
             SWGSDRangel::SWGMapCoordinate* p = track->at(i);
             QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
-            QDateTime *d = new QDateTime(QDateTime::fromString(*p->getDateTime(), Qt::ISODate));
+            QDateTime *d = new QDateTime(parseDateTime(*p->getDateTime(), Qt::ISODate));
             m_predictedTrackCoords.push_back(c);
             m_predictedTrackDateTimes.push_back(d);
             m_predictedTrack.push_back(QVariant::fromValue(*c));

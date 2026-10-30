@@ -231,7 +231,11 @@ Check to enable individual avionics displays for aircraft selected on the 3D Map
 
 <h4>PFD (Primary Flight Display)</h4>
 
-When checked, the aircraft PFD (Primary Flight Display) will be displayed. This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude and altitude.
+When checked, the aircraft PFD (Primary Flight Display) will be displayed. This can be either Airbus or Boeing style, depending upon the aircraft type.
+This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude, altitude, vertical rate, heading, track and QNH setting.
+It can display whether the autopilot is enganged (CMD or AP1+2) and selected alitutude and heading, as well as lateral and vertical navigation modes, such as LNAV/NAV, VNAV/CLB/ALT, LOC and G/S.
+The flight director is simulated, rather than being based on ADS-B data, as it the rad alt (radio altimeter).
+In the bottom left hand corner it will display the aircrafts callsign and type, if known. 
 
 The PFD can be moved by left clicking on it and dragging it. It can be resized by left clicking and dragging in the bottom right corner.
 
@@ -243,9 +247,9 @@ When checked, the aircraft ND (Navigation Display) will be displayed for the sel
 ground speed, true air speed and wind direction, the flight plan and its waypoints when one has been received (via the Aircraft feature,
 from an ACARS FPN message or oceanic clearance), and other nearby aircraft as TCAS-style traffic symbols with relative altitudes.
 
-Two display modes are supported, toggled by clicking the button in the top right corner: ARC, which shows a 120 degree arc ahead of
-the aircraft, and ROSE, which shows a full 360 degree compass rose. The range (10 to 320 nautical miles) can be changed with the
-+ and - buttons or by scrolling the mouse wheel over the display.
+Two display modes are supported, toggled by the MODE button in the EFIS. ARC, which shows a 120 degree arc ahead of
+the aircraft, and ROSE, which shows a full 360 degree compass rose. The range (10 to 320 nautical miles) can be changed with the RANGE button
+in the EFIS, or by scrolling the mouse wheel over the ND.
 
 When the flight plan includes an arrival approach or runway (e.g. ILSY 18R), it is displayed at the top of the ND once the aircraft
 is within 250 nautical miles of the arrival airport, or whenever the approach is being flown (G/S or LOC mode active).
@@ -283,7 +287,7 @@ When checked, the Radio Management Panel will be displayed. This:
 <h4>DCDU (Datalink Control and Display Unit)</h4>
 
 When a datalink ATC message (CPDLC, pre-departure clearance or oceanic clearance, received via the Aircraft feature) arrives for the
-currently selected aircraft, a DCDU window pops up on the 3D map showing the time the message was received, which station it is to
+currently selected aircraft, or the aircraft being followed, a DCDU window pops up on the 3D map showing the time the message was received, which station it is to
 or from (e.g. 1412Z FROM EDDS) and the message text. Long messages are split over multiple pages - click the PG indicator to move
 between them. The window is closed by clicking CLOSE, and can be moved and resized like the PFD and ND.
 

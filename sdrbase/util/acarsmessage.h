@@ -21,6 +21,8 @@
 
 #include <QString>
 #include <QDate>
+#include <QDateTime>
+#include <QStringList>
 #include <QTime>
 #include <QSharedPointer>
 #include <QHash>
@@ -235,13 +237,18 @@ public:
     QString m_aircraftICAO;
     QTime m_time;
     QString m_mti;  // Message text identifier
+    bool m_positionValid = false;   //!< From the contact (FPO)
+    float m_latitude = 0.0f;
+    float m_longitude = 0.0f;
     AcarsATSFacilitiesNotification(const QByteArray &message);
     bool decode(const QString &text) override;
     virtual QString toString() override;
+    bool getPosition(float& latitude, float& longitude, int& altitudeFt) const override;
 };
 
 class SDRBASE_API AcarsRequestOceanicClearance : public AcarsMessage {
 public:
+    QString m_atcCenter;    // The ground address it is sent to, e.g. EGGX; empty if not given
     QString m_avionicsIndicator;
     QString m_aircraft;
     QString m_entryPoint;
@@ -394,6 +401,8 @@ public:
     // The airline formats, tried before the ARINC ones. Each returns true only when the
     // text really is that format, because these labels carry other things as well.
     bool decodeAirlinePosition(const QString &text);
+    bool decodeOperatorPosition(const QString &text);
+    bool decodeRouteReport(const QString &text);
     bool decodeInRangePosition(const QString &text);
     bool decodeWaypointPosition(const QString &text);
     bool decodeRoutedPosition(const QString &text);
@@ -407,10 +416,14 @@ public:
     bool getPosition(float& latitude, float& longitude, int& altitudeFt) const override;
 };
 
-// Airline operational reports on label 80 (3X01 POSRPT / OPNORM / INRANG formats)
+// Airline operational reports on label 80 (3X01 POSRPT / OPNORM / INRANG formats, and
+// the ETA, OFFRP, DSPTCH, OPSCTL and NLINFO reports with the same header)
 class SDRBASE_API AcarsOpsReport : public AcarsMessage {
 public:
-    QString m_reportType;           // POSRPT, OPNORM or INRANG
+    QString m_reportType;           // POSRPT, OPNORM, INRANG, ETA, OFFRP...
+    QTime m_outTime;                // From /OUT and /OFF, on the off report
+    QTime m_offTime;
+    QString m_freeText;             // OPSCTL and NLINFO
     QString m_reportFlight;
     int m_day = -1;
     QString m_departureAirport;
@@ -471,6 +484,25 @@ public:
     // FMS reports (e.g. #M1BPOS position, #M1BFPN flight plan) when the text is not
     // an ARINC 622 ATS message
     QString m_fmsSublabel;
+    //!< What kind of report it is, where the text does not make that plain - the progress
+    //!< report and the position reports that are not the FMC's own
+    QString m_fmsReport;
+    QTime m_positionTime;           //!< When the position was taken, for reports that name no waypoint
+    //!< The maintenance fault (FLR) and warning (WRN) reports
+    QDateTime m_maintenanceTime;
+    QString m_ataReference;         //!< Chapter-section-subject, e.g. 34-58-00
+    int m_flightPhase = -1;         //!< Airbus flight phase number
+    QString m_maintenanceText;
+    QString m_reportingSystem;
+    QString m_partNumber;
+    QString m_faultClass;           //!< HARD or INTERMITTENT, in the .1/ layout
+    //!< The FMS's response to, or rejection of, an uplink: RESPWI/AC, REJPWI
+    QString m_responseTo;           //!< The uplink type, e.g. PWI
+    QString m_responseStatus;       //!< AK, AC or RJ
+    QString m_responseData;         //!< What follows a rejection, which is not identified
+    //!< A request for predicted winds (REQPWI)
+    QStringList m_windRequestLevels;
+    QStringList m_windRequestWaypoints;
     bool m_positionValid = false;
     float m_latitude = 0.0f;
     float m_longitude = 0.0f;

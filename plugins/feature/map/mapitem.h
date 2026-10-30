@@ -133,6 +133,7 @@ protected:
     friend ObjectMapModel;
     friend CZML;
     QDateTime m_positionDateTime;
+    QString m_positionDateTimeString;   // As the sender wrote it, which m_positionDateTime is not - see updateTrack
     QDateTime m_altitudeDateTime;
     bool m_useHeadingPitchRoll;
     float m_heading;
@@ -220,7 +221,7 @@ protected:
     float m_modelAltitudeOffset;
     QList<CesiumInterface::Animation *> m_animations;
     MapAircraftState *m_aircraftState;
-    // Engine sound-set directory below 3d/Sounds, or a legacy bundled audio file.
+    // Engine sound-set directory below 3d/Sounds, or a single file in 3d/Sounds/aircraft.
     QString m_loopSound;    // Empty for none
     // Fast replay sends PFD state immediately but lets the ordinary model flush send
     // the accumulated altitude-coloured track once per batch. These flags keep those

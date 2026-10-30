@@ -273,9 +273,11 @@ Aircraft3DModels::~Aircraft3DModels()
 
 // The ICAO type and operator a model converted from FSLTL/MSFS is named after, with the
 // FSLTL_ prefix and _cesium suffix already off: A20N_AAN, Asobo_208B_ACN, B744F_CLX. The
-// operator is empty for a model of the type in no particular livery. False for a name
-// that doesn't read as a type
-static bool typeAndOperator(const QString &name, QString &type, QString &operatorICAO)
+// operator is empty for a model of the type in no particular livery. Variant is set for a
+// special livery of the operator's, named with something after it: A319_BAW_BEA, BA's
+// retro BEA scheme, beside A319_BAW, its everyday one. False for a name that doesn't read
+// as a type
+static bool typeAndOperator(const QString &name, QString &type, QString &operatorICAO, bool &variant)
 {
     const QStringList parts = name.split('_');
 
@@ -297,14 +299,38 @@ static bool typeAndOperator(const QString &name, QString &type, QString &operato
     }
 
     operatorICAO.clear();
+    variant = false;
     if (parts.size() > typeIndex + 1)
     {
         const QString candidate = parts[typeIndex + 1].toUpper();
-        if (candidate.size() == 3) {
+        if (candidate.size() == 3)
+        {
             operatorICAO = candidate;
+            variant = parts.size() > typeIndex + 2;
         }
     }
     return true;
+}
+
+// Only one model can stand for an operator's livery on a type, and where the set has
+// the operator's plain livery that is the one: a variant only stands in where there is
+// none. Without this the last found won, which for BA's A319 was the retro BEA scheme,
+// on every BA A319 - the scan finds it after the everyday one. Otherwise a model still
+// replaces what was found before it, as the FSLTL models replace the Bluebell ones: a
+// variant is as often the everyday fleet (A320_BAW_IAE, by its engines) as a special
+// scheme. Plain holds the keys a plain livery has been found for.
+static void insertLivery(QHash<QString, QString> &liveries, QSet<QString> &plain,
+                         const QString &key, const QString &model, bool variant)
+{
+    if (!variant)
+    {
+        liveries.insert(key, model);
+        plain.insert(key);
+    }
+    else if (!plain.contains(key))
+    {
+        liveries.insert(key, model);
+    }
 }
 
 // The installed 3D models: the downloadable Bluebell set and any converted from FSLTL/MSFS
@@ -361,6 +387,7 @@ void Aircraft3DModels::findModels(bool verbose)
         lowDetailFiles.insert(lowDetailModels.next());
     }
     QDirIterator msfsModels(msfsDir, {"*_cesium.gltf"}, QDir::Files, QDirIterator::Subdirectories);
+    QSet<QString> plainLiveries;
     while (msfsModels.hasNext())
     {
         const QString gltf = msfsModels.next();
@@ -368,8 +395,9 @@ void Aircraft3DModels::findModels(bool verbose)
         static const QString prefix = QStringLiteral("FSLTL_");
         QString type;
         QString operatorICAO;
+        bool variant;
         if (!aircraft.startsWith(prefix, Qt::CaseInsensitive)
-            || !typeAndOperator(aircraft.mid(prefix.size()), type, operatorICAO)) {
+            || !typeAndOperator(aircraft.mid(prefix.size()), type, operatorICAO, variant)) {
             continue;
         }
 
@@ -380,7 +408,7 @@ void Aircraft3DModels::findModels(bool verbose)
             m_lowDetailModels.insert(filename, QDir(modelDir).relativeFilePath(lowDetail));
         }
         if (!operatorICAO.isEmpty()) {
-            m_3DModels.insert(type + "_" + operatorICAO, filename);
+            insertLivery(m_3DModels, plainLiveries, type + "_" + operatorICAO, filename, variant);
         }
     }
 }
@@ -396,17 +424,19 @@ void Aircraft3DModels::findModels(bool verbose)
 void Aircraft3DModels::findLiveryIcons()
 {
     const QStringList icons = QDir(":/map/liveries").entryList({"*.png"}, QDir::Files);
+    QSet<QString> plainLiveries;
     for (const QString &icon : icons)
     {
         const QString name = QFileInfo(icon).completeBaseName();
         QString type;
         QString operatorICAO;
-        if (!typeAndOperator(name, type, operatorICAO)) {
+        bool variant;
+        if (!typeAndOperator(name, type, operatorICAO, variant)) {
             continue;
         }
         m_3DModelsByType[type].append(name);
         if (!operatorICAO.isEmpty()) {
-            m_3DModels.insert(type + "_" + operatorICAO, name);
+            insertLivery(m_3DModels, plainLiveries, type + "_" + operatorICAO, name, variant);
         }
     }
 }
