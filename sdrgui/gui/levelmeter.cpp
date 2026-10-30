@@ -118,8 +118,8 @@ void LevelMeter::requestUpdate()
         return;
     }
     // A hidden meter is still fed by its channel's tick. Qt would discard the repaint,
-    // but asking for it still marks the window dirty
-    if (!isVisible()) {
+    // but asking for it still marks the window dirty.
+    if (!isVisible() || visibleRegion().isEmpty()) {
         return;
     }
     if ((levelPixel(m_avgLevel) == m_paintedAvg)
@@ -150,11 +150,12 @@ void LevelMeter::levelChanged(qreal avgLevel, qreal peakLevel, int numSamples)
         m_peakHoldLevelChanged.start();
     }
 
-    // The redraw timer exists to animate the peak decaying between readings. A reading
-    // has just arrived, so restart it rather than let it free run: otherwise its ticks
-    // interleave with these and the meter asks for half as many repaints again as there
-    // is new data to show
-    m_redrawTimer->start(RedrawInterval);
+    // The redraw timer exists to animate the peak decaying between readings, so it only
+    // needs starting when there is a peak to decay or hold and it has stopped.
+    m_lastReading.start();
+    if (!m_redrawTimer->isActive() && ((m_decayedPeakLevel > 0.0) || (m_peakHoldLevel > 0.0))) {
+        m_redrawTimer->start(RedrawInterval);
+    }
 
     requestUpdate();
 }
@@ -177,6 +178,10 @@ void LevelMeter::redrawTimerExpired()
     // the next reading arrives, which restarts it
     if ((m_decayedPeakLevel == 0.0) && (m_peakHoldLevel == 0.0)) {
         m_redrawTimer->stop();
+    }
+
+    if (m_lastReading.isValid() && (m_lastReading.elapsed() < RedrawInterval)) {
+        return;
     }
 
     requestUpdate();

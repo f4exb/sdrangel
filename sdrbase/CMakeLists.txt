@@ -225,6 +225,7 @@ set(sdrbase_SOURCES
     util/airlines.cpp
     util/ais.cpp
     util/android.cpp
+    util/asset3dmanifest.cpp
     util/aprsfi.cpp
     util/aviationweather.cpp
     util/ax25.cpp
@@ -512,6 +513,7 @@ set(sdrbase_HEADERS
     util/airlines.h
     util/ais.h
     util/android.h
+    util/asset3dmanifest.h
     util/aprsfi.h
     util/aurora.h
     util/aviationweather.h

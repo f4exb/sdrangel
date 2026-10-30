@@ -5427,8 +5427,10 @@ void GLSpectrumView::leaveEvent(QEvent* event)
 
 void GLSpectrumView::tick()
 {
-    // Update scroll bar to account for changes to m_spectrumBuffer and waterfall size changes
-    updateScrollBar();
+    // Update scroll bar to account for changes to m_spectrumBuffer and waterfall size changes.
+    if (m_scrollBar && !m_scrollBar->visibleRegion().isEmpty()) {
+        updateScrollBar();
+    }
 
     if (m_displayChanged)
     {

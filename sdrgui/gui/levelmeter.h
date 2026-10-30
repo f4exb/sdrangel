@@ -162,6 +162,12 @@ protected:
     */
     uint32_t m_avgSmoothing;
 
+    /**
+     * Time at which the last reading arrived, so the redraw timer can leave the
+     * repaint to it while readings are coming in.
+     */
+    QElapsedTimer m_lastReading;
+
     QTimer *m_redrawTimer;
 
     QColor m_avgColor;
