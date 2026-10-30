@@ -13,7 +13,7 @@ The ADS-B plugin can send aircraft for display on the [Map Feature](../../featur
 ![ADS-B on 3D Map](../../../doc/img/ADSBDemod_plugin_map_3d.png)
 
 The ADS-B plugin can also send data to the [Aircraft feature](../../feature/aircraft/readme.md) to be combined with ACARS data.
- 
+
 The ADS-B plugin can be run in server mode, with aircraft state accessible via SDRangel's API and received frames can be forwarded via IP to aggregators.
 
 <h2>Interface</h2>

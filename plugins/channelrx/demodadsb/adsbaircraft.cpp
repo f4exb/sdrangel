@@ -472,4 +472,3 @@ void ADSBAircraft::setHeading(float heading, const QDateTime& dateTime)
     m_orientationDateTime = dateTime;
     m_trackWhenHeadingSet = m_track;
 }
-

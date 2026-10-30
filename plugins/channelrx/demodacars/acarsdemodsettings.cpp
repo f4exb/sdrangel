@@ -277,5 +277,3 @@ bool AcarsDemodSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
-
-
