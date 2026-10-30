@@ -76,8 +76,12 @@ AndroidSDRDriverInput::~AndroidSDRDriverInput()
         &AndroidSDRDriverInput::networkManagerFinished
     );
     delete m_networkManager;
+    m_networkManager = nullptr;
     stop();
-    m_androidSDRDriverInputTCPPHandler->deleteLater();
+    // Can't use deleteLater(), as the thread the handler lives in has stopped,
+    // so the deferred delete event would never be processed
+    delete m_androidSDRDriverInputTCPPHandler;
+    m_androidSDRDriverInputTCPPHandler = nullptr;
 }
 
 void AndroidSDRDriverInput::destroy()
