@@ -27,6 +27,7 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
+#include "SWGMapItem.h"
 
 #include "feature/featureset.h"
 #include "settings/serializable.h"

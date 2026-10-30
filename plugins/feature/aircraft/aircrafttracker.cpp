@@ -774,8 +774,6 @@ void AircraftTracker::processReport(AircraftReport& report)
         }
     }
 
-    // Whether THIS report supplied the position we are now holding - see updateStatistics()
-    bool positionAccepted = false;
     // How far away the position THIS report carried is, whether or not it was adopted
     bool reportRangeValid = false;
     float reportRangeKm = 0.0f;
@@ -872,7 +870,6 @@ void AircraftTracker::processReport(AircraftReport& report)
 
         if (current && !superseded && plausible)
         {
-            positionAccepted = true;
             item->m_positionRankTimes[rank] = report.m_received;
             item->m_positionRank = rank;
             item->m_positionValid = true;

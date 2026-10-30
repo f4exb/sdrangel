@@ -105,7 +105,7 @@ bool reusableKtx2(const QString &fileName)
     const quint32 faceCount = littleEndianValue<quint32>(prefix, 36);
     const quint32 levelCount = littleEndianValue<quint32>(prefix, 40);
     if (width == 0 || height == 0 || faceCount != 1 || levelCount == 0 ||
-        levelCount > 32 || prefix.size() < 80 + levelCount * 24) {
+        levelCount > 32 || prefix.size() < 80 + static_cast<int>(levelCount) * 24) {
         return false;
     }
 

@@ -107,8 +107,8 @@ public:
 public:
     ObjectMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
         MapItem(sourcePipe, group, itemSettings, mapItem),
-        m_aircraftState(nullptr),
-        m_trackColorModel(nullptr)
+        m_trackColorModel(nullptr),
+        m_aircraftState(nullptr)
     {
         update(mapItem);
     }

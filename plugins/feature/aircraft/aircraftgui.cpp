@@ -1434,7 +1434,7 @@ void AircraftGUI::trackerDocumentsAdded(const QList<DocumentEvent>& documents)
         row.m_receivedMs = e.m_received.isValid() ? e.m_received.toMSecsSinceEpoch() : 0;
         row.m_mapName = e.m_mapName;
         row.m_text = e.m_text;
-        row.m_cells = { e.m_flight, e.m_reg, e.m_kind, e.m_title };
+        row.m_cells = QStringList{ e.m_flight, e.m_reg, e.m_kind, e.m_title };
         // Logons go to their own tab. There are far more of them than of everything else
         // together - 6610 against 700 in a week here - so left in with the flight plans
         // and clearances they buried them.
@@ -1505,7 +1505,7 @@ void AircraftGUI::trackerAtcMessages(const QList<AtcEvent>& messages)
         // The link it arrived on, not e.m_protocol: every ATC message is CPDLC by
         // definition - addAtcMessage() returns early for anything else - so that column
         // held the same word in every row
-        row.m_cells = { e.m_link, QString(QChar(e.m_uplink ? 0x2191 : 0x2193)), e.m_from, e.m_to, e.m_message };
+        row.m_cells = QStringList{ e.m_link, QString(QChar(e.m_uplink ? 0x2191 : 0x2193)), e.m_from, e.m_to, e.m_message };
         rows.append(row);
     }
     m_atcModel->append(rows);

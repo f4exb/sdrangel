@@ -285,14 +285,14 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_beaconDialog(this),
     m_ibpBeaconDialog(this),
     m_radioTimeDialog(this),
+    m_viewCoordinator(this),
+    m_restoreMapPosition(false),
     m_cesium(nullptr),
     m_legend(nullptr),
     m_nasaWidget(nullptr),
     m_legendWidget(nullptr),
     m_overviewWidget(nullptr),
-    m_descriptionWidget(nullptr),
-    m_restoreMapPosition(false),
-    m_viewCoordinator(this)
+    m_descriptionWidget(nullptr)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
