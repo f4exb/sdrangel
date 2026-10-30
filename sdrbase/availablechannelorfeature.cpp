@@ -19,7 +19,10 @@
 
 bool AvailableChannelOrFeature::operator==(const AvailableChannelOrFeature& a) const
 {
-    return (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type) && ((m_kind == 'M') && (m_streamIndex == a.m_streamIndex));
+    // The object as well as the place. Not every way of removing a channel announces it
+    // (loading a preset deletes them all without a channelRemoved), so the channel now in
+    // a slot can be a new one of the same type, which needs its own pipes registering.
+    return (m_object == a.m_object) && (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type) && ((m_kind != 'M') || (m_streamIndex == a.m_streamIndex));
 }
 
 QString AvailableChannelOrFeature::getId() const
