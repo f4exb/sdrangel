@@ -47,7 +47,10 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
+![3D Map feature avionics](../../../doc/img/Map_plugin_aircraft.png)
+
 3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (26).
+The aircraft sounds are not included either, and are downloaded with the Download Sounds button beside it.
 
 <h2>Interface</h2>
 
@@ -345,9 +348,14 @@ For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will
 * Whether FXAA anti-aliasing is applied.
 * Whether MSAA anti-aliasing is applied and how many samples to use.
 * Whether the FPS (Frames Per Second) are displayed.
+* The frame rate the 3D map is rendered at. The default is 60 fps. Display uses the refresh rate of the display the map is on. Lower rates use less CPU and GPU.
+QtWebEngine puts at most 60 frames per second on screen, so to run the 3D map at more than 60 FPS, set the environment variable `QTWEBENGINE_CHROMIUM_FLAGS=--disable-frame-rate-limit` before starting SDRangel.
+Without it, frames rendered above 60 FPS are discarded and Display is limited to 60 fps. However, this can result in stuttering at the Qt compositor discarding rendered frames, so currently isn't recommended.
 
 The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
 These are not included with the SDRangel distribution, so must be downloaded. It is recommended to restart SDRangel after downloading the models.
+
+The "Download Sounds" button will download the aircraft sounds the 3D map plays: the engine sound sets, the cockpit callouts, and the gear and flap movements.
 
 ![Map Display Settings Dialog Items Tab](../../../doc/img/Map_plugin_display_settings_items.png)
 
