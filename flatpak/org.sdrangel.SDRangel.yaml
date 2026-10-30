@@ -540,6 +540,20 @@ modules:
         url: https://github.com/cropinghigh/inmarsatc.git
         commit: cda1242e79981d71cd8608e971c8dbc691942b10
 
+  - name: libacars
+    buildsystem: cmake-ninja
+    config-opts:
+      - -Wno-dev
+    sources:
+      - type: git
+        url: https://github.com/szpajder/libacars.git
+        tag: v2.2.1
+        commit: 9af09a0121d4ec577339cbd4c7420d7519da48fa
+    cleanup:
+      - /bin/decode_acars_apps
+      - /bin/adsc_get_position
+      - /bin/cpdlc_get_position
+
   - name: rnnoise
     sources:
       - type: git
@@ -565,6 +579,7 @@ modules:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DENABLE_QT6=ON
       - -DRX_SAMPLE_24BIT=ON
+      - -DLIBACARS_DIR=/app
       - -Wno-dev
     sources:
       - type: dir

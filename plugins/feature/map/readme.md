@@ -229,7 +229,7 @@ Select from:
 
 <h3>21: Avionics</h3>
 
-Check to enable individual avionics displays for aircraft selected on the 3D Map. 
+Check to enable individual avionics displays for aircraft selected on the 3D Map.
 
 <h4>PFD (Primary Flight Display)</h4>
 
@@ -237,7 +237,7 @@ When checked, the aircraft PFD (Primary Flight Display) will be displayed. This 
 This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude, altitude, vertical rate, heading, track and QNH setting.
 It can display whether the autopilot is enganged (CMD or AP1+2) and selected alitutude and heading, as well as lateral and vertical navigation modes, such as LNAV/NAV, VNAV/CLB/ALT, LOC and G/S.
 The flight director is simulated, rather than being based on ADS-B data, as it the rad alt (radio altimeter).
-In the bottom left hand corner it will display the aircrafts callsign and type, if known. 
+In the bottom left hand corner it will display the aircrafts callsign and type, if known.
 
 The PFD can be moved by left clicking on it and dragging it. It can be resized by left clicking and dragging in the bottom right corner.
 
