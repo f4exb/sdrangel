@@ -52,6 +52,8 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (26).
 The aircraft sounds are not included either, and are downloaded with the Download Sounds button beside it.
 
+If the 3D map doesn't display on Linux, try setting QT_QPA_PLATFORM=xcb QTWEBENGINE_CHROMIUM_FLAGS="--ignore-gpu-blocklist"
+
 <h2>Interface</h2>
 
 ![Map feature plugin GUI](../../../doc/img/Map_plugin.png)
