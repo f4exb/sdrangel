@@ -1877,6 +1877,7 @@ bool ObjectMapFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
 void ObjectMapFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
 {
     PROFILER_START()
+    beginFilterChange();
     m_zoomLevel = zoomLevel;
     if (!std::isnan(topLeftLongitude))
     {
@@ -1885,7 +1886,7 @@ void ObjectMapFilter::viewChanged(double topLeftLongitude, double topLeftLatitud
         m_bottomRightLongitude = bottomRightLongitude;
         m_bottomRightLatitude = bottomRightLatitude;
     }
-    invalidateFilter();
+    endFilterChange();
     PROFILER_STOP("Map filter objects")
 }
 
@@ -1927,11 +1928,12 @@ bool PolygonFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourcePar
 void PolygonFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
 {
     PROFILER_START()
+    beginFilterChange();
     m_zoomLevel = zoomLevel;
     if (!std::isnan(topLeftLongitude)) {
         m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
     }
-    invalidateFilter();
+    endFilterChange();
     PROFILER_STOP("Map filter polygons")
 }
 
@@ -1972,11 +1974,12 @@ bool PolylineFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourcePa
 void PolylineFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
 {
     PROFILER_START()
+    beginFilterChange();
     m_zoomLevel = zoomLevel;
     if (!std::isnan(topLeftLongitude)) {
         m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
     }
-    invalidateFilter();
+    endFilterChange();
     PROFILER_STOP("Map filter polylines")
 }
 
@@ -2021,11 +2024,12 @@ bool ImageFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParen
 void ImageFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
 {
     PROFILER_START()
+    beginFilterChange();
     m_zoomLevel = zoomLevel;
     if (!std::isnan(topLeftLongitude)) {
         m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
     }
-    invalidateFilter();
+    endFilterChange();
     PROFILER_STOP("Map filter images")
 }
 
@@ -2037,24 +2041,28 @@ Q_INVOKABLE int ImageFilter::mapRowToSource(int row)
 
 void PolygonFilter::setPosition(const QGeoCoordinate& position)
 {
+    beginFilterChange();
     m_position = position;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void PolylineFilter::setPosition(const QGeoCoordinate& position)
 {
+    beginFilterChange();
     m_position = position;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void ObjectMapFilter::setPosition(const QGeoCoordinate& position)
 {
+    beginFilterChange();
     m_position = position;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void ImageFilter::setPosition(const QGeoCoordinate& position)
 {
+    beginFilterChange();
     m_position = position;
-    invalidateFilter();
+    endFilterChange();
 }

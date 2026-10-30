@@ -3713,14 +3713,16 @@ void MapGUI::find(const QString& target)
             }
             else
             {
+                // The names match case-insensitively, but the 3D map's IDs don't, so
+                // track by the item's own name, not what was typed
                 ObjectMapItem *mapItem = (ObjectMapItem *)m_objectMapModel.findMapItem(target);
                 if (mapItem != nullptr)
                 {
                     map->setProperty("center", QVariant::fromValue(mapItem->getCoordinates()));
                     if (m_cesium) {
-                        m_cesium->track(target);
+                        m_cesium->track(mapItem->getName());
                     }
-                    m_objectMapModel.moveToFront(m_objectMapModel.findMapItemIndex(target).row());
+                    m_objectMapModel.moveToFront(mapItem->m_row);
                     return;
                 }
 
@@ -3729,18 +3731,18 @@ void MapGUI::find(const QString& target)
                 {
                     map->setProperty("center", QVariant::fromValue(polylineMapItem->getCoordinates()));
                     if (m_cesium) {
-                        m_cesium->track(target);
+                        m_cesium->track(polylineMapItem->getName());
                     }
                     //m_polylineMapModel.moveToFront(m_polylineMapModel.findMapItemIndex(target).row());
                     return;
                 }
 
-                PolygonMapItem *polygonMapItem = (PolygonMapItem *)m_polylineMapModel.findMapItem(target);
+                PolygonMapItem *polygonMapItem = (PolygonMapItem *)m_polygonMapModel.findMapItem(target);
                 if (polygonMapItem != nullptr)
                 {
                     map->setProperty("center", QVariant::fromValue(polygonMapItem->getCoordinates()));
                     if (m_cesium) {
-                        m_cesium->track(target);
+                        m_cesium->track(polygonMapItem->getName());
                     }
                     //m_polylineMapModel.moveToFront(m_polylineMapModel.findMapItemIndex(target).row());
                     return;

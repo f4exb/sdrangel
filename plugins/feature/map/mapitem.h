@@ -73,6 +73,7 @@ public:
     int m_row = -1;
     virtual void update(SWGSDRangel::SWGMapItem *mapItem);
     QGeoCoordinate getCoordinates();
+    const QString& getName() const { return m_name; }
 
 protected:
 

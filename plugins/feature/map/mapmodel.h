@@ -454,6 +454,14 @@ public:
     Q_INVOKABLE int mapRowToSource(int row);
     void setPosition(const QGeoCoordinate& position);
 
+protected:
+    // Qt 6.10 brought these, deprecating invalidateFilter() in their favour. On anything
+    // older they stand in for it, as in AcarsMessageFilter
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange() {}
+    void endFilterChange() { invalidateFilter(); }
+#endif
+
 private:
     QGeoRectangle m_view;
     double m_zoomLevel;
@@ -475,6 +483,13 @@ public:
     Q_INVOKABLE void viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel);
     Q_INVOKABLE int mapRowToSource(int row);
     void setPosition(const QGeoCoordinate& position);
+
+protected:
+    // As in PolygonFilter
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange() {}
+    void endFilterChange() { invalidateFilter(); }
+#endif
 
 private:
     QGeoRectangle m_view;
@@ -503,6 +518,13 @@ public:
     Q_INVOKABLE int mapRowToSource(int row);
     void setPosition(const QGeoCoordinate& position);
 
+protected:
+    // As in PolygonFilter
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange() {}
+    void endFilterChange() { invalidateFilter(); }
+#endif
+
 private:
     double m_topLeftLongitude;
     double m_topLeftLatitude;
@@ -527,6 +549,13 @@ public:
     Q_INVOKABLE void viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel);
     Q_INVOKABLE int mapRowToSource(int row);
     void setPosition(const QGeoCoordinate& position);
+
+protected:
+    // As in PolygonFilter
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    void beginFilterChange() {}
+    void endFilterChange() { invalidateFilter(); }
+#endif
 
 private:
     QGeoRectangle m_view;

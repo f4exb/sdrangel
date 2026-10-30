@@ -533,8 +533,11 @@ AircraftGUI::AircraftGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     });
 
     // Context menus: copy cell contents or find the aircraft on the Map
-    for (auto pair : { qMakePair((QTableView *) ui->aircraft, true), qMakePair((QTableView *) ui->oldAircraft, true),
-                       qMakePair((QTableView *) ui->flights, false), qMakePair((QTableView *) ui->oldFlights, false) })
+    const QPair<QTableView *, bool> contextMenuViews[] = {
+        { ui->aircraft, true }, { ui->oldAircraft, true },
+        { ui->flights, false }, { ui->oldFlights, false }
+    };
+    for (const auto& pair : contextMenuViews)
     {
         QTableView *view = pair.first;
         bool isAircraft = pair.second;
@@ -940,8 +943,11 @@ void AircraftGUI::setDefaultColumnWidths()
     set(ui->flights, FlightTableModel::COL_ROUTE_SOURCE, "Message <>DB");
 
     // The archive views show the same columns, so give them the same widths
-    for (auto pair : { qMakePair((QTableView *) ui->aircraft, (QTableView *) ui->oldAircraft),
-                       qMakePair((QTableView *) ui->flights, (QTableView *) ui->oldFlights) })
+    const QPair<QTableView *, QTableView *> archiveViews[] = {
+        { ui->aircraft, ui->oldAircraft },
+        { ui->flights, ui->oldFlights }
+    };
+    for (const auto& pair : archiveViews)
     {
         for (int col = 0; col < pair.first->model()->columnCount(); col++) {
             pair.second->setColumnWidth(col, pair.first->columnWidth(col));

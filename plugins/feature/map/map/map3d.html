@@ -1004,23 +1004,29 @@
             viewer.selectedEntity = pickEntityPrioritized(e);
         }
 
+        // Follow an entity with the camera, in the current camera mode. Something with no
+        // position to follow - a polygon or polyline - is zoomed to instead
+        function followEntity(entity) {
+            withFullDetail(entity, function () {
+                if (cameraMode === cameraModeFirstPerson) {
+                    setFirstPersonView(entity);
+                } else if (cameraMode === cameraModeFlyBy) {
+                    setFlyByView(entity);
+                } else {
+                    if (Cesium.Property.getValueOrUndefined(entity.position, viewer.clock.currentTime)) {
+                        setThirdPersonView(entity);
+                    } else {
+                        clearFarAmbient(entity);
+                        viewer.zoomTo(entity);
+                    }
+                }
+            });
+        }
+
         function pickAndTrack(e) {
             const entity = pickEntityPrioritized(e);
             if (Cesium.defined(entity)) {
-                withFullDetail(entity, function () {
-                    if (cameraMode === cameraModeFirstPerson) {
-                        setFirstPersonView(entity);
-                    } else if (cameraMode === cameraModeFlyBy) {
-                        setFlyByView(entity);
-                    } else {
-                        if (Cesium.Property.getValueOrUndefined(entity.position, viewer.clock.currentTime)) {
-                            setThirdPersonView(entity);
-                        } else {
-                            clearFarAmbient(entity);
-                            viewer.zoomTo(entity);
-                        }
-                    }
-                });
+                followEntity(entity);
             } else if (Cesium.defined(viewer.trackedEntity)) {
                 //viewer.trackedEntity = undefined;
                 lodPendingFocus = undefined;
@@ -3619,11 +3625,15 @@
                 const command = JSON.parse(event.data);
 
                 if (command.command == "trackId") {
-                    // Track an entity with the given ID
+                    // Select and track an entity with the given ID, as a click then a double
+                    // click on it would. Setting trackedEntity alone left a first person or
+                    // fly-by camera on whatever it was following before. An ID that isn't on
+                    // the map leaves the selection and camera be
                     const entity = czmlStream.entities.getById(command.id);
-                    withFullDetail(entity, function () {
-                        viewer.trackedEntity = entity;
-                    });
+                    if (Cesium.defined(entity)) {
+                        viewer.selectedEntity = entity;
+                        followEntity(entity);
+                    }
                 } else if (command.command == "setHomeView") {
                     // Set the viewing rectangle used when the home button is pressed
                     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
@@ -3635,7 +3645,10 @@
                     Cesium.Camera.DEFAULT_VIEW_FACTOR = 0.0;
                     viewer.camera.flyHome(0);
                 } else if (command.command == "setView") {
-                    // Set the camera view
+                    // Set the camera view. Only sent for a search, so stop following whatever
+                    // was being tracked, or the camera would stay with it
+                    lodPendingFocus = undefined;
+                    setThirdPersonView(undefined);
                     viewer.scene.camera.setView({
                         destination: Cesium.Cartesian3.fromDegrees(command.longitude, command.latitude, command.altitude),
                         orientation: {

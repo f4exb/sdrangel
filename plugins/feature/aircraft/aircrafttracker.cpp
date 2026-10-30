@@ -2204,8 +2204,11 @@ void AircraftTracker::mergeFlightInto(TrackedAircraft *item, TrackedFlight *dst,
     // stays on the Map with nothing left that knows how to take it off. Where dst has one
     // of its own, src's drawing is removed rather than kept: two flights have become one,
     // and only one route can be current.
-    for (auto pair : { qMakePair(&src->m_flightPlan, &dst->m_flightPlan),
-                       qMakePair(&src->m_clearance, &dst->m_clearance) })
+    const QPair<TrackedFlight::FiledRoute *, TrackedFlight::FiledRoute *> routes[] = {
+        { &src->m_flightPlan, &dst->m_flightPlan },
+        { &src->m_clearance, &dst->m_clearance }
+    };
+    for (const auto& pair : routes)
     {
         TrackedFlight::FiledRoute *from = pair.first;
         TrackedFlight::FiledRoute *to = pair.second;
