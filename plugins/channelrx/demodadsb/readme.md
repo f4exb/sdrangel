@@ -64,19 +64,19 @@ This sets the correlation threshold in dB between the received signal and expect
 
 Specifies the allowed number of errors in Mode S preambles. Higher values may allow more frames to be received, but increases the chance of decoding invalid frames.
 
-<h3>9: Download Aircraft Database</h3>
+<h3>10: Download Aircraft Database</h3>
 
 Clicking this will download the aircraft database. This database contains information about aircraft, such as registration, aircraft model, owner details and also airline routes, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it should be downloaded before starting the demodulator.
 
-<h3>10: Download OurAirports Airport Databases</h3>
+<h3>11: Download OurAirports Airport Databases</h3>
 
 Clicking this will download the [OurAirports](https://ourairports.com/) airport databases. These contains names and locations for airports allowing them to be drawn on the map, as well as their corresponding ATC frequencies, which can also be displayed next to the airport on the map, by clicking the airport name. The size of airports that will be displayed on the map, and whether heliports are displayed, can be set in the Display Settings dialog.
 
-<h3>11: Download OpenAIP Airspace and NAVAID Databases</h3>
+<h3>12: Download OpenAIP Airspace and NAVAID Databases</h3>
 
 Clicking this will download the [OpenAIP](https://www.openaip.net/) airspace and NAVAID databases. These can be displayed on the map. The airspace categories to be displayed can individually be selected in the Display Settings dialog.
 
-<h3>12: Display Settings</h3>
+<h3>13: Display Settings</h3>
 
 Clicking the Display Settings button will open the Display Settings dialog, which allows you to choose:
 
@@ -114,24 +114,24 @@ Map:
 * The colour palette to use for aircraft flight paths.
 * Whether aircraft are displayed using icons showing their airline's livery, instead of black icons. Livery icons are matched from the aircraft type and operator, in the same way as 3D models. Aircraft without a matching livery icon are displayed with a white version of the plain icon. Livery icons are sized proportionally to the real aircraft, so an A380 will appear larger than an A320.
 
-<h3>13: Display Flight Path</h3>
+<h3>14: Display Flight Path</h3>
 
 Checking this button draws a line on the map showing the highlighted aircraft's flight paths, as determined from received ADS-B frames. The path can be coloured according to altitude. The colour palette for this can be set in Display Settings.
 
 Each palette has 8 colours, one for each 5,000 ft. For the Spectral palette, 0-5000 ft is red and above 35,000 ft is blue.
 
-<h3>14: Display All Flight Paths</h3>
+<h3>15: Display All Flight Paths</h3>
 
 Checking this button draws flight paths for all aircraft.
 
 ![ADS-B Demodulator All Flight Paths](../../../doc/img/ADSBDemod_plugin_map2.png)
 
-<h3>14: ATC Mode</h3>
+<h3>16: ATC Mode</h3>
 
 When in ATC mode, the map will display callsign, route, altitude, ground speed and type, as well as the last 25 seconds of it flight path for all aircraft.
 When unchecked, only callsign (or ICAO, until callsign is received) will be displayed.
 
-<h3>15: Receiver Coverage Map</h3>
+<h3>17: Receiver Coverage Map</h3>
 
 When checked, a receiver coverage map will be displayed. This will show the maximum distance a frame has been received from in each direction.
 The yellow region is for frames freceived from aircraft above 10,000 ft, with the green region for below 10,000 ft.
@@ -140,7 +140,7 @@ Right clicking on the button will clear the coverage map data.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_coverage.png)
 
-<h3>16: Display Statistics</h3>
+<h3>18: Display Statistics</h3>
 
 When checked, a statistics table will be displayed. This table contains statistics such as:
 
@@ -157,7 +157,7 @@ The statistics can be reset by right clicking the button.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_stats.png)
 
-<h3>17: Display Chart</h3>
+<h3>19: Display Chart</h3>
 
 When checked, a chart will be displayed that shows ADS-B and Mode S frame rates in fps (frames per second) as well as the total number of aircraft frames have been received from in the last 10 seconds.
 The chart is updated every second. Data older than 10 minutes is averaged over a minute, in order to keep the number of data points managable.
@@ -167,25 +167,25 @@ Series can be hidden/shown by clicking on the corresponding label in the legend.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_chart.png)
 
-<h3>18: Display Orientation</h3>
+<h3>20: Display Orientation</h3>
 
 Check to display the ADS-B table and map side by side. Uncheck for table on top of the map.
 
-<h3>19: Display Containment Radius</h3>
+<h3>21: Display Containment Radius</h3>
 
 When checked, an aircraft's horizontal containment radius (Rc) will be drawn as a red circle around an aircraft on the map. This circle represents the aircraft's uncertainty in its reported position.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_radius.png)
 
-<h3>20: Download flight information for selected flight</h3>
+<h3>22: Download flight information for selected flight</h3>
 
 When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
 To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
 the case for callsigns that have a letter in the last 3 digits, as for these, some digits from the flight number will have been omitted).
 
-To use this feature, an [aviationstack](https://aviationstack.com) API Key must be entered in the Display Settings dialog (12). A free key giving 500 API calls per month is [available](https://aviationstack.com/product).
+To use this feature, an [aviationstack](https://aviationstack.com) API Key must be entered in the Display Settings dialog (13). A free key giving 500 API calls per month is [available](https://aviationstack.com/product).
 
-<h3>21: Feed</h3>
+<h3>23: Feed</h3>
 
 Checking Feed enables feeding received ADS-B frames to aggregators such as [Airplanes.Live](https://www.airplanes.live/), [ADS-B Exchange](https://www.adsbexchange.com), [ADSBHub](https://www.adsbhub.org) or [OpenSky Network](https://opensky-network.org/)
 and receiving aircraft state from anywhere in the world from [OpenSky Network](https://opensky-network.org/). Right clicking on the Feed button opens the Feed Settings dialog.
@@ -211,7 +211,7 @@ See the [OpenSky REST API documentation](https://openskynetwork.github.io/opensk
 
 To limit network traffic and processing power requirements, a geographical region can be set via the minimum and maximum latitude and longitude fields.
 
-<h3>22: Open Notifications Dialog</h3>
+<h3>24: Open Notifications Dialog</h3>
 
 When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when aircraft matching user-defined rules are seen.
 
@@ -312,33 +312,33 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${eta}
 * ${ata}
 
-<h3>23: Start/stop Logging ADS-B frames to .csv File</h3>
+<h3>25: Start/stop Logging ADS-B frames to .csv File</h3>
 
 When checked, writes all received ADS-B frames to a .csv file.
 
-<h3>24: .csv Log Filename</h3>
+<h3>26: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received ADS-B frames are logged to.
 
-<h3>25: Read Data from .csv File</h3>
+<h3>27: Read Data from .csv File</h3>
 
 Click to specify a previously written ADS-B .csv log file, which is read and used to update the ADS-B data table and map.
 
-<h3>26: Find on Feature Map</h3>
+<h3>28: Find on Feature Map</h3>
 
 Click to find the currently selected aircraft on a [Map Feature](../../feature/map/readme.md).
 
-<h3>27: Delete All Aircraft</h3>
+<h3>29: Delete All Aircraft</h3>
 
 Click to delete all aircraft from the table and map.
 
-<h3>28: IC - Interrogator Code</h3>
+<h3>30: IC - Interrogator Code</h3>
 
 The IC dropdown contains a checkable list of Mode S IC (Interrogator Codes) that have been received. When checked, an ellipse in the corresponding colour is drawn on the map showing the location of all the aircraft that have responded to that IC.
 
 ![ADS-B IC Coverage](../../../doc/img/ADSBDemod_plugin_ic.png)
 
-<h3>29: AM Demod</h3>
+<h3>31: AM Demod</h3>
 
 Specify the AM Demodulator that will be have its centre frequency set when an airport ATC frequency is clicked on the map.
 
@@ -456,7 +456,7 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 * Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded) and METAR weather information (if the CheckWX API key has been entered).
 The METAR for the airport is downloaded each time the information box is opened.
 This information box can be closed by left clicking on the airport identifier.
-Double clicking on one of the listed frequencies, will tune the AM Demod (29) to that frequency.
+Double clicking on one of the listed frequencies, will tune the AM Demod (31) to that frequency.
 The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 * Right clicking on an airport will display a popup menu, allowing range rings to be shown or hidden, and for the ATC frequencies for the airport to be send to a Frequency Scanner.
 
