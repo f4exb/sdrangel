@@ -234,6 +234,7 @@ public:
     //!< Datasets whose map items have been built, so enabling a second group of the same
     //!< dataset, or any other settings change, does not build them again
     QSet<QString> m_builtDatasets;
+    bool m_kiwiSDRListEnabled = false;  //!< KiwiSDR list is being downloaded periodically
     CesiumInterface *cesium() { return m_cesium; }
     bool useLiveryIcons() const { return m_settings.m_useLiveryIcons; }
 

@@ -489,7 +489,6 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     loadDataset("deferred", [this] { addDeferredDatasets(); });
     loadDataset("navtex", [this] { addNavtex(); });
     loadDataset("VLF", [this] { addVLF(); });
-    loadDataset("KiwiSDR", [this] { addKiwiSDR(); });
     loadDataset("SpyServer", [this] { addSpyServer(); });
     loadDataset("SDRangel servers", [this] { addSDRangelServer(); });
     PROFILER_STOP("Map DB load")
@@ -925,9 +924,21 @@ QString MapGUI::formatFrequency(qint64 frequency) const
     return s + " Hz";
 }
 
+// The list is only downloaded while the layer is enabled. Called from
+// addDeferredDatasets(), so whenever the item settings may have changed. The check waits
+// for the event loop, as the constructor runs with the default settings, and when a
+// configuration is loaded, the saved ones only arrive in deserialize() straight after
 void MapGUI::addKiwiSDR()
 {
-    m_kiwiSDRList.getDataPeriodically();
+    QTimer::singleShot(0, this, [this]() {
+        bool enabled = itemGroupEnabled("KiwiSDR");
+
+        if (enabled != m_kiwiSDRListEnabled)
+        {
+            m_kiwiSDRListEnabled = enabled;
+            m_kiwiSDRList.getDataPeriodically(enabled ? 30 : 0);
+        }
+    });
 }
 
 void MapGUI::kiwiSDRUpdated(const QList<KiwiSDRList::KiwiSDR>& sdrs)
@@ -2492,6 +2503,7 @@ void MapGUI::addDeferredDatasets()
         m_builtDatasets.insert("waypoints");
         addWaypoints();
     }
+    addKiwiSDR();
 }
 
 MapSettings::MapItemSettings *MapGUI::getItemSettings(const QString &group)
