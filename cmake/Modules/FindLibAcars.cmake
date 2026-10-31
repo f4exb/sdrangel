@@ -16,7 +16,7 @@ IF (NOT LIBACARS_FOUND)
               /usr/lib64
               /usr/local/lib
               /usr/local/lib64
-    )   
+    )
 
     if (LIBACARS_INCLUDE_DIR AND LIBACARS_LIBRARY)
         set(LIBACARS_LIBRARIES ${LIBACARS_LIBRARY} CACHE INTERNAL "libacars libraries")
