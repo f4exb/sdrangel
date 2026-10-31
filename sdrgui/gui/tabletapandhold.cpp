@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QTableWidget>
+#include <QTableView>
 #include <QHeaderView>
 #include <QGestureEvent>
 #include <QGesture>
@@ -26,7 +26,7 @@
 
 #include "tabletapandhold.h"
 
-TableTapAndHold::TableTapAndHold(QTableWidget *table) :
+TableTapAndHold::TableTapAndHold(QTableView *table) :
     QObject(table),
     m_table(table)
 {

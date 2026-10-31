@@ -16,6 +16,8 @@ FeatureActions:
     AFCActions:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCActions"
       description: "Afc actions configuration for Feature."
+    AircraftActions:
+      $ref: "/doc/swagger/include/Aircraft.yaml#/AircraftActions"
     AMBEActions:
       $ref: "/doc/swagger/include/AMBE.yaml#/AMBEActions"
       description: "Ambe actions configuration for Feature."

@@ -16,6 +16,8 @@ FeatureSettings:
     AFCSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
       description: "Afc settings configuration for Feature."
+    AircraftSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/Aircraft.yaml#/AircraftSettings"
     AISSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AIS.yaml#/AISSettings"
       description: "AIS settings configuration for Feature."

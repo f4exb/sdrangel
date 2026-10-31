@@ -27,7 +27,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkDiskCache;
 
-// Gets a list of public Kiwi SDRs from http://kiwisdr.com/public/
+// Gets a list of public Kiwi SDRs from http://rx.linkfanel.net/kiwisdr_com.js (generated from http://kiwisdr.com/public/)
 class SDRBASE_API KiwiSDRList : public QObject
 {
     Q_OBJECT
@@ -57,7 +57,7 @@ public:
     ~KiwiSDRList();
 
     void getData();
-    void getDataPeriodically(int periodInMins=4);
+    void getDataPeriodically(int periodInMins=30); // 0 to stop
 
 public slots:
     void handleReply(QNetworkReply* reply);
@@ -71,7 +71,7 @@ private:
     QNetworkDiskCache *m_cache;
     QTimer m_timer;             // Timer for periodic updates
 
-    void handleHTML(const QString& url, const QByteArray& bytes);
+    void handleJS(const QString& url, const QByteArray& bytes);
 
 };
 

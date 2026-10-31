@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDateTime>
+#include <QTimeZone>
 #include <QVector3D>
 
 #include "util/radiosonde.h"
@@ -223,7 +224,7 @@ void RS41Frame::decodePosDateTime(const QByteArray ba)
         if ((ba[0x19] & 0xff) < 100) {
             msec = (ba[0x19] & 0xff) * 10;
         }
-        m_gpsDateTime = QDateTime(QDate(year, month, day), QTime(hour, minute, second, msec), Qt::UTC);
+        m_gpsDateTime = QDateTime(QDate(year, month, day), QTime(hour, minute, second, msec), QTimeZone::utc());
     }
 }
 

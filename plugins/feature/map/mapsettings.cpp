@@ -21,6 +21,7 @@
 
 #include <QColor>
 #include <QDebug>
+#include <QDir>
 
 #include "util/simpleserializer.h"
 #include "util/httpdownloadmanager.h"
@@ -28,9 +29,36 @@
 
 #include "mapsettings.h"
 
+static QString defaultMSFSAircraftDirectory()
+{
+    QString localAppData = qEnvironmentVariable("LOCALAPPDATA");
+    if (localAppData.isEmpty()) {
+        localAppData = QDir::home().filePath("AppData/Local");
+    }
+    return QDir(localAppData).filePath(
+        "Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/"
+        "Community/fsltl-traffic-base/SimObjects/Airplanes");
+}
+
+static QString defaultMSFSNavigraphDirectory()
+{
+#ifdef Q_OS_WIN
+    QString localAppData = qEnvironmentVariable("LOCALAPPDATA");
+    if (localAppData.isEmpty()) {
+        localAppData = QDir::home().filePath("AppData/Local");
+    }
+    return QDir(localAppData).filePath(
+        "Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/"
+        "Community/navigraph-nav-base");
+#else
+    return QString();
+#endif
+}
+
 const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("ACARSDemod"),
     QStringLiteral("ADSBDemod"),
+    QStringLiteral("Aircraft"),
     QStringLiteral("AIS"),
     QStringLiteral("APRS"),
     QStringLiteral("APTDemod"),
@@ -51,6 +79,7 @@ const QStringList MapSettings::m_pipeTypes = {
 const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.acarsdemod"),
     QStringLiteral("sdrangel.channel.adsbdemod"),
+    QStringLiteral("sdrangel.feature.aircraft"),
     QStringLiteral("sdrangel.feature.ais"),
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.channel.aptdemod"),
@@ -83,6 +112,26 @@ const QStringList MapSettings::m_mapProviderNames = {
     QStringLiteral("MapLibreGL")
 };
 
+// 3D map options that consume Cesium Ion quota, so need a user-supplied Cesium Ion
+// API key. Names as used in the combo boxes in the settings dialog.
+const QStringList MapSettings::m_cesiumIonImagery = {
+    QStringLiteral("Bing Maps Aerial"),
+    QStringLiteral("Sentinel-2"),
+    QStringLiteral("Earth at night"),
+    QStringLiteral("Google Maps Satellite"),
+    QStringLiteral("Google Maps Satellite with Labels"),
+    QStringLiteral("Google Maps Roadmap"),
+    QStringLiteral("Google Maps Contour")
+};
+
+const QStringList MapSettings::m_cesiumIonTerrain = {
+    QStringLiteral("Cesium World Terrain")
+};
+
+const QStringList MapSettings::m_cesiumIonBuildings = {
+    QStringLiteral("Cesium OSM Buildings")
+};
+
 MapSettings::MapSettings() :
     m_rgbColor(QColor(0, 0, 0).rgb()),
     m_rollupState(nullptr)
@@ -93,8 +142,28 @@ MapSettings::MapSettings() :
     MapItemSettings *aptSettings = new MapItemSettings("APTDemod", true, QColor(216, 112, 169), true, false, 11);
     aptSettings->m_display2DIcon = false; // Disabled as 2D projection is wrong
     m_itemSettings.insert("APTDemod", aptSettings);
+    // Built from the corrected defaults, so nothing to migrate
+    m_itemSettingsVersion = 1;
+    m_splitterState.clear();
     m_itemSettings.insert("ACARSDemod", new MapItemSettings("ACARSDemod", true, QColor(244, 151, 57), true, false, 11, modelMinPixelSize));
     m_itemSettings.insert("ADSBDemod", new MapItemSettings("ADSBDemod", true, QColor(244, 151, 57), true, false, 11, modelMinPixelSize));
+    m_itemSettings.insert("Aircraft", new MapItemSettings("Aircraft", true, QColor(244, 151, 57), true, false, 11, modelMinPixelSize));
+    // Filed flight plans and oceanic clearances, which the Aircraft feature asks for by
+    // name - see MapItem.group in the API. They are here rather than sharing the group
+    // above because a route wants the opposite of what an aircraft wants from a minimum
+    // zoom: an icon has to be decluttered away when zoomed out, while a route drawn
+    // across an ocean is exactly what you want to see at that zoom. Not a pipe type, so
+    // no source is ever assigned to it - only an item that names it.
+    m_itemSettings.insert("Aircraft Routes", new MapItemSettings("Aircraft Routes", true, QColor(244, 151, 57), false, false, 0, modelMinPixelSize));
+    // The per protocol coverage polygons. Each carries its own colour, so the colour
+    // here only matters if one ever arrives without one.
+    //
+    // display2DTrack must be TRUE, unlike the routes above: PolygonMapModel::data()
+    // returns a transparent fill for a polygon whose group does not have it, and the
+    // border of every polygon is transparent unconditionally - so with it false the
+    // coverage was on the 2D map, filtered in and drawn, and completely invisible.
+    // Polylines have no such gate, which is why the routes are visible without it.
+    m_itemSettings.insert("Aircraft Coverage", new MapItemSettings("Aircraft Coverage", true, QColor(244, 151, 57), true, false, 0, modelMinPixelSize));
     m_itemSettings.insert("AIS", new MapItemSettings("AIS", true, QColor(102, 0, 0), true, false, 11, modelMinPixelSize));
     MapItemSettings *aprsSettings = new MapItemSettings("APRS", true, QColor(255, 255, 0), true, false, 11);
     aprsSettings->m_extrapolate = 0;
@@ -145,25 +214,25 @@ MapSettings::MapSettings() :
     ionosondeItemSettings->m_display2DIcon = false;
     m_itemSettings.insert("Ionosonde Stations", ionosondeItemSettings);
 
-    m_itemSettings.insert("Airspace (A)", new MapItemSettings("Airspace (A)", false, QColor(255, 0, 0, 0x20), false, false, 7));
-    m_itemSettings.insert("Airspace (B)", new MapItemSettings("Airspace (B)", false, QColor(255, 0, 0, 0x20), false, false, 7));
-    m_itemSettings.insert("Airspace (C)", new MapItemSettings("Airspace (C)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (D)", new MapItemSettings("Airspace (D)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (E)", new MapItemSettings("Airspace (E)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (F)", new MapItemSettings("Airspace (F)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (G)", new MapItemSettings("Airspace (G)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (FIR)", new MapItemSettings("Airspace (FIR)", false, QColor(255, 0, 0, 0x20), false, false, 7));
-    m_itemSettings.insert("Airspace (CTR)", new MapItemSettings("Airspace (CTR)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (RMZ)", new MapItemSettings("Airspace (RMZ)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (TMA)", new MapItemSettings("Airspace (TMA)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (TMZ)", new MapItemSettings("Airspace (TMZ)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (OTH)", new MapItemSettings("Airspace (OTH)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Restricted)", new MapItemSettings("Airspace (Restricted)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Gliding)", new MapItemSettings("Airspace (Gliding)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Danger)", new MapItemSettings("Airspace (Danger)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Prohibited)", new MapItemSettings("Airspace (Prohibited)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Wave)", new MapItemSettings("Airspace (Wave)", false, QColor(255, 0, 0, 0x20), false, false, 11));
-    m_itemSettings.insert("Airspace (Airports)", new MapItemSettings("Airspace (Airports)", false, QColor(0, 0, 255, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (A)", new MapItemSettings("Airspace (A)", false, QColor(255, 0, 0, 0x20), true, false, 7));
+    m_itemSettings.insert("Airspace (B)", new MapItemSettings("Airspace (B)", false, QColor(255, 0, 0, 0x20), true, false, 7));
+    m_itemSettings.insert("Airspace (C)", new MapItemSettings("Airspace (C)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (D)", new MapItemSettings("Airspace (D)", false, QColor(0, 0, 255, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (E)", new MapItemSettings("Airspace (E)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (F)", new MapItemSettings("Airspace (F)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (G)", new MapItemSettings("Airspace (G)", false, QColor(0, 0, 255, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (FIR)", new MapItemSettings("Airspace (FIR)", false, QColor(255, 0, 0, 0x20), true, false, 7));
+    m_itemSettings.insert("Airspace (CTR)", new MapItemSettings("Airspace (CTR)", false, QColor(0, 0, 255, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (RMZ)", new MapItemSettings("Airspace (RMZ)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (TMA)", new MapItemSettings("Airspace (TMA)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (TMZ)", new MapItemSettings("Airspace (TMZ)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (OTH)", new MapItemSettings("Airspace (OTH)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Restricted)", new MapItemSettings("Airspace (Restricted)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Gliding)", new MapItemSettings("Airspace (Gliding)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Danger)", new MapItemSettings("Airspace (Danger)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Prohibited)", new MapItemSettings("Airspace (Prohibited)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Wave)", new MapItemSettings("Airspace (Wave)", false, QColor(255, 0, 0, 0x20), true, false, 11));
+    m_itemSettings.insert("Airspace (Airports)", new MapItemSettings("Airspace (Airports)", false, QColor(0, 0, 255, 0x20), true, false, 11));
 
     MapItemSettings *waypointsSettings = new MapItemSettings("Waypoints", false, QColor(255, 0, 255), false, true, 11);
     waypointsSettings->m_filterDistance = 500000;
@@ -207,40 +276,53 @@ MapSettings::~MapSettings()
 void MapSettings::resetToDefaults()
 {
     m_displayNames = true;
-#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
 #endif
     m_thunderforestAPIKey = "";
     m_maptilerAPIKey = "";
+    m_cartoDBAPIKey = "";
     m_mapBoxAPIKey = "";
     m_osmURL = "";
     m_mapBoxStyles = "";
     m_displaySelectedGroundTracks = true;
     m_displayAllGroundTracks = true;
     m_title = "Map";
-    m_displayAllGroundTracks = QColor(225, 25, 99).rgba();
+    m_rgbColor = QColor(225, 25, 99).rgba();
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_map2DEnabled = true;
+    m_useLiveryIcons = true;
     m_map3DEnabled = true;
     m_terrain = "Ellipsoid";
     m_buildings = "None";
     m_sunLightEnabled = true;
     m_lightIntensity = 3.0f;
+    m_distantLightIntensity = 0.5f;
+    m_lowDetailModels = true;
     m_eciCamera = false;
     m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
+    m_msfsNavigraphDir = defaultMSFSNavigraphDirectory();
+    m_msfsAircraftDir = defaultMSFSAircraftDirectory();
+    m_msfsMaxTextureSize = 2048;
+    m_msfsLowDetailMaxTextureSize = 512;
     m_fxaa = true;
     m_msaa = 1;
+    m_mapCenterLatitude = 0.0f;
+    m_mapCenterLongitude = 0.0f;
+    m_mapZoomLevel = -1.0f;
     m_terrainLighting = true;
     m_water = false;
+    m_googlePhotorealistic3DTiles = false;
     m_hdr = true;
     m_fog = true;
     m_fps = false;
+    m_frameRate = 60;
     m_displayMUF = false;
     m_displayfoF2 = false;
     m_displayRain = false;
@@ -254,8 +336,22 @@ void MapSettings::resetToDefaults()
     m_displayMagDec = false;
     m_displayMaidenheadGrid = false;
     m_displayPFD = false;
-    m_viewFirstPerson = false;
-    m_defaultImagery = "Sentinel-2";
+    m_displayND = false;
+    m_mapItemSoundVolume = 50;
+    m_cockpitSoundVolume = 100;
+    m_audioMuted = false;
+    m_displayCockpitPanels = true;
+    m_displayEFIS = false;
+    m_displayRMP = false;
+    m_vhf1Channel = "";
+    m_vhf2Channel = "";
+    m_vhf1Standby = 121500000;  // The guard frequency, until something is entered
+    m_vhf2Standby = 121500000;
+    m_cockpitPanelGeometry = "";
+    m_efisState = "";
+    m_displayDCDU = false;
+    m_cameraMode = ThirdPerson;
+    m_defaultImagery = "ArcGIS world imagery";
     m_arcGISAPIKey = "";
     m_workspaceIndex = 0;
     m_checkWXAPIKey = "";
@@ -280,6 +376,7 @@ QByteArray MapSettings::serialize() const
     s.writeBool(16, m_displayAllGroundTracks);
     s.writeString(17, m_thunderforestAPIKey);
     s.writeString(18, m_maptilerAPIKey);
+    s.writeString(86, m_cartoDBAPIKey);
 
     if (m_rollupState) {
         s.writeBlob(19, m_rollupState->serialize());
@@ -314,20 +411,50 @@ QByteArray MapSettings::serialize() const
     s.writeString(46, m_checkWXAPIKey);
 
     s.writeFloat(47, m_lightIntensity);
+    s.writeFloat(87, m_distantLightIntensity);
+    s.writeBool(88, m_lowDetailModels);
 
     s.writeBool(48, m_displayMaidenheadGrid);
     s.writeString(49, m_defaultImagery);
     s.writeString(50, m_arcGISAPIKey);
     s.writeBool(51, m_displayPFD);
-    s.writeBool(52, m_viewFirstPerson);
 
     s.writeBool(53, m_terrainLighting);
     s.writeBool(54, m_water);
     s.writeBool(55, m_hdr);
     s.writeBool(56, m_fog);
     s.writeBool(57, m_fps);
+    s.writeS32(85, m_frameRate);
     s.writeBool(58, m_fxaa);
     s.writeS32(59, m_msaa);
+    s.writeFloat(60, m_mapCenterLatitude);
+    s.writeFloat(61, m_mapCenterLongitude);
+    s.writeFloat(62, m_mapZoomLevel);
+    s.writeBool(63, m_useLiveryIcons);
+    s.writeBool(64, m_displayND);
+    s.writeS32(65, m_itemSettingsVersion);
+    s.writeBlob(66, m_splitterState);
+    // 67 was m_dcduSound, superseded by the cockpit volume slider
+    s.writeS32(68, m_mapItemSoundVolume);
+    s.writeS32(69, m_cockpitSoundVolume);
+    s.writeBool(70, m_audioMuted);
+    // 71 is m_googlePhotorealistic3DTiles (below); these start at 72
+    s.writeBool(72, m_displayEFIS);
+    s.writeBool(73, m_displayRMP);
+    s.writeBool(74, m_displayDCDU);
+    s.writeBool(75, m_displayCockpitPanels);
+    s.writeString(76, m_vhf1Channel);
+    s.writeString(77, m_vhf2Channel);
+    s.writeS32(78, m_vhf1Standby);
+    s.writeS32(79, m_vhf2Standby);
+    s.writeString(80, m_cockpitPanelGeometry);
+    s.writeString(81, m_efisState);
+    s.writeBool(71, m_googlePhotorealistic3DTiles);
+    s.writeString(82, m_msfsAircraftDir);
+    s.writeS32(83, m_cameraMode);
+    s.writeString(84, m_msfsNavigraphDir);
+    s.writeS32(89, m_msfsMaxTextureSize);
+    s.writeS32(90, m_msfsLowDetailMaxTextureSize);
 
     return s.final();
 }
@@ -352,12 +479,17 @@ bool MapSettings::deserialize(const QByteArray& data)
 
         d.readBool(1, &m_displayNames, true);
         d.readString(2, &m_mapProvider, "osm");
-#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+        d.readString(3, &m_mapBoxAPIKey, "");
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
         }
+#else
+        // mapboxgl doesn't work without a key
+        if ((m_mapProvider == "mapboxgl") && m_mapBoxAPIKey.isEmpty()) {
+            m_mapProvider = "osm";
+        }
 #endif
-        d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");
         d.readString(8, &m_title, "Map");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgba());
@@ -379,6 +511,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(16, &m_displayAllGroundTracks, true);
         d.readString(17, &m_thunderforestAPIKey, "");
         d.readString(18, &m_maptilerAPIKey, "");
+        d.readString(86, &m_cartoDBAPIKey, "");
 
         if (m_rollupState)
         {
@@ -417,19 +550,68 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readString(46, &m_checkWXAPIKey, "");
 
         d.readFloat(47, &m_lightIntensity, 3.0f);
+        d.readFloat(87, &m_distantLightIntensity, 0.5f);
+        d.readBool(88, &m_lowDetailModels, true);
         d.readBool(48, &m_displayMaidenheadGrid, false);
-        d.readString(49, &m_defaultImagery, "Sentinel-2");
+        d.readString(49, &m_defaultImagery, "ArcGIS world imagery");
         d.readString(50, &m_arcGISAPIKey, "");
         d.readBool(51, &m_displayPFD, false);
-        d.readBool(52, &m_viewFirstPerson, false);
+        // Key 52 held the old first person/third person switch. It is no longer
+        // written, but it still chooses the default camera mode for anyone upgrading
+        bool viewFirstPerson;
+        d.readBool(52, &viewFirstPerson, false);
+        d.readS32(83, &m_cameraMode, viewFirstPerson ? FirstPerson : ThirdPerson);
 
         d.readBool(53, &m_terrainLighting, true);
         d.readBool(54, &m_water, false);
         d.readBool(55, &m_hdr, true);
         d.readBool(56, &m_fog, true);
         d.readBool(57, &m_fps, false);
+        d.readS32(85, &m_frameRate, 60);
         d.readBool(58, &m_fxaa, false);
         d.readS32(59, &m_msaa, 1);
+        d.readFloat(60, &m_mapCenterLatitude, 0.0f);
+        d.readFloat(61, &m_mapCenterLongitude, 0.0f);
+        d.readFloat(62, &m_mapZoomLevel, -1.0f);
+        d.readBool(63, &m_useLiveryIcons, true);
+        d.readBool(64, &m_displayND, false);
+        d.readS32(65, &m_itemSettingsVersion, 0);
+        d.readBlob(66, &m_splitterState);
+        d.readS32(68, &m_mapItemSoundVolume, 50);
+        d.readS32(69, &m_cockpitSoundVolume, 100);
+        d.readBool(70, &m_audioMuted, false);
+        d.readBool(72, &m_displayEFIS, false);
+        d.readBool(73, &m_displayRMP, false);
+        d.readBool(74, &m_displayDCDU, true);
+        d.readBool(75, &m_displayCockpitPanels, true);
+        d.readString(76, &m_vhf1Channel, "");
+        d.readString(77, &m_vhf2Channel, "");
+        d.readS32(78, &m_vhf1Standby, 121500000);
+        d.readS32(79, &m_vhf2Standby, 121500000);
+        d.readString(80, &m_cockpitPanelGeometry, "");
+        d.readString(81, &m_efisState, "");
+        d.readBool(71, &m_googlePhotorealistic3DTiles, false);
+        d.readString(82, &m_msfsAircraftDir, defaultMSFSAircraftDirectory());
+        d.readString(84, &m_msfsNavigraphDir, defaultMSFSNavigraphDirectory());
+        d.readS32(89, &m_msfsMaxTextureSize, 2048);
+        d.readS32(90, &m_msfsLowDetailMaxTextureSize, 512);
+
+        // Airspaces never had a usable 2D colour: their groups were created without
+        // display2DTrack, which makes PolygonMapModel::data() return a transparent fill,
+        // so they were drawn and invisible. A preset written before that was fixed still
+        // carries the false, and would go on overriding the corrected default - so it is
+        // turned on once, here, and the fact recorded so a later decision to switch them
+        // off again is left alone.
+        if (m_itemSettingsVersion < 1)
+        {
+            for (MapItemSettings *itemSettings : m_itemSettings)
+            {
+                if (itemSettings && itemSettings->m_group.startsWith("Airspace (")) {
+                    itemSettings->m_display2DTrack = true;
+                }
+            }
+            m_itemSettingsVersion = 1;
+        }
 
         return true;
     }
@@ -472,6 +654,7 @@ void MapSettings::MapItemSettings::resetToDefaults()
     m_display2DLabel = true;
     m_display2DTrack = true;
     m_2DTrackColor = QColor(150, 0, 20).rgba();
+    m_2DTrackPalette = defaultTrackPalette(m_group);
     m_2DMinZoom = 1;
     m_display3DModel = true;
     m_display3DPoint = false;
@@ -486,6 +669,17 @@ void MapSettings::MapItemSettings::resetToDefaults()
     m_extrapolate = 60;
     m_smoothingWindow = 0;
     m_smoothingLambda = 100;
+}
+
+// Aircraft tracks are coloured by altitude by default, as they are on the ADS-B
+// demodulator's own map. Everything else is drawn in a single colour.
+QString MapSettings::MapItemSettings::defaultTrackPalette(const QString& group)
+{
+    if ((group == "ADSBDemod") || (group == "Aircraft")) {
+        return "Spectral";
+    } else {
+        return "";
+    }
 }
 
 QByteArray MapSettings::MapItemSettings::serialize() const
@@ -512,6 +706,7 @@ QByteArray MapSettings::MapItemSettings::serialize() const
     s.writeS32(18, m_extrapolate);
     s.writeS32(19, m_smoothingWindow);
     s.writeFloat(20, m_smoothingLambda);
+    s.writeString(21, m_2DTrackPalette);
 
     return s.final();
 }
@@ -546,9 +741,10 @@ bool MapSettings::MapItemSettings::deserialize(const QByteArray& data)
         d.readString(16, &m_filterName, "");
         d.readS32(17, &m_filterDistance, 0);
         d.readS32(18, &m_extrapolate, 60);
+        d.readString(21, &m_2DTrackPalette, defaultTrackPalette(m_group));
         m_filterNameRE.setPattern(m_filterName);
         m_filterNameRE.optimize();
-        if (m_group == "ADSBDemod")
+        if ((m_group == "ADSBDemod") || (m_group == "Aircraft"))
         {
             d.readS32(19, &m_smoothingWindow, 10);
             d.readFloat(20, &m_smoothingLambda, 100);
@@ -607,6 +803,7 @@ void MapSettings::deserializeItemSettings(const QByteArray& data, QHash<QString,
         }
         else
         {
+            d.readBlob(idx+2, &blob);
             if (itemSettings.contains(key))
             {
                 itemSettings[key]->deserialize(blob);
@@ -637,6 +834,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("maptilerAPIKey")) {
         m_maptilerAPIKey = settings.m_maptilerAPIKey;
+    }
+    if (settingsKeys.contains("cartoDBAPIKey")) {
+        m_cartoDBAPIKey = settings.m_cartoDBAPIKey;
     }
     if (settingsKeys.contains("osmURL")) {
         m_osmURL = settings.m_osmURL;
@@ -677,6 +877,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("map2DEnabled")) {
         m_map2DEnabled = settings.m_map2DEnabled;
     }
+    if (settingsKeys.contains("useLiveryIcons")) {
+        m_useLiveryIcons = settings.m_useLiveryIcons;
+    }
     if (settingsKeys.contains("map3DEnabled")) {
         m_map3DEnabled = settings.m_map3DEnabled;
     }
@@ -689,6 +892,12 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("sunLightEnabled")) {
         m_sunLightEnabled = settings.m_sunLightEnabled;
     }
+    if (settingsKeys.contains("distantLightIntensity")) {
+        m_distantLightIntensity = settings.m_distantLightIntensity;
+    }
+    if (settingsKeys.contains("lowDetailModels")) {
+        m_lowDetailModels = settings.m_lowDetailModels;
+    }
     if (settingsKeys.contains("lightIntensity")) {
         m_lightIntensity = settings.m_lightIntensity;
     }
@@ -698,17 +907,41 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("modelDir")) {
         m_modelDir = settings.m_modelDir;
     }
+    if (settingsKeys.contains("msfsNavigraphDir")) {
+        m_msfsNavigraphDir = settings.m_msfsNavigraphDir;
+    }
+    if (settingsKeys.contains("msfsAircraftDir")) {
+        m_msfsAircraftDir = settings.m_msfsAircraftDir;
+    }
+    if (settingsKeys.contains("msfsMaxTextureSize")) {
+        m_msfsMaxTextureSize = settings.m_msfsMaxTextureSize;
+    }
+    if (settingsKeys.contains("msfsLowDetailMaxTextureSize")) {
+        m_msfsLowDetailMaxTextureSize = settings.m_msfsLowDetailMaxTextureSize;
+    }
     if (settingsKeys.contains("fxaa")) {
         m_fxaa = settings.m_fxaa;
     }
     if (settingsKeys.contains("msaa")) {
         m_msaa = settings.m_msaa;
     }
+    if (settingsKeys.contains("mapCenterLatitude")) {
+        m_mapCenterLatitude = settings.m_mapCenterLatitude;
+    }
+    if (settingsKeys.contains("mapCenterLongitude")) {
+        m_mapCenterLongitude = settings.m_mapCenterLongitude;
+    }
+    if (settingsKeys.contains("mapZoomLevel")) {
+        m_mapZoomLevel = settings.m_mapZoomLevel;
+    }
     if (settingsKeys.contains("terrainLighting")) {
         m_terrainLighting = settings.m_terrainLighting;
     }
     if (settingsKeys.contains("water")) {
         m_water = settings.m_water;
+    }
+    if (settingsKeys.contains("googlePhotorealistic3DTiles")) {
+        m_googlePhotorealistic3DTiles = settings.m_googlePhotorealistic3DTiles;
     }
     if (settingsKeys.contains("hdr")) {
         m_hdr = settings.m_hdr;
@@ -718,6 +951,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("fps")) {
         m_fps = settings.m_fps;
+    }
+    if (settingsKeys.contains("frameRate")) {
+        m_frameRate = settings.m_frameRate;
     }
     if (settingsKeys.contains("displayMUF")) {
         m_displayMUF = settings.m_displayMUF;
@@ -761,11 +997,56 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("arcGISAPIKey")) {
         m_arcGISAPIKey = settings.m_arcGISAPIKey;
     }
+    if (settingsKeys.contains("cesiumIonAPIKey")) {
+        m_cesiumIonAPIKey = settings.m_cesiumIonAPIKey;
+    }
     if (settingsKeys.contains("displayPFD")) {
         m_displayPFD = settings.m_displayPFD;
     }
-    if (settingsKeys.contains("viewFirstPerson")) {
-        m_viewFirstPerson = settings.m_viewFirstPerson;
+    if (settingsKeys.contains("displayND")) {
+        m_displayND = settings.m_displayND;
+    }
+    if (settingsKeys.contains("mapItemSoundVolume")) {
+        m_mapItemSoundVolume = settings.m_mapItemSoundVolume;
+    }
+    if (settingsKeys.contains("cockpitSoundVolume")) {
+        m_cockpitSoundVolume = settings.m_cockpitSoundVolume;
+    }
+    if (settingsKeys.contains("audioMuted")) {
+        m_audioMuted = settings.m_audioMuted;
+    }
+    if (settingsKeys.contains("displayCockpitPanels")) {
+        m_displayCockpitPanels = settings.m_displayCockpitPanels;
+    }
+    if (settingsKeys.contains("displayEFIS")) {
+        m_displayEFIS = settings.m_displayEFIS;
+    }
+    if (settingsKeys.contains("displayRMP")) {
+        m_displayRMP = settings.m_displayRMP;
+    }
+    if (settingsKeys.contains("vhf1Channel")) {
+        m_vhf1Channel = settings.m_vhf1Channel;
+    }
+    if (settingsKeys.contains("vhf2Channel")) {
+        m_vhf2Channel = settings.m_vhf2Channel;
+    }
+    if (settingsKeys.contains("vhf1Standby")) {
+        m_vhf1Standby = settings.m_vhf1Standby;
+    }
+    if (settingsKeys.contains("vhf2Standby")) {
+        m_vhf2Standby = settings.m_vhf2Standby;
+    }
+    if (settingsKeys.contains("cockpitPanelGeometry")) {
+        m_cockpitPanelGeometry = settings.m_cockpitPanelGeometry;
+    }
+    if (settingsKeys.contains("efisState")) {
+        m_efisState = settings.m_efisState;
+    }
+    if (settingsKeys.contains("displayDCDU")) {
+        m_displayDCDU = settings.m_displayDCDU;
+    }
+    if (settingsKeys.contains("cameraMode")) {
+        m_cameraMode = settings.m_cameraMode;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -787,6 +1068,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("maptilerAPIKey") || force) {
         ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("cartoDBAPIKey") || force) {
+        ostr << " m_cartoDBAPIKey: " << m_cartoDBAPIKey.toStdString();
     }
     if (settingsKeys.contains("mapBoxAPIKey") || force) {
         ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
@@ -827,6 +1111,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("map2DEnabled") || force) {
         ostr << " m_map2DEnabled: " << m_map2DEnabled;
     }
+    if (settingsKeys.contains("useLiveryIcons") || force) {
+        ostr << " m_useLiveryIcons: " << m_useLiveryIcons;
+    }
     if (settingsKeys.contains("map3DEnabled") || force) {
         ostr << " m_map3DEnabled: " << m_map3DEnabled;
     }
@@ -839,6 +1126,12 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("sunLightEnabled") || force) {
         ostr << " m_sunLightEnabled: " << m_sunLightEnabled;
     }
+    if (settingsKeys.contains("distantLightIntensity") || force) {
+        ostr << " m_distantLightIntensity: " << m_distantLightIntensity;
+    }
+    if (settingsKeys.contains("lowDetailModels") || force) {
+        ostr << " m_lowDetailModels: " << m_lowDetailModels;
+    }
     if (settingsKeys.contains("lightIntensity") || force) {
         ostr << " m_lightIntensity: " << m_lightIntensity;
     }
@@ -848,17 +1141,41 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("modelDir") || force) {
         ostr << " m_modelDir: " << m_modelDir.toStdString();
     }
+    if (settingsKeys.contains("msfsNavigraphDir") || force) {
+        ostr << " m_msfsNavigraphDir: " << m_msfsNavigraphDir.toStdString();
+    }
+    if (settingsKeys.contains("msfsAircraftDir") || force) {
+        ostr << " m_msfsAircraftDir: " << m_msfsAircraftDir.toStdString();
+    }
+    if (settingsKeys.contains("msfsMaxTextureSize") || force) {
+        ostr << " m_msfsMaxTextureSize: " << m_msfsMaxTextureSize;
+    }
+    if (settingsKeys.contains("msfsLowDetailMaxTextureSize") || force) {
+        ostr << " m_msfsLowDetailMaxTextureSize: " << m_msfsLowDetailMaxTextureSize;
+    }
     if (settingsKeys.contains("fxaa") || force) {
         ostr << " m_fxaa: " << m_fxaa;
     }
     if (settingsKeys.contains("msaa") || force) {
         ostr << " m_msaa: " << m_msaa;
     }
+    if (settingsKeys.contains("mapCenterLatitude") || force) {
+        ostr << " m_mapCenterLatitude: " << m_mapCenterLatitude;
+    }
+    if (settingsKeys.contains("mapCenterLongitude") || force) {
+        ostr << " m_mapCenterLongitude: " << m_mapCenterLongitude;
+    }
+    if (settingsKeys.contains("mapZoomLevel") || force) {
+        ostr << " m_mapZoomLevel: " << m_mapZoomLevel;
+    }
     if (settingsKeys.contains("terrainLighting") || force) {
         ostr << " m_terrainLighting: " << m_terrainLighting;
     }
     if (settingsKeys.contains("water") || force) {
         ostr << " m_water: " << m_water;
+    }
+    if (settingsKeys.contains("googlePhotorealistic3DTiles") || force) {
+        ostr << " m_googlePhotorealistic3DTiles: " << m_googlePhotorealistic3DTiles;
     }
     if (settingsKeys.contains("hdr") || force) {
         ostr << " m_hdr: " << m_hdr;
@@ -868,6 +1185,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("fps") || force) {
         ostr << " m_fps: " << m_fps;
+    }
+    if (settingsKeys.contains("frameRate") || force) {
+        ostr << " m_frameRate: " << m_frameRate;
     }
     if (settingsKeys.contains("displayMUF") || force) {
         ostr << " m_displayMUF: " << m_displayMUF;
@@ -908,14 +1228,59 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("defaultImagery") || force) {
         ostr << " m_defaultImagery: " << m_defaultImagery.toStdString();
     }
+    if (settingsKeys.contains("cesiumIonAPIKey") || force) {
+        ostr << " m_cesiumIonAPIKey: " << m_cesiumIonAPIKey.toStdString();
+    }
     if (settingsKeys.contains("arcGISAPIKey") || force) {
         ostr << " m_arcGISAPIKey: " << m_arcGISAPIKey.toStdString();
     }
     if (settingsKeys.contains("displayPFD") || force) {
         ostr << " m_displayPFD: " << m_displayPFD;
     }
-    if (settingsKeys.contains("viewFirstPerson") || force) {
-        ostr << " m_viewFirstPerson: " << m_viewFirstPerson;
+    if (settingsKeys.contains("displayND") || force) {
+        ostr << " m_displayND: " << m_displayND;
+    }
+    if (settingsKeys.contains("mapItemSoundVolume") || force) {
+        ostr << " m_mapItemSoundVolume: " << m_mapItemSoundVolume;
+    }
+    if (settingsKeys.contains("cockpitSoundVolume") || force) {
+        ostr << " m_cockpitSoundVolume: " << m_cockpitSoundVolume;
+    }
+    if (settingsKeys.contains("audioMuted") || force) {
+        ostr << " m_audioMuted: " << m_audioMuted;
+    }
+    if (settingsKeys.contains("displayCockpitPanels") || force) {
+        ostr << " m_displayCockpitPanels: " << m_displayCockpitPanels;
+    }
+    if (settingsKeys.contains("displayEFIS") || force) {
+        ostr << " m_displayEFIS: " << m_displayEFIS;
+    }
+    if (settingsKeys.contains("displayRMP") || force) {
+        ostr << " m_displayRMP: " << m_displayRMP;
+    }
+    if (settingsKeys.contains("vhf1Channel") || force) {
+        ostr << " m_vhf1Channel: " << m_vhf1Channel.toStdString();
+    }
+    if (settingsKeys.contains("vhf2Channel") || force) {
+        ostr << " m_vhf2Channel: " << m_vhf2Channel.toStdString();
+    }
+    if (settingsKeys.contains("vhf1Standby") || force) {
+        ostr << " m_vhf1Standby: " << m_vhf1Standby;
+    }
+    if (settingsKeys.contains("vhf2Standby") || force) {
+        ostr << " m_vhf2Standby: " << m_vhf2Standby;
+    }
+    if (settingsKeys.contains("cockpitPanelGeometry") || force) {
+        ostr << " m_cockpitPanelGeometry: " << m_cockpitPanelGeometry.toStdString();
+    }
+    if (settingsKeys.contains("efisState") || force) {
+        ostr << " m_efisState: " << m_efisState.toStdString();
+    }
+    if (settingsKeys.contains("displayDCDU") || force) {
+        ostr << " m_displayDCDU: " << m_displayDCDU;
+    }
+    if (settingsKeys.contains("cameraMode") || force) {
+        ostr << " m_cameraMode: " << m_cameraMode;
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;

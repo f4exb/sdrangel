@@ -27,6 +27,7 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
+#include "SWGMapItem.h"
 
 #include "feature/featureset.h"
 #include "settings/serializable.h"
@@ -109,8 +110,18 @@ bool Map::handleMessage(const Message& cmd)
     {
         // qDebug() << "Map::handleMessage: MsgMapItem";
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) cmd;
-        MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
-        getMessageQueueToGUI()->push(copy);
+
+        if (getMessageQueueToGUI())
+        {
+            // The GUI owns the item from here, and deletes it once the map has it
+            MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
+            getMessageQueueToGUI()->push(copy);
+        }
+        else
+        {
+            // Nothing to display it, so it would otherwise be leaked
+            delete msgMapItem.getSWGMapItem();
+        }
         return true;
     }
     else
@@ -289,6 +300,8 @@ void Map::webapiFormatFeatureSettings(
     }
     response.getMapSettings()->setSunLightEnabled(settings.m_sunLightEnabled ? 1 : 0);
     response.getMapSettings()->setLightIntensity(settings.m_lightIntensity);
+    response.getMapSettings()->setDistantLightIntensity(settings.m_distantLightIntensity);
+    response.getMapSettings()->setLowDetailModels(settings.m_lowDetailModels ? 1 : 0);
     response.getMapSettings()->setEciCamera(settings.m_eciCamera ? 1 : 0);
     response.getMapSettings()->setFxaa(settings.m_fxaa ? 1 : 0);
     response.getMapSettings()->setMsaa(settings.m_msaa);
@@ -297,6 +310,7 @@ void Map::webapiFormatFeatureSettings(
     response.getMapSettings()->setHdr(settings.m_hdr ? 1 : 0);
     response.getMapSettings()->setFog(settings.m_fog ? 1 : 0);
     response.getMapSettings()->setFps(settings.m_fps ? 1 : 0);
+    response.getMapSettings()->setFrameRate(settings.m_frameRate);
     response.getMapSettings()->setDisplayMuf(settings.m_displayMUF ? 1 : 0);
     response.getMapSettings()->setDisplayfoF2(settings.m_displayfoF2 ? 1 : 0);
     response.getMapSettings()->setDisplayRain(settings.m_displayRain ? 1 : 0);
@@ -314,7 +328,13 @@ void Map::webapiFormatFeatureSettings(
     response.getMapSettings()->setDisplayMagDec(settings.m_displayMagDec ? 1 : 0);
     response.getMapSettings()->setDisplayMaidenheadGrid(settings.m_displayMaidenheadGrid ? 1 : 0);
     response.getMapSettings()->setDisplayPfd(settings.m_displayPFD ? 1 : 0);
-    response.getMapSettings()->setViewFirstPerson(settings.m_viewFirstPerson ? 1 : 0);
+    // The boolean this API field was built around became a three-valued camera mode
+    // (third person, first person, fly by). The field is kept working as it always did -
+    // true means first person - rather than dropped, which would break existing callers.
+    // Fly by is not reachable over the web API until the schema gains a cameraMode field,
+    // which needs a swagger regeneration.
+    response.getMapSettings()->setViewFirstPerson(
+        (settings.m_cameraMode == MapSettings::FirstPerson) ? 1 : 0);
     if (response.getMapSettings()->getDefaultImagery()) {
         *response.getMapSettings()->getDefaultImagery() = settings.m_defaultImagery;
     } else {
@@ -398,6 +418,12 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("sunLightEnabled")) {
         settings.m_sunLightEnabled = response.getMapSettings()->getSunLightEnabled() != 0;
     }
+    if (featureSettingsKeys.contains("distantLightIntensity")) {
+        settings.m_distantLightIntensity = response.getMapSettings()->getDistantLightIntensity();
+    }
+    if (featureSettingsKeys.contains("lowDetailModels")) {
+        settings.m_lowDetailModels = response.getMapSettings()->getLowDetailModels() != 0;
+    }
     if (featureSettingsKeys.contains("lightIntensity")) {
         settings.m_lightIntensity = response.getMapSettings()->getLightIntensity();
     }
@@ -424,6 +450,9 @@ void Map::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("fps")) {
         settings.m_fps = response.getMapSettings()->getFps() != 0;
+    }
+    if (featureSettingsKeys.contains("frameRate")) {
+        settings.m_frameRate = response.getMapSettings()->getFrameRate();
     }
     if (featureSettingsKeys.contains("displayMUF")) {
         settings.m_displayMUF = response.getMapSettings()->getDisplayMuf() != 0;
@@ -464,8 +493,12 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("displayPFD")) {
         settings.m_displayPFD = response.getMapSettings()->getDisplayPfd() != 0;
     }
-    if (featureSettingsKeys.contains("viewFirstPerson")) {
-        settings.m_viewFirstPerson = response.getMapSettings()->getViewFirstPerson() != 0;
+    if (featureSettingsKeys.contains("viewFirstPerson"))
+    {
+        // See webapiFormatFeatureSettings: clearing it returns to third person, which is
+        // what the boolean's false meant before the camera mode replaced it
+        settings.m_cameraMode = (response.getMapSettings()->getViewFirstPerson() != 0)
+            ? MapSettings::FirstPerson : MapSettings::ThirdPerson;
     }
     if (featureSettingsKeys.contains("defaultImagery")) {
         settings.m_defaultImagery = *response.getMapSettings()->getDefaultImagery();
@@ -543,6 +576,12 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
     if (featureSettingsKeys.contains("sunLightEnabled") || force) {
         swgMapSettings->setSunLightEnabled(settings.m_sunLightEnabled);
     }
+    if (featureSettingsKeys.contains("distantLightIntensity") || force) {
+        swgMapSettings->setDistantLightIntensity(settings.m_distantLightIntensity);
+    }
+    if (featureSettingsKeys.contains("lowDetailModels") || force) {
+        swgMapSettings->setLowDetailModels(settings.m_lowDetailModels ? 1 : 0);
+    }
     if (featureSettingsKeys.contains("lightIntensity") || force) {
         swgMapSettings->setLightIntensity(settings.m_lightIntensity);
     }
@@ -569,6 +608,9 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
     }
     if (featureSettingsKeys.contains("fps") || force) {
         swgMapSettings->setFps(settings.m_fps);
+    }
+    if (featureSettingsKeys.contains("frameRate") || force) {
+        swgMapSettings->setFrameRate(settings.m_frameRate);
     }
     if (featureSettingsKeys.contains("displayMUF") || force) {
         swgMapSettings->setDisplayMuf(settings.m_displayMUF);
@@ -610,7 +652,7 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
         swgMapSettings->setDisplayPfd(settings.m_displayPFD);
     }
     if (featureSettingsKeys.contains("viewFirstPerson") || force) {
-        swgMapSettings->setViewFirstPerson(settings.m_viewFirstPerson);
+        swgMapSettings->setViewFirstPerson(settings.m_cameraMode == MapSettings::FirstPerson);
     }
     if (featureSettingsKeys.contains("defaultImagery") || force) {
         swgMapSettings->setDefaultImagery(new QString(settings.m_defaultImagery));
@@ -706,6 +748,12 @@ void Map::channelsOrFeaturesChanged(const QStringList& renameFrom, const QString
 {
     m_availableChannelOrFeatures = m_availableChannelOrFeatureHandler.getAvailableChannelOrFeatureList();
     notifyUpdate(renameFrom, renameTo);
+}
+
+// For the GUI, which is created after the constructor's scan has reported to nobody
+void Map::getAvailableChannelsReport()
+{
+    notifyUpdate(QStringList{}, QStringList{});
 }
 
 void Map::notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo)

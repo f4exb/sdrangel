@@ -88,6 +88,7 @@
 #include "gui/dialogpositioner.h"
 #include "gui/welcomedialog.h"
 #include "gui/profiledialog.h"
+#include "util/profiler.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -311,6 +312,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 MainWindow::~MainWindow()
 {
 	qDebug() << "MainWindow::~MainWindow";
+
+    // Log before tearing anything down, so the data survives a problem during shutdown
+    GlobalProfileData::logProfileData();
 
     setConnectionOverlayEnabled(false);
     m_statusTimer.stop();
@@ -3029,16 +3033,9 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
-        &Workspace::startAllDevices,
+        &Workspace::startStopRequested,
         this,
-        &MainWindow::startAllDevices
-    );
-
-    QObject::connect(
-        m_workspaces.back(),
-        &Workspace::stopAllDevices,
-        this,
-        &MainWindow::stopAllDevices
+        &MainWindow::startStop
     );
 
     if (m_workspaces.size() > 1)
@@ -4360,6 +4357,45 @@ void MainWindow::stopAllDevices(const Workspace *workspace) const
         {
             int deviceIndex = deviceUI->m_deviceAPI->getDeviceSetIndex();
             ChannelWebAPIUtils::stop(deviceIndex);
+        }
+    }
+}
+
+void MainWindow::startStop(const Workspace *workspace, bool start, bool includeFeatures, bool allWorkspaces) const
+{
+    const int workspaceIndex = workspace->getIndex();
+
+    for (const auto *deviceUI : m_deviceUIs)
+    {
+        DeviceAPI *deviceAPI = deviceUI->m_deviceAPI;
+        if (allWorkspaces || (deviceAPI->getWorkspaceIndex() == workspaceIndex))
+        {
+            const int deviceIndex = deviceAPI->getDeviceSetIndex();
+            if (start) {
+                ChannelWebAPIUtils::run(deviceIndex);
+            } else {
+                ChannelWebAPIUtils::stop(deviceIndex);
+            }
+        }
+    }
+
+    if (includeFeatures)
+    {
+        for (std::size_t featureSetIndex = 0; featureSetIndex < m_featureUIs.size(); featureSetIndex++)
+        {
+            FeatureUISet *featureUISet = m_featureUIs[featureSetIndex];
+            for (int featureIndex = 0; featureIndex < featureUISet->getNumberOfFeatures(); featureIndex++)
+            {
+                Feature *feature = featureUISet->getFeatureAt(featureIndex);
+                if (allWorkspaces || (feature->getWorkspaceIndex() == workspaceIndex))
+                {
+                    if (start) {
+                        FeatureWebAPIUtils::run(featureSetIndex, featureIndex);
+                    } else {
+                        FeatureWebAPIUtils::stop(featureSetIndex, featureIndex);
+                    }
+                }
+            }
         }
     }
 }

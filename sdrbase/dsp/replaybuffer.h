@@ -22,6 +22,7 @@
 #include <QMutex>
 #include <QFileInfo>
 
+#include <algorithm>
 #include <vector>
 
 #include "dsp/wavfilerecord.h"
@@ -34,7 +35,6 @@ class ReplayBuffer {
 
 public:
     ReplayBuffer() :
-        m_data(1000000*2, 0),
         m_write(0),
         m_read(0),
         m_readOffset(0),
@@ -48,35 +48,37 @@ public:
         return (m_readOffset > 0) || m_loop;
     }
 
+    // A length of 0 disables replay and frees the buffer
     void setSize(float lengthInSeconds, int sampleRate)
     {
-         QMutexLocker locker(&m_mutex);
-         unsigned int newSize = lengthInSeconds * sampleRate * 2;
-         unsigned int oldSize = m_data.size();
+        QMutexLocker locker(&m_mutex);
+        // Whole I/Q pairs
+        const unsigned int newSize = ((unsigned int) (lengthInSeconds * sampleRate)) * 2;
+        const unsigned int oldSize = m_data.size();
 
-         if (newSize == oldSize) {
-             return;
-         }
+        if (newSize == oldSize) {
+            return;
+        }
 
-         // Save most recent data
-         if (m_write >= newSize)
-         {
-             memmove(&m_data[0], &m_data[m_write-newSize], newSize);
-             m_write = 0;
-             m_count = newSize;
-             m_data.resize(newSize);
-         }
-         else if (newSize < oldSize)
-         {
-             memmove(&m_data[m_write], &m_data[oldSize-(newSize-m_write)], newSize-m_write);
-             m_count = std::min(m_count, newSize);
-             m_data.resize(newSize);
-         }
-         else
-         {
-             m_data.resize(newSize);
-             memmove(&m_data[newSize-(oldSize-m_write)], &m_data[m_write], oldSize-m_write);
-         }
+        // Copy the most recent samples, oldest first, into a buffer of exactly the new size.
+        // Resizing in place never gives memory back - std::vector keeps its capacity - so
+        // disabling replay, or lowering the length or sample rate, used to keep the largest
+        // buffer there had ever been
+        const unsigned int keep = std::min(m_count, newSize);
+        std::vector<T> data(newSize, 0);
+
+        if (keep > 0)
+        {
+            const unsigned int start = (m_write + oldSize - keep) % oldSize;
+            const unsigned int first = std::min(keep, oldSize - start);
+            std::copy(m_data.begin() + start, m_data.begin() + start + first, data.begin());
+            std::copy(m_data.begin(), m_data.begin() + (keep - first), data.begin() + first);
+        }
+
+        m_data.swap(data);
+        m_write = (newSize > 0) ? keep % newSize : 0;
+        m_count = keep;
+        updateReadPointer();
     }
 
     // lock()/unlock() should be called before/after calling this function
@@ -135,12 +137,7 @@ public:
     {
         QMutexLocker locker(&m_mutex);
         m_readOffset = offset;
-        offset = std::min(offset, (unsigned int)(m_data.size() - 1));
-        int read = m_write - offset;
-        while (read < 0) {
-            read += m_data.size();
-        }
-        m_read = (unsigned int) read;
+        updateReadPointer();
     }
 
     unsigned int getReadOffset()
@@ -192,6 +189,19 @@ public:
     }
 
 private:
+    // Read pointer from m_readOffset, behind the write pointer. m_mutex must be held
+    void updateReadPointer()
+    {
+        if (m_data.empty())
+        {
+            m_read = 0;
+            return;
+        }
+
+        const unsigned int offset = std::min(m_readOffset, (unsigned int)(m_data.size() - 1));
+        m_read = (m_write + m_data.size() - offset) % m_data.size();
+    }
+
     std::vector<T> m_data;
     unsigned int m_write;       // Write index
     unsigned int m_read;        // Read index

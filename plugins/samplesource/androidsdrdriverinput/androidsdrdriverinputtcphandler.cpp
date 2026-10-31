@@ -36,7 +36,9 @@ AndroidSDRDriverInputTCPHandler::AndroidSDRDriverInputTCPHandler(SampleSinkFifo 
     m_dataSocket(nullptr),
     m_tcpBuf(nullptr),
     m_sampleFifo(sampleFifo),
-    m_messageQueueToGUI(0),
+    m_messageQueueToInput(nullptr),
+    m_messageQueueToGUI(nullptr),
+    m_readMetaData(false),
     m_fillBuffer(true),
     m_reconnectTimer(this),
     m_rsp0(false),
@@ -52,10 +54,13 @@ AndroidSDRDriverInputTCPHandler::AndroidSDRDriverInputTCPHandler(SampleSinkFifo 
 AndroidSDRDriverInputTCPHandler::~AndroidSDRDriverInputTCPHandler()
 {
     delete[] m_tcpBuf;
-    if (m_converterBuffer) {
+    if (m_converterBuffer)
+    {
         delete[] m_converterBuffer;
+        m_converterBuffer = nullptr;
+        m_converterBufferNbSamples = 0;
     }
-    cleanup();
+    cleanup(true);
 }
 
 void AndroidSDRDriverInputTCPHandler::reset()
@@ -99,7 +104,7 @@ void AndroidSDRDriverInputTCPHandler::started()
 void AndroidSDRDriverInputTCPHandler::finished()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    disconnectFromHost();
+    cleanup(false);
     disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
 }
@@ -117,25 +122,28 @@ void AndroidSDRDriverInputTCPHandler::connectToHost(const QString& address, quin
     m_dataSocket->connectToHost(address, port);
 }
 
-void AndroidSDRDriverInputTCPHandler::disconnectFromHost()
+// threadStopped should be true if the thread this object lives in is no longer
+// running an event loop (i.e. when called from the destructor), as deleteLater()
+// would never be processed and the socket would be leaked
+void AndroidSDRDriverInputTCPHandler::cleanup(bool threadStopped)
 {
+    m_reconnectTimer.stop();
+
     if (m_dataSocket)
     {
-        qDebug() << "AndroidSDRDriverInputTCPHandler::disconnectFromHost";
+        qDebug() << "AndroidSDRDriverInputTCPHandler::cleanup: Closing and deleting TCP socket";
+        // Disconnect disconnected, so we don't get called recursively.
+        // Disconnect readyRead, so dataReadyRead() isn't called after m_dataSocket is cleared
         disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
         disconnect(m_dataSocket, SIGNAL(connected()), this, SLOT(connected()));
         disconnect(m_dataSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
         disconnect(m_dataSocket, &QAbstractSocket::errorOccurred, this, &AndroidSDRDriverInputTCPHandler::errorOccurred);
-        m_dataSocket->disconnectFromHost();
-        cleanup();
-    }
-}
-
-void AndroidSDRDriverInputTCPHandler::cleanup()
-{
-    if (m_dataSocket)
-    {
-        m_dataSocket->deleteLater();
+        m_dataSocket->close();
+        if (threadStopped) {
+            delete m_dataSocket;
+        } else {
+            m_dataSocket->deleteLater();
+        }
         m_dataSocket = nullptr;
     }
 }
@@ -469,7 +477,7 @@ void AndroidSDRDriverInputTCPHandler::applySettings(const AndroidSDRDriverInputS
     // Don't use force, as disconnect can cause rtl_tcp to quit
     if (settingsKeys.contains("dataPort") || (m_dataSocket == nullptr))
     {
-        disconnectFromHost();
+        cleanup(false);
         connectToHost("127.0.0.1", settings.m_dataPort);
     }
 
@@ -505,7 +513,7 @@ void AndroidSDRDriverInputTCPHandler::disconnected()
 {
     QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "AndroidSDRDriverInputTCPHandler::disconnected";
-    cleanup();
+    cleanup(false);
     if (m_messageQueueToGUI)
     {
         MsgReportConnection *msg = MsgReportConnection::create(false);
@@ -517,8 +525,9 @@ void AndroidSDRDriverInputTCPHandler::disconnected()
 
 void AndroidSDRDriverInputTCPHandler::errorOccurred(QAbstractSocket::SocketError socketError)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "AndroidSDRDriverInputTCPHandler::errorOccurred: " << socketError;
-    cleanup();
+    cleanup(false);
     if (m_messageQueueToGUI)
     {
         MsgReportConnection *msg = MsgReportConnection::create(false);
@@ -648,10 +657,14 @@ void AndroidSDRDriverInputTCPHandler::convert(int nbSamples)
 {
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) {
+        if (m_converterBuffer)
+        {
             delete[] m_converterBuffer;
+            m_converterBuffer = nullptr;
+            m_converterBufferNbSamples = 0;
         }
         m_converterBuffer = new int32_t[nbSamples*2];
+        m_converterBufferNbSamples = nbSamples;
     }
 
     if ((m_settings.m_sampleBits == 32) && (SDR_RX_SAMP_SZ == 24))

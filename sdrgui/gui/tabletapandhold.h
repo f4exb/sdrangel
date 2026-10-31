@@ -25,15 +25,15 @@
 
 #include "export.h"
 
-class QTableWidget;
+class QTableView;
 
 // Emits a signal when tap and hold gesture occurs on a table
 // Position passed with tapAndHold signal is adjusted by table header size,
-// so can be used to call QTableWidget::itemAt(itemPos)
+// so can be used to call QTableView::indexAt(itemPos)
 class SDRGUI_API TableTapAndHold : public QObject {
     Q_OBJECT
 public:
-    TableTapAndHold(QTableWidget *table);
+    TableTapAndHold(QTableView *table);
 
 signals:
     void tapAndHold(const QPoint& itemPos);
@@ -42,7 +42,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    QTableWidget* m_table;
+    QTableView* m_table;
 };
 
 #endif /* SDRGUI_GUI_TABLETAPANDHOLD_H */

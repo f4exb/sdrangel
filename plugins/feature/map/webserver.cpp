@@ -41,6 +41,8 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
     m_mimeTypes.insert(".json", new MimeType("application/json"));
     m_mimeTypes.insert(".geojson", new MimeType("application/geo+json"));
     m_mimeTypes.insert(".wasm", new MimeType("application/wasm"));
+    m_mimeTypes.insert(".wav", new MimeType("audio/wav"));
+    m_mimeTypes.insert(".ogg", new MimeType("audio/ogg"));
 }
 
 WebServer::~WebServer()

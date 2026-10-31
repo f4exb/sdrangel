@@ -7,9 +7,9 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     id: qmlMap
-    property int aircraftZoomLevel: 11
-    property int aircraftMinZoomLevel: 11
-    property int airportZoomLevel: 11
+    property real aircraftZoomLevel: 11
+    property real aircraftMinZoomLevel: 11
+    property real airportZoomLevel: 11
     property string mapProvider: "osm"
     property variant mapPtr
     property string requestedMapType
@@ -77,25 +77,31 @@ Item {
                 parent: mapView.map
             }
 
+            // Explicit z, as Qt 6 stacks sibling MapItemViews in reverse declaration order,
+            // which would draw airspaces, navaids and airports on top of aircraft
             MapItemView {
+                z: 1
                 model: airspaceModel
                 delegate: airspaceComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 2
                 model: navAidModel
                 delegate: navAidComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 3
                 model: airspaceModel
                 delegate: airspaceNameComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 4
                 model: airportModel
                 delegate: airportComponent
                 parent: mapView.map
@@ -103,12 +109,14 @@ Item {
 
             // This needs to be before aircraftComponent MapItemView, so it's drawn underneath
             MapItemView {
+                z: 5
                 model: aircraftModel
                 delegate: aircraftPathComponent
                 parent: mapView.map
             }
 
             MapItemView {
+                z: 6
                 model: aircraftModel
                 delegate: aircraftComponent
                 parent: mapView.map
@@ -246,8 +254,8 @@ Item {
         id: aircraftComponent
         MapQuickItem {
             id: aircraft
-            anchorPoint.x: image.width/2
-            anchorPoint.y: image.height/2
+            anchorPoint.x: imageBounds.width/2
+            anchorPoint.y: imageBounds.height/2
             coordinate: position
             zoomLevel: aircraftZoomLevel
 
@@ -257,43 +265,52 @@ Item {
                     layer.enabled: smoothing
                     layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
-                    Image {
-                        id: image
-                        rotation: heading
-                        source: aircraftImage
-                        visible: !lightIcons
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
-                                if (mouse.button === Qt.LeftButton) {
-                                    highlighted = true
-                                    console.log("z=" + aircraft.sourceItem.z)
-                                    aircraft.sourceItem.z = aircraft.sourceItem.z + 1
-                                } else if (mouse.button === Qt.RightButton) {
-                                    contextMenu.popup()
+                    // Sized to the rotated image's bounding box, so the smoothing layer
+                    // doesn't clip wingtips and the bubble sits close at every heading
+                    Item {
+                        id: imageBounds
+                        width: image.implicitWidth * Math.abs(Math.cos(heading * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.sin(heading * Math.PI / 180))
+                        height: image.implicitWidth * Math.abs(Math.sin(heading * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.cos(heading * Math.PI / 180))
+                        Image {
+                            id: image
+                            anchors.centerIn: parent
+                            rotation: heading
+                            source: aircraftImage
+                            visible: !lightIcons
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        highlighted = true
+                                        console.log("z=" + aircraft.sourceItem.z)
+                                        aircraft.sourceItem.z = aircraft.sourceItem.z + 1
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        contextMenu.popup()
+                                    }
+                                }
+                                onDoubleClicked: {
+                                    target = true
                                 }
                             }
-                            onDoubleClicked: {
-                                target = true
-                            }
                         }
-                    }
-                    ColorOverlay {
-                        cached: true
-                        width: image.width
-                        height: image.height
-                        rotation: heading
-                        source: image
-                        color: "#c0ffffff"
-                        visible: lightIcons
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                highlighted = true
-                            }
-                            onDoubleClicked: {
-                                target = true
+                        ColorOverlay {
+                            cached: true
+                            anchors.centerIn: parent
+                            width: image.implicitWidth
+                            height: image.implicitHeight
+                            rotation: heading
+                            source: image
+                            color: "#c0ffffff"
+                            visible: lightIcons
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    highlighted = true
+                                }
+                                onDoubleClicked: {
+                                    target = true
+                                }
                             }
                         }
                     }

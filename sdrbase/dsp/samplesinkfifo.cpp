@@ -29,7 +29,14 @@ void SampleSinkFifo::create(unsigned int s)
     m_head = 0;
     m_tail = 0;
 
-    m_data.resize(s);
+    // resize() never gives memory back, so a FIFO made smaller would keep its largest size.
+    // The contents are discarded either way
+    if (s < m_data.size()) {
+        SampleVector(s).swap(m_data);
+    } else {
+        m_data.resize(s);
+    }
+
     m_size = m_data.size();
 }
 

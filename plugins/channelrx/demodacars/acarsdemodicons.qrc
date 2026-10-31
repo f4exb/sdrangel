@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/aircraft.png</file>
+    <file>icons/chart.png</file>
+    <file>icons/gs.png</file>
+    <file>icons/forward.png</file>
+  </qresource>
+</RCC>

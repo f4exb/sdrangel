@@ -18,6 +18,7 @@
 #include <QJsonObject>
 
 #include "cesiuminterface.h"
+#include "util/profiler.h"
 
 CesiumInterface::CesiumInterface(const MapSettings *settings, QObject *parent) :
     MapWebSocketServer(parent),
@@ -50,11 +51,12 @@ void CesiumInterface::setView(float latitude, float longitude, float altitude)
     send(obj);
 }
 
-void CesiumInterface::setViewFirstPerson(bool firstPerson)
+// How the camera follows the tracked object: MapSettings::CameraMode
+void CesiumInterface::setCameraMode(int mode)
 {
     QJsonObject obj {
-        {"command", "setViewFirstPerson"},
-        {"firstPerson", firstPerson}
+        {"command", "setCameraMode"},
+        {"mode", mode}
     };
     send(obj);
 }
@@ -72,8 +74,14 @@ void CesiumInterface::playAnimation(const QString &name, Animation *animation)
         {"stop", animation->m_stop},
         {"startOffset", animation->m_startOffset},
         {"duration", animation->m_duration},
-        {"multiplier", animation->m_multiplier}
+        {"multiplier", animation->m_multiplier},
+        {"sound", animation->m_sound}
     };
+    if (m_batching) {
+        // Queued so it cannot overtake the entity update it refers to
+        m_pendingCommands.append(obj);
+        return;
+    }
     send(obj);
 }
 
@@ -137,7 +145,8 @@ void CesiumInterface::setTerrain(const QString &terrain, const QString &maptiler
         {"command", "setTerrain"},
         {"provider", provider},
         {"url", url},
-        {"lighting", lighting},
+        // Not "lighting", which is the Sun/camera lighting in setLighting
+        {"terrainLighting", lighting},
         {"water", water}
     };
     send(obj);
@@ -152,12 +161,31 @@ void CesiumInterface::setBuildings(const QString &buildings)
     send(obj);
 }
 
-void CesiumInterface::setLighting(bool useSunLight, float cameraLightIntensity)
+void CesiumInterface::setGooglePhotorealistic3DTiles(bool enabled)
+{
+    QJsonObject obj {
+        {"command", "setGooglePhotorealistic3DTiles"},
+        {"enabled", enabled}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setLighting(bool useSunLight, float cameraLightIntensity, float distantLightIntensity)
 {
     QJsonObject obj {
         {"command", "setLighting"},
         {"useSunLight", useSunLight},
-        {"cameraLightIntensity", cameraLightIntensity}
+        {"cameraLightIntensity", cameraLightIntensity},
+        {"distantLightIntensity", distantLightIntensity}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setLowDetailModels(bool enabled)
+{
+    QJsonObject obj {
+        {"command", "setLowDetailModels"},
+        {"enabled", enabled}
     };
     send(obj);
 }
@@ -199,6 +227,17 @@ void CesiumInterface::setFog(bool enabled)
     send(obj);
 }
 
+// 0 means render at the refresh rate of the display the map is on, which the page
+// cannot determine for itself
+void CesiumInterface::setFrameRate(int frameRate)
+{
+    QJsonObject obj {
+        {"command", "setFrameRate"},
+        {"frameRate", frameRate}
+    };
+    send(obj);
+}
+
 void CesiumInterface::showFPS(bool show)
 {
     QJsonObject obj {
@@ -213,6 +252,106 @@ void CesiumInterface::showPFD(bool show)
     QJsonObject obj {
         {"command", "showPFD"},
         {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showND(bool show)
+{
+    QJsonObject obj {
+        {"command", "showND"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showEFIS(bool show)
+{
+    QJsonObject obj {
+        {"command", "showEFIS"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showRMP(bool show)
+{
+    QJsonObject obj {
+        {"command", "showRMP"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+// The RMP's two VHF channels: {"vhf1": {"active": Hz, "standby": Hz, "available": bool},
+// "vhf2": {...}}. active is null when the linked AM Demod cannot be read
+void CesiumInterface::setRMPState(const QJsonObject& state)
+{
+    QJsonObject obj = state;
+    obj.insert("command", "setRMPState");
+    send(obj);
+}
+
+// Hiding also suppresses the DCDU's pop-on-message behaviour
+void CesiumInterface::showDCDU(bool show)
+{
+    QJsonObject obj {
+        {"command", "showDCDU"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+// The airport database for the ND's airport overlay: [{n, lat, lon, t}] with
+// t 0 small, 1 medium, 2 large
+// Where each cockpit panel is to be placed: {"pfd": {"l": x, "t": y, "w": w, "h": h}, ...}
+// in CSS pixels, as the page last reported them
+void CesiumInterface::setPanelGeometry(const QJsonObject& panels)
+{
+    QJsonObject obj {
+        {"command", "setPanelGeometry"},
+        {"panels", panels}
+    };
+    send(obj);
+}
+
+// What the EFIS knobs and pushbuttons are set to: {"mode", "range", "wx", "terr",
+// "arpt", "vor", "tcas"}, as the page last reported them
+void CesiumInterface::setEFISState(const QJsonObject& state)
+{
+    QJsonObject obj {
+        {"command", "setEFISState"},
+        {"state", state}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setNDAirports(const QJsonArray& airports)
+{
+    QJsonObject obj {
+        {"command", "setNDAirports"},
+        {"airports", airports}
+    };
+    send(obj);
+}
+
+// The VOR-family navaids for the ND's overlay: [{n, lat, lon}]
+void CesiumInterface::setNDNavAids(const QJsonArray& navAids)
+{
+    QJsonObject obj {
+        {"command", "setNDNavAids"},
+        {"navAids", navAids}
+    };
+    send(obj);
+}
+
+// Volumes are [0..100]
+void CesiumInterface::setAudioVolume(int mapItemVolume, int cockpitVolume)
+{
+    QJsonObject obj {
+        {"command", "setAudioVolume"},
+        {"mapItem", mapItemVolume / 100.0},
+        {"cockpit", cockpitVolume / 100.0}
     };
     send(obj);
 }
@@ -314,6 +453,10 @@ void CesiumInterface::removeAllCZMLEntities()
         {"command", "removeAllCZMLEntities"}
     };
     send(obj);
+    // Cesium keeps nothing after this, so neither may we: describing an item against
+    // what it used to look like would leave out of the packet everything that has not
+    // changed, and none of it is there any more
+    m_czml.clear();
 }
 
 void CesiumInterface::initCZML()
@@ -325,26 +468,145 @@ void CesiumInterface::initCZML()
 // Send and process CZML
 void CesiumInterface::czml(QJsonObject &obj)
 {
+    if (m_batching)
+    {
+        // The command key is added once, to the array, not to every packet
+        m_batch.append(obj);
+        return;
+    }
     obj.insert("command", "czml");
     send(obj);
 }
 
+void CesiumInterface::beginBatch()
+{
+    m_batching = true;
+    m_batch = QJsonArray();
+}
+
+void CesiumInterface::endBatch()
+{
+    m_batching = false;
+
+    // One packet is not worth an array
+    if (m_batch.size() == 1)
+    {
+        QJsonObject obj = m_batch.first().toObject();
+        obj.insert("command", "czml");
+        m_sendQueue.append(obj);
+    }
+    else if (!m_batch.isEmpty())
+    {
+        // Cut into chunks so the page pays for the flush over several frames rather than
+        // one - see m_batchChunkPackets
+        for (qsizetype i = 0; i < m_batch.size(); i += m_batchChunkPackets)
+        {
+            qsizetype count = m_batch.size() - i;
+            QJsonArray chunk;
+
+            if (count > m_batchChunkPackets) {
+                count = m_batchChunkPackets;
+            }
+            for (qsizetype j = 0; j < count; j++) {
+                chunk.append(m_batch.at(i + j));
+            }
+            m_sendQueue.append(QJsonObject {
+                {"command", "czmlArray"},
+                {"packets", chunk}
+            });
+        }
+    }
+    m_batch = QJsonArray();
+
+    // The CZML goes first, then anything that was issued while it was being collected -
+    // an animation must not arrive before the entity update it belongs to. Queued behind
+    // the chunks rather than sent here, which also keeps them behind the chunks of an
+    // earlier batch that has not finished draining
+    m_sendQueue.append(m_pendingCommands);
+    m_pendingCommands.clear();
+
+    drainSendQueue();
+}
+
+// Sends one chunk and the commands that follow it, then leaves the rest to the timer. The
+// commands go with their chunk rather than one per tick: they are small, and holding them
+// back would only delay the animation behind the entity update it belongs to.
+void CesiumInterface::drainSendQueue()
+{
+    // Decided once, before anything is sent, so a drain that starts backlogged empties the
+    // whole queue instead of stopping as soon as it drops under the limit
+    const bool backlogged = m_sendQueue.size() > m_batchMaxQueuedMessages;
+    bool sentChunk = false;
+
+    while (!m_sendQueue.isEmpty())
+    {
+        const QJsonObject obj = m_sendQueue.first();
+        const QString command = obj.value("command").toString();
+        const bool isCZML = (command == "czmlArray") || (command == "czml");
+
+        if (isCZML && sentChunk && !backlogged) {
+            break;
+        }
+        m_sendQueue.removeFirst();
+        send(obj);
+        sentChunk = sentChunk || isCZML;
+    }
+
+    if (m_sendQueue.isEmpty())
+    {
+        if (m_chunkTimer) {
+            m_chunkTimer->stop();
+        }
+        return;
+    }
+    if (!m_chunkTimer)
+    {
+        m_chunkTimer = new QTimer(this);
+        QObject::connect(m_chunkTimer, &QTimer::timeout, this, [this]() { drainSendQueue(); });
+    }
+    if (!m_chunkTimer->isActive()) {
+        m_chunkTimer->start(m_batchChunkIntervalMS);
+    }
+}
+
 void CesiumInterface::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
 {
+    PROFILER_START()
+    // Track segments first: update() resets the item's cached state when the item is
+    // deleted, and the segments' cleanup packets are built from that state
+    const QList<QJsonObject> trackSegments = m_czml.updateTrackSegments3D(mapItem, isSelected);
+    PROFILER_STOP("Map CZML segments")
+    PROFILER_RESTART()
     QJsonObject obj = m_czml.update(mapItem, isTarget, isSelected);
-    czml(obj);
+    PROFILER_STOP("Map CZML update")
+    PROFILER_RESTART()
+    // Nothing changed: the packet holds an id and nothing else, so there is nothing for
+    // Cesium to do with it. Sending it anyway costs a websocket frame, a JSON parse and a
+    // czmlStream.process() call in the page, per item - which with 200,000 static items
+    // in the model was most of the traffic the 3D map ever saw.
+    if (obj.size() > 1) {
+        czml(obj);
+    }
+    for (QJsonObject segment : trackSegments) { // czml() takes a non-const reference
+        czml(segment);
+    }
+    PROFILER_STOP("Map CZML emit")
 }
 
 void CesiumInterface::update(PolygonMapItem *mapItem)
 {
     QJsonObject obj = m_czml.update(mapItem);
-    czml(obj);
+    if (obj.size() > 1) {   // id only means nothing to do - see update(ObjectMapItem *)
+        czml(obj);
+    }
 }
 
 void CesiumInterface::update(PolylineMapItem *mapItem)
 {
     QJsonObject obj = m_czml.update(mapItem);
-    czml(obj);
+    if (obj.size() > 1) {   // id only means nothing to do - see update(ObjectMapItem *)
+        czml(obj);
+    }
 }
 
 void CesiumInterface::setPosition(const QGeoCoordinate& position)

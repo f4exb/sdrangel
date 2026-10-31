@@ -124,12 +124,17 @@ public:
     static QHash<QString, ProfileData>& getProfileData();
     static void releaseProfileData();
     static void resetProfileData();
-    static qint64 getMSSinceStart() { return m_startTimer.elapsed(); }
+    static qint64 getMSSinceStart();
+
+    // Write the collected profile data to the log. Called on exit, so profile runs
+    // can be compared without having to keep the Profile dialog open, and so it
+    // works in the server, which has no GUI
+    static void logProfileData();
 
 private:
 
     static QHash<QString, ProfileData> m_profileData;
-    static QMutex m_mutex;
+    static QRecursiveMutex m_mutex;
     static QElapsedTimer m_startTimer;
 
 };

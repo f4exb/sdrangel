@@ -165,6 +165,18 @@ MapSettings:
     defaultImagery:
       description: Default imagery layer for the 3D map.
       type: string
+    mapCenterLatitude:
+      description: "Latitude in decimal degrees (North positive) the 2D map is centred on"
+      type: number
+      format: float
+    mapCenterLongitude:
+      description: "Longitude in decimal degrees (East positive) the 2D map is centred on"
+      type: number
+      format: float
+    mapZoomLevel:
+      description: "Zoom level of the 2D map. Negative means nothing has been saved, in which case the map opens centred on My Position"
+      type: number
+      format: float
     title:
       type: string
       description: "User-visible title."
@@ -218,6 +230,11 @@ MapItem:
   properties:
     name:
       description: "A name for the item"
+      type: string
+    group:
+      description: "Which of the Map's item settings groups this item belongs to - its
+        colour, labels, minimum zoom and so on. Optional: when it is not given the item
+        takes the group named after the plugin that sent it!"
       type: string
     image:
       description: "Filename or URL of image to draw on the 2D map"
@@ -364,6 +381,9 @@ MapItem:
     aircraftState:
       $ref: "/doc/swagger/include/Map.yaml#/MapAircraftState"
       description: "Current states of aircraft tracked by the ADS-B demodulator."
+    loopSound:
+      description: "Sound to loop while the item is on the 3D map, spatially located at the item. Either an engine sound-set directory below the configured 3d/Sounds directory, containing engine.json and OGG layers, or a legacy audio file name from the Map's bundled audio directory (e.g. helicopter.wav). Empty for none"
+      type: string
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"
@@ -402,6 +422,9 @@ MapAnimation:
     stop:
       description: "Stop a looped animation from playing"
       type: integer
+    sound:
+      description: "Audio file to play when the animation starts (from the Map's audio directory, e.g. A320_gear.wav), spatially located at the map item. Empty for none"
+      type: string
 
 MapCoordinate:
   description: "A map coordinate"
@@ -429,6 +452,12 @@ MapCoordinate:
 MapAircraftState:
   description: "Aircraft state for PFD/ND"
   properties:
+    dateTime:
+      description: "Date and time at which this complete aircraft state applies (ISO 8601 extended format). When set, the Map preserves this sample instead of coalescing it with a later update."
+      type: string
+    icao:
+      description: "ICAO Mode S address of this aircraft as lower-case hex"
+      type: string
     callsign:
       type: string
       description: "Radio callsign."
@@ -505,8 +534,17 @@ MapAircraftState:
       description: "0 unknown, 1 LNAV, APP (LOC)"
       type: integer
     tcasMode:
-      description: "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
-      type: integer  
+      description: "0 unknown, 1 Off, 2 TA only, 3 TA/RA"
+      type: integer
+    tcasRA:
+      description: "Active TCAS resolution advisory bitfield. 0 none, bit 0 active, bit 1 corrective (vs preventive), bit 2 downward sense (descend), bit 3 positive (vs vertical speed limit), bit 4 clear of conflict, bit 5 multiple threats, bit 6 opposite-sense multiple-threat coding"
+      type: integer
+    tcasThreatIcao:
+      description: "ICAO Mode S address of the RA threat aircraft as lower-case hex, empty if not identified"
+      type: string
+    squawk:
+      description: "Mode A squawk code as decimal digits (e.g. 7000), -1 for unknown"
+      type: integer
     windSpeed:
       type: number
       format: float
@@ -519,4 +557,69 @@ MapAircraftState:
       type: number
       format: float
       description: "Static air temperature for Map aircraft state."
-      
+    flightPlan:
+      $ref: "/doc/swagger/include/Map.yaml#/MapFlightPlan"
+    datalinkMessage:
+      $ref: "/doc/swagger/include/Map.yaml#/MapDatalinkMessage"
+
+MapDatalinkMessage:
+  description: "Datalink ATC message (CPDLC / pre-departure clearance / oceanic clearance), shown on the Map's DCDU"
+  properties:
+    id:
+      description: "Sequence number, incremented for each message for an aircraft"
+      type: integer
+    received:
+      description: "Date and time the message was received (ISO 8601 extended format)"
+      type: string
+    uplink:
+      description: "1 ground to air, 0 air to ground"
+      type: integer
+    station:
+      description: "Ground station / ATC facility, e.g. EDDS. Empty if unknown"
+      type: string
+    text:
+      type: string
+
+MapFlightPlan:
+  description: "Flight plan / cleared route, drawn on the Map's ND (Navigation Display)"
+  properties:
+    departure:
+      description: "ICAO of departure airport"
+      type: string
+    arrival:
+      description: "ICAO of arrival airport"
+      type: string
+    arrivalRunway:
+      description: "Arrival runway, e.g. 27R. Empty if unknown"
+      type: string
+    approach:
+      description: "Arrival approach procedure as filed, e.g. ILSY01R. Empty if unknown"
+      type: string
+    activeWaypoint:
+      description: "Index in to waypoints of the waypoint being flown to, -1 if unknown"
+      type: integer
+    waypoints:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Map.yaml#/MapRouteWaypoint"
+
+MapRouteWaypoint:
+  description: "A waypoint of a flight plan, for the Map's ND (Navigation Display)"
+  properties:
+    name:
+      type: string
+    latitude:
+      description: "Latitude in decimal degrees, positive to the North. NaN if the waypoint could not be placed"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees, positive to the East. NaN if the waypoint could not be placed"
+      type: number
+      format: float
+    altitude:
+      description: "Expected or constrained altitude at this waypoint in feet. NaN if unknown"
+      type: number
+      format: float
+    eta:
+      description: "Estimated time over this waypoint (ISO 8601 extended format). Empty if unknown"
+      type: string

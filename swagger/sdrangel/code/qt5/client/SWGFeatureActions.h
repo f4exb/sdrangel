@@ -24,6 +24,7 @@
 
 #include "SWGAFCActions.h"
 #include "SWGAMBEActions.h"
+#include "SWGAircraftActions.h"
 #include "SWGDemodAnalyzerActions.h"
 #include "SWGDenoiserActions.h"
 #include "SWGGS232ControllerActions.h"
@@ -69,6 +70,9 @@ public:
 
     SWGAFCActions* getAfcActions();
     void setAfcActions(SWGAFCActions* afc_actions);
+
+    SWGAircraftActions* getAircraftActions();
+    void setAircraftActions(SWGAircraftActions* aircraft_actions);
 
     SWGAMBEActions* getAmbeActions();
     void setAmbeActions(SWGAMBEActions* ambe_actions);
@@ -130,6 +134,9 @@ private:
 
     SWGAFCActions* afc_actions;
     bool m_afc_actions_isSet;
+
+    SWGAircraftActions* aircraft_actions;
+    bool m_aircraft_actions_isSet;
 
     SWGAMBEActions* ambe_actions;
     bool m_ambe_actions_isSet;

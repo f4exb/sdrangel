@@ -50,6 +50,7 @@ DTVScope::DTVScope(QWidget *parent) :
     m_lastRowTime(0)
 {
     setMinimumSize(300, 150);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
     setView(Response);
 }
 

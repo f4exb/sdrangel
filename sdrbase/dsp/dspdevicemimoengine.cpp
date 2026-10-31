@@ -810,12 +810,12 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(int subsystemIndex, co
 
     if (subsystemIndex == 0)
     {
-        m_errorMessageRx = errorMessage;
+        m_errorMessageRx = QString("M:%1: %2").arg(getUID()).arg(errorMessage);
         setStateRx(State::StError);
     }
     else if (subsystemIndex == 1)
     {
-        m_errorMessageTx = errorMessage;
+        m_errorMessageTx = QString("M:%1: %2").arg(getUID()).arg(errorMessage);
         setStateTx(State::StError);
     }
 

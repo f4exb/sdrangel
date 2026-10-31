@@ -369,12 +369,12 @@ bool APRSGUI::handleMessage(const Message& message)
                         swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
                         swgMapItem->setFixedPosition(false);
                         if (aprs->m_hasTimestamp) {
-                            swgMapItem->setPositionDateTime(new QString(aprs->m_timestamp.toString(Qt::ISODateWithMs)));
+                            swgMapItem->setPositionDateTime(new QString(aprs->m_timestamp.toUTC().toString(Qt::ISODateWithMs)));
                         } else {
-                            swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+                            swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)));
                         }
                         // Need to set availableUntil for 3D track to be displayed
-                        swgMapItem->setAvailableUntil(new QString(QDateTime::currentDateTime().addDays(1).toString(Qt::ISODateWithMs)));
+                        swgMapItem->setAvailableUntil(new QString(QDateTime::currentDateTimeUtc().addDays(1).toString(Qt::ISODateWithMs)));
                         if (aprs->m_objectKilled)
                         {
                             swgMapItem->setImage(new QString(""));

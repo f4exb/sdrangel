@@ -28,14 +28,15 @@ class ADSBOSMTemplateServer : public QTcpServer
 {
     Q_OBJECT
 private:
-    QString m_thunderforestAPIKey;
     QString m_maptilerAPIKey;
+    QString m_cartoDBAPIKey;
 
 public:
     // port - port to listen on / is listening on. Use 0 for any free port.
-    ADSBOSMTemplateServer(const QString &maptilerAPIKey, quint16 &port, QObject* parent = 0) :
+    ADSBOSMTemplateServer(const QString &maptilerAPIKey, const QString &cartoDBAPIKey, quint16 &port, QObject* parent = 0) :
         QTcpServer(parent),
-        m_maptilerAPIKey(maptilerAPIKey)
+        m_maptilerAPIKey(maptilerAPIKey),
+        m_cartoDBAPIKey(cartoDBAPIKey)
     {
         listen(QHostAddress::Any, port);
         port = serverPort();
@@ -100,14 +101,14 @@ private slots:
                     int idx = map.indexOf(tokens[1]);
                     xml = QString("\
                     {\
-                        \"UrlTemplate\" : \"http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1\",\
+                        \"UrlTemplate\" : \"http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1?key=%4\",\
                         \"ImageFormat\" : \"png\",\
                         \"QImageFormat\" : \"Indexed8\",\
                         \"ID\" : \"%3\",\
                         \"MaximumZoomLevel\" : 20,\
                         \"MapCopyRight\" : \"<a href='https://carto.com'>CartoDB</a>\",\
                         \"DataCopyRight\" : \"<a href='https://carto.com'>CartoDB</a>\"\
-                    }").arg(hiresURL).arg(mapUrl[idx]).arg(mapId[idx]);
+                    }").arg(hiresURL).arg(mapUrl[idx]).arg(mapId[idx]).arg(m_cartoDBAPIKey);
                 }
                 else
                 {

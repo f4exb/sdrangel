@@ -1,0 +1,104 @@
+ACARSDemodSettings:
+  description: ACARSDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    mode:
+      description: "Which protocol to demodulate: 0 ACARS, 1 VDL Mode 2, 2 HFDL, 3 Inmarsat Classic Aero, 4 Iridium"
+      type: integer
+    aeroChannel:
+      description: "Which Aero rate and channel is tuned. 0 600 bps P, 1 1200 bps P, 2 10500 bps P, 3 600 bps R, 4 1200 bps R, 5 600 bps T, 6 1200 bps T. Only used when mode is 3"
+      type: integer
+    iridiumBandwidth:
+      description: "How much of the band the Iridium scanner covers: 0 1 MHz, 1 2 MHz, 2 4 MHz, 3 8 MHz. The device has to be able to supply the width chosen. Only used when mode is 4"
+      type: integer
+    rfBandwidth:
+      type: number
+      format: float
+    correlationThreshold:
+      description: "Pre-key detection threshold, as depth of 2400 Hz modulation from 0 to 1. Only used when mode is 0: the other protocols acquire by preamble correlation with their own thresholds"
+      type: number
+      format: float
+    filter:
+      description: "Regular expression the filtered column must match for a message to be shown"
+      type: string
+    filterColumn:
+      description: "Which column the filter applies to: 0 registration, 1 flight, 2 label, 3 message"
+      type: integer
+    hideNoInfo:
+      description: "Hide frames carrying no usable information - VDL-2 supervisory and acknowledgement frames, and Aero satellite housekeeping. They are still received and still held, only not shown (1 for yes, 0 for no)"
+      type: integer
+    showDate:
+      description: "Show the date as well as the time in the Date/Time column (1 for yes, 0 for no)"
+      type: integer
+    displayPhotos:
+      description: "Show a photograph of the selected aircraft (1 for yes, 0 for no)"
+      type: integer
+    displayChart:
+      description: "Show the frames per second chart (1 for yes, 0 for no)"
+      type: integer
+    udpEnabled:
+      description: "Whether to forward received messages to the specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to forward received messages to"
+      type: string
+    udpPort:
+      description: "UDP port to forward received messages to"
+      type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+    scopeCh1:
+      description: "Which internal signal the scope shows on channel 1"
+      type: integer
+    scopeCh2:
+      description: "Which internal signal the scope shows on channel 2"
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    workspaceIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+ACARSDemodReport:
+  description: ACARSDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      description: "The rate the demodulator runs at, which depends on the protocol and, for Aero, on the rate tuned"
+      type: integer
+    aeroEVM:
+      description: "Error vector magnitude of the Aero carrier, as a fraction. Only meaningful in Aero mode, which needs a continuous carrier to average over"
+      type: number
+      format: float
+    aeroSignalUnitRate:
+      description: "Fraction of Aero signal units whose CRC passed, from 0 to 1. Only meaningful in Aero mode"
+      type: number
+      format: float

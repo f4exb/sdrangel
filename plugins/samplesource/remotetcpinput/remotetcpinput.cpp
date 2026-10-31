@@ -86,8 +86,10 @@ RemoteTCPInput::~RemoteTCPInput()
         &RemoteTCPInput::networkManagerFinished
     );
     delete m_networkManager;
+    m_networkManager = nullptr;
     stop();
-    m_remoteInputTCPPHandler->deleteLater();
+    delete m_remoteInputTCPPHandler;    // Possibly a problem for WASM, as we haven't waited for thread to finish
+    m_remoteInputTCPPHandler = nullptr;
 }
 
 void RemoteTCPInput::destroy()
@@ -239,7 +241,7 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     else if (MsgSaveReplay::match(message))
     {
         const MsgSaveReplay& cmd = (const MsgSaveReplay&) message;
-        m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
+        m_replayBuffer.save(cmd.getFilename(), m_settings.m_channelSampleRate, getCenterFrequency());
         return true;
     }
     else if (MsgSendMessage::match(message))
@@ -304,8 +306,10 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const
         forwardChange = true;
     }
 
+    // The replay buffer holds samples at the channel sample rate - what the remote sends
+    // after its decimation - so samples at the old rate can't be replayed at the new one
     if ((settingsKeys.contains("channelSampleRate") || force)
-        && (settings.m_devSampleRate != m_settings.m_devSampleRate))
+        && (settings.m_channelSampleRate != m_settings.m_channelSampleRate))
     {
         m_replayBuffer.clear();
     }
@@ -333,12 +337,14 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const
         m_settings.applySettings(settingsKeys, settings);
     }
 
-    if (settingsKeys.contains("replayLength") || settingsKeys.contains("devSampleRate") || force) {
-        m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_devSampleRate);
+    // Sized by the channel sample rate, not the device's: 20 s at a 48 kS/s channel is
+    // 7.7 MB, where 20 s of a 10 MS/s device was 1.6 GB that was never filled
+    if (settingsKeys.contains("replayLength") || settingsKeys.contains("channelSampleRate") || force) {
+        m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_channelSampleRate);
     }
 
-    if (settingsKeys.contains("replayOffset") || settingsKeys.contains("devSampleRate")  || force) {
-        m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_devSampleRate)) * 2);
+    if (settingsKeys.contains("replayOffset") || settingsKeys.contains("channelSampleRate")  || force) {
+        m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_channelSampleRate)) * 2);
     }
 
     if (settingsKeys.contains("replayLoop") || force) {

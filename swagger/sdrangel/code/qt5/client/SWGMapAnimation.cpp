@@ -44,6 +44,8 @@ SWGMapAnimation::SWGMapAnimation() {
     m_duration_isSet = false;
     stop = 0;
     m_stop_isSet = false;
+    sound = nullptr;
+    m_sound_isSet = false;
 }
 
 SWGMapAnimation::~SWGMapAnimation() {
@@ -68,6 +70,8 @@ SWGMapAnimation::init() {
     m_duration_isSet = false;
     stop = 0;
     m_stop_isSet = false;
+    sound = new QString("");
+    m_sound_isSet = false;
 }
 
 void
@@ -84,6 +88,9 @@ SWGMapAnimation::cleanup() {
 
 
 
+    if(sound != nullptr) { 
+        delete sound;
+    }
 }
 
 SWGMapAnimation*
@@ -112,6 +119,8 @@ SWGMapAnimation::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&duration, pJson["duration"], "float", "");
     
     ::SWGSDRangel::setValue(&stop, pJson["stop"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sound, pJson["sound"], "QString", "QString");
     
 }
 
@@ -152,6 +161,9 @@ SWGMapAnimation::asJsonObject() {
     }
     if(m_stop_isSet){
         obj->insert("stop", QJsonValue(stop));
+    }
+    if(sound != nullptr && *sound != QString("")){
+        toJsonValue(QString("sound"), sound, obj, QString("QString"));
     }
 
     return obj;
@@ -237,6 +249,16 @@ SWGMapAnimation::setStop(qint32 stop) {
     this->m_stop_isSet = true;
 }
 
+QString*
+SWGMapAnimation::getSound() {
+    return sound;
+}
+void
+SWGMapAnimation::setSound(QString* sound) {
+    this->sound = sound;
+    this->m_sound_isSet = true;
+}
+
 
 bool
 SWGMapAnimation::isSet(){
@@ -264,6 +286,9 @@ SWGMapAnimation::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_stop_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(sound && *sound != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

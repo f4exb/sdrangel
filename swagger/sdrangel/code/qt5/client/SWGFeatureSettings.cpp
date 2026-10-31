@@ -36,6 +36,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_index_isSet = false;
     afc_settings = nullptr;
     m_afc_settings_isSet = false;
+    aircraft_settings = nullptr;
+    m_aircraft_settings_isSet = false;
     ais_settings = nullptr;
     m_ais_settings_isSet = false;
     ambe_settings = nullptr;
@@ -96,6 +98,8 @@ SWGFeatureSettings::init() {
     m_originator_feature_index_isSet = false;
     afc_settings = new SWGAFCSettings();
     m_afc_settings_isSet = false;
+    aircraft_settings = new SWGAircraftSettings();
+    m_aircraft_settings_isSet = false;
     ais_settings = new SWGAISSettings();
     m_ais_settings_isSet = false;
     ambe_settings = new SWGAMBESettings();
@@ -151,6 +155,9 @@ SWGFeatureSettings::cleanup() {
 
     if(afc_settings != nullptr) { 
         delete afc_settings;
+    }
+    if(aircraft_settings != nullptr) { 
+        delete aircraft_settings;
     }
     if(ais_settings != nullptr) { 
         delete ais_settings;
@@ -239,6 +246,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_settings, pJson["AFCSettings"], "SWGAFCSettings", "SWGAFCSettings");
     
+    ::SWGSDRangel::setValue(&aircraft_settings, pJson["AircraftSettings"], "SWGAircraftSettings", "SWGAircraftSettings");
+    
     ::SWGSDRangel::setValue(&ais_settings, pJson["AISSettings"], "SWGAISSettings", "SWGAISSettings");
     
     ::SWGSDRangel::setValue(&ambe_settings, pJson["AMBESettings"], "SWGAMBESettings", "SWGAMBESettings");
@@ -310,6 +319,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((afc_settings != nullptr) && (afc_settings->isSet())){
         toJsonValue(QString("AFCSettings"), afc_settings, obj, QString("SWGAFCSettings"));
+    }
+    if((aircraft_settings != nullptr) && (aircraft_settings->isSet())){
+        toJsonValue(QString("AircraftSettings"), aircraft_settings, obj, QString("SWGAircraftSettings"));
     }
     if((ais_settings != nullptr) && (ais_settings->isSet())){
         toJsonValue(QString("AISSettings"), ais_settings, obj, QString("SWGAISSettings"));
@@ -419,6 +431,16 @@ void
 SWGFeatureSettings::setAfcSettings(SWGAFCSettings* afc_settings) {
     this->afc_settings = afc_settings;
     this->m_afc_settings_isSet = true;
+}
+
+SWGAircraftSettings*
+SWGFeatureSettings::getAircraftSettings() {
+    return aircraft_settings;
+}
+void
+SWGFeatureSettings::setAircraftSettings(SWGAircraftSettings* aircraft_settings) {
+    this->aircraft_settings = aircraft_settings;
+    this->m_aircraft_settings_isSet = true;
 }
 
 SWGAISSettings*
@@ -656,6 +678,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(afc_settings && afc_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aircraft_settings && aircraft_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(ais_settings && ais_settings->isSet()){

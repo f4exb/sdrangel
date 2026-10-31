@@ -386,30 +386,23 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="viewFirstPerson">
+       <widget class="QToolButton" name="cameraMode">
         <property name="toolTip">
-         <string>First person / third person view on 3D map</string>
+         <string>How the camera follows the tracked object on the 3D map: third person, first person or fly-by</string>
         </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="mapicons.qrc">
-          <normaloff>:/map/icons/thirdperson.png</normaloff>
-          <normalon>:/map/icons/firstperson.png</normalon>:/map/icons/thirdperson.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+          <normaloff>:/map/icons/thirdperson.png</normaloff>:/map/icons/thirdperson.png</iconset>
         </property>
        </widget>
       </item>
       <item>
        <widget class="ButtonSwitch" name="displayPFD">
         <property name="toolTip">
-         <string>Display aircraft PFD (Primary Flight Display) on 3D map</string>
+         <string>Display the cockpit panels selected in the drop down menu (PFD, ND, EFIS, RMP, DCDU) on the 3D map. Click the button to show or hide them all, or the arrow to choose which are wanted</string>
         </property>
         <property name="text">
          <string/>
@@ -417,6 +410,30 @@
         <property name="icon">
          <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/pfd.png</normaloff>:/map/icons/pfd.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::ToolButtonPopupMode::MenuButtonPopup</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="muteAudio">
+        <property name="toolTip">
+         <string>Mute 3D map audio</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/sound_on.png</normaloff>
+          <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>

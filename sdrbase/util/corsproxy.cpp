@@ -59,6 +59,7 @@ QUrl CORSProxy::adjustHost(const QUrl& url)
         "www.spaceweather.gc.ca",
         "airspy.com",
         "kiwisdr.com",
+        "rx.linkfanel.net",
         "opensky-network.org",
         "storage.googleapis.com"
     };

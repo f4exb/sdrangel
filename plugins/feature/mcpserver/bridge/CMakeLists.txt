@@ -91,6 +91,12 @@ if(BUILD_MCP_BUNDLE)
         # This helper runs during the build, before macOS packaging rewrites library paths for
         # the app bundle, so it needs the external-library build directories on its own rpath.
         set_target_properties(sdrangel-mcp-tools-dump PROPERTIES BUILD_RPATH "${MACOS_EXTERNAL_LIBS_FIXUP}")
+    elseif(WIN32)
+        # The same on Windows: sdrbase needs the fftw and libsigmf DLLs, which are copied into
+        # bin/ by targets that nothing orders before this helper runs, so it loads them from
+        # where they come from. Joined with | because a ; would split the command argument
+        set(MCPTOOLSDUMP_DLL_DIRS "${FFTW3F_DLL_DIR}" "${LIBSIGMF_DLL_DIR}")
+        list(JOIN MCPTOOLSDUMP_DLL_DIRS "|" MCPTOOLSDUMP_DLL_PATH)
     endif()
 
     set(MCPTOOLSDUMP_TIMEOUT 60 CACHE STRING "Timeout in seconds for generating the MCP tool list")
@@ -118,6 +124,7 @@ if(BUILD_MCP_BUNDLE)
             "-DTOOLSDUMP=$<TARGET_FILE:sdrangel-mcp-tools-dump>"
             "-DTOOLS_JSON=${MCPBRIDGE_BUNDLE_DIR}/server/tools.json"
             "-DTOOLSDUMP_TIMEOUT=${MCPTOOLSDUMP_TIMEOUT}"
+            "-DTOOLSDUMP_DLL_PATH=${MCPTOOLSDUMP_DLL_PATH}"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/run-tools-dump.cmake"
         COMMAND ${CMAKE_COMMAND} -E rm -f "${MCPBRIDGE_BUNDLE_FILE}"
         # Relative paths and a working directory, so that manifest.json lands at the root of

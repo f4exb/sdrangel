@@ -30,12 +30,15 @@
 #include <QApplication>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 
 #include "gui/samplingdevicedialog.h"
 #include "gui/rollupcontents.h"
 #include "gui/buttonswitch.h"
 #include "gui/crightclickenabler.h"
 #include "channel/channelgui.h"
+#include "feature/feature.h"
+#include "feature/featureset.h"
 #include "feature/featuregui.h"
 #include "device/devicegui.h"
 #include "device/deviceset.h"
@@ -47,6 +50,8 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     QDockWidget(parent, flags),
     m_index(index),
     m_menuButton(nullptr),
+    m_startStopMenu(nullptr),
+    m_startStopMode(StartStopCurrentWorkspaceDevices),
     m_featureAddDialog(this),
     m_stacking(false),
     m_autoStack(false),
@@ -89,8 +94,28 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
 
     m_startStopButton = new ButtonSwitch();
     m_startStopButton->setCheckable(true);
+    m_startStopMenu = new QMenu(m_startStopButton);
+    QActionGroup *startStopActionGroup = new QActionGroup(m_startStopMenu);
+    startStopActionGroup->setExclusive(true);
+    const QStringList startStopModes {
+        tr("Start/stop devices in current workspace"),
+        tr("Start/stop devices and features in current workspace"),
+        tr("Start/stop devices in all workspaces"),
+        tr("Start/stop devices and features in all workspaces")
+    };
+    for (int i = 0; i < startStopModes.size(); i++)
+    {
+        QAction *action = m_startStopMenu->addAction(startStopModes[i]);
+        action->setCheckable(true);
+        action->setData(i);
+        action->setActionGroup(startStopActionGroup);
+        action->setChecked(i == static_cast<int>(m_startStopMode));
+    }
+    connect(startStopActionGroup, &QActionGroup::triggered, this, &Workspace::startStopModeChanged);
+    m_startStopButton->setMenu(m_startStopMenu);
+    m_startStopButton->setPopupMode(QToolButton::MenuButtonPopup);
     updateStartStopButton(false);
-    m_startStopButton->setFixedSize(20, 20);
+    m_startStopButton->setFixedSize(34, 20);
     m_startStopButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
 
     m_vline1 = new QFrame();
@@ -966,32 +991,89 @@ void Workspace::layoutSubWindows()
     }
 }
 
-// Start/stop all devices in workspace
+// Start/stop the devices and features selected in the button menu
 void Workspace::startStopClicked(bool checked)
 {
-    if (!checked) {
-        emit stopAllDevices(this);
-    } else {
-        emit startAllDevices(this);
-    }
+    const bool includeFeatures = (m_startStopMode == StartStopCurrentWorkspaceDevicesAndFeatures)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    const bool allWorkspaces = (m_startStopMode == StartStopAllWorkspacesDevices)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    emit startStopRequested(this, checked, includeFeatures, allWorkspaces);
     updateStartStopButton(checked);
+}
+
+void Workspace::startStopModeChanged(QAction *action)
+{
+    m_startStopMode = static_cast<StartStopMode>(action->data().toInt());
+    updateStartStopButtonState();
 }
 
 void Workspace::updateStartStopButton(bool checked)
 {
+    const bool includeFeatures = (m_startStopMode == StartStopCurrentWorkspaceDevicesAndFeatures)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    const bool allWorkspaces = (m_startStopMode == StartStopAllWorkspacesDevices)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    const QString targets = includeFeatures ? tr("devices and features") : tr("devices");
+    const QString scope = allWorkspaces ? tr("all workspaces") : tr("current workspace");
+
     if (!checked)
     {
         QIcon startIcon(":/play.png");
         m_startStopButton->setIcon(startIcon);
         m_startStopButton->setStyleSheet("QToolButton { background-color : blue; }");
-        m_startStopButton->setToolTip("Start all devices in workspace");
+        m_startStopButton->setToolTip(tr("Start %1 in %2").arg(targets, scope));
     }
     else
     {
         QIcon stopIcon(":/stop.png");
         m_startStopButton->setIcon(stopIcon);
         m_startStopButton->setStyleSheet("QToolButton { background-color : green; }");
-        m_startStopButton->setToolTip("Stop all devices in workspace");
+        m_startStopButton->setToolTip(tr("Stop %1 in %2").arg(targets, scope));
+    }
+}
+
+void Workspace::updateStartStopButtonState()
+{
+    const bool includeFeatures = (m_startStopMode == StartStopCurrentWorkspaceDevicesAndFeatures)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    const bool allWorkspaces = (m_startStopMode == StartStopAllWorkspacesDevices)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    bool running = false;
+    bool error = false;
+    const std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+
+    for (const auto *deviceSet : deviceSets)
+    {
+        if (allWorkspaces || (deviceSet->m_deviceAPI->getWorkspaceIndex() == m_index))
+        {
+            const DeviceAPI::EngineState state = deviceSet->m_deviceAPI->state();
+            running |= state == DeviceAPI::StRunning;
+            error |= state == DeviceAPI::StError;
+        }
+    }
+
+    if (includeFeatures)
+    {
+        const std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+        for (const auto *featureSet : featureSets)
+        {
+            for (int i = 0; i < featureSet->getNumberOfFeatures(); i++)
+            {
+                const Feature *feature = featureSet->getFeatureAt(i);
+                if (allWorkspaces || (feature->getWorkspaceIndex() == m_index))
+                {
+                    running |= feature->getState() == Feature::StRunning;
+                    error |= feature->getState() == Feature::StError;
+                }
+            }
+        }
+    }
+
+    updateStartStopButton(running);
+    m_startStopButton->setChecked(running);
+    if (error) {
+        m_startStopButton->setStyleSheet("QToolButton { background-color : red; }");
     }
 }
 
@@ -1015,27 +1097,10 @@ void Workspace::updateMCPServerButton(bool available, bool running, int port)
 
 void Workspace::deviceStateChanged(int, DeviceAPI *deviceAPI)
 {
-    if (deviceAPI->getWorkspaceIndex() == m_index)
-    {
-        // Check state of all devices in workspace, to see if any are running or have errors
-        bool running = false;
-        bool error = false;
-        std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-        for (auto deviceSet : deviceSets)
-        {
-            DeviceAPI::EngineState state = deviceSet->m_deviceAPI->state();
-            if (state == DeviceAPI::StRunning) {
-                running = true;
-            } else if (state == DeviceAPI::StError) {
-                error = true;
-            }
-        }
-        // Update start/stop button to reflect current state of devices
-        updateStartStopButton(running);
-        m_startStopButton->setChecked(running);
-        if (error) {
-            m_startStopButton->setStyleSheet("QToolButton { background-color : red; }");
-        }
+    const bool allWorkspaces = (m_startStopMode == StartStopAllWorkspacesDevices)
+        || (m_startStopMode == StartStopAllWorkspacesDevicesAndFeatures);
+    if (allWorkspaces || (deviceAPI->getWorkspaceIndex() == m_index)) {
+        updateStartStopButtonState();
     }
 }
 

@@ -6,7 +6,7 @@ import QtLocation 6.5
 
 Item {
     id: qmlMap
-    property int mapZoomLevel: 11
+    property real mapZoomLevel: 11
     property string mapProvider: "osm"
     property variant mapPtr
     property variant guiPtr
@@ -97,6 +97,12 @@ Item {
 
             MapItemView {
                 model: polylineModelFiltered
+                delegate: polylineTrackComponent
+                parent: mapView.map
+            }
+
+            MapItemView {
+                model: polylineModelFiltered
                 delegate: polylineNameComponent
                 parent: mapView.map
             }
@@ -116,6 +122,12 @@ Item {
 
             MapItemView {
                 model: mapModelFiltered
+                delegate: groundTrackSegmentsComponent
+                parent: mapView.map
+            }
+
+            MapItemView {
+                model: mapModelFiltered
                 delegate: predictedGroundTrack1Component
                 parent: mapView.map
             }
@@ -127,6 +139,10 @@ Item {
             }
 
             MapItemView {
+                // Each MapItemView is a MapItemGroup, so it owns its delegates as children - a
+                // delegate's z only ranks it among that view's own items. Ordering icons above
+                // ground tracks therefore has to happen between the VIEWS, not inside them.
+                z: 1
                 model: mapModelFiltered
                 delegate: mapComponent
                 parent: mapView.map
@@ -134,21 +150,14 @@ Item {
 
             map.onZoomLevelChanged: {
                 mapZoomLevel = map.zoomLevel
-                mapModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                imageModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                polygonModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                polylineModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
+                viewCoordinator.viewChanged(map.visibleRegion.boundingGeoRectangle(), map.zoomLevel);
             }
 
             // The map displays MapPolyLines in the wrong place (+360 degrees) if
             // they start to the left of the visible region, so we need to
             // split them so they don't, each time the visible region is changed. meh.
             map.onCenterChanged: {
-                polylineModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                polygonModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                imageModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                mapModelFiltered.viewChanged(map.visibleRegion.boundingGeoRectangle().topLeft.longitude, map.visibleRegion.boundingGeoRectangle().topLeft.latitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.latitude, map.zoomLevel);
-                mapModel.viewChanged(map.visibleRegion.boundingGeoRectangle().bottomLeft.longitude, map.visibleRegion.boundingGeoRectangle().bottomRight.longitude);
+                viewCoordinator.viewChanged(map.visibleRegion.boundingGeoRectangle(), map.zoomLevel);
             }
 
             map.onSupportedMapTypesChanged : {
@@ -251,12 +260,127 @@ Item {
         id: mapComponent
         MapQuickItem {
             id: mapElement
-            anchorPoint.x: image.width/2
-            anchorPoint.y: image.height/2
+            z: zOrder                       // Move to front / move to back
+            anchorPoint.x: imageBounds.width/2
+            anchorPoint.y: imageBounds.height/2
             coordinate: position
             // when zooming, mapImageMinZoom can be temporarily undefined. Not sure why
             zoomLevel: (typeof mapImageMinZoom !== 'undefined') ? (mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom) : zoomLevel
             autoFadeIn: false               // not in 5.12
+
+
+            // A context menu per item is most of what an item costs to show, and it is
+            // only ever needed for the one item that gets right-clicked, so it is built
+            // on demand rather than for every item on the map
+            Component {
+                id: contextMenuComponent
+                Item {
+                    property alias contextMenu: contextMenu
+                    property alias menus: menus
+                    property alias menuItems: menuItems
+                    property alias coordsMenuItem: coordsMenuItem
+                    ListModel {
+                        id: menus
+                    }
+                    ListModel {
+                        id: menuItems
+                    }
+                    Menu {
+                        id: contextMenu
+                        MenuItem {
+                            text: "Set as target"
+                            onTriggered: target = true
+                        }
+                        MenuItem {
+                            text: "Move to front"
+                            onTriggered: mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
+                        }
+                        MenuItem {
+                            text: "Move to back"
+                            onTriggered: mapModel.moveToBack(mapModelFiltered.mapRowToSource(index))
+                        }
+                        MenuItem {
+                            text: "Track on 3D map"
+                            onTriggered: mapModel.track3D(mapModelFiltered.mapRowToSource(index))
+                        }
+                        MenuItem {
+                            id: coordsMenuItem
+                            text: ""
+                        }
+                        Instantiator {
+                            model: menus
+                            delegate: Menu {
+                                //cascade: true
+                                id: contextSubMenu
+                                title: model.title
+                            }
+                            onObjectAdded: function(index, object) {
+                                contextMenu.insertMenu(index, object)
+                            }
+                            onObjectRemoved: function(index, object) {
+                                contextMenu.removeMenu(object)
+                            }
+                        }
+                        Instantiator {
+                            model: menuItems
+                            delegate: MenuItem {
+                                text: model.text
+                                onTriggered: mapModel.setFrequency(model.frequency, model.deviceSet)
+                            }
+                            onObjectAdded: function(index, object) {
+                                // index is index in to menuItems model
+                                // object is the MenuItem
+                                var menuItem = menuItems.get(index)
+                                var menu = menus.get(menuItem.menuIndex)
+                                contextMenu.menuAt(menuItem.menuIndex).insertItem(index, object)
+                            }
+                            onObjectRemoved: function(index, object) {
+                                // Can't use menuItems.get(index) here, as already removed from model
+                                object.menu.removeItem(object)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Loader {
+                id: contextMenuLoader
+                active: false
+            }
+
+            // Populate and show the menu for this item, creating it the first time
+            function showContextMenu(item, mouseX, mouseY) {
+                if (!contextMenuLoader.active) {
+                    contextMenuLoader.sourceComponent = contextMenuComponent
+                    contextMenuLoader.active = true
+                }
+                var menu = contextMenuLoader.item
+                menu.menuItems.clear()
+                menu.menus.clear()
+                if (frequencies.length > 0) {
+                    var deviceSets = mapModel.getDeviceSets()
+                    for (var i = 0; i < deviceSets.length; i++) {
+                        menu.menus.append({
+                            title: "Set " + deviceSets[i] + " to...",
+                            deviceSet: i
+                        })
+                        for (var j = 0; j < frequencies.length; j++) {
+                            menu.menuItems.append({
+                                text: frequencyStrings[j],
+                                frequency: frequencies[j],
+                                deviceSet: deviceSets[i],
+                                menuIndex: i
+                            })
+                        }
+                    }
+                }
+                var c = mapPtr.map.toCoordinate(Qt.point(mouseX, mouseY))
+                menu.coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
+                var menuParent = menu.contextMenu.parent
+                var p = menuParent ? menuParent.mapFromItem(item, mouseX, mouseY)
+                                   : item.mapToItem(null, mouseX, mouseY)
+                menu.contextMenu.popup(p.x, p.y)
+            }
 
             sourceItem: Grid {
                 id: gridItem
@@ -266,44 +390,32 @@ Item {
                     columnSpacing: 5
                     layer.enabled: smoothing
                     layer.smooth: smoothing
-                    Image {
-                        id: image
-                        rotation: mapImageRotation
-                        source: mapImage
-                        visible: mapImageVisible
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: (mouse) => {
-                                if (mouse.button === Qt.LeftButton) {
-                                    selected = !selected
-                                    if (selected) {
-                                        mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
-                                    }
-                                } else if (mouse.button === Qt.RightButton) {
-                                    menuItems.clear()
-                                    menus.clear()
-                                    if (frequencies.length > 0) {
-                                        var deviceSets = mapModel.getDeviceSets()
-                                        for (var i = 0; i < deviceSets.length; i++) {
-                                            menus.append({
-                                                title: "Set " + deviceSets[i] + " to...",
-                                                deviceSet: i
-                                            })
-                                            for (var j = 0; j < frequencies.length; j++) {
-                                                menuItems.append({
-                                                    text: frequencyStrings[j],
-                                                    frequency: frequencies[j],
-                                                    deviceSet: deviceSets[i],
-                                                    menuIndex: i
-                                                })
-                                            }
+                    // Sized to the rotated image's bounding box, so the smoothing layer
+                    // doesn't clip wingtips and the bubble sits close at every rotation
+                    Item {
+                        id: imageBounds
+                        width: image.implicitWidth * Math.abs(Math.cos(mapImageRotation * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.sin(mapImageRotation * Math.PI / 180))
+                        height: image.implicitWidth * Math.abs(Math.sin(mapImageRotation * Math.PI / 180)) + image.implicitHeight * Math.abs(Math.cos(mapImageRotation * Math.PI / 180))
+                        Image {
+                            id: image
+                            anchors.centerIn: parent
+                            rotation: mapImageRotation
+                            source: mapImage
+                            visible: mapImageVisible
+                            MouseArea {
+                                id: imageMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        selected = !selected
+                                        if (selected) {
+                                            mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                         }
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        mapElement.showContextMenu(imageMouseArea, mouse.x, mouse.y)
                                     }
-                                    var c = mapPtr.map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                                    coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
-                                    contextMenu.popup()
                                 }
                             }
                         }
@@ -317,6 +429,7 @@ Item {
                         radius: 5
                         visible: mapTextVisible
                         MouseArea {
+                            id: bubbleMouseArea
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -327,91 +440,9 @@ Item {
                                         mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
                                 } else if (mouse.button === Qt.RightButton) {
-                                    menuItems.clear()
-                                    menus.clear()
-                                    if (frequencies.length > 0) {
-                                        var deviceSets = mapModel.getDeviceSets()
-                                        for (var i = 0; i < deviceSets.length; i++) {
-                                            menus.append({
-                                                title: "Set " + deviceSets[i] + " to...",
-                                                deviceSet: i
-                                            })
-                                            for (var j = 0; j < frequencies.length; j++) {
-                                                menuItems.append({
-                                                    text: frequencyStrings[j],
-                                                    frequency: frequencies[j],
-                                                    deviceSet: deviceSets[i],
-                                                    menuIndex: i
-                                                })
-                                            }
-                                        }
-                                    }
-                                    var c = mapPtr.map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                                    coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
-                                    contextMenu.popup()
+                                    mapElement.showContextMenu(bubbleMouseArea, mouse.x, mouse.y)
                                 }
                             }
-                            ListModel {
-                                id: menus
-                            }
-                            ListModel {
-                                id: menuItems
-                            }
-                            Menu {
-                                id: contextMenu
-                                MenuItem {
-                                    text: "Set as target"
-                                    onTriggered: target = true
-                                }
-                                MenuItem {
-                                    text: "Move to front"
-                                    onTriggered: mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
-                                }
-                                MenuItem {
-                                    text: "Move to back"
-                                    onTriggered: mapModel.moveToBack(mapModelFiltered.mapRowToSource(index))
-                                }
-                                MenuItem {
-                                    text: "Track on 3D map"
-                                    onTriggered: mapModel.track3D(mapModelFiltered.mapRowToSource(index))
-                                }
-                                MenuItem {
-                                    id: coordsMenuItem
-                                    text: ""
-                                }
-                                Instantiator {
-                                    model: menus
-                                    delegate: Menu {
-                                        //cascade: true
-                                        id: contextSubMenu
-                                        title: model.title
-                                    }
-                                    onObjectAdded: function(index, object) {
-                                        contextMenu.insertMenu(index, object)
-                                    }
-                                    onObjectRemoved: function(index, object) {
-                                        contextMenu.removeMenu(object)
-                                    }
-                                }
-                                Instantiator {
-                                    model: menuItems
-                                    delegate: MenuItem {
-                                        text: model.text
-                                        onTriggered: mapModel.setFrequency(model.frequency, model.deviceSet)
-                                    }
-                                    onObjectAdded: function(index, object) {
-                                        // index is index in to menuItems model
-                                        // object is the MenuItem
-                                        var menuItem = menuItems.get(index)
-                                        var menu = menus.get(menuItem.menuIndex)
-                                        contextMenu.menuAt(menuItem.menuIndex).insertItem(index, object)
-                                    }
-                                    onObjectRemoved: function(index, object) {
-                                        // Can't use menuItems.get(index) here, as already removed from model
-                                        object.menu.removeItem(object)
-                                    }
-                                }
-                             }
                         }
                         // Have Text after MouseArea, so links can be clicked
                         Text {
@@ -433,6 +464,7 @@ Item {
     Component {
         id: predictedGroundTrack1Component
         MapPolyline {
+            z: -0.5                         // Under every icon, which sit at 0 or above
             line.width: 2
             line.color: predictedGroundTrackColor
             path: predictedGroundTrack1
@@ -444,6 +476,7 @@ Item {
     Component {
         id: predictedGroundTrack2Component
         MapPolyline {
+            z: -0.5                         // Under every icon, which sit at 0 or above
             line.width: 2
             line.color: predictedGroundTrackColor
             path: predictedGroundTrack2
@@ -454,6 +487,7 @@ Item {
     Component {
         id: groundTrack1Component
         MapPolyline {
+            z: -0.5                         // Under every icon, which sit at 0 or above
             line.width: 2
             line.color: groundTrackColor
             path: groundTrack1
@@ -465,10 +499,48 @@ Item {
     Component {
         id: groundTrack2Component
         MapPolyline {
+            z: -0.5                         // Under every icon, which sit at 0 or above
             line.width: 2
             line.color: groundTrackColor
             path: groundTrack2
             autoFadeIn: false
+        }
+    }
+
+    // A MapPolyline can only be one colour, so a ground track that's coloured according
+    // to altitude is drawn as a series of them
+    Component {
+        id: groundTrackSegmentComponent
+        MapPolyline {
+            z: -0.5                         // Under every icon, which sit at 0 or above
+            line.width: 2
+            line.color: segmentColor
+            path: segmentCoordinates
+            autoFadeIn: false
+        }
+    }
+
+    Component {
+        id: groundTrackSegmentsComponent
+        MapItemGroup {
+            z: -0.5                         // Under every icon, which sit at 0 or above
+            MapItemView {
+                model: groundTrackModel
+                delegate: groundTrackSegmentComponent
+            }
+        }
+    }
+
+    // A line sent as a track (item type 4) is coloured by the altitude of its points, so
+    // like a ground track it has to be drawn as a series of lines rather than as one
+    Component {
+        id: polylineTrackComponent
+        MapItemGroup {
+            z: -0.5                         // Under every icon, which sit at 0 or above
+            MapItemView {
+                model: polylineTrackModel
+                delegate: groundTrackSegmentComponent
+            }
         }
     }
 

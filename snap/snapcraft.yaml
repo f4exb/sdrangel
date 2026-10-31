@@ -169,7 +169,7 @@ parts:
         override-pull: |
             craftctl default
             craftctl set version="$(git describe --tags --abbrev=0 | sed 's/v//')"
-        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, libacars, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
@@ -197,6 +197,7 @@ parts:
             - -DSGP4_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DCSPICE_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DINMARSATC_DIR=$CRAFT_STAGE/opt/install/sdrangel
+            - -DLIBACARS_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DLIBSIGMF_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DFDKAAC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DARCH_OPT=nehalem
@@ -502,6 +503,21 @@ parts:
         source-tag: msvc
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    libacars:
+        plugin: cmake
+        source: https://github.com/szpajder/libacars.git
+        source-type: git
+        source-tag: v2.2.1
+        build-packages:
+            - zlib1g-dev
+            - libxml2-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+        prime:
+            - -opt/install/sdrangel/bin/decode_acars_apps
+            - -opt/install/sdrangel/bin/adsc_get_position
+            - -opt/install/sdrangel/bin/cpdlc_get_position
 
     cm265cc:
         plugin: cmake

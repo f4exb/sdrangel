@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AircraftSettingsDialog</class>
+ <widget class="QDialog" name="AircraftSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>460</width>
+    <height>380</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Aircraft Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="timeoutsGroup">
+     <property name="title">
+      <string>Timeouts</string>
+     </property>
+     <layout class="QFormLayout" name="timeoutsLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="removalLabel">
+        <property name="text">
+         <string>Archive after (mins)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="removal">
+        <property name="toolTip">
+         <string>Move an aircraft to the Old Aircraft table, and off the Map, after this many minutes without a report</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10080</number>
+        </property>
+        <property name="value">
+         <number>180</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="retentionLabel">
+        <property name="text">
+         <string>Keep aircraft for (days)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="retention">
+        <property name="toolTip">
+         <string>Discard archived aircraft, with all of their flights, after this many days without a report. Zero keeps them indefinitely, but the session database will grow.</string>
+        </property>
+        <property name="specialValueText">
+         <string>Forever</string>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>3650</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="flightRetentionLabel">
+        <property name="text">
+         <string>Keep flights for (days)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="flightRetention">
+        <property name="toolTip">
+         <string>Discard flights this many days after they were last heard, while keeping the aircraft that flew them. An aircraft's most recent flight is always kept. Zero keeps flights for as long as their aircraft.</string>
+        </property>
+        <property name="specialValueText">
+         <string>Forever</string>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>3650</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="adsbPositionLabel">
+        <property name="text">
+         <string>ADS-B position for (mins)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="adsbPosition">
+        <property name="toolTip">
+         <string>Keep an aircraft on the Map for this many minutes after its last ADS-B position. ADS-B reports about once a second, so a short time here means the Map only shows aircraft that are actually being heard</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1440</number>
+        </property>
+        <property name="value">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="acarsPositionLabel">
+        <property name="text">
+         <string>ACARS position for (mins)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="acarsPosition">
+        <property name="toolTip">
+         <string>Keep an aircraft on the Map for this many minutes after its last position from ACARS, VDL-2, HFDL or Aero. These report far less often than ADS-B, so expiring them as quickly would leave the aircraft off the Map most of the time</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1440</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="databaseGroup">
+     <property name="title">
+      <string>Session database</string>
+     </property>
+     <layout class="QHBoxLayout" name="databaseLayout">
+      <item>
+       <widget class="QLineEdit" name="database">
+        <property name="toolTip">
+         <string>File the aircraft, flights and messages seen are saved in, so they survive a restart</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browse">
+        <property name="toolTip">
+         <string>Choose where the session database is kept</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="sourcesGroup">
+     <property name="title">
+      <string>Receive aircraft data from</string>
+     </property>
+     <layout class="QVBoxLayout" name="sourcesLayout">
+      <item>
+       <widget class="QListWidget" name="sources">
+        <property name="toolTip">
+         <string>Demodulators to accept aircraft reports from. Unticked demodulators are ignored.</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="mapGroup">
+     <property name="title">
+      <string>Map</string>
+     </property>
+     <layout class="QVBoxLayout" name="mapLayout">
+      <item>
+       <widget class="QCheckBox" name="atcCallsigns">
+        <property name="toolTip">
+         <string>Label aircraft with the airline's radio callsign (SPEEDBIRD 123) rather than its code (BAW123)</string>
+        </property>
+        <property name="text">
+         <string>Use airline callsigns in Map labels</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="maxRangeOnMap">
+        <property name="toolTip">
+         <string>Keep the aircraft that set the all time maximum range record on the Map, drawn at the position it was in when it set it. It stays there until the record is beaten or the records are reset.</string>
+        </property>
+        <property name="text">
+         <string>Show the maximum range record on the Map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="favourLivery">
+        <property name="toolTip">
+         <string>On the 3D map, prefer a similar aircraft in the correct airline livery over an exact aircraft type in the wrong one. Only applies where no model of the right type in the right livery exists.</string>
+        </property>
+        <property name="text">
+         <string>Favour airline livery over aircraft type (3D map)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="useLiveryIcons">
+        <property name="toolTip">
+         <string>On the 2D map, display aircraft using icons showing their airline's livery, matched from the aircraft type and operator, instead of black icons</string>
+        </property>
+        <property name="text">
+         <string>Livery aircraft icons (2D map)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>AircraftSettingsDialog</receiver>
+   <slot>accept()</slot>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>AircraftSettingsDialog</receiver>
+   <slot>reject()</slot>
+  </connection>
+ </connections>
+</ui>

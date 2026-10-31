@@ -18,7 +18,38 @@
 #ifndef INCLUDE_FEATURE_MAPAIRCRAFTSTATE_H_
 #define INCLUDE_FEATURE_MAPAIRCRAFTSTATE_H_
 
+#include <QDateTime>
+
+struct MapRouteWaypoint {
+    QString m_name;
+    float m_latitude;   // NaN if the waypoint could not be placed
+    float m_longitude;
+    float m_altitudeFt; // NaN for unknown
+    QString m_eta;      // Empty for unknown
+};
+
+struct MapFlightPlan {
+    bool m_valid = false;
+    QString m_departure;
+    QString m_arrival;
+    QString m_arrivalRunway;    // E.g. 27R. Empty for unknown
+    QString m_approach;         // As filed, e.g. ILSY01R. Empty for unknown
+    int m_activeWaypoint = -1;
+    QList<MapRouteWaypoint> m_waypoints;
+};
+
+struct MapDatalinkMessage {
+    bool m_valid = false;
+    int m_id = 0;           // Sequence number, so a new message can be told from a re-send
+    QString m_received;     // ISO 8601
+    bool m_uplink = false;
+    QString m_station;      // Empty for unknown
+    QString m_text;
+};
+
 struct MapAircraftState {
+    QDateTime m_dateTime;   // Time this complete state applies; invalid for a live/coalesced update
+    QString m_icao;     // Mode S address as lower-case hex, empty for unknown
     QString m_callsign;
     QString m_aircraftType;
     int m_onSurface;    // -1 for unknown
@@ -53,9 +84,17 @@ struct MapAircraftState {
         TA,
         TA_RA
     } m_tcasMode;
+    // Active TCAS resolution advisory bitfield. 0 none; bit 0 active, bit 1 corrective,
+    // bit 2 downward sense, bit 3 positive (vs vertical speed limit), bit 4 clear of
+    // conflict, bit 5 multiple threats
+    int m_tcasRA = 0;
+    QString m_tcasThreatIcao;   // Threat's Mode S address as hex, empty if unknown
+    int m_squawk = -1;          // Mode A code as decimal digits (e.g. 7000), -1 unknown
     float m_windSpeed;
     float m_windDirection;
     float m_staticAirTemperature;
+    MapFlightPlan m_flightPlan;
+    MapDatalinkMessage m_datalinkMessage;
 };
 
 #endif // INCLUDE_FEATURE_MAPAIRCRAFTSTATE_H_

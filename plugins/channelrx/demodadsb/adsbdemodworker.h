@@ -84,24 +84,25 @@ public:
 
     ADSBDemodWorker();
     ~ADSBDemodWorker();
-    void reset();
-    bool startWork();
-    void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+
+public slots:
+    // Called when the worker thread starts; everything with thread affinity is
+    // created here rather than in the constructor
+    void startWork();
+
+public:
 
 private:
 
     MessageQueue m_inputMessageQueue;
     ADSBDemodSettings m_settings;
-    bool m_running;
-    QRecursiveMutex m_mutex;
-    QTimer m_heartbeatTimer;
-    QTcpSocket m_socket;
+    QTimer *m_heartbeatTimer;
+    QTcpSocket *m_socket;
     QFile m_logFile;
     QTextStream m_logStream;
     qint64 m_startTime;
-    ADSBBeastServer m_beastServer;
+    ADSBBeastServer *m_beastServer;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force = false);

@@ -28,6 +28,10 @@ SWGMapAircraftState::SWGMapAircraftState(QString* json) {
 }
 
 SWGMapAircraftState::SWGMapAircraftState() {
+    date_time = nullptr;
+    m_date_time_isSet = false;
+    icao = nullptr;
+    m_icao_isSet = false;
     callsign = nullptr;
     m_callsign_isSet = false;
     aircraft_type = nullptr;
@@ -72,12 +76,22 @@ SWGMapAircraftState::SWGMapAircraftState() {
     m_lateral_mode_isSet = false;
     tcas_mode = 0;
     m_tcas_mode_isSet = false;
+    tcas_ra = 0;
+    m_tcas_ra_isSet = false;
+    tcas_threat_icao = nullptr;
+    m_tcas_threat_icao_isSet = false;
+    squawk = 0;
+    m_squawk_isSet = false;
     wind_speed = 0.0f;
     m_wind_speed_isSet = false;
     wind_direction = 0.0f;
     m_wind_direction_isSet = false;
     static_air_temperature = 0.0f;
     m_static_air_temperature_isSet = false;
+    flight_plan = nullptr;
+    m_flight_plan_isSet = false;
+    datalink_message = nullptr;
+    m_datalink_message_isSet = false;
 }
 
 SWGMapAircraftState::~SWGMapAircraftState() {
@@ -86,6 +100,10 @@ SWGMapAircraftState::~SWGMapAircraftState() {
 
 void
 SWGMapAircraftState::init() {
+    date_time = new QString("");
+    m_date_time_isSet = false;
+    icao = new QString("");
+    m_icao_isSet = false;
     callsign = new QString("");
     m_callsign_isSet = false;
     aircraft_type = new QString("");
@@ -130,21 +148,40 @@ SWGMapAircraftState::init() {
     m_lateral_mode_isSet = false;
     tcas_mode = 0;
     m_tcas_mode_isSet = false;
+    tcas_ra = 0;
+    m_tcas_ra_isSet = false;
+    tcas_threat_icao = new QString("");
+    m_tcas_threat_icao_isSet = false;
+    squawk = 0;
+    m_squawk_isSet = false;
     wind_speed = 0.0f;
     m_wind_speed_isSet = false;
     wind_direction = 0.0f;
     m_wind_direction_isSet = false;
     static_air_temperature = 0.0f;
     m_static_air_temperature_isSet = false;
+    flight_plan = new SWGMapFlightPlan();
+    m_flight_plan_isSet = false;
+    datalink_message = new SWGMapDatalinkMessage();
+    m_datalink_message_isSet = false;
 }
 
 void
 SWGMapAircraftState::cleanup() {
+    if(date_time != nullptr) {
+        delete date_time;
+    }
+    if(icao != nullptr) {
+        delete icao;
+    }
     if(callsign != nullptr) { 
         delete callsign;
     }
     if(aircraft_type != nullptr) { 
         delete aircraft_type;
+    }
+    if(tcas_threat_icao != nullptr) {
+        delete tcas_threat_icao;
     }
 
 
@@ -175,6 +212,12 @@ SWGMapAircraftState::cleanup() {
 
 
 
+    if(flight_plan != nullptr) { 
+        delete flight_plan;
+    }
+    if(datalink_message != nullptr) { 
+        delete datalink_message;
+    }
 }
 
 SWGMapAircraftState*
@@ -188,12 +231,16 @@ SWGMapAircraftState::fromJson(QString &json) {
 
 void
 SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&date_time, pJson["dateTime"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&icao, pJson["icao"], "QString", "QString");
+
     ::SWGSDRangel::setValue(&callsign, pJson["callsign"], "QString", "QString");
-    
+
     ::SWGSDRangel::setValue(&aircraft_type, pJson["aircraftType"], "QString", "QString");
-    
+
     ::SWGSDRangel::setValue(&on_surface, pJson["onSurface"], "qint32", "");
-    
+
     ::SWGSDRangel::setValue(&airspeed, pJson["airspeed"], "float", "");
     
     ::SWGSDRangel::setValue(&airspeed_date_time, pJson["airspeedDateTime"], "QString", "QString");
@@ -232,11 +279,21 @@ SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tcas_mode, pJson["tcasMode"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&tcas_ra, pJson["tcasRA"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tcas_threat_icao, pJson["tcasThreatIcao"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&squawk, pJson["squawk"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&wind_speed, pJson["windSpeed"], "float", "");
     
     ::SWGSDRangel::setValue(&wind_direction, pJson["windDirection"], "float", "");
     
     ::SWGSDRangel::setValue(&static_air_temperature, pJson["staticAirTemperature"], "float", "");
+    
+    ::SWGSDRangel::setValue(&flight_plan, pJson["flightPlan"], "SWGMapFlightPlan", "SWGMapFlightPlan");
+    
+    ::SWGSDRangel::setValue(&datalink_message, pJson["datalinkMessage"], "SWGMapDatalinkMessage", "SWGMapDatalinkMessage");
     
 }
 
@@ -254,6 +311,12 @@ SWGMapAircraftState::asJson ()
 QJsonObject*
 SWGMapAircraftState::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(date_time != nullptr && *date_time != QString("")){
+        toJsonValue(QString("dateTime"), date_time, obj, QString("QString"));
+    }
+    if(icao != nullptr && *icao != QString("")){
+        toJsonValue(QString("icao"), icao, obj, QString("QString"));
+    }
     if(callsign != nullptr && *callsign != QString("")){
         toJsonValue(QString("callsign"), callsign, obj, QString("QString"));
     }
@@ -320,6 +383,15 @@ SWGMapAircraftState::asJsonObject() {
     if(m_tcas_mode_isSet){
         obj->insert("tcasMode", QJsonValue(tcas_mode));
     }
+    if(m_tcas_ra_isSet){
+        obj->insert("tcasRA", QJsonValue(tcas_ra));
+    }
+    if(tcas_threat_icao != nullptr && *tcas_threat_icao != QString("")){
+        toJsonValue(QString("tcasThreatIcao"), tcas_threat_icao, obj, QString("QString"));
+    }
+    if(m_squawk_isSet){
+        obj->insert("squawk", QJsonValue(squawk));
+    }
     if(m_wind_speed_isSet){
         obj->insert("windSpeed", QJsonValue(wind_speed));
     }
@@ -329,8 +401,34 @@ SWGMapAircraftState::asJsonObject() {
     if(m_static_air_temperature_isSet){
         obj->insert("staticAirTemperature", QJsonValue(static_air_temperature));
     }
+    if((flight_plan != nullptr) && (flight_plan->isSet())){
+        toJsonValue(QString("flightPlan"), flight_plan, obj, QString("SWGMapFlightPlan"));
+    }
+    if((datalink_message != nullptr) && (datalink_message->isSet())){
+        toJsonValue(QString("datalinkMessage"), datalink_message, obj, QString("SWGMapDatalinkMessage"));
+    }
 
     return obj;
+}
+
+QString*
+SWGMapAircraftState::getDateTime() {
+    return date_time;
+}
+void
+SWGMapAircraftState::setDateTime(QString* date_time) {
+    this->date_time = date_time;
+    this->m_date_time_isSet = true;
+}
+
+QString*
+SWGMapAircraftState::getIcao() {
+    return icao;
+}
+void
+SWGMapAircraftState::setIcao(QString* icao) {
+    this->icao = icao;
+    this->m_icao_isSet = true;
 }
 
 QString*
@@ -553,6 +651,36 @@ SWGMapAircraftState::setTcasMode(qint32 tcas_mode) {
     this->m_tcas_mode_isSet = true;
 }
 
+qint32
+SWGMapAircraftState::getTcasRa() {
+    return tcas_ra;
+}
+void
+SWGMapAircraftState::setTcasRa(qint32 tcas_ra) {
+    this->tcas_ra = tcas_ra;
+    this->m_tcas_ra_isSet = true;
+}
+
+QString*
+SWGMapAircraftState::getTcasThreatIcao() {
+    return tcas_threat_icao;
+}
+void
+SWGMapAircraftState::setTcasThreatIcao(QString* tcas_threat_icao) {
+    this->tcas_threat_icao = tcas_threat_icao;
+    this->m_tcas_threat_icao_isSet = true;
+}
+
+qint32
+SWGMapAircraftState::getSquawk() {
+    return squawk;
+}
+void
+SWGMapAircraftState::setSquawk(qint32 squawk) {
+    this->squawk = squawk;
+    this->m_squawk_isSet = true;
+}
+
 float
 SWGMapAircraftState::getWindSpeed() {
     return wind_speed;
@@ -583,11 +711,37 @@ SWGMapAircraftState::setStaticAirTemperature(float static_air_temperature) {
     this->m_static_air_temperature_isSet = true;
 }
 
+SWGMapFlightPlan*
+SWGMapAircraftState::getFlightPlan() {
+    return flight_plan;
+}
+void
+SWGMapAircraftState::setFlightPlan(SWGMapFlightPlan* flight_plan) {
+    this->flight_plan = flight_plan;
+    this->m_flight_plan_isSet = true;
+}
+
+SWGMapDatalinkMessage*
+SWGMapAircraftState::getDatalinkMessage() {
+    return datalink_message;
+}
+void
+SWGMapAircraftState::setDatalinkMessage(SWGMapDatalinkMessage* datalink_message) {
+    this->datalink_message = datalink_message;
+    this->m_datalink_message_isSet = true;
+}
+
 
 bool
 SWGMapAircraftState::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(date_time && *date_time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(icao && *icao != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(callsign && *callsign != QString("")){
             isObjectUpdated = true; break;
         }
@@ -654,6 +808,15 @@ SWGMapAircraftState::isSet(){
         if(m_tcas_mode_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_tcas_ra_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(tcas_threat_icao && *tcas_threat_icao != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_squawk_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_wind_speed_isSet){
             isObjectUpdated = true; break;
         }
@@ -663,8 +826,13 @@ SWGMapAircraftState::isSet(){
         if(m_static_air_temperature_isSet){
             isObjectUpdated = true; break;
         }
+        if(flight_plan && flight_plan->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(datalink_message && datalink_message->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }
 }
-

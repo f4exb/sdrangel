@@ -82,6 +82,8 @@ Double clicking on a VOR will select and add it to the list of VORs to demodulat
 
 When a signal from a VOR is correctly being demodulated, a radial line will be drawn on the map, at the angle provided by the VOR demodulator or their average over the round robin turn if this is the case. Your receiver should be somewhere along this radial line. The length of the radial line is set according to the range of the VOR as recorded in the database, which is valid for aircraft at altitude. Range on the ground will be considerably less. An approximate position for the receiver is where the radial lines from two or more VORs intersect.
 
+The display settings button (next to the Draw Radials Adjusted for Magnetic Declination button) opens a dialog to select the map provider. This can be osm for OpenStreetMaps or mapboxgl for Mapbox. mapboxgl should be used on Linux with Qt versions earlier than 5.15.13, as osm maps will cause SDRangel to hang, due to a bug in Qt. mapboxgl requires a [Mapbox](https://www.mapbox.com/) API key, which can be entered in the same dialog.
+
 ![VOR Demodulator Map](../../../doc/img/VORDemod_plugin_map.png)
 
 <h2>Attribution</h2>

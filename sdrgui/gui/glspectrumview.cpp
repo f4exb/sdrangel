@@ -5427,11 +5427,22 @@ void GLSpectrumView::leaveEvent(QEvent* event)
 
 void GLSpectrumView::tick()
 {
-    // Update scroll bar to account for changes to m_spectrumBuffer and waterfall size changes
-    updateScrollBar();
+    // Update scroll bar to account for changes to m_spectrumBuffer and waterfall size changes.
+    if (m_scrollBar && !m_scrollBar->visibleRegion().isEmpty()) {
+        updateScrollBar();
+    }
 
     if (m_displayChanged)
     {
+        // Qt only skips painting widgets that are hidden, not ones that are covered, so
+        // a spectrum behind another subwindow or under a floating workspace still gets
+        // repainted at the full rate. The paint itself is not the expense: on a window
+        // holding a QQuickWidget or QWebEngineView, every repaint makes Qt composite the
+        // whole window through the RHI.
+        if (!isVisible() || window()->isMinimized() || visibleRegion().isEmpty()) {
+            return;
+        }
+
         m_displayChanged = false;
         update();
     }

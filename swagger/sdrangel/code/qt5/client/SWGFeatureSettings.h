@@ -26,6 +26,7 @@
 #include "SWGAISSettings.h"
 #include "SWGAMBESettings.h"
 #include "SWGAPRSSettings.h"
+#include "SWGAircraftSettings.h"
 #include "SWGAntennaToolsSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGDenoiserSettings.h"
@@ -76,6 +77,9 @@ public:
 
     SWGAFCSettings* getAfcSettings();
     void setAfcSettings(SWGAFCSettings* afc_settings);
+
+    SWGAircraftSettings* getAircraftSettings();
+    void setAircraftSettings(SWGAircraftSettings* aircraft_settings);
 
     SWGAISSettings* getAisSettings();
     void setAisSettings(SWGAISSettings* ais_settings);
@@ -158,6 +162,9 @@ private:
 
     SWGAFCSettings* afc_settings;
     bool m_afc_settings_isSet;
+
+    SWGAircraftSettings* aircraft_settings;
+    bool m_aircraft_settings_isSet;
 
     SWGAISSettings* ais_settings;
     bool m_ais_settings_isSet;

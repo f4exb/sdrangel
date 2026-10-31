@@ -35,6 +35,11 @@
   font-size: 15px;
   text-anchor: middle;
 }
+.cesium-animation-dateField,
+.cesium-animation-timeField {
+  cursor: ns-resize;
+  pointer-events: all;
+}
 .cesium-animation-blank {
   fill: #000;
   fill-opacity: 0.01;

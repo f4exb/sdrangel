@@ -50,14 +50,14 @@ void WhittakerEilers::alloc(int length)
 
 void WhittakerEilers::dealloc()
 {
-    delete v1a;
-    delete v2a;
-    delete da;
-    delete dtd;
-    delete ca;
-    delete za;
-    delete zb;
-    delete b;
+    delete[] v1a;
+    delete[] v2a;
+    delete[] da;
+    delete[] dtd;
+    delete[] ca;
+    delete[] za;
+    delete[] zb;
+    delete[] b;
     m_length = 0;
 }
 
@@ -172,18 +172,19 @@ void WhittakerEilers::filter(const double *xi, double *yi, const double *w, cons
     }
 
     // Backward substituion  C \ (C' \ (w .* y));
-    b = za;
+    // Reads za directly. This used to be written "b = za;", which repointed the
+    // member at za's allocation - so dealloc() freed za twice and leaked the real b.
 
     i = m - 1;
-    zb[i] = b[i] / ca[i * 3];
+    zb[i] = za[i] / ca[i * 3];
 
     i = m - 2;
     sum = ca[i * 3 + 1] * zb[i + 1];
-    zb[i] = (b[i] - sum) / ca[i * 3];
+    zb[i] = (za[i] - sum) / ca[i * 3];
 
     for (i = m - 2; i >= 1; i--) {
         sum = ca[(i - 1) * 3 + 2] * zb[i + 1] + ca[(i - 1) * 3 + 1] * zb[i];
-        zb[i-1] = (b[i - 1] - sum) / ca[(i - 1) * 3];
+        zb[i-1] = (za[i - 1] - sum) / ca[(i - 1) * 3];
     }
 
     if (std::isnan(zb[0])) {

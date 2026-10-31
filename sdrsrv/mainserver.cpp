@@ -42,6 +42,7 @@
 
 #include "mainparser.h"
 #include "mainserver.h"
+#include "util/profiler.h"
 
 MainServer *MainServer::m_instance = nullptr;
 
@@ -89,6 +90,9 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 MainServer::~MainServer()
 {
+    // Log before tearing anything down, so the data survives a problem during shutdown
+    GlobalProfileData::logProfileData();
+
     while (!m_mainCore->m_deviceSets.empty()) {
         removeLastDevice();
     }

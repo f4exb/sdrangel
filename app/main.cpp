@@ -330,6 +330,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
 int main(int argc, char* argv[])
 {
+
 #ifdef __APPLE__
     // Request OpenGL 3.3 context, needed for glspectrum and 3D Map feature
     // Note that Mac only supports CoreProfile, so any deprecated OpenGL 2 features

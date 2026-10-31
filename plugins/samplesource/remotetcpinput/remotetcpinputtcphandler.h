@@ -54,6 +54,7 @@ public:
     void resize(qsizetype elements); // Sets capacity
     void clear();
     qsizetype fill() const { return m_fill; }  // Number of elements in use
+    qsizetype size() const { return m_data.size(); }  // Capacity
     bool empty() const { return m_fill == 0; }
     bool full() const { return m_fill == m_data.size(); }
 
@@ -209,6 +210,7 @@ private:
     QTcpSocket *m_tcpSocket;
     QWebSocket *m_webSocket;
     char *m_tcpBuf;
+    qsizetype m_tcpBufSize;
     SampleSinkFifo *m_sampleFifo;
     ReplayBuffer<FixReal> *m_replayBuffer;
     MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
@@ -219,6 +221,8 @@ private:
     QTimer m_timer;
     QTimer m_reconnectTimer;
     QDateTime m_prevDateTime;
+    QDateTime m_lastDataTime;       //!< When data was last received, for connection watchdog
+    static const int m_minDataTimeout = 5000;   //!< Minimum ms without data before we reconnect
     bool m_sdra;
     bool m_spyServer;
     RemoteTCPProtocol::Device m_device;
@@ -262,8 +266,9 @@ private:
     bool handleMessage(const Message& message);
     void connectToHost(const QString& address, quint16 port, const QString& protocol);
     //void disconnectFromHost();
-    void cleanup();
+    void cleanup(bool threadStopped);
     void clearBuffer();
+    void resizeUncompressedData(float preFill, int channelSampleRate);
     void sendCommand(RemoteTCPProtocol::Command cmd, quint32 value);
     void sendCommandFloat(RemoteTCPProtocol::Command cmd, float value);
     void setSampleRate(int sampleRate);
@@ -289,11 +294,13 @@ private:
     void setSquelchGate(float squelchGate);
     void sendMessage(const QString& callsign, const QString& text, bool broadcast);
     void applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    bool sizeBuffers(qint32 channelSampleRate);
     void processMetaData();
     void spyServerConnect();
     void spyServerSet(int setting, int value);
     void spyServerSetIQFormat(int sampleBits);
     void spyServerSetStreamIQ();
+    bool readSpyServerHeader();
     void processSpyServerMetaData();
     void processSpyServerDevice(const SpyServerProtocol::Device* ssDevice);
     void processSpyServerState(const SpyServerProtocol::State* ssState, bool initial);

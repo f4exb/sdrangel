@@ -16,9 +16,11 @@
         <file>icons/earthsat.png</file>
         <file>icons/aurora.png</file>
         <file>icons/pfd.png</file>
+        <file>icons/nd.png</file>
         <file>icons/compass.png</file>
         <file>icons/grid.png</file>
         <file>icons/thirdperson.png</file>
         <file>icons/firstperson.png</file>
+        <file>icons/flyby.png</file>
     </qresource>
 </RCC>

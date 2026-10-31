@@ -19,6 +19,8 @@ ChannelSettings:
     originatorChannelIndex:
       description: Optional for reverse API. This is the channel index from where the message comes from.
       type: integer
+    ACARSDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/ACARSDemod.yaml#/ACARSDemodSettings"
     ADSBDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodSettings"
       description: "ADS-B demod settings configuration for Channel."
