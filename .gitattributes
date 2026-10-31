@@ -5,6 +5,10 @@
 # Vendored Cesium content: preserve upstream line endings.
 plugins/feature/map/Cesium/** -text
 
+# Vendor source
+plugins/channelrx/demodacars/atn/** -text
+plugins/channelrx/demodacars/vdl2gs.txt -text
+
 # Generated Swagger UI files
 sdrbase/resources/webapi/doc/swagger-ui/** -text
 
