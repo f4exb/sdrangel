@@ -1373,6 +1373,36 @@
             }
         }
 
+        // A polygon's or polyline's vertices lifted (or clamped) to the surface of Google's
+        // tiles, synchronously, from what is loaded or drawn - no query is left behind.
+        // These used to be sampled with sampleHeightMostDetailed, one query per vertex, and
+        // the packet held back until every one was answered. Cesium re-traverses the whole
+        // tileset for each unanswered query on every frame, and over Google's tiles some are
+        // never answered: after 14 hours 8,195 were queued, around home, none had been for
+        // an hour, each frame took 465 ms - and the page fell so far behind the feed that the
+        // aircraft it was drawing were an hour old, outside the clock, and none were shown.
+        // Most vertices are above anything standing in their part of the world and are not
+        // looked up at all. The rest use the depth-buffer sample where it is affordable - on
+        // screen, one a frame, shared with the aircraft - and otherwise the same cached
+        // lookup as the tracks. One that neither can answer keeps the height it was sent
+        // with, as an aircraft or a track vertex does, until the shape is next sent
+        function groundShapeVertices(coords, clamp) {
+            for (let i = 0; i + 2 < coords.length; i += 3) {
+                const height = coords[i + 2];
+                const position = Cesium.Cartographic.fromDegrees(coords[i], coords[i + 1], 0, clipCartographic);
+                if (!clamp && (height > maxSurfaceHeightAt(position))) {
+                    continue;
+                }
+                let ground = surfaceHeightAt(position);
+                if (!Cesium.defined(ground)) {
+                    ground = trackGroundAt(coords[i], coords[i + 1], position, Cesium.HeightReference.CLAMP_TO_3D_TILE);
+                }
+                if (Cesium.defined(ground) && (clamp || (height < ground))) {
+                    coords[i + 2] = ground;
+                }
+            }
+        }
+
         // A CZML position is either a constant [lon, lat, height] or time tagged samples
         // of [time, lon, lat, height] repeated. An aircraft with the PFD open sends its
         // whole smoothed window as one packet, so every sample is clipped, not just the
@@ -1393,23 +1423,50 @@
             }
         }
 
-        // Sample the height of the surface at the given Cartographic positions.
+        // Sample the height of the surface at the given Cartographic positions, at the most
+        // detailed level - asynchronously, as that can mean loading tiles first.
         // Google's 3D tiles aren't terrain, so have to be sampled from the rendered scene,
         // where objectsToExclude keeps an entity from being sampled against itself.
+        // Only for where nothing quicker will do: shapes on terrain, and a double click's
+        // coordinates - shapes on Google's tiles use groundShapeVertices. Bounded either way:
+        // an answer not in after surfaceSampleTimeoutMs is given up on, so a shape is drawn
+        // with the heights it was sent with rather than waiting for ever, and no more than
+        // surfaceSamplesMaxPending positions are asked for at once, as an unanswered query
+        // costs Cesium a tileset traversal every frame, or a tile request, for as long as
+        // it stays unanswered
+        const surfaceSampleTimeoutMs = 10000;
+        const surfaceSamplesMaxPending = 1000;
+        var surfaceSamplesPending = 0;
         function sampleSurfaceHeight(positions, objectsToExclude) {
-            if (googleTileset === undefined) {
-                return Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+            if (surfaceSamplesPending + positions.length > surfaceSamplesMaxPending) {
+                return Promise.reject(new Error(`${surfaceSamplesPending} surface heights already pending`));
             }
-            return Promise.resolve(
-                viewer.scene.sampleHeightMostDetailed(positions, objectsToExclude)
-            ).then((updatedPositions) => {
-                for (const position of updatedPositions) {
-                    if (position.height === undefined) { // Nothing was hit at this position
-                        position.height = 0;
+            surfaceSamplesPending += positions.length;
+            let sampling;
+            if (googleTileset === undefined) {
+                sampling = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+            } else {
+                sampling = Promise.resolve(
+                    viewer.scene.sampleHeightMostDetailed(positions, objectsToExclude)
+                ).then((updatedPositions) => {
+                    for (const position of updatedPositions) {
+                        if (position.height === undefined) { // Nothing was hit at this position
+                            position.height = 0;
+                        }
                     }
-                }
-                return updatedPositions;
+                    return updatedPositions;
+                });
+            }
+            // Counted until Cesium has finished with them, not until we stop waiting: one
+            // given up on is still in Cesium's queue
+            sampling = sampling.finally(() => {
+                surfaceSamplesPending -= positions.length;
             });
+            let timer;
+            const timeout = new Promise((resolve, reject) => {
+                timer = setTimeout(() => reject(new Error(`No surface heights after ${surfaceSampleTimeoutMs} ms`)), surfaceSampleTimeoutMs);
+            });
+            return Promise.race([sampling, timeout]).finally(() => clearTimeout(timer));
         }
 
         Cesium.Ion.defaultAccessToken = '$CESIUM_ION_API_KEY$';
@@ -3577,6 +3634,11 @@
                         }
                     }
                     processPacket(command);
+                } else if (googleTileset !== undefined) {
+                    // Synchronous, so nothing is queued and the packet isn't held back -
+                    // see groundShapeVertices
+                    groundShapeVertices(prim.positions.cartographicDegrees, clampToGround);
+                    processPacket(command);
                 } else {
                     for (let i = 0; i < positionCount; i++) {
                         positions[i] = Cesium.Cartographic.fromDegrees(prim.positions.cartographicDegrees[i * 3 + 0], prim.positions.cartographicDegrees[i * 3 + 1]);
@@ -3610,7 +3672,9 @@
                         // Drawing it unclamped is a far better outcome than not
                         // drawing it: the heights are whatever the sender gave, so at
                         // worst it sits at the ellipsoid instead of on the terrain.
-                        console.warn("Terrain sampling failed for", command.id, e);
+                        // Also how a sample that timed out, or was refused because
+                        // too many are pending, ends - see sampleSurfaceHeight
+                        console.warn("Terrain sampling failed for", command.id, formatRejection(e));
                         processPacket(command);
                     });
                 }
