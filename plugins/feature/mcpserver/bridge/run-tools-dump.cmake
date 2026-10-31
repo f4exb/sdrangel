@@ -10,6 +10,19 @@ if(NOT TOOLSDUMP_TIMEOUT MATCHES "^[1-9][0-9]*$")
     message(FATAL_ERROR "TOOLSDUMP_TIMEOUT must be a positive integer")
 endif()
 
+# Windows only: directories of DLLs that may not have been copied beside the helper yet,
+# separated by |
+if(TOOLSDUMP_DLL_PATH)
+    string(REPLACE "|" ";" toolsdump_dll_dirs "${TOOLSDUMP_DLL_PATH}")
+    foreach(dll_dir IN LISTS toolsdump_dll_dirs)
+        if(dll_dir)
+            file(TO_NATIVE_PATH "${dll_dir}" dll_dir)
+            set(ENV{PATH} "${dll_dir};$ENV{PATH}")
+        endif()
+    endforeach()
+    message(STATUS "mcpbundle: DLL search path adds ${TOOLSDUMP_DLL_PATH}")
+endif()
+
 message(STATUS "mcpbundle: starting ${TOOLSDUMP}")
 message(STATUS "mcpbundle: output ${TOOLS_JSON}; timeout ${TOOLSDUMP_TIMEOUT}s")
 get_filename_component(toolsdump_working_directory "${TOOLS_JSON}" DIRECTORY)
