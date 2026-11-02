@@ -62,10 +62,20 @@ protected:
 
 private:
     static bool isRollupChild(QWidget *childWidget); //!< chidl is part of rollups (ex: not a dialog)
+    //!< Whether a child takes a share of any space left over. MinimumExpanding carries
+    //!< ExpandFlag as well as Expanding, and hasExpandableWidgets() and arrangeRollups()
+    //!< have to agree, or the window is made fixed size while its contents expand
+    static bool isExpandingChild(const QWidget *childWidget);
+    int arrangeRollupsOnce();
     // bool m_channelWidget;
-    int m_newHeight;
     QSize m_minimumSizeHint;
     bool m_transparentBackground;
+    //!< arrangeRollups() resizes children and sets our own minimum height, either of
+    //!< which can have Qt deliver a resize event synchronously and call us again while
+    //!< we are part way through positioning
+    bool m_arranging;
+    //!< Set when that happens, so the arrangement is repeated rather than lost
+    bool m_arrangePending;
 };
 
 #endif // INCLUDE_ROLLUPCONTENTS_H

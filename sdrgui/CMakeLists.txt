@@ -7,6 +7,7 @@ set(CMAKE_AUTOUIC OFF)
 set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
+    gui/acarsmessageview.cpp
     gui/acronymview.cpp
     gui/addpresetdialog.cpp
     gui/audiodialog.cpp
@@ -40,6 +41,8 @@ set(sdrgui_SOURCES
     gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
+    gui/fastheaderview.cpp
+    gui/fastitemdelegate.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
@@ -106,6 +109,7 @@ set(sdrgui_SOURCES
     gui/timedelegate.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
+    gui/udpsettingsdialog.cpp
     gui/tvscreen.cpp
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
@@ -155,8 +159,11 @@ set(sdrgui_SOURCES
 set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
+    gui/fastheaderview.h
+    gui/fastitemdelegate.h
     gui/accessiblevaluedial.h
     gui/accessiblevaluedialz.h
+    gui/acarsmessageview.h
     gui/acronymview.h
     gui/addpresetdialog.h
     gui/audiodialog.h
@@ -257,6 +264,7 @@ set(sdrgui_HEADERS
     gui/timedelegate.h
     gui/transverterbutton.h
     gui/transverterdialog.h
+    gui/udpsettingsdialog.h
     gui/tvscreen.h
     gui/tvscreenanalog.h
     gui/valuedial.h
@@ -340,6 +348,7 @@ set(sdrgui_FORMS
     gui/spectrumdisplaysettingsdialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
+    gui/udpsettingsdialog.ui
     gui/loggingdialog.ui
     gui/welcomedialog.ui
     gui/workspaceselectiondialog.ui

@@ -21,6 +21,7 @@
 #include <QCheckBox>
 
 #include "adsbdemodnotificationdialog.h"
+#include "gui/fastitemdelegate.h"
 
 // Map main ADS-B table column numbers to combo box indices
 std::vector<int> ADSBDemodNotificationDialog::m_columnMap = {
@@ -38,6 +39,8 @@ ADSBDemodNotificationDialog::ADSBDemodNotificationDialog(ADSBDemodSettings *sett
     m_settings(settings)
 {
     ui->setupUi(this);
+
+    ui->table->setItemDelegate(new FastItemDelegate(ui->table));
 
     resizeTable();
 

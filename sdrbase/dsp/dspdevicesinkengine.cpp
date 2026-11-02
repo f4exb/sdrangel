@@ -384,9 +384,11 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoError(const QString& errorMessage)
 {
-	qDebug() << "DSPDeviceSinkEngine::gotoError";
+	QString message = QString("T:%1: %2").arg(getUID()).arg(errorMessage);
 
-	m_errorMessage = errorMessage;
+	qDebug() << "DSPDeviceSinkEngine::gotoError: " << message;
+
+	m_errorMessage = message;
 	m_deviceDescription.clear();
 	setState(State::StError);
 	return State::StError;

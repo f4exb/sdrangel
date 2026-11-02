@@ -498,9 +498,11 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& errorMessage)
 {
-	qDebug() << "DSPDeviceSourceEngine::gotoError: " << errorMessage;
+	QString message = QString("R:%1: %2").arg(getUID()).arg(errorMessage);
 
-	m_errorMessage = errorMessage;
+	qDebug() << "DSPDeviceSourceEngine::gotoError: " << message;
+
+	m_errorMessage = message;
 	m_deviceDescription.clear();
 	setState(State::StError);
 	return State::StError;

@@ -344,7 +344,7 @@ void DroneIDDemod::sendMapItem(const QString& name, double latitude, double long
         swgMapItem->setLongitude(longitude);
         swgMapItem->setAltitude(altitude);
         swgMapItem->setAltitudeReference(altitudeReference);
-        swgMapItem->setPositionDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+        swgMapItem->setPositionDateTime(new QString(dateTime.toUTC().toString(Qt::ISODateWithMs)));
         swgMapItem->setFixedPosition(false);
         swgMapItem->setImage(new QString(image));
         swgMapItem->setImageRotation(imageRotation);
@@ -357,7 +357,7 @@ void DroneIDDemod::sendMapItem(const QString& name, double latitude, double long
             swgMapItem->setHeading(imageRotation);
             swgMapItem->setPitch(0.0f);
             swgMapItem->setRoll(0.0f);
-            swgMapItem->setOrientationDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setOrientationDateTime(new QString(dateTime.toUTC().toString(Qt::ISODateWithMs)));
             swgMapItem->setLabelAltitudeOffset(1.0f);
 
             if (!animation.isEmpty())
@@ -365,7 +365,7 @@ void DroneIDDemod::sendMapItem(const QString& name, double latitude, double long
                 // Each map item owns and deletes its animations, so create for each pipe
                 SWGSDRangel::SWGMapAnimation *swgAnimation = new SWGSDRangel::SWGMapAnimation();
                 swgAnimation->setName(new QString(animation));
-                swgAnimation->setStartDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+                swgAnimation->setStartDateTime(new QString(dateTime.toUTC().toString(Qt::ISODateWithMs)));
                 swgAnimation->setReverse(0);
                 swgAnimation->setLoop(1);
                 swgAnimation->setMultiplier(1.0f);

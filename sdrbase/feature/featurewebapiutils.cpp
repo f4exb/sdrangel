@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include "SWGFeatureActions.h"
+#include "SWGAircraftActions.h"
 #include "SWGMapActions.h"
 #include "SWGPERTesterActions.h"
 #include "SWGDeviceState.h"
@@ -56,6 +57,34 @@ bool FeatureWebAPIUtils::run(int featureSetIndex, int featureIndex)
     }
 }
 
+// Stop feature
+bool FeatureWebAPIUtils::stop(int featureSetIndex, int featureIndex)
+{
+    Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "");
+    if (feature != nullptr)
+    {
+        SWGSDRangel::SWGDeviceState runResponse;
+        QString errorResponse;
+
+        runResponse.setState(new QString());
+        const int httpRC = feature->webapiRun(false, runResponse, errorResponse);
+
+        if (httpRC/100 != 2)
+        {
+            qWarning("FeatureWebAPIUtils::stop: stop error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        qWarning("FeatureWebAPIUtils::stop: no feature F%d:%d", featureSetIndex, featureIndex);
+        return false;
+    }
+}
+
 // Find the specified target on the map
 bool FeatureWebAPIUtils::mapFind(const QString& target, int featureSetIndex, int featureIndex)
 {
@@ -84,6 +113,46 @@ bool FeatureWebAPIUtils::mapFind(const QString& target, int featureSetIndex, int
         qWarning("FeatureWebAPIUtils::mapFind: no Map feature");
         return false;
     }
+}
+
+// Ask the Aircraft feature to select an aircraft or a flight. This is how a link clicked
+// in an aircraft's Map popup gets back to the feature that knows what an aircraft is - the
+// Map deliberately knows nothing about them.
+bool FeatureWebAPIUtils::aircraftSelect(const QString& key, const QString& value,
+                                        int featureSetIndex, int featureIndex)
+{
+    Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "sdrangel.feature.aircraft");
+    if (feature == nullptr)
+    {
+        qWarning("FeatureWebAPIUtils::aircraftSelect: no Aircraft feature");
+        return false;
+    }
+
+    QString errorMessage;
+    QStringList featureActionKeys = { key };
+    SWGSDRangel::SWGFeatureActions query;
+    SWGSDRangel::SWGAircraftActions *aircraftActions = new SWGSDRangel::SWGAircraftActions();
+
+    if (key == "selectIcao") {
+        aircraftActions->setSelectIcao(new QString(value));
+    } else if (key == "selectRegistration") {
+        aircraftActions->setSelectRegistration(new QString(value));
+    } else if (key == "selectFlight") {
+        aircraftActions->setSelectFlight(new QString(value));
+    } else {
+        qWarning() << "FeatureWebAPIUtils::aircraftSelect: unknown action" << key;
+        delete aircraftActions;
+        return false;
+    }
+    query.setAircraftActions(aircraftActions);
+
+    int httpRC = feature->webapiActionsPost(featureActionKeys, query, errorMessage);
+    if (httpRC/100 != 2)
+    {
+        qWarning() << "FeatureWebAPIUtils::aircraftSelect: error " << httpRC << ":" << errorMessage;
+        return false;
+    }
+    return true;
 }
 
 // Set the date and time the map uses for display

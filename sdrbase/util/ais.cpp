@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QTimeZone>
 
 #include <cmath>
 
@@ -450,7 +451,7 @@ AISBaseStationReport::AISBaseStationReport(QByteArray ba) :
     int hour = ((ba[7] & 0x7) << 2) | ((ba[8] >> 6) & 0x3);
     int minute = ba[8] & 0x3f;
     int second = (ba[9] >> 2) & 0x3f;
-    m_utc = QDateTime(QDate(year, month, day), QTime(hour, minute, second), Qt::UTC);
+    m_utc = QDateTime(QDate(year, month, day), QTime(hour, minute, second), QTimeZone::utc());
 
     m_positionAccuracy = (ba[9] >> 1) & 0x1;
 

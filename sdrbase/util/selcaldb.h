@@ -50,6 +50,11 @@ public:
     // Registrations of aircraft assigned a code, in file order.
     static QStringList getRegistrations(const QString& code);
 
+    // The other way round: the codes assigned to each registration, joined with ", "
+    // where an aircraft has more than one. Built with the forward table, so it reloads
+    // with it. Null if the database has not been downloaded.
+    static QSharedPointer<const QHash<QString, QString>> getCodesByRegistration();
+
     // Code in the form AB-CD, with each pair in tone designation order, or an
     // empty string if it is not a valid code.
     static QString normalizeCode(const QString& code);
@@ -63,6 +68,7 @@ private:
     HttpDownloadManager m_dlm;
 
     static QSharedPointer<const QMultiHash<QString, QString>> m_registrations;
+    static QSharedPointer<const QHash<QString, QString>> m_codes;
     static QDateTime m_modifiedDateTime;
     static QMutex m_mutex;
 

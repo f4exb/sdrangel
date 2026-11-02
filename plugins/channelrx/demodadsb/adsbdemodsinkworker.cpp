@@ -261,18 +261,8 @@ bool ADSBDemodSinkWorker::icaoHeardRecently(unsigned icao, const QDateTime &date
 
 void ADSBDemodSinkWorker::forwardFrame(const unsigned char *data, int size, float preambleCorrelation, float correlationOnes, const QDateTime& dateTime, unsigned crc)
 {
-    // Pass to GUI
-    if (m_sink->getMessageQueueToGUI())
-    {
-        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
-            QByteArray((char*)data, size),
-            preambleCorrelation,
-            correlationOnes,
-            dateTime,
-            crc);
-        m_sink->getMessageQueueToGUI()->push(msg);
-    }
-    // Pass to worker to feed to other servers
+    // Pass to the tracker, which decodes the frame, and passes it on to be exported
+    // to other servers and to the GUI
     if (m_sink->getMessageQueueToWorker())
     {
         ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(

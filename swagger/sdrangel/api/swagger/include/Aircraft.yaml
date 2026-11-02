@@ -1,0 +1,165 @@
+AircraftSettings:
+  description: Aircraft
+  properties:
+    removalMins:
+      description: "Archive an aircraft after this many minutes without a report"
+      type: integer
+    adsbPositionMins:
+      description: "How long an ADS-B position stays believable, and so how long the aircraft stays on the map, in minutes"
+      type: integer
+    acarsPositionMins:
+      description: "How long an ACARS, VDL-2, HFDL or Aero position stays believable, in minutes. Longer than the ADS-B figure because those protocols report far less often"
+      type: integer
+    retentionDays:
+      description: "Discard archived aircraft, with their flights, after this many days. 0 keeps them for ever"
+      type: integer
+    flightRetentionDays:
+      description: "Discard flights this many days after they were last heard, keeping their aircraft. An aircraft's most recent flight is always kept. 0 keeps flights for as long as their aircraft"
+      type: integer
+    atcLabels:
+      description: "Display route, altitude and speed in map labels (1 for yes, 0 for no)"
+      type: integer
+    atcCallsigns:
+      description: "Map labels use the airline's radio callsign (SPEEDBIRD 123) rather than its code (BAW123) (1 for yes, 0 for no). Only has an effect when atcLabels is set"
+      type: integer
+    displayMaxRangeOnMap:
+      description: "Keep the aircraft that set the all time maximum range record on the map, at the position it was in when it set it (1 for yes, 0 for no)"
+      type: integer
+    favourLivery:
+      description: "On the 3D map, prefer a similar aircraft in the correct airline livery over an exact aircraft type in the wrong one (1 for yes, 0 for no)"
+      type: integer
+    displayStatistics:
+      description: "Show the statistics table (1 for yes, 0 for no)"
+      type: integer
+    displayChart:
+      description: "Show the message rate chart (1 for yes, 0 for no)"
+      type: integer
+    displayCoverage:
+      description: "Draw each protocol's polar coverage on the map (1 for yes, 0 for no)"
+      type: integer
+    useLiveryIcons:
+      description: "Use aircraft icons in airline liveries on the 2D map, rather than black icons (1 for yes, 0 for no)"
+      type: integer
+    feedEnabled:
+      description: "Feed received ACARS messages on to aggregators (1 for yes, 0 for no)"
+      type: integer
+    feedStationId:
+      description: "Station ident sent with each message fed to aggregators"
+      type: string
+    feedAirframes:
+      description: "Feed airframes.io (1 for yes, 0 for no)"
+      type: integer
+    feedAirframesHost:
+      description: "airframes.io feed host"
+      type: string
+    feedAirframesPort:
+      description: "airframes.io feed port"
+      type: integer
+    feedAirframesTcp:
+      description: "Feed airframes.io over TCP rather than UDP (1 for TCP, 0 for UDP)"
+      type: integer
+    feedAvdelphi:
+      description: "Feed avdelphi.com (1 for yes, 0 for no)"
+      type: integer
+    feedAvdelphiHost:
+      description: "avdelphi.com feed host"
+      type: string
+    feedAvdelphiPort:
+      description: "avdelphi.com feed port"
+      type: integer
+    feedAvdelphiTcp:
+      description: "Feed avdelphi.com over TCP rather than UDP (1 for TCP, 0 for UDP)"
+      type: integer
+    databaseFilename:
+      description: "Where the session database is kept. Empty for the default location"
+      type: string
+    disabledSources:
+      description: "Channel URIs not to accept reports from. Empty accepts all"
+      type: array
+      items:
+        type: string
+    notificationSettings:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Aircraft.yaml#/AircraftNotificationSettings"
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    workspaceIndex:
+      type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+AircraftNotificationSettings:
+  description: "A rule matched against each aircraft, which speaks a phrase or runs a command when it matches"
+  properties:
+    matchColumn:
+      description: "What the regular expression is matched against. 0 ICAO address, 1 registration, 2 flight, 3 aircraft type"
+      type: integer
+    regExp:
+      description: "Regular expression to match"
+      type: string
+    speech:
+      description: "Text to speak when the rule matches. May contain ${icao}, ${reg}, ${flight}, ${type} and ${protocol}"
+      type: string
+    command:
+      description: "Command to run when the rule matches"
+      type: string
+
+AircraftReport:
+  description: Aircraft
+  properties:
+    aircraftCount:
+      description: "Aircraft currently held, active and archived"
+      type: integer
+    activeAircraftCount:
+      description: "Aircraft currently being heard from"
+      type: integer
+    flightCount:
+      description: "Flights currently held"
+      type: integer
+    messageCount:
+      description: "Reports received this session, over every protocol"
+      type: integer
+      format: int64
+    protocols:
+      description: "Reports received this session, per protocol"
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Aircraft.yaml#/AircraftProtocolReport"
+
+AircraftProtocolReport:
+  description: "What one protocol has contributed this session"
+  properties:
+    protocol:
+      description: "Protocol name: ADS-B, ACARS, VDL-2, HFDL or Aero"
+      type: string
+    messageCount:
+      description: "Reports received on this protocol this session"
+      type: integer
+      format: int64
+
+AircraftActions:
+  description: Aircraft
+  properties:
+    selectIcao:
+      description: "Select the aircraft with this 24 bit ICAO address, written in hexadecimal (e.g. 4CA1FA)"
+      type: string
+    selectRegistration:
+      description: "Select the aircraft with this registration (e.g. G-ABCD)"
+      type: string
+    selectFlight:
+      description: "Select this flight number (e.g. BAW123). The most recently heard flight with that number is chosen"
+      type: string

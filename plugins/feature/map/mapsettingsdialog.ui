@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1267</width>
-    <height>775</height>
+    <width>1023</width>
+    <height>918</height>
    </rect>
   </property>
   <property name="font">
@@ -123,6 +123,23 @@
                </property>
               </widget>
              </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="useLiveryIconsLabel">
+               <property name="text">
+                <string>Livery aircraft icons</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QCheckBox" name="useLiveryIcons">
+               <property name="toolTip">
+                <string>Display aircraft icons showing airline liveries, matched from the aircraft type and operator, instead of black icons</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -131,7 +148,41 @@
             <property name="title">
              <string>3D Map Settings</string>
             </property>
-            <layout class="QFormLayout" name="formLayout">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="3" column="0">
+              <widget class="QLabel" name="terrainLabel">
+               <property name="text">
+                <string>Terrain</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="1">
+              <widget class="QCheckBox" name="fps">
+               <property name="toolTip">
+                <string>Display frames per second (FPS)</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="googlePhotorealistic3DTiles">
+               <property name="toolTip">
+                <string>Display Google Photorealistic 3D Tiles. This replaces the imagery, terrain and buildings settings and hides map layers drawn on the globe, such as rain and clouds. Uses Cesium Ion quota, so requires a Cesium Ion API key to be entered on the API keys tab</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="defaultImageryLabel">
+               <property name="text">
+                <string>Default imagery</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="map3DEnabledLabel">
                <property name="minimumSize">
@@ -145,6 +196,23 @@
                </property>
               </widget>
              </item>
+             <item row="12" column="0">
+              <widget class="QLabel" name="fxaaLabel">
+               <property name="text">
+                <string>FXAA</string>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="1">
+              <widget class="QCheckBox" name="fxaa">
+               <property name="toolTip">
+                <string>Fast Approximate Anti-aliasing</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="1">
               <widget class="QCheckBox" name="map3DEnabled">
                <property name="text">
@@ -152,17 +220,98 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="defaultImageryLabel">
+             <item row="11" column="0">
+              <widget class="QLabel" name="eciCameraLabel">
                <property name="text">
-                <string>Default imagery</string>
+                <string>Camera reference frame</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="15" column="1">
+              <widget class="QSlider" name="mapItemSoundVolume">
+               <property name="toolTip">
+                <string>Volume of sounds located at map items, such as engines and animation sounds</string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="googlePhotorealistic3DTilesLabel">
+               <property name="text">
+                <string>Google 3D tiles</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="sunLightEnabledLabel">
+               <property name="text">
+                <string>Lighting</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="buildingsLabel">
+               <property name="text">
+                <string>Buildings</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QCheckBox" name="hdr">
+               <property name="toolTip">
+                <string>High dynamic range</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QComboBox" name="sunLightEnabled">
+               <property name="toolTip">
+                <string>Whether lighting is from the Sun or Camera</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Camera</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Sun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="11" column="1">
+              <widget class="QComboBox" name="eciCamera">
+               <property name="toolTip">
+                <string>Selects camera reference frame. For ECEF the camera rotates with the Earth. For ECI, the camera position is fixed relative to the stars and the Earth's rotation will be visible.</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>ECEF</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>ECI</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1">
               <widget class="QComboBox" name="defaultImagery">
                <property name="toolTip">
-                <string>Default imagery (Note there is a quota on Bing Maps Ariel usage)</string>
+                <string>Default imagery. Bing, Sentinel-2, Earth at night and Google use Cesium Ion quota, so require a Cesium Ion API key to be entered on the API keys tab</string>
                </property>
                <item>
                 <property name="text">
@@ -189,17 +338,40 @@
                  <string>Ersi world ocean</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Google Maps Satellite</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Google Maps Satellite with Labels</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Google Maps Roadmap</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Google Maps Contour</string>
+                </property>
+               </item>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="terrainLabel">
+             <item row="6" column="2">
+              <widget class="QLabel" name="lightIntensityLabel">
                <property name="text">
-                <string>Terrain</string>
+                <string>Camera light Intensity</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="3" column="1">
               <widget class="QComboBox" name="terrain">
+               <property name="toolTip">
+                <string>Terrain provider. Cesium World Terrain uses Cesium Ion quota, so requires a Cesium Ion API key to be entered on the API keys tab</string>
+               </property>
                <item>
                 <property name="text">
                  <string>Cesium World Terrain</string>
@@ -222,49 +394,61 @@
                </item>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="terrainLightingLabel">
+             <item row="14" column="0">
+              <widget class="QLabel" name="fpsLabel">
                <property name="text">
-                <string>Terrain lighting</string>
+                <string>Display FPS</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="terrainLighting">
+             <item row="14" column="2">
+              <widget class="QLabel" name="frameRateLabel">
+               <property name="text">
+                <string>Frame rate</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="3">
+              <widget class="QSpinBox" name="frameRate">
                <property name="toolTip">
-                <string>Enable terrain lighting</string>
+                <string>Frame rate to render the 3D map at. Lower rates use less CPU and GPU. Display uses the refresh rate of the display the map is on, up to 60 fps. More than 60 fps requires QTWEBENGINE_CHROMIUM_FLAGS=--disable-frame-rate-limit</string>
+               </property>
+               <property name="specialValueText">
+                <string>Display</string>
+               </property>
+               <property name="suffix">
+                <string> fps</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QCheckBox" name="fog">
+               <property name="toolTip">
+                <string>Enable fog effect</string>
                </property>
                <property name="text">
                 <string/>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="waterLabel">
+             <item row="15" column="0">
+              <widget class="QLabel" name="mapItemSoundVolumeLabel">
                <property name="text">
-                <string>Water effects</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QCheckBox" name="water">
-               <property name="toolTip">
-                <string>Enable water effects such as waves</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="buildingsLabel">
-               <property name="text">
-                <string>Buildings</string>
+                <string>Map item volume</string>
                </property>
               </widget>
              </item>
              <item row="5" column="1">
               <widget class="QComboBox" name="buildings">
+               <property name="toolTip">
+                <string>Buildings to display. Cesium OSM Buildings uses Cesium Ion quota, so requires a Cesium Ion API key to be entered on the API keys tab</string>
+               </property>
                <item>
                 <property name="text">
                  <string>None</string>
@@ -277,38 +461,64 @@
                </item>
               </widget>
              </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="sunLightEnabledLabel">
+             <item row="8" column="0">
+              <widget class="QLabel" name="hdrLabel">
                <property name="text">
-                <string>Lighting</string>
+                <string>HDR</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
-              <widget class="QComboBox" name="sunLightEnabled">
+             <item row="8" column="2">
+              <widget class="QLabel" name="lowDetailModelsLabel">
+               <property name="text">
+                <string>Low detail models</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="3">
+              <widget class="QCheckBox" name="lowDetailModels">
                <property name="toolTip">
-                <string>Whether lighting is from the Sun or Camera</string>
+                <string>Draw aircraft that are small on screen with a simpler model of the same aircraft and livery, where one is installed (MSFS models converted with a second level of detail). Much faster with many aircraft in view</string>
                </property>
-               <item>
-                <property name="text">
-                 <string>Camera</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Sun</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="lightIntensityLabel">
                <property name="text">
-                <string>Camera light Intensity</string>
+                <string/>
                </property>
               </widget>
              </item>
-             <item row="7" column="1">
+             <item row="9" column="0">
+              <widget class="QLabel" name="fogLabel">
+               <property name="text">
+                <string>Fog</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="2">
+              <widget class="QLabel" name="distantLightIntensityLabel">
+               <property name="text">
+                <string>Distant light intensity</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="3">
+              <widget class="QDoubleSpinBox" name="distantLightIntensity">
+               <property name="toolTip">
+                <string>Ambient light added to 3D models in the distance, which are otherwise lit only from the side facing the Sun and appear as dark silhouettes against a bright sky. 0 to disable</string>
+               </property>
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="maximum">
+                <double>5.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="3">
               <widget class="QDoubleSpinBox" name="lightIntensity">
                <property name="toolTip">
                 <string>Intensity of camera light</string>
@@ -324,89 +534,31 @@
                </property>
               </widget>
              </item>
-             <item row="8" column="0">
-              <widget class="QLabel" name="hdrLabel">
+             <item row="9" column="2">
+              <widget class="QLabel" name="waterLabel">
                <property name="text">
-                <string>HDR</string>
+                <string>Water effects</string>
                </property>
               </widget>
              </item>
-             <item row="8" column="1">
-              <widget class="QCheckBox" name="hdr">
+             <item row="9" column="3">
+              <widget class="QCheckBox" name="water">
                <property name="toolTip">
-                <string>High dynamic range</string>
+                <string>Enable water effects such as waves</string>
                </property>
                <property name="text">
                 <string/>
                </property>
               </widget>
              </item>
-             <item row="9" column="0">
-              <widget class="QLabel" name="fogLabel">
-               <property name="text">
-                <string>Fog</string>
-               </property>
-              </widget>
-             </item>
-             <item row="9" column="1">
-              <widget class="QCheckBox" name="fog">
-               <property name="toolTip">
-                <string>Enable fog effect</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="11" column="0">
-              <widget class="QLabel" name="eciCameraLabel">
-               <property name="text">
-                <string>Camera reference frame</string>
-               </property>
-              </widget>
-             </item>
-             <item row="11" column="1">
-              <widget class="QComboBox" name="eciCamera">
-               <property name="toolTip">
-                <string>Selects camera reference frame. For ECEF the camera rotates with the Earth. For ECI, the camera position is fixed relative to the stars and the Earth's rotation will be visible.</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>ECEF</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ECI</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="14" column="0">
-              <widget class="QLabel" name="fpsLabel">
-               <property name="text">
-                <string>Display FPS</string>
-               </property>
-              </widget>
-             </item>
-             <item row="14" column="1">
-              <widget class="QCheckBox" name="fps">
-               <property name="toolTip">
-                <string>Display frames per second (FPS)</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="13" column="0">
+             <item row="12" column="2">
               <widget class="QLabel" name="msaaLabel">
                <property name="text">
                 <string>MSAA</string>
                </property>
               </widget>
              </item>
-             <item row="13" column="1">
+             <item row="12" column="3">
               <widget class="QComboBox" name="msaa">
                <property name="toolTip">
                 <string>Multisample Anti-Aliasing</string>
@@ -438,17 +590,68 @@
                </item>
               </widget>
              </item>
-             <item row="12" column="0">
-              <widget class="QLabel" name="fxaaLabel">
+             <item row="15" column="2">
+              <widget class="QLabel" name="cockpitSoundVolumeLabel">
                <property name="text">
-                <string>FXAA</string>
+                <string>Cockpit volume</string>
                </property>
               </widget>
              </item>
-             <item row="12" column="1">
-              <widget class="QCheckBox" name="fxaa">
+             <item row="15" column="3">
+              <widget class="QSlider" name="cockpitSoundVolume">
                <property name="toolTip">
-                <string>Fast Approximate Anti-aliasing</string>
+                <string>Volume of cockpit sounds, such as altitude callouts and the datalink message ring</string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="0">
+              <widget class="QLabel" name="vhf1ChannelLabel">
+               <property name="text">
+                <string>VHF1 AM Demod</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="1">
+              <widget class="QComboBox" name="vhf1Channel">
+               <property name="toolTip">
+                <string>AM Demod channel tuned by the RMP's VHF1 active frequency</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="2">
+              <widget class="QLabel" name="vhf2ChannelLabel">
+               <property name="text">
+                <string>VHF2 AM Demod</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="3">
+              <widget class="QComboBox" name="vhf2Channel">
+               <property name="toolTip">
+                <string>AM Demod channel tuned by the RMP's VHF2 active frequency</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLabel" name="terrainLightingLabel">
+               <property name="text">
+                <string>Terrain lighting</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="3">
+              <widget class="QCheckBox" name="terrainLighting">
+               <property name="toolTip">
+                <string>Enable terrain lighting</string>
                </property>
                <property name="text">
                 <string/>
@@ -479,7 +682,17 @@
                <string>Download 3D models. It is recommended to restart SDRangel after download.</string>
               </property>
               <property name="text">
-               <string>Download 3D Models (1.6GB)</string>
+               <string>Download 3D Models</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="downloadSounds">
+              <property name="toolTip">
+               <string>Download the aircraft sounds - engine sound sets, cockpit callouts and gear and flap movements - used by the 3D map.</string>
+              </property>
+              <property name="text">
+               <string>Download Sounds</string>
               </property>
              </widget>
             </item>
@@ -522,6 +735,20 @@
               <property name="icon">
                <iconset resource="mapicons.qrc">
                 <normaloff>:/map/icons/waypoints.png</normaloff>:/map/icons/waypoints.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="getSidStar">
+              <property name="toolTip">
+               <string>Download SID and STAR procedures (1MB)</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="mapicons.qrc">
+                <normaloff>:/map/icons/groundtracks.png</normaloff>:/map/icons/groundtracks.png</iconset>
               </property>
              </widget>
             </item>
@@ -587,6 +814,14 @@
              </property>
              <property name="toolTip">
               <string>Track colour or 2D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Palette</string>
+             </property>
+             <property name="toolTip">
+              <string>Palette used to colour the track on the 2D and 3D maps according to the altitude of the object, with a colour for every 5000ft. None to draw the track in a single colour.</string>
              </property>
             </column>
             <column>
@@ -765,6 +1000,26 @@
                </property>
               </widget>
              </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="cartoDBAPIKeyLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>140</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>CartoDB API Key</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QLineEdit" name="cartoDBAPIKey">
+               <property name="toolTip">
+                <string>Enter a CartoDB API key to use for the aviation maps, which use CartoDB tiles without labels: https://carto.com/ Leave blank to use the built in key</string>
+               </property>
+              </widget>
+             </item>
              <item row="5" column="1">
               <widget class="QLineEdit" name="checkWXAPIKey">
                <property name="toolTip">
@@ -787,6 +1042,206 @@
               </widget>
              </item>
             </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="msfsTab">
+         <attribute name="title">
+          <string>MSFS</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="msfsDescription">
+            <property name="text">
+             <string>Use Microsoft Flight Simulator waypoint data and convert aircraft models.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="msfsDirectoryLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="msfsNavigraphDirectoryLabel">
+              <property name="text">
+               <string>Waypoint BGL directory</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="msfsNavigraphDirectory">
+              <property name="toolTip">
+               <string>Directory recursively scanned for waypoint BGL files. Leave empty to use waypoints.csv.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="msfsNavigraphBrowse">
+              <property name="text">
+               <string>Browse…</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="msfsAircraftDirectoryLabel">
+              <property name="toolTip">
+               <string/>
+              </property>
+              <property name="text">
+               <string>Aircraft model directory</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="msfsAircraftDirectory">
+              <property name="toolTip">
+               <string>Parent directory recursively scanned for aircraft.cfg files</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="msfsBrowse">
+              <property name="text">
+               <string>Browse…</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="msfsOutputDirectoryLabel">
+              <property name="text">
+               <string>Converted models</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLabel" name="msfsOutputDirectory">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="msfsMaxTextureSizeLabel">
+              <property name="text">
+               <string>Maximum texture size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="msfsMaxTextureSize">
+              <property name="toolTip">
+               <string>Largest livery texture written by the converter. A 4096 texture costs around 21MB of graphics memory however far away the aircraft is drawn, so this is the main control over how much memory a sky full of aircraft uses. 2048 is indistinguishable from 4096 except when very close; 1024 softens small markings. Takes effect on the next conversion.</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>1024</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2048</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4096</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="msfsLowDetailMaxTextureSizeLabel">
+              <property name="text">
+               <string>Maximum texture size (low detail)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="msfsLowDetailMaxTextureSize">
+              <property name="toolTip">
+               <string>Largest livery texture written for the low detail models. These are only drawn while an aircraft is small on screen - around 33 to 49 pixels across - so 512 is indistinguishable from 2048 there and uses a sixteenth of the graphics memory. Never larger than the setting above. Takes effect on the next conversion.</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>256</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>512</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1024</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2048</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="convertMSFS">
+              <property name="toolTip">
+               <string>Convert every aircraft.cfg below the selected directory</string>
+              </property>
+              <property name="text">
+               <string>Convert Aircraft Models</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="cancelMSFS">
+              <property name="text">
+               <string>Cancel</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="msfsButtonSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QProgressBar" name="msfsProgress">
+            <property name="maximum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="msfsLog">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>Conversion progress and errors will appear here.</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -818,8 +1273,13 @@
   <tabstop>buildings</tabstop>
   <tabstop>sunLightEnabled</tabstop>
   <tabstop>eciCamera</tabstop>
-  <tabstop>msaa</tabstop>
   <tabstop>downloadModels</tabstop>
+  <tabstop>downloadSounds</tabstop>
+  <tabstop>msfsNavigraphDirectory</tabstop>
+  <tabstop>msfsNavigraphBrowse</tabstop>
+  <tabstop>msfsAircraftDirectory</tabstop>
+  <tabstop>msfsBrowse</tabstop>
+  <tabstop>convertMSFS</tabstop>
   <tabstop>thunderforestAPIKey</tabstop>
   <tabstop>maptilerAPIKey</tabstop>
   <tabstop>mapBoxAPIKey</tabstop>

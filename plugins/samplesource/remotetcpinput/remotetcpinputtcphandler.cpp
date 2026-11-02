@@ -18,6 +18,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+
+#include <algorithm>
 #include <cstring>
 
 #include "device/deviceapi.h"
@@ -39,6 +41,7 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_tcpSocket(nullptr),
     m_webSocket(nullptr),
     m_tcpBuf(nullptr),
+    m_tcpBufSize(0),
     m_sampleFifo(sampleFifo),
     m_replayBuffer(replayBuffer),
     m_messageQueueToInput(nullptr),
@@ -49,10 +52,10 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_reconnectTimer(this),
     m_sdra(false),
     m_spyServer(false),
-    m_device(),
+    m_device(RemoteTCPProtocol::Device::UNKNOWN),
     m_spyServerHeader(),
     m_state(HEADER),
-    m_command(),
+    m_command(RemoteTCPProtocol::Command::setCenterFrequency),
     m_commandLength(0),
     m_converterBuffer(nullptr),
     m_converterBufferNbSamples(0),
@@ -73,8 +76,7 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_magsqPeak(0.0f),
     m_magsqCount(0)
 {
-    m_sampleFifo->setSize(5000000); // Start with large FIFO, to avoid having to resize
-    m_tcpBuf = new char[m_sampleFifo->size()*2*4];
+    sizeBuffers(0); // The minimum, until the channel sample rate is known
     m_timer.setInterval(50); // Previously 125, but this results in an obviously slow spectrum refresh rate
     connect(&m_reconnectTimer, SIGNAL(timeout()), this, SLOT(reconnect()));
     m_reconnectTimer.setSingleShot(true);
@@ -89,10 +91,14 @@ RemoteTCPInputTCPHandler::~RemoteTCPInputTCPHandler()
 {
     qDebug() << "RemoteTCPInputTCPHandler::~RemoteTCPInputTCPHandler";
     delete[] m_tcpBuf;
-    if (m_converterBuffer) {
+    if (m_converterBuffer)
+    {
         delete[] m_converterBuffer;
+        m_converterBuffer = nullptr;
+        m_converterBufferNbSamples = 0;
     }
-    cleanup();
+    cleanup(true);
+    inflateEnd(&m_zStream);
 }
 
 void RemoteTCPInputTCPHandler::reset()
@@ -146,7 +152,7 @@ void RemoteTCPInputTCPHandler::finished()
     m_timer.stop();
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(processData()));
     //disconnectFromHost();
-    cleanup();
+    cleanup(false);
     disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
 }
@@ -211,8 +217,11 @@ void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 por
     }
 }*/
 
-void RemoteTCPInputTCPHandler::cleanup()
+void RemoteTCPInputTCPHandler::cleanup(bool threadStopped)
 {
+    m_timer.stop();
+    m_reconnectTimer.stop();
+
     if (m_decoder)
     {
         FLAC__stream_decoder_delete(m_decoder);
@@ -243,22 +252,48 @@ void RemoteTCPInputTCPHandler::cleanup()
         disconnect(m_tcpSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
 #endif
     }
+
     if (m_dataSocket)
     {
         m_dataSocket->close();
-        m_dataSocket->deleteLater();
+        // Socket wrapper owns the QTcpSocket/QWebSocket - ~Socket() deletes it
+        if (threadStopped) {
+            delete m_dataSocket;
+        } else {
+            m_dataSocket->deleteLater();
+        }
         m_dataSocket = nullptr;
-    }
-    if (m_webSocket)
-    {
-        m_webSocket->deleteLater();
+        m_tcpSocket = nullptr;
         m_webSocket = nullptr;
     }
-    if (m_tcpSocket)
+    else
     {
-        m_tcpSocket->deleteLater();
-        m_tcpSocket = nullptr;
+        if (m_webSocket)
+        {
+            if (threadStopped) {
+                delete m_webSocket;
+            } else {
+                m_webSocket->deleteLater();
+            }
+            m_webSocket = nullptr;
+        }
+        if (m_tcpSocket)
+        {
+            if (threadStopped) {
+                delete m_tcpSocket;
+            } else {
+                m_tcpSocket->deleteLater();
+            }
+            m_tcpSocket = nullptr;
+        }
     }
+
+    m_compressedData.clear();
+    m_uncompressedData.clear();
+    m_compressedFrames = 0;
+    m_uncompressedFrames = 0;
+
+    inflateReset(&m_zStream);
 }
 
 // Clear input buffer when settings change that invalidate the data in it
@@ -282,6 +317,24 @@ void RemoteTCPInputTCPHandler::clearBuffer()
                 m_fillBuffer = true;
             }
         }
+    }
+}
+
+// m_uncompressedData needs to be able to hold at least m_preFill seconds of data at the
+// current sample rate, so it needs resizing whenever either changes - not just on connection.
+// If it's too small, processData() can never prime the buffer and the stream stalls forever.
+void RemoteTCPInputTCPHandler::resizeUncompressedData(float preFill, int channelSampleRate)
+{
+    qsizetype bytesPerSecond = (qsizetype) channelSampleRate * sizeof(Sample);
+    qsizetype fifoSize = (qsizetype) (2.0f * preFill * bytesPerSecond);
+
+    if (fifoSize != m_uncompressedData.size())
+    {
+        qDebug() << "RemoteTCPInputTCPHandler::resizeUncompressedData: Resizing uncompressed FIFO from"
+                 << m_uncompressedData.size() << "to" << fifoSize;
+        m_uncompressedData.resize(fifoSize);
+        m_uncompressedData.clear();
+        m_fillBuffer = true; // So we reprime
     }
 }
 
@@ -520,6 +573,28 @@ void RemoteTCPInputTCPHandler::spyServerSetStreamIQ()
     spyServerSet(SpyServerProtocol::setStreamingEnabled, 1);    // Enable streaming
 }
 
+// Size the sample FIFO to a second at the channel sample rate, and the TCP buffer to a FIFO's
+// worth at the widest sample format - every read into it is limited to the FIFO's free space.
+// Both used to start at 5M samples and only ever grow, which was 80 MB for a 48 kS/s channel.
+// Returns whether they were resized, which empties the FIFO.
+bool RemoteTCPInputTCPHandler::sizeBuffers(qint32 channelSampleRate)
+{
+    // Room for the start of a stream whose rate is low or not yet known
+    const unsigned int minSize = 48000 * 8;
+    const unsigned int size = std::max((unsigned int) std::max(channelSampleRate, 0), minSize);
+
+    if (m_tcpBuf && (size == m_sampleFifo->size())) {
+        return false;
+    }
+
+    qDebug() << "RemoteTCPInputTCPHandler::sizeBuffers: Resizing sample FIFO from" << m_sampleFifo->size() << "to" << size;
+    m_sampleFifo->setSize(size);
+    delete[] m_tcpBuf;
+    m_tcpBufSize = (qsizetype) m_sampleFifo->size() * 2 * 4;
+    m_tcpBuf = new char[m_tcpBufSize];
+    return true;
+}
+
 void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "RemoteTCPInputTCPHandler::applySettings: "
@@ -534,13 +609,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         }
         if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
         {
-            // Resize FIFO to give us 1 second
-            if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
-            {
-                qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
-                m_sampleFifo->setSize(settings.m_channelSampleRate);
-                delete[] m_tcpBuf;
-                m_tcpBuf = new char[m_sampleFifo->size()*2*4];
+            if ((settingsKeys.contains("channelSampleRate") || force) && sizeBuffers(settings.m_channelSampleRate)) {
                 m_fillBuffer = true; // So we reprime FIFO
             }
             // Protocol only seems to allow changing decimation
@@ -624,13 +693,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         }
         if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
         {
-            // Resize FIFO to give us 1 second
-            if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
-            {
-                qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
-                m_sampleFifo->setSize(settings.m_channelSampleRate);
-                delete[] m_tcpBuf;
-                m_tcpBuf = new char[m_sampleFifo->size()*2*4];
+            if ((settingsKeys.contains("channelSampleRate") || force) && sizeBuffers(settings.m_channelSampleRate)) {
                 m_fillBuffer = true; // So we reprime FIFO
             }
             if (m_sdra) {
@@ -669,13 +732,20 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         m_dataSocket->flush(); // Apparently needed for WebAssembly with proxy
     }
 
+    // Only sized when decompressing, and only once we know from the metadata whether we are
+    if (m_readMetaData && !m_iqOnly
+        && (settingsKeys.contains("preFill") || settingsKeys.contains("channelSampleRate") || force))
+    {
+        resizeUncompressedData(settings.m_preFill, settings.m_channelSampleRate);
+    }
+
     // Don't use force, as disconnect can cause rtl_tcp to quit
     if (settingsKeys.contains("dataAddress")
         || settingsKeys.contains("dataPort")
         || ((m_dataSocket == nullptr) && !m_blacklisted))
     {
         //disconnectFromHost();
-        cleanup();
+        cleanup(false);
         connectToHost(settings.m_dataAddress, settings.m_dataPort, settings.m_protocol);
     }
 
@@ -720,7 +790,7 @@ FLAC__StreamDecoderReadStatus RemoteTCPInputTCPHandler::flacRead(const FLAC__Str
     if (bytesRead == 0)
     {
         qDebug() << "RemoteTCPInputTCPHandler::flacRead: Decoder will hang if we can't return data";
-        abort();
+        return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
     }
 
     *bytes = (size_t) bytesRead;
@@ -797,7 +867,7 @@ qsizetype FIFO::readPtr(quint8 **data, qsizetype elements)
 {
     *data = (quint8 *) &m_data.data()[m_readPtr];
 
-    return std::min(elements, m_data.size() - m_readPtr);
+    return std::min({elements, m_data.size() - m_readPtr, m_fill});
 }
 
 void FIFO::read(qsizetype elements)
@@ -849,10 +919,14 @@ FLAC__StreamDecoderWriteStatus RemoteTCPInputTCPHandler::flacWrite(const FLAC__S
     int nbSamples = frame->header.blocksize;
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) {
+        if (m_converterBuffer)
+        {
             delete[] m_converterBuffer;
+            m_converterBuffer = nullptr;
+            m_converterBufferNbSamples = 0;
         }
         m_converterBuffer = new int32_t[nbSamples*2];
+        m_converterBufferNbSamples = nbSamples;
     }
 
     // Convert and interleave samples and output to FIFO
@@ -975,10 +1049,14 @@ void RemoteTCPInputTCPHandler::processDecompressedZlibData(const char *inBuf, in
     // Ensure conversion buffer is large enough - FIXME: Don't use this buffer - just write in to FIFO
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) {
+        if (m_converterBuffer)
+        {
             delete[] m_converterBuffer;
+            m_converterBuffer = nullptr;
+            m_converterBufferNbSamples = 0;
         }
         m_converterBuffer = new int32_t[nbSamples*2];
+        m_converterBufferNbSamples = nbSamples;
     }
 
     // Convert from network format to Sample
@@ -1079,6 +1157,7 @@ void RemoteTCPInputTCPHandler::connected()
         MsgReportConnection *msg = MsgReportConnection::create(true);
         m_messageQueueToGUI->push(msg);
     }
+    m_lastDataTime = QDateTime::currentDateTimeUtc();
     m_spyServer = m_settings.m_protocol == "Spy Server";
     m_state = HEADER;
     m_sdra = false;
@@ -1103,7 +1182,7 @@ void RemoteTCPInputTCPHandler::disconnected()
 {
     QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "RemoteTCPInputTCPHandler::disconnected";
-    cleanup();
+    cleanup(false);
     if (m_messageQueueToGUI)
     {
         MsgReportConnection *msg = MsgReportConnection::create(false);
@@ -1131,7 +1210,7 @@ void RemoteTCPInputTCPHandler::errorOccurred(QAbstractSocket::SocketError socket
     // We try to reconnect here, for errors such as ConnectionRefusedError
     if (socketError != QAbstractSocket::RemoteHostClosedError)
     {
-        cleanup();
+        cleanup(false);
         if (m_messageQueueToGUI)
         {
             MsgReportConnection *msg = MsgReportConnection::create(false);
@@ -1153,6 +1232,10 @@ void RemoteTCPInputTCPHandler::sslErrors(const QList<QSslError> &errors)
 void RemoteTCPInputTCPHandler::dataReadyRead()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    // Feed the watchdog in processData(). This is called for all protocols, even when the
+    // body below does nothing (i.e. uncompressed IQ, which is read in processData())
+    m_lastDataTime = QDateTime::currentDateTimeUtc();
 
     if (!m_readMetaData && !m_spyServer) {
         processMetaData();
@@ -1284,9 +1367,7 @@ void RemoteTCPInputTCPHandler::processMetaData()
                     m_compressedFrames = 0;
                     m_uncompressedFrames = 0;
 
-                    int bytesPerSecond = m_settings.m_channelSampleRate * 2 * sizeof(Sample);
-                    int fifoSize = 2 * m_settings.m_preFill * bytesPerSecond;
-                    m_uncompressedData.resize(fifoSize);
+                    resizeUncompressedData(m_settings.m_preFill, m_settings.m_channelSampleRate);
                     m_uncompressedData.clear();
 
                     if (m_decoder)
@@ -1323,25 +1404,48 @@ void RemoteTCPInputTCPHandler::processMetaData()
     }
 }
 
+// Read a Spy Server header in to m_spyServerHeader and check its payload will fit in m_tcpBuf.
+// Returns true if a valid header was read (and m_state advanced to DATA).
+// An oversized payload can't be skipped in a framed protocol, so we drop the connection
+// and let the reconnect timer resync the stream. Callers must therefore check m_dataSocket.
+bool RemoteTCPInputTCPHandler::readSpyServerHeader()
+{
+    if (m_dataSocket->bytesAvailable() < (qint64) sizeof(SpyServerProtocol::Header)) {
+        return false;
+    }
+
+    qint64 bytesRead = m_dataSocket->read((char *) &m_spyServerHeader, sizeof(SpyServerProtocol::Header));
+
+    if (bytesRead != (qint64) sizeof(SpyServerProtocol::Header))
+    {
+        qDebug() << "RemoteTCPInputTCPHandler::readSpyServerHeader: Failed to read:" << bytesRead << "/" << sizeof(SpyServerProtocol::Header);
+        return false;
+    }
+
+    if ((qsizetype) m_spyServerHeader.m_size > m_tcpBufSize)
+    {
+        qWarning() << "RemoteTCPInputTCPHandler::readSpyServerHeader: Message size" << m_spyServerHeader.m_size
+                   << "exceeds buffer size" << m_tcpBufSize << "- reconnecting to resync";
+        cleanup(false);
+        m_reconnectTimer.start(500);
+        return false;
+    }
+
+    m_state = DATA;
+
+    return true;
+}
+
 void RemoteTCPInputTCPHandler::processSpyServerMetaData()
 {
     bool done = false;
 
-    while (!done)
+    // readSpyServerHeader() can close the connection, so check m_dataSocket
+    while (!done && m_dataSocket)
     {
         if (m_state == HEADER)
         {
-            if (m_dataSocket->bytesAvailable() >= (qint64)sizeof(SpyServerProtocol::Header))
-            {
-                qint64 bytesRead = m_dataSocket->read((char *)&m_spyServerHeader, sizeof(SpyServerProtocol::Header));
-                if (bytesRead == sizeof(SpyServerProtocol::Header)) {
-                    m_state = DATA;
-                } else {
-                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: Failed to read:" << bytesRead << "/" << sizeof(SpyServerProtocol::Header);
-                }
-            }
-            else
-            {
+            if (!readSpyServerHeader()) {
                 done = true;
             }
         }
@@ -1354,17 +1458,28 @@ void RemoteTCPInputTCPHandler::processSpyServerMetaData()
                 {
                     if (m_spyServerHeader.m_message == SpyServerProtocol::DeviceMessage)
                     {
-                        processSpyServerDevice((SpyServerProtocol::Device *) &m_tcpBuf[0]);
+                        if (bytesRead >= (qint64) sizeof(SpyServerProtocol::Device)) {
+                            processSpyServerDevice((SpyServerProtocol::Device *) &m_tcpBuf[0]);
+                        } else {
+                            qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: DeviceMessage too short:" << bytesRead;
+                        }
                         m_state = HEADER;
                     }
                     else if (m_spyServerHeader.m_message == SpyServerProtocol::StateMessage)
                     {
-                        // This call can result in applySettings() calling clearBuffer() then processSpyServerData()
-                        processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], true);
-                        spyServerSetStreamIQ();
+                        if (bytesRead >= (qint64) sizeof(SpyServerProtocol::State))
+                        {
+                            // This call can result in applySettings() calling clearBuffer() then processSpyServerData()
+                            processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], true);
+                            spyServerSetStreamIQ();
 
+                            m_readMetaData = true;
+                        }
+                        else
+                        {
+                            qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: StateMessage too short:" << bytesRead;
+                        }
                         m_state = HEADER;
-                        m_readMetaData = true;
                         done = true;
                     }
                     else
@@ -1376,6 +1491,7 @@ void RemoteTCPInputTCPHandler::processSpyServerMetaData()
                 else
                 {
                     qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: Failed to read:" << bytesRead << "/" << m_spyServerHeader.m_size;
+                    done = true;
                 }
             }
             else
@@ -1479,21 +1595,12 @@ void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clea
 
     bool done = false;
 
-    while (!done)
+    // readSpyServerHeader() can close the connection, so check m_dataSocket
+    while (!done && m_dataSocket)
     {
         if (m_state == HEADER)
         {
-            if (m_dataSocket->bytesAvailable() >= (qint64) sizeof(SpyServerProtocol::Header))
-            {
-                qint64 bytesRead = m_dataSocket->read((char *) &m_spyServerHeader, sizeof(SpyServerProtocol::Header));
-                if (bytesRead == sizeof(SpyServerProtocol::Header)) {
-                    m_state = DATA;
-                } else {
-                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: Failed to read:" << bytesRead << "/" << sizeof(SpyServerProtocol::Header);
-                }
-            }
-            else
-            {
+            if (!readSpyServerHeader()) {
                 done = true;
             }
         }
@@ -1530,7 +1637,11 @@ void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clea
                     }
                     else if (m_spyServerHeader.m_message == SpyServerProtocol::StateMessage)
                     {
-                        processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], false);
+                        if (bytesRead >= (qint64) sizeof(SpyServerProtocol::State)) {
+                            processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], false);
+                        } else {
+                            qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: StateMessage too short:" << bytesRead;
+                        }
                         m_state = HEADER;
                     }
                     else
@@ -1542,6 +1653,7 @@ void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clea
                 else
                 {
                     qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: Failed to read:" << bytesRead << "/" << bytes;
+                    done = true;
                 }
             }
             else
@@ -1850,6 +1962,9 @@ void RemoteTCPInputTCPHandler::processCommands()
                                     {
                                         qDebug() << "FLAC decode failed";
                                         decodeDone = true;
+                                        cleanup(false);
+                                        m_reconnectTimer.start(500);
+                                        return;
                                     }
                                 }
                                 else
@@ -1907,20 +2022,27 @@ void RemoteTCPInputTCPHandler::processCommands()
                     case RemoteTCPProtocol::dataPosition:
                     {
                         char pos[4+4+4];
-                        qint64 bytesRead = m_dataSocket->read(pos, m_commandLength);
-                        if (bytesRead == m_commandLength)
+                        if (m_commandLength == sizeof(pos))
                         {
-                            float latitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[0]);
-                            float longitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[4]);
-                            float altitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[8]);
-                            //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Position " << latitude << longitude << altitude;
-                            if (m_messageQueueToInput) {
-                                m_messageQueueToInput->push(RemoteTCPInput::MsgReportPosition::create(latitude, longitude, altitude));
+                            qint64 bytesRead = m_dataSocket->read(pos, m_commandLength);
+                            if (bytesRead == m_commandLength)
+                            {
+                                float latitude = RemoteTCPProtocol::extractFloat((const quint8*)&pos[0]);
+                                float longitude = RemoteTCPProtocol::extractFloat((const quint8*)&pos[4]);
+                                float altitude = RemoteTCPProtocol::extractFloat((const quint8*)&pos[8]);
+                                //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Position " << latitude << longitude << altitude;
+                                if (m_messageQueueToInput) {
+                                    m_messageQueueToInput->push(RemoteTCPInput::MsgReportPosition::create(latitude, longitude, altitude));
+                                }
+                            }
+                            else
+                            {
+                                qDebug() << "RemoteTCPInputTCPHandler::processCommands: Failed to read:" << bytesRead << "/" << m_commandLength;
                             }
                         }
                         else
                         {
-                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Failed to read:" << bytesRead << "/" << m_commandLength;
+                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Unexpected command length for dataPosition:" << m_commandLength;
                         }
                         break;
                     }
@@ -1928,20 +2050,27 @@ void RemoteTCPInputTCPHandler::processCommands()
                     case RemoteTCPProtocol::dataDirection:
                     {
                         char dir[4+4+4];
-                        qint64 bytesRead = m_dataSocket->read(dir, m_commandLength);
-                        if (bytesRead == m_commandLength)
+                        if (m_commandLength == sizeof(dir))
                         {
-                            float isotropic = RemoteTCPProtocol::extractUInt32((const quint8 *) &dir[0]);
-                            float azimuth = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[4]);
-                            float elevation = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[8]);
-                            //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Direction " << isotropic << azimuth << elevation;
-                            if (m_messageQueueToInput) {
-                                m_messageQueueToInput->push(RemoteTCPInput::MsgReportDirection::create(isotropic, azimuth, elevation));
+                            qint64 bytesRead = m_dataSocket->read(dir, m_commandLength);
+                            if (bytesRead == m_commandLength)
+                            {
+                                float isotropic = RemoteTCPProtocol::extractUInt32((const quint8 *) &dir[0]);
+                                float azimuth = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[4]);
+                                float elevation = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[8]);
+                                //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Direction " << isotropic << azimuth << elevation;
+                                if (m_messageQueueToInput) {
+                                    m_messageQueueToInput->push(RemoteTCPInput::MsgReportDirection::create(isotropic, azimuth, elevation));
+                                }
+                            }
+                            else
+                            {
+                                qDebug() << "RemoteTCPInputTCPHandler::processCommands: Failed to read:" << bytesRead << "/" << m_commandLength;
                             }
                         }
                         else
                         {
-                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Failed to read:" << bytesRead << "/" << m_commandLength;
+                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Unexpected command length for dataDirection:" << m_commandLength;
                         }
                         break;
                     }
@@ -1954,22 +2083,34 @@ void RemoteTCPInputTCPHandler::processCommands()
                         if (bytesRead == m_commandLength)
                         {
                             buf[m_commandLength] = '\0';
-                            bool broadcast = (bool) buf[0];
-                            int i;
-                            for (i = 1; i < (int) m_commandLength; i++)
+                            if (m_commandLength >= 2)
                             {
-                                if (buf[i] == '\0') {
-                                    break;
+                                bool broadcast = (bool)buf[0];
+                                int i;
+                                for (i = 1; i < (int)m_commandLength; i++)
+                                {
+                                    if (buf[i] == '\0') {
+                                        break;
+                                    }
+                                }
+                                if (i < (int)m_commandLength)
+                                {
+                                    QString callsign = QString::fromUtf8(&buf[1]);
+                                    QString text = QString::fromUtf8(&buf[i + 1]);
+
+                                    qDebug() << "RemoteTCPInputTCPHandler::processCommands: Message " << m_dataSocket->peerAddress() << m_dataSocket->peerPort() << callsign << broadcast << text;
+                                    if (m_messageQueueToGUI) {
+                                        m_messageQueueToGUI->push(RemoteTCPInput::MsgSendMessage::create(callsign, text, broadcast));
+                                    }
+                                }
+                                else
+                                {
+                                    qDebug() << "RemoteTCPInputTCPHandler::processCommands: sendMessage callsign not terminated";
                                 }
                             }
-                            QString callsign = QString::fromUtf8(&buf[1]);
-                            QString text = (i < (int) m_commandLength)
-                                ? QString::fromUtf8(&buf[i+1])
-                                : QString();
-
-                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Message " << m_dataSocket->peerAddress() << m_dataSocket->peerPort() << callsign << broadcast << text;
-                            if (m_messageQueueToGUI) {
-                                m_messageQueueToGUI->push(RemoteTCPInput::MsgSendMessage::create(callsign, text, broadcast));
+                            else
+                            {
+                                qDebug() << "RemoteTCPInputTCPHandler::processCommands: Unexpected command length for sendMessage:" << m_commandLength;
                             }
                         }
                         else
@@ -2023,13 +2164,43 @@ void RemoteTCPInputTCPHandler::processData()
 
     if (m_dataSocket && m_dataSocket->isConnected())
     {
+        // Watchdog. If the peer disappears without closing the connection (server killed,
+        // NAT/firewall dropping the flow), TCP never notices, the socket stays in
+        // ConnectedState and we get neither disconnected() nor errorOccurred(), so nothing
+        // else would ever trigger a reconnect. Note a squelched remote still sends data
+        // (zeroed samples), so silence always means the link is gone
+        if (m_lastDataTime.isValid())
+        {
+            qint64 msSinceData = m_lastDataTime.msecsTo(QDateTime::currentDateTimeUtc());
+            qint64 timeout = std::max((qint64) m_minDataTimeout, (qint64) (2.0f * m_settings.m_preFill * 1000.0f));
+
+            if (msSinceData > timeout)
+            {
+                qWarning() << "RemoteTCPInputTCPHandler::processData: No data received for" << msSinceData
+                           << "ms - reconnecting";
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(MsgReportConnection::create(false));
+                }
+                cleanup(false);
+                m_reconnectTimer.start(500);
+                return;
+            }
+        }
+
         int sampleRate = m_settings.m_channelSampleRate;
-        int bytesPerIQPair = m_iqOnly ?  (2 * m_settings.m_sampleBits / 8) : (2 * sizeof(Sample));
+        int bytesPerIQPair = m_iqOnly ? (2 * m_settings.m_sampleBits / 8) : sizeof(Sample);
         int bytesPerSecond = sampleRate * bytesPerIQPair;
 
         qint64 bytesAvailable = m_iqOnly ? m_dataSocket->bytesAvailable() : m_uncompressedData.fill();
 
-        if ((bytesAvailable < (0.1f * m_settings.m_preFill * bytesPerSecond)) && !m_fillBuffer)
+        // How much data we wait for before we start reading. When decompressing this can't
+        // exceed what the FIFO is able to hold, or we would never be able to prime it
+        qint64 preFillBytes = (qint64) (m_settings.m_preFill * bytesPerSecond);
+        if (!m_iqOnly) {
+            preFillBytes = std::min(preFillBytes, (qint64) (m_uncompressedData.size() / 2));
+        }
+
+        if ((bytesAvailable < (0.1f * preFillBytes)) && !m_fillBuffer)
         {
             qDebug() << "RemoteTCPInputTCPHandler::processData: Buffering - bytesAvailable:" << bytesAvailable;
             m_fillBuffer = true;
@@ -2039,7 +2210,7 @@ void RemoteTCPInputTCPHandler::processData()
         // QTcpSockets buffer size should be unlimited - we pretend here it's twice as big as the point we start reading from it
         if (m_messageQueueToGUI)
         {
-            qint64 size = std::max(bytesAvailable, (qint64)(m_settings.m_preFill * bytesPerSecond));
+            qint64 size = std::max(bytesAvailable, preFillBytes);
             RemoteTCPInput::MsgReportTCPBuffer *report = RemoteTCPInput::MsgReportTCPBuffer::create(
                                                             bytesAvailable, size, bytesAvailable / (float)bytesPerSecond,
                                                             m_sampleFifo->fill(),  m_sampleFifo->size(), m_sampleFifo->fill() / (float)bytesPerSecond
@@ -2051,17 +2222,17 @@ void RemoteTCPInputTCPHandler::processData()
         // Prime buffer, before we start reading
         if (m_fillBuffer)
         {
-            if (bytesAvailable >= m_settings.m_preFill * bytesPerSecond)
+            if (bytesAvailable >= preFillBytes)
             {
                 qDebug() << "RemoteTCPInputTCPHandler::processData: Buffer primed - bytesAvailable:" << bytesAvailable;
                 m_fillBuffer = false;
-                m_prevDateTime = QDateTime::currentDateTime();
+                m_prevDateTime = QDateTime::currentDateTimeUtc();
                 factor = 1.0f / 4.0f; // If this is too high, samples can just be dropped downstream
             }
         }
         else
         {
-            QDateTime currentDateTime = QDateTime::currentDateTime();
+            QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
             factor = m_prevDateTime.msecsTo(currentDateTime) / 1000.0f; // FIXME: Close skew.. Actual sample rate may differ
             m_prevDateTime = currentDateTime;
         }
@@ -2109,7 +2280,7 @@ void RemoteTCPInputTCPHandler::processDecompressedData(int requiredSamples)
     while ((requiredBytes > 0) && !m_uncompressedData.empty())
     {
         quint8 *uncompressedPtr;
-        qsizetype uncompressedBytes = m_uncompressedData.readPtr(&uncompressedPtr, requiredSamples * sizeof(Sample));
+        qsizetype uncompressedBytes = m_uncompressedData.readPtr(&uncompressedPtr, requiredBytes);
         qsizetype uncompressedSamples = 2 * uncompressedBytes / sizeof(Sample);
 
         // Save data to replay buffer
@@ -2152,10 +2323,14 @@ void RemoteTCPInputTCPHandler::processUncompressedData(const char *inBuf, int nb
     // Ensure conversion buffer is large enough
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
-        if (m_converterBuffer) {
+        if (m_converterBuffer)
+        {
             delete[] m_converterBuffer;
+            m_converterBuffer = nullptr;
+            m_converterBufferNbSamples = 0;
         }
         m_converterBuffer = new int32_t[nbSamples*2];
+        m_converterBufferNbSamples = nbSamples;
     }
 
     // Convert from network format to Sample

@@ -66,6 +66,9 @@ public:
     qint32 getStop();
     void setStop(qint32 stop);
 
+    QString* getSound();
+    void setSound(QString* sound);
+
 
     virtual bool isSet() override;
 
@@ -93,6 +96,9 @@ private:
 
     qint32 stop;
     bool m_stop_isSet;
+
+    QString* sound;
+    bool m_sound_isSet;
 
 };
 

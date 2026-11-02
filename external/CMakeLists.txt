@@ -1070,6 +1070,33 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
     endif ()
 endif()
 
+# For ACARS decoder
+if(ENABLE_CHANNELRX_DEMODACARS AND (NOT LIBACARS_FOUND))
+    if (LINUX)
+        set(LIBACARS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(LIBACARS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/libacars/src/libacars-build/libacars/libacars-2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(libacars
+        GIT_REPOSITORY https://github.com/szpajder/libacars
+        GIT_TAG "v2.2.1"
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libacars"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        BUILD_BYPRODUCTS "${LIBACARS_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(libacars source_dir binary_dir)
+    set(LIBACARS_DEPENDS libacars CACHE INTERNAL "")
+    set_global_cache(LIBACARS_FOUND ON)
+    set(LIBACARS_EXTERNAL ON CACHE INTERNAL "")
+    set(LIBACARS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libacars/src/libacars" CACHE INTERNAL "")
+    if (APPLE)
+        install(DIRECTORY "${binary_dir}/libacars" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libacars-2*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libacars")
+    endif ()
+endif()
 # For DRM demodulator AAC/xHE-AAC audio
 # Built as a static library that only modemdrm links, so
 # not clash with the libfdk-aac that FFmpeg may load

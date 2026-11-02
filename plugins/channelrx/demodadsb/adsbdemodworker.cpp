@@ -88,63 +88,51 @@ void ADSBBeastServer::discardClient()
 }
 
 ADSBDemodWorker::ADSBDemodWorker() :
-    m_running(false)
+    m_heartbeatTimer(nullptr),
+    m_socket(nullptr),
+    m_beastServer(nullptr)
 {
-    connect(&m_heartbeatTimer, SIGNAL(timeout()), this, SLOT(heartbeat()));
-    connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
-    connect(&m_socket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(&m_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &ADSBDemodWorker::errorOccurred);
-#else
-    connect(&m_socket, &QAbstractSocket::errorOccurred, this, &ADSBDemodWorker::errorOccurred);
-#endif
     m_startTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
-    m_heartbeatTimer.start(60*1000);
 }
 
 ADSBDemodWorker::~ADSBDemodWorker()
 {
-    m_heartbeatTimer.stop();
-
-    m_beastServer.close();
-
-    if (m_socket.state() != QAbstractSocket::UnconnectedState) {
-        m_socket.close();
+    if (m_socket && m_socket->isOpen()) {
+        m_socket->close();
     }
-
+    if (m_beastServer) {
+        m_beastServer->close();
+    }
+    if (m_logFile.isOpen()) {
+        m_logFile.close();
+    }
+    delete m_heartbeatTimer;
+    delete m_socket;
+    delete m_beastServer;
     m_inputMessageQueue.clear();
 }
 
-void ADSBDemodWorker::reset()
+void ADSBDemodWorker::startWork()
 {
-    QMutexLocker mutexLocker(&m_mutex);
-    m_inputMessageQueue.clear();
-}
+    // Created here so they belong to the thread that will use them
+    m_socket = new QTcpSocket();
+    m_beastServer = new ADSBBeastServer();
+    m_heartbeatTimer = new QTimer();
 
-bool ADSBDemodWorker::startWork()
-{
-    QMutexLocker mutexLocker(&m_mutex);
+    connect(m_heartbeatTimer, &QTimer::timeout, this, &ADSBDemodWorker::heartbeat);
+    connect(m_socket, &QTcpSocket::readyRead, this, &ADSBDemodWorker::recv);
+    connect(m_socket, &QTcpSocket::connected, this, &ADSBDemodWorker::connected);
+    connect(m_socket, &QTcpSocket::disconnected, this, &ADSBDemodWorker::disconnected);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+    connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &ADSBDemodWorker::errorOccurred);
+#else
+    connect(m_socket, &QAbstractSocket::errorOccurred, this, &ADSBDemodWorker::errorOccurred);
+#endif
+    m_heartbeatTimer->start(60*1000);
 
-    if (m_running) {
-        return m_running;
-    }
-
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
-    return m_running;
-}
-
-void ADSBDemodWorker::stopWork()
-{
-    QMutexLocker mutexLocker(&m_mutex);
-
-    if (!m_running) {
-        return;
-    }
-
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = false;
+    connect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &ADSBDemodWorker::handleInputMessages);
+    // Settings can arrive before the thread has started running
+    handleInputMessages();
 }
 
 void ADSBDemodWorker::handleInputMessages()
@@ -164,7 +152,6 @@ bool ADSBDemodWorker::handleMessage(const Message& message)
 {
     if (MsgConfigureADSBDemodWorker::match(message))
     {
-        QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureADSBDemodWorker& cfg = (MsgConfigureADSBDemodWorker&) message;
 
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
@@ -203,12 +190,12 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, const QSt
         || force)
     {
         // Close any existing connection
-        if (m_socket.isOpen()) {
-            m_socket.close();
+        if (m_socket->isOpen()) {
+            m_socket->close();
         }
         // Open connection
         if (settings.m_feedEnabled && settings.m_exportClientEnabled) {
-            m_socket.connectToHost(settings.m_exportClientHost, settings.m_exportClientPort);
+            m_socket->connectToHost(settings.m_exportClientHost, settings.m_exportClientPort);
         }
     }
 
@@ -217,11 +204,11 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, const QSt
         || (settingsKeys.contains("exportServerPort") && (settings.m_exportServerPort != m_settings.m_exportServerPort))
         || force)
     {
-        if (m_beastServer.isListening()) {
-            m_beastServer.close();
+        if (m_beastServer->isListening()) {
+            m_beastServer->close();
         }
         if (settings.m_feedEnabled && settings.m_exportServerEnabled) {
-            m_beastServer.listen(settings.m_exportServerPort);
+            m_beastServer->listen(settings.m_exportServerPort);
         }
     }
 
@@ -281,7 +268,7 @@ void ADSBDemodWorker::recv()
 {
     // Not expecting to receiving anything from server
     qDebug() << "ADSBDemodWorker::recv";
-    qDebug() << m_socket.readAll();
+    qDebug() << m_socket->readAll();
 }
 
 void ADSBDemodWorker::send(const char *data, int length)
@@ -289,11 +276,11 @@ void ADSBDemodWorker::send(const char *data, int length)
     if (m_settings.m_feedEnabled && m_settings.m_exportClientEnabled)
     {
         // Reopen connection if it was lost
-        if (!m_socket.isOpen()) {
-            m_socket.connectToHost(m_settings.m_exportClientHost, m_settings.m_exportClientPort);
+        if (!m_socket->isOpen()) {
+            m_socket->connectToHost(m_settings.m_exportClientHost, m_settings.m_exportClientPort);
         }
         // Send data
-        m_socket.write(data, length);
+        m_socket->write(data, length);
     }
 }
 
@@ -314,7 +301,7 @@ char *ADSBDemodWorker::escape(char *p, char c)
 void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, float correlation)
 {
     if (m_logFile.isOpen()) {
-        m_logStream << dateTime.date().toString() << "," << dateTime.time().toString() << "," << data.toHex() << "," << correlation << "\n";
+        m_logStream << dateTime.date().toString() << "," << dateTime.time().toString(QStringLiteral("hh:mm:ss.zzz")) << "," << data.toHex() << "," << correlation << "\n";
     }
 
     if (m_settings.m_feedEnabled && (m_settings.m_exportClientEnabled || m_settings.m_exportServerEnabled))
@@ -365,7 +352,7 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
                 send(beastBinary, length);
             }
             if (m_settings.m_exportServerEnabled) {
-                m_beastServer.send(beastBinary, length);
+                m_beastServer->send(beastBinary, length);
             }
         }
         if (m_settings.m_exportClientEnabled && (m_settings.m_exportClientFormat == ADSBDemodSettings::BeastHex))
@@ -379,14 +366,11 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
 // Periodically send heartbeat to keep connection alive
 void ADSBDemodWorker::heartbeat()
 {
-    if (m_running)
-    {
-        const char heartbeat[] = {BEAST_ESC, '1', 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Mode AC packet
-        if (m_settings.m_exportClientEnabled) {
-            send(heartbeat, sizeof(heartbeat));
-        }
-        if (m_settings.m_exportServerEnabled) {
-            m_beastServer.send(heartbeat, sizeof(heartbeat));
-        }
+    const char heartbeat[] = {BEAST_ESC, '1', 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Mode AC packet
+    if (m_settings.m_feedEnabled && m_settings.m_exportClientEnabled) {
+        send(heartbeat, sizeof(heartbeat));
+    }
+    if (m_settings.m_feedEnabled && m_settings.m_exportServerEnabled) {
+        m_beastServer->send(heartbeat, sizeof(heartbeat));
     }
 }

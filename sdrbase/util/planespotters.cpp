@@ -65,7 +65,8 @@ void PlaneSpotters::getAircraftPhoto(const QString& icao)
         // Fetch from network
         QUrl url(QString("https://api.planespotters.net/pub/photos/hex/%1").arg(icao));
         QNetworkRequest request(url);
-        request.setRawHeader("User-Agent", "SDRangel/1.0"); // Get 403 error without this
+        // The API returns 403 unless the User-Agent includes a contact URL or email
+        request.setRawHeader("User-Agent", "SDRangel/7.0 (+https://github.com/f4exb/sdrangel)");
         request.setOriginatingObject(photo);
         m_networkManager->get(request);
     }
@@ -87,7 +88,8 @@ void PlaneSpotters::getAircraftPhotoByRegistration(const QString& registration)
         // Fetch from network
         QUrl url(QString("https://api.planespotters.net/pub/photos/reg/%1").arg(registration));
         QNetworkRequest request(url);
-        request.setRawHeader("User-Agent", "SDRangel/1.0"); // Get 403 error without this
+        // The API returns 403 unless the User-Agent includes a contact URL or email
+        request.setRawHeader("User-Agent", "SDRangel/7.0 (+https://github.com/f4exb/sdrangel)");
         request.setOriginatingObject(photo);
         m_networkManager->get(request);
     }
@@ -160,6 +162,7 @@ void PlaneSpotters::parseJson(PlaneSpottersPhoto *photo, QByteArray bytes)
                 {
                     QUrl url(photo->m_thumbnail.m_src);
                     QNetworkRequest request(url);
+                    request.setRawHeader("User-Agent", "SDRangel/7.0 (+https://github.com/f4exb/sdrangel)");
                     request.setOriginatingObject(photo);
                     m_networkManager->get(request);
                 }

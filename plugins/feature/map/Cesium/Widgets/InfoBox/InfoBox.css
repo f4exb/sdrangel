@@ -38,6 +38,15 @@
   white-space: nowrap;
   overflow: hidden;
   box-sizing: content-box;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.cesium-infoBox-dragging {
+  transition: none;
+}
+.cesium-infoBox-dragging .cesium-infoBox-title {
+  cursor: grabbing;
 }
 .cesium-infoBox-bodyless .cesium-infoBox-title {
   border-bottom-left-radius: 7px;

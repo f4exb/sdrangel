@@ -197,6 +197,8 @@ struct ADSBDemodSettings
     QString m_aviationstackAPIKey;      //!< aviationstack.com API key
     QString m_checkWXAPIKey;            //!< checkwxapi.com API key
     QString m_maptilerAPIKey;           //!< maptiler.com API key (for osm/satellite map)
+    QString m_cartoDBAPIKey;            //!< carto.com API key (for the aviation maps, which use CartoDB tiles without labels)
+    QString m_mapBoxAPIKey;             //!< mapbox.com API key (for mapboxgl map provider)
 
     QString m_logFilename;
     bool m_logEnabled;
@@ -229,6 +231,7 @@ struct ADSBDemodSettings
     bool m_displayIC[ADSB_IC_MAX];
     QString m_flightPathPaletteName;
     bool m_favourLivery;            //!< Favour airline livery over aircraft type when exact 3D model isn't available
+    bool m_useLiveryIcons;          //!< Use aircraft icons with airline liveries on 2D map, instead of black icons
 
     const QVariant *m_flightPathPalette;
 
@@ -244,14 +247,6 @@ struct ADSBDemodSettings
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
     void applyPalette();
 
-    static const QVariant m_rainbowPalette[8];
-    static const QVariant m_pastelPalette[8];
-    static const QVariant m_spectralPalette[8];
-    static const QVariant m_bluePalette[8];
-    static const QVariant m_purplePalette[8];
-    static const QVariant m_greyPalette[8];
-
-    static const QHash<QString, const QVariant *> m_palettes;
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODADSB_ADSBDEMODSETTINGS_H_ */

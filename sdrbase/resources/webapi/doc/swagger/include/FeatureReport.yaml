@@ -19,6 +19,8 @@ FeatureReport:
     AFCReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
       description: "Afc report data for Feature."
+    AircraftReport:
+      $ref: "/doc/swagger/include/Aircraft.yaml#/AircraftReport"
     AMBEReport:
       $ref: "/doc/swagger/include/AMBE.yaml#/AMBEReport"
       description: "Ambe report data for Feature."

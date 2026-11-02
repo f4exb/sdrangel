@@ -79,6 +79,7 @@ struct VORLocalizerSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     QString m_mapProvider;
+    QString m_mapBoxAPIKey;             //!< mapbox.com API key (for mapboxgl map provider)
 
     static const int VORDEMOD_COLUMNS  = 10;
     static const int VOR_COL_NAME      =  0;

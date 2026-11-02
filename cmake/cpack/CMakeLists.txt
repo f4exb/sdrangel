@@ -206,6 +206,14 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(hidapi_dll)
 
+  file(GLOB ACARS_DLLS "${LIBACARS_DLL_DIR}/acars*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(acars_dll ${ACARS_DLLS})
+    get_filename_component(acars_dll_name "${acars_dll}"  NAME)
+    add_custom_target(copy_acars_${acars_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${acars_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(acars_dll)
+
   if(ENABLE_USRP AND UHD_FOUND)
     file(GLOB UHD_DLLS "${UHD_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     foreach(uhd_dll ${UHD_DLLS})
@@ -302,6 +310,9 @@ elseif(WIN32 OR MINGW)
     # hidapi
     install(DIRECTORY "${HIDAPI_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # acars
+    install(DIRECTORY "${LIBACARS_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "acars*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # uhd
     install(DIRECTORY "${UHD_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")

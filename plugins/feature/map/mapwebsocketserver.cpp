@@ -18,6 +18,7 @@
 #include <QJsonDocument>
 
 #include "mapwebsocketserver.h"
+#include "util/profiler.h"
 
 MapWebSocketServer::MapWebSocketServer(QObject *parent) :
     QObject(parent),
@@ -88,10 +89,22 @@ void MapWebSocketServer::send(const QJsonObject &obj)
 {
     if (m_client)
     {
+        // Timed in three parts, because a single 650 ms maximum was once seen across the
+        // whole of this, and only the file write below can actually block the thread:
+        // sendTextMessage() buffers, and the socket is written by the event loop
+        PROFILER_START()
         QJsonDocument doc(obj);
-        QByteArray bytes = doc.toJson();
+        // Compact, not toJson()'s default of Indented. Nothing reads this but JSON.parse
+        // in the page, and a CZML packet is deeply nested - position and orientation
+        // arrays, point, label and model objects - so pretty printing was adding a
+        // newline and leading spaces to every one of those lines, for nobody to read.
+        QByteArray bytes = doc.toJson(QJsonDocument::Compact);
+        PROFILER_STOP("Map CZML serialise")
+        PROFILER_RESTART()
         qint64 bytesSent = m_client->sendTextMessage(bytes);
-        m_client->flush(); // Try to reduce latency
+        // No flush(): it is non-blocking and the event loop writes the socket within the
+        // same iteration anyway, so it bought nothing - and read as if it could block
+        PROFILER_STOP("Map CZML socket")
         if (bytesSent != bytes.size()) {
             qDebug() << "MapWebSocketServer::send - Sent only " << bytesSent << " bytes out of " << bytes.size();
         }

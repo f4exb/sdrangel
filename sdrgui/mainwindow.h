@@ -492,6 +492,7 @@ private slots:
     void startAll();
     void startAllDevices(const Workspace *workspace) const;
     void stopAllDevices(const Workspace *workspace) const;
+    void startStop(const Workspace *workspace, bool start, bool includeFeatures, bool allWorkspaces) const;
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
     void mainSpectrumShow(int deviceSetIndex);

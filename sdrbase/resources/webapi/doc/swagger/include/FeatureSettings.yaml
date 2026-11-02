@@ -16,6 +16,8 @@ FeatureSettings:
     AFCSettings:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
       description: "Afc settings configuration for Feature."
+    AircraftSettings:
+      $ref: "/doc/swagger/include/Aircraft.yaml#/AircraftSettings"
     AISSettings:
       $ref: "/doc/swagger/include/AIS.yaml#/AISSettings"
       description: "AIS settings configuration for Feature."

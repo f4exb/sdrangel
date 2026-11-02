@@ -148,6 +148,11 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - name: Install dependencies
         run: |
           sudo apt-get update

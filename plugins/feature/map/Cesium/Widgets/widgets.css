@@ -139,6 +139,11 @@
   font-size: 15px;
   text-anchor: middle;
 }
+.cesium-animation-dateField,
+.cesium-animation-timeField {
+  cursor: ns-resize;
+  pointer-events: all;
+}
 .cesium-animation-blank {
   fill: #000;
   fill-opacity: 0.01;
@@ -819,6 +824,15 @@ input.cesium-cesiumInspector-url {
   white-space: nowrap;
   overflow: hidden;
   box-sizing: content-box;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.cesium-infoBox-dragging {
+  transition: none;
+}
+.cesium-infoBox-dragging .cesium-infoBox-title {
+  cursor: grabbing;
 }
 .cesium-infoBox-bodyless .cesium-infoBox-title {
   border-bottom-left-radius: 7px;

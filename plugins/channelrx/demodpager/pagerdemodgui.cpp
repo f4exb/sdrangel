@@ -1132,7 +1132,7 @@ void PagerDemodGUI::sendToMap(const QString& address, const QString& message, fl
         swgMapItem->setAltitude(0);
         swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
         swgMapItem->setFixedPosition(false);
-        swgMapItem->setPositionDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+        swgMapItem->setPositionDateTime(new QString(dateTime.toUTC().toString(Qt::ISODateWithMs)));
 
         swgMapItem->setImageRotation(0);
         swgMapItem->setText(new QString(message));

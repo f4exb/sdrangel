@@ -41,6 +41,7 @@ QMutex AircraftInformation::m_mutex;
 QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::m_aircraftInformation;
 QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::m_aircraftInformationByReg;
 QSharedPointer<const QHash<QString, AircraftRouteInformation *>> OsnDB::m_aircraftRouteInformation;
+QRecursiveMutex OsnDB::m_dbMutex;
 QDateTime OsnDB::m_modifiedDateTime;
 
 
@@ -88,7 +89,7 @@ void OsnDB::downloadFinished(const QString& filename, bool success)
         else
         {
             qWarning() << "OsnDB::downloadFinished - Failed to extract files from " << filename;
-            emit downloadError(QString("Failed to extract files from ").arg(filename));
+            emit downloadError(QString("Failed to extract files from %1").arg(filename));
         }
     }
     else
@@ -100,6 +101,8 @@ void OsnDB::downloadFinished(const QString& filename, bool success)
 
 QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::getAircraftInformation()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     QFileInfo fastFileInfo(getFastDBFilename());
     QFileInfo fullFileInfo(getOSNDBFilename());
     QDateTime fastModifiedDateTime = fastFileInfo.lastModified();
@@ -134,12 +137,16 @@ QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::getAircraftInform
 
 QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::getAircraftInformationByReg()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     getAircraftInformation();
     return m_aircraftInformationByReg;
 }
 
 QSharedPointer<const QHash<QString, AircraftRouteInformation *>>  OsnDB::getAircraftRouteInformation()
 {
+    QMutexLocker locker(&m_dbMutex);
+
     if (!m_aircraftRouteInformation) {
         m_aircraftRouteInformation = QSharedPointer<const QHash<QString, AircraftRouteInformation *>>(OsnDB::readRouteDB(getRouteDBFilename()));
     }
@@ -348,6 +355,14 @@ QHash<QString, AircraftInformation *> *OsnDB::registrationHash(const QHash<int, 
     {
         i.next();
         AircraftInformation *info = i.value();
+        // Thousands of records in the database have no registration - military and
+        // government aircraft, gliders, anything withheld. They would all land on the
+        // "" key, leaving whichever was read last to answer for every aircraft whose
+        // registration is unknown, which then wears that record's owner, type, sideview
+        // and flag. There is no useful entry to make for them here.
+        if (info->m_registration.isEmpty()) {
+            continue;
+        }
         out->insert(info->m_registration, info);
     }
     return out;

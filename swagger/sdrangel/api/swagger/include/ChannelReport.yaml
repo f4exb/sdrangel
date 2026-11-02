@@ -13,6 +13,8 @@ ChannelReport:
       type: integer
       minimum: 0
       maximum: 2
+    ACARSDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ACARSDemod.yaml#/ACARSDemodReport"
     ADSBDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
       description: "ADS-B demod report data for Channel."

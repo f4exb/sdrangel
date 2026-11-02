@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,8 +20,10 @@
 #define INCLUDE_WAYPOINTS_H
 
 #include <QString>
+#include <QStringList>
 #include <QFile>
-#include <QHash>
+#include <QMultiHash>
+#include <QGeoCoordinate>
 
 #include <stdio.h>
 #include <string.h>
@@ -30,7 +33,7 @@
 #include "util/units.h"
 #include "util/httpdownloadmanager.h"
 
-#define WAYPOINTS_URL     "https://github.com/srcejon/aviationwaypoints/waypoints.csv"
+#define WAYPOINTS_URL     "https://sdrangel.org/downloads/waypoints.zip"
 
 // Aviation waypoints
 struct SDRBASE_API Waypoint {
@@ -39,7 +42,8 @@ struct SDRBASE_API Waypoint {
     float m_latitude;
     float m_longitude;
 
-    static QHash<QString, Waypoint *> *readCSV(const QString &filename);
+    static QMultiHash<QString, Waypoint *> *readCSV(const QString &filename);
+    static QMultiHash<QString, Waypoint *> *readBGL(const QString& path, QStringList *errors = nullptr);
 };
 
 class SDRBASE_API Waypoints : public QObject {
@@ -51,19 +55,26 @@ public:
 
     void downloadWaypoints();
 
-    static const Waypoint* findWayPoint(const QString& name);
-    static QSharedPointer<const QHash<QString, Waypoint *>> getWaypoints();
+    static const Waypoint* findWayPoint(const QString& name, const QStringList& nearby = QStringList());
+    // The same choice made against positions rather than names. Needed wherever the
+    // fixes around a name are things no waypoint database holds - an oceanic clearance
+    // surrounds its named entry point with bare latitudes and longitudes - because the
+    // name form can only score against names it can itself look up, and scores nothing
+    // at all when it cannot.
+    static const Waypoint* findWayPoint(const QString& name, const QList<QGeoCoordinate>& nearby);
+    static QSharedPointer<const QMultiHash<QString, Waypoint *>> getWaypoints();
 
 private:
     HttpDownloadManager m_dlm;
 
-    static QSharedPointer<QHash<QString, Waypoint *>> m_waypoints;
+    static QSharedPointer<QMultiHash<QString, Waypoint *>> m_waypoints;
 
     static QDateTime m_waypointsModifiedDateTime;
 
-    static QHash<QString, Waypoint *> *readWaypoints();
+    static QMultiHash<QString, Waypoint *> *readWaypoints();
 
     static QString getDataDir();
+    static QString getWaypointsZipFilename();
     static QString getWaypointsFilename();
     static QDateTime getWaypointsModifiedDateTime();
 

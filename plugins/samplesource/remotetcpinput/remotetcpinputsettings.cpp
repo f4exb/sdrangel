@@ -49,6 +49,7 @@ void RemoteTCPInputSettings::resetToDefaults()
     m_dataPort = 1234;
     m_overrideRemoteSettings = true;
     m_preFill = 1.0f;
+    m_addressList = QStringList();
     m_protocol = "SDRangel";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -139,7 +140,7 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
         d.readU32(16, &uintval, 1234);
         m_dataPort = uintval % (1<<16);
         d.readString(17, &m_dataAddress, "127.0.0.1");
-        d.readBool(18, &m_overrideRemoteSettings, false);
+        d.readBool(18, &m_overrideRemoteSettings, true);
         d.readFloat(19, &m_preFill, 1.0f);
         d.readBool(20, &m_useReverseAPI, false);
         d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
@@ -396,7 +397,7 @@ QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, 
 
     for (int i = 0; i < m_maxGains; i++)
     {
-        if (settingsKeys.contains(QString("gain[%1]").arg(i))) {
+        if (settingsKeys.contains(QString("gain[%1]").arg(i)) || force) {
             ostr << QString(" gain[%1]: ").arg(i).toStdString() <<  m_gain[i];
         }
     }

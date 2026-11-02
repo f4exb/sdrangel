@@ -297,6 +297,7 @@ private slots:
     void on_startStop_toggled(bool checked);
     void on_getOpenAIPVORDB_clicked();
     void on_magDecAdjust_toggled(bool checked);
+    void on_displaySettings_clicked();
     void on_rrTime_valueChanged(int value);
     void on_centerShift_valueChanged(int value);
     void channelsRefresh();

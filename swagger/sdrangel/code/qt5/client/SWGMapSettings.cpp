@@ -54,6 +54,10 @@ SWGMapSettings::SWGMapSettings() {
     m_sun_light_enabled_isSet = false;
     light_intensity = 0.0f;
     m_light_intensity_isSet = false;
+    distant_light_intensity = 0.0f;
+    m_distant_light_intensity_isSet = false;
+    low_detail_models = 0;
+    m_low_detail_models_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
     fxaa = 0;
@@ -70,6 +74,8 @@ SWGMapSettings::SWGMapSettings() {
     m_fog_isSet = false;
     fps = 0;
     m_fps_isSet = false;
+    frame_rate = 0;
+    m_frame_rate_isSet = false;
     display_muf = 0;
     m_display_muf_isSet = false;
     displayfo_f2 = 0;
@@ -100,6 +106,12 @@ SWGMapSettings::SWGMapSettings() {
     m_view_first_person_isSet = false;
     default_imagery = nullptr;
     m_default_imagery_isSet = false;
+    map_center_latitude = 0.0f;
+    m_map_center_latitude_isSet = false;
+    map_center_longitude = 0.0f;
+    m_map_center_longitude_isSet = false;
+    map_zoom_level = 0.0f;
+    m_map_zoom_level_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -150,6 +162,10 @@ SWGMapSettings::init() {
     m_sun_light_enabled_isSet = false;
     light_intensity = 0.0f;
     m_light_intensity_isSet = false;
+    distant_light_intensity = 0.0f;
+    m_distant_light_intensity_isSet = false;
+    low_detail_models = 0;
+    m_low_detail_models_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
     fxaa = 0;
@@ -166,6 +182,8 @@ SWGMapSettings::init() {
     m_fog_isSet = false;
     fps = 0;
     m_fps_isSet = false;
+    frame_rate = 0;
+    m_frame_rate_isSet = false;
     display_muf = 0;
     m_display_muf_isSet = false;
     displayfo_f2 = 0;
@@ -196,6 +214,12 @@ SWGMapSettings::init() {
     m_view_first_person_isSet = false;
     default_imagery = new QString("");
     m_default_imagery_isSet = false;
+    map_center_latitude = 0.0f;
+    m_map_center_latitude_isSet = false;
+    map_center_longitude = 0.0f;
+    m_map_center_longitude_isSet = false;
+    map_zoom_level = 0.0f;
+    m_map_zoom_level_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -268,6 +292,9 @@ SWGMapSettings::cleanup() {
     if(default_imagery != nullptr) { 
         delete default_imagery;
     }
+
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -320,6 +347,10 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sun_light_enabled, pJson["sunLightEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "float", "");
+
+    ::SWGSDRangel::setValue(&distant_light_intensity, pJson["distantLightIntensity"], "float", "");
+    
+    ::SWGSDRangel::setValue(&low_detail_models, pJson["lowDetailModels"], "qint32", "");
     
     ::SWGSDRangel::setValue(&eci_camera, pJson["eciCamera"], "qint32", "");
     
@@ -336,6 +367,8 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fog, pJson["fog"], "qint32", "");
     
     ::SWGSDRangel::setValue(&fps, pJson["fps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&frame_rate, pJson["frameRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_muf, pJson["displayMUF"], "qint32", "");
     
@@ -366,6 +399,12 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&view_first_person, pJson["viewFirstPerson"], "qint32", "");
     
     ::SWGSDRangel::setValue(&default_imagery, pJson["defaultImagery"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&map_center_latitude, pJson["mapCenterLatitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&map_center_longitude, pJson["mapCenterLongitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&map_zoom_level, pJson["mapZoomLevel"], "float", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -438,6 +477,12 @@ SWGMapSettings::asJsonObject() {
     if(m_light_intensity_isSet){
         obj->insert("lightIntensity", QJsonValue(light_intensity));
     }
+    if(m_distant_light_intensity_isSet){
+        obj->insert("distantLightIntensity", QJsonValue(distant_light_intensity));
+    }
+    if(m_low_detail_models_isSet){
+        obj->insert("lowDetailModels", QJsonValue(low_detail_models));
+    }
     if(m_eci_camera_isSet){
         obj->insert("eciCamera", QJsonValue(eci_camera));
     }
@@ -461,6 +506,9 @@ SWGMapSettings::asJsonObject() {
     }
     if(m_fps_isSet){
         obj->insert("fps", QJsonValue(fps));
+    }
+    if(m_frame_rate_isSet){
+        obj->insert("frameRate", QJsonValue(frame_rate));
     }
     if(m_display_muf_isSet){
         obj->insert("displayMUF", QJsonValue(display_muf));
@@ -506,6 +554,15 @@ SWGMapSettings::asJsonObject() {
     }
     if(default_imagery != nullptr && *default_imagery != QString("")){
         toJsonValue(QString("defaultImagery"), default_imagery, obj, QString("QString"));
+    }
+    if(m_map_center_latitude_isSet){
+        obj->insert("mapCenterLatitude", QJsonValue(map_center_latitude));
+    }
+    if(m_map_center_longitude_isSet){
+        obj->insert("mapCenterLongitude", QJsonValue(map_center_longitude));
+    }
+    if(m_map_zoom_level_isSet){
+        obj->insert("mapZoomLevel", QJsonValue(map_zoom_level));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -635,6 +692,36 @@ SWGMapSettings::setTerrain(QString* terrain) {
     this->m_terrain_isSet = true;
 }
 
+float
+SWGMapSettings::getMapCenterLatitude() {
+    return map_center_latitude;
+}
+void
+SWGMapSettings::setMapCenterLatitude(float map_center_latitude) {
+    this->map_center_latitude = map_center_latitude;
+    this->m_map_center_latitude_isSet = true;
+}
+
+float
+SWGMapSettings::getMapCenterLongitude() {
+    return map_center_longitude;
+}
+void
+SWGMapSettings::setMapCenterLongitude(float map_center_longitude) {
+    this->map_center_longitude = map_center_longitude;
+    this->m_map_center_longitude_isSet = true;
+}
+
+float
+SWGMapSettings::getMapZoomLevel() {
+    return map_zoom_level;
+}
+void
+SWGMapSettings::setMapZoomLevel(float map_zoom_level) {
+    this->map_zoom_level = map_zoom_level;
+    this->m_map_zoom_level_isSet = true;
+}
+
 QString*
 SWGMapSettings::getBuildings() {
     return buildings;
@@ -663,6 +750,26 @@ void
 SWGMapSettings::setLightIntensity(float light_intensity) {
     this->light_intensity = light_intensity;
     this->m_light_intensity_isSet = true;
+}
+
+float
+SWGMapSettings::getDistantLightIntensity() {
+    return distant_light_intensity;
+}
+void
+SWGMapSettings::setDistantLightIntensity(float distant_light_intensity) {
+    this->distant_light_intensity = distant_light_intensity;
+    this->m_distant_light_intensity_isSet = true;
+}
+
+qint32
+SWGMapSettings::getLowDetailModels() {
+    return low_detail_models;
+}
+void
+SWGMapSettings::setLowDetailModels(qint32 low_detail_models) {
+    this->low_detail_models = low_detail_models;
+    this->m_low_detail_models_isSet = true;
 }
 
 qint32
@@ -743,6 +850,16 @@ void
 SWGMapSettings::setFps(qint32 fps) {
     this->fps = fps;
     this->m_fps_isSet = true;
+}
+
+qint32
+SWGMapSettings::getFrameRate() {
+    return frame_rate;
+}
+void
+SWGMapSettings::setFrameRate(qint32 frame_rate) {
+    this->frame_rate = frame_rate;
+    this->m_frame_rate_isSet = true;
 }
 
 qint32
@@ -1019,6 +1136,12 @@ SWGMapSettings::isSet(){
         if(m_light_intensity_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_distant_light_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_low_detail_models_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_eci_camera_isSet){
             isObjectUpdated = true; break;
         }
@@ -1041,6 +1164,9 @@ SWGMapSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_fps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frame_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_display_muf_isSet){
@@ -1086,6 +1212,15 @@ SWGMapSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(default_imagery && *default_imagery != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_map_center_latitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_map_center_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_map_zoom_level_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

@@ -23,6 +23,8 @@
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 
+#include "util/flightpathpalette.h"
+
 #include "adsbdemodsettings.h"
 
 ADSBDemodSettings::ADSBDemodSettings() :
@@ -81,6 +83,8 @@ void ADSBDemodSettings::resetToDefaults()
     m_aviationstackAPIKey = "";
     m_checkWXAPIKey = "";
     m_maptilerAPIKey = "";
+    m_cartoDBAPIKey = "";
+    m_mapBoxAPIKey = "";
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -90,7 +94,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_logEnabled = false;
     m_airspaces = QStringList({"CTR"});
     m_airspaceRange = 500.0f;
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
@@ -117,6 +121,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_flightPathPaletteName = "Spectral";
     applyPalette();
     m_favourLivery = true;
+    m_useLiveryIcons = true;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -214,6 +219,9 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(77, m_favourLivery);
 
     s.writeString(78, m_maptilerAPIKey);
+    s.writeString(80, m_cartoDBAPIKey);
+    s.writeString(81, m_mapBoxAPIKey);
+    s.writeBool(79, m_useLiveryIcons);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -361,12 +369,20 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(77, &m_favourLivery, true);
 
         d.readString(78, &m_maptilerAPIKey, "");
+        d.readString(80, &m_cartoDBAPIKey, "");
+        d.readString(81, &m_mapBoxAPIKey, "");
+        d.readBool(79, &m_useLiveryIcons, true);
 
         applyPalette();
 
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 13))
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
+        }
+#else
+        // mapboxgl doesn't work without a key
+        if ((m_mapProvider == "mapboxgl") && m_mapBoxAPIKey.isEmpty()) {
+            m_mapProvider = "osm";
         }
 #endif
 
@@ -591,6 +607,12 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("maptilerAPIKey")) {
         m_maptilerAPIKey = settings.m_maptilerAPIKey;
     }
+    if (settingsKeys.contains("cartoDBAPIKey")) {
+        m_cartoDBAPIKey = settings.m_cartoDBAPIKey;
+    }
+    if (settingsKeys.contains("mapBoxAPIKey")) {
+        m_mapBoxAPIKey = settings.m_mapBoxAPIKey;
+    }
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
     }
@@ -655,6 +677,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     }
     if (settingsKeys.contains("favourLivery")) {
         m_favourLivery = settings.m_favourLivery;
+    }
+    if (settingsKeys.contains("useLiveryIcons")) {
+        m_useLiveryIcons = settings.m_useLiveryIcons;
     }
 }
 
@@ -797,6 +822,12 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("maptilerAPIKey") || force) {
         ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
     }
+    if (settingsKeys.contains("cartoDBAPIKey") || force) {
+        ostr << " m_cartoDBAPIKey: " << m_cartoDBAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("mapBoxAPIKey") || force) {
+        ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
+    }
     if (settingsKeys.contains("logFilename") || force) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();
     }
@@ -860,90 +891,14 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("favourLivery") || force) {
         ostr << " m_favourLivery: " << m_favourLivery;
     }
+    if (settingsKeys.contains("useLiveryIcons") || force) {
+        ostr << " m_useLiveryIcons: " << m_useLiveryIcons;
+    }
 
     return QString(ostr.str().c_str());
 }
 
 void ADSBDemodSettings::applyPalette()
 {
-    if (m_palettes.contains(m_flightPathPaletteName)) {
-        m_flightPathPalette = m_palettes.value(m_flightPathPaletteName);
-    } else {
-        m_flightPathPalette = m_rainbowPalette;
-    }
+    m_flightPathPalette = FlightPathPalette::getPalette(m_flightPathPaletteName);
 }
-
-const QVariant ADSBDemodSettings::m_rainbowPalette[8] = {
-    QVariant(QColor(0xff, 0x00, 0x00)),
-    QVariant(QColor(0xff, 0x7f, 0x00)),
-    QVariant(QColor(0xff, 0xff, 0x00)),
-    QVariant(QColor(0xf7, 0xff, 0x00)),
-    QVariant(QColor(0x00, 0xff, 0x00)),
-    QVariant(QColor(0x00, 0xff, 0x7f)),
-    QVariant(QColor(0x00, 0xff, 0xff)),
-    QVariant(QColor(0x00, 0x7f, 0xff)),
-};
-
-const QVariant ADSBDemodSettings::m_pastelPalette[8] = {
-    QVariant(QColor(0xff, 0xad, 0xad)),
-    QVariant(QColor(0xff, 0xd6, 0xa5)),
-    QVariant(QColor(0xfd, 0xff, 0xb6)),
-    QVariant(QColor(0xca, 0xff, 0xbf)),
-    QVariant(QColor(0x9b, 0xf6, 0xff)),
-    QVariant(QColor(0xa0, 0xc4, 0xff)),
-    QVariant(QColor(0xbd, 0xb2, 0xff)),
-    QVariant(QColor(0xff, 0xc6, 0xff)),
-};
-
-const QVariant ADSBDemodSettings::m_spectralPalette[8] = {
-    QVariant(QColor(0xd5, 0x3e, 0x4f)),
-    QVariant(QColor(0xf4, 0x6d, 0x43)),
-    QVariant(QColor(0xfd, 0xae, 0x61)),
-    QVariant(QColor(0xfe, 0xe0, 0x8b)),
-    QVariant(QColor(0xe6, 0xf5, 0x98)),
-    QVariant(QColor(0xab, 0xdd, 0xa4)),
-    QVariant(QColor(0x66, 0xc2, 0xa5)),
-    QVariant(QColor(0x32, 0x88, 0xbd)),
-};
-
-const QVariant ADSBDemodSettings::m_bluePalette[8] = {
-    QVariant(QColor(0xde, 0xeb, 0xf7)),
-    QVariant(QColor(0xc6, 0xdb, 0xef)),
-    QVariant(QColor(0x9e, 0xca, 0xe1)),
-    QVariant(QColor(0x6b, 0xae, 0xd6)),
-    QVariant(QColor(0x42, 0x92, 0xc6)),
-    QVariant(QColor(0x21, 0x71, 0xb5)),
-    QVariant(QColor(0x08, 0x51, 0x9c)),
-    QVariant(QColor(0x08, 0x30, 0x6b)),
-};
-
-const QVariant ADSBDemodSettings::m_purplePalette[8] = {
-    QVariant(QColor(0xcc, 0xaf, 0xf2)),
-    QVariant(QColor(0xb6, 0x99, 0xe0)),
-    QVariant(QColor(0xa0, 0x84, 0xcf)),
-    QVariant(QColor(0x8a, 0x6f, 0xbd)),
-    QVariant(QColor(0x76, 0x5a, 0xac)),
-    QVariant(QColor(0x62, 0x45, 0x9a)),
-    QVariant(QColor(0x4f, 0x30, 0x89)),
-    QVariant(QColor(0x3e, 0x18, 0x78)),
-};
-
-const QVariant ADSBDemodSettings::m_greyPalette[8] = {
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-    QVariant(QColor(0x80, 0x80, 0x80)),
-};
-
-const QHash<QString, const QVariant *> ADSBDemodSettings::m_palettes = {
-    {"Rainbow", &ADSBDemodSettings::m_rainbowPalette[0]},
-    {"Pastel", &ADSBDemodSettings::m_pastelPalette[0]},
-    {"Spectral", &ADSBDemodSettings::m_spectralPalette[0]},
-    {"Blues", &ADSBDemodSettings::m_bluePalette[0]},
-    {"Purples", &ADSBDemodSettings::m_purplePalette[0]},
-    {"Grey", &ADSBDemodSettings::m_greyPalette[0]},
-};

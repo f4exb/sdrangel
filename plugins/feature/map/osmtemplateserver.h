@@ -29,15 +29,17 @@ class OSMTemplateServer : public QTcpServer
 private:
     QString m_thunderforestAPIKey;
     QString m_maptilerAPIKey;
+    QString m_cartoDBAPIKey;
     quint16 m_tileServerPort;
     bool m_overlay;
 
 public:
     // port - port to listen on / is listening on. Use 0 for any free port.
-    OSMTemplateServer(const QString &thunderforestAPIKey, const QString &maptilerAPIKey, quint16 tileServerPort, quint16 &port, QObject* parent = 0) :
+    OSMTemplateServer(const QString &thunderforestAPIKey, const QString &maptilerAPIKey, const QString &cartoDBAPIKey, quint16 tileServerPort, quint16 &port, QObject* parent = 0) :
         QTcpServer(parent),
         m_thunderforestAPIKey(thunderforestAPIKey),
         m_maptilerAPIKey(maptilerAPIKey),
+        m_cartoDBAPIKey(cartoDBAPIKey),
         m_tileServerPort(tileServerPort),
         m_overlay(false)
     {
@@ -62,6 +64,11 @@ public:
     void setMaptilerAPIKey(const QString& maptilerAPIKey)
     {
         m_maptilerAPIKey = maptilerAPIKey;
+    }
+
+    void setCartoDBAPIKey(const QString& cartoDBAPIKey)
+    {
+        m_cartoDBAPIKey = cartoDBAPIKey;
     }
 
     void setEnableOverlay(bool enableOverlay)
@@ -131,7 +138,7 @@ private slots:
                     if (m_overlay) {
                         url = QString("http://127.0.0.1:%1/%2/%z/%x/%y.png").arg(m_tileServerPort).arg(mapUrl[idx]);
                     } else {
-                        url = QString("http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1").arg(hiresURL).arg(mapUrl[idx]);
+                        url = QString("http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1?key=%3").arg(hiresURL).arg(mapUrl[idx]).arg(m_cartoDBAPIKey);
                     }
                     xml = QString("\
                     {\

@@ -4853,7 +4853,13 @@ bool WebAPIRequestMapper::getChannelSettings(
             << " channelSettingsKey: " << channelSettingsKey
             << " channelSettingsKeys: " << channelSettingsKeys;
 
-        if (channelSettingsKey == "ADSBDemodSettings")
+        if (channelSettingsKey == "ACARSDemodSettings")
+        {
+            channelSettings->setAcarsDemodSettings(new SWGSDRangel::SWGACARSDemodSettings());
+            channelSettings->getAcarsDemodSettings()->init();
+            channelSettings->getAcarsDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "ADSBDemodSettings")
         {
             channelSettings->setAdsbDemodSettings(new SWGSDRangel::SWGADSBDemodSettings());
             channelSettings->getAdsbDemodSettings()->init();
@@ -5775,6 +5781,12 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setAisSettings(new SWGSDRangel::SWGAISSettings());
             featureSettings->getAisSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "AircraftSettings")
+        {
+            featureSettings->setAircraftSettings(new SWGSDRangel::SWGAircraftSettings());
+            featureSettings->getAircraftSettings()->init();     // fromJsonObject() fills the lists init() allocates
+            featureSettings->getAircraftSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "AntennaToolsSettings")
         {
             featureSettings->setAntennaToolsSettings(new SWGSDRangel::SWGAntennaToolsSettings());
@@ -5904,6 +5916,11 @@ bool WebAPIRequestMapper::getFeatureActions(
         {
             featureActions->setAfcActions(new SWGSDRangel::SWGAFCActions());
             featureActions->getAfcActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "AircraftActions")
+        {
+            featureActions->setAircraftActions(new SWGSDRangel::SWGAircraftActions());
+            featureActions->getAircraftActions()->fromJsonObject(actionsJsonObject);
         }
         else if (featureActionsKey == "AMBEActions")
         {
@@ -6103,6 +6120,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
 {
     channelSettings.cleanup();
     channelSettings.setChannelType(nullptr);
+    channelSettings.setAcarsDemodSettings(nullptr);
     channelSettings.setAdsbDemodSettings(nullptr);
     channelSettings.setAisDemodSettings(nullptr);
     channelSettings.setAisModSettings(nullptr);
@@ -6157,6 +6175,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
 {
     channelReport.cleanup();
     channelReport.setChannelType(nullptr);
+    channelReport.setAcarsDemodReport(nullptr);
     channelReport.setAdsbDemodReport(nullptr);
     channelReport.setAisDemodReport(nullptr);
     channelReport.setAisModReport(nullptr);
@@ -6235,6 +6254,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
 {
     featureSettings.cleanup();
     featureSettings.setFeatureType(nullptr);
+    featureSettings.setAircraftSettings(nullptr);
     featureSettings.setAisSettings(nullptr);
     featureSettings.setAntennaToolsSettings(nullptr);
     featureSettings.setAprsSettings(nullptr);
@@ -6257,6 +6277,7 @@ void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& feat
     featureReport.cleanup();
     featureReport.setFeatureType(nullptr);
     featureReport.setAfcReport(nullptr);
+    featureReport.setAircraftReport(nullptr);
     featureReport.setFreqDisplayReport(nullptr);
     featureReport.setGs232ControllerReport(nullptr);
     featureReport.setPerTesterReport(nullptr);
@@ -6275,6 +6296,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.cleanup();
     featureActions.setFeatureType(nullptr);
     featureActions.setAfcActions(nullptr);
+    featureActions.setAircraftActions(nullptr);
     featureActions.setGs232ControllerActions(nullptr);
     featureActions.setMapActions(nullptr);
     featureActions.setPerTesterActions(nullptr);

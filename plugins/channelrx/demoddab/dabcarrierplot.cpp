@@ -31,6 +31,7 @@ DABCarrierPlot::DABCarrierPlot(QWidget *parent) :
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setMinimumHeight(110);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
     setToolTip(tr("Carrier to noise ratio of each carrier, from the null symbol.\n"
         "Notches are multipath; dips over a few carriers are interference.\n"
         "The dashed line is the median (the C/N statistic)."));

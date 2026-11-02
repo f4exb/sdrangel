@@ -28,16 +28,22 @@ if(NOT SERVER_MODE)
         ${vor_SOURCES}
         vorlocalizergui.cpp
         vorlocalizergui.ui
+        vorlocalizerdisplaydialog.cpp
+        vorlocalizerdisplaydialog.ui
         vorlocalizermap.qrc
         vorlocalizericons.qrc
     )
     set(vor_HEADERS
         ${vor_HEADERS}
         vorlocalizergui.h
+        vorlocalizerdisplaydialog.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}vorlocalizer)
     set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning)
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}Location_FOUND)
+        list(APPEND TARGET_LIB Qt::Location)
+    endif()
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

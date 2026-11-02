@@ -151,8 +151,7 @@ private:
     bool handleMessage(const Message& message);
     void convert(int nbSamples);
     void connectToHost(const QString& address, quint16 port);
-    void disconnectFromHost();
-    void cleanup();
+    void cleanup(bool threadStopped);
     void clearBuffer();
     void setSampleRate(int sampleRate);
     void setCenterFrequency(quint64 frequency);

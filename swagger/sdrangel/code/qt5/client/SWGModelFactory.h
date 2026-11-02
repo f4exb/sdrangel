@@ -14,6 +14,8 @@
 #define ModelFactory_H_
 
 
+#include "SWGACARSDemodReport.h"
+#include "SWGACARSDemodSettings.h"
 #include "SWGADSBDemodAircraftState.h"
 #include "SWGADSBDemodReport.h"
 #include "SWGADSBDemodSettings.h"
@@ -56,6 +58,11 @@
 #include "SWGAaroniaRTSAOutputSettings.h"
 #include "SWGAaroniaRTSAReport.h"
 #include "SWGAaroniaRTSASettings.h"
+#include "SWGAircraftActions.h"
+#include "SWGAircraftNotificationSettings.h"
+#include "SWGAircraftProtocolReport.h"
+#include "SWGAircraftReport.h"
+#include "SWGAircraftSettings.h"
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspyReport.h"
@@ -264,9 +271,12 @@
 #include "SWGMapAircraftState.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
+#include "SWGMapDatalinkMessage.h"
+#include "SWGMapFlightPlan.h"
 #include "SWGMapItem.h"
 #include "SWGMapItem_2.h"
 #include "SWGMapReport.h"
+#include "SWGMapRouteWaypoint.h"
 #include "SWGMapSettings.h"
 #include "SWGMeshcoreDemodReport.h"
 #include "SWGMeshcoreDemodSettings.h"
@@ -458,6 +468,16 @@
 namespace SWGSDRangel {
 
   inline void* create(QString type) {
+    if(QString("SWGACARSDemodReport").compare(type) == 0) {
+      SWGACARSDemodReport *obj = new SWGACARSDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGACARSDemodSettings").compare(type) == 0) {
+      SWGACARSDemodSettings *obj = new SWGACARSDemodSettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGADSBDemodAircraftState").compare(type) == 0) {
       SWGADSBDemodAircraftState *obj = new SWGADSBDemodAircraftState();
       obj->init();
@@ -662,6 +682,31 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAaroniaRTSASettings").compare(type) == 0) {
       SWGAaroniaRTSASettings *obj = new SWGAaroniaRTSASettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAircraftActions").compare(type) == 0) {
+      SWGAircraftActions *obj = new SWGAircraftActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAircraftNotificationSettings").compare(type) == 0) {
+      SWGAircraftNotificationSettings *obj = new SWGAircraftNotificationSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAircraftProtocolReport").compare(type) == 0) {
+      SWGAircraftProtocolReport *obj = new SWGAircraftProtocolReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAircraftReport").compare(type) == 0) {
+      SWGAircraftReport *obj = new SWGAircraftReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAircraftSettings").compare(type) == 0) {
+      SWGAircraftSettings *obj = new SWGAircraftSettings();
       obj->init();
       return obj;
     }
@@ -1705,6 +1750,16 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGMapDatalinkMessage").compare(type) == 0) {
+      SWGMapDatalinkMessage *obj = new SWGMapDatalinkMessage();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMapFlightPlan").compare(type) == 0) {
+      SWGMapFlightPlan *obj = new SWGMapFlightPlan();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGMapItem").compare(type) == 0) {
       SWGMapItem *obj = new SWGMapItem();
       obj->init();
@@ -1717,6 +1772,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMapReport").compare(type) == 0) {
       SWGMapReport *obj = new SWGMapReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMapRouteWaypoint").compare(type) == 0) {
+      SWGMapRouteWaypoint *obj = new SWGMapRouteWaypoint();
       obj->init();
       return obj;
     }

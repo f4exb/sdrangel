@@ -21,10 +21,11 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QNetworkReply>
-#include <QXmlStreamReader>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QNetworkDiskCache>
 #include <QRegularExpression>
-#include <QSet>
 
 #include "util/corsproxy.h"
 
@@ -55,20 +56,29 @@ KiwiSDRList::~KiwiSDRList()
 
 void KiwiSDRList::getData()
 {
+    // kiwisdr.com/public/ now sits behind a "Click to show KiwiSDRs" page, so use
+    // the list that rx.linkfanel.net generates from it
 #ifdef __EMSCRIPTEN__
-    // kiwisdr.com doesn't support https, but it's needed for Emscripten - our CORS proxy handles it
-    QUrl url = CORSProxy::adjustHost(QUrl("https://kiwisdr.com/public/"));
+    // rx.linkfanel.net doesn't support https, but it's needed for Emscripten - our CORS proxy handles it
+    QUrl url = CORSProxy::adjustHost(QUrl("https://rx.linkfanel.net/kiwisdr_com.js"));
 #else
-    QUrl url = CORSProxy::adjustHost(QUrl("http://kiwisdr.com/public/"));
+    QUrl url = CORSProxy::adjustHost(QUrl("http://rx.linkfanel.net/kiwisdr_com.js"));
 #endif
     m_networkManager->get(QNetworkRequest(url));
 }
 
 void KiwiSDRList::getDataPeriodically(int periodInMins)
 {
-    m_timer.setInterval(periodInMins*60*1000);
-    m_timer.start();
-    update();
+    if (periodInMins > 0)
+    {
+        m_timer.setInterval(periodInMins*60*1000);
+        m_timer.start();
+        update();
+    }
+    else
+    {
+        m_timer.stop();
+    }
 }
 
 void KiwiSDRList::update()
@@ -85,7 +95,7 @@ void KiwiSDRList::handleReply(QNetworkReply* reply)
             QString url = reply->url().toEncoded().constData();
             QByteArray bytes = reply->readAll();
 
-            handleHTML(url, bytes);
+            handleJS(url, bytes);
         }
         else
         {
@@ -99,120 +109,78 @@ void KiwiSDRList::handleReply(QNetworkReply* reply)
     }
 }
 
-void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
+void KiwiSDRList::handleJS(const QString& url, const QByteArray& bytes)
 {
-    static QSet<QString> unhandledKeys{};
     (void) url;
 
     QList<KiwiSDR> sdrs;
-    QString html(bytes);
 
-    // Strip nested divs, as the following div regexp can't handle them
-    QRegularExpression divName("<div class='cl-name'>(.*?)<\\/div>", QRegularExpression::DotMatchesEverythingOption);
-    html.replace(divName, "\\1");
+    // File is JavaScript: "var kiwisdr_com = [ {...}, {...}, ];"
+    // Extract the array and drop the trailing comma, so it can be parsed as JSON
+    int start = bytes.indexOf('[');
+    int end = bytes.lastIndexOf('}');
 
-    QRegularExpression div("<div class='cl-info'>(.*?)<\\/div>", QRegularExpression::DotMatchesEverythingOption);
-    QRegularExpressionMatchIterator divItr = div.globalMatch(html);
-
-    if (divItr.hasNext())
+    if ((start < 0) || (end < start))
     {
-        while (divItr.hasNext())
-        {
-            QRegularExpressionMatch divMatch = divItr.next();
-            QString divText = divMatch.captured(1);
-            QRegularExpression urlRe("a href='(.*?)'");
-            QRegularExpressionMatch urlMatch = urlRe.match(divText);
-
-            if (urlMatch.hasMatch())
-            {
-                KiwiSDR sdr{};
-
-                sdr.m_url = urlMatch.captured(1);
-
-                QRegularExpression element("<!-- (\\w+)=(.*?) -->");
-                QRegularExpressionMatchIterator elementItr = element.globalMatch(divText);
-                while(elementItr.hasNext())
-                {
-                    QRegularExpressionMatch elementMatch = elementItr.next();
-                    QString key = elementMatch.captured(1);
-                    QString value = elementMatch.captured(2);
-
-                    if (key == "name")
-                    {
-                        sdr.m_name = value;
-                    }
-                    else if (key == "sdr_hw")
-                    {
-                        sdr.m_sdrHW = value;
-                    }
-                    else if (key == "bands")
-                    {
-                        QRegularExpression freqRe("([\\d]+)-([\\d]+)");
-                        QRegularExpressionMatch freqMatch = freqRe.match(value);
-
-                        if (freqMatch.hasMatch())
-                        {
-                            sdr.m_lowFrequency = freqMatch.captured(1).toInt();
-                            sdr.m_highFrequency = freqMatch.captured(2).toInt();
-                        }
-                    }
-                    else if (key == "users")
-                    {
-                        sdr.m_users = value.toInt();
-                    }
-                    else if (key == "users_max")
-                    {
-                        sdr.m_usersMax = value.toInt();
-                    }
-                    else if (key == "gps")
-                    {
-                        QRegularExpression gpsRe("([\\d.+-]+), ([\\d.+-]+)");
-                        QRegularExpressionMatch gpsMatch = gpsRe.match(value);
-
-                        if (gpsMatch.hasMatch())
-                        {
-                            sdr.m_latitude = gpsMatch.captured(1).toFloat();
-                            sdr.m_longitude = gpsMatch.captured(2).toFloat();
-                        }
-                    }
-                    else if (key == "asl")
-                    {
-                        sdr.m_altitude = value.toInt();
-                    }
-                    else if (key == "loc")
-                    {
-                        sdr.m_location = value;
-                    }
-                    else if (key == "antenna")
-                    {
-                        sdr.m_antenna = value;
-                    }
-                    else if (key == "ant_connected")
-                    {
-                        sdr.m_antennaConnected = value == "1";
-                    }
-                    else if (key == "snr")
-                    {
-                        sdr.m_snr = value;
-                    }
-                    else if (!unhandledKeys.contains(key))
-                    {
-                        qDebug() << "KiwiSDRList::handleHTML: Unhandled key:" << key << "value:" << value;
-                        unhandledKeys.insert(key);
-                    }
-                }
-
-                sdrs.append(sdr);
-            }
-            else
-            {
-                qDebug() << "KiwiSDRPublic::handleHTML: No URL found in:\n" << divText;
-            }
-        }
+        qDebug() << "KiwiSDRList::handleJS: No receiver array found";
+        return;
     }
-    else
+
+    QByteArray json = bytes.mid(start, end - start + 1) + "]";
+    QJsonParseError error;
+    QJsonDocument document = QJsonDocument::fromJson(json, &error);
+
+    if (!document.isArray())
     {
-        qDebug() << "KiwiSDRPublic::handleHTML: No cl-info found in:\n" << html;
+        qDebug() << "KiwiSDRList::handleJS: Failed to parse:" << error.errorString() << "at offset" << error.offset;
+        return;
+    }
+
+    QJsonArray array = document.array();
+    QRegularExpression freqRe("([\\d]+)-([\\d]+)");
+    QRegularExpression gpsRe("([\\d.+-]+), ([\\d.+-]+)");
+
+    for (const auto& value : array)
+    {
+        QJsonObject obj = value.toObject();
+        KiwiSDR sdr{};
+
+        sdr.m_url = obj.value("url").toString();
+        if (sdr.m_url.isEmpty()) {
+            continue;
+        }
+
+        sdr.m_status = obj.value("status").toString();
+        sdr.m_offline = obj.value("offline").toString();
+        sdr.m_name = obj.value("name").toString();
+        sdr.m_sdrHW = obj.value("sdr_hw").toString();
+
+        QRegularExpressionMatch freqMatch = freqRe.match(obj.value("bands").toString());
+
+        if (freqMatch.hasMatch())
+        {
+            sdr.m_lowFrequency = freqMatch.captured(1).toLongLong();
+            sdr.m_highFrequency = freqMatch.captured(2).toLongLong();
+        }
+
+        sdr.m_users = obj.value("users").toString().toInt();
+        sdr.m_usersMax = obj.value("users_max").toString().toInt();
+
+        QRegularExpressionMatch gpsMatch = gpsRe.match(obj.value("gps").toString());
+
+        if (gpsMatch.hasMatch())
+        {
+            sdr.m_latitude = gpsMatch.captured(1).toFloat();
+            sdr.m_longitude = gpsMatch.captured(2).toFloat();
+        }
+
+        sdr.m_altitude = obj.value("asl").toString().toInt();
+        sdr.m_location = obj.value("loc").toString();
+        sdr.m_antenna = obj.value("antenna").toString();
+        sdr.m_antennaConnected = obj.value("ant_connected").toString() == "1";
+        sdr.m_snr = obj.value("snr").toString();
+
+        sdrs.append(sdr);
     }
 
     emit dataUpdated(sdrs);

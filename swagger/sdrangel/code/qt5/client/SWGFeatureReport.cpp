@@ -38,6 +38,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_radiosonde_report_isSet = false;
     afc_report = nullptr;
     m_afc_report_isSet = false;
+    aircraft_report = nullptr;
+    m_aircraft_report_isSet = false;
     ambe_report = nullptr;
     m_ambe_report_isSet = false;
     freq_display_report = nullptr;
@@ -82,6 +84,8 @@ SWGFeatureReport::init() {
     m_radiosonde_report_isSet = false;
     afc_report = new SWGAFCReport();
     m_afc_report_isSet = false;
+    aircraft_report = new SWGAircraftReport();
+    m_aircraft_report_isSet = false;
     ambe_report = new SWGAMBEReport();
     m_ambe_report_isSet = false;
     freq_display_report = new SWGFreqDisplayReport();
@@ -126,6 +130,9 @@ SWGFeatureReport::cleanup() {
     }
     if(afc_report != nullptr) { 
         delete afc_report;
+    }
+    if(aircraft_report != nullptr) { 
+        delete aircraft_report;
     }
     if(ambe_report != nullptr) { 
         delete ambe_report;
@@ -189,6 +196,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
+    ::SWGSDRangel::setValue(&aircraft_report, pJson["AircraftReport"], "SWGAircraftReport", "SWGAircraftReport");
+    
     ::SWGSDRangel::setValue(&ambe_report, pJson["AMBEReport"], "SWGAMBEReport", "SWGAMBEReport");
     
     ::SWGSDRangel::setValue(&freq_display_report, pJson["FreqDisplayReport"], "SWGFreqDisplayReport", "SWGFreqDisplayReport");
@@ -245,6 +254,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((afc_report != nullptr) && (afc_report->isSet())){
         toJsonValue(QString("AFCReport"), afc_report, obj, QString("SWGAFCReport"));
+    }
+    if((aircraft_report != nullptr) && (aircraft_report->isSet())){
+        toJsonValue(QString("AircraftReport"), aircraft_report, obj, QString("SWGAircraftReport"));
     }
     if((ambe_report != nullptr) && (ambe_report->isSet())){
         toJsonValue(QString("AMBEReport"), ambe_report, obj, QString("SWGAMBEReport"));
@@ -337,6 +349,16 @@ void
 SWGFeatureReport::setAfcReport(SWGAFCReport* afc_report) {
     this->afc_report = afc_report;
     this->m_afc_report_isSet = true;
+}
+
+SWGAircraftReport*
+SWGFeatureReport::getAircraftReport() {
+    return aircraft_report;
+}
+void
+SWGFeatureReport::setAircraftReport(SWGAircraftReport* aircraft_report) {
+    this->aircraft_report = aircraft_report;
+    this->m_aircraft_report_isSet = true;
 }
 
 SWGAMBEReport*
@@ -487,6 +509,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(afc_report && afc_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aircraft_report && aircraft_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(ambe_report && ambe_report->isSet()){

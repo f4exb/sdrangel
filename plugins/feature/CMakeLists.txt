@@ -29,6 +29,16 @@ else()
     message(STATUS "Not building afc (ENABLE_FEATURE_AFC=${ENABLE_FEATURE_AFC})")
 endif()
 
+# Positioning for the distance and track geometry, Charts for the GUI's rate chart and
+# flight profile. Both are optional components in some Qt 6 packages, and without this
+# the feature failed the whole configure step rather than turning itself off.
+if (ENABLE_FEATURE_AIRCRAFT AND Qt${QT_DEFAULT_MAJOR_VERSION}Positioning_FOUND
+    AND (NOT ENABLE_GUI OR Qt${QT_DEFAULT_MAJOR_VERSION}Charts_FOUND))
+    add_subdirectory(aircraft)
+else()
+    message(STATUS "Not building aircraft (ENABLE_FEATURE_AIRCRAFT=${ENABLE_FEATURE_AIRCRAFT} Qt${QT_DEFAULT_MAJOR_VERSION}Positioning_FOUND=${Qt${QT_DEFAULT_MAJOR_VERSION}Positioning_FOUND} Qt${QT_DEFAULT_MAJOR_VERSION}Charts_FOUND=${Qt${QT_DEFAULT_MAJOR_VERSION}Charts_FOUND})")
+endif()
+
 if (ENABLE_FEATURE_AIS)
     add_subdirectory(ais)
 else()

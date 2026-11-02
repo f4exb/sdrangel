@@ -168,6 +168,7 @@ private:
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const QStringList& settingsKeys, const SELCALDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
+    void sendAircraftReport(const SELCALMessages::Call& call);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SELCALDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(const QList<QString>& channelSettingsKeys, SWGSDRangel::SWGChannelSettings *swgChannelSettings,
                                      const SELCALDemodSettings& settings, bool force);

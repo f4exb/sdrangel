@@ -42,6 +42,7 @@
 
 #include "adsbdemod.h"
 #include "adsbdemodworker.h"
+#include "adsbdemodtracker.h"
 
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgConfigureADSBDemod, Message)
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgAircraftReport, Message)
@@ -68,8 +69,21 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
     m_basebandSink = new ADSBDemodBaseband();
     m_basebandSink->moveToThread(m_thread);
 
+    m_workerThread = new QThread();
     m_worker = new ADSBDemodWorker();
-    m_basebandSink->setMessageQueueToWorker(m_worker->getInputMessageQueue());
+    m_tracker = new ADSBDemodTracker(this);
+    m_tracker->setExportWorker(m_worker);
+    m_worker->moveToThread(m_workerThread);
+    m_tracker->moveToThread(m_workerThread);
+    QObject::connect(m_workerThread, &QThread::started, m_worker, &ADSBDemodWorker::startWork);
+    QObject::connect(m_workerThread, &QThread::started, m_tracker, &ADSBDemodTracker::startWork);
+    QObject::connect(m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_workerThread, &QThread::finished, m_tracker, &QObject::deleteLater);
+    QObject::connect(m_workerThread, &QThread::finished, m_workerThread, &QThread::deleteLater);
+    m_workerThread->start();
+
+    // Frames are decoded by the tracker, which passes them on for export and logging
+    m_basebandSink->setMessageQueueToWorker(m_tracker->getInputMessageQueue());
 
     applySettings(m_settings, QStringList(), true);
 
@@ -93,9 +107,6 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
 
 ADSBDemod::~ADSBDemod()
 {
-    if (m_worker->isRunning()) {
-        stop();
-    }
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -106,8 +117,21 @@ ADSBDemod::~ADSBDemod()
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this, true);
     delete m_basebandSink; // This results in a call to ADSBDemod::stop(), so need to delete before worker and thread
-    delete m_worker;
     delete m_thread;
+
+    // Nothing pushes to the tracker any more, so the thread can go. The tracker and
+    // the worker delete themselves when it finishes
+    m_workerThread->quit();
+    m_workerThread->wait();
+    m_tracker = nullptr;
+    m_worker = nullptr;
+}
+
+void ADSBDemod::setMessageQueueToGUI(MessageQueue* queue)
+{
+    ChannelAPI::setMessageQueueToGUI(queue);
+    m_basebandSink->setMessageQueueToGUI(queue);
+    m_tracker->setMessageQueueToGUI(queue);
 }
 
 void ADSBDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -137,8 +161,6 @@ void ADSBDemod::start()
 {
     qDebug() << "ADSBDemod::start";
 
-    m_worker->reset();
-    m_worker->startWork();
     m_basebandSink->reset();
     m_basebandSink->startWork();
     m_thread->start();
@@ -148,13 +170,15 @@ void ADSBDemod::start()
 
     ADSBDemodWorker::MsgConfigureADSBDemodWorker *msg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(m_settings, QStringList(), true);
     m_worker->getInputMessageQueue()->push(msg);
+
+    ADSBDemodTracker::MsgConfigureADSBDemodTracker *trackerMsg = ADSBDemodTracker::MsgConfigureADSBDemodTracker::create(m_settings, QStringList(), true);
+    m_tracker->getInputMessageQueue()->push(trackerMsg);
 }
 
 void ADSBDemod::stop()
 {
     qDebug() << "ADSBDemod::stop";
     m_basebandSink->stopWork();
-    m_worker->stopWork();
     m_thread->exit();
 #ifndef __EMSCRIPTEN__
     m_thread->wait();
@@ -185,6 +209,8 @@ bool ADSBDemod::handleMessage(const Message& cmd)
         if (m_guiMessageQueue) {
             m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
+        // And to the tracker, which needs the frequency for the reports it sends
+        m_tracker->getInputMessageQueue()->push(new DSPSignalNotification(notif));
 
         return true;
     }
@@ -231,6 +257,9 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, const QStringLi
 
     ADSBDemodWorker::MsgConfigureADSBDemodWorker *workerMsg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(settings, settingsKeys, force);
     m_worker->getInputMessageQueue()->push(workerMsg);
+
+    ADSBDemodTracker::MsgConfigureADSBDemodTracker *trackerMsg = ADSBDemodTracker::MsgConfigureADSBDemodTracker::create(settings, settingsKeys, force);
+    m_tracker->getInputMessageQueue()->push(trackerMsg);
 
     if (settings.m_useReverseAPI)
     {
