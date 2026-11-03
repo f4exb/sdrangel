@@ -173,7 +173,11 @@ bool MCPProtocol::isLongRunning(const QString& method, const QJsonObject& params
     }
 
     static const QStringList blocking = {"record_iq", "capture_audio", "listen", "scan"};
-    return blocking.contains(params["name"].toString());
+    QString name = params["name"].toString();
+    if (MCPToolCatalog::isCallRouter(name)) {
+        name = params["arguments"].toObject()["name"].toString();
+    }
+    return blocking.contains(name);
 }
 
 QJsonValue MCPProtocol::dispatch(const QString& method, const QJsonObject& params, Context& context)
@@ -276,11 +280,15 @@ QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
     if (context.m_compactTools)
     {
         serverInstructions += "\n\nCompact discovery: the initial tool list contains get_status, listen, scan, cleanup, "
-            "get_receiving_guide and search_tools. Search for device/channel/feature settings, spectrum, maps, "
+            "get_receiving_guide, search_tools, read_tool and write_tool. Search for device/channel/feature settings, spectrum, maps, "
             "decoded packets, recording, workspaces, presets, configurations and documentation. search_tools returns "
-            "the matching schemas and adds them to this session's tools/list. Refresh tools/list on "
-            "notifications/tools/list_changed before calling a newly discovered tool. Use the default /mcp endpoint "
-            "if your client cannot refresh its tool list. Searching never executes a discovered tool.";
+            "the matching schemas. Then use read_tool with {name, arguments} for targets annotated readOnlyHint true, "
+            "or write_tool for targets that change state. These entry points are in the initial catalog, so no refresh "
+            "is needed. For example, write_tool({name: 'set_center_frequency', arguments: {deviceSetIndex: 0, "
+            "frequency: 145500000}}). Search also adds matches to this session's tools/list and sends "
+            "notifications/tools/list_changed for clients that support direct named calls after a refresh. "
+            "Compact mode groups permissions under read_tool/write_tool. Use the full /mcp catalog if individual "
+            "target allowlists or approvals are required. Searching never executes a discovered tool.";
     }
     result["instructions"] = serverInstructions;
     return result;
@@ -370,9 +378,9 @@ QJsonValue MCPProtocol::toolsList(const QJsonObject& params, Context& context)
 {
     (void) params;
     QJsonObject result;
-    const QJsonArray tools = m_tools.listTools();
-    result["tools"] = m_streams && m_streams->usesCompactTools(context.m_sessionId)
-        ? MCPToolCatalog::filter(tools, m_streams->visibleTools(context.m_sessionId)) : tools;
+    const bool compact = m_streams && m_streams->usesCompactTools(context.m_sessionId);
+    const QJsonArray tools = m_tools.listTools(compact);
+    result["tools"] = compact ? MCPToolCatalog::filter(tools, m_streams->visibleTools(context.m_sessionId)) : tools;
     return result;
 }
 
@@ -384,6 +392,9 @@ QJsonValue MCPProtocol::toolsCall(const QJsonObject& params, Context& context)
         throw MCPError(InvalidParams, "Invalid params: missing tool name");
     }
 
+    if (MCPToolCatalog::isCallRouter(name) && (!m_streams || !m_streams->usesCompactTools(context.m_sessionId))) {
+        throw MCPError(InvalidParams, "Call routers are available only in compact sessions; use the named tool directly");
+    }
     const QJsonObject result = m_tools.callTool(name, params["arguments"].toObject());
     if (name == "search_tools" && !result["isError"].toBool() && m_streams)
     {

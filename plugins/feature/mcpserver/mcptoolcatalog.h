@@ -9,6 +9,7 @@
 
 // Discovery operates on the real registry's serialized definitions, retaining schemas and hints.
 namespace MCPToolCatalog {
+    bool isCallRouter(const QString& name);
     QSet<QString> initialTools();
     QJsonArray filter(const QJsonArray& tools, const QSet<QString>& names);
     QJsonObject search(const QJsonArray& tools, const QJsonObject& arguments);

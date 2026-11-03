@@ -102,7 +102,7 @@ public:
 
     explicit MCPTools(WebAPIAdapterInterface *webAPIAdapterInterface);
 
-    QJsonArray listTools() const;
+    QJsonArray listTools(bool includeCallRouters = false) const;
     QJsonObject callTool(const QString& name, const QJsonObject& arguments);
 
     // Data also served as resources
@@ -169,6 +169,8 @@ private:
 
     void add(const QString& name, const QString& description, const QJsonObject& inputSchema,
         std::function<QJsonValue(const QJsonObject& args)> handler);
+
+    QJsonObject routeToolCall(const QJsonObject& arguments, bool readOnly);
 
     void registerInstanceTools();
     void registerDeviceSetTools();

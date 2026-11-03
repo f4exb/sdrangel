@@ -7,9 +7,14 @@
 
 #include "mcperror.h"
 
+bool MCPToolCatalog::isCallRouter(const QString& name)
+{
+    return name == "read_tool" || name == "write_tool";
+}
+
 QSet<QString> MCPToolCatalog::initialTools()
 {
-    return {"get_status", "listen", "scan", "cleanup", "get_receiving_guide", "search_tools"};
+    return {"get_status", "listen", "scan", "cleanup", "get_receiving_guide", "search_tools", "read_tool", "write_tool"};
 }
 
 QJsonArray MCPToolCatalog::filter(const QJsonArray& tools, const QSet<QString>& names)

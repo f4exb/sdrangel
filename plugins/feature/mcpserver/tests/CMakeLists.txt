@@ -29,8 +29,10 @@ if(TARGET sdrbase)
     set_tests_properties(mcp-discovery PROPERTIES TIMEOUT 30)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
-        add_test(NAME mcp-discovery-http COMMAND ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/httptest.py $<TARGET_FILE:mcp-discovery-test>)
+        target_compile_definitions(mcp-discovery-test PRIVATE
+            MCP_HTTP_TEST_PYTHON="${Python3_EXECUTABLE}"
+            MCP_HTTP_TEST_SCRIPT="${CMAKE_CURRENT_SOURCE_DIR}/httptest.py")
+        add_test(NAME mcp-discovery-http COMMAND mcp-discovery-test --http-test)
         set_tests_properties(mcp-discovery-http PROPERTIES TIMEOUT 60)
     endif()
 endif()

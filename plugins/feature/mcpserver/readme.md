@@ -113,7 +113,7 @@ smaller initial catalog by initializing at `http://127.0.0.1:8092/mcp?tools=comp
 This is implemented in the plugin itself and requires no additional runtime or adapter.
 
 Compact mode initially advertises `get_status`, `listen`, `scan`, `cleanup`,
-`get_receiving_guide` and `search_tools`. The initialization instructions also describe
+`get_receiving_guide`, `search_tools`, `read_tool` and `write_tool`. The initialization instructions also describe
 settings, decoded packets and maps, recording, spectrum, workspaces, presets and docs,
 so the agent knows what else it can search for.
 
@@ -122,26 +122,48 @@ characters) and an optional `limit` (1 to 20, default 5). It searches names and
 descriptions, prioritizes exact names, and returns matching definitions with their
 original input schemas and safety annotations. It never runs a matching tool.
 
-In compact mode, matches are also added to that session's `tools/list`, and the server
-sends `notifications/tools/list_changed` on its SSE stream when the list grows. The
-client must retain the `Mcp-Session-Id`, open the event stream, and refresh `tools/list`
-on that notification. Discovered operations are then ordinary named tool calls, using
-the same validation, handlers and individual approval metadata as in full mode.
-Other clients' catalogs are unaffected. The profile lasts for the session; omitting
-the URL option on later requests does not change it. Anonymous requests keep the full
-catalog. Session deletion or expiry discards discovered names.
+After discovery, invoke a target through one of the stable call tools, which are present
+in the initial catalog even when the client cannot refresh tools during a turn:
 
-Use the default full catalog for clients that cannot refresh their tool list (including
-a bridge that uses a fixed bundled catalog). Search is available in full mode as well.
-Compact discovery trades some initial catalog size for additional discovery requests;
-it is not a claim that tasks need fewer turns or finish faster. This is native tool
-discovery, without JavaScript execution or a Code Mode sandbox.
+```json
+{"name":"write_tool","arguments":{"name":"set_center_frequency","arguments":{"deviceSetIndex":0,"frequency":145500000}}}
+```
+
+Use `read_tool` when the target's annotations have `readOnlyHint: true`, and `write_tool`
+otherwise. The server checks this classification against its own registry, rejects nested
+call tools, and applies the original target's argument validation. The original result is
+forwarded unchanged, including `isError`, structured data and media content. Blocking targets
+such as `listen`, `scan` and captures retain their existing dispatch-lock behavior.
+
+The call tools are advertised and accepted only in compact sessions. `read_tool` is marked
+read-only but open-world because reports can contain off-air or network data; `write_tool`
+is conservatively marked read-write, destructive, non-idempotent and open-world. Compact
+mode groups permissions under these call tools. Target-specific client allowlists and
+approval policies do not carry through a generic call tool: use the full catalog when
+individual target permissions are required. Full sessions cannot invoke these routes.
+
+Matches are also added to that session's `tools/list`, with a
+`notifications/tools/list_changed` event on its SSE stream when the list grows. Clients
+that support tool refresh can use the ordinary named calls after refreshing. This is
+optional: clients with a frozen catalog can complete discovery and invocation through the
+initial `read_tool`/`write_tool` entry points without SSE or a catalog refresh. Other
+clients' catalogs are unaffected. The profile lasts for the session; omitting the URL
+option on later requests does not change it. Anonymous requests keep the full catalog.
+Session deletion or expiry discards discovered names.
+
+Search is available in full mode as well. Compact discovery trades some initial catalog
+size for additional discovery requests; it is not a claim that tasks need fewer turns or
+finish faster. This is native tool discovery and dispatch, without JavaScript execution
+or a Code Mode sandbox. A manual Codex test of direct named-tool discovery did not expose
+the newly found tool during the same turn; the stable call tools address that dependency.
+SDK or protocol tests alone do not establish compatibility with a particular agent client.
 
 The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports every frequency above the threshold with its level (and, for intermittent signals, where the scanner parked), stepping by the channel spacing usual for the mode unless told otherwise and refusing modes that live on fixed frequencies, and `get_status` returns one line per device set and feature. Both `listen` and `scan` keep track of the channels they add: by default the next of either on the same device set removes them first, so that exploring a band does not leave a trail of demodulators all playing audio, and `cleanup` removes them all. A `listen` that finds a demodulator of the type it needs among them retunes it instead, as a person would, so stepping through a band in one mode keeps one channel open throughout. Both measure and set the receiver gain, as `tune_gain` does, when they create a device set or move one to another band, and leave it alone otherwise or when told `tuneGain` false. A mode whose output goes to a feature (AIS, radiosondes, APRS) has `listen` add that feature when it is absent, and remove it again, along with the channels, once nothing it added feeds it; a feature that was already there is left alone. AIS gets a demodulator on each of its two channels with the device centred between them. Channels added any other way are kept on the frequency they had, by moving their offset, when the retuned baseband still holds them; an audio demodulator it cannot hold is removed, since all it could do is play noise, while anything else (a file sink, an analyser) is left in place and named in the reply. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
 
 | Area | Tools |
 |------|-------|
 | Intent | `listen`, `scan`, `cleanup`, `tune_gain`, `get_status` |
+| Compact calls | `read_tool`, `write_tool` (compact sessions only) |
 | Discovery | `search_tools`, `get_instance_summary`, `list_available_devices`, `list_channel_types`, `list_feature_types`, `describe_settings`, `get_receiving_guide`, `list_docs`, `get_docs`, `list_audio_devices`, `get_location`, `set_location` |
 | Device sets | `add_deviceset`, `remove_last_deviceset`, `get_deviceset`, `set_device`, `get_device_settings`, `set_device_settings`, `set_center_frequency`, `start_device`, `stop_device`, `get_device_report`, `device_action`, `get_spectrum_settings`, `set_spectrum_settings`, `get_spectrum_data`, `get_spectrum_history`, `get_waterfall_image`, `spectrum_action` |
 | Channels | `add_channel`, `delete_channel`, `get_channel_settings`, `set_channel_settings`, `get_channel_report`, `channel_action` |
@@ -213,6 +235,7 @@ For native protocol, session and HTTP/SSE tests, configure a normal SDRangel bui
 with `-DBUILD_MCPSERVER_TESTS=ON`, build `mcp-catalog-test` and `mcp-discovery-test`,
 and run `ctest --test-dir <build>/plugins/feature/mcpserver/tests --output-on-failure`
 (use `pluginssrv` instead of `plugins` for a server-only build).
-The HTTP test uses Python 3's standard library and starts an isolated listener on an
+The HTTP test includes a frozen-catalog client that searches and invokes through an
+initial call tool without SSE or a refresh. It uses Python 3's standard library and starts an isolated listener on an
 ephemeral loopback port. It exercises the production protocol and tool registry with
 no Web API adapter; it does not open a radio or contact an existing instance.

@@ -826,11 +826,29 @@ MCPTools::MCPTools(WebAPIAdapterInterface *webAPIAdapterInterface) :
         "Find SDRangel tools by exact name or keywords across devices, channels, features, settings, maps, "
         "decoded packets, recording, spectrum, workspaces, presets and documentation. Returns matching input schemas "
         "and safety hints; it does not run the tools. In compact mode, matches are added to this session's tools/list "
-        "and a tools/list_changed notification requests a client refresh. Use specific names to narrow results.",
+        "and a tools/list_changed notification requests a client refresh. With a fixed client catalog, use read_tool for "
+        "matches annotated readOnlyHint true and write_tool for other matches. Use specific names to narrow results.",
         schema({{"query", QJsonObject{{"type", "string"}, {"description", "Tool name or keywords, case insensitive"},
                     {"minLength", 1}, {"maxLength", 256}}},
                 {"limit", bounded(intProp("Maximum matches (default 5)"), 1, 20)}}, {"query"}),
         [this](const QJsonObject& args) { return MCPToolCatalog::search(listTools(), args); });
+    const QJsonObject callSchema = schema({
+        {"name", strProp("Exact tool name returned by search_tools")},
+        {"arguments", objProp("Arguments conforming to that tool's inputSchema, or {} when it takes none")}
+    }, {"name", "arguments"});
+    add("read_tool",
+        "Call a discovered read-only SDRangel tool by name, without refreshing the client catalog. "
+        "First search_tools for its inputSchema. Accepts only targets annotated readOnlyHint true; "
+        "state-changing tools and nested routers are rejected. Returns the original tool result, including errors and media. "
+        "Reads may include data received from unknown transmitters or network services.",
+        callSchema, [this](const QJsonObject& args) { return routeToolCall(args, true); });
+    add("write_tool",
+        "Call a discovered state-changing SDRangel tool by name, without refreshing the client catalog. "
+        "First search_tools for its inputSchema. May retune or start hardware, change settings, add or delete objects, "
+        "write recordings or contact network services. Use read_tool for read-only targets. "
+        "Runs one ordinary handler, without JavaScript execution or a transaction; applied changes are not rolled back. "
+        "Permissions are grouped under write_tool rather than granted separately per target operation.",
+        callSchema, [this](const QJsonObject& args) { return routeToolCall(args, false); });
 }
 
 void MCPTools::setStopping(bool stopping)
@@ -923,6 +941,10 @@ static ToolBehaviour behaviourFor(const QString& name)
         "add_deviceset", "add_channel", "add_feature", "add_workspace", "add_annotation"
     };
 
+    if (name == "read_tool") {
+        return {true, false, true, true};
+    }
+
     if (localReads.contains(name)) {
         return {true, false, true, false};
     }
@@ -952,12 +974,15 @@ void MCPTools::add(const QString& name, const QString& description, const QJsonO
     m_tools.append(tool);
 }
 
-QJsonArray MCPTools::listTools() const
+QJsonArray MCPTools::listTools(bool includeCallRouters) const
 {
     QJsonArray tools;
 
     for (const Tool& tool : m_tools)
     {
+        if (!includeCallRouters && MCPToolCatalog::isCallRouter(tool.name)) {
+            continue;
+        }
         QJsonObject t;
         t["name"] = tool.name;
         t["description"] = tool.description;
@@ -976,6 +1001,25 @@ QJsonArray MCPTools::listTools() const
     }
 
     return tools;
+}
+
+QJsonObject MCPTools::routeToolCall(const QJsonObject& arguments, bool readOnly)
+{
+    const QString name = argString(arguments, "name");
+    const QJsonObject targetArguments = argObject(arguments, "arguments");
+    if (MCPToolCatalog::isCallRouter(name) || name == "search_tools") {
+        throw MCPToolError("Call search_tools directly; nested call routers are not supported");
+    }
+    const auto target = std::find_if(m_tools.cbegin(), m_tools.cend(), [&name](const Tool& tool) {
+        return tool.name == name;
+    });
+    if (target == m_tools.cend()) {
+        throw MCPToolError(QString("Unknown tool: %1").arg(name));
+    }
+    if (behaviourFor(name).m_readOnly != readOnly) {
+        throw MCPToolError(QString("Use %1 for %2").arg(readOnly ? "write_tool" : "read_tool").arg(name));
+    }
+    return callTool(name, targetArguments);
 }
 
 QJsonObject MCPTools::callTool(const QString& name, const QJsonObject& arguments)
@@ -1024,6 +1068,11 @@ QJsonObject MCPTools::callTool(const QString& name, const QJsonObject& arguments
         }
 
         QJsonValue value = tool->handler(arguments);
+        // Routers already hold the target's complete MCP result. Forward it unchanged so
+        // errors, structured content and images/audio are not nested in a successful result.
+        if (MCPToolCatalog::isCallRouter(name)) {
+            return value.toObject();
+        }
 
         // A handler that has a picture to show puts it under _image, which becomes an image
         // content item beside the text rather than a base64 blob in it

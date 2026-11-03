@@ -2,6 +2,7 @@
 #include <QtTest>
 #include <cstdio>
 #include <cstdlib>
+#include <QProcess>
 #include "httplistener.h"
 #include "mcprequesthandler.h"
 #include "maincore.h"
@@ -53,8 +54,8 @@ private slots:
         // After initialize the URL option is no longer needed; the session owns the profile.
         compact.m_compactTools = false;
         const QJsonArray initial = request(protocol, compact, "tools/list")["result"].toObject()["tools"].toArray();
-        QCOMPARE(initial.size(), 6);
-        QCOMPARE(initial, MCPToolCatalog::filter(all, MCPToolCatalog::initialTools()));
+        QCOMPARE(initial.size(), 8);
+        QCOMPARE(initial, MCPToolCatalog::filter(protocol.getTools().listTools(true), MCPToolCatalog::initialTools()));
 
         const QString other = streams.createSession(true);
         QString error;
@@ -72,7 +73,7 @@ private slots:
         QVERIFY(otherStream->waitForEvent(1).isEmpty());
         QCOMPARE(streams.visibleTools(other), MCPToolCatalog::initialTools());
         const QJsonArray expanded = request(protocol, compact, "tools/list")["result"].toObject()["tools"].toArray();
-        QCOMPARE(expanded.size(), 7);
+        QCOMPARE(expanded.size(), 9);
         QVERIFY(expanded.contains(matches.first()));
         QVERIFY(all.contains(matches.first())); // The original definition and safety hints are retained.
         QVERIFY(!call(protocol, compact, "list_docs")["isError"].toBool());
@@ -94,6 +95,71 @@ private slots:
         streams.close(otherStream);
     }
 
+    void fixedCatalogCallsAndGuards()
+    {
+        MCPStreams streams;
+        MCPProtocol protocol(nullptr);
+        protocol.setStreams(&streams);
+        MCPProtocol::Context compact;
+        compact.m_compactTools = true;
+        request(protocol, compact, "initialize");
+        const QJsonArray initial = request(protocol, compact, "tools/list")["result"].toObject()["tools"].toArray();
+        const QJsonArray found = call(protocol, compact, "search_tools", {{"query", "list_docs"}, {"limit", 1}})
+            ["structuredContent"].toObject()["tools"].toArray();
+        QVERIFY(!initial.contains(found.first()));
+        // Keep the initial catalog frozen: no SSE connection or tools/list refresh.
+        const QJsonObject routed = call(protocol, compact, "read_tool", {{"name", "list_docs"}, {"arguments", QJsonObject()}});
+        QVERIFY(!routed["isError"].toBool());
+        QCOMPARE(routed, call(protocol, compact, "list_docs"));
+        QVERIFY(!routed["structuredContent"].toObject().contains("content")); // No double wrapping.
+
+        const QList<QJsonObject> invalidReads = {
+            {{"name", "set_center_frequency"}, {"arguments", QJsonObject{{"deviceSetIndex", 0}, {"frequency", 145500000}}}},
+            {{"name", "write_tool"}, {"arguments", QJsonObject()}},
+            {{"name", "read_tool"}, {"arguments", QJsonObject()}},
+            {{"name", "search_tools"}, {"arguments", QJsonObject()}},
+            {{"name", "unknown_tool"}, {"arguments", QJsonObject()}},
+            {{"name", "list_docs"}, {"arguments", QJsonArray()}},
+            {{"name", "list_docs"}},
+            {{"name", "list_docs"}, {"arguments", QJsonObject()}, {"unknown", 1}}
+        };
+        for (const QJsonObject& args : invalidReads) {
+            QVERIFY(call(protocol, compact, "read_tool", args)["isError"].toBool());
+        }
+        QVERIFY(call(protocol, compact, "write_tool", {{"name", "list_docs"}, {"arguments", QJsonObject()}})["isError"].toBool());
+        // Native target validation failures must remain errors, not successful nested results.
+        QCOMPARE(call(protocol, compact, "read_tool", {{"name", "list_docs"}, {"arguments", QJsonObject{{"unknown", true}}}}),
+            call(protocol, compact, "list_docs", {{"unknown", true}}));
+        QVERIFY(call(protocol, compact, "write_tool", {{"name", "set_center_frequency"}, {"arguments", QJsonObject()}})["isError"].toBool());
+
+        MCPProtocol::Context full;
+        request(protocol, full, "initialize");
+        const QJsonArray all = request(protocol, full, "tools/list")["result"].toObject()["tools"].toArray();
+        for (const QJsonValue& value : all) {
+            QVERIFY(!MCPToolCatalog::isCallRouter(value.toObject()["name"].toString()));
+        }
+        QVERIFY(request(protocol, full, "tools/call", {{"name", "read_tool"},
+            {"arguments", QJsonObject{{"name", "list_docs"}, {"arguments", QJsonObject()}}}}).contains("error"));
+        for (const QJsonValue& value : initial)
+        {
+            const QJsonObject tool = value.toObject();
+            if (tool["name"] == "read_tool")
+            {
+                const QJsonObject hints = tool["annotations"].toObject();
+                QVERIFY(hints["readOnlyHint"].toBool());
+                QVERIFY(!hints["destructiveHint"].toBool(true));
+                QVERIFY(hints["openWorldHint"].toBool(true));
+            }
+            if (tool["name"] == "write_tool")
+            {
+                const QJsonObject hints = tool["annotations"].toObject();
+                QVERIFY(!hints["readOnlyHint"].toBool());
+                QVERIFY(hints["destructiveHint"].toBool(true));
+                QVERIFY(!hints["idempotentHint"].toBool());
+            }
+        }
+    }
+
     void expiredSessionsReleaseDiscoveryState()
     {
         MCPStreams streams;
@@ -108,7 +174,8 @@ private slots:
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
-    if (app.arguments().contains("--serve"))
+    const bool httpTest = app.arguments().contains("--http-test");
+    if (httpTest || app.arguments().contains("--serve"))
     {
         QCoreApplication::setLibraryPaths({});
         MainCore::instance();
@@ -123,6 +190,29 @@ int main(int argc, char **argv)
         if (!listener.isListening()) { return 1; }
         std::printf("PORT=%u\n", listener.serverPort());
         std::fflush(stdout);
+        QProcess client;
+        if (httpTest)
+        {
+#ifdef MCP_HTTP_TEST_PYTHON
+            // Paths are fixed by CMake's test configuration. Only the ephemeral port is
+            // passed at runtime; the Python client never launches an arbitrary executable.
+            client.setProcessChannelMode(QProcess::ForwardedChannels);
+            QObject::connect(&client, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                [](int code, QProcess::ExitStatus status) {
+                    std::fflush(nullptr);
+                    // MainCore's global workers need the same one-shot exit as below.
+                    std::_Exit(status == QProcess::NormalExit ? code : 1);
+                });
+            QObject::connect(&client, &QProcess::errorOccurred, [](QProcess::ProcessError) {
+                std::fflush(nullptr);
+                std::_Exit(1);
+            });
+            client.start(QString::fromUtf8(MCP_HTTP_TEST_PYTHON), {
+                QString::fromUtf8(MCP_HTTP_TEST_SCRIPT), QString::number(listener.serverPort())});
+#else
+            return 1;
+#endif
+        }
         return app.exec();
     }
     DiscoveryTest test;
