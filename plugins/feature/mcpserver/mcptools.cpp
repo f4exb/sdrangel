@@ -78,6 +78,7 @@
 
 #include "mcpstreams.h"
 #include "mcptools.h"
+#include "mcptoolcatalog.h"
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -821,6 +822,15 @@ MCPTools::MCPTools(WebAPIAdapterInterface *webAPIAdapterInterface) :
     registerWorkspaceTools();
     registerCaptureTools();
     registerIntentTools();
+    add("search_tools",
+        "Find SDRangel tools by exact name or keywords across devices, channels, features, settings, maps, "
+        "decoded packets, recording, spectrum, workspaces, presets and documentation. Returns matching input schemas "
+        "and safety hints; it does not run the tools. In compact mode, matches are added to this session's tools/list "
+        "and a tools/list_changed notification requests a client refresh. Use specific names to narrow results.",
+        schema({{"query", QJsonObject{{"type", "string"}, {"description", "Tool name or keywords, case insensitive"},
+                    {"minLength", 1}, {"maxLength", 256}}},
+                {"limit", bounded(intProp("Maximum matches (default 5)"), 1, 20)}}, {"query"}),
+        [this](const QJsonObject& args) { return MCPToolCatalog::search(listTools(), args); });
 }
 
 void MCPTools::setStopping(bool stopping)
@@ -893,7 +903,7 @@ static ToolBehaviour behaviourFor(const QString& name)
 {
     // Reads of this instance's own configuration and of documentation compiled into the plugin
     static const QStringList localReads = {
-        "get_instance_summary", "list_available_devices", "list_channel_types", "list_feature_types",
+        "search_tools", "get_instance_summary", "list_available_devices", "list_channel_types", "list_feature_types",
         "describe_settings", "get_receiving_guide", "list_docs", "get_docs", "list_audio_devices",
         "get_location", "get_deviceset", "get_device_settings",
         "get_spectrum_settings", "get_spectrum_report", "get_spectrum_data", "get_channel_settings", "get_feature_settings",

@@ -33,6 +33,7 @@
 #include "mcperror.h"
 #include "mcpstreams.h"
 #include "mcptools.h"
+#include "mcptoolcatalog.h"
 
 // ---------------------------------------------------------------------------
 // MCPEventStream
@@ -109,13 +110,54 @@ MCPStreams::~MCPStreams()
     closeAll();
 }
 
-QString MCPStreams::createSession()
+QString MCPStreams::createSession(bool compactTools)
 {
     QMutexLocker locker(&m_mutex);
     QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     m_sessions.insert(id, QDateTime::currentDateTimeUtc());
+    if (compactTools) {
+        m_visibleTools.insert(id, MCPToolCatalog::initialTools());
+    }
     expireSessions();
     return id;
+}
+
+bool MCPStreams::usesCompactTools(const QString& sessionId) const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_visibleTools.contains(sessionId);
+}
+
+QSet<QString> MCPStreams::visibleTools(const QString& sessionId) const
+{
+    QMutexLocker locker(&m_mutex);
+    return m_visibleTools.value(sessionId);
+}
+
+void MCPStreams::revealTools(const QString& sessionId, const QSet<QString>& names)
+{
+    QList<StreamPtr> targets;
+    {
+        QMutexLocker locker(&m_mutex);
+        auto it = m_visibleTools.find(sessionId);
+        if (it == m_visibleTools.end() || (names - it.value()).isEmpty()) {
+            return;
+        }
+        it.value().unite(names);
+        for (const StreamPtr& stream : m_streams)
+        {
+            if (stream->getSessionId() == sessionId) {
+                targets.append(stream);
+            }
+        }
+        m_notificationsSent += targets.size();
+    }
+    const QByteArray event = QJsonDocument(QJsonObject{
+        {"jsonrpc", "2.0"}, {"method", "notifications/tools/list_changed"}
+    }).toJson(QJsonDocument::Compact);
+    for (const StreamPtr& stream : targets) {
+        stream->push(event);
+    }
 }
 
 bool MCPStreams::sessionExists(const QString& sessionId)
@@ -168,6 +210,7 @@ void MCPStreams::expireSessions()
         {
             m_sessions.remove(id);
             m_subscriptions.remove(id);
+            m_visibleTools.remove(id);
         }
     }
 }
@@ -179,6 +222,7 @@ void MCPStreams::endSession(const QString& sessionId)
         QMutexLocker locker(&m_mutex);
         m_sessions.remove(sessionId);
         m_subscriptions.remove(sessionId);
+        m_visibleTools.remove(sessionId);
 
         for (const StreamPtr& stream : m_streams)
         {

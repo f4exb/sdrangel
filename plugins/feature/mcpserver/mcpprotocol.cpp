@@ -23,6 +23,7 @@
 
 #include "mcpstreams.h"
 #include "mcpprotocol.h"
+#include "mcptoolcatalog.h"
 
 const char* const MCPProtocol::m_serverName = "SDRangel";
 const char* const MCPProtocol::m_latestProtocolVersion = "2025-06-18";
@@ -184,9 +185,9 @@ QJsonValue MCPProtocol::dispatch(const QString& method, const QJsonObject& param
     } else if (method.startsWith("notifications/")) {
         return QJsonValue(); // initialized, cancelled, progress, roots/list_changed: nothing to do
     } else if (method == "tools/list") {
-        return toolsList(params);
+        return toolsList(params, context);
     } else if (method == "tools/call") {
-        return toolsCall(params);
+        return toolsCall(params, context);
     } else if (method == "resources/list") {
         return resourcesList(params);
     } else if (method == "resources/templates/list") {
@@ -230,6 +231,9 @@ bool MCPProtocol::isSupportedVersion(const QString& version)
 
 QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
 {
+    if (context.m_compactTools && !m_streams) {
+        throw MCPError(InvalidParams, "Compact discovery requires session support");
+    }
     // Echo the client's version if we implement it, otherwise offer the newest we have
     QString requested = params["protocolVersion"].toString();
     QString version = isSupportedVersion(requested) ? requested : QString(m_latestProtocolVersion);
@@ -241,7 +245,7 @@ QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
         qPrintable(requested));
 
     QJsonObject tools;
-    tools["listChanged"] = false;
+    tools["listChanged"] = context.m_compactTools && m_streams;
     QJsonObject resources;
     resources["subscribe"] = true;
     resources["listChanged"] = false;
@@ -260,14 +264,25 @@ QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
     // A session lets subscriptions and the event stream of this client be told apart from
     // those of any other. Clients that ignore the session id share an anonymous one.
     if (m_streams) {
-        context.m_newSessionId = m_streams->createSession();
+        context.m_newSessionId = m_streams->createSession(context.m_compactTools);
+        context.m_sessionId = context.m_newSessionId;
     }
 
     QJsonObject result;
     result["protocolVersion"] = version;
     result["capabilities"] = capabilities;
     result["serverInfo"] = serverInfo;
-    result["instructions"] = instructions();
+    QString serverInstructions = instructions();
+    if (context.m_compactTools)
+    {
+        serverInstructions += "\n\nCompact discovery: the initial tool list contains get_status, listen, scan, cleanup, "
+            "get_receiving_guide and search_tools. Search for device/channel/feature settings, spectrum, maps, "
+            "decoded packets, recording, workspaces, presets, configurations and documentation. search_tools returns "
+            "the matching schemas and adds them to this session's tools/list. Refresh tools/list on "
+            "notifications/tools/list_changed before calling a newly discovered tool. Use the default /mcp endpoint "
+            "if your client cannot refresh its tool list. Searching never executes a discovered tool.";
+    }
+    result["instructions"] = serverInstructions;
     return result;
 }
 
@@ -351,15 +366,17 @@ QString MCPProtocol::instructions()
         "setting changes are applied asynchronously.";
 }
 
-QJsonValue MCPProtocol::toolsList(const QJsonObject& params)
+QJsonValue MCPProtocol::toolsList(const QJsonObject& params, Context& context)
 {
     (void) params;
     QJsonObject result;
-    result["tools"] = m_tools.listTools();
+    const QJsonArray tools = m_tools.listTools();
+    result["tools"] = m_streams && m_streams->usesCompactTools(context.m_sessionId)
+        ? MCPToolCatalog::filter(tools, m_streams->visibleTools(context.m_sessionId)) : tools;
     return result;
 }
 
-QJsonValue MCPProtocol::toolsCall(const QJsonObject& params)
+QJsonValue MCPProtocol::toolsCall(const QJsonObject& params, Context& context)
 {
     QString name = params["name"].toString();
 
@@ -367,7 +384,17 @@ QJsonValue MCPProtocol::toolsCall(const QJsonObject& params)
         throw MCPError(InvalidParams, "Invalid params: missing tool name");
     }
 
-    return m_tools.callTool(name, params["arguments"].toObject());
+    const QJsonObject result = m_tools.callTool(name, params["arguments"].toObject());
+    if (name == "search_tools" && !result["isError"].toBool() && m_streams)
+    {
+        QSet<QString> names;
+        const QJsonArray matches = result["structuredContent"].toObject()["tools"].toArray();
+        for (const QJsonValue& tool : matches) {
+            names.insert(tool.toObject()["name"].toString());
+        }
+        m_streams->revealTools(context.m_sessionId, names);
+    }
+    return result;
 }
 
 QJsonObject MCPProtocol::textContent(const QString& text)

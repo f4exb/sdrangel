@@ -305,6 +305,15 @@ void MCPRequestHandler::handlePost(qtwebapp::HttpRequest& request, qtwebapp::Htt
 
     MCPProtocol::Context context;
     context.m_sessionId = sessionId;
+    // The profile is chosen at initialize and retained with the session; subsequent URLs
+    // cannot change it. Session-less requests retain the existing full catalog.
+    const QByteArray toolProfile = request.getParameter("tools");
+    if (!toolProfile.isEmpty() && toolProfile != "compact" && toolProfile != "full")
+    {
+        sendHttpError(response, 400, "Bad Request", "tools must be full or compact");
+        return;
+    }
+    context.m_compactTools = toolProfile == "compact";
 
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(request.getBody(), &parseError);
