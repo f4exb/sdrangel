@@ -108,6 +108,12 @@ With a token set, the header goes alongside it:
 
 <h2>Tools</h2>
 
+For clients that prefer progressive tool discovery and composing operations in
+JavaScript, an optional [local Code Mode adapter](codemode/README.md) exposes
+`search` and `execute` in front of this server. It uses Cloudflare's local Worker
+runtime and leaves this plugin and its normal tool interface unchanged. It is
+installed separately and is not required to build or run SDRangel.
+
 The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports every frequency above the threshold with its level (and, for intermittent signals, where the scanner parked), stepping by the channel spacing usual for the mode unless told otherwise and refusing modes that live on fixed frequencies, and `get_status` returns one line per device set and feature. Both `listen` and `scan` keep track of the channels they add: by default the next of either on the same device set removes them first, so that exploring a band does not leave a trail of demodulators all playing audio, and `cleanup` removes them all. A `listen` that finds a demodulator of the type it needs among them retunes it instead, as a person would, so stepping through a band in one mode keeps one channel open throughout. Both measure and set the receiver gain, as `tune_gain` does, when they create a device set or move one to another band, and leave it alone otherwise or when told `tuneGain` false. A mode whose output goes to a feature (AIS, radiosondes, APRS) has `listen` add that feature when it is absent, and remove it again, along with the channels, once nothing it added feeds it; a feature that was already there is left alone. AIS gets a demodulator on each of its two channels with the device centred between them. Channels added any other way are kept on the frequency they had, by moving their offset, when the retuned baseband still holds them; an audio demodulator it cannot hold is removed, since all it could do is play noise, while anything else (a file sink, an analyser) is left in place and named in the reply. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
 
 | Area | Tools |
