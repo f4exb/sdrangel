@@ -8,7 +8,7 @@ export interface RadioTool {
 
 /** Return only matching schemas, without sending the entire catalog to the model. */
 export function searchTools(tools: RadioTool[], query: string, limit = 5) {
-  const terms = query.toLowerCase().match(/[a-z0-9_]+/g) ?? [];
+  const terms: string[] = query.toLowerCase().match(/[a-z0-9_]+/g) ?? [];
   return tools.map((tool, index) => {
     const name = tool.name.toLowerCase();
     const description = (tool.description ?? "").toLowerCase();

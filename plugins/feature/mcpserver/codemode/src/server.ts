@@ -12,8 +12,8 @@ interface Env {
   SDRANGEL_MCP_TOKEN?: string;
 }
 
-function textResult(value: unknown) {
-  const text = JSON.stringify(value) ?? "null";
+function textResult(value: Record<string, unknown>) {
+  const text = JSON.stringify(value);
   if (text.length > 250000) throw new Error("Result exceeds 250000 characters; filter or summarise it in execute");
   return { content: [{ type: "text" as const, text }] };
 }
