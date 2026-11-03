@@ -392,8 +392,8 @@ QJsonValue MCPProtocol::toolsCall(const QJsonObject& params, Context& context)
         throw MCPError(InvalidParams, "Invalid params: missing tool name");
     }
 
-    if (MCPToolCatalog::isCallRouter(name) && (!m_streams || !m_streams->usesCompactTools(context.m_sessionId))) {
-        throw MCPError(InvalidParams, "Call routers are available only in compact sessions; use the named tool directly");
+    if (MCPToolCatalog::isCompactTool(name) && (!m_streams || !m_streams->usesCompactTools(context.m_sessionId))) {
+        throw MCPError(InvalidParams, "Discovery and call tools are available only in compact sessions; use the named tool directly");
     }
     const QJsonObject result = m_tools.callTool(name, params["arguments"].toObject());
     if (name == "search_tools" && !result["isError"].toBool() && m_streams)

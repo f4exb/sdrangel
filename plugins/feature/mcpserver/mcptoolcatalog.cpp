@@ -12,6 +12,11 @@ bool MCPToolCatalog::isCallRouter(const QString& name)
     return name == "read_tool" || name == "write_tool";
 }
 
+bool MCPToolCatalog::isCompactTool(const QString& name)
+{
+    return name == "search_tools" || isCallRouter(name);
+}
+
 QSet<QString> MCPToolCatalog::initialTools()
 {
     return {"get_status", "listen", "scan", "cleanup", "get_receiving_guide", "search_tools", "read_tool", "write_tool"};

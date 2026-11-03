@@ -108,7 +108,8 @@ With a token set, the header goes alongside it:
 
 <h2>Tools</h2>
 
-The default `/mcp` endpoint advertises the full tool catalog. A client can opt into a
+The default `/mcp` endpoint advertises the original full operation catalog, without the
+compact-only `search_tools`, `read_tool` and `write_tool`. A client can opt into a
 smaller initial catalog by initializing at `http://127.0.0.1:8092/mcp?tools=compact`.
 This is implemented in the plugin itself and requires no additional runtime or adapter.
 
@@ -131,11 +132,12 @@ in the initial catalog even when the client cannot refresh tools during a turn:
 
 Use `read_tool` when the target's annotations have `readOnlyHint: true`, and `write_tool`
 otherwise. The server checks this classification against its own registry, rejects nested
-call tools, and applies the original target's argument validation. The original result is
+call tools, requires a string target name and a JSON argument object, and applies the
+original target's argument validation. The original result is
 forwarded unchanged, including `isError`, structured data and media content. Blocking targets
 such as `listen`, `scan` and captures retain their existing dispatch-lock behavior.
 
-The call tools are advertised and accepted only in compact sessions. `read_tool` is marked
+Discovery and call tools are advertised and accepted only in compact sessions. `read_tool` is marked
 read-only but open-world because reports can contain off-air or network data; `write_tool`
 is conservatively marked read-write, destructive, non-idempotent and open-world. Compact
 mode groups permissions under these call tools. Target-specific client allowlists and
@@ -151,7 +153,8 @@ clients' catalogs are unaffected. The profile lasts for the session; omitting th
 option on later requests does not change it. Anonymous requests keep the full catalog.
 Session deletion or expiry discards discovered names.
 
-Search is available in full mode as well. Compact discovery trades some initial catalog
+Search is omitted in full mode because every operation is already advertised there.
+Compact discovery trades some initial catalog
 size for additional discovery requests; it is not a claim that tasks need fewer turns or
 finish faster. This is native tool discovery and dispatch, without JavaScript execution
 or a Code Mode sandbox. A manual Codex test of direct named-tool discovery did not expose
@@ -222,6 +225,9 @@ To keep web pages from driving the server through a browser, requests carrying a
 
 
 <h2>Discovery tests</h2>
+
+See [manual validation and review findings](tests/manual-validation.md) for the tested
+workflows, initial-tool assessment and limits.
 
 The catalog tests need only Qt Core and Qt Test:
 

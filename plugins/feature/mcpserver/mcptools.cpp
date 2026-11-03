@@ -974,13 +974,13 @@ void MCPTools::add(const QString& name, const QString& description, const QJsonO
     m_tools.append(tool);
 }
 
-QJsonArray MCPTools::listTools(bool includeCallRouters) const
+QJsonArray MCPTools::listTools(bool includeCompactTools) const
 {
     QJsonArray tools;
 
     for (const Tool& tool : m_tools)
     {
-        if (!includeCallRouters && MCPToolCatalog::isCallRouter(tool.name)) {
+        if (!includeCompactTools && MCPToolCatalog::isCompactTool(tool.name)) {
             continue;
         }
         QJsonObject t;
@@ -1005,8 +1005,16 @@ QJsonArray MCPTools::listTools(bool includeCallRouters) const
 
 QJsonObject MCPTools::routeToolCall(const QJsonObject& arguments, bool readOnly)
 {
-    const QString name = argString(arguments, "name");
-    const QJsonObject targetArguments = argObject(arguments, "arguments");
+    // Unlike legacy target helpers, these new entry points require the advertised JSON
+    // types: no numeric tool names or string-encoded argument objects.
+    if (!arguments["name"].isString() || arguments["name"].toString().trimmed().isEmpty()) {
+        throw MCPToolError("name must be a non-empty string");
+    }
+    if (!arguments["arguments"].isObject()) {
+        throw MCPToolError("arguments must be a JSON object");
+    }
+    const QString name = arguments["name"].toString();
+    const QJsonObject targetArguments = arguments["arguments"].toObject();
     if (MCPToolCatalog::isCallRouter(name) || name == "search_tools") {
         throw MCPToolError("Call search_tools directly; nested call routers are not supported");
     }

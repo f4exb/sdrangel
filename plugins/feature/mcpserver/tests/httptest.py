@@ -23,6 +23,8 @@ def rpc(method, params=None, session=None, profile=""):
 status, full, init = rpc("initialize", {"protocolVersion": "2025-06-18"})
 assert status == 200 and full
 all_tools = rpc("tools/list", session=full)[2]["result"]["tools"]
+assert not {"search_tools", "read_tool", "write_tool"} & {tool["name"] for tool in all_tools}
+assert "error" in rpc("tools/call", {"name": "search_tools", "arguments": {"query": "list_docs"}}, full)[2]
 status, compact, init = rpc("initialize", profile="?tools=compact")
 assert status == 200 and compact
 assert init["result"]["capabilities"]["tools"]["listChanged"]
@@ -47,6 +49,7 @@ assert fixed_call("read_tool", {"name": "set_center_frequency", "arguments": {}}
 assert fixed_call("write_tool", {"name": "list_docs", "arguments": {}})["isError"]
 assert fixed_call("read_tool", {"name": "write_tool", "arguments": {}})["isError"]
 assert fixed_call("read_tool", {"name": "list_docs", "arguments": {"invalid": 1}})["isError"]
+assert fixed_call("read_tool", {"name": "list_docs", "arguments": "{}"})["isError"]
 assert "error" in rpc("tools/call", {"name": "write_tool", "arguments": {"name": "set_center_frequency", "arguments": {}}}, full)[2]
 print("Fixed-catalog client: search -> read_tool passed without SSE or catalog refresh; route and validation guards passed")
 

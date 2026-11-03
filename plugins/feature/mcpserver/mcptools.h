@@ -102,7 +102,8 @@ public:
 
     explicit MCPTools(WebAPIAdapterInterface *webAPIAdapterInterface);
 
-    QJsonArray listTools(bool includeCallRouters = false) const;
+    //!< Full mode omits compact-only discovery and call tools.
+    QJsonArray listTools(bool includeCompactTools = false) const;
     QJsonObject callTool(const QString& name, const QJsonObject& arguments);
 
     // Data also served as resources

@@ -107,6 +107,14 @@ private slots:
         const QJsonArray found = call(protocol, compact, "search_tools", {{"query", "list_docs"}, {"limit", 1}})
             ["structuredContent"].toObject()["tools"].toArray();
         QVERIFY(!initial.contains(found.first()));
+        for (const QString& query : {QString("documentation"), QString("search_tools"), QString("read_tool")})
+        {
+            const QJsonArray hits = call(protocol, compact, "search_tools", {{"query", query}, {"limit", 20}})
+                ["structuredContent"].toObject()["tools"].toArray();
+            for (const QJsonValue& hit : hits) {
+                QVERIFY(!MCPToolCatalog::isCompactTool(hit.toObject()["name"].toString()));
+            }
+        }
         // Keep the initial catalog frozen: no SSE connection or tools/list refresh.
         const QJsonObject routed = call(protocol, compact, "read_tool", {{"name", "list_docs"}, {"arguments", QJsonObject()}});
         QVERIFY(!routed["isError"].toBool());
@@ -121,11 +129,20 @@ private slots:
             {{"name", "unknown_tool"}, {"arguments", QJsonObject()}},
             {{"name", "list_docs"}, {"arguments", QJsonArray()}},
             {{"name", "list_docs"}},
+            {{"name", "list_docs"}, {"arguments", "{}"}},
+            {{"name", "list_docs"}, {"arguments", QJsonValue()}},
+            {{"name", 1}, {"arguments", QJsonObject()}},
+            {{"name", "  "}, {"arguments", QJsonObject()}},
             {{"name", "list_docs"}, {"arguments", QJsonObject()}, {"unknown", 1}}
         };
         for (const QJsonObject& args : invalidReads) {
             QVERIFY(call(protocol, compact, "read_tool", args)["isError"].toBool());
         }
+        // A get_ prefix does not imply read-only: history enables collection on first use.
+        const QJsonObject historyRead = call(protocol, compact, "read_tool", {
+            {"name", "get_spectrum_history"}, {"arguments", QJsonObject{{"deviceSetIndex", 0}}}});
+        QVERIFY(historyRead["isError"].toBool());
+        QVERIFY(historyRead["content"].toArray().first().toObject()["text"].toString().contains("write_tool"));
         QVERIFY(call(protocol, compact, "write_tool", {{"name", "list_docs"}, {"arguments", QJsonObject()}})["isError"].toBool());
         // Native target validation failures must remain errors, not successful nested results.
         QCOMPARE(call(protocol, compact, "read_tool", {{"name", "list_docs"}, {"arguments", QJsonObject{{"unknown", true}}}}),
@@ -136,8 +153,10 @@ private slots:
         request(protocol, full, "initialize");
         const QJsonArray all = request(protocol, full, "tools/list")["result"].toObject()["tools"].toArray();
         for (const QJsonValue& value : all) {
-            QVERIFY(!MCPToolCatalog::isCallRouter(value.toObject()["name"].toString()));
+            QVERIFY(!MCPToolCatalog::isCompactTool(value.toObject()["name"].toString()));
         }
+        QVERIFY(request(protocol, full, "tools/call", {{"name", "search_tools"},
+            {"arguments", QJsonObject{{"query", "list_docs"}}}}).contains("error"));
         QVERIFY(request(protocol, full, "tools/call", {{"name", "read_tool"},
             {"arguments", QJsonObject{{"name", "list_docs"}, {"arguments", QJsonObject()}}}}).contains("error"));
         for (const QJsonValue& value : initial)
