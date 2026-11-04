@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <cstring>
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDateTime>
 #include <QRegularExpression>
@@ -509,6 +510,48 @@ void WavFileRecord::writeHeader()
     header.m_auxi.m_unused5 = 0;
     memset(&header.m_auxi.m_nextFilename[0], 0, 96);
 
+    QString appName = QCoreApplication::applicationName();
+    if (appName.isEmpty()) {
+        #ifdef APPLICATION_NAME
+            appName = APPLICATION_NAME;
+        #else
+            appName = "SDRAngel";
+        #endif
+    }
+
+    QString appVersion = QCoreApplication::applicationVersion();
+    if (appVersion.isEmpty()) {
+        #ifdef SDRANGEL_VERSION
+        appVersion = SDRANGEL_VERSION;
+        #endif
+    }
+
+    QString softwareString = appVersion.isEmpty()
+        ? appName
+        : QString("%1 %2").arg(appName, appVersion);
+    QByteArray softwareBytes = softwareString.toUtf8();
+
+    header.m_listHeader.m_id[0] = 'L';
+    header.m_listHeader.m_id[1] = 'I';
+    header.m_listHeader.m_id[2] = 'S';
+    header.m_listHeader.m_id[3] = 'T';
+    header.m_listHeader.m_size = sizeof(header.m_infoType) + sizeof(Chunk) + sizeof(header.m_isftData);
+
+    header.m_infoType[0] = 'I';
+    header.m_infoType[1] = 'N';
+    header.m_infoType[2] = 'F';
+    header.m_infoType[3] = 'O';
+
+    header.m_isftHeader.m_id[0] = 'I';
+    header.m_isftHeader.m_id[1] = 'S';
+    header.m_isftHeader.m_id[2] = 'F';
+    header.m_isftHeader.m_id[3] = 'T';
+    header.m_isftHeader.m_size = sizeof(header.m_isftData);
+
+    memset(header.m_isftData, 0, sizeof(header.m_isftData));
+    std::memcpy(header.m_isftData, softwareBytes.constData(), qMin(size_t(softwareBytes.length()), sizeof(header.m_isftData) - 1));
+    // Make sure the chunk size covers the entire fixed array buffer written by the struct
+
     header.m_dataHeader.m_id[0] = 'd';
     header.m_dataHeader.m_id[1] = 'a';
     header.m_dataHeader.m_id[2] = 't';
@@ -718,6 +761,15 @@ bool WavFileRecord::readHeaderInternal(File& sampleFile, Header& header, bool ch
                 return false;
             }
             gotData = true;
+        }
+        else if (!strncmp(chunkHeader.m_id, "LIST", 4))
+        {
+            // Safely skip LIST INFO chunks without printing an "unknown section" warning
+            if (!skipBytes(sampleFile, static_cast<qint64>(chunkHeader.m_size) + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping LIST";
+                return false;
+            }
         }
         else
         {
