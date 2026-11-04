@@ -825,9 +825,9 @@ MCPTools::MCPTools(WebAPIAdapterInterface *webAPIAdapterInterface) :
     add("search_tools",
         "Find SDRangel tools by exact name or keywords across devices, channels, features, settings, maps, "
         "decoded packets, recording, spectrum, workspaces, presets and documentation. Returns matching input schemas "
-        "and safety hints; it does not run the tools. In compact mode, matches are added to this session's tools/list "
-        "and a tools/list_changed notification requests a client refresh. With a fixed client catalog, use read_tool for "
-        "matches annotated readOnlyHint true and write_tool for other matches. Use specific names to narrow results.",
+        "and safety hints; it does not run the tools or change the compact catalog. Use read_tool for "
+        "matches annotated readOnlyHint true and write_tool for other matches. Reuse a discovered schema for "
+        "later calls with the same operation instead of searching again. Use specific names to narrow results.",
         schema({{"query", QJsonObject{{"type", "string"}, {"description", "Tool name or keywords, case insensitive"},
                     {"minLength", 1}, {"maxLength", 256}}},
                 {"limit", bounded(intProp("Maximum matches (default 5)"), 1, 20)}}, {"query"}),
@@ -925,7 +925,7 @@ static ToolBehaviour behaviourFor(const QString& name)
         "describe_settings", "get_receiving_guide", "list_docs", "get_docs", "list_audio_devices",
         "get_location", "get_deviceset", "get_device_settings",
         "get_spectrum_settings", "get_spectrum_report", "get_spectrum_data", "get_channel_settings", "get_feature_settings",
-        "list_presets", "list_configurations", "get_server_status", "get_status"
+        "list_presets", "list_configurations", "list_windows", "get_server_status", "get_status"
     };
 
     // Reads that return data received off the air, from transmitters this instance does not

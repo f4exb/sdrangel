@@ -89,6 +89,7 @@ private:
 
     QJsonValue initialize(const QJsonObject& params, Context& context);
     QJsonValue resourcesSubscribe(const QJsonObject& params, Context& context, bool subscribe);
+    bool compactToolsFor(const Context& context) const;
     QJsonValue toolsList(const QJsonObject& params, Context& context);
     QJsonValue toolsCall(const QJsonObject& params, Context& context);
     QJsonValue resourcesList(const QJsonObject& params);

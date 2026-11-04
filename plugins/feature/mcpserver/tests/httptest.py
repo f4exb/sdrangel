@@ -27,7 +27,7 @@ assert not {"search_tools", "read_tool", "write_tool"} & {tool["name"] for tool 
 assert "error" in rpc("tools/call", {"name": "search_tools", "arguments": {"query": "list_docs"}}, full)[2]
 status, compact, init = rpc("initialize", profile="?tools=compact")
 assert status == 200 and compact
-assert init["result"]["capabilities"]["tools"]["listChanged"]
+assert not init["result"]["capabilities"]["tools"]["listChanged"]
 initial = rpc("tools/list", session=compact)[2]["result"]["tools"]
 assert len(initial) == 8 and len(all_tools) > 60
 # Session-less calls never opt in accidentally, even on the compact URL.
@@ -63,19 +63,26 @@ result = rpc("tools/call", {"name": "search_tools", "arguments": {"query": "list
 assert not result["isError"]
 definition = result["structuredContent"]["tools"][0]
 assert definition in all_tools
-notification = json.loads(events.readline().removeprefix(b"data: "))
-assert notification["method"] == "notifications/tools/list_changed"
-expanded = rpc("tools/list", session=compact)[2]["result"]["tools"]
-assert len(expanded) == 9 and definition in expanded
-assert not rpc("tools/call", {"name": "list_docs", "arguments": {}}, compact)[2]["result"]["isError"]
+# Search never changes the catalog, including when every target has been discovered.
+for tool in all_tools:
+    result = rpc("tools/call", {"name": "search_tools", "arguments": {"query": tool["name"], "limit": 1}}, compact)[2]["result"]
+    assert not result["isError"]
+    assert result["structuredContent"]["tools"][0] == tool
+assert rpc("tools/list", session=compact)[2]["result"]["tools"] == initial
 assert rpc("tools/list", session=full)[2]["result"]["tools"] == all_tools
+assert "error" in rpc("tools/call", {"name": "list_docs", "arguments": {}}, compact)[2]
+assert not rpc("tools/call", {"name": "read_tool", "arguments": {"name": "list_docs", "arguments": {}}}, compact)[2]["result"]["isError"]
 invalid = rpc("tools/call", {"name": "search_tools", "arguments": {"query": "list_docs", "limit": 99}}, compact)[2]["result"]
 assert invalid["isError"]
-assert rpc("tools/list", session=compact)[2]["result"]["tools"] == expanded
+assert rpc("tools/list", session=compact)[2]["result"]["tools"] == initial
+# Existing resource SSE notifications still work with a fixed tool catalog.
+rpc("resources/subscribe", {"uri": "sdrangel://instance"}, compact)
+# Resource notifier is not constructed by this fixture; direct event delivery is
+# tested in the C++ suite. Session DELETE must still close this open SSE stream.
 deletion = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
 deletion.request("DELETE", "/mcp", headers={"Mcp-Session-Id": compact})
 assert deletion.getresponse().status == 200
 deletion.close()
 assert rpc("tools/list", session=compact)[0] == 404
 conn.close()
-print(f"Native HTTP: full={len(all_tools)}, compact={len(initial)}, discovered={len(expanded)}; search, SSE refresh, direct call, isolation, errors and deletion passed")
+print(f"Native HTTP: full={len(all_tools)}, compact stays {len(initial)} after all searches; routes, isolation, errors and deletion passed")

@@ -33,7 +33,6 @@
 #include "mcperror.h"
 #include "mcpstreams.h"
 #include "mcptools.h"
-#include "mcptoolcatalog.h"
 
 // ---------------------------------------------------------------------------
 // MCPEventStream
@@ -114,50 +113,22 @@ QString MCPStreams::createSession(bool compactTools)
 {
     QMutexLocker locker(&m_mutex);
     QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    m_sessions.insert(id, QDateTime::currentDateTimeUtc());
-    if (compactTools) {
-        m_visibleTools.insert(id, MCPToolCatalog::initialTools());
-    }
-    expireSessions();
+    m_sessions.insert(id, {QDateTime::currentDateTimeUtc(), compactTools});
+    expireSessions(id);
     return id;
 }
 
-bool MCPStreams::usesCompactTools(const QString& sessionId) const
+MCPStreams::ToolProfile MCPStreams::toolProfile(const QString& sessionId) const
 {
-    QMutexLocker locker(&m_mutex);
-    return m_visibleTools.contains(sessionId);
-}
-
-QSet<QString> MCPStreams::visibleTools(const QString& sessionId) const
-{
-    QMutexLocker locker(&m_mutex);
-    return m_visibleTools.value(sessionId);
-}
-
-void MCPStreams::revealTools(const QString& sessionId, const QSet<QString>& names)
-{
-    QList<StreamPtr> targets;
-    {
-        QMutexLocker locker(&m_mutex);
-        auto it = m_visibleTools.find(sessionId);
-        if (it == m_visibleTools.end() || (names - it.value()).isEmpty()) {
-            return;
-        }
-        it.value().unite(names);
-        for (const StreamPtr& stream : m_streams)
-        {
-            if (stream->getSessionId() == sessionId) {
-                targets.append(stream);
-            }
-        }
-        m_notificationsSent += targets.size();
+    if (sessionId.isEmpty()) {
+        return ToolProfile::Full; // Anonymous requests retain the legacy full interface.
     }
-    const QByteArray event = QJsonDocument(QJsonObject{
-        {"jsonrpc", "2.0"}, {"method", "notifications/tools/list_changed"}
-    }).toJson(QJsonDocument::Compact);
-    for (const StreamPtr& stream : targets) {
-        stream->push(event);
+    QMutexLocker locker(&m_mutex);
+    const auto it = m_sessions.constFind(sessionId);
+    if (it == m_sessions.cend()) {
+        return ToolProfile::Unknown;
     }
+    return it.value().m_compactTools ? ToolProfile::Compact : ToolProfile::Full;
 }
 
 bool MCPStreams::sessionExists(const QString& sessionId)
@@ -168,19 +139,23 @@ bool MCPStreams::sessionExists(const QString& sessionId)
         return false;
     }
 
-    m_sessions[sessionId] = QDateTime::currentDateTimeUtc();
+    m_sessions[sessionId].m_lastUsed = QDateTime::currentDateTimeUtc();
     return true;
 }
 
 // Clients are not obliged to end their session, and a bridge that reconnects starts a new one
 // every time, so idle sessions are dropped rather than kept for the life of the process.
 // Sessions with an open stream are never dropped. Call with the mutex held.
-void MCPStreams::expireSessions()
+void MCPStreams::expireSessions(const QString& newSession)
 {
-    QSet<QString> streaming;
-
-    for (const StreamPtr& stream : m_streams) {
-        streaming.insert(stream->getSessionId());
+    // Timestamps have millisecond resolution. Sorting ties by UUID must not evict the
+    // session initialize is about to return, even when every idle client was just used.
+    QSet<QString> protectedSessions{newSession};
+    for (const StreamPtr& stream : m_streams)
+    {
+        if (m_sessions.contains(stream->getSessionId())) {
+            protectedSessions.insert(stream->getSessionId());
+        }
     }
 
     QDateTime now = QDateTime::currentDateTimeUtc();
@@ -188,29 +163,28 @@ void MCPStreams::expireSessions()
 
     for (auto it = m_sessions.begin(); it != m_sessions.end(); ++it)
     {
-        if (!streaming.contains(it.key())) {
+        if (!protectedSessions.contains(it.key())) {
             candidates.append(it.key());
         }
     }
 
     // Oldest first, so that trimming to the cap drops the least recently used
     std::sort(candidates.begin(), candidates.end(), [this](const QString& a, const QString& b) {
-        return m_sessions[a] < m_sessions[b];
+        return m_sessions[a].m_lastUsed < m_sessions[b].m_lastUsed;
     });
 
-    int droppable = candidates.size() - qMax(0, m_maxSessions - (int) streaming.size());
+    int droppable = candidates.size() - qMax(0, m_maxSessions - (int) protectedSessions.size());
 
     for (int i = 0; i < candidates.size(); i++)
     {
         const QString& id = candidates[i];
-        bool tooOld = m_sessions[id].msecsTo(now) > m_sessionIdleMs;
+        bool tooOld = m_sessions[id].m_lastUsed.msecsTo(now) > m_sessionIdleMs;
         bool overCap = i < droppable;
 
         if (tooOld || overCap)
         {
             m_sessions.remove(id);
             m_subscriptions.remove(id);
-            m_visibleTools.remove(id);
         }
     }
 }
@@ -222,7 +196,6 @@ void MCPStreams::endSession(const QString& sessionId)
         QMutexLocker locker(&m_mutex);
         m_sessions.remove(sessionId);
         m_subscriptions.remove(sessionId);
-        m_visibleTools.remove(sessionId);
 
         for (const StreamPtr& stream : m_streams)
         {

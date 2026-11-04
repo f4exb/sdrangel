@@ -74,11 +74,9 @@ public:
     MCPStreams();
     ~MCPStreams();
 
+    enum class ToolProfile { Unknown, Full, Compact };
     QString createSession(bool compactTools = false);
-    bool usesCompactTools(const QString& sessionId) const;
-    QSet<QString> visibleTools(const QString& sessionId) const;
-    //!< Makes searched tools visible and notifies only this compact session, once per change.
-    void revealTools(const QString& sessionId, const QSet<QString>& names);
+    ToolProfile toolProfile(const QString& sessionId) const;
     bool sessionExists(const QString& sessionId); //!< Also marks the session as recently used
     void endSession(const QString& sessionId);
 
@@ -114,12 +112,16 @@ private:
     mutable QMutex m_mutex;
     QList<StreamPtr> m_streams;
     QMap<QString, QSet<QString>> m_subscriptions; //!< Session id (empty for anonymous) to subscribed URIs
-    QMap<QString, QDateTime> m_sessions;           //!< Session id to when it was last used
-    QMap<QString, QSet<QString>> m_visibleTools; //!< Present only for compact sessions
+    struct Session
+    {
+        QDateTime m_lastUsed;
+        bool m_compactTools = false;
+    };
+    QMap<QString, Session> m_sessions;
     qint64 m_notificationsSent;
 
     static QByteArray resourceUpdatedEvent(const QString& uri);
-    void expireSessions(); //!< Call with the mutex held
+    void expireSessions(const QString& newSession); //!< Call with the mutex held; protect the session being returned
 };
 
 // Watches SDRangel for changes worth telling subscribed clients about, and coalesces them so

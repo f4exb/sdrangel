@@ -144,20 +144,22 @@ mode groups permissions under these call tools. Target-specific client allowlist
 approval policies do not carry through a generic call tool: use the full catalog when
 individual target permissions are required. Full sessions cannot invoke these routes.
 
-Matches are also added to that session's `tools/list`, with a
-`notifications/tools/list_changed` event on its SSE stream when the list grows. Clients
-that support tool refresh can use the ordinary named calls after refreshing. This is
-optional: clients with a frozen catalog can complete discovery and invocation through the
-initial `read_tool`/`write_tool` entry points without SSE or a catalog refresh. Other
-clients' catalogs are unaffected. The profile lasts for the session; omitting the URL
-option on later requests does not change it. Anonymous requests keep the full catalog.
-Session deletion or expiry discards discovered names.
+The compact catalog stays fixed at eight tools, including after searches. Discovery
+returns schemas as data for `read_tool`/`write_tool`; it never adds named operations to
+the advertised tool list or sends tool-list change events. Direct calls to operations
+outside those eight entry points are rejected in compact sessions. This avoids catalog
+growth and makes the invocation path independent of client refresh behavior. Existing
+resource subscriptions and SSE resource notifications remain available.
+
+The profile lasts for the session; omitting the URL option on later requests does not
+change it. Anonymous requests keep the full catalog. Session deletion or expiry removes
+the profile. Requests for an ended session are rejected rather than treated as full mode.
 
 Search is omitted in full mode because every operation is already advertised there.
 Compact discovery trades some initial catalog
 size for additional discovery requests; it is not a claim that tasks need fewer turns or
 finish faster. This is native tool discovery and dispatch, without JavaScript execution
-or a Code Mode sandbox. A manual Codex test of direct named-tool discovery did not expose
+or a Code Mode sandbox. An earlier manual Codex test of direct named-tool discovery did not expose
 the newly found tool during the same turn; the stable call tools address that dependency.
 SDK or protocol tests alone do not establish compatibility with a particular agent client.
 

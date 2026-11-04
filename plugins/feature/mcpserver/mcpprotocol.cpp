@@ -249,7 +249,7 @@ QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
         qPrintable(requested));
 
     QJsonObject tools;
-    tools["listChanged"] = context.m_compactTools && m_streams;
+    tools["listChanged"] = false;
     QJsonObject resources;
     resources["subscribe"] = true;
     resources["listChanged"] = false;
@@ -285,8 +285,8 @@ QJsonValue MCPProtocol::initialize(const QJsonObject& params, Context& context)
             "the matching schemas. Then use read_tool with {name, arguments} for targets annotated readOnlyHint true, "
             "or write_tool for targets that change state. These entry points are in the initial catalog, so no refresh "
             "is needed. For example, write_tool({name: 'set_center_frequency', arguments: {deviceSetIndex: 0, "
-            "frequency: 145500000}}). Search also adds matches to this session's tools/list and sends "
-            "notifications/tools/list_changed for clients that support direct named calls after a refresh. "
+            "frequency: 145500000}}). The compact catalog stays fixed at eight tools after searching; "
+            "discovered schemas are data for read_tool/write_tool, not additional callable tool definitions. "
             "Compact mode groups permissions under read_tool/write_tool. Use the full /mcp catalog if individual "
             "target allowlists or approvals are required. Searching never executes a discovered tool.";
     }
@@ -374,13 +374,27 @@ QString MCPProtocol::instructions()
         "setting changes are applied asynchronously.";
 }
 
+bool MCPProtocol::compactToolsFor(const Context& context) const
+{
+    if (!m_streams) {
+        return false;
+    }
+    const auto profile = m_streams->toolProfile(context.m_sessionId);
+    if (profile == MCPStreams::ToolProfile::Unknown) {
+        // The transport checked the session before dispatch. It may have ended or been
+        // evicted while this request waited; never turn that into the full profile.
+        throw MCPError(InvalidParams, "Session no longer exists; initialize a new session");
+    }
+    return profile == MCPStreams::ToolProfile::Compact;
+}
+
 QJsonValue MCPProtocol::toolsList(const QJsonObject& params, Context& context)
 {
     (void) params;
     QJsonObject result;
-    const bool compact = m_streams && m_streams->usesCompactTools(context.m_sessionId);
+    const bool compact = compactToolsFor(context);
     const QJsonArray tools = m_tools.listTools(compact);
-    result["tools"] = compact ? MCPToolCatalog::filter(tools, m_streams->visibleTools(context.m_sessionId)) : tools;
+    result["tools"] = compact ? MCPToolCatalog::filter(tools, MCPToolCatalog::initialTools()) : tools;
     return result;
 }
 
@@ -392,20 +406,14 @@ QJsonValue MCPProtocol::toolsCall(const QJsonObject& params, Context& context)
         throw MCPError(InvalidParams, "Invalid params: missing tool name");
     }
 
-    if (MCPToolCatalog::isCompactTool(name) && (!m_streams || !m_streams->usesCompactTools(context.m_sessionId))) {
+    const bool compact = compactToolsFor(context);
+    if (MCPToolCatalog::isCompactTool(name) && !compact) {
         throw MCPError(InvalidParams, "Discovery and call tools are available only in compact sessions; use the named tool directly");
     }
-    const QJsonObject result = m_tools.callTool(name, params["arguments"].toObject());
-    if (name == "search_tools" && !result["isError"].toBool() && m_streams)
-    {
-        QSet<QString> names;
-        const QJsonArray matches = result["structuredContent"].toObject()["tools"].toArray();
-        for (const QJsonValue& tool : matches) {
-            names.insert(tool.toObject()["name"].toString());
-        }
-        m_streams->revealTools(context.m_sessionId, names);
+    if (compact && !MCPToolCatalog::initialTools().contains(name)) {
+        throw MCPError(InvalidParams, "Use read_tool or write_tool for a discovered operation in compact mode");
     }
-    return result;
+    return m_tools.callTool(name, params["arguments"].toObject());
 }
 
 QJsonObject MCPProtocol::textContent(const QString& text)
