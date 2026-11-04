@@ -94,6 +94,18 @@ SWGATVDemodSettings::SWGATVDemodSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    colour_system = 0;
+    m_colour_system_isSet = false;
+    colour_saturation = 0;
+    m_colour_saturation_isSet = false;
+    colour_hue = 0;
+    m_colour_hue_isSet = false;
+    pal_delay_line = 0;
+    m_pal_delay_line_isSet = false;
+    noise_reduction = 0;
+    m_noise_reduction_isSet = false;
+    ghost_cancellation = 0;
+    m_ghost_cancellation_isSet = false;
 }
 
 SWGATVDemodSettings::~SWGATVDemodSettings() {
@@ -168,6 +180,18 @@ SWGATVDemodSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    colour_system = 0;
+    m_colour_system_isSet = false;
+    colour_saturation = 0;
+    m_colour_saturation_isSet = false;
+    colour_hue = 0;
+    m_colour_hue_isSet = false;
+    pal_delay_line = 0;
+    m_pal_delay_line_isSet = false;
+    noise_reduction = 0;
+    m_noise_reduction_isSet = false;
+    ghost_cancellation = 0;
+    m_ghost_cancellation_isSet = false;
 }
 
 void
@@ -288,6 +312,18 @@ SWGATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&colour_system, pJson["colourSystem"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&colour_saturation, pJson["colourSaturation"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&colour_hue, pJson["colourHue"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&pal_delay_line, pJson["palDelayLine"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&noise_reduction, pJson["noiseReduction"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ghost_cancellation, pJson["ghostCancellation"], "qint32", "");
+    
 }
 
 QString
@@ -402,6 +438,24 @@ SWGATVDemodSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if(m_colour_system_isSet){
+        obj->insert("colourSystem", QJsonValue(colour_system));
+    }
+    if(m_colour_saturation_isSet){
+        obj->insert("colourSaturation", QJsonValue(colour_saturation));
+    }
+    if(m_colour_hue_isSet){
+        obj->insert("colourHue", QJsonValue(colour_hue));
+    }
+    if(m_pal_delay_line_isSet){
+        obj->insert("palDelayLine", QJsonValue(pal_delay_line));
+    }
+    if(m_noise_reduction_isSet){
+        obj->insert("noiseReduction", QJsonValue(noise_reduction));
+    }
+    if(m_ghost_cancellation_isSet){
+        obj->insert("ghostCancellation", QJsonValue(ghost_cancellation));
     }
 
     return obj;
@@ -737,6 +791,66 @@ SWGATVDemodSettings::setUdpPort(qint32 udp_port) {
     this->m_udp_port_isSet = true;
 }
 
+qint32
+SWGATVDemodSettings::getColourSystem() {
+    return colour_system;
+}
+void
+SWGATVDemodSettings::setColourSystem(qint32 colour_system) {
+    this->colour_system = colour_system;
+    this->m_colour_system_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getColourSaturation() {
+    return colour_saturation;
+}
+void
+SWGATVDemodSettings::setColourSaturation(qint32 colour_saturation) {
+    this->colour_saturation = colour_saturation;
+    this->m_colour_saturation_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getColourHue() {
+    return colour_hue;
+}
+void
+SWGATVDemodSettings::setColourHue(qint32 colour_hue) {
+    this->colour_hue = colour_hue;
+    this->m_colour_hue_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getPalDelayLine() {
+    return pal_delay_line;
+}
+void
+SWGATVDemodSettings::setPalDelayLine(qint32 pal_delay_line) {
+    this->pal_delay_line = pal_delay_line;
+    this->m_pal_delay_line_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getNoiseReduction() {
+    return noise_reduction;
+}
+void
+SWGATVDemodSettings::setNoiseReduction(qint32 noise_reduction) {
+    this->noise_reduction = noise_reduction;
+    this->m_noise_reduction_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getGhostCancellation() {
+    return ghost_cancellation;
+}
+void
+SWGATVDemodSettings::setGhostCancellation(qint32 ghost_cancellation) {
+    this->ghost_cancellation = ghost_cancellation;
+    this->m_ghost_cancellation_isSet = true;
+}
+
 
 bool
 SWGATVDemodSettings::isSet(){
@@ -839,6 +953,24 @@ SWGATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_colour_system_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_colour_saturation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_colour_hue_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pal_delay_line_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_noise_reduction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ghost_cancellation_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

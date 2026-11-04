@@ -19,6 +19,9 @@
 #include <QTime>
 #include <QDebug>
 
+#include <algorithm>
+#include <cmath>
+
 #include <stdio.h>
 #include <complex.h>
 
@@ -30,12 +33,14 @@ const int ATVDemodSink::m_ssbFftLen = 1024;
 ATVDemodSink::ATVDemodSink() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
+    m_videoSampleRate(1000000),
     m_samplesPerLine(100),
 	m_samplesPerLineFrac(0.0f),
     m_videoTabIndex(0),
     m_scopeSink(nullptr),
     m_registeredTVScreen(nullptr),
     m_numberSamplesPerHTop(0),
+    m_numberSamplesPerHSyncMin(1),
     m_fieldIndex(0),
     m_synchroSamples(0),
     m_fieldDetectSampleCount(0),
@@ -52,13 +57,33 @@ ATVDemodSink::ATVDemodSink() :
     m_lineIndex(0),
 	m_hSyncShift(0.0f),
     m_hSyncErrorCount(0),
+    m_hSyncCandidate(false),
+    m_hSyncCandidateShift(0.0f),
+    m_hSyncCandidateAge(0),
+    m_hSyncCandidateBelow(0),
+    m_hSyncCandidateAbove(0),
     prevSample(0.0f),
     m_ampAverage(4800),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
-    m_DSBFilterBufferIndex(0)
+    m_DSBFilterBufferIndex(0),
+    m_useNCO(false),
+    m_vsbFrontEnd(false),
+    m_carrierReferenced(false),
+    m_carrierVideoRange(1.0f),
+    m_envelopeLPAlpha(1.0f),
+    m_envelopeLP(0.0f),
+    m_envelopeLineMax(0.0f),
+    m_syncTipEnvelope(0.0f),
+    m_colourLineFirst(0),
+    m_colourLineStart(0),
+    m_videoSampleCount(0),
+    m_currentRow(-1),
+    m_syncFilterIndex(0),
+    m_syncFilterSum(0.0f),
+    m_syncFilterScale(1.0f)
 {
     qDebug("ATVDemodSink::ATVDemodSink");
     //*************** ATV PARAMETERS  ***************
@@ -93,7 +118,7 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     {
         Complex c(it->real(), it->imag());
 
-        if (m_settings.m_inputFrequencyOffset != 0) {
+        if (m_useNCO) {
             c *= m_nco.nextIQ();
         }
 
@@ -115,7 +140,44 @@ void ATVDemodSink::demod(Complex& c)
     float sampleNormQ;
     float sampleNorm;
     float sample;
-    int sampleVideo;
+
+    //********** AM / VSB **********
+
+    if (m_vsbFrontEnd)
+    {
+        m_magSqAverage(c.real()*c.real() + c.imag()*c.imag());
+        Complex *filtered;
+        int n_out = m_vsbFilter.process(c, &filtered);
+
+        for (int i = 0; i < n_out; i++)
+        {
+            if (m_carrierReferenced)
+            {
+                // Scale from the carrier as a TV does: sync tip 0, peak white 1. The sync tip
+                // is the peak of the smoothed envelope, tracked line by line
+                float envelope = m_synchronousDetector.process(filtered[i]);
+
+                if (m_settings.m_ghostCancellation && m_ghostEstimator.feed(m_sampleOffset, m_synchronousDetector.getGhostInput())) {
+                    m_synchronousDetector.setGhost(m_ghostEstimator.getDelay(), m_ghostEstimator.getGain());
+                }
+
+                m_envelopeLP += m_envelopeLPAlpha * (envelope - m_envelopeLP);
+                m_envelopeLineMax = std::max(m_envelopeLineMax, m_envelopeLP);
+                float video = m_syncTipEnvelope > 0.0f ? (m_syncTipEnvelope - envelope) / (m_syncTipEnvelope * m_carrierVideoRange) : 0.0f;
+                processVideo(video, envelope);
+            }
+            else
+            {
+                // Same AGC as AM
+                float envelope = std::abs(filtered[i]);
+                float sampleRaw = envelope / SDR_RX_SCALEF;
+                m_ampAverage(sampleRaw);
+                processVideo(sampleRaw / (2.0f * (float) m_ampAverage.instantAverage()), envelope);
+            }
+        }
+
+        return;
+    }
 
     //********** FFT filtering **********
 
@@ -206,7 +268,7 @@ void ATVDemodSink::demod(Complex& c)
         sampleNorm = sqrt(magSq);
         float sampleRaw = sampleNorm / SDR_RX_SCALEF;
         m_ampAverage(sampleRaw);
-        sample = sampleRaw / (2.0f * m_ampAverage.asFloat()); // AGC
+        sample = sampleRaw / (2.0f * (float) m_ampAverage.instantAverage()); // AGC (average of what has arrived, while the window fills)
     }
     else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
     {
@@ -244,11 +306,19 @@ void ATVDemodSink::demod(Complex& c)
         sample = 0.0f;
     }
 
+    processVideo(sample, 0.0f);
+}
+
+void ATVDemodSink::processVideo(float sample, float envelope)
+{
+    int sampleVideo;
+
     //********** AM sample normalization and coarse scale estimation **********
 
-    if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_AM)
+    if (!m_carrierReferenced &&
+        ((m_settings.m_atvModulation == ATVDemodSettings::ATV_AM)
         || (m_settings.m_atvModulation == ATVDemodSettings::ATV_USB)
-        || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
+        || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB)))
     {
         // Mini and Maxi Amplitude tracking
 
@@ -293,7 +363,11 @@ void ATVDemodSink::demod(Complex& c)
         sample /= m_ampDelta;
     }
 
-    sample = m_settings.m_invertVideo ? 1.0f - sample : sample;
+    if (!m_carrierReferenced) { // already scaled with sync tip low
+        sample = m_settings.m_invertVideo ? 1.0f - sample : sample;
+    }
+
+    float composite = sample; // colour needs the chroma excursions beyond black and white
     // 0.0 -> 1.0
     sample = (sample < 0.0f) ? 0.0f : (sample > 1.0f) ? 1.0f : sample;
 
@@ -312,7 +386,46 @@ void ATVDemodSink::demod(Complex& c)
 
     if (m_registeredTVScreen) // can process only if the screen is available (set via the GUI)
     {
-        processSample(sample, sampleVideo);
+        if (m_settings.isColour() && (m_sampleOffset >= 0) && (m_sampleOffset < m_samplesPerLine))
+        {
+            m_colourLine[m_sampleOffset] = m_carrierReferenced ? envelope : composite;
+            m_colourLineFirst = std::min(m_colourLineFirst, m_sampleOffset);
+            m_colourLineStart = m_videoSampleCount - m_sampleOffset;
+        }
+
+        m_videoSampleCount++;
+
+        if (m_syncFilter.size() > 1)
+        {
+            // Sync is sliced with the colour subcarrier removed, as a TV's sync separator does
+            m_syncFilterSum += composite - m_syncFilter[m_syncFilterIndex];
+            m_syncFilter[m_syncFilterIndex] = composite;
+            m_syncFilterIndex = m_syncFilterIndex + 1 == (int) m_syncFilter.size() ? 0 : m_syncFilterIndex + 1;
+            float syncSample = m_syncFilterSum * m_syncFilterScale;
+            processSample(syncSample, sampleVideo);
+        }
+        else
+        {
+            processSample(sample, sampleVideo);
+        }
+    }
+}
+
+// Writes a line held in m_lineRGB to the screen: decoding colour first, and reducing noise
+void ATVDemodSink::writeLine()
+{
+    if (m_settings.isColour())
+    {
+        m_colourDecoder.decodeLine(m_colourLine.data(), m_samplesPerLine, m_colourLineFirst, m_colourLineStart, m_lineRGB.data());
+        m_colourLineFirst = m_samplesPerLine;
+    }
+
+    if (m_noiseReduction.isEnabled()) {
+        m_noiseReduction.processRow(m_currentRow, &m_lineRGB[m_numberSamplesPerHSync]);
+    }
+
+    for (int i = std::max(m_numberSamplesPerHSync - 2, 0); i < m_samplesPerLine; i++) {
+        m_tvScreenBuffer->setSampleValue(i - m_numberSamplesPerHSync, (int) m_lineRGB[i]);
     }
 }
 
@@ -375,6 +488,7 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
     m_numberSamplesPerLineSignals = (int)(lineDuration * sampleRate * 12.0  / 64.0); // "a", Line-blanking interval
     m_numberSamplesPerHSync       = (int)(lineDuration * sampleRate * 10.5  / 64.0); // "b", Interval between time datum and back edge of line-blanking pulse
     m_numberSamplesPerHTop        = (int)(lineDuration * sampleRate *  4.7  / 64.0); // "d", Duration of synchronizing pulse
+    m_numberSamplesPerHSyncMin    = std::max(1, (int) std::round(lineDuration * sampleRate * 1.0 / 64.0)); // shorter than an equalizing pulse, longer than ringing
 
     // Table 3. Details of field synchronizing signals
     float hl = 32.0f; // half of the line
@@ -418,20 +532,10 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         return;
     }
 
-    if ((channelFrequencyOffset != m_channelFrequencyOffset) ||
-        (channelSampleRate != m_channelSampleRate) || force)
-    {
-        m_nco.setFreq(-channelFrequencyOffset, channelSampleRate);
-    }
-
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
-        unsigned int samplesPerLineNom;
-        ATVDemodSettings::getBaseValues(channelSampleRate, m_settings.m_nbLines * m_settings.m_fps, samplesPerLineNom);
-        m_samplesPerLine = samplesPerLineNom;
-		m_samplesPerLineFrac = (float)channelSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - m_samplesPerLine;
         qDebug() << "ATVDemodSink::applyChannelSettings:"
-                << " m_channelSampleRate: " << m_channelSampleRate
+                << " m_channelSampleRate: " << channelSampleRate
                 << " m_fftBandwidth: " << m_settings.m_fftBandwidth
                 << " m_fftOppBandwidth:" << m_settings.m_fftOppBandwidth
                 << " m_bfoFrequency: " << m_settings.m_bfoFrequency;
@@ -451,7 +555,94 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         m_bfoFilter.setFrequencies(m_channelSampleRate, m_settings.m_bfoFrequency);
     }
 
-    applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
+    m_channelSampleRate = channelSampleRate;
+    m_channelFrequencyOffset = channelFrequencyOffset;
+
+    applyVideoSettings();
+}
+
+void ATVDemodSink::applyVideoSettings()
+{
+    m_vsbFrontEnd = m_settings.usesVSBFrontEnd();
+    m_videoSampleRate = m_settings.getVideoSampleRate(m_channelSampleRate);
+
+    float lineFrequency = m_settings.getLineFrequency();
+    m_samplesPerLine = (int) (m_videoSampleRate / lineFrequency);
+    m_samplesPerLine = m_samplesPerLine < 1 ? 1 : m_samplesPerLine;
+    m_samplesPerLineFrac = m_videoSampleRate / lineFrequency - m_samplesPerLine;
+    m_ampAverage.resize(m_samplesPerLine * m_settings.m_nbLines * 2); // AGC average in two full images
+
+    qDebug() << "ATVDemodSink::applyVideoSettings:"
+            << " m_channelSampleRate: " << m_channelSampleRate
+            << " m_videoSampleRate: " << m_videoSampleRate
+            << " m_samplesPerLine:" << m_samplesPerLine
+            << " m_samplesPerLineFrac:" << m_samplesPerLineFrac;
+
+    applyStandard(m_videoSampleRate, m_settings.m_atvStd, 1.0f / lineFrequency);
+
+    // For colour, the VSB front end needs the centre of the video band, not the vision carrier,
+    // at DC, or the top of the chroma wraps round when the sample rate is only just wide enough.
+    // Mono is not upsampled, so keeps the carrier at DC and the video is limited to half the rate
+    float shift = 0.0f;
+
+    if (m_vsbFrontEnd)
+    {
+        bool usb = m_settings.m_atvModulation != ATVDemodSettings::ATV_LSB;
+
+        if (m_settings.isColour())
+        {
+            float centreOffset = ATVDemodSettings::getColourBandCentreOffset(m_settings.m_colourSystem);
+            shift = usb ? centreOffset : -centreOffset;
+        }
+
+        m_vsbFilter.configure(
+            m_channelSampleRate,
+            -shift,
+            m_settings.getVideoBandwidth(),
+            usb,
+            m_videoSampleRate / m_channelSampleRate
+        );
+        m_synchronousDetector.configure(m_videoSampleRate, -shift, lineFrequency);
+    }
+
+    m_ghostEstimator.configure(m_videoSampleRate, m_samplesPerLine, std::min(m_settings.getVideoBandwidth(), m_videoSampleRate / 2.0f));
+
+    m_nco.setFreq(-(m_channelFrequencyOffset + shift), m_channelSampleRate);
+    m_useNCO = (m_channelFrequencyOffset != 0) || (shift != 0.0f);
+
+    // For negatively modulated AM, levels are taken from the carrier
+    m_carrierReferenced = m_vsbFrontEnd && m_settings.m_invertVideo;
+    m_carrierVideoRange = 1.0f - m_settings.getWhiteCarrier();
+    m_envelopeLPAlpha = 1.0f / (0.5e-6f * m_videoSampleRate); // ~0.5 us, so noise does not set the peak
+    m_envelopeLP = 0.0f;
+    m_envelopeLineMax = 0.0f;
+    m_syncTipEnvelope = 0.0f;
+
+    if (m_settings.isColour())
+    {
+        m_colourDecoder.configure(m_videoSampleRate, m_settings.m_colourSystem);
+        m_colourDecoder.setCarrierReferenced(m_carrierReferenced);
+        m_colourLine.assign(m_samplesPerLine, 0.0f);
+        m_colourLineFirst = m_samplesPerLine;
+    }
+
+    // The subcarrier is in the video when decoding colour, and in mono when the rate is high enough
+    if (m_settings.isColour() || m_vsbFrontEnd)
+    {
+        float subcarrier = m_settings.isColour() ? ATVDemodSettings::getSubcarrierFrequency(m_settings.m_colourSystem)
+            : ATVDemodSettings::getSubcarrierFrequency(m_settings.m_nbLines == 525 ? ATVDemodSettings::ColourNTSC : ATVDemodSettings::ColourPAL);
+        m_syncFilter.assign(std::max(1, (int) std::round(m_videoSampleRate / subcarrier)), 0.0f);
+    }
+    else
+    {
+        m_syncFilter.assign(1, 0.0f);
+    }
+
+    m_syncFilterIndex = 0;
+    m_syncFilterSum = 0.0f;
+    m_syncFilterScale = 1.0f / m_syncFilter.size();
+    m_lineRGB.assign(m_samplesPerLine, 0);
+    m_noiseReduction.configure(m_samplesPerLine - m_numberSamplesPerLineSignals, m_settings.m_nbLines - m_numberOfBlackLines);
 
     if (m_registeredTVScreen)
     {
@@ -459,13 +650,11 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
             m_samplesPerLine - m_numberSamplesPerLineSignals,
             m_settings.m_nbLines - m_numberOfBlackLines
         );
-		m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
+        m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
     }
 
     m_fieldIndex = 0;
-
-    m_channelSampleRate = channelSampleRate;
-    m_channelFrequencyOffset = channelFrequencyOffset;
+    m_amSampleIndex = 0;
 }
 
 void ATVDemodSink::applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
@@ -490,45 +679,52 @@ void ATVDemodSink::applySettings(const QStringList& settingsKeys, const ATVDemod
         m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
     }
 
-    if (settingsKeys.contains("nbLines") || settingsKeys.contains("fps") || settingsKeys.contains("atvStd") || force)
-    {
-        unsigned int samplesPerLineNom;
-        ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, samplesPerLineNom);
-        m_samplesPerLine = samplesPerLineNom;
-		m_samplesPerLineFrac = (float)m_channelSampleRate / (settings.m_nbLines * settings.m_fps) - m_samplesPerLine;
-		m_ampAverage.resize(m_samplesPerLine * settings.m_nbLines * 2); // AGC average in two full images
-
-        qDebug() << "ATVDemodSink::applySettings:"
-                << " m_channelSampleRate: " << m_channelSampleRate
-                << " m_samplesPerLine:" << m_samplesPerLine
-                << " m_samplesPerLineFrac:" << m_samplesPerLineFrac;
-
-        applyStandard(m_channelSampleRate, settings.m_atvStd,
-            ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
-
-        if (m_registeredTVScreen)
-        {
-            m_registeredTVScreen->resizeTVScreen(
-                m_samplesPerLine - m_numberSamplesPerLineSignals,
-                settings.m_nbLines - m_numberOfBlackLines
-            );
-			m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
-        }
-
-        m_fieldIndex = 0;
-    }
-
     if (settingsKeys.contains("fmDeviation") || force) {
         m_objPhaseDiscri.setFMScaling(1.0f / settings.m_fmDeviation);
     }
 
     if (settingsKeys.contains("levelBlack") || force) {
-        m_sampleRangeCorrection = 255.0f / (1.0f - m_settings.m_levelBlack);
+        m_sampleRangeCorrection = 255.0f / (1.0f - settings.m_levelBlack);
     }
+
+    bool videoChanged = settingsKeys.contains("nbLines")
+        || settingsKeys.contains("fps")
+        || settingsKeys.contains("atvStd")
+        || settingsKeys.contains("atvModulation")
+        || settingsKeys.contains("colourSystem")
+        || settingsKeys.contains("invertVideo")
+        || settingsKeys.contains("fftFiltering")
+        || force;
 
     if (force) {
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (settingsKeys.contains("colourSaturation") || force) {
+        m_colourDecoder.setSaturation(m_settings.m_colourSaturation);
+    }
+
+    if (settingsKeys.contains("noiseReduction") || force) {
+        m_noiseReduction.setStrength(m_settings.m_noiseReduction);
+    }
+
+    if (settingsKeys.contains("colourHue") || force) {
+        m_colourDecoder.setHue(m_settings.m_colourHue);
+    }
+
+    if (settingsKeys.contains("palDelayLine") || force) {
+        m_colourDecoder.setDelayLine(m_settings.m_palDelayLine);
+    }
+
+    if ((settingsKeys.contains("ghostCancellation") || force) && !m_settings.m_ghostCancellation)
+    {
+        m_synchronousDetector.setGhost(1.0f, 0.0f);
+        m_ghostEstimator.reset();
+    }
+
+    if (videoChanged) {
+        applyVideoSettings();
     }
 }

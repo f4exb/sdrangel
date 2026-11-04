@@ -51,6 +51,9 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
+    /** The keys of ATVDemodSettings for keys of the Web API, whose names mostly differ */
+    static QStringList getSettingsKeys(const QStringList& channelSettingsKeys);
+
 private:
     ATVDemodSettings m_settings;
 };

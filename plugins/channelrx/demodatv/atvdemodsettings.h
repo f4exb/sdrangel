@@ -46,6 +46,16 @@ struct ATVDemodSettings
         ATVStdHSkip
     };
 
+    enum ColourSystem
+    {
+        ColourMono,   //!< Luminance only (any sample rate)
+        ColourNTSC,   //!< NTSC-M, 3.579545 MHz subcarrier
+        ColourNTSC443,//!< NTSC with 4.43361875 MHz subcarrier
+        ColourPAL,    //!< PAL-B/G/D/K/I, 4.43361875 MHz subcarrier
+        ColourPALM,   //!< PAL-M, 3.57561149 MHz subcarrier
+        ColourPALN    //!< PAL-N, 3.58205625 MHz subcarrier
+    };
+
     // RF settings
     qint64        m_inputFrequencyOffset; //!< Offset from baseband center frequency
     int           m_bfoFrequency;         //!< BFO frequency (Hz)
@@ -67,6 +77,14 @@ struct ATVDemodSettings
     bool          m_halfFrames;           //!< Toggle half frames processing
     float         m_levelSynchroTop;      //!< Horizontal synchronization top level (0.0 to 1.0 scale)
     float         m_levelBlack;           //!< Black level (0.0 to 1.0 scale)
+
+    // Colour settings
+    ColourSystem  m_colourSystem;         //!< Colour decoding (mono decodes luminance only)
+    int           m_colourSaturation;     //!< Saturation in % of nominal
+    int           m_colourHue;            //!< Hue adjustment in degrees (NTSC only)
+    bool          m_palDelayLine;         //!< Average chroma of successive lines (PAL delay line, also used for NTSC)
+    int           m_noiseReduction;       //!< Temporal noise reduction strength in % (0 is off)
+    bool          m_ghostCancellation;    //!< Estimate and cancel an echo from multipath (AM through the VSB front end)
 
     // common channel settings
     quint32 m_rgbColor;
@@ -103,6 +121,19 @@ struct ATVDemodSettings
     static float getNominalLineTime(int nbLines, int fps);
     static float getRFBandwidthDivisor(ATVModulation modulation);
     static void getBaseValues(int sampleRate, int linesPerSecond, uint32_t& nbPointsPerLine);
+
+    bool isColour() const { return m_colourSystem != ColourMono; }
+    bool isPAL() const { return (m_colourSystem == ColourPAL) || (m_colourSystem == ColourPALM) || (m_colourSystem == ColourPALN); }
+    bool usesVSBFrontEnd() const;              //!< AM goes through the VSB filter (and for colour, the upsampler)
+    float getLineFrequency() const;            //!< Lines per second, exact for 525 line colour systems
+    int getVideoSampleRate(int channelSampleRate) const; //!< Rate the video is processed at
+    static float getSubcarrierFrequency(ColourSystem colourSystem);
+    static float getWhiteCarrier(ColourSystem colourSystem); //!< Peak white carrier as a fraction of sync tip (negative modulation)
+    float getWhiteCarrier() const;             //!< As above, from the number of lines for mono
+    float getVideoBandwidth() const;           //!< Top of the video above the vision carrier, for the VSB filter
+    static float getColourBandwidth(ColourSystem colourSystem); //!< RF span needed from just below the vision carrier to the top of the chroma
+    static float getColourBandCentreOffset(ColourSystem colourSystem); //!< Offset from the vision carrier to the centre of that span
+    static int getColourUpsampling(int sampleRate, ColourSystem colourSystem);
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODATV_ATVDEMODSETTINGS_H_ */

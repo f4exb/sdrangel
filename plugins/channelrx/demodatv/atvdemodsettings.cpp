@@ -50,6 +50,12 @@ void ATVDemodSettings::resetToDefaults()
     m_halfFrames = false; // m_fltRatioOfRowsToDisplay = 1.0
     m_levelSynchroTop = 0.15f;
     m_levelBlack = 0.3f;
+    m_colourSystem = ColourMono;
+    m_colourSaturation = 100;
+    m_colourHue = 0;
+    m_palDelayLine = true;
+    m_noiseReduction = 0;
+    m_ghostCancellation = false;
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Demodulator";
     m_udpAddress = "127.0.0.1";
@@ -107,6 +113,12 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeS32(31, m_workspaceIndex);
     s.writeBlob(32, m_geometryBytes);
     s.writeBool(33, m_hidden);
+    s.writeS32(34, (int) m_colourSystem);
+    s.writeS32(35, m_colourSaturation);
+    s.writeS32(36, m_colourHue);
+    s.writeBool(37, m_palDelayLine);
+    s.writeS32(38, m_noiseReduction);
+    s.writeBool(39, m_ghostCancellation);
 
     return s.final();
 }
@@ -187,6 +199,13 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(31, &m_workspaceIndex, 0);
         d.readBlob(32, &m_geometryBytes);
         d.readBool(33, &m_hidden, false);
+        d.readS32(34, &tmp, (int) ColourMono);
+        m_colourSystem = (tmp >= (int) ColourMono) && (tmp <= (int) ColourPALN) ? (ColourSystem) tmp : ColourMono;
+        d.readS32(35, &m_colourSaturation, 100);
+        d.readS32(36, &m_colourHue, 0);
+        d.readBool(37, &m_palDelayLine, true);
+        d.readS32(38, &m_noiseReduction, 0);
+        d.readBool(39, &m_ghostCancellation, false);
 
         return true;
     }
@@ -399,6 +418,24 @@ void ATVDemodSettings::applySettings(const QStringList& settingsKeys, const ATVD
     if (settingsKeys.contains("levelBlack")) {
         m_levelBlack = settings.m_levelBlack;
     }
+    if (settingsKeys.contains("colourSystem")) {
+        m_colourSystem = settings.m_colourSystem;
+    }
+    if (settingsKeys.contains("colourSaturation")) {
+        m_colourSaturation = settings.m_colourSaturation;
+    }
+    if (settingsKeys.contains("colourHue")) {
+        m_colourHue = settings.m_colourHue;
+    }
+    if (settingsKeys.contains("palDelayLine")) {
+        m_palDelayLine = settings.m_palDelayLine;
+    }
+    if (settingsKeys.contains("noiseReduction")) {
+        m_noiseReduction = settings.m_noiseReduction;
+    }
+    if (settingsKeys.contains("ghostCancellation")) {
+        m_ghostCancellation = settings.m_ghostCancellation;
+    }
     if (settingsKeys.contains("rgbColor")) {
         m_rgbColor = settings.m_rgbColor;
     }
@@ -495,6 +532,24 @@ QString ATVDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("levelBlack") || force) {
         ostr << " m_levelBlack: " << m_levelBlack;
     }
+    if (settingsKeys.contains("colourSystem") || force) {
+        ostr << " m_colourSystem: " << m_colourSystem;
+    }
+    if (settingsKeys.contains("colourSaturation") || force) {
+        ostr << " m_colourSaturation: " << m_colourSaturation;
+    }
+    if (settingsKeys.contains("colourHue") || force) {
+        ostr << " m_colourHue: " << m_colourHue;
+    }
+    if (settingsKeys.contains("palDelayLine") || force) {
+        ostr << " m_palDelayLine: " << m_palDelayLine;
+    }
+    if (settingsKeys.contains("noiseReduction") || force) {
+        ostr << " m_noiseReduction: " << m_noiseReduction;
+    }
+    if (settingsKeys.contains("ghostCancellation") || force) {
+        ostr << " m_ghostCancellation: " << m_ghostCancellation;
+    }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;
     }
@@ -566,4 +621,106 @@ void ATVDemodSettings::getBaseValues(int sampleRate, int linesPerSecond, uint32_
 {
     nbPointsPerLine = sampleRate / linesPerSecond;
     nbPointsPerLine = nbPointsPerLine == 0 ? 1 : nbPointsPerLine;
+}
+
+bool ATVDemodSettings::usesVSBFrontEnd() const
+{
+    if (isColour()) {
+        return (m_atvModulation == ATV_AM) || (m_atvModulation == ATV_USB) || (m_atvModulation == ATV_LSB);
+    } else {
+        // The FFT filter, when enabled, replaces it (for double sideband AM, for example)
+        return (m_atvModulation == ATV_AM) && !m_fftFiltering;
+    }
+}
+
+float ATVDemodSettings::getLineFrequency() const
+{
+    // 525 line colour systems run at 59.94 fields/s, which the integer fps setting cannot express
+    if (isColour() && (m_nbLines == 525)) {
+        return 4500000.0f / 286.0f;
+    } else {
+        return (float) (m_nbLines * m_fps);
+    }
+}
+
+int ATVDemodSettings::getVideoSampleRate(int channelSampleRate) const
+{
+    if (isColour() && usesVSBFrontEnd()) {
+        return channelSampleRate * getColourUpsampling(channelSampleRate, m_colourSystem);
+    } else {
+        return channelSampleRate;
+    }
+}
+
+float ATVDemodSettings::getSubcarrierFrequency(ColourSystem colourSystem)
+{
+    switch (colourSystem)
+    {
+    case ColourNTSC:
+        return 315.0e6f / 88.0f;   // 3.579545 MHz
+    case ColourPALM:
+        return 3575611.49f;
+    case ColourPALN:
+        return 3582056.25f;
+    case ColourNTSC443:
+    case ColourPAL:
+        return 4433618.75f;
+    case ColourMono:
+    default:
+        return 0.0f;
+    }
+}
+
+float ATVDemodSettings::getWhiteCarrier(ColourSystem colourSystem)
+{
+    // 12.5% for 525 line systems, 10% for 625 line systems
+    if ((colourSystem == ColourNTSC) || (colourSystem == ColourPALM)) {
+        return 0.125f;
+    } else {
+        return 0.1f;
+    }
+}
+
+float ATVDemodSettings::getWhiteCarrier() const
+{
+    if (isColour()) {
+        return getWhiteCarrier(m_colourSystem);
+    } else {
+        return m_nbLines == 525 ? 0.125f : 0.1f;
+    }
+}
+
+float ATVDemodSettings::getVideoBandwidth() const
+{
+    if (isColour()) {
+        return getSubcarrierFrequency(m_colourSystem) + 0.6e6f; // Top of the upper chroma sideband
+    } else {
+        return m_nbLines == 525 ? 4.2e6f : 5.0e6f; // Below the sound carrier
+    }
+}
+
+float ATVDemodSettings::getColourBandwidth(ColourSystem colourSystem)
+{
+    // 0.3 MHz below the vision carrier (Nyquist slope) to 0.6 MHz above the subcarrier (upper chroma sideband)
+    return getSubcarrierFrequency(colourSystem) + 0.9e6f;
+}
+
+float ATVDemodSettings::getColourBandCentreOffset(ColourSystem colourSystem)
+{
+    return (getSubcarrierFrequency(colourSystem) + 0.3e6f) / 2.0f;
+}
+
+int ATVDemodSettings::getColourUpsampling(int sampleRate, ColourSystem colourSystem)
+{
+    // The envelope of the VSB signal is real and extends to the top of the chroma,
+    // so it needs a sample rate a little over twice that
+    float minRate = 2.2f * (getSubcarrierFrequency(colourSystem) + 0.6e6f);
+
+    if (sampleRate >= minRate) {
+        return 1;
+    } else if (2 * sampleRate >= minRate) {
+        return 2;
+    } else {
+        return 4;
+    }
 }

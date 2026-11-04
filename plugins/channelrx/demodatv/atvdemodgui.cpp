@@ -18,6 +18,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+#include <cmath>
+
 #include <QDockWidget>
 #include <QMainWindow>
 
@@ -112,6 +115,17 @@ void ATVDemodGUI::displaySettings()
     lineTimeUpdate();
     topTimeUpdate();
 
+    //********** Colour values **********
+    ui->colourSystem->setCurrentIndex((int) m_settings.m_colourSystem);
+    ui->colourSaturation->setValue(m_settings.m_colourSaturation);
+    ui->colourSaturationText->setText(QString("%1%").arg(m_settings.m_colourSaturation));
+    ui->colourHue->setValue(m_settings.m_colourHue);
+    ui->colourHueText->setText(QString("%1%2").arg(m_settings.m_colourHue).arg(QChar(0xB0)));
+    ui->palDelayLine->setChecked(m_settings.m_palDelayLine);
+    ui->noiseReduction->setValue(m_settings.m_noiseReduction);
+    ui->noiseReductionText->setText(QString("%1%").arg(m_settings.m_noiseReduction));
+    ui->ghostCancellation->setChecked(m_settings.m_ghostCancellation);
+
     //********** RF values **********
     ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
     ui->rfFiltering->setChecked(m_settings.m_fftFiltering);
@@ -146,17 +160,20 @@ void ATVDemodGUI::displayRFBandwidths()
 void ATVDemodGUI::applySampleRate()
 {
     qDebug("ATVDemodGUI::applySampleRate");
-    unsigned int nbPointsPerLine;
-    ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, nbPointsPerLine);
-    float samplesPerLineFrac = (float) m_basebandSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - nbPointsPerLine;
-    ui->tvSampleRateText->setText(tr("%1k").arg(m_basebandSampleRate/1000.0f, 0, 'f', 2));
+    // Colour AM is upsampled, so the video can be at a higher rate than the channel
+    int videoSampleRate = m_settings.getVideoSampleRate(m_basebandSampleRate);
+    float lineFrequency = m_settings.getLineFrequency();
+    unsigned int nbPointsPerLine = (unsigned int) (videoSampleRate / lineFrequency);
+    float samplesPerLineFrac = videoSampleRate / lineFrequency - nbPointsPerLine;
+    ui->tvSampleRateText->setText(tr("%1k").arg(videoSampleRate/1000.0f, 0, 'f', 2));
     ui->nbPointsPerLineText->setText(tr("%1p+%2").arg(nbPointsPerLine).arg(samplesPerLineFrac, 0, 'f', 2));
-    m_scopeVis->setLiveRate(m_basebandSampleRate);
+    m_scopeVis->setLiveRate(videoSampleRate);
     setRFFiltersSlidersRange(m_basebandSampleRate);
     displayRFBandwidths();
     lineTimeUpdate();
     topTimeUpdate();
     setChannelMarkerBandwidth();
+    updateColourStatus();
 }
 
 bool ATVDemodGUI::handleMessage(const Message& message)
@@ -173,6 +190,20 @@ bool ATVDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (ATVDemod::MsgConfigureATVDemod::match(message))
+    {
+        const ATVDemod::MsgConfigureATVDemod& cfg = (const ATVDemod::MsgConfigureATVDemod&) message;
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
+        displaySettings();
+
+        return true;
+    }
     else
     {
         return false;
@@ -184,6 +215,7 @@ void ATVDemodGUI::channelMarkerChangedByCursor()
     qDebug("ATVDemodGUI::channelMarkerChangedByCursor");
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateColourStatus();
     applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
@@ -372,7 +404,19 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
     ui->rfOppBW->blockSignals(true);
     ui->modulation->blockSignals(true);
 
-    if (ui->rfFiltering->isChecked()) // FFT filter
+    if (m_settings.usesVSBFrontEnd()) // VSB filter: Nyquist slope through the carrier to the top of the video (for mono, at most half the sample rate)
+    {
+        float videoBandwidth = m_settings.getVideoBandwidth();
+
+        if (!m_settings.isColour()) {
+            videoBandwidth = std::min(videoBandwidth, m_basebandSampleRate / 2.0f);
+        }
+
+        m_channelMarker.setBandwidth(videoBandwidth);
+        m_channelMarker.setOppositeBandwidth(0.3e6f);
+        m_channelMarker.setSidebands(m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB ? ChannelMarker::vlsb : ChannelMarker::vusb);
+    }
+    else if (ui->rfFiltering->isChecked()) // FFT filter
     {
         m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
         m_channelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
@@ -456,6 +500,20 @@ void ATVDemodGUI::tick()
             } else {
                 ui->bfoLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
+
+            if (m_atvDemod->getColourLocked()) {
+                ui->colourLockedLabel->setStyleSheet("QLabel { background-color : green; }");
+            } else {
+                ui->colourLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            }
+
+            float ghostAmplitude = m_atvDemod->getGhostAmplitude();
+
+            if (m_settings.m_ghostCancellation && (ghostAmplitude > 0.0f)) {
+                ui->ghostText->setText(QString("%1%2s %3%").arg(m_atvDemod->getGhostDelay() * 1e6f, 0, 'f', 1).arg(QChar(0xB5)).arg((int) std::round(ghostAmplitude * 100.0f)));
+            } else {
+                ui->ghostText->setText("");
+            }
         }
 
         m_intTickCount = 0;
@@ -493,6 +551,7 @@ void ATVDemodGUI::on_vSync_clicked()
 void ATVDemodGUI::on_invertVideo_clicked()
 {
     m_settings.m_invertVideo = ui->invertVideo->isChecked();
+    updateColourStatus();
     applySettings(QStringList("invertVideo"), false);
 }
 
@@ -532,7 +591,7 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 {
     m_settings.m_atvModulation = (ATVDemodSettings::ATVModulation) index;
     setRFFiltersSlidersRange(m_basebandSampleRate);
-    setChannelMarkerBandwidth();
+    applySampleRate();
     applySettings(QStringList("atvModulation"), false);
 }
 
@@ -557,6 +616,7 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
     m_settings.m_fftFiltering = checked;
     setRFFiltersSlidersRange(m_basebandSampleRate);
     setChannelMarkerBandwidth();
+    updateColourStatus();
     applySettings(QStringList("fftFiltering"), false);
 }
 
@@ -565,6 +625,7 @@ void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
     updateAbsoluteCenterFrequency();
+    updateColourStatus();
     applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
@@ -603,9 +664,125 @@ void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)
     m_atvDemod->setVideoTabIndex(index);
 }
 
+void ATVDemodGUI::on_colourSystem_currentIndexChanged(int index)
+{
+    m_settings.m_colourSystem = (ATVDemodSettings::ColourSystem) index;
+    applySampleRate();
+    applySettings(QStringList("colourSystem"), false);
+}
+
+void ATVDemodGUI::on_colourSaturation_valueChanged(int value)
+{
+    m_settings.m_colourSaturation = value;
+    ui->colourSaturationText->setText(QString("%1%").arg(value));
+    applySettings(QStringList("colourSaturation"), false);
+}
+
+void ATVDemodGUI::on_colourHue_valueChanged(int value)
+{
+    m_settings.m_colourHue = value;
+    ui->colourHueText->setText(QString("%1%2").arg(value).arg(QChar(0xB0)));
+    applySettings(QStringList("colourHue"), false);
+}
+
+void ATVDemodGUI::on_palDelayLine_clicked()
+{
+    m_settings.m_palDelayLine = ui->palDelayLine->isChecked();
+    applySettings(QStringList("palDelayLine"), false);
+}
+
+void ATVDemodGUI::on_ghostCancellation_clicked()
+{
+    m_settings.m_ghostCancellation = ui->ghostCancellation->isChecked();
+    applySettings(QStringList("ghostCancellation"), false);
+}
+
+void ATVDemodGUI::on_noiseReduction_valueChanged(int value)
+{
+    m_settings.m_noiseReduction = value;
+    ui->noiseReductionText->setText(QString("%1%").arg(value));
+    applySettings(QStringList("noiseReduction"), false);
+}
+
+// Shows whether the sample rate and tuning cover the colour subcarrier
+void ATVDemodGUI::updateColourStatus()
+{
+    bool colour = m_settings.isColour();
+    ui->colourSaturation->setEnabled(colour);
+    ui->colourHue->setEnabled(colour && !m_settings.isPAL());
+    ui->palDelayLine->setEnabled(colour);
+    ui->ghostCancellation->setEnabled(m_settings.usesVSBFrontEnd() && m_settings.m_invertVideo);
+
+    if (!colour)
+    {
+        ui->colourStatusText->setText("");
+        ui->colourStatusText->setToolTip("");
+        return;
+    }
+
+    float subcarrier = ATVDemodSettings::getSubcarrierFrequency(m_settings.m_colourSystem);
+    float halfRate = m_basebandSampleRate / 2.0f;
+    QString problem;
+
+    if (m_settings.usesVSBFrontEnd())
+    {
+        // From just below the vision carrier to the top of the chroma, relative to the device centre
+        float span = ATVDemodSettings::getColourBandwidth(m_settings.m_colourSystem);
+        float low, high;
+
+        if (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB)
+        {
+            low = m_settings.m_inputFrequencyOffset - (subcarrier + 0.6e6f);
+            high = m_settings.m_inputFrequencyOffset + 0.3e6f;
+        }
+        else
+        {
+            low = m_settings.m_inputFrequencyOffset - 0.3e6f;
+            high = m_settings.m_inputFrequencyOffset + subcarrier + 0.6e6f;
+        }
+
+        if (span > m_basebandSampleRate) {
+            problem = tr("Needs %1 MS/s").arg(span / 1e6f, 0, 'f', 1);
+        } else if ((low < -halfRate) || (high > halfRate)) {
+            problem = tr("Chroma outside band");
+        }
+    }
+    else
+    {
+        // FM: the demodulated composite must extend to the top of the chroma
+        float minRate = 2.2f * (subcarrier + 0.6e6f);
+
+        if (m_basebandSampleRate < minRate) {
+            problem = tr("Needs %1 MS/s").arg(minRate / 1e6f, 0, 'f', 1);
+        }
+    }
+
+    if (problem.isEmpty())
+    {
+        ui->colourStatusText->setText(tr("OK"));
+        ui->colourStatusText->setStyleSheet("");
+        ui->colourStatusText->setToolTip(tr("The channel covers the colour subcarrier"));
+    }
+    else if (m_settings.usesVSBFrontEnd())
+    {
+        ui->colourStatusText->setText(problem);
+        ui->colourStatusText->setStyleSheet("QLabel { color: red; }");
+        ui->colourStatusText->setToolTip(
+            tr("The device needs to receive from 0.3 MHz below the vision carrier to %1 MHz above it. "
+               "Increase the sample rate, or move the device centre frequency towards the subcarrier")
+                .arg((subcarrier + 0.6e6f) / 1e6f, 0, 'f', 2));
+    }
+    else
+    {
+        ui->colourStatusText->setText(problem);
+        ui->colourStatusText->setStyleSheet("QLabel { color: red; }");
+        ui->colourStatusText->setToolTip(tr("The sample rate is too low for the demodulated video to include the colour subcarrier"));
+    }
+}
+
 void ATVDemodGUI::lineTimeUpdate()
 {
-    float nominalLineTime = ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps);
+    float nominalLineTime = 1.0f / m_settings.getLineFrequency();
 
     if (nominalLineTime < 0.0)
         ui->lineTimeText->setText("invalid");
@@ -621,7 +798,7 @@ void ATVDemodGUI::lineTimeUpdate()
 
 void ATVDemodGUI::topTimeUpdate()
 {
-    float nominalTopTime = ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps) * (4.7f / 64.0f);
+    float nominalTopTime = (1.0f / m_settings.getLineFrequency()) * (4.7f / 64.0f);
 
     if (nominalTopTime < 0.0)
         ui->topTimeText->setText("invalid");
@@ -657,6 +834,12 @@ void ATVDemodGUI::makeUIConnections()
     QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
     QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
     QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
+    QObject::connect(ui->colourSystem, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_colourSystem_currentIndexChanged);
+    QObject::connect(ui->colourSaturation, &QDial::valueChanged, this, &ATVDemodGUI::on_colourSaturation_valueChanged);
+    QObject::connect(ui->colourHue, &QDial::valueChanged, this, &ATVDemodGUI::on_colourHue_valueChanged);
+    QObject::connect(ui->palDelayLine, &QCheckBox::clicked, this, &ATVDemodGUI::on_palDelayLine_clicked);
+    QObject::connect(ui->ghostCancellation, &QCheckBox::clicked, this, &ATVDemodGUI::on_ghostCancellation_clicked);
+    QObject::connect(ui->noiseReduction, &QDial::valueChanged, this, &ATVDemodGUI::on_noiseReduction_valueChanged);
 }
 
 void ATVDemodGUI::updateAbsoluteCenterFrequency()

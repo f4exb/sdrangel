@@ -143,3 +143,36 @@ ATVDemodSettings:
       description: "UDP port number."
       minimum: 1
       maximum: 65535
+    colourSystem:
+      description: >
+        Colour decoding
+          * 0 - Mono (luminance only)
+          * 1 - NTSC
+          * 2 - NTSC 4.43
+          * 3 - PAL
+          * 4 - PAL-M
+          * 5 - PAL-N
+      type: integer
+      minimum: 0
+      maximum: 5
+    colourSaturation:
+      type: integer
+      description: "Colour saturation in % of nominal."
+    colourHue:
+      type: integer
+      description: "Hue adjustment in degrees (NTSC only)."
+    palDelayLine:
+      description: "Average the chroma of successive lines (the PAL delay line; also reduces chroma noise for NTSC)."
+      type: integer
+      minimum: 0
+      maximum: 1
+    noiseReduction:
+      type: integer
+      description: "Temporal noise reduction strength in % (0 is off)."
+      minimum: 0
+      maximum: 100
+    ghostCancellation:
+      description: "Estimate and cancel an echo (ghost) from multipath (1 for on). AM through the vestigial sideband filter only."
+      type: integer
+      minimum: 0
+      maximum: 1

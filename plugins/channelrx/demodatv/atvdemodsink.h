@@ -33,6 +33,9 @@
 #include "gui/tvscreenanalog.h"
 
 #include "atvdemodsettings.h"
+#include "atvcolourdecoder.h"
+#include "atvnoisereduction.h"
+#include "atvghostestimator.h"
 
 class ScopeVis;
 
@@ -53,6 +56,12 @@ public:
     }
     double getMagSq() const { return m_magSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
+    bool getColourLocked() const { return m_settings.isColour() && m_colourDecoder.getColourLocked(); }
+    float getBurstAmplitude() const { return m_colourDecoder.getBurstAmplitude(); }
+    float getCarrierFrequencyError() const { return m_synchronousDetector.getFrequencyError(); } //!< Hz, for AM through the VSB filter
+    float getGhostDelay() const { return m_ghostEstimator.getDelaySeconds(); }      //!< s, of the echo being cancelled
+    float getGhostAmplitude() const { return std::abs(m_ghostEstimator.getGain()); } //!< Relative to the signal, 0 when none
+    int getVideoSampleRate() const { return m_videoSampleRate; }
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
@@ -102,6 +111,7 @@ private:
 
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
+    int m_videoSampleRate;      //!< rate video is processed at (channel rate, upsampled for colour AM)
     int m_samplesPerLine;       //!< number of samples per complete line (includes sync signals) - adjusted value
 	float m_samplesPerLineFrac; //!< number of samples per complete line (includes sync signals), fractional part
 	ATVDemodSettings m_settings;
@@ -118,6 +128,7 @@ private:
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - integer value
+    int m_numberSamplesPerHSyncMin;    //!< number of samples in sync after a falling edge for it to be taken as horizontal sync
     int m_numberOfBlackLines;          //!< this is the total number of lines not part of the image and is used for vertical screen size
     int m_firstVisibleLine;
 
@@ -163,6 +174,11 @@ private:
 
 	float m_hSyncShift;
     int m_hSyncErrorCount;
+    bool m_hSyncCandidate;      // a falling edge through the sync level is being checked
+    float m_hSyncCandidateShift;
+    int m_hSyncCandidateAge;    // samples since the edge
+    int m_hSyncCandidateBelow;  // samples in sync since the edge
+    int m_hSyncCandidateAbove;  // consecutive samples out of sync
 
     float prevSample;
 
@@ -188,20 +204,64 @@ private:
     // Used for FM
     PhaseDiscriminators m_objPhaseDiscri;
 
+    bool m_useNCO;
+
+    //*************** COLOUR  ***************
+
+    bool m_vsbFrontEnd;                  //!< AM / VSB: VSB filter (and for colour, upsampling) and envelope detection
+    bool m_carrierReferenced;            //!< negative modulation AM through the VSB filter: levels from the carrier, not min / max
+    float m_carrierVideoRange;           //!< 1 - white carrier level as a fraction of the sync tip
+    float m_envelopeLPAlpha;
+    float m_envelopeLP;
+    float m_envelopeLineMax;
+    float m_syncTipEnvelope;             //!< tracked sync tip envelope
+    ATVVSBFrontEnd m_vsbFilter;
+    ATVSynchronousDetector m_synchronousDetector;
+    ATVColourDecoder m_colourDecoder;
+    std::vector<float> m_colourLine;     //!< composite for the current line, index 0 at start of sync pulse
+    int m_colourLineFirst;               //!< first index of m_colourLine written in the current line
+    int64_t m_colourLineStart;           //!< video sample count at index 0 of the current line
+    int64_t m_videoSampleCount;
+    std::vector<unsigned int> m_lineRGB; //!< pixels of the current line, when written a whole line at a time
+    ATVNoiseReduction m_noiseReduction;
+    ATVGhostEstimator m_ghostEstimator;
+    int m_currentRow;                    //!< row of the TV screen being written
+    std::vector<float> m_syncFilter;     //!< boxcar one colour subcarrier period long, so saturated colours do not reach the sync slicer
+    int m_syncFilterIndex;
+    float m_syncFilterSum;
+    float m_syncFilterScale;
+
     void demod(Complex& c);
+    void processVideo(float sample, float envelope);
     void applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration);
+    void applyVideoSettings();
+    void writeLine();
 
     inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-		m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
+        // (colour is decoded, and noise reduced, a whole line at a time, at the end of the line)
+        if (!m_settings.isColour())
+        {
+            int grey = sampleVideo | (sampleVideo << 8) | (sampleVideo << 16);
+
+            if (!m_noiseReduction.isEnabled()) {
+                m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, grey);
+            } else if ((m_sampleOffset >= 0) && (m_sampleOffset < m_samplesPerLine)) {
+                m_lineRGB[m_sampleOffset] = grey;
+            }
+        }
 
         if (m_settings.m_hSync)
         {
-            // Horizontal Synchro detection
+            // Horizontal Synchro detection: a falling edge through the sync level is only taken as sync
+            // once the signal has been below the level for m_numberSamplesPerHSyncMin samples,
+            // so the brief undershoot and ringing next to bright picture content are not mistaken for sync.
+            // Ringing on the pulse's own leading edge can take it back above the level briefly
             if ((prevSample >= m_settings.m_levelSynchroTop &&
-                sample < m_settings.m_levelSynchroTop) // horizontal synchro detected
-                && (m_sampleOffsetDetected > m_samplesPerLine - m_numberSamplesPerHTop))
+                sample < m_settings.m_levelSynchroTop) // horizontal synchro candidate
+                && (m_sampleOffsetDetected > m_samplesPerLine - m_numberSamplesPerHTop)
+                && !m_hSyncCandidate)
             {
                 float sampleOffsetDetectedFrac =
                     (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
@@ -211,26 +271,52 @@ private:
                 else if (hSyncShift < -m_samplesPerLine / 2)
 					hSyncShift += m_samplesPerLine;
 
-                if (fabs(hSyncShift) > m_numberSamplesPerHTop)
+                m_hSyncCandidate = true;
+                m_hSyncCandidateShift = hSyncShift;
+                m_hSyncCandidateAge = 0;
+                m_hSyncCandidateBelow = 0;
+                m_hSyncCandidateAbove = 0;
+            }
+
+            m_sampleOffsetDetected++;
+
+            if (m_hSyncCandidate)
+            {
+                m_hSyncCandidateAge++;
+
+                if (sample < m_settings.m_levelSynchroTop)
                 {
-                    m_hSyncErrorCount++;
-                    if (m_hSyncErrorCount >= 4)
+                    m_hSyncCandidateBelow++;
+                    m_hSyncCandidateAbove = 0;
+                }
+                else if (++m_hSyncCandidateAbove > m_numberSamplesPerHSyncMin / 2)
+                {
+                    m_hSyncCandidate = false; // not a sync pulse
+                }
+
+                if (m_hSyncCandidate && (m_hSyncCandidateBelow >= m_numberSamplesPerHSyncMin)) // horizontal synchro detected
+                {
+                    m_hSyncCandidate = false;
+
+                    if (fabs(m_hSyncCandidateShift) > m_numberSamplesPerHTop)
                     {
-                        // Fast sync: shift is too large, needs to be fixed ASAP
-						m_hSyncShift = hSyncShift;
+                        m_hSyncErrorCount++;
+                        if (m_hSyncErrorCount >= 4)
+                        {
+                            // Fast sync: shift is too large, needs to be fixed ASAP
+                            m_hSyncShift = m_hSyncCandidateShift;
+                            m_hSyncErrorCount = 0;
+                        }
+                    }
+                    else
+                    {
+                        // Slow sync: slight adjustment is needed
+                        m_hSyncShift = m_hSyncCandidateShift * 0.2f;
                         m_hSyncErrorCount = 0;
                     }
+                    m_sampleOffsetDetected = m_hSyncCandidateAge - 1; // counted from the edge
                 }
-                else
-                {
-					// Slow sync: slight adjustment is needed
-					m_hSyncShift = hSyncShift * 0.2f;
-                    m_hSyncErrorCount = 0;
-                }
-				m_sampleOffsetDetected = 0;
             }
-            else
-				m_sampleOffsetDetected++;
         }
 		m_sampleOffset++;
 
@@ -245,6 +331,16 @@ private:
         // end of line
         if (m_sampleOffset >= m_samplesPerLine)
         {
+            if (m_carrierReferenced)
+            {
+                m_syncTipEnvelope = m_syncTipEnvelope > 0.0f ? m_syncTipEnvelope + 0.1f * (m_envelopeLineMax - m_syncTipEnvelope) : m_envelopeLineMax;
+                m_envelopeLineMax = 0.0f;
+            }
+
+            if (m_settings.isColour() || m_noiseReduction.isEnabled()) {
+                writeLine();
+            }
+
             float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac - m_samplesPerLineFrac;
             m_sampleOffset = sampleOffsetFloat;
             m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
@@ -267,6 +363,7 @@ private:
         if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
         {
 			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
+            m_noiseReduction.endFrame();
         }
 
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
@@ -300,6 +397,7 @@ private:
             rowIndex = rowIndex * 2 - m_fieldIndex;
 
 		m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac);
+        m_currentRow = rowIndex;
 	}
 
     // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
@@ -309,10 +407,12 @@ private:
             || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
         {
 			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
+            m_noiseReduction.endFrame();
 			m_lineIndex = 0;
         }
 
 		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
+        m_currentRow = m_lineIndex;
     }
 };
 

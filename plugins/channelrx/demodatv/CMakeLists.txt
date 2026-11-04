@@ -2,7 +2,10 @@ project(atv)
 
 set(atv_SOURCES
     atvdemod.cpp
+    atvcolourdecoder.cpp
     atvdemodbaseband.cpp
+    atvnoisereduction.cpp
+    atvghostestimator.cpp
     atvdemodsink.cpp
     atvdemodsettings.cpp
     atvdemodwebapiadapter.cpp
@@ -13,7 +16,10 @@ set(atv_SOURCES
 
 set(atv_HEADERS
     atvdemod.h
+    atvcolourdecoder.h
     atvdemodbaseband.h
+    atvnoisereduction.h
+    atvghostestimator.h
     atvdemodsink.h
     atvdemodsettings.h
     atvdemodwebapiadapter.h

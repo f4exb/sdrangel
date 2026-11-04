@@ -141,6 +141,24 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    qint32 getColourSystem();
+    void setColourSystem(qint32 colour_system);
+
+    qint32 getColourSaturation();
+    void setColourSaturation(qint32 colour_saturation);
+
+    qint32 getColourHue();
+    void setColourHue(qint32 colour_hue);
+
+    qint32 getPalDelayLine();
+    void setPalDelayLine(qint32 pal_delay_line);
+
+    qint32 getNoiseReduction();
+    void setNoiseReduction(qint32 noise_reduction);
+
+    qint32 getGhostCancellation();
+    void setGhostCancellation(qint32 ghost_cancellation);
+
 
     virtual bool isSet() override;
 
@@ -243,6 +261,24 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    qint32 colour_system;
+    bool m_colour_system_isSet;
+
+    qint32 colour_saturation;
+    bool m_colour_saturation_isSet;
+
+    qint32 colour_hue;
+    bool m_colour_hue_isSet;
+
+    qint32 pal_delay_line;
+    bool m_pal_delay_line_isSet;
+
+    qint32 noise_reduction;
+    bool m_noise_reduction_isSet;
+
+    qint32 ghost_cancellation;
+    bool m_ghost_cancellation_isSet;
 
 };
 

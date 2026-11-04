@@ -23,10 +23,18 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
+#include "SWGATVDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGATVDemodReport.h"
+
 #include "device/deviceapi.h"
 
 #include "atvdemod.h"
+#include "atvdemodwebapiadapter.h"
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 
@@ -214,4 +222,72 @@ void ATVDemod::handleIndexInDeviceSetChanged(int index)
 int ATVDemod::getChannelSampleRate() const
 {
     return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int ATVDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAtvDemodSettings(new SWGSDRangel::SWGATVDemodSettings());
+    response.getAtvDemodSettings()->init();
+    ATVDemodWebAPIAdapter::webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ATVDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
+    return 200;
+}
+
+int ATVDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    ATVDemodSettings settings = m_settings;
+    ATVDemodWebAPIAdapter::webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
+    QStringList settingsKeys = ATVDemodWebAPIAdapter::getSettingsKeys(channelSettingsKeys);
+
+    MsgConfigureATVDemod *msg = MsgConfigureATVDemod::create(settingsKeys, settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureATVDemod *msgToGUI = MsgConfigureATVDemod::create(settingsKeys, settings, force);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    ATVDemodWebAPIAdapter::webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int ATVDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAtvDemodReport(new SWGSDRangel::SWGATVDemodReport());
+    response.getAtvDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void ATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getAtvDemodReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq() / (SDR_RX_SCALED*SDR_RX_SCALED)));
+    response.getAtvDemodReport()->setChannelSampleRate(getChannelSampleRate());
+    response.getAtvDemodReport()->setBfoLocked(getBFOLocked() ? 1 : 0);
+    response.getAtvDemodReport()->setColourLocked(getColourLocked() ? 1 : 0);
+    response.getAtvDemodReport()->setBurstAmplitude(getBurstAmplitude());
+    response.getAtvDemodReport()->setCarrierFrequencyError(getCarrierFrequencyError());
+    response.getAtvDemodReport()->setGhostDelay(getGhostDelay() * 1e6f);
+    response.getAtvDemodReport()->setGhostAmplitude(getGhostAmplitude());
 }
