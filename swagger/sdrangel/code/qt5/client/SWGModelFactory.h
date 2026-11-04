@@ -52,6 +52,7 @@
 #include "SWGWefaxDemodReport.h"
 #include "SWGWefaxDemodSettings.h"
 #include "SWGATVDemodSettings.h"
+#include "SWGATVDemodReport.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
 #include "SWGAaroniaRTSAOutputReport.h"
@@ -652,6 +653,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGATVDemodSettings").compare(type) == 0) {
       SWGATVDemodSettings *obj = new SWGATVDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGATVDemodReport").compare(type) == 0) {
+      SWGATVDemodReport *obj = new SWGATVDemodReport();
       obj->init();
       return obj;
     }

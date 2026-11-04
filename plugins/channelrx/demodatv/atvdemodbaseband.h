@@ -74,6 +74,11 @@ public:
     ScopeVis *getScopeSink() { return &m_scopeSink; }
     void setTVScreen(TVScreenAnalog *tvScreen) { m_sink.setTVScreen(tvScreen); }
     bool getBFOLocked() { return m_sink.getBFOLocked(); }
+    bool getColourLocked() const { return m_sink.getColourLocked(); }
+    float getBurstAmplitude() const { return m_sink.getBurstAmplitude(); }
+    float getCarrierFrequencyError() const { return m_sink.getCarrierFrequencyError(); }
+    float getGhostDelay() const { return m_sink.getGhostDelay(); }
+    float getGhostAmplitude() const { return m_sink.getGhostAmplitude(); }
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     bool isRunning() const { return m_running; }

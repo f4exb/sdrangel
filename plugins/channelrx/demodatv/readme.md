@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same baseband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
+This plugin can be used to view analog television transmissions, both amateur (ATV) and broadcast. NTSC and PAL colour can be decoded (see B.13), when the sample rate is high enough for the colour subcarrier, otherwise only the black and white level (luminance) is retained. There is no provision to demodulate the audio subcarrier. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same baseband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
 
-A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable.
+A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. Colour needs more: see [Colour reception](#colour-reception).
 
 Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Very low line frequencies and thus small bandwidths are reachable with degraded image quality. This is known as NBTV see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
@@ -30,9 +30,9 @@ Each part is detailed next
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: Channel sample rate</h3>
+<h3>2: Video sample rate</h3>
 
-This is the baseband sample rate as no decimation takes place in this channel plugin.
+This is the rate the video is processed at. It is the baseband sample rate, as no decimation takes place in this channel plugin, except when decoding colour from an AM signal, when it is upsampled by 2 or 4 so that the video can extend to the top of the colour subcarrier (see [Colour reception](#colour-reception)).
 
 <h3>3: Number of integer points or samples per line and fractional remainder</h3>
 
@@ -45,7 +45,7 @@ This is the number of integer points or samples per complete line including sync
 n = Sb / (l &times; F) (Euclidean division)
 
 Where:
-  - Sb is the baseband sample rate
+  - Sb is the video sample rate (2)
   - n is the number of integer points
   - l is the number of lines
   - F is the frame rate in frames/second
@@ -84,7 +84,7 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
   - **FM1**: this is Frequency Modulation with approximative demodulation algorithm not using atan2
   - **FM2**: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
   - **FM3**: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
-  - **AM**: this is Amplitude Modulation. It can be used for vestigial sideband transmissions in conjunction with the asymmetrical filter (11, 12, 13)
+  - **AM**: this is Amplitude Modulation, as used for broadcast TV with a vestigial lower sideband. Unless the FFT filter (11) is on, it goes through a vestigial sideband filter and synchronous detector (see below)
   - **USB**: &#9888; USB demodulation synchronous to the carrier (experimental)
   - **LSB**: &#9888; LSB demodulation synchronous to the carrier (experimental)
 
@@ -95,6 +95,14 @@ For FM choose the algorithm that best suits your conditions.
 &#9888; in AM modes (also USB and LSB) there is an automatic amplitude scaling so that the video signal fits in the 0.0 to 1.0 range. For synchronization standards other than HSkip (see B.3) it may be difficult for the system to find the appropriate level when the standard changes or the signal power changes abruptly. In this case you have to select HSkip (B.3) until the video signal reaches the 0.0 to 1.0 range approximately (use scope tab see C) before returning to the desired standard.
 
 &#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
+
+&#9758; In AM without the FFT filter (11), and when decoding colour (B.13) in AM, USB or LSB, the signal goes through a dedicated vestigial sideband filter and synchronous detector, as a TV does:
+
+  - A Nyquist slope through the vision carrier flattens the response across the vestigial sideband and removes anything more than 0.3 MHz below the carrier. That is where the sound carrier ends up when it is outside the device's band and aliases, where it would otherwise put a herringbone pattern over the picture.
+  - The vision carrier is recovered and the video detected synchronously. Tuning errors of up to &#177;50 kHz are tracked. The carrier is recovered from the sync pulses only, as the picture modulates it: transmitters often overmodulate on white, cutting the carrier off, which would otherwise tear the picture.
+  - With video inversion (B.6), as for the usual negative modulation, the levels are taken from the sync tip carrier, so the AM range corrections (9, 10) are not used.
+
+In black and white, the vision carrier is kept at the centre of the channel, so the video extends to half the sample rate, without aliasing (2.5 MHz at 5 MS/s). For colour the video is upsampled as needed (see [Colour reception](#colour-reception)), and the FFT filter and BFO (5) are not used. USB and AM behave the same in colour; LSB is for spectrum inverted signals, with the video below the vision carrier.
 
 <h3>8: FM deviation adjustment</h3>
 
@@ -112,7 +120,7 @@ This is a factor in % applied to the signal resulting from the previous correcti
 
 <h3>11: FFT asymmetrical filter toggle</h3>
 
-Use this button to enable/disable the FFT asymmetrical filter. Use this filter when you want to optimize the reception of vestigial sideband AM signals.
+Use this button to enable/disable the FFT asymmetrical filter. In black and white AM it replaces the vestigial sideband filter and synchronous detector (see 7) with this filter and an envelope detector. This can be better for double sideband AM, such as some amateur TV, as it uses both sidebands, while the vestigial sideband filter uses only one above 0.3 MHz. It is not used when decoding colour.
 
 <h3>12: FFT asymmetrical filter opposite band cutoff frequency</h3>
 
@@ -262,13 +270,80 @@ Use this slider to adjust the trigger level of the synchronization pulse on a 0 
 
 This is the line length in time units. The value depends on the line frequency. For example with 625 lines and 12 FPS The line frequency is 625 &times; 12 = 7500 Hz thus the nominal line time is the inverse of this value that is &#8776;133.33 &mu;s
 
-<h3>10: Black level</h3>
+<h3>11: Black level</h3>
 
 Use this slider to adjust the black level of the video signal on a 0 to 1V scale. This also triggers the end of horizontal synchronization pulse. The value in mV appears on the right of the slider. Nominal value: 300 mV.
 
 <h3>12: Horizontal synchronization pulse length</h3>
 
 This is the length in time units of a horizontal or line synchronization pulse. The value depends on the nominal line length as described above. The pulse length is derived from the 4.7 &mu;s pulse of a 625 lines and 25 FPS standard system with a 64 &mu;s line length. For example with a 625 lines &times; 12 FPS transmission that has a line length of &#8776;133.33 &mu;s this is (4.7 &divide; 64) &times; 133.33 &#8776; 9.79 &mu;s.
+
+<h3>13: Colour system</h3>
+
+  - **Mono**: luminance only. This works at any sample rate and is the only choice when the sample rate cannot cover the colour subcarrier.
+  - **NTSC**: NTSC-M, 3.579545 MHz subcarrier
+  - **NTSC 4.43**: NTSC with a 4.43361875 MHz subcarrier, as played back by some multi-standard video recorders
+  - **PAL**: PAL-B/G/D/K/I, 4.43361875 MHz subcarrier
+  - **PAL-M**: 525 lines PAL as used in Brazil, 3.57561149 MHz subcarrier
+  - **PAL-N**: 625 lines PAL as used in Argentina, Paraguay and Uruguay, 3.58205625 MHz subcarrier
+  - **SECAM**: SECAM-B/G/D/K, frequency modulated subcarriers at 4.25 and 4.40625 MHz (see <a href="#colour-reception">Colour reception</a>)
+
+With a 525 line colour system, the line rate is the exact 15734.26 Hz of 59.94 fields per second, rather than 525 &times; 30.
+
+When colour is selected, the black level slider (11) is not used: levels are taken from the sync tip and the blanking level, as a TV does, and the colour saturation from the amplitude of the colour burst (SECAM's colour is frequency modulated, so its saturation does not depend on the signal level).
+
+<h3>14: Colour burst indicator</h3>
+
+Turns green while a colour burst is being received, or for SECAM, while the subcarriers are seen on alternate lines. When there is no burst for longer than the vertical blanking interval, the colour killer turns colour off and the image is shown in black and white.
+
+<h3>15: Colour saturation</h3>
+
+Saturation as a percentage of nominal, from 0 to 200%.
+
+<h3>16: Hue</h3>
+
+Hue (tint) adjustment in degrees, for NTSC only. PAL corrects phase errors itself, and SECAM's colour is not carried in the phase.
+
+<h3>17: Delay line</h3>
+
+When checked, the colour of each line is averaged with the previous line of the field. For PAL this is the delay line of a PAL-D receiver, which cancels phase errors from multipath or the transmission path; when unchecked, phase errors show as "Hanover bars" (PAL-S). For both PAL and NTSC it halves the colour noise, for half the vertical colour resolution, which is worth having on weak signals. SECAM sends each colour difference on alternate lines, so it always uses the previous line and this has no effect.
+
+<h3>18: Noise reduction</h3>
+
+Temporal noise reduction, from 0 (off) to 100%. Each pixel is blended with the same pixel in the previous frame, except where the picture has changed by more than the noise, which is taken to be movement. The noise level is measured from the picture itself, so there is nothing else to adjust. This works in black and white as well as colour.
+
+On a weak signal, 50 to 70% removes most of the grain without visible smearing. Higher values are cleaner still on still pictures but leave faint trails behind fast movement. With 100% the noise is reduced to about half on a typical weak signal.
+
+<h3>19: Colour status</h3>
+
+Shows OK when the sample rate and tuning cover the colour subcarrier, or what is wrong when they do not. Hover over it for details.
+
+<h3>20: Ghost cancellation</h3>
+
+When checked, an echo from multipath (a ghost: a fainter copy of the picture, shifted to the right) is measured and cancelled. The delay and strength of the echo being cancelled are shown beside the check box.
+
+The echo is measured from the horizontal sync pulses, whose tips and back porches are flat without one, averaged over a frame, and cancelled from the signal before it is detected, so its effect on colour is removed too. One echo, delayed by 1 to 4 &#181;s, is cancelled. It is only available for AM with video inverted, through the Nyquist slope filter (not with the FFT filter, A.11), and needs at least 2 MHz of video bandwidth (a sample rate of 4 MS/s or more for black and white), as with less, the edges of the sync pulses ring for longer than a short echo. Turn it off if the ghost is not steady, for example from an aircraft.
+
+<h2 id="colour-reception">Colour reception</h2>
+
+The colour (chroma) is carried on a subcarrier 3.58 MHz (NTSC, PAL-M, PAL-N) or 4.43 MHz (PAL) above the vision carrier. To decode it, the device must receive from 0.3 MHz below the vision carrier to 0.6 MHz above the subcarrier, a span of about 4.5 MHz for NTSC and 5.3 MHz for PAL. As this span is not centred on the vision carrier, the device centre frequency should be set above the vision carrier, by about half the span, with the channel (A.1) on the vision carrier. For example, for NTSC channel 2 (vision carrier 55.25 MHz) at 5 MS/s, set the device to 57 MHz and the channel to -1.75 MHz. The channel marker shows the band needed, and the colour status (B.19) shows whether it is covered.
+
+For AM, USB and LSB signals, colour decoding:
+
+  - Filters the signal with a Nyquist slope through the vision carrier, as a TV's IF filter does (see 7).
+  - Upsamples the video by 2 or 4 when needed, so it can extend to the top of the chroma (A.2).
+  - Recovers the vision carrier and detects synchronously, which avoids the distortion of saturated colours that envelope detection of a vestigial sideband signal causes.
+  - Takes the video levels from the sync tip carrier, so video inversion (B.6) should be checked for the usual negative modulation.
+
+For FM signals, the sample rate must be high enough for the demodulated video to include the subcarrier (about 9 MS/s for NTSC and 11 MS/s for PAL), and the video levels are taken from the depth of the sync pulses.
+
+Sync is detected with the colour subcarrier filtered out, so saturated colours are not mistaken for sync pulses, and a horizontal sync pulse must last at least 1 &#181;s, so the brief undershoot next to bright white is not either. If the transmission has a compressed sync, as long distance reception can, lower the synchronization level (B.9) until the image locks.
+
+The displayed colour is limited to about 0.75 MHz, as TV sets did, which halves its noise compared with the full chroma bandwidth. On weak signals, the delay line (B.17) and noise reduction (B.18) reduce the noise further.
+
+SECAM differs from NTSC and PAL. B-Y and R-Y are sent on alternate lines, each frequency modulating its own subcarrier (4.25 and 4.40625 MHz), with no burst, so the receiver finds which line is which from the frequency on the back porch, and takes the other colour from the line before. A file or signal needs the same span as PAL: for example at 9 MS/s, the vision carrier about 2.9 MHz below the device centre. Frequency modulated colour needs more signal than NTSC or PAL. Rather than the discriminator a TV uses, which on a weak signal gives the horizontal streaks known as "SECAM fire", the colour is followed by a phase locked loop, narrowed automatically for a weak signal, when a vertical median also removes streaks a line high. A weak picture will still show patches of the wrong colour on pale pinks and flesh tones, where the subcarrier is at its weakest. Noise reduction (B.18) helps with what is left. The SECAM-L used in France is positively modulated, and its amplitude modulated sound is not removed: it has not been tested.
+
+Colour decoding uses more CPU than black and white, and it grows with the sample rate: about a third of a core for NTSC at 5 MS/s on a recent desktop, and about half a core for PAL or SECAM from a 9 MS/s source, which is upsampled to 18 MS/s. Both double when the machine is busy with other work. A source of 12 MS/s is not upsampled, so needs less than one of 9 MS/s. Noise reduction (B.18) adds about a tenth.
 
 <h2>C: Image</h2>
 

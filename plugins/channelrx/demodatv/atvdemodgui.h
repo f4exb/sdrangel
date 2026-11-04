@@ -99,6 +99,8 @@ private:
     void setRFFiltersSlidersRange(int sampleRate);
     void lineTimeUpdate();
     void topTimeUpdate();
+    void updateColourStatus();
+    void setDeltaFrequencyRange();
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -131,6 +133,12 @@ private slots:
     void on_amScaleFactor_valueChanged(int value);
     void on_amScaleOffset_valueChanged(int value);
     void on_screenTabWidget_currentChanged(int index);
+    void on_colourSystem_currentIndexChanged(int index);
+    void on_colourSaturation_valueChanged(int value);
+    void on_colourHue_valueChanged(int value);
+    void on_palDelayLine_clicked();
+    void on_noiseReduction_valueChanged(int value);
+    void on_ghostCancellation_clicked();
 };
 
 #endif // INCLUDE_ATVDEMODGUI_H

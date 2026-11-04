@@ -97,10 +97,33 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
 	ScopeVis *getScopeSink() { return m_basebandSink->getScopeSink(); }
     void setTVScreen(TVScreenAnalog *tvScreen) { m_basebandSink->setTVScreen(tvScreen); }; //!< set by the GUI
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
+    bool getColourLocked() const { return m_basebandSink->getColourLocked(); }
+    float getBurstAmplitude() const { return m_basebandSink->getBurstAmplitude(); }
+    float getCarrierFrequencyError() const { return m_basebandSink->getCarrierFrequencyError(); } //!< Hz, for AM through the VSB filter
+    float getGhostDelay() const { return m_basebandSink->getGhostDelay(); }         //!< s
+    float getGhostAmplitude() const { return m_basebandSink->getGhostAmplitude(); } //!< 0 when no echo is being cancelled
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }
     uint32_t getNumberOfDeviceStreams() const;
 
@@ -117,6 +140,7 @@ private:
 
 	virtual bool handleMessage(const Message& cmd);
     void applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force = false);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
 private slots:
     void handleIndexInDeviceSetChanged(int index);

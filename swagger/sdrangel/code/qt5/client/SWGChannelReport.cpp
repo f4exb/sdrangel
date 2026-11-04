@@ -46,6 +46,8 @@ SWGChannelReport::SWGChannelReport() {
     m_wefax_demod_report_isSet = false;
     am_mod_report = nullptr;
     m_am_mod_report_isSet = false;
+    atv_demod_report = nullptr;
+    m_atv_demod_report_isSet = false;
     atv_mod_report = nullptr;
     m_atv_mod_report_isSet = false;
     bfm_demod_report = nullptr;
@@ -190,6 +192,8 @@ SWGChannelReport::init() {
     m_wefax_demod_report_isSet = false;
     am_mod_report = new SWGAMModReport();
     m_am_mod_report_isSet = false;
+    atv_demod_report = new SWGATVDemodReport();
+    m_atv_demod_report_isSet = false;
     atv_mod_report = new SWGATVModReport();
     m_atv_mod_report_isSet = false;
     bfm_demod_report = new SWGBFMDemodReport();
@@ -336,6 +340,9 @@ SWGChannelReport::cleanup() {
     }
     if(am_mod_report != nullptr) { 
         delete am_mod_report;
+    }
+    if(atv_demod_report != nullptr) { 
+        delete atv_demod_report;
     }
     if(atv_mod_report != nullptr) { 
         delete atv_mod_report;
@@ -544,6 +551,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&am_mod_report, pJson["AMModReport"], "SWGAMModReport", "SWGAMModReport");
     
+    ::SWGSDRangel::setValue(&atv_demod_report, pJson["ATVDemodReport"], "SWGATVDemodReport", "SWGATVDemodReport");
+    
     ::SWGSDRangel::setValue(&atv_mod_report, pJson["ATVModReport"], "SWGATVModReport", "SWGATVModReport");
     
     ::SWGSDRangel::setValue(&bfm_demod_report, pJson["BFMDemodReport"], "SWGBFMDemodReport", "SWGBFMDemodReport");
@@ -701,6 +710,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((am_mod_report != nullptr) && (am_mod_report->isSet())){
         toJsonValue(QString("AMModReport"), am_mod_report, obj, QString("SWGAMModReport"));
+    }
+    if((atv_demod_report != nullptr) && (atv_demod_report->isSet())){
+        toJsonValue(QString("ATVDemodReport"), atv_demod_report, obj, QString("SWGATVDemodReport"));
     }
     if((atv_mod_report != nullptr) && (atv_mod_report->isSet())){
         toJsonValue(QString("ATVModReport"), atv_mod_report, obj, QString("SWGATVModReport"));
@@ -971,6 +983,16 @@ void
 SWGChannelReport::setAmModReport(SWGAMModReport* am_mod_report) {
     this->am_mod_report = am_mod_report;
     this->m_am_mod_report_isSet = true;
+}
+
+SWGATVDemodReport*
+SWGChannelReport::getAtvDemodReport() {
+    return atv_demod_report;
+}
+void
+SWGChannelReport::setAtvDemodReport(SWGATVDemodReport* atv_demod_report) {
+    this->atv_demod_report = atv_demod_report;
+    this->m_atv_demod_report_isSet = true;
 }
 
 SWGATVModReport*
@@ -1596,6 +1618,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(am_mod_report && am_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(atv_demod_report && atv_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(atv_mod_report && atv_mod_report->isSet()){
