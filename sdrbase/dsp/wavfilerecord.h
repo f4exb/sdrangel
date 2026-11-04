@@ -91,6 +91,11 @@ public:
         quint16 m_bitsPerSample;
         Chunk m_auxiHeader;
         Auxi m_auxi;
+        Chunk m_listHeader;     // "LIST"
+        char m_infoType[4];     // "INFO"
+        Chunk m_isftHeader;     // "ISFT"
+        char m_isftData[64];    // App Name + Version
+
         Chunk m_dataHeader;
 
         QDateTime getStartTime() const;
