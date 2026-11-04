@@ -77,6 +77,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.11.3'
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: 'false'
