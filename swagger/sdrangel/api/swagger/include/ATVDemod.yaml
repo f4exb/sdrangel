@@ -152,9 +152,10 @@ ATVDemodSettings:
           * 3 - PAL
           * 4 - PAL-M
           * 5 - PAL-N
+          * 6 - SECAM
       type: integer
       minimum: 0
-      maximum: 5
+      maximum: 6
     colourSaturation:
       type: integer
       description: "Colour saturation in % of nominal."

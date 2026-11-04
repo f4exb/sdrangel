@@ -53,7 +53,8 @@ struct ATVDemodSettings
         ColourNTSC443,//!< NTSC with 4.43361875 MHz subcarrier
         ColourPAL,    //!< PAL-B/G/D/K/I, 4.43361875 MHz subcarrier
         ColourPALM,   //!< PAL-M, 3.57561149 MHz subcarrier
-        ColourPALN    //!< PAL-N, 3.58205625 MHz subcarrier
+        ColourPALN,   //!< PAL-N, 3.58205625 MHz subcarrier
+        ColourSECAM   //!< SECAM-B/D/G/H/K, FM subcarriers at 4.25 and 4.40625 MHz
     };
 
     // RF settings
@@ -124,6 +125,7 @@ struct ATVDemodSettings
 
     bool isColour() const { return m_colourSystem != ColourMono; }
     bool isPAL() const { return (m_colourSystem == ColourPAL) || (m_colourSystem == ColourPALM) || (m_colourSystem == ColourPALN); }
+    bool isSECAM() const { return m_colourSystem == ColourSECAM; }
     bool usesVSBFrontEnd() const;              //!< AM goes through the VSB filter (and for colour, the upsampler)
     float getLineFrequency() const;            //!< Lines per second, exact for 525 line colour systems
     int getVideoSampleRate(int channelSampleRate) const; //!< Rate the video is processed at

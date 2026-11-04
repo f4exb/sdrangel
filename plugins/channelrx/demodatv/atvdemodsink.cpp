@@ -63,6 +63,7 @@ ATVDemodSink::ATVDemodSink() :
     m_hSyncCandidateBelow(0),
     m_hSyncCandidateAbove(0),
     prevSample(0.0f),
+    m_magSqCount(0),
     m_ampAverage(4800),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
@@ -76,10 +77,12 @@ ATVDemodSink::ATVDemodSink() :
     m_envelopeLPAlpha(1.0f),
     m_envelopeLP(0.0f),
     m_envelopeLineMax(0.0f),
+    m_videoScale(0.0f),
     m_syncTipEnvelope(0.0f),
     m_colourLineFirst(0),
     m_colourLineStart(0),
     m_videoSampleCount(0),
+    m_pixelStep(1),
     m_currentRow(-1),
     m_syncFilterIndex(0),
     m_syncFilterSum(0.0f),
@@ -145,7 +148,12 @@ void ATVDemodSink::demod(Complex& c)
 
     if (m_vsbFrontEnd)
     {
-        m_magSqAverage(c.real()*c.real() + c.imag()*c.imag());
+        if (++m_magSqCount >= m_magSqInterval)
+        {
+            m_magSqCount = 0;
+            m_magSqAverage(c.real()*c.real() + c.imag()*c.imag());
+        }
+
         Complex *filtered;
         int n_out = m_vsbFilter.process(c, &filtered);
 
@@ -163,7 +171,7 @@ void ATVDemodSink::demod(Complex& c)
 
                 m_envelopeLP += m_envelopeLPAlpha * (envelope - m_envelopeLP);
                 m_envelopeLineMax = std::max(m_envelopeLineMax, m_envelopeLP);
-                float video = m_syncTipEnvelope > 0.0f ? (m_syncTipEnvelope - envelope) / (m_syncTipEnvelope * m_carrierVideoRange) : 0.0f;
+                float video = (m_syncTipEnvelope - envelope) * m_videoScale;
                 processVideo(video, envelope);
             }
             else
@@ -311,7 +319,7 @@ void ATVDemodSink::demod(Complex& c)
 
 void ATVDemodSink::processVideo(float sample, float envelope)
 {
-    int sampleVideo;
+    int sampleVideo = 0;
 
     //********** AM sample normalization and coarse scale estimation **********
 
@@ -376,11 +384,14 @@ void ATVDemodSink::processVideo(float sample, float envelope)
     }
 
     //********** gray level **********
-    // -0.3 -> 0.7 / 0.7
-    sampleVideo = (int) ((sample - m_settings.m_levelBlack) * m_sampleRangeCorrection);
+    if (!m_settings.isColour()) // colour is decoded, and its levels taken, a whole line at a time
+    {
+        // -0.3 -> 0.7 / 0.7
+        sampleVideo = (int) ((sample - m_settings.m_levelBlack) * m_sampleRangeCorrection);
 
-    // 0 -> 255
-    sampleVideo = (sampleVideo < 0) ? 0 : (sampleVideo > 255) ? 255 : sampleVideo;
+        // 0 -> 255
+        sampleVideo = (sampleVideo < 0) ? 0 : (sampleVideo > 255) ? 255 : sampleVideo;
+    }
 
     //********** process video sample **********
 
@@ -420,12 +431,15 @@ void ATVDemodSink::writeLine()
         m_colourLineFirst = m_samplesPerLine;
     }
 
+    const int firstPixel = m_numberSamplesPerHSync / m_pixelStep;
+    const int pixels = m_samplesPerLine / m_pixelStep;
+
     if (m_noiseReduction.isEnabled()) {
-        m_noiseReduction.processRow(m_currentRow, &m_lineRGB[m_numberSamplesPerHSync]);
+        m_noiseReduction.processRow(m_currentRow, &m_lineRGB[firstPixel]);
     }
 
-    for (int i = std::max(m_numberSamplesPerHSync - 2, 0); i < m_samplesPerLine; i++) {
-        m_tvScreenBuffer->setSampleValue(i - m_numberSamplesPerHSync, (int) m_lineRGB[i]);
+    for (int i = std::max(firstPixel - 2, 0); i < pixels; i++) {
+        m_tvScreenBuffer->setSampleValue(i - firstPixel, (int) m_lineRGB[i]);
     }
 }
 
@@ -617,6 +631,7 @@ void ATVDemodSink::applyVideoSettings()
     m_envelopeLP = 0.0f;
     m_envelopeLineMax = 0.0f;
     m_syncTipEnvelope = 0.0f;
+    m_videoScale = 0.0f;
 
     if (m_settings.isColour())
     {
@@ -642,12 +657,14 @@ void ATVDemodSink::applyVideoSettings()
     m_syncFilterSum = 0.0f;
     m_syncFilterScale = 1.0f / m_syncFilter.size();
     m_lineRGB.assign(m_samplesPerLine, 0);
-    m_noiseReduction.configure(m_samplesPerLine - m_numberSamplesPerLineSignals, m_settings.m_nbLines - m_numberOfBlackLines);
+    m_pixelStep = m_settings.isColour() ? m_colourDecoder.getPixelStep() : 1; // A wider picture would show nothing more
+    int screenWidth = (m_samplesPerLine - m_numberSamplesPerLineSignals) / m_pixelStep;
+    m_noiseReduction.configure(screenWidth, m_settings.m_nbLines - m_numberOfBlackLines);
 
     if (m_registeredTVScreen)
     {
         m_registeredTVScreen->resizeTVScreen(
-            m_samplesPerLine - m_numberSamplesPerLineSignals,
+            screenWidth,
             m_settings.m_nbLines - m_numberOfBlackLines
         );
         m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();

@@ -286,16 +286,15 @@ This is the length in time units of a horizontal or line synchronization pulse. 
   - **PAL**: PAL-B/G/D/K/I, 4.43361875 MHz subcarrier
   - **PAL-M**: 525 lines PAL as used in Brazil, 3.57561149 MHz subcarrier
   - **PAL-N**: 625 lines PAL as used in Argentina, Paraguay and Uruguay, 3.58205625 MHz subcarrier
-
-SECAM is not supported.
+  - **SECAM**: SECAM-B/G/D/K, frequency modulated subcarriers at 4.25 and 4.40625 MHz (see <a href="#colour-reception">Colour reception</a>)
 
 With a 525 line colour system, the line rate is the exact 15734.26 Hz of 59.94 fields per second, rather than 525 &times; 30.
 
-When colour is selected, the black level slider (11) is not used: levels are taken from the sync tip and the blanking level, as a TV does, and the colour saturation from the amplitude of the colour burst.
+When colour is selected, the black level slider (11) is not used: levels are taken from the sync tip and the blanking level, as a TV does, and the colour saturation from the amplitude of the colour burst (SECAM's colour is frequency modulated, so its saturation does not depend on the signal level).
 
 <h3>14: Colour burst indicator</h3>
 
-Turns green while a colour burst is being received. When there is no burst for longer than the vertical blanking interval, the colour killer turns colour off and the image is shown in black and white.
+Turns green while a colour burst is being received, or for SECAM, while the subcarriers are seen on alternate lines. When there is no burst for longer than the vertical blanking interval, the colour killer turns colour off and the image is shown in black and white.
 
 <h3>15: Colour saturation</h3>
 
@@ -303,11 +302,11 @@ Saturation as a percentage of nominal, from 0 to 200%.
 
 <h3>16: Hue</h3>
 
-Hue (tint) adjustment in degrees, for NTSC only. PAL corrects phase errors itself.
+Hue (tint) adjustment in degrees, for NTSC only. PAL corrects phase errors itself, and SECAM's colour is not carried in the phase.
 
 <h3>17: Delay line</h3>
 
-When checked, the colour of each line is averaged with the previous line of the field. For PAL this is the delay line of a PAL-D receiver, which cancels phase errors from multipath or the transmission path; when unchecked, phase errors show as "Hanover bars" (PAL-S). For both PAL and NTSC it halves the colour noise, for half the vertical colour resolution, which is worth having on weak signals.
+When checked, the colour of each line is averaged with the previous line of the field. For PAL this is the delay line of a PAL-D receiver, which cancels phase errors from multipath or the transmission path; when unchecked, phase errors show as "Hanover bars" (PAL-S). For both PAL and NTSC it halves the colour noise, for half the vertical colour resolution, which is worth having on weak signals. SECAM sends each colour difference on alternate lines, so it always uses the previous line and this has no effect.
 
 <h3>18: Noise reduction</h3>
 
@@ -342,7 +341,9 @@ Sync is detected with the colour subcarrier filtered out, so saturated colours a
 
 The displayed colour is limited to about 0.75 MHz, as TV sets did, which halves its noise compared with the full chroma bandwidth. On weak signals, the delay line (B.17) and noise reduction (B.18) reduce the noise further.
 
-Colour decoding uses more CPU than black and white: about a third of a core for NTSC at 5 MS/s on a recent desktop.
+SECAM differs from NTSC and PAL. B-Y and R-Y are sent on alternate lines, each frequency modulating its own subcarrier (4.25 and 4.40625 MHz), with no burst, so the receiver finds which line is which from the frequency on the back porch, and takes the other colour from the line before. A file or signal needs the same span as PAL: for example at 9 MS/s, the vision carrier about 2.9 MHz below the device centre. Frequency modulated colour needs more signal than NTSC or PAL. Rather than the discriminator a TV uses, which on a weak signal gives the horizontal streaks known as "SECAM fire", the colour is followed by a phase locked loop, narrowed automatically for a weak signal, when a vertical median also removes streaks a line high. A weak picture will still show patches of the wrong colour on pale pinks and flesh tones, where the subcarrier is at its weakest. Noise reduction (B.18) helps with what is left. The SECAM-L used in France is positively modulated, and its amplitude modulated sound is not removed: it has not been tested.
+
+Colour decoding uses more CPU than black and white, and it grows with the sample rate: about a third of a core for NTSC at 5 MS/s on a recent desktop, and about half a core for PAL or SECAM from a 9 MS/s source, which is upsampled to 18 MS/s. Both double when the machine is busy with other work. A source of 12 MS/s is not upsampled, so needs less than one of 9 MS/s. Noise reduction (B.18) adds about a tenth.
 
 <h2>C: Image</h2>
 

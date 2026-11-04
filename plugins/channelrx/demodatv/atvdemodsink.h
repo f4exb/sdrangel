@@ -189,6 +189,8 @@ private:
     //*************** RF  ***************
 
     MovingAverageUtil<double, double, 32> m_magSqAverage;
+    static const int m_magSqInterval = 16; //!< The display of channel power only needs one sample in this many, at the rates colour uses
+    int m_magSqCount;
     MovingAverageUtilVar<double, double> m_ampAverage;
 
     NCO m_nco;
@@ -214,6 +216,7 @@ private:
     float m_envelopeLPAlpha;
     float m_envelopeLP;
     float m_envelopeLineMax;
+    float m_videoScale;                  //!< 1 / (sync tip less white), for the video from the envelope
     float m_syncTipEnvelope;             //!< tracked sync tip envelope
     ATVVSBFrontEnd m_vsbFilter;
     ATVSynchronousDetector m_synchronousDetector;
@@ -224,6 +227,7 @@ private:
     int64_t m_videoSampleCount;
     std::vector<unsigned int> m_lineRGB; //!< pixels of the current line, when written a whole line at a time
     ATVNoiseReduction m_noiseReduction;
+    int m_pixelStep;                     //!< Samples of the line per pixel of the screen
     ATVGhostEstimator m_ghostEstimator;
     int m_currentRow;                    //!< row of the TV screen being written
     std::vector<float> m_syncFilter;     //!< boxcar one colour subcarrier period long, so saturated colours do not reach the sync slicer
@@ -334,6 +338,7 @@ private:
             if (m_carrierReferenced)
             {
                 m_syncTipEnvelope = m_syncTipEnvelope > 0.0f ? m_syncTipEnvelope + 0.1f * (m_envelopeLineMax - m_syncTipEnvelope) : m_envelopeLineMax;
+                m_videoScale = m_syncTipEnvelope > 0.0f ? 1.0f / (m_syncTipEnvelope * m_carrierVideoRange) : 0.0f;
                 m_envelopeLineMax = 0.0f;
             }
 
@@ -396,7 +401,7 @@ private:
         if (m_interleaved)
             rowIndex = rowIndex * 2 - m_fieldIndex;
 
-		m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac);
+		m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac / m_pixelStep);
         m_currentRow = rowIndex;
 	}
 
@@ -411,7 +416,7 @@ private:
 			m_lineIndex = 0;
         }
 
-		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
+		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac / m_pixelStep);
         m_currentRow = m_lineIndex;
     }
 };

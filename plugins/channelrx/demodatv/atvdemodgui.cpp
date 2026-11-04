@@ -183,7 +183,7 @@ bool ATVDemodGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
         m_deviceCenterFrequency = notif.getCenterFrequency();
-        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        setDeltaFrequencyRange();
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
         applySampleRate();
@@ -200,6 +200,7 @@ bool ATVDemodGUI::handleMessage(const Message& message)
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
         }
 
+        setDeltaFrequencyRange();
         displaySettings();
 
         return true;
@@ -208,6 +209,12 @@ bool ATVDemodGUI::handleMessage(const Message& message)
     {
         return false;
     }
+}
+
+void ATVDemodGUI::setDeltaFrequencyRange()
+{
+    qint64 range = std::max((qint64) m_basebandSampleRate / 2, (qint64) std::abs(m_settings.m_inputFrequencyOffset));
+    ui->deltaFrequency->setValueRange(false, 8, -range, range);
 }
 
 void ATVDemodGUI::channelMarkerChangedByCursor()
@@ -709,8 +716,8 @@ void ATVDemodGUI::updateColourStatus()
 {
     bool colour = m_settings.isColour();
     ui->colourSaturation->setEnabled(colour);
-    ui->colourHue->setEnabled(colour && !m_settings.isPAL());
-    ui->palDelayLine->setEnabled(colour);
+    ui->colourHue->setEnabled(colour && !m_settings.isPAL() && !m_settings.isSECAM());
+    ui->palDelayLine->setEnabled(colour && !m_settings.isSECAM());
     ui->ghostCancellation->setEnabled(m_settings.usesVSBFrontEnd() && m_settings.m_invertVideo);
 
     if (!colour)

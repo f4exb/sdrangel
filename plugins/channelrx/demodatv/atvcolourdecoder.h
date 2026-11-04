@@ -215,11 +215,19 @@ private:
 };
 
 /**
- * Decodes NTSC and PAL colour, one line at a time.
+ * Decodes NTSC, PAL and SECAM colour, one line at a time.
  *
  * Works on a whole line of composite video once it is complete, so its filters can be
  * zero phase and the burst, which comes before the active video, is known before any
  * pixel is decoded.
+ *
+ * SECAM has no burst or quadrature modulation: B-Y and R-Y are sent on alternate lines, each
+ * frequency modulating its own subcarrier, so the other one always comes from the line
+ * before. Each line's subcarrier sits at its rest frequency on the back porch, which shows
+ * which line this is. As FM needs far more signal than quadrature modulation, and the chroma
+ * of a weak picture can be no stronger than the noise in its band, where a discriminator
+ * gives streaks and is pulled to the middle of the band, a narrow phase locked loop follows
+ * the subcarrier, started each line from the rest frequency.
  */
 class ATVColourDecoder
 {
@@ -229,7 +237,7 @@ public:
     void configure(float sampleRate, ATVDemodSettings::ColourSystem colourSystem);
     void setSaturation(int saturation) { m_saturation = saturation / 100.0f; }
     void setHue(int hue) { m_hue = std::polar(1.0f, hue * (float) M_PI / 180.0f); }
-    void setDelayLine(bool delayLine) { m_delayLine = delayLine; }
+    void setDelayLine(bool delayLine) { m_delayLine = delayLine; } //!< SECAM always needs it, so ignores this
     /** Line is the envelope of a negatively modulated AM signal, rather than video scaled with sync tip low */
     void setCarrierReferenced(bool carrierReferenced) { m_carrierReferenced = carrierReferenced; }
 
@@ -241,17 +249,32 @@ public:
      * @param length number of samples in the line
      * @param firstValid first index written for this line (earlier ones are stale after a sync jump)
      * @param lineStart sample count at index 0 of the line, so the subcarrier phase is continuous across lines
-     * @param rgb output, packed as 0x00BBGGRR (the byte order the TV screen texture uses)
+     * @param rgb output, one pixel every getPixelStep() samples of the line, packed as 0x00BBGGRR
+     *        (the byte order the TV screen texture uses)
      */
     void decodeLine(const float *line, int length, int firstValid, int64_t lineStart, unsigned int *rgb);
 
     bool getColourLocked() const { return m_colourOn; }
-    float getBurstAmplitude() const { return m_burstAmplitude; } //!< Smoothed burst amplitude, IRE
+    float getBurstAmplitude() const { return m_burstAmplitude; } //!< Smoothed burst amplitude (for SECAM, of the subcarrier on the back porch), IRE
+    int getPixelStep() const { return m_pixelStep; } //!< Samples of the line per pixel of the output
 
 private:
+    static constexpr float m_secamDbRest = 4250000.0f;      //!< Hz, B-Y subcarrier
+    static constexpr float m_secamDrRest = 4406250.0f;      //!< Hz, R-Y subcarrier
+    static constexpr float m_secamDbDeviation = 230000.0f;  //!< Hz for D'b = 1
+    static constexpr float m_secamDrDeviation = 280000.0f;  //!< Hz for D'r = 1
+    static constexpr float m_secamDbGain = 1.505f;          //!< D'b = 1.505 (B-Y)
+    static constexpr float m_secamDrGain = -1.902f;         //!< D'r = -1.902 (R-Y)
+    static constexpr float m_secamBandCentre = 4325000.0f;  //!< Hz, of the chroma band, half way between the band's limits
+    static constexpr float m_secamMinLoopBandwidth = 200000.0f; //!< Hz, of the phase locked loop for a weak signal
+    static constexpr float m_secamMaxLoopBandwidth = 500000.0f; //!< and a strong one, which can follow the steepest edges
+    static constexpr float m_secamWeakQuality = 0.65f;      //!< Back porch coherence of a weak signal, which gets the narrowest loop
+    static constexpr float m_secamStrongQuality = 0.8f;     //!< and of one strong enough for the widest
+
     float m_sampleRate;
     float m_subcarrierFrequency;
     bool m_pal;
+    bool m_secam;
     float m_syncDepth;      //!< Sync depth below blanking, IRE
     float m_nominalBurst;   //!< Nominal burst peak amplitude, IRE
     float m_setup;          //!< Black level above blanking, IRE
@@ -260,6 +283,8 @@ private:
     int m_tipStart, m_tipEnd;
     int m_burstStart, m_burstEnd;
     int m_chromaDecimation; //!< Chroma is band limited, so is only filtered every this many samples
+    int m_chromaPrefilter;  //!< The rate is divided by this before the chroma filter
+    int m_pixelStep;        //!< Pixels are only calculated every this many samples
 
     bool m_carrierReferenced;
     float m_saturation;
@@ -271,10 +296,12 @@ private:
     std::vector<float> m_ire;
     std::vector<float> m_mixedRe;                 //!< Composite mixed down by the subcarrier
     std::vector<float> m_mixedIm;
+    std::vector<float> m_filterRe;                //!< The above at the rate of the chroma filter, when m_chromaPrefilter is more than 1
+    std::vector<float> m_filterIm;
     std::vector<std::complex<float>> m_chroma;    //!< Baseband chroma, every sample
-    std::vector<std::complex<float>> m_chromaSum; //!< Running sums for smoothing the displayed chroma
-    std::vector<std::complex<float>> m_chromaDisplay;
-    int m_chromaSmoothing;                        //!< Boxcar length, applied twice
+    std::vector<std::complex<float>> m_chromaPoints; //!< Baseband chroma, every m_chromaDecimation samples, then smoothed for display
+    std::vector<std::complex<float>> m_chromaSum; //!< Running sums for that smoothing
+    int m_chromaSmoothing;                        //!< Boxcar length in m_chromaPoints, applied twice
     std::vector<std::complex<float>> m_prevUV;    //!< Previous line's U + jV for the delay line
 
     float m_tipLevel;
@@ -287,8 +314,22 @@ private:
     int m_missingBursts;                  //!< Consecutive lines without a burst
     float m_vSign;                        //!< PAL V switch for the current line
 
+    int m_secamPorchStart, m_secamPorchEnd; //!< Where the rest frequency is measured
+    int m_secamLag;                       //!< Samples, for the frequency comparison on the back porch
+    bool m_secamDb;                       //!< This line carries B-Y
+    float m_secamLineType;                //!< How well the back porches fit the assumed line sequence: 0 is no fit, up to 1
+    float m_secamAmplitude;               //!< Smoothed rms of the chroma over the picture
+    float m_secamQuality;                 //!< Smoothed coherence of the subcarrier along the back porch, 0 to 1
+    std::vector<float> m_secamFrequency;  //!< The loop's frequency, radians per decimated sample
+    std::vector<float> m_secamHistory[2][2]; //!< The last two lines of each type, for the vertical median
+    std::vector<float> m_secamSum;        //!< Running sums for smoothing
+    std::vector<float> m_secamLine;       //!< This line's colour difference, per pixel
+    std::vector<float> m_secamPrevious;   //!< The previous line's, which is the other one, as displayed
+
     void resize(int length);
-    void smoothChroma(std::vector<std::complex<float>>& in, std::vector<std::complex<float>>& out, int length);
+    void updateSECAMLineType(int firstValid, int length);
+    void demodulateSECAM(int firstValid, int length);
+    void decodeLineSECAM(int firstValid, int length, unsigned int *rgb);
     std::complex<float> filterChroma(int n, int length) const;
 };
 

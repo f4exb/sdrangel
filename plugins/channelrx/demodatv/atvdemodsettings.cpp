@@ -665,6 +665,8 @@ float ATVDemodSettings::getSubcarrierFrequency(ColourSystem colourSystem)
     case ColourNTSC443:
     case ColourPAL:
         return 4433618.75f;
+    case ColourSECAM:
+        return 4406250.0f;         // The higher of the two
     case ColourMono:
     default:
         return 0.0f;

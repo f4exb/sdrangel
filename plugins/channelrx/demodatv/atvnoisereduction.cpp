@@ -86,27 +86,30 @@ void ATVNoiseReduction::processRow(int row, unsigned int *rgb)
         m_differenceSum[n + 1] = m_differenceSum[n] + difference;
     }
 
+    const float windowScale = 1.0f / m_window;
+
     for (int n = 0; n < m_width; n++)
     {
         // The signed difference averaged over a few pixels: noise averages towards zero,
         // while motion, a consistent change in brightness, does not
         int a = std::max(n - m_window / 2, 0);
         int b = std::min(n - m_window / 2 + m_window, m_width);
-        float d = std::fabs(m_differenceSum[b] - m_differenceSum[a]) / (b - a);
+        float d = std::fabs(m_differenceSum[b] - m_differenceSum[a]) * (b - a == m_window ? windowScale : 1.0f / (b - a));
         int bin = std::min((int) (d * histogramBinsPerLevel), (int) m_histogram.size() - 1);
         m_histogram[bin]++;
         m_histogramCount++;
 
         // Full blend below the threshold, none above twice it
         float k = m_threshold > 0.0f ? m_strength * std::min(std::max(2.0f - d / m_threshold, 0.0f), 1.0f) : 0.0f;
+        const unsigned int in = rgb[n];
         unsigned int packed = 0;
 
         for (int c = 0; c < 3; c++)
         {
-            float cur = (rgb[n] >> (8 * c)) & 0xff;
+            float cur = (in >> (8 * c)) & 0xff;
             float out = cur + k * (prev[3*n+c] - cur);
             prev[3*n+c] = out;
-            packed |= ((unsigned int) std::min(std::max((int) (out + 0.5f), 0), 255)) << (8 * c);
+            packed |= ((unsigned int) (out + 0.5f)) << (8 * c); // Between two 8-bit values, so no need to clip
         }
 
         rgb[n] = packed;

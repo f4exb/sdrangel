@@ -230,7 +230,7 @@ void ATVSynchronousDetector::setGhost(float delay, std::complex<float> gain)
 void ATVSynchronousDetector::update()
 {
     m_count = 0;
-    float magnitude = std::abs(m_phaseCarrier);
+    float magnitude = std::sqrt(std::norm(m_phaseCarrier));
 
     if (magnitude > 0.0f) {
         m_carrierUnit = std::conj(m_phaseCarrier) / magnitude;
@@ -238,7 +238,7 @@ void ATVSynchronousDetector::update()
 
     // Sync tip level: follows the strongest blocks, and decays over ~100 ms so keying
     // recovers if the signal level drops
-    float blockAmplitude = std::abs(m_block) / m_blockLength;
+    float blockAmplitude = std::sqrt(std::norm(m_block)) / m_blockLength;
 
     if (blockAmplitude > m_tipLevel) {
         m_tipLevel += 0.02f * (blockAmplitude - m_tipLevel);
@@ -268,7 +268,7 @@ void ATVSynchronousDetector::update()
 
     m_block = 0.0f;
     m_blockIndex++;
-    m_rotation /= std::abs(m_rotation); // Keep the recursive rotation on the unit circle
+    m_rotation *= 1.0f / std::sqrt(std::norm(m_rotation)); // Keep the recursive rotation on the unit circle
 }
 
 void ATVSynchronousDetector::endRun()
@@ -342,7 +342,8 @@ ATVColourDecoder::ATVColourDecoder() :
 void ATVColourDecoder::configure(float sampleRate, ATVDemodSettings::ColourSystem colourSystem)
 {
     m_sampleRate = sampleRate;
-    m_subcarrierFrequency = ATVDemodSettings::getSubcarrierFrequency(colourSystem);
+    m_secam = colourSystem == ATVDemodSettings::ColourSECAM;
+    m_subcarrierFrequency = m_secam ? m_secamBandCentre : ATVDemodSettings::getSubcarrierFrequency(colourSystem);
     m_pal = (colourSystem == ATVDemodSettings::ColourPAL)
         || (colourSystem == ATVDemodSettings::ColourPALM)
         || (colourSystem == ATVDemodSettings::ColourPALN);
@@ -362,10 +363,28 @@ void ATVColourDecoder::configure(float sampleRate, ATVDemodSettings::ColourSyste
     m_burstStart = (int) (5.8e-6f * sampleRate);
     m_burstEnd = (int) (7.4e-6f * sampleRate);
 
+    m_chromaDecimation = std::max(1, (int) (sampleRate / 4.5e6f));
+
+    // At the highest rates the chroma filter is the main cost, and most of the band it rejects
+    // can go first: a 1 2 1 filter and half the rate, which needs half the taps at half the
+    // rate. Below 18 MS/s the luma would alias near the chroma, so it is not done. SECAM's
+    // chroma is narrow enough to do it twice
+    bool prefilter = m_chromaDecimation >= 4;
+    m_chromaPrefilter = !prefilter ? 1 : m_secam ? 4 : 2;
+
+    if (prefilter) {
+        m_chromaDecimation = (m_chromaDecimation / m_chromaPrefilter) * m_chromaPrefilter;
+    }
+
+    // The picture has no use for more than half of that rate
+    m_pixelStep = prefilter ? 2 : 1;
+
     // Chroma low pass: 6 dB at 1.5 MHz, stop band from about 2.1 MHz, which rejects
-    // both the luma (shifted down to -fsc) and the image at -2 fsc
-    float cutoff = 1.5e6f / sampleRate;
-    int taps = ((int) std::ceil(5.5f * sampleRate / 1.2e6f)) | 1;
+    // both the luma (shifted down to -fsc) and the image at -2 fsc.
+    // SECAM's chroma is confined to 3.9 to 4.75 MHz, so needs only that
+    float filterRate = sampleRate / m_chromaPrefilter;
+    float cutoff = (m_secam ? 0.65e6f : 1.5e6f) / filterRate;
+    int taps = ((int) std::ceil(5.5f * filterRate / (m_secam ? 0.8e6f : 1.2e6f))) | 1;
     int half = taps / 2;
     m_lpfTaps.resize(taps);
     float sum = 0.0f;
@@ -383,12 +402,10 @@ void ATVColourDecoder::configure(float sampleRate, ATVDemodSettings::ColourSyste
         tap /= sum;
     }
 
-    m_chromaDecimation = std::max(1, (int) (sampleRate / 4.5e6f));
-
     // The displayed chroma is narrower again, as a TV's was, which halves its noise:
     // two 0.6 us boxcars make a triangle about 0.75 MHz wide at 6 dB. The wider chroma is
     // still used to separate it from the luma, so the luma keeps no subcarrier
-    m_chromaSmoothing = std::max(1, (int) std::round(0.6e-6f * sampleRate));
+    m_chromaSmoothing = std::max(1, (int) std::round(0.6e-6f * sampleRate / m_chromaDecimation));
 
     m_phasor.clear(); // Recalculated for the new rate by resize()
     m_prevUV.clear();
@@ -401,6 +418,15 @@ void ATVColourDecoder::configure(float sampleRate, ATVDemodSettings::ColourSyste
     m_colourOn = false;
     m_missingBursts = 1000;
     m_vSign = 1.0f;
+
+    // SECAM's subcarrier is on from 5.6 us after the sync's leading edge
+    m_secamPorchStart = ((int) (6.0e-6f * sampleRate) / m_chromaDecimation) * m_chromaDecimation;
+    m_secamPorchEnd = (int) (9.8e-6f * sampleRate);
+    m_secamLag = std::max(1, (int) std::round(1.0e-6f * sampleRate / m_chromaDecimation)) * m_chromaDecimation;
+    m_secamDb = false;
+    m_secamLineType = 0.0f;
+    m_secamAmplitude = 0.0f;
+    m_secamQuality = 0.0f;
 }
 
 void ATVColourDecoder::resize(int length)
@@ -418,34 +444,69 @@ void ATVColourDecoder::resize(int length)
         m_ire.resize(length);
         m_mixedRe.resize(length);
         m_mixedIm.resize(length);
+        m_filterRe.resize(length / 2 + 1);
+        m_filterIm.resize(length / 2 + 1);
         m_chroma.resize(length);
-        m_chromaSum.resize(length + 1);
-        m_chromaDisplay.resize(length);
+        m_chromaPoints.resize(length / m_chromaDecimation + 2);
+        m_chromaSum.resize(length / m_chromaDecimation + 3);
+        m_secamSum.resize(length / m_chromaDecimation + 3);
+        m_secamLine.resize(length);
+        m_secamPrevious.resize(length);
         m_prevUV.resize(length);
+        m_secamFrequency.resize(length / m_chromaDecimation + 2);
+
+        for (auto& lines : m_secamHistory)
+        {
+            for (auto& line : lines) {
+                line.resize(length);
+            }
+        }
     }
 }
 
-// Centred moving average of m_chromaSmoothing samples (in and out can be the same)
-void ATVColourDecoder::smoothChroma(std::vector<std::complex<float>>& in, std::vector<std::complex<float>>& out, int length)
+// Centred moving average of w samples
+template <typename T>
+static void movingAverage(std::vector<T>& values, std::vector<T>& sum, int length, int w)
 {
-    const int w = m_chromaSmoothing;
+    if (w <= 1) {
+        return;
+    }
+
     const int before = w / 2;
-    m_chromaSum[0] = 0.0f;
+    const float scale = 1.0f / w;
+    sum[0] = T(0.0f);
 
     for (int n = 0; n < length; n++) {
-        m_chromaSum[n + 1] = m_chromaSum[n] + in[n];
+        sum[n + 1] = sum[n] + values[n];
     }
 
     for (int n = 0; n < length; n++)
     {
         int a = std::max(n - before, 0);
         int b = std::min(n - before + w, length);
-        out[n] = (m_chromaSum[b] - m_chromaSum[a]) / (float) (b - a);
+        values[n] = (sum[b] - sum[a]) * (b - a == w ? scale : 1.0f / (b - a));
     }
 }
 
+// 1 2 1, keeping every second sample. out can be in
+static void halveRate(const float *in, float *out, int length)
+{
+    float first = in[0];
+    float end = in[2 * (length - 1)];
+
+    for (int n = 1; n < length - 1; n++) {
+        out[n] = 0.25f * (in[2 * n - 1] + in[2 * n + 1]) + 0.5f * in[2 * n];
+    }
+
+    out[0] = first;
+    out[length - 1] = end;
+}
+
+// n and length are in samples of m_filterRe and m_filterIm
 std::complex<float> ATVColourDecoder::filterChroma(int n, int length) const
 {
+    const std::vector<float>& mixedRe = m_chromaPrefilter > 1 ? m_filterRe : m_mixedRe;
+    const std::vector<float>& mixedIm = m_chromaPrefilter > 1 ? m_filterIm : m_mixedIm;
     const int taps = (int) m_lpfTaps.size();
     const int half = taps / 2;
     const float *h = m_lpfTaps.data();
@@ -454,23 +515,44 @@ std::complex<float> ATVColourDecoder::filterChroma(int n, int length) const
 
     if ((n - half >= 0) && (n + half < length))
     {
-        // Separate real and imaginary arrays, so this vectorises
-        const float *xr = &m_mixedRe[n - half];
-        const float *xi = &m_mixedIm[n - half];
+        // This is the decoder's main cost. The taps are symmetric, so pairs of samples share a
+        // multiply, and compilers will not vectorise a floating point sum without being allowed
+        // to reorder it, so four sums are kept by hand, which can then run in parallel
+        const float *xr = &mixedRe[n - half];
+        const float *xi = &mixedIm[n - half];
+        const int last = taps - 1;
+        float re0 = 0.0f, re1 = 0.0f, re2 = 0.0f, re3 = 0.0f;
+        float im0 = 0.0f, im1 = 0.0f, im2 = 0.0f, im3 = 0.0f;
+        int i = 0;
 
-        for (int i = 0; i < taps; i++)
+        for (; i + 4 <= half; i += 4)
         {
-            re += h[i] * xr[i];
-            im += h[i] * xi[i];
+            re0 += h[i] * (xr[i] + xr[last - i]);
+            im0 += h[i] * (xi[i] + xi[last - i]);
+            re1 += h[i + 1] * (xr[i + 1] + xr[last - i - 1]);
+            im1 += h[i + 1] * (xi[i + 1] + xi[last - i - 1]);
+            re2 += h[i + 2] * (xr[i + 2] + xr[last - i - 2]);
+            im2 += h[i + 2] * (xi[i + 2] + xi[last - i - 2]);
+            re3 += h[i + 3] * (xr[i + 3] + xr[last - i - 3]);
+            im3 += h[i + 3] * (xi[i + 3] + xi[last - i - 3]);
         }
+
+        for (; i < half; i++)
+        {
+            re0 += h[i] * (xr[i] + xr[last - i]);
+            im0 += h[i] * (xi[i] + xi[last - i]);
+        }
+
+        re = re0 + re1 + re2 + re3 + h[half] * xr[half];
+        im = im0 + im1 + im2 + im3 + h[half] * xi[half];
     }
     else
     {
         for (int i = 0; i < taps; i++)
         {
             int j = std::min(std::max(n + i - half, 0), length - 1);
-            re += h[i] * m_mixedRe[j];
-            im += h[i] * m_mixedIm[j];
+            re += h[i] * mixedRe[j];
+            im += h[i] * mixedIm[j];
         }
     }
 
@@ -527,8 +609,8 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
     if (!m_levelsValid)
     {
-        for (int n = 0; n < length; n++) {
-            rgb[n] = packRGB(line[n], line[n], line[n]);
+        for (int n = 0; n < length; n += m_pixelStep) {
+            *rgb++ = packRGB(line[n], line[n], line[n]);
         }
 
         return;
@@ -551,14 +633,37 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
     // Baseband chroma, filtered every m_chromaDecimation samples and linearly interpolated between
     int d = m_chromaDecimation;
     int last = 0;
-    m_chroma[0] = filterChroma(0, length);
+    int filterLength = length / m_chromaPrefilter;
+
+    if (m_chromaPrefilter > 1)
+    {
+        // Each pass is 1 2 1 and half the rate: the second works on the first's output, in place
+        halveRate(m_mixedRe.data(), m_filterRe.data(), length / 2);
+        halveRate(m_mixedIm.data(), m_filterIm.data(), length / 2);
+
+        if (m_chromaPrefilter > 2)
+        {
+            halveRate(m_filterRe.data(), m_filterRe.data(), length / 4);
+            halveRate(m_filterIm.data(), m_filterIm.data(), length / 4);
+        }
+    }
+
+    m_chroma[0] = filterChroma(0, filterLength);
+    m_chromaPoints[0] = m_chroma[0];
+    const int filterStep = d / m_chromaPrefilter;
+    int filterIndex = filterStep;
+    int point = 1;
+    const float perSample = 1.0f / d;
 
     for (int n = d; n < length; n += d)
     {
-        m_chroma[n] = filterChroma(n, length);
+        m_chroma[n] = filterChroma(filterIndex, filterLength);
+        m_chromaPoints[point] = m_chroma[n];
+        filterIndex += filterStep;
+        point++;
 
-        for (int i = 1; i < d; i++) {
-            m_chroma[last + i] = m_chroma[last] + (m_chroma[n] - m_chroma[last]) * ((float) i / d);
+        for (int i = m_pixelStep; i < d; i += m_pixelStep) {
+            m_chroma[last + i] = m_chroma[last] + (m_chroma[n] - m_chroma[last]) * (i * perSample);
         }
 
         last = n;
@@ -566,6 +671,12 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
     for (int n = last + 1; n < length; n++) {
         m_chroma[n] = m_chroma[last];
+    }
+
+    if (m_secam)
+    {
+        decodeLineSECAM(firstValid, length, rgb);
+        return;
     }
 
     // m_phasor restarts at each line, but the subcarrier does not (in NTSC its phase is
@@ -580,11 +691,15 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
     if (burstValid)
     {
-        for (int n = m_burstStart; n < m_burstEnd; n++) {
+        int count = 0;
+
+        for (int n = (m_burstStart / m_pixelStep) * m_pixelStep; n < m_burstEnd; n += m_pixelStep) // the samples of m_chroma that are set
+        {
             burst += m_chroma[n];
+            count++;
         }
 
-        burst *= lineRotation / (float) (m_burstEnd - m_burstStart);
+        burst *= lineRotation / (float) count;
         float amplitude = std::abs(burst);
         burstPresent = amplitude > 0.25f * m_nominalBurst;
 
@@ -615,10 +730,10 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
     if (!m_colourOn)
     {
-        for (int n = 0; n < length; n++)
+        for (int n = 0; n < length; n += m_pixelStep)
         {
             float y = (m_ire[n] - m_setup) / range;
-            rgb[n] = packRGB(y, y, y);
+            *rgb++ = packRGB(y, y, y);
         }
 
         return;
@@ -643,15 +758,33 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
     rot *= lineRotation * (m_saturation * m_nominalBurst / std::max(m_burstAmplitude, 1.0f) / range);
 
-    smoothChroma(m_chroma, m_chromaDisplay, length);
-    smoothChroma(m_chromaDisplay, m_chromaDisplay, length);
+    int points = last / d + 1;
+    movingAverage(m_chromaPoints, m_chromaSum, points, m_chromaSmoothing);
+    movingAverage(m_chromaPoints, m_chromaSum, points, m_chromaSmoothing);
 
-    for (int n = 0; n < length; n++)
+    point = 0;
+    int within = 0;
+
+    for (int n = 0; n < length; n += m_pixelStep)
     {
         const std::complex<float>& c = m_chroma[n];
         float chroma = 0.5f * (c.real() * m_phasor[n].real() + c.imag() * m_phasor[n].imag()); // Re(c * conj(phasor)) / 2
         float y = (m_ire[n] - chroma - m_setup) / range;
-        std::complex<float> uv = m_chromaDisplay[n] * rot;
+        std::complex<float> display = m_chromaPoints[point];
+
+        if (point + 1 < points) {
+            display += (m_chromaPoints[point + 1] - display) * (within * perSample);
+        }
+
+        within += m_pixelStep;
+
+        if (within >= d)
+        {
+            within -= d;
+            point++;
+        }
+
+        std::complex<float> uv = display * rot;
 
         if (m_pal) {
             uv.imag(uv.imag() * m_vSign);
@@ -668,6 +801,222 @@ void ATVColourDecoder::decodeLine(const float *line, int length, int firstValid,
 
         float ry = uv.imag() / 0.877f;
         float by = uv.real() / 0.492f;
-        rgb[n] = packRGB(y + ry, y - 0.509f * ry - 0.194f * by, y + by);
+        *rgb++ = packRGB(y + ry, y - 0.509f * ry - 0.194f * by, y + by);
+    }
+}
+
+// The lines alternate strictly, so only their order has to be found. Each back porch is above
+// or below the middle of the chroma band, which is unbiased however weak the subcarrier is, as
+// the noise is equally on both sides, and enough lines are averaged to ride through a poor one
+void ATVColourDecoder::updateSECAMLineType(int firstValid, int length)
+{
+    m_secamDb = !m_secamDb;
+
+    if ((firstValid > m_secamPorchStart) || (length <= m_secamPorchEnd)) {
+        return;
+    }
+
+    std::complex<float> sum = 0.0f;
+    float magnitude = 0.0f;
+
+    for (int n = m_secamPorchStart; n + m_secamLag < m_secamPorchEnd; n += m_chromaDecimation)
+    {
+        std::complex<float> d = m_chroma[n + m_secamLag] * std::conj(m_chroma[n]);
+        sum += d;
+        magnitude += std::sqrt(std::norm(d));
+    }
+
+    if (magnitude > 0.0f)
+    {
+        float above = sum.imag() / magnitude;
+        m_secamLineType += 0.02f * ((m_secamDb ? -above : above) - m_secamLineType);
+        m_secamQuality += 0.02f * (std::abs(sum) / magnitude - m_secamQuality);
+
+        if (m_secamLineType < -0.01f)
+        {
+            m_secamDb = !m_secamDb;
+            m_secamLineType = -m_secamLineType;
+        }
+    }
+}
+
+// Writes the colour difference this line carries to m_secamLine
+void ATVColourDecoder::demodulateSECAM(int firstValid, int length)
+{
+    const int d = m_chromaDecimation;
+    const float rate = m_sampleRate / d;
+    const float rest = (m_secamDb ? m_secamDbRest : m_secamDrRest) - m_secamBandCentre;
+    const float radiansPerHz = 2.0f * (float) M_PI / rate;
+
+    // Second order loop. Gain is normalised by the magnitude, so it is the same for any signal
+    // level, and samples where the signal and noise cancel count for less. A wide loop follows
+    // the steep edges the pre-emphasis gives, but with a weak signal lets noise through
+    float strength = (m_secamQuality - m_secamWeakQuality) / (m_secamStrongQuality - m_secamWeakQuality);
+    float bandwidth = m_secamMinLoopBandwidth
+        + std::min(std::max(strength, 0.0f), 1.0f) * (m_secamMaxLoopBandwidth - m_secamMinLoopBandwidth);
+    const float wn = 2.0f * (float) M_PI * bandwidth / rate;
+    const float k1 = 2.0f * 0.8f * wn;
+    const float k2 = wn * wn;
+    const float scale = 1.0f / std::max(1.15f * m_secamAmplitude, 1e-6f);
+
+    float frequency = rest * radiansPerHz;
+    float ncoRe = 1.0f;
+    float ncoIm = 0.0f;
+    float power = 0.0f;
+    int powerCount = 0;
+    int first = std::max(m_secamPorchStart, (firstValid / d + 1) * d);
+
+    int point = 0;
+
+    for (int n = 0; n < first; n += d) {
+        m_secamFrequency[point++] = frequency;
+    }
+
+    for (int n = first; n < length; n += d)
+    {
+        const float re = m_chroma[n].real();
+        const float im = m_chroma[n].imag();
+        float error = (im * ncoRe - re * ncoIm) * scale; // Im(c * conj(nco))
+        error = std::min(std::max(error, -1.5f), 1.5f);
+        frequency += k2 * error;
+
+        // A step is well under a radian, so a short series will do, and is much quicker than
+        // sin and cos here. The tiny error in its magnitude does not build up in a line
+        float step = frequency + k1 * error;
+        float step2 = step * step;
+        float cosine = 1.0f - step2 * (0.5f - step2 * (1.0f / 24.0f - step2 / 720.0f));
+        float sine = step * (1.0f - step2 * (1.0f / 6.0f - step2 / 120.0f));
+        float rotated = ncoRe * cosine - ncoIm * sine;
+        ncoIm = ncoRe * sine + ncoIm * cosine;
+        ncoRe = rotated;
+        m_secamFrequency[point++] = frequency;
+        power += re * re + im * im;
+        powerCount++;
+    }
+
+    if (powerCount > 0) {
+        m_secamAmplitude += 0.05f * (std::sqrt(power / powerCount) - m_secamAmplitude);
+    }
+
+    // To the colour difference, with the low frequency de-emphasis, (1 + jf/255k) / (1 + jf/85k)
+    const float deviation = (m_secamDb ? m_secamDbDeviation : m_secamDrDeviation) * (m_secamDb ? m_secamDbGain : m_secamDrGain);
+    const float w1 = 2.0f * (float) M_PI * 85000.0f;
+    const float w2 = 2.0f * (float) M_PI * 255000.0f;
+    const float k = 2.0f * rate;
+    const float a0 = 1.0f + k / w1;
+    const float a1 = (1.0f - k / w1) / a0;
+    const float b0 = (1.0f + k / w2) / a0;
+    const float b1 = (1.0f - k / w2) / a0;
+    const float toDifference = 1.0f / (radiansPerHz * deviation);
+    float x1 = 0.0f;
+    float y1 = 0.0f;
+    int points = (length - 1) / d + 1;
+
+    for (int i = 0; i < points; i++)
+    {
+        float x = (m_secamFrequency[i] - rest * radiansPerHz) * toDifference;
+        float y = b0 * x + b1 * x1 - a1 * y1;
+        x1 = x;
+        y1 = y;
+        m_secamFrequency[i] = std::min(std::max(y, -1.0f), 1.0f); // The range of the signal, as the loop can slip
+    }
+
+    movingAverage(m_secamFrequency, m_secamSum, points, m_chromaSmoothing);
+    movingAverage(m_secamFrequency, m_secamSum, points, m_chromaSmoothing);
+
+    // The de-emphasis delays by this many samples at low frequencies, so take it back out
+    const float delay = (1.0f / w1 - 1.0f / w2) * m_sampleRate;
+    const int advance = (int) std::round(delay);
+    const float perSample = 1.0f / d;
+    int i = advance / d;
+    int within = advance - i * d;
+    int pixel = 0;
+
+    for (int n = 0; n < length; n += m_pixelStep)
+    {
+        float value = m_secamFrequency[std::min(i, points - 1)];
+
+        if (i + 1 < points) {
+            value += (within * perSample) * (m_secamFrequency[i + 1] - value);
+        }
+
+        m_secamLine[pixel++] = value;
+        within += m_pixelStep;
+
+        if (within >= d)
+        {
+            within -= d;
+            i++;
+        }
+    }
+}
+
+void ATVColourDecoder::decodeLineSECAM(int firstValid, int length, unsigned int *rgb)
+{
+    updateSECAMLineType(firstValid, length);
+
+    if ((firstValid <= m_secamPorchStart) && (length > m_secamPorchEnd))
+    {
+        float power = 0.0f;
+        int count = 0;
+
+        for (int n = m_secamPorchStart; n < m_secamPorchEnd; n += m_chromaDecimation)
+        {
+            power += std::norm(m_chroma[n]);
+            count++;
+        }
+
+        m_burstAmplitude += 0.1f * (std::sqrt(power / count) - m_burstAmplitude);
+    }
+
+    // Colour killer. There is no fit to the line sequence without SECAM's subcarriers
+    m_colourOn = m_secamLineType > (m_colourOn ? 0.03f : 0.06f);
+    demodulateSECAM(firstValid, length);
+
+    float range = 100.0f - m_setup;
+
+    if (!m_colourOn)
+    {
+        for (int n = 0; n < length; n += m_pixelStep)
+        {
+            float y = (m_ire[n] - m_setup) / range;
+            *rgb++ = packRGB(y, y, y);
+        }
+
+        return;
+    }
+
+    // On a weak signal, what noise gets through the loop is mostly in streaks a line high, so a
+    // median of the last three lines of this type removes them, for less vertical colour detail
+    bool median = m_secamQuality < m_secamStrongQuality;
+    std::vector<float>& older = m_secamHistory[m_secamDb ? 1 : 0][1];
+    std::vector<float>& old = m_secamHistory[m_secamDb ? 1 : 0][0];
+
+    int pixel = 0;
+
+    for (int n = 0; n < length; n += m_pixelStep)
+    {
+        const std::complex<float>& c = m_chroma[n];
+        float chroma = 0.5f * (c.real() * m_phasor[n].real() + c.imag() * m_phasor[n].imag()); // Re(c * conj(phasor)) / 2
+        float y = (m_ire[n] - chroma - m_setup) / range;
+        const float latest = m_secamLine[pixel];
+        float value = latest;
+
+        if (median)
+        {
+            float b = old[pixel];
+            float e = older[pixel];
+            value = std::max(std::min(value, b), std::min(std::max(value, b), e));
+        }
+
+        older[pixel] = old[pixel];
+        old[pixel] = latest;
+        float current = value * m_saturation;
+        float previous = m_secamPrevious[pixel];
+        m_secamPrevious[pixel] = current;
+        float by = m_secamDb ? current : previous;
+        float ry = m_secamDb ? previous : current;
+        *rgb++ = packRGB(y + ry, y - 0.509f * ry - 0.194f * by, y + by);
+        pixel++;
     }
 }

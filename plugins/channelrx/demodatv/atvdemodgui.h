@@ -100,6 +100,7 @@ private:
     void lineTimeUpdate();
     void topTimeUpdate();
     void updateColourStatus();
+    void setDeltaFrequencyRange();
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();

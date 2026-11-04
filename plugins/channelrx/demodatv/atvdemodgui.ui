@@ -932,6 +932,11 @@
           <string>PAL-N</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>SECAM</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -943,7 +948,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Green when a colour burst is being received</string>
+         <string>Green when a colour burst is being received, or for SECAM, the subcarriers on alternate lines</string>
         </property>
         <property name="text">
          <string>Burst</string>
@@ -1058,7 +1063,7 @@
       <item>
        <widget class="QCheckBox" name="palDelayLine">
         <property name="toolTip">
-         <string>Delay line: average the colour of successive lines. For PAL this cancels phase errors; for both PAL and NTSC it halves the colour noise, for half the vertical colour resolution</string>
+         <string>Delay line: average the colour of successive lines. For PAL this cancels phase errors; for both PAL and NTSC it halves the colour noise, for half the vertical colour resolution. SECAM always has one</string>
         </property>
         <property name="text">
          <string>Delay line</string>
