@@ -6128,6 +6128,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAmModSettings(nullptr);
     channelSettings.setAptDemodSettings(nullptr);
     channelSettings.setWefaxDemodSettings(nullptr);
+    channelSettings.setAtvDemodSettings(nullptr);
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
     channelSettings.setBfmModSettings(nullptr);
@@ -6182,6 +6183,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setAmDemodReport(nullptr);
     channelReport.setWefaxDemodReport(nullptr);
     channelReport.setAmModReport(nullptr);
+    channelReport.setAtvDemodReport(nullptr);
     channelReport.setAtvModReport(nullptr);
     channelReport.setBfmDemodReport(nullptr);
     channelReport.setBfmModReport(nullptr);

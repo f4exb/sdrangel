@@ -31,6 +31,8 @@ ChannelReport:
     AMModReport:
       $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
       description: "Am mod report data for Channel."
+    ATVDemodReport:
+      $ref: "/doc/swagger/include/ATVDemod.yaml#/ATVDemodReport"
     ATVModReport:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
       description: "Atv mod report data for Channel."

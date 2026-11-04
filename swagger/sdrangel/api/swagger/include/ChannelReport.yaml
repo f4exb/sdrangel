@@ -33,6 +33,8 @@ ChannelReport:
     AMModReport:
       $ref: "http://swgserver:8081/api/swagger/include/AMMod.yaml#/AMModReport"
       description: "Am mod report data for Channel."
+    ATVDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ATVDemod.yaml#/ATVDemodReport"
     ATVModReport:
       $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
       description: "Atv mod report data for Channel."

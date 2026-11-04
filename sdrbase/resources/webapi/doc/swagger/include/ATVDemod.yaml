@@ -176,3 +176,35 @@ ATVDemodSettings:
       type: integer
       minimum: 0
       maximum: 1
+
+ATVDemodReport:
+  description: ATVDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    bfoLocked:
+      description: "BFO PLL lock (1 for locked)."
+      type: integer
+    colourLocked:
+      description: "Colour burst being received (1 for yes)."
+      type: integer
+    burstAmplitude:
+      description: "Smoothed colour burst amplitude in IRE."
+      type: number
+      format: float
+    carrierFrequencyError:
+      description: "Vision carrier frequency error in Hz, for AM through the vestigial sideband filter."
+      type: number
+      format: float
+    ghostDelay:
+      description: "Delay of the echo being cancelled in microseconds."
+      type: number
+      format: float
+    ghostAmplitude:
+      description: "Amplitude of the echo being cancelled relative to the signal (0 when none)."
+      type: number
+      format: float
