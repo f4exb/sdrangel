@@ -30,6 +30,22 @@
 
 using namespace libsgp4;
 
+// Support both libsgp4 APIs: CoordTopocentric::range_rate was renamed
+// to rangeRate. Keep both overloads for compatibility with older
+// host-installed versions of libsgp4.
+
+template<typename T>
+auto getRangeRate(const T& topo, int) -> decltype(topo.rangeRate)
+{
+    return topo.rangeRate;
+}
+
+template<typename T>
+auto getRangeRate(const T& topo, long) -> decltype(topo.range_rate)
+{
+    return topo.range_rate;
+}
+
 // Convert QGP4 DateTime to Qt QDataTime
 static QDateTime dateTimeToQDateTime(DateTime dt)
 {
@@ -499,7 +515,7 @@ void getSatelliteState(QDateTime dateTime,
         satState->m_azimuth = Units::radiansToDegrees(topo.azimuth);
         satState->m_elevation = Units::radiansToDegrees(topo.elevation);
         satState->m_range = topo.range;
-        satState->m_rangeRate = topo.rangeRate;
+        satState->m_rangeRate = getRangeRate(topo, 0);
         OrbitalElements ele(tle);
         satState->m_speed = eci.Velocity().Magnitude();
         satState->m_period = ele.Period();
