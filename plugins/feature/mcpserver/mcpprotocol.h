@@ -49,6 +49,7 @@ public:
     struct Context
     {
         QString m_sessionId;    //!< In: the Mcp-Session-Id header of the request, empty if none
+        bool m_compactTools = false; //!< In: opt in through the transport on initialize
         QString m_newSessionId; //!< Out: set by initialize, to be returned in the response header
     };
 
@@ -88,8 +89,9 @@ private:
 
     QJsonValue initialize(const QJsonObject& params, Context& context);
     QJsonValue resourcesSubscribe(const QJsonObject& params, Context& context, bool subscribe);
-    QJsonValue toolsList(const QJsonObject& params);
-    QJsonValue toolsCall(const QJsonObject& params);
+    bool compactToolsFor(const Context& context) const;
+    QJsonValue toolsList(const QJsonObject& params, Context& context);
+    QJsonValue toolsCall(const QJsonObject& params, Context& context);
     QJsonValue resourcesList(const QJsonObject& params);
     QJsonValue resourcesTemplatesList(const QJsonObject& params);
     QJsonValue resourcesRead(const QJsonObject& params);
