@@ -5,5 +5,6 @@ for plugin in $PLUGINS
 do
     FILE=$(find $BASEDIR/plugins/$plugin -name "*plugin.cpp")
     echo $FILE
-    sed -i -E "s/QStringLiteral\(\"7\.(.*)\"\)/QStringLiteral\(\"8\.0\.0\"\)/" $FILE
+    sed -i -E "s/QStringLiteral\(\"8\.(.*)\"\)/QStringLiteral\(\"8\.1\.0\"\)/" $FILE
+    sed -i -E "s/QStringLiteral\(\"7\.(.*)\"\)/QStringLiteral\(\"8\.1\.0\"\)/" $FILE
 done

@@ -29,7 +29,7 @@
 const PluginDescriptor AircraftPlugin::m_pluginDescriptor = {
     Aircraft::m_featureId,
     QStringLiteral("Aircraft"),
-    QStringLiteral("7.28.0"),
+    QStringLiteral("8.1.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

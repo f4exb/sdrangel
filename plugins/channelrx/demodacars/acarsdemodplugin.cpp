@@ -29,7 +29,7 @@
 const PluginDescriptor AcarsDemodPlugin::m_pluginDescriptor = {
     AcarsDemod::m_channelId,
     QStringLiteral("ACARS Demodulator"),
-    QStringLiteral("7.28.0"),
+    QStringLiteral("8.1.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
