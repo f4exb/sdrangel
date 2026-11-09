@@ -50,7 +50,7 @@ execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRan
 # macdeployqt's install_name_tool edits leave some libraries with signatures that no longer
 # match their contents. dyld then kills SDRangel with "Code Signature Invalid" when it
 # loads one: libusb in https://github.com/f4exb/sdrangel/issues/2524, QtSvg (via the Map
-# plugin) in 8.1.0 (https://github.com/f4exb/sdrangel/issues/3066). 
+# plugin) in 8.1.0 (https://github.com/f4exb/sdrangel/issues/3066).
 # So ad-hoc re-sign everything rather than individual files.
 set(APP_BUNDLE "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app")
 message("Re-signing all Mach-O files in ${APP_BUNDLE}")
