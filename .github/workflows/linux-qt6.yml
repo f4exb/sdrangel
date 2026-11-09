@@ -42,7 +42,7 @@ jobs:
             qtchooser qt6-tools-dev qt6-tools-dev-tools libqt6quick6 qt6-location-plugins \
             qml6-module-qtlocation qml6-module-qtpositioning qml6-module-qtquick-window \
             qml6-module-qtquick-dialogs qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-            qml6-module-qt5compat-graphicaleffects qt6-speech-speechd-plugin \
+            qml6-module-qt5compat-graphicaleffects qml6-module-qtquick-effects qt6-speech-speechd-plugin \
             libfaad-dev libflac-dev zlib1g-dev \
             libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
             libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libavfilter-dev \

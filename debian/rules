@@ -17,7 +17,7 @@ QT_CMAKE_OPTION := -DENABLE_QT6=OFF
 QT_RUNTIME_DEPENDS := libqt5multimedia5-plugins, qtspeech5-speechd-plugin, qml-module-qtlocation, qml-module-qtpositioning, qml-module-qtquick-window2, qml-module-qtquick-dialogs, qml-module-qtquick-controls, qml-module-qtquick-controls2, qml-module-qtquick-layouts, qml-module-qtgraphicaleffects
 else ifeq ($(QT_VERSION),6)
 QT_CMAKE_OPTION := -DENABLE_QT6=ON -DENABLE_PERSEUS=OFF -DENABLE_BLADERF=OFF -DENABLE_MIRISDR=OFF -DENABLE_CHANNELRX_SIGMFFILESINK=OFF  
-QT_RUNTIME_DEPENDS := qt6-speech-speechd-plugin, qt6-location-plugins, qml6-module-qtlocation, qml6-module-qtpositioning, qml6-module-qtquick-window, qml6-module-qtquick-dialogs, qml6-module-qtquick-controls, qml6-module-qtquick-layouts, qml6-module-qt5compat-graphicaleffects
+QT_RUNTIME_DEPENDS := qt6-speech-speechd-plugin, qt6-location-plugins, qml6-module-qtlocation, qml6-module-qtpositioning, qml6-module-qtquick-window, qml6-module-qtquick-dialogs, qml6-module-qtquick-controls, qml6-module-qtquick-layouts, qml6-module-qt5compat-graphicaleffects, qml6-module-qtquick-effects
 else
 $(error QT_VERSION must be either 5 or 6)
 endif
