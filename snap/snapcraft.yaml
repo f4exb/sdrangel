@@ -287,6 +287,7 @@ parts:
             - qml6-module-qtquick-effects
             - qml6-module-qtquick-layouts
             - qml6-module-qt5compat-graphicaleffects
+            - qml6-module-qtquick-effects
             - libgraphite2-3
             - libpcre2-16-0
             - libicu78
