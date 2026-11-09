@@ -47,6 +47,64 @@ endforeach()
 message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
 
-# macdeployqt corrupts libusb signature, so resign it. See: https://github.com/f4exb/sdrangel/issues/2524
-execute_process ( COMMAND echo "resigning" )
-execute_process ( COMMAND codesign --force --sign - ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
+# macdeployqt's install_name_tool edits leave some libraries with signatures that no longer
+# match their contents. dyld then kills SDRangel with "Code Signature Invalid" when it
+# loads one: libusb in https://github.com/f4exb/sdrangel/issues/2524, QtSvg (via the Map
+# plugin) in 8.1.0 (https://github.com/f4exb/sdrangel/issues/3066).
+# So ad-hoc re-sign everything rather than individual files.
+set(APP_BUNDLE "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app")
+message("Re-signing all Mach-O files in ${APP_BUNDLE}")
+
+# codesign --deep only reaches nested code in standard locations (Frameworks, PlugIns,
+# Helpers), not the SDRangel plugins in Resources/lib/plugins, so sign each Mach-O file first
+file(GLOB_RECURSE BUNDLE_FILES LIST_DIRECTORIES false "${APP_BUNDLE}/*")
+set(MACHO_FILES "")
+foreach(BUNDLE_FILE ${BUNDLE_FILES})
+  if(NOT IS_SYMLINK "${BUNDLE_FILE}")
+    file(READ "${BUNDLE_FILE}" MAGIC LIMIT 4 HEX)
+    # 64-bit, 32-bit (little-endian as stored) and fat (universal) Mach-O
+    if(MAGIC STREQUAL "cffaedfe" OR MAGIC STREQUAL "cefaedfe" OR MAGIC STREQUAL "cafebabe")
+      list(APPEND MACHO_FILES "${BUNDLE_FILE}")
+    endif()
+  endif()
+endforeach()
+list(LENGTH MACHO_FILES MACHO_COUNT)
+message("Signing ${MACHO_COUNT} Mach-O files")
+
+# In batches, to keep the command line short
+set(BATCH "")
+set(BATCH_SIZE 0)
+foreach(MACHO_FILE ${MACHO_FILES})
+  list(APPEND BATCH "${MACHO_FILE}")
+  math(EXPR BATCH_SIZE "${BATCH_SIZE} + 1")
+  if(BATCH_SIZE EQUAL 100)
+    execute_process(COMMAND codesign --force --sign - ${BATCH} RESULT_VARIABLE SIGN_RESULT)
+    if(NOT SIGN_RESULT EQUAL 0)
+      list(GET BATCH 0 FIRST_FILE)
+      message(WARNING "codesign failed (${SIGN_RESULT}) for a batch starting with ${FIRST_FILE}")
+    endif()
+    set(BATCH "")
+    set(BATCH_SIZE 0)
+  endif()
+endforeach()
+if(BATCH)
+  execute_process(COMMAND codesign --force --sign - ${BATCH} RESULT_VARIABLE SIGN_RESULT)
+  if(NOT SIGN_RESULT EQUAL 0)
+    list(GET BATCH 0 FIRST_FILE)
+    message(WARNING "codesign failed (${SIGN_RESULT}) for a batch starting with ${FIRST_FILE}")
+  endif()
+endif()
+
+# Then the nested bundles (frameworks, QtWebEngineProcess.app) and the app itself, inside out,
+# so each bundle's resource seal matches its re-signed contents
+execute_process(COMMAND codesign --force --deep --sign - "${APP_BUNDLE}" RESULT_VARIABLE SIGN_RESULT)
+if(NOT SIGN_RESULT EQUAL 0)
+  message(WARNING "codesign of ${APP_BUNDLE} failed (${SIGN_RESULT})")
+endif()
+
+execute_process(COMMAND codesign --verify --deep --strict --verbose=2 "${APP_BUNDLE}" RESULT_VARIABLE VERIFY_RESULT)
+if(VERIFY_RESULT EQUAL 0)
+  message("codesign verification passed")
+else()
+  message(WARNING "codesign verification failed (${VERIFY_RESULT})")
+endif()
