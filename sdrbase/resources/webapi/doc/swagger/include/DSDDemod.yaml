@@ -4,118 +4,121 @@ DSDDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
-      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
+      description: Channel bandwidth (Hz). Sets the search filter and bounds the automatic frequency correction
       type: number
       format: float
-      description: "RF bandwidth in Hz."
-    fmDeviation:
-      type: number
-      format: float
-      description: "FM frequency deviation in Hz."
-    demodGain:
-      type: number
-      format: float
-      description: "Demod gain setting for Dsd demod."
     volume:
       type: number
       format: float
-      description: "Audio volume multiplier."
-    baudRate:
+    protocol:
+      description: >
+        Protocols searched for
+          * 0 - Automatic (all)
+          * 1 - DMR
+          * 2 - D-STAR
+          * 3 - YSF
+          * 4 - NXDN48 (2400 symbols/s, 4800 bit/s)
+          * 5 - NXDN96 (4800 symbols/s, 9600 bit/s)
+          * 6 - dPMR
+          * 7 - P25 Phase 1
+          * 8 - P25 Phase 2 (TDMA, 6000 symbols/s)
+          * 9 - M17
+          * 10 - Angel61 NB (6.25 kHz linear QPSK / 16-QAM, V1 voice)
+          * 11 - Angel61 WB (12.5 kHz linear QPSK / 16-QAM, V1 voice or Opus audio)
+          * 12 - Angel61 HF-NB (OFDM, 2.5 kHz, V1 voice; only when selected)
+          * 13 - Angel61 HF-WB (OFDM, 5.5 kHz, V1 voice; only when selected)
+        Auto (0) searches every protocol but HF.
       type: integer
-      description: "Serial-port baud rate in bits per second."
-    squelchGate:
+    p25p2Wacn:
+      description: P25 Phase 2 scrambling - WACN of the system (20 bits)
       type: integer
-      description: "Squelch gate duration."
-    squelch:
-      type: number
-      format: float
-      description: "Squelch threshold in dB."
+    p25p2Sysid:
+      description: P25 Phase 2 scrambling - system ID (12 bits)
+      type: integer
+    p25p2Nac:
+      description: P25 Phase 2 scrambling - NAC (12 bits)
+      type: integer
+    coherent:
+      description: coherent re-detection of the 4FSK bursts from the IQ (1 on, 0 off)
+      type: integer
     audioMute:
       type: integer
-      description: "Mute audio output (1 muted, 0 unmuted)."
-      minimum: 0
-      maximum: 1
-    enableCosineFiltering:
-      type: integer
-      description: "Enable cosine filtering (1 enabled, 0 disabled)."
-      minimum: 0
-      maximum: 1
-    syncOrConstellation:
-      type: integer
-      description: "Sync or constellation setting for Dsd demod."
     slot1On:
       type: integer
-      description: "Slot1 on setting for Dsd demod."
     slot2On:
       type: integer
-      description: "Slot2 on setting for Dsd demod."
     tdmaStereo:
       type: integer
-      description: "Tdma stereo setting for Dsd demod."
-    pllLock:
+    dmrColorCode:
+      description: Audio filter on the DMR or dPMR colour code or the NXDN RAN (-1 accepts any, otherwise 0 to 63; DMR stops at 15)
       type: integer
-      description: "Pll lock setting for Dsd demod."
+    angel61FileDirectory:
+      description: "Directory Angel61 file transfers are written to, empty: files are decoded but not stored"
+      type: string
+    angel61FileMaxKB:
+      description: Largest Angel61 file this station accepts in kilobytes, 0 for no limit
+      type: integer
+    angel61FileConfirm:
+      description: >
+        1 when the operator confirms every Angel61 file offer before the file is kept (ANGEL61.md 3.4):
+        until accepted (DSDDemodActions.angel61File) its blocks are held in memory, no answer goes back
+        and nothing is saved. 0 takes every offer within angel61FileMaxKB
+      type: integer
+    angel61Groups:
+      description: Angel61 talkgroups played, comma separated numbers (9, 23); empty plays every call. Calls to CQ and to callsigns are always played
+      type: string
+    codecModelDirectory:
+      description: >
+        Directory of Angel61's V1 models (vocoscodec: encodec_encoder.bin, encodec_codebooks.bin,
+        vocos_decoder.bin), empty for the default (VOCOSCODEC_MODEL_DIR, then vocos beside the executable)
+      type: string
+    contactReportEnabled:
+      description: Opt in to Angel61 RF contact reporting to angel61.sdrangel.org, with the station position (1 on, 0 off)
+      type: integer
+    contactReportCallsign:
+      description: Callsign to include in contact reports as the receiver
+      type: string
     rgbColor:
       type: integer
-      description: "Display color encoded as an RGB integer."
     title:
       type: string
-      description: "User-visible title."
     audioDeviceName:
       type: string
-      description: "Name of the audio device to use."
     highPassFilter:
       type: integer
-      description: "High pass filter setting for Dsd demod."
     traceLengthMutliplier:
       description: multiply by 50ms
       type: integer
     traceStroke:
       description: 0 to 255
       type: integer
-      minimum: 0
-      maximum: 255
     traceDecay:
       description: 0 to 255
       type: integer
-      minimum: 0
-      maximum: 255
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
-      minimum: 0
-      maximum: 1
     reverseAPIAddress:
       type: string
-      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
-      description: "TCP port of the reverse API peer."
-      minimum: 1
-      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
-      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
-      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
-      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
-      description: "Saved expanded or collapsed state of the GUI sections."
     ambeFeatureIndex:
       type: integer
       description: index of AMBE controller feature to be used for AMBE frames decoding
     connectAMBE:
       type: integer
-      minimum: 0
-      maximum: 1
       description: >
         Decode frames with AMBE feature
           * 0 - Do not decode frames with AMBE feature
@@ -129,15 +132,10 @@ DSDDemodReport:
       format: float
     audioSampleRate:
       type: integer
-      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
-      description: "Effective sample rate delivered to the channel in samples per second."
-    squelch:
-      description: squelch status (1 if open else 0)
-      type: integer
-    pllLocked:
-      description: symbol PLL status (1 if locked else 0)
+    syncLocked:
+      description: 1 when locked on a transmission, 0 while searching
       type: integer
     slot1On:
       description: slot 1 status (1 if voice active else 0)
@@ -145,22 +143,97 @@ DSDDemodReport:
     slot2On:
       description: slot 2 status (1 if voice active else 0)
       type: integer
-    syncType:
-      description: type of frame synchronized
+    protocol:
+      description: protocol locked to (DMR, D-STAR, YSF, NXDN48, NXDN96, dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB, Angel61 HF-NB, Angel61 HF-WB), empty while searching
       type: string
-    inLevel:
-      description: decoder input level after discriminator. Percent of mid scale (aim 100).
+    syncType:
+      description: name of the last sync pattern accepted
+      type: string
+    polarity:
+      description: 0 normal, 1 inverted (the received symbol levels are negated)
       type: integer
-    carierPosition:
-      description: position of carrier relative to discriminator center. Percent of scale (aim 0).
+    deviationHz:
+      description: measured outer symbol level (peak frequency deviation) in Hz
+      type: number
+      format: float
+    frequencyErrorHz:
+      description: measured carrier frequency error in Hz (corrected internally)
+      type: number
+      format: float
+    clockErrorPpm:
+      description: measured symbol clock error in ppm
+      type: number
+      format: float
+    snrDB:
+      description: symbol signal to noise ratio at the slicer in dB
+      type: number
+      format: float
+    berEstimate:
+      description: raw bit error rate estimated from the vocoder's error corrections (software vocoder only)
+      type: number
+      format: float
+    syncCount:
+      description: number of syncs accepted since the channel started
       type: integer
-    zeroCrossingPosition:
-      description: position of symbol synchronizer zero crossing in number of samples (aim 0).
+    voiceFrames:
+      description: Voice frames received since the channel started (all protocols and slots), erased ones aside
       type: integer
-    syncRate:
-      description: successful synchronization rate. Percent of expected symbols (aim 100).
+    voiceFramesErased:
+      description: >
+        Voice frames the decoder knew were lost since the channel started (Angel61's missing packets,
+        P25 Phase 2's uncorrectable codewords), played as erasures
       type: integer
+    correctedBits:
+      description: >
+        Channel bit errors the voice frames' codes corrected since the channel started; over protectedBits
+        it is the raw bit error rate of an interval (the difference of two reports)
+      type: integer
+      format: int64
+    protectedBits:
+      description: The bits those codes protected since the channel started
+      type: integer
+      format: int64
     statusText:
       description: mode dependent status messages (ref UI documentation)
       type: string
+    dtmf:
+      description: the keys of the last DTMF sequence received, on any protocol (Angel61's DTMF slots, AMBE tone frames, or tones detected in the decoded voice)
+      type: string
+    angel61FilePending:
+      description: An Angel61 file offer awaiting the operator's confirmation ("name (size bytes) from callsign"), empty for none
+      type: string
+    lastMessage:
+      description: >
+        The text of the last text message received on any protocol (D-STAR slow data, DMR text and TMS,
+        YSF, NXDN, dPMR, M17, P25, Angel61; Angel61 binary data as "[N bytes of binary data]"), empty until
+        one is. DTMF is reported in dtmf instead
+      type: string
+    lastMessageProtocol:
+      description: The last text message's protocol as the message log names it (DMR, D-STAR, YSF, NXDN, dPMR, M17, P25, Angel61 NB, Angel61 WB, Angel61 HF-NB, Angel61 HF-WB)
+      type: string
+    lastMessageSource:
+      description: The last text message's source (a callsign, or a radio ID for DMR, NXDN, dPMR and P25)
+      type: string
+    lastMessageDestination:
+      description: The last text message's destination (a callsign, CQ, a radio ID, or "TG n" for a talkgroup)
+      type: string
+    lastMessageTime:
+      description: When the last text message was received (UTC, ISO 8601 with milliseconds)
+      type: string
+    lastMessageSequence:
+      description: Increases with every text message received, so that a repeated text is told from no new one (0 until the first)
+      type: integer
+    angel61HeardCallsigns:
+      description: Angel61 source callsigns heard by this channel, most recently heard first (maximum 32)
+      type: array
+      items:
+        type: string
 
+DSDDemodActions:
+  description: DSDDemod
+  properties:
+    angel61File:
+      description: >
+        The operator's decision on the Angel61 file offer awaiting confirmation (DSDDemodReport.angel61FilePending):
+        "accept" or "reject". 409 when none is awaiting
+      type: string

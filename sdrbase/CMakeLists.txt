@@ -183,6 +183,34 @@ set(sdrbase_SOURCES
     dsp/spectrumcalibrationpoint.cpp
     dsp/spectrumvis.cpp
     dsp/wavfilerecord.cpp
+    dsp/dv/dvbits.cpp
+    dsp/dv/dvblockcode.cpp
+    dsp/dv/dvreedsolomon.cpp
+    dsp/dv/dvconvolutional.cpp
+    dsp/dv/dvcrc.cpp
+    dsp/dv/dvscrambler.cpp
+    dsp/dv/dvambe.cpp
+    dsp/dv/dvdtmf.cpp
+    dsp/dv/dvsync.cpp
+    dsp/dv/dvdmr.cpp
+    dsp/dv/dvp25.cpp
+    dsp/dv/dvp25p2.cpp
+    dsp/dv/dvysf.cpp
+    dsp/dv/dvnxdn.cpp
+    dsp/dv/dvdpmr.cpp
+    dsp/dv/dvdstar.cpp
+    dsp/dv/dvangel61.cpp
+    dsp/dv/dvangel61frames.cpp
+    dsp/dv/dvangel61ofdm.cpp
+    dsp/dv/dvangel61ofdmrx.cpp
+    dsp/dv/dvm17.cpp
+    dsp/dv/dvangel61aprs.cpp
+    dsp/dv/dvangel61file.cpp
+    dsp/dv/dvangel61ip.cpp
+    dsp/dv/dvangel61hc.cpp
+    dsp/dv/dvopus.cpp
+    dsp/dv/dvframe.cpp
+    dsp/dv/vocoscodec.cpp
 
     dtv/dtvapps.cpp
     dtv/dtvcarousel.cpp
@@ -221,6 +249,10 @@ set(sdrbase_SOURCES
     settings/preset.cpp
     settings/mainsettings.cpp
     settings/rollupstate.cpp
+
+    tun/iptunnel.cpp
+    tun/iptunnelbackend.cpp
+    tun/iptunnelrouting.cpp
 
     util/airlines.cpp
     util/ais.cpp
@@ -465,6 +497,33 @@ set(sdrbase_HEADERS
     dsp/devicesamplestatic.h
     dsp/spectrumvis.h
     dsp/wavfilerecord.h
+    dsp/dv/dvbits.h
+    dsp/dv/dvblockcode.h
+    dsp/dv/dvreedsolomon.h
+    dsp/dv/dvconvolutional.h
+    dsp/dv/dvcrc.h
+    dsp/dv/dvscrambler.h
+    dsp/dv/dvambe.h
+    dsp/dv/dvdtmf.h
+    dsp/dv/dvsync.h
+    dsp/dv/dvdmr.h
+    dsp/dv/dvp25.h
+    dsp/dv/dvp25p2.h
+    dsp/dv/dvysf.h
+    dsp/dv/dvnxdn.h
+    dsp/dv/dvdpmr.h
+    dsp/dv/dvdstar.h
+    dsp/dv/dvangel61.h
+    dsp/dv/dvangel61ofdm.h
+    dsp/dv/dvm17.h
+    dsp/dv/dvangel61aprs.h
+    dsp/dv/dvangel61file.h
+    dsp/dv/dvangel61ip.h
+    dsp/dv/dvangel61hc.h
+    dsp/dv/dvopus.h
+    dsp/dv/dvframe.h
+    dsp/dv/vocoscodec.h
+    dsp/dv/dvangel61tables.h
 
     dtv/dtvapps.h
     dtv/dtvcarousel.h
@@ -509,6 +568,12 @@ set(sdrbase_HEADERS
     settings/preset.h
     settings/mainsettings.h
     settings/rollupstate.h
+
+    tun/iptunnel.h
+    tun/iptunnelbackend.h
+    tun/iptunnelbrokerprotocol.h
+    tun/iptunnelrouting.h
+    tun/iptunneltypes.h
 
     util/airlines.h
     util/ais.h
@@ -629,6 +694,16 @@ set(sdrbase_HEADERS
     remotetcpsinkstarter.h
 )
 
+if(WIN32)
+    list(APPEND sdrbase_SOURCES tun/iptunnel_win.cpp)
+elseif(APPLE)
+    list(APPEND sdrbase_SOURCES tun/iptunnel_mac.cpp)
+elseif(LINUX AND NOT ANDROID)
+    list(APPEND sdrbase_SOURCES tun/iptunnel_linux.cpp)
+else()
+    list(APPEND sdrbase_SOURCES tun/iptunnel_unsupported.cpp)
+endif()
+
 include_directories(
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
@@ -688,7 +763,7 @@ if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
 endif()
 
 if(CUDA_FOUND AND (${VKFFT_BACKEND} EQUAL 1))
-    set_property(TARGET sdrbase PROPERTY CUDA_ARCHITECTURES 60 70 75 80 86)
+    set_property(TARGET sdrbase PROPERTY CUDA_ARCHITECTURES 75 80 86)
     add_compile_definitions(sdrbase VKFFT_BACKEND=1)
     target_compile_options(sdrbase PUBLIC
         "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:
@@ -713,6 +788,7 @@ target_link_libraries(sdrbase
     ${sdrbase_LIMERFE_LIB}
     ${sdrbase_LIBSIGMF_LIB}
     Qt::Core
+    Qt::Network
     Qt::Multimedia
     Qt::WebSockets
     Qt::Positioning
@@ -729,6 +805,45 @@ if (LIBSIGMF_FOUND)
         target_link_libraries(sdrbase ${LIBSIGMF_LIBRARIES})
     endif()
 endif()
+
+if(WIN32)
+    target_include_directories(sdrbase PRIVATE ${CMAKE_SOURCE_DIR}/external/windows/wintun/include)
+    target_link_libraries(sdrbase iphlpapi ws2_32)
+
+    string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" WINTUN_PROCESSOR)
+    if(WINTUN_PROCESSOR MATCHES "^(amd64|x86_64|x64)$")
+        set(WINTUN_ARCH amd64)
+    elseif(WINTUN_PROCESSOR MATCHES "^(arm64|aarch64)$")
+        set(WINTUN_ARCH arm64)
+    elseif(WINTUN_PROCESSOR MATCHES "^(x86|i[3-6]86)$")
+        set(WINTUN_ARCH x86)
+    elseif(WINTUN_PROCESSOR MATCHES "^arm")
+        set(WINTUN_ARCH arm)
+    else()
+        message(FATAL_ERROR "Unsupported Wintun target architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    set(WINTUN_DLL "${CMAKE_SOURCE_DIR}/external/windows/wintun/bin/${WINTUN_ARCH}/wintun.dll")
+    set_property(GLOBAL PROPERTY SDRANGEL_WINTUN_DLL "${WINTUN_DLL}")
+    add_custom_command(TARGET sdrbase POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${WINTUN_DLL}" "$<TARGET_FILE_DIR:sdrbase>/wintun.dll")
+
+    add_executable(sdrangel-tunnel-helper
+        tun/iptunnelhelper_main.cpp
+        tun/iptunnel.cpp
+        tun/iptunnelbackend.cpp
+        tun/iptunnelrouting.cpp
+        tun/iptunnel_win.cpp
+        tun/iptunnel.h
+    )
+    target_compile_definitions(sdrangel-tunnel-helper PRIVATE sdrangel_STATIC IPTUNNEL_ELEVATED_HELPER)
+    target_include_directories(sdrangel-tunnel-helper PRIVATE
+        ${CMAKE_SOURCE_DIR}/exports
+        ${CMAKE_SOURCE_DIR}/external/windows/wintun/include
+    )
+    target_link_libraries(sdrangel-tunnel-helper PRIVATE Qt::Core Qt::Network iphlpapi ws2_32)
+    install(TARGETS sdrangel-tunnel-helper DESTINATION ${INSTALL_BIN_DIR})
+endif()
+
 if (Qt6_FOUND)
     target_link_libraries(sdrbase
         Qt::CorePrivate

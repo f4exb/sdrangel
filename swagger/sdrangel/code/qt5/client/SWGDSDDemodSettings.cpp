@@ -28,40 +28,46 @@ SWGDSDDemodSettings::SWGDSDDemodSettings(QString* json) {
 }
 
 SWGDSDDemodSettings::SWGDSDDemodSettings() {
-    input_frequency_offset = 0L;
+    input_frequency_offset = 0;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
-    demod_gain = 0.0f;
-    m_demod_gain_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    squelch_gate = 0;
-    m_squelch_gate_isSet = false;
-    squelch = 0.0f;
-    m_squelch_isSet = false;
+    protocol = 0;
+    m_protocol_isSet = false;
+    p25p2_wacn = 0;
+    m_p25p2_wacn_isSet = false;
+    p25p2_sysid = 0;
+    m_p25p2_sysid_isSet = false;
+    p25p2_nac = 0;
+    m_p25p2_nac_isSet = false;
+    coherent = 0;
+    m_coherent_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
-    enable_cosine_filtering = 0;
-    m_enable_cosine_filtering_isSet = false;
-    sync_or_constellation = 0;
-    m_sync_or_constellation_isSet = false;
     slot1_on = 0;
     m_slot1_on_isSet = false;
     slot2_on = 0;
     m_slot2_on_isSet = false;
     tdma_stereo = 0;
     m_tdma_stereo_isSet = false;
-    pll_lock = 0;
-    m_pll_lock_isSet = false;
+    dmr_color_code = 0;
+    m_dmr_color_code_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    angel61_file_directory = nullptr;
+    m_angel61_file_directory_isSet = false;
+    codec_model_directory = nullptr;
+    m_codec_model_directory_isSet = false;
+    angel61_groups = nullptr;
+    m_angel61_groups_isSet = false;
+    angel61_file_max_kb = 0;
+    m_angel61_file_max_kb_isSet = false;
+    angel61_file_confirm = 0;
+    m_angel61_file_confirm_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
     high_pass_filter = 0;
@@ -100,40 +106,46 @@ SWGDSDDemodSettings::~SWGDSDDemodSettings() {
 
 void
 SWGDSDDemodSettings::init() {
-    input_frequency_offset = 0L;
+    input_frequency_offset = 0;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
-    demod_gain = 0.0f;
-    m_demod_gain_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    squelch_gate = 0;
-    m_squelch_gate_isSet = false;
-    squelch = 0.0f;
-    m_squelch_isSet = false;
+    protocol = 0;
+    m_protocol_isSet = false;
+    p25p2_wacn = 0;
+    m_p25p2_wacn_isSet = false;
+    p25p2_sysid = 0;
+    m_p25p2_sysid_isSet = false;
+    p25p2_nac = 0;
+    m_p25p2_nac_isSet = false;
+    coherent = 0;
+    m_coherent_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
-    enable_cosine_filtering = 0;
-    m_enable_cosine_filtering_isSet = false;
-    sync_or_constellation = 0;
-    m_sync_or_constellation_isSet = false;
     slot1_on = 0;
     m_slot1_on_isSet = false;
     slot2_on = 0;
     m_slot2_on_isSet = false;
     tdma_stereo = 0;
     m_tdma_stereo_isSet = false;
-    pll_lock = 0;
-    m_pll_lock_isSet = false;
+    dmr_color_code = 0;
+    m_dmr_color_code_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    angel61_file_directory = new QString("");
+    m_angel61_file_directory_isSet = false;
+    codec_model_directory = new QString("");
+    m_codec_model_directory_isSet = false;
+    angel61_groups = new QString("");
+    m_angel61_groups_isSet = false;
+    angel61_file_max_kb = 0;
+    m_angel61_file_max_kb_isSet = false;
+    angel61_file_confirm = 0;
+    m_angel61_file_confirm_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
     high_pass_filter = 0;
@@ -181,11 +193,17 @@ SWGDSDDemodSettings::cleanup() {
 
 
 
-
-
-
     if(title != nullptr) { 
         delete title;
+    }
+    if(angel61_file_directory != nullptr) { 
+        delete angel61_file_directory;
+    }
+    if(codec_model_directory != nullptr) { 
+        delete codec_model_directory;
+    }
+    if(angel61_groups != nullptr) { 
+        delete angel61_groups;
     }
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
@@ -223,39 +241,47 @@ SWGDSDDemodSettings::fromJson(QString &json) {
 
 void
 SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
+    m_contact_report = QJsonObject();
+    for (const char *key : {"contactReportEnabled", "contactReportCallsign"}) {
+        if (pJson.contains(key)) m_contact_report[key] = pJson.value(key);
+    }
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
-    ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
-    
-    ::SWGSDRangel::setValue(&demod_gain, pJson["demodGain"], "float", "");
-    
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
-    ::SWGSDRangel::setValue(&baud_rate, pJson["baudRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&squelch_gate, pJson["squelchGate"], "qint32", "");
+    ::SWGSDRangel::setValue(&p25p2_wacn, pJson["p25p2Wacn"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "float", "");
+    ::SWGSDRangel::setValue(&p25p2_sysid, pJson["p25p2Sysid"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&p25p2_nac, pJson["p25p2Nac"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&coherent, pJson["coherent"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&enable_cosine_filtering, pJson["enableCosineFiltering"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&sync_or_constellation, pJson["syncOrConstellation"], "qint32", "");
     
     ::SWGSDRangel::setValue(&slot1_on, pJson["slot1On"], "qint32", "");
     
     ::SWGSDRangel::setValue(&slot2_on, pJson["slot2On"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tdma_stereo, pJson["tdmaStereo"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&pll_lock, pJson["pllLock"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&dmr_color_code, pJson["dmrColorCode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&angel61_file_directory, pJson["angel61FileDirectory"], "QString", "QString");
+    ::SWGSDRangel::setValue(&codec_model_directory, pJson["codecModelDirectory"], "QString", "QString");
+    ::SWGSDRangel::setValue(&angel61_groups, pJson["angel61Groups"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&angel61_file_max_kb, pJson["angel61FileMaxKB"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&angel61_file_confirm, pJson["angel61FileConfirm"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
@@ -309,32 +335,26 @@ SWGDSDDemodSettings::asJsonObject() {
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
-    if(m_fm_deviation_isSet){
-        obj->insert("fmDeviation", QJsonValue(fm_deviation));
-    }
-    if(m_demod_gain_isSet){
-        obj->insert("demodGain", QJsonValue(demod_gain));
-    }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
     }
-    if(m_baud_rate_isSet){
-        obj->insert("baudRate", QJsonValue(baud_rate));
+    if(m_protocol_isSet){
+        obj->insert("protocol", QJsonValue(protocol));
     }
-    if(m_squelch_gate_isSet){
-        obj->insert("squelchGate", QJsonValue(squelch_gate));
+    if(m_p25p2_wacn_isSet){
+        obj->insert("p25p2Wacn", QJsonValue(p25p2_wacn));
     }
-    if(m_squelch_isSet){
-        obj->insert("squelch", QJsonValue(squelch));
+    if(m_p25p2_sysid_isSet){
+        obj->insert("p25p2Sysid", QJsonValue(p25p2_sysid));
+    }
+    if(m_p25p2_nac_isSet){
+        obj->insert("p25p2Nac", QJsonValue(p25p2_nac));
+    }
+    if(m_coherent_isSet){
+        obj->insert("coherent", QJsonValue(coherent));
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
-    }
-    if(m_enable_cosine_filtering_isSet){
-        obj->insert("enableCosineFiltering", QJsonValue(enable_cosine_filtering));
-    }
-    if(m_sync_or_constellation_isSet){
-        obj->insert("syncOrConstellation", QJsonValue(sync_or_constellation));
     }
     if(m_slot1_on_isSet){
         obj->insert("slot1On", QJsonValue(slot1_on));
@@ -345,14 +365,29 @@ SWGDSDDemodSettings::asJsonObject() {
     if(m_tdma_stereo_isSet){
         obj->insert("tdmaStereo", QJsonValue(tdma_stereo));
     }
-    if(m_pll_lock_isSet){
-        obj->insert("pllLock", QJsonValue(pll_lock));
+    if(m_dmr_color_code_isSet){
+        obj->insert("dmrColorCode", QJsonValue(dmr_color_code));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(angel61_file_directory != nullptr && *angel61_file_directory != QString("")){
+        toJsonValue(QString("angel61FileDirectory"), angel61_file_directory, obj, QString("QString"));
+    }
+    if(codec_model_directory != nullptr && *codec_model_directory != QString("")){
+        toJsonValue(QString("codecModelDirectory"), codec_model_directory, obj, QString("QString"));
+    }
+    if(angel61_groups != nullptr && *angel61_groups != QString("")){
+        toJsonValue(QString("angel61Groups"), angel61_groups, obj, QString("QString"));
+    }
+    if(m_angel61_file_max_kb_isSet){
+        obj->insert("angel61FileMaxKB", QJsonValue(angel61_file_max_kb));
+    }
+    if(m_angel61_file_confirm_isSet){
+        obj->insert("angel61FileConfirm", QJsonValue(angel61_file_confirm));
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
@@ -400,6 +435,8 @@ SWGDSDDemodSettings::asJsonObject() {
         obj->insert("connectAMBE", QJsonValue(connect_ambe));
     }
 
+    for (auto it = m_contact_report.constBegin(); it != m_contact_report.constEnd(); ++it)
+        obj->insert(it.key(), it.value());
     return obj;
 }
 
@@ -424,26 +461,6 @@ SWGDSDDemodSettings::setRfBandwidth(float rf_bandwidth) {
 }
 
 float
-SWGDSDDemodSettings::getFmDeviation() {
-    return fm_deviation;
-}
-void
-SWGDSDDemodSettings::setFmDeviation(float fm_deviation) {
-    this->fm_deviation = fm_deviation;
-    this->m_fm_deviation_isSet = true;
-}
-
-float
-SWGDSDDemodSettings::getDemodGain() {
-    return demod_gain;
-}
-void
-SWGDSDDemodSettings::setDemodGain(float demod_gain) {
-    this->demod_gain = demod_gain;
-    this->m_demod_gain_isSet = true;
-}
-
-float
 SWGDSDDemodSettings::getVolume() {
     return volume;
 }
@@ -454,33 +471,53 @@ SWGDSDDemodSettings::setVolume(float volume) {
 }
 
 qint32
-SWGDSDDemodSettings::getBaudRate() {
-    return baud_rate;
+SWGDSDDemodSettings::getProtocol() {
+    return protocol;
 }
 void
-SWGDSDDemodSettings::setBaudRate(qint32 baud_rate) {
-    this->baud_rate = baud_rate;
-    this->m_baud_rate_isSet = true;
+SWGDSDDemodSettings::setProtocol(qint32 protocol) {
+    this->protocol = protocol;
+    this->m_protocol_isSet = true;
 }
 
 qint32
-SWGDSDDemodSettings::getSquelchGate() {
-    return squelch_gate;
+SWGDSDDemodSettings::getP25p2Wacn() {
+    return p25p2_wacn;
 }
 void
-SWGDSDDemodSettings::setSquelchGate(qint32 squelch_gate) {
-    this->squelch_gate = squelch_gate;
-    this->m_squelch_gate_isSet = true;
+SWGDSDDemodSettings::setP25p2Wacn(qint32 p25p2_wacn) {
+    this->p25p2_wacn = p25p2_wacn;
+    this->m_p25p2_wacn_isSet = true;
 }
 
-float
-SWGDSDDemodSettings::getSquelch() {
-    return squelch;
+qint32
+SWGDSDDemodSettings::getP25p2Sysid() {
+    return p25p2_sysid;
 }
 void
-SWGDSDDemodSettings::setSquelch(float squelch) {
-    this->squelch = squelch;
-    this->m_squelch_isSet = true;
+SWGDSDDemodSettings::setP25p2Sysid(qint32 p25p2_sysid) {
+    this->p25p2_sysid = p25p2_sysid;
+    this->m_p25p2_sysid_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getP25p2Nac() {
+    return p25p2_nac;
+}
+void
+SWGDSDDemodSettings::setP25p2Nac(qint32 p25p2_nac) {
+    this->p25p2_nac = p25p2_nac;
+    this->m_p25p2_nac_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getCoherent() {
+    return coherent;
+}
+void
+SWGDSDDemodSettings::setCoherent(qint32 coherent) {
+    this->coherent = coherent;
+    this->m_coherent_isSet = true;
 }
 
 qint32
@@ -491,26 +528,6 @@ void
 SWGDSDDemodSettings::setAudioMute(qint32 audio_mute) {
     this->audio_mute = audio_mute;
     this->m_audio_mute_isSet = true;
-}
-
-qint32
-SWGDSDDemodSettings::getEnableCosineFiltering() {
-    return enable_cosine_filtering;
-}
-void
-SWGDSDDemodSettings::setEnableCosineFiltering(qint32 enable_cosine_filtering) {
-    this->enable_cosine_filtering = enable_cosine_filtering;
-    this->m_enable_cosine_filtering_isSet = true;
-}
-
-qint32
-SWGDSDDemodSettings::getSyncOrConstellation() {
-    return sync_or_constellation;
-}
-void
-SWGDSDDemodSettings::setSyncOrConstellation(qint32 sync_or_constellation) {
-    this->sync_or_constellation = sync_or_constellation;
-    this->m_sync_or_constellation_isSet = true;
 }
 
 qint32
@@ -544,13 +561,13 @@ SWGDSDDemodSettings::setTdmaStereo(qint32 tdma_stereo) {
 }
 
 qint32
-SWGDSDDemodSettings::getPllLock() {
-    return pll_lock;
+SWGDSDDemodSettings::getDmrColorCode() {
+    return dmr_color_code;
 }
 void
-SWGDSDDemodSettings::setPllLock(qint32 pll_lock) {
-    this->pll_lock = pll_lock;
-    this->m_pll_lock_isSet = true;
+SWGDSDDemodSettings::setDmrColorCode(qint32 dmr_color_code) {
+    this->dmr_color_code = dmr_color_code;
+    this->m_dmr_color_code_isSet = true;
 }
 
 qint32
@@ -571,6 +588,54 @@ void
 SWGDSDDemodSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
+}
+
+QString*
+SWGDSDDemodSettings::getAngel61FileDirectory() {
+    return angel61_file_directory;
+}
+QString*
+SWGDSDDemodSettings::getCodecModelDirectory() {
+    return codec_model_directory;
+}
+QString*
+SWGDSDDemodSettings::getAngel61Groups() {
+    return angel61_groups;
+}
+void
+SWGDSDDemodSettings::setAngel61FileDirectory(QString* angel61_file_directory) {
+    this->angel61_file_directory = angel61_file_directory;
+    this->m_angel61_file_directory_isSet = true;
+}
+void
+SWGDSDDemodSettings::setCodecModelDirectory(QString* codec_model_directory) {
+    this->codec_model_directory = codec_model_directory;
+    this->m_codec_model_directory_isSet = true;
+}
+void
+SWGDSDDemodSettings::setAngel61Groups(QString* angel61_groups) {
+    this->angel61_groups = angel61_groups;
+    this->m_angel61_groups_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getAngel61FileMaxKb() {
+    return angel61_file_max_kb;
+}
+void
+SWGDSDDemodSettings::setAngel61FileMaxKb(qint32 angel61_file_max_kb) {
+    this->angel61_file_max_kb = angel61_file_max_kb;
+    this->m_angel61_file_max_kb_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getAngel61FileConfirm() {
+    return angel61_file_confirm;
+}
+void
+SWGDSDDemodSettings::setAngel61FileConfirm(qint32 angel61_file_confirm) {
+    this->angel61_file_confirm = angel61_file_confirm;
+    this->m_angel61_file_confirm_isSet = true;
 }
 
 QString*
@@ -726,6 +791,7 @@ SWGDSDDemodSettings::setConnectAmbe(qint32 connect_ambe) {
 
 bool
 SWGDSDDemodSettings::isSet(){
+    if (!m_contact_report.isEmpty()) return true;
     bool isObjectUpdated = false;
     do{
         if(m_input_frequency_offset_isSet){
@@ -734,31 +800,25 @@ SWGDSDDemodSettings::isSet(){
         if(m_rf_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_fm_deviation_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_demod_gain_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_volume_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_baud_rate_isSet){
+        if(m_protocol_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_squelch_gate_isSet){
+        if(m_p25p2_wacn_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_squelch_isSet){
+        if(m_p25p2_sysid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_p25p2_nac_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_coherent_isSet){
             isObjectUpdated = true; break;
         }
         if(m_audio_mute_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_enable_cosine_filtering_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_sync_or_constellation_isSet){
             isObjectUpdated = true; break;
         }
         if(m_slot1_on_isSet){
@@ -770,13 +830,28 @@ SWGDSDDemodSettings::isSet(){
         if(m_tdma_stereo_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_pll_lock_isSet){
+        if(m_dmr_color_code_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(angel61_file_directory && *angel61_file_directory != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(codec_model_directory && *codec_model_directory != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(angel61_groups && *angel61_groups != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_angel61_file_max_kb_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_angel61_file_confirm_isSet){
             isObjectUpdated = true; break;
         }
         if(audio_device_name && *audio_device_name != QString("")){
@@ -828,4 +903,3 @@ SWGDSDDemodSettings::isSet(){
     return isObjectUpdated;
 }
 }
-

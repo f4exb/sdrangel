@@ -1,37 +1,38 @@
-<h1>DSD (Digital Speech Decoder) demodulator and decoder plugin</h1>
+<h1>DSD (Digital Speech Decoder) demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
-This plugin uses the [DSDcc](https://github.com/f4exb/dsdcc) library that has been rewritten from the original [DSD](https://github.com/szechyjs/dsd) program to decode several digital speech formats. At present it covers the following:
+This plugin demodulates and decodes digital voice modes. It is the receive counterpart of the [DSE Modulator](../../../plugins/channeltx/moddse/readme.md). The following protocols are supported:
 
-  - DMR/MOTOTRBO: ETSI two slot TDMA standard. MOTOTRBO is a popular implementation of this standard.
-  - dPMR: Another ETSI standard at slower rate (2400 Baud / 6.25 kHz) and FDMA
-  - D-Star: developed and promoted by Icom for Amateur Radio customers.
-  - Yaesu System Fusion (YSF): developed and promoted by Yaesu for Amateur Radio customers. Voice full rate with DV serial devices is not supported
-  - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard with 2400 and 4800 Baud versions.
+  - D-STAR: GMSK, 4800 bit/s, AMBE 3600x2400. Developed and promoted by Icom for Amateur Radio customers.
+  - DMR: 4FSK, 4800 symbols/s, AMBE+2 3600x2450. ETSI two slot TDMA standard (base station, mobile station and direct mode). MOTOTRBO is a popular implementation of this standard.
+  - Yaesu System Fusion (YSF): C4FM, 4800 symbols/s. Developed and promoted by Yaesu for Amateur Radio customers. Voice/data type 2 (the usual narrow mode) is decoded to audio; the other data types are identified only.
+  - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard, both the 4800 bit/s (2400 Baud, 6.25 kHz, "NXDN48") and the 9600 bit/s (4800 Baud, 12.5 kHz, "NXDN96") versions. The full rate vocoder (EFR) of NXDN96 is decoded by the AMBE feature only.
+  - dPMR (ETSI TS 102 490): 4FSK, 2400 symbols/s, AMBE+2 3600x2450.  
+  - P25 Phase 1: C4FM, 4800 symbols/s, IMBE 7200x4400. the APCO Project 25 FDMA standard used by public safety networks in North America, clear (unencrypted) voice.
+  - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450. The two slot TDMA version of Project 25 used by trunked systems for their voice channels. The voice is scrambled with a sequence derived from the system's identity (WACN, system ID and NAC), which must be entered (B.13); the values are broadcast on the system's control channel and listed by the usual radio reference sites.
+  - [M17](https://spec.m17project.org): 4FSK at 4800 symbols/s in 12.5 kHz, 40 ms frames, Codec2 3200 voice with the callsigns in a link setup frame and packet transmissions carrying SMS text or APRS. This is SDRangel's second M17 receiver: the [M17 Demodulator](../demodm17/readme.md) has its own modem, this one decodes M17 in the same chain as the other protocols here, so a scanner or a recording can switch between them, and the two can be compared on the same measurements.
+  - Angel61: SDRangel's own amateur digital voice protocol in four profiles - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s), on HF Angel61 HF-NB and HF-WB (OFDM, 2.5 and 5.5 kHz) - with V1 speech (vocoscodec) at four tiers each (WB's top tier is Opus audio at 18.4 kbit/s instead), LDPC coding, callsign routing, text messages and positions, transmitted by the [DSE Modulator](../../channeltx/moddse/readme.md). Unlike the FM protocols above it is received coherently from the I/Q signal.
 
-The modulation and standard is automatically detected and switched depending on the Baud rate chosen.
-
-To enable this plugin at compile time you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DDSDCC_DIR=/opt/install/dsdcc`
+The protocol is detected automatically from the synchronisation patterns found in the signal, at all three symbol rates, or the search can be limited to one protocol (B.2). The receiver measures the frequency deviation, the carrier frequency error and the symbol clock error of the signal it locks to and corrects them itself, so there is nothing to adjust for a given radio or channel plan beyond the channel bandwidth.
 
 &#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required for the demodulator/decoder to work correctly.
 
-<h2>DV serial device support</h2>
+<h2>AMBE Voice decoding</h2>
+
+For protocols using the AMBE vocoder (which is all apart from M17 and Angel61), there are two ways of turning the received voice frames into audio:
+
+<h3>Software: mbevocoder</h3>
+
+[mbevocoder](https://github.com/srcejon/mbevocoder) decodes AMBE and IMBE frames in software with soft decisions: the demodulator passes the confidence of every received bit to the codec's own error correction, which is what gives the best audio at low signal levels. All protocols and vocoder rates (AMBE 3600x2400 for D-Star, AMBE+2 3600x2450 for DMR, NXDN and dPMR, AMBE+2 2450 for YSF, IMBE 7200x4400 for P25) are covered.
+
+<h3>DV serial device (AMBE feature)</h3>
 
 You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network. This is supported via the [AMBE feature](../../feature/ambe/readme.md).
 
-If no AMBE features are active or the AMBE support is not engaged (B.19) AMBE decoding will take place with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
+When an AMBE feature is selected as the vocoder (B.11) the received frames go to the feature as hard bits and its device decodes them. IMBE (P25) decoding depends on the device firmware. If the selected feature is not there, or mbevocoder is selected, decoding takes place in software with mbevocoder.
 
-<h2>Mbelib support</h2>
-
-DSDcc itself can use [mbelib](https://github.com/szechyjs/mbelib) to decode AMBE frames. While DSDcc is intended to be patent-free, `mbelib` that it uses describes functions that may be covered by one or more U.S. patents owned by DVSI Inc. The source code itself should not be infringing as it merely describes possible methods of implementation. Compiling or using `mbelib` may infringe on patents rights in your jurisdiction and/or require licensing. It is unknown if DVSI will sell licenses for software that uses `mbelib`.
-
-If you are not comfortable with this just do not install DSDcc and/or mbelib and the plugin will not be compiled and added to SDRangel. For packaged distributions just remove:
-
-  - For Linux distributions: `plugins/channel/libdemoddsd.so`
-  - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
-
-For software built from source if you choose to have `mbelib` support you will need to have DSDcc compiled with `mbelib` support. You will also need to have defines for it on the cmake command. If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DMBE_DIR=/opt/install/mbelib`
+The decoded audio (mono, at the audio device rate, after the volume and the slot selection) is also available to features that take a channel's demodulated signal, such as the Demod Analyzer and the Morse Decoder. Audio decoded by the AMBE feature goes straight to the audio device and is not on that path.
 
 <h2>Interface</h2>
 
@@ -47,21 +48,25 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 <h4>A.2: Channel bandwidth before discriminator</h4>
 
-This is the bandwidth of the pre-discriminator filter
+This is the bandwidth of the pre-discriminator filter while the demodulator searches for a signal. It should match the channel plan: 12.5 kHz for DMR, YSF, P25 and NXDN, 6.25 kHz is enough for dPMR and D-Star. Once locked, the filter narrows itself to the occupied bandwidth of the signal found (measured from its deviation and symbol rate), so a wide setting only costs sensitivity while searching (the synchronisation patterns must still be found through the wide filter): a 25 kHz channel works for a scanner. The automatic frequency correction of the demodulator is bounded to a quarter of this bandwidth.
+Angel61 does not depend on it: while an Angel61 receiver is listening (Angel61 NB, Angel61 WB or Auto) the input is never filtered narrower than it needs (8 kHz for NB, 10 kHz for WB before its own matched filter).
+The receiver's DC (the DC spike of an SDR tuned to the channel) is removed before anything else.
 
 <h4>A.3: Channel power</h4>
 
-Total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
+Total power in dB relative to a +/- 1.0 amplitude signal generated in the pass band.
 
 <h4>A.4: Channel power bar graph</h4>
 
 <h4>A.5: Activate status text log</h4>
 
-Check to send the status text lines (A.12) to the log. Uncheck to dismiss sending.
+Check to send the status text lines (A.12) and DMR events to the log. Uncheck to dismiss sending.
+DMR events are emitted when a call starts or ends, when link-control details become available or change, and when a complete standard Talker Alias, in-band GPS position or text message is decoded.
+Repeated voice bursts and unchanged metadata do not produce repeated rows; changing GPS positions are limited to one row per second per slot.
 
 <h4>A.6 View status text log</h4>
 
-Click to open a dialog to view the status text lines log:
+Click to open the non-modal status text and event log. It can remain open while the demodulator controls are used; clicking the button again brings the existing window to the front:
 
 ![DSD Demodulator status text log GUI](../../../doc/img/DSDdemod_plugin_status_text_log.png)
 
@@ -75,509 +80,337 @@ Use this toggle to pin or unpin the log to the last line
 
 <h5>A.6.3 Save log to file</h5>
 
-Save the present log content to a file
+Click to select a file to which the log will be saved
 
 <h5>A.6.4 Timestamp</h5>
 
 Each line in the log starts with the timestamp when the status line was fetched from the decoder
 
-<h5>A.6.5 Status text</h5>
+<h5>A.6.5 Status text and DMR events</h5>
 
-One line per status text
+One line per status text or DMR call event after the timestamp. A DMR event has the form:
 
-<h4>A.7: Audio volume</h4>
+`DMR S1 CC:1 EVT:START SRC:1234567 DST:91 TYPE:GROUP EMG:N PRIV:N PRI:0`
 
-When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature.
+`EVT` is `START`, `UPDATE` or `END`; an `END` row also carries the approximate call duration. `SRC` and `DST` are the source radio and destination radio or talkgroup IDs; `TYPE` distinguishes group from unit-to-unit calls; `EMG`, `PRIV` and `PRI` are the emergency flag, privacy flag and priority from the DMR service-options field. `--` means that valid link control has not yet been received.
 
-With the DV serial device(s) amplification factor in dB is given by `(value - 3.0)*5.0`. In most practical cases the middle value of 5.0 (+10 dB) is a comfortable level.
+Standard Talker Alias, in-band GPS link control and text messages produce rows such as:
 
-<h4>A.8: Squelch level</h4>
+`DMR S1 CC:1 EVT:ALIAS SRC:1234567 FORMAT:UTF-8 TEXT:"M7RCE"`
 
-The level corresponds to the channel power above which the squelch gate opens.
+`DMR S1 CC:1 EVT:GPS SRC:1234567 LAT:51.123456 LON:-1.234567 ERR:<20m`
 
-<h4>A.9: Squelch time gate</h4>
+`DMR S1 CC:1 EVT:TEXT SRC:1234567 DST:91 TYPE:GROUP FORMAT:UTF-16BE TEXT:"Meet at gate 2"`
 
-Number of milliseconds following squelch gate opening after which the signal is declared open. There is a delay line for the samples so samples applied to the decoder actually start at the beginning of the gate period not losing any samples. 0 means squelch is declared open with no delay.
+`DMR S1 CC:1 EVT:TEXT SRC:1234567 DST:7654321 TYPE:UNIT FORMAT:UTF-16BE/IP TEXT:"On my way"`
 
-<h4>A.10: High-pass filter for audio</h4>
+An Angel61 transmission logs its start and end, its text messages (from the data slots or the message field of data frames), the positions it sends and, at its end, the rate request record kept for its source (see A12.8):
 
-Use this switch to toggle high-pass filter on the audio
+`ANGEL61 EVT:START`
 
-<h4>A.11: Audio mute, squelch indicator and select audio output device</h4>
+`ANGEL61 EVT:TEXT SRC:M7RCE DST:CQ VIA:SLOTS TEXT:"Hello from Angel61"`
 
-Left click to mute/unmute audio. This button lights in green when the squelch opens.
+`ANGEL61 EVT:POSITION SRC:M7RCE LAT:51.36900 LON:-0.12190 ALT:35 SPD:-- CRS:--`
 
-If you right click on it, it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+`ANGEL61 EVT:RATE SRC:M7RCE DST:CQ REQ:0 SEND:2 PROFILE:NB BLER:0.0 SNR:40.0`
 
-<h3>A.12: Format specific status display</h3>
+`ANGEL61 EVT:END SRC:M7RCE DST:CQ FRAMES:141 LOST:0 SNR:40.0 CONCEALED:0 FALLBACK:0`
 
-When the display is active the background turns from the surrounding gray color to dark green. It shows informational or status messages that are particular to each format.
+Talker Alias supports the ETSI 7-bit, ISO-8859-1, UTF-8 and UTF-16BE formats. GPS latitude and longitude are in decimal degrees and `ERR` is the accuracy category sent by the radio. Decoded DMR GPS positions, D-Star D-PRS/NMEA positions and Angel61 positions are also sent to a running Map feature, where the source radio ID or callsign labels the marker. Text decoding supports ETSI Unified Data Transport in packed 7-bit, ISO-8859-1 and UTF-16BE formats, plus UTF-16BE text carried by UDP on port 5016 with either the full IPv4 header or the DMR compressed UDP/IPv4 header. Headers, confirmed-data block sequence numbers and CRCs, complete packet CRCs and IP headers are checked before a message is logged; incomplete or damaged messages are discarded. Packet text is currently reassembled from rate 1/2 data blocks. Vendor-specific text and location services, such as Motorola TMS/LRRP and Hytera text/location protocols, are not decoded.
 
-<h4>A11.1: D-Star status display</h4>
 
-![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
+<h4>A.7: Vocoder</h4>
 
-<h5>A11.1.1: Origin (my) and destination (your) callsign</h5>
+Selects what decodes the received AMBE and IMBE frames: `mbevocoder` in software, or a hardware device through an AMBE feature (`AMBE F:0` and so on). The list is updated when features are added or removed. It shows `none` in place of `mbevocoder` when that is not built in, and `(absent)` after a selected feature that is not there now: decoding is then in software and goes back to the feature when it returns. M17 and Angel61 do not use this setting. Web API: `connectAMBE` and `ambeFeatureIndex`.
 
-  - at the left of the `>` sign is the origin callsign ` MY` with the 4 character informative suffix nest to the slash `/`
-  - at the right of the `>` sign is the destination callsign `YOUR`. As per Icom standard this is `CQCQCQ` when a call is made to all stations
-  - this information is retrieved from the header or the slow data if it can be decoded
-
-<h5>A11.1.2: Repeater callsign</h5>
-
-  - at the left of the `>` sign is the origin repeater or `RPT1`
-  - at the right of the `>` sign is the destination repeater or `RPT2`
-  - this information is retrieved from the header or the slow data if it can be decoded
-
-<h5>A11.1.3: Informative text</h5>
-
-When slow data can be decoded this is the 20 character string that is sent in the text frames
-
-<h5>A11.1.4: Geopositional data</h5>
-
-When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:
-
-   - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
-   - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`.
-
-<h4>A11.2: DMR status display</h4>
-
-![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
-
-  - Note 1: statuses are polled at ~1s rate and therefore do not reflect values instantaneously. As a consequence some block types that occur during the conversation may not appear.
-  - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared
-
-<h5>A11.2.1: Station role</h5>
-
-  - `BS`: base station
-  - `MS`: mobile station
-  - `NA`: not applicable or could not be determined (you should not see this normally)
-
-<h5>A11.2.2: TDMA slot #0 status</h5>
-
-For mobile stations on an inbound channel there is no channel identification (no CACH) so information goes there by default.
-
-<h5>A11.2.3: TDMA slot #1 status</h5>
-
-<h5>A11.2.4: Channel status and color code</h5>
-
-This applies to base stations and mobile stations in continuous mode that is transmissions including the CACH sequences.
-
-  - The first character is either:
-
-    - `*`: Busy. That is the AT bit on the opposite channel is on
-    - `.`: Clear. That is the AT bit on the opposite channel is off
-    - `/`: The CACH could not be decoded and information is missing
-
-  - The two next characters are either:
-
-    - The color code from 0 to 15 (4 bits)
-    - `--`: The color code could not be decoded and information is missing
-
-<h5>A11.2.5: Slot type</h5>
-
-This is either:
-
-   - `VOX`: voice block
-   - `IDL`: data idle block
-   - `VLC`: voice Link Control data block
-   - `TLC`: terminator with Link Control information data block
-   - `CSB`: CSBK (Control Signaling BlocK) data block
-   - `MBH`: Multi Block Control block header data block
-   - `MBC`: Multi Block Control block continuation data block
-   - `DAH`: Data header block
-   - `D12`: 1/2 rate data block
-   - `D34`: 3/4 rate data block
-   - `DB1`: full rate data block
-   - `RES`: reserved data block
-   - `UNK`: unknown data type or could not be decoded
-
-<h5>A11.2.6: Addressing information</h5>
-
-String is in the form: `02223297>G00000222`
-
-  - At the left of the `>` sign this is the source address (24 bits) as defined in the DMR ETSI standard
-  - The first character at the right of the `>` sign is the address type indicator:
-    - `G`: group address
-    - `U`: unit (individual) address
-  - Next on the right is the target address (24 bits) as defined in the DMR ETSI standard
-
-<h4>A11.3: dPMR status display</h4>
-
-![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
-
-<h5>A11.3.1: dPMR frame type</h5>
-
-  - `--`: undetermined
-  - `HD`: Header of FS1 type
-  - `PY`: Payload frame of a still undetermined type
-  - `VO`: Voice frame
-  - `VD`: Voice and data frame
-  - `D1`: Data without FEC frame
-  - `D2`: Data with FEC frame
-  - `XS`: Extended search: looking for a new payload frame when out of sequence
-  - `EN`: End frame
-
-<h5>A11.3.2: Colour code</h5>
-
-Colour code in decimal (12 bits)
-
-<h5>A11.3.3: Own ID</h5>
-
-Sender's identification code in decimal (24 bits)
-
-<h5>A11.3.4: Called ID</h5>
-
-Called party's identification code in decimal (24 bits)
-
-<h4>A11.4: Yaesu System Fusion (YSF) status display</h4>
-
-![DSD YSF status](../../../doc/img/DSDdemod_plugin_ysf_status.png)
-
-<h5>A11.4.1: FICH data</h5>
-
-This displays a summary of FICH (Frame Identification CHannel) block data. From left to right:
-
-  - Frame type:
-    - `H`: header
-    - `C`: channel (as in the example)
-    - `T`: terminator
-    - `S`: test
-
-  - Channel type:
-    - `V1`: voice/data mode 1
-    - `V2`: voice/data mode 2 (as in the example)
-    - `VF`: voice full rate
-    - `DF`: data full rate
-
-  - Call mode:
-    - `GC`: group call (as in the example)
-    - `RI`: radio ID
-    - `RE`: reserved
-    - `IN`: individual call
-
-  - Number of total blocks and number of total frames separated by a colon `:`
-
-  - Miscellaneous information in a single string
-    - first character is the bandwidth mode:
-      - `N`: narrow band mode
-      - `W`: wide band mode (as in the example)
-    - second character is the path type:
-      - `I`: Internet path
-      - `L`: local path (as in the example)
-    - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
-
-<h5>A11.4.2: Origin and destination callsigns</h5>
-
-  - at the left of the `>` sign is the origin callsign
-  - at the right of the `>` sign is the destination callsign. It is filled with stars `*` when call is made to all stations (similar to the CQCQCQ in D-Star)
-
-<h5>A11.4.3: Origin and destination repeaters callsigns</h5>
-
-  - at the left of the `>` sign is the origin repeater callsign
-  - at the right of the `>` sign is the destination repeater callsign.
-
-<h5>A11.4.4: Originator radio ID</h5>
-
-This is the unique character string assigned to the device by the manufacturer.
-
-<h4>A11.5: NXDN status display</h4>
-
-There are 3 display formats depending on the kind of transmission called RF channel in the NXDN system.
-
-<h5>A11.5.1: RCCH RF channel display</h5>
-
-This is the control channel used in trunked systems and is usually sent continuously.
-
-![DSD NXDN RTDCH status](../../../doc/img/DSDdemod_plugin_nxdn_rcch_status.png)
-
-<h6>A11.5.1.1: RF channel indicator</h6>
-
-This is `RC` for RCCH
-
-<h6>A11.5.2.2: Half/full rate</h6>
-
-Indicator of transmission rate:
-
-  - `H`: half rate (2400 or 4800 S/s). Uses EHR vocoder (AMBE 3600/2450)
-  - `F`: full rate (4800 S/s only). Uses EFR vocoder (AMBE 7200/4400)
-
-<h6>A11.5.1.3: RAN number</h6>
-
-This is the RAN number (0 to 63) associated to the transmission. RAN stands for "Radio Access Number" and for trunked systems this is the site identifier (Site Id) modulo 64.
-
-<h6>A11.5.1.4: Last message type code</h6>
-
-This is the type code of the last message (6 bits) displayed in hexadecimal. The complete list is found in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.
-
-<h6>A11.5.1.5: Location Id</h6>
-
-This is the 3 byte location Id associated to the site displayed in hexadecimal
-
-<h6>A11.5.1.6: Services available flags</h6>
-
-This is a 16 bit collection of flags to indicate which services are available displayed in hexadecimal. The breakdown is listed in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.5.33. From MSB to LSB:
-
-  - first nibble (here `B`):
-    - `b15`: Multi-site service
-    - `b14`: Multi-system service
-    - `b13`: Location Registration service
-    - `b12`: Group Registration Service
-  - second nibble (here `3`):
-    - `b11`: Authentication Service
-    - `b10`: Composite Control Channel Service
-    - `b9`: Voice Call Service
-    - `b8`: Data Call Service
-  - third nibble (here `C`):
-    - `b7`: Short Data Call Service
-    - `b6`: Status Call & Remote Control Service
-    - `b5`: PSTN Network Connection Service
-    - `b4`: IP Network Connection Service
-  - fourth nibble (here `0`) is spare
-
-<h5>A11.5.2: RTCH or RDCH RF channel display</h5>
-
-This is the transmission channel either in a trunked system (RTCH) or conventional system (RDCH).
-
-![DSD NXDN RTDCH status](../../../doc/img/DSDdemod_plugin_nxdn_rtdch_status.png)
-
-<h6>A11.5.2.1: RF channel indicator</h6>
-
-It can be either `RT` for RTCH or `RD` for a RDCH channel
-
-<h6>A11.5.2.2: Half/full rate</h6>
-
-Indicator of transmission rate:
-
-  - `H`: half rate (2400 or 4800 S/s). Uses EHR vocoder (AMBE 3600/2450)
-  - `F`: full rate (4800 S/s only). Uses EFR vocoder (AMBE 7200/4400)
-
-<h6>A11.5.2.3: RAN number</h6>
-
-This is the RAN number (0 to 63) associated to the transmission. RAN stands for "Radio Access Number" and has a different usage in conventional or trunked systems:
-
-  - Conventional (RDCH): this is used as a selective squelch. Code `0` means always unmute.
-  - Trunked (RTCH): this is the site identifier (Site Id) modulo 64.
-
-<h6>A11.5.2.4: Last message type code</h6>
-
-This is the type code of the last message (6 bits) displayed in hexadecimal. The complete list is found in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.
-
-<h6>A11.5.2.5: Source Id</h6>
-
-This is the source of transmission identification code on two bytes (0 to 65353) displayed in decimal.
-
-<h6>A11.5.2.6: Destination Id</h6>
-
-This is the destination of transmission identification code on two bytes (0 to 65353) displayed in decimal. It is prefixed by a group call indicator:
-
-  - `G`: this is a group call
-  - `I`: this is an individual call
-
-<h5>A11.5.3: Unknown or erroneous data display</h5>
-
-In this case the display is simply "RU" for "unknown"
-
-<h3>B section: digital</h3>
-
-<h4>B.1: FM signal scope</h4>
-
-This display shows the sampled points of the demodulated FM signal in a XY plane with either:
-
-  - X as the signal at time t and Y the signal at time t minus symbol time if "transitions constellation" is selected by button (B.13)
-  - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13)
-
-The display shows 16 points as yellow crosses that can be used to tune the center frequency (A.1) and FM deviation (B.17) so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers from 0 to 15 starting at the top left corner and going from left to right and top to bottom.
-
-<h5>Transition constellation display</h5>
-
-This is selected by the transition constellation or symbol synchronization signal toggle (B.13)
-
-The discriminator signal at 48 kS/s is routed to the scope display with the following connections:
-
-  - X input: the discriminator samples
-  - Y input: the discriminator samples delayed by the baud rate i.e. one symbol delay:
-    - 2400 baud: 20 samples
-    - 4800 baud: 10 samples
-
-Depending on the type of modulation the figure will have different characteristic forms:
-
-<h6>2-FSK or 2-GFSK</h6>
-
-![DSD Demodulator plugin GUI 2FSK](../../../doc/img/DSDdemod_plugin_2fsk.png)
-
-This concerns the following standards:
-
-  - D-Star
-
-There are 4 possible points corresponding to the 4 possible transitions. x represents the current symbol and y the previous symbol. The 4 points given by their (y,x) coordinates correspond to the following:
-
-  - (1, 1): upper right corner. The pointer can stay there or move to (1, -1). Ideally this should be placed at point 3.
-  - (1, -1): upper left corner. The pointer can move to (-1, -1) or (-1, 1). Ideally this should be placed at point 0.
-  - (-1, 1): lower right corner. The pointer can move to (1, -1) or (1, 1). Ideally this should be placed at point 15.
-  - (-1, -1): lower left corner. The pointer can stay there or move to (-1, 1). Ideally this should be placed at point 12.
-
-As you can see the pointer can make all moves except between (-1, -1) and (1,1) hence all vertices between the 4 points can appear except the one between the lower left corner and the upper right corner.
-
-<h6>4-FSK or 4-GFSK</h6>
-
-![DSD Demodulator plugin GUI 4FSK](../../../doc/img/DSDdemod_plugin_4fsk.png)
-
-This concerns the following standards:
-
-  - DMR
-  - YSF
-  - dPMR
-  - NXDN
-
-There are 16 possible points corresponding to the 16 possible transitions between the 4 dibits. The 4 dibits are equally spaced at relative positions of -3, -1, 1, 3 hence the 16 points are also equally spaced between each other on the IQ or (x,y) plane.
-
-Ideally the figure should show a cloud of persistent points at the locations marked by the yellow crosses (0 to 15).
-
-<h5>Symbol synchronization display</h5>
-
-2-FSK
-
-![DSD Demodulator plugin GUI 2FSK symbols](../../../doc/img/DSDdemod_plugin_2fsk_sym.png)
-
-4-FSK
-
-![DSD Demodulator plugin GUI 4FSK symbols](../../../doc/img/DSDdemod_plugin_4fsk_sym.png)
-
-This is selected by the transition constellation or symbol synchronization signal toggle (B.13)
-
-The X input is the discriminator signal and the Y input is the symbol synchronization signal that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
-
-The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Y input should go down to mid position in the first fourth of the symbol period.
-
-Ideally the figure should show a cloud of persistent points at the locations marked by points 0 to 3. Each one of these points represent an ideally decoded symbol.
-
-<h4>B.2: Symbol (Baud) rate</h4>
-
-Here you can specify which symbol rate or Baud rate is expected. Choices are:
-
-  - `2.4k`: 2400 S/s used for dPMR and 4800 b/s NXDN
-  - `4.8k`: 4800 S/s used for 9600 b/s NXDN, DMR, D-Star and YSF.
-
-<h4>B.3: Type of frame detected</h4>
-
-This can be one of the following:
-
-  - `+DMRd`: non-inverted DMR data frame
-  - `+DMRv`: non-inverted DMR voice frame
-  - `-DMRd`: inverted DMR data frame
-  - `-DMRv`: inverted DMR voice frame
-  - `+D-STAR`: non-inverted D-Star frame
-  - `-D-STAR`: inverted D-Star frame
-  - `+D-STAR_HD`: non-inverted D-Star header frame encountered
-  - `-D-STAR_HD`: inverted D-Star header frame encountered
-  - `+dPMR`: non-inverted dPMR non-packet frame
-  - `+NXDN`: non-inverted NXDN frame
-  - `-NXDN`: inverted NXDN frame (not likely)
-  - `+YSF`: non-inverted Yaesu System Fusion frame
-
-<h4>B.4: Matched filter toggle</h4>
-
-Normally you would always want to have a matched filter however on some strong D-Star signals more synchronization points could be obtained without. When engaged the background of the button is lit in orange.
-
-<h4>B.5: Symbol PLL lock indicator</h4>
-
-Since dsdcc version 1.7.1 the symbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
-
-However with marginal signals the ringing filter alone and a few heuristics work better. This is why since DSDcc version 1.7.1 the PLL became optional.
-
-You can use this button to toggle between the two options:
-
-  - with the locker icon in locked position: PLL is engaged
-  - with the locker icon in unlocked position: PLL is bypassed
-
-When in lock position the button lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
-
-<h4>B.6: Symbol synchronization zero crossing hits in %</h4>
-
-This is the percentage per symbols for which a valid zero crossing has been detected. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
-
-With the PLL engaged the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
-
-<h4>B.7: Zero crossing shift</h4>
-
-This is the current (at display polling time) zero crossing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
-
-  - `2400 S/s`: +/- 5 inclusive
-  - `4800 S/s`: +/- 2 inclusive
-
-<h4>B.8: Discriminator input signal median level in %</h4>
-
-This is the estimated median level (center) of the discriminator input signal in percentage of half the total range. When the signal is correctly aligned in the input range it should be 0
-
-<h4>B.9: Discriminator input signal level range in %</h4>
-
-This is the estimated discriminator input signal level range (max - min) in percentage of half the total range. For optimal decoding it should be maintained close to 100.
-
-<h4>B.10 to B.12: Two slot TDMA handling</h4>
-
-This is useful for two slot TDMA modes that is only DMR at present. FDMA modes are treated as using slot #1 only.
+<h4>A.8 to A.10: Two slot TDMA handling</h4>
 
 ![DSD TDMA handling](../../../doc/img/DSDdemod_plugin_tdma.png)
 
-<h5>B.10 (1): Slot #1 voice select</h5>
+<h5>A.8 (1): Slot #1 voice select</h5>
 
-Toggle button to select slot #1 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave only this toggle on.
+Toggle button to select slot #1 voice output. When on (lit) the voice frames from slot #1 are sent to the audio output. This applies to DMR and P25 Phase 2 (channel 0). For all other protocols the (single) voice stream is controlled by this button. The button turns green while voice frames are being received on the slot.
 
-<h5>B.11 (2): Slot #2 voice select</h5>
+<h5>A.9 (2): Slot #2 voice select</h5>
 
-Toggle button to select slot #2 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave this toggle off.
+Toggle button to select slot #2 voice output. When on (lit) the voice frames from slot #2 are sent to the audio output. This applies to DMR and P25 Phase 2 (channel 1). The button turns green while voice frames are being received on the slot.
 
-<h5>B.12 (3): TDMA stereo mode toggle</h5>
+<h5>A.10 (3): TDMA stereo mode toggle</h5>
 
-  - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
-  - When on the icon shows a pair of loudspeakers. It sends slot #1 voice to the left stereo audio channel and slot #2 to the right one
+  - When off the slot(s) selected sends their voice as mono on both audio channels
+  - When on the slot #1 voice goes to the left audio channel and slot #2 to the right audio channel
 
-For FDMA standards you may want to leave this as mono mode.
+<h4>A.11: Audio volume</h4>
 
-<h4>B.13: Transition constellation or symbol synchronization signal toggle</h4>
+This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can be varied continuously in 0.1 steps using the dial button. With the software vocoder this is a linear gain applied to the decoded audio; with the AMBE feature it drives the device's output gain. The default of 2.0 is about right for speech.
 
-Using this button you can either:
+<h4>A.12: High-pass filter for audio</h4>
 
-  - show the transitions constellation
-  - show a indicative signal about symbol synchronization
-    - when a zero crossing is detected the signal is set to estimated input discriminator signal maximum value
-    - when the symbol clock is 0 (start of symbol period) the signal is set to the estimated median point of the input discriminator signal
+Use this switch to toggle high-pass filter on the audio. This is useful to remove the low frequency content of the decoded speech. Applies to the software vocoder and to the AMBE feature.
 
-<h4>B.14: Trace length</h4>
+<h4>A.13: Audio mute, lock indicator and select audio output device</h4>
 
-This button tunes the length of the trace displayed on B.1. Units are milliseconds. Default value is 300.
+Left click on this button to toggle audio mute for this channel. The button lights up in green while the demodulator is locked to a transmission it has confirmed (a sync matched by chance in noise does not light it).
 
-<h4>B.15: Trace stroke</h4>
+If you right click on it a dialog will open to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
-This button tunes the stroke of the points displayed on B.1. The trace has limited persistence based on alpha blending. This is the 8 bit unsigned integer value of the trace alpha blending. Default value is 100.
+<h3>A.14: Format specific status display</h3>
 
-<h4>B.16: Trace decay</h4>
+When the decoder is locked on a transmission this area shows the signalling it decodes, in a format that depends on the protocol. The status line is also what the log (A.5, A.6) and the `statusText` field of the Web API report carry.
 
-This button tunes the persistence decay of the points displayed on B.1. The trace has limited persistence based on alpha blending. This controls the alpha value of the black screen printed at the end of each trace and thus the trace points decay time. The value is 255 minus the displayed value using 8 bit unsigned integers.
+<h4>A14.1: D-Star status display</h4>
+
+`MY/SFX>UR|RPT1>RPT2|text|locator:bearing/distance`
+
+  - `MY/SFX`: the origin callsign and its 4 character suffix from the radio header, `UR` the destination callsign
+  - `RPT1`, `RPT2`: the departure and destination repeater callsigns
+  - `text`: the 20 character informative text sent in the slow data, once the four blocks have been received
+  - `locator`: the Maidenhead locator of the position sent in the slow data as D-PRS (`$$CRC...`) or NMEA (`$GPGGA`, `$GPRMC`) sentences; when the position of the station is known (see the [Preferences](../../../sdrgui/readme.md) dialog) the bearing in degrees and the distance in kilometres follow
+
+`no header` shows while the transmission has been joined at a voice sync and no radio header has been decoded yet, neither from the start of the transmission nor from its repetition in the slow data.
+
+A D-PRS sentence whose CRC checks is an APRS packet, whatever it carries (a position, a message, an object, telemetry). It is logged as an `APRS` event and forwarded to the [APRS](../../feature/aprs/readme.md) feature, and to any other feature listening for packets, as the AX.25 frame of its `CALL>APxxxx,DSTAR*:...` text - so positions, messages and status from D-STAR radios appear in the APRS feature beside those received through a Packet Demodulator. The sentence is repeated every few seconds while the transmission lasts: the same text again inside 30 seconds is treated as a duplicate and not forwarded, as an APRS-IS gateway would.
+
+<h4>A14.2: DMR status display</h4>
+
+`Sta: BS CC: 1 S1: VOX G 1234567>8 S2: ---`
+
+  - `Sta`: the station role: `BS` base station (both slots transmitted), `MS` mobile station (one slot, the other silent), `DM` direct mode
+  - `CC`: the colour code, from the slot type of data bursts or the embedded signalling of voice bursts
+  - `S1`, `S2`: for each TDMA slot the type of the last burst and its addressing:
+    - `VOX` voice, `PI` privacy indicator header, `VLC` voice LC header, `TLC` terminator with LC, `CSBK`, `MBH` multi block control header, `MBC` multi block control continuation, `DAH` data header, `R12` rate 1/2 data, `R34` rate 3/4 data, `IDL` idle, `R1` rate 1 data, `UNK` unknown, `---` nothing received yet
+    - then `G` group call or `U` unit to unit call, the source ID and the destination ID from the voice LC header, the terminator or the embedded LC
+
+<h4>A14.3: dPMR status display</h4>
+
+`CC 4 VOICE 1234567 > 2345678 (all call)`
+
+  - `CC`: the colour code
+  - the type of the last frame: `HEADER`, `VOICE` (payload frame) or `END`
+  - the own ID and the called ID from the header, `(all call)` when the call is an all call
+
+<h4>A14.4: Yaesu System Fusion (YSF) status display</h4>
+
+`V/D 2 src: F4EXB dest: CQCQCQ down: F5ZOO up: F5ZOO`
+
+  - the data type from the FICH: `V/D 1`, `data FR`, `V/D 2` or `voice FR`; `no FICH` while none has been decoded
+  - the source and destination callsigns from the header or the data channel of the communication frames, then the downlink and uplink repeater callsigns
+
+<h4>A12.5: NXDN status display</h4>
+
+`RAN 1 VCALL group 1234 > 5678`
+
+  - `RAN`: the radio access number from the SACCH; `EFR` follows the message type when the call uses the full rate vocoder
+  - the last message type decoded from the SACCH or FACCH1: `VCALL` (voice call), `TX_REL` (transmission release) or `MSG xx` for the others
+  - for a voice call: `group` or `unit` call, the source ID and the destination ID
+
+<h4>A14.6: P25 status display</h4>
+
+`NAC 293 LDU1 TG 100 from 1234567`
+
+  - `NAC`: the network access code from the NID, in hexadecimal
+  - the last data unit type: `HDU`, `LDU1`, `LDU2`, `TDU`, `TDULC`, `TSDU`, `PDU`
+  - `TG` talkgroup (group call) or `unit` (unit to unit call) destination and the source ID from the header or the link control; `encrypted` is appended when the algorithm ID says the voice is encrypted (only clear voice is decoded)
+
+On a trunking control channel (a stream of TSDUs) the display becomes:
+
+`NAC 1A0 system BEE00:1AE:1A0 TSDU GRP_V_CH_GRANT_UPDT TG 20400 500.7000 MHz`
+
+  - `system`: the WACN, system ID and NAC from the network status broadcast, in the form the P25 Phase 2 setting (B.13) takes
+  - the last trunking signalling block decoded: its opcode name (TIA-102.AABC) and, for the channel grants, the talkgroup (or unit) and the frequency (from the identifier update broadcasts; the raw channel field until they have been seen, and the slot for a TDMA channel), for the status broadcasts the system, RFSS and site. A channel grant stays on display for a few seconds; the vendor specific blocks show as `MFID xx op yy`.
+
+<h4>A14.7: P25 Phase 2 status display</h4>
+
+`S1: 4V PTT TG 4321 from 1234567 S2: SACCH IDLE`
+
+For each of the two channels (slots): the last burst type (`4V`, `2V` voice, `SACCH`, `FACCH`, `LCCH`), the last MAC message decoded from a SACCH or FACCH (`PTT`, `END`, `IDLE`, `ACTIVE`, `HANGTIME`), and from the last PTT the talkgroup and the source ID, followed by the encryption algorithm name when the voice is encrypted (only clear voice is decoded). `TS ?` at the start means the timeslot is not yet known (the first bursts after a lock, until an information ISCH is read); `no system` means the WACN, system ID and NAC (B.13) are not set, in which case only the unscrambled signalling is decoded.
+
+<h4>A14.8: Angel61 status display</h4>
+
+`M7RCE > CQ | NB V1 4.5k (V1, next tier 2) | BLER 0.0% | Es/N0 min 11.0 dB | req 2 send 3 | IO91XJ:123/4.5km`
+
+* The source and destination callsigns of the transmission (`CQ` for everyone; a callsign longer than 9 characters, such as `EA8/G4ABC/QRP-7`,
+arrives in a slot of its own every 2 s: until it has, it shows as its base callsign and `...`, `G4ABC...`, or as `#` and a hash for a special event callsign), 
+* the frame type (`NB V1 2.25k` to `NB V1 9.0k`, `NB voice + data`, `NB data`, `NB data 16-QAM` or `NB idle`, and the same for WB,
+whose top tier is `WB Opus 18.4k`, and for HF, whose data goes in groups, `HF-NB data tier 0` and so on) with what the station slot announces (the codec family of the voice the station uses next and its tier),
+* the block error rate (BLER) since the lock, 
+* the least Es/N0 of the transmission (the mean SNR in 3 kHz on HF),
+* the rate request tiers (`req` the tier the source asks of its destination, `send` the tier this station would ask of the source from what it has received.
+On VHF the judgement steps one tier at a time: up when a transmission of a second or more came in with under 1% of blocks lost and a least Es/N0 3 dB above the next tier's threshold, down after over 3% or two consecutive lost blocks,
+otherwise the previous judgement, forgotten after a minute or when the station is heard on another profile; HF's reads the mean SNR3k, with holds) and,
+* when a position was received, its Maidenhead locator with the bearing and distance from this station when its own position is known.
+
+What an Angel61 transmission carries is also published as APRS: the position becomes a compressed APRS position report (keeping the slot's resolution,
+with its course, speed and altitude), text to a callsign an APRS message, text to `CQ` a status, and an information field sent verbatim (content type 2, for objects, weather, telemetry or a message acknowledgement) is passed on as it was received.
+The packets are `SOURCE>APZA61[,repeater*]:...`, they go to the [APRS](../../feature/aprs/readme.md) feature, with a 30 second duplicate window,
+and the symbol is the one the station sent in its slot.
+
+A call to a talkgroup shows as `G4ABC > TG 9`. The **TG** field beside the Files setting is a group list, as a DMR radio's RX group list: talkgroups separated by commas (`9, 23`).
+A call to a talkgroup not in it is shown and logged but not played; calls to `CQ` and to callsigns are always played, and with the field empty every call is. Its Web API setting is `angel61Groups`.
+
+A file transfer is received into the directory of the Files setting, when one is set: the offer, the file and the answers are logged as events, the name is sanitised (no path separators, no leading dot),
+a file larger than the limit is refused before a block is stored, and nothing is opened or executed. The answer this station owes the transmitter - the blocks that did not arrive,
+or that the file is complete - is sent to the DSE Modulators of this instance through the `angel61` pipe, and the modulator transmits it to the file's sender, keying up for it by itself.
+A file sent to `CQ` or a talkgroup is received in the same way but never answered.
+
+With **Confirm** checked (Web API `angel61FileConfirm`), every offer waits for the operator: the offer's event says `AWAITING CONFIRMATION`,
+**Accept** and **Refuse** light up (their tooltips name the file, its size and its sender), and until one is pressed the blocks are held in memory only - no answer goes back,
+nothing is saved, and the sender, hearing nothing, offers again. Accept sends the answer that was held back (the missing blocks, or complete) and keeps the file;
+Refuse tells the sender it was refused by the operator. The Web API reports the offer waiting as `angel61FilePending` and takes the decision as the channel action `DSDDemodActions` `{"angel61File": "accept"}` (or `"reject"`).
+
+A transfer that does not finish is kept for a day in the `.angel61-partial` directory under the Files directory (one `.a61p` file each, at most 16),
+and a later offer of the same file - from the same station, with the same size and CRC-32 - takes what arrived, even with a new transfer id,
+another block size or after SDRangel has been restarted: the offer's event says `RESUMED:n`, and only the rest is asked for.
+
+IP datagrams received over the radio are counted on the IP tunnel tab (F). DSDDemod is the receive side; the DSE Modulator owns the host tunnel and displays its transmit and receive totals.
+
+The rate request records are also passed to any DSE Modulator in the instance, as `ANGEL61 source destination requested send profile` on the `angel61` pipe,
+which uses them for its `Auto` rate: it takes the record of its own destination callsign, and only when that station was heard addressing it
+(see the [DSE Modulator](../../channeltx/moddse/readme.md) 12e).
+
+<h4>A.15: Text messages / DTMF</h4>
+
+Shows received text messages and DTMF sequences. Text messages are formatted as: `protocol source > destination: text`: 
+
+* DMR text messages (UDT and IP: the ETSI service on UDP port 5016 and Motorola's TMS on port 4007, see A.6.5)
+* D-STAR 20 character slow data text
+* YSF text messages (data full rate transmissions)
+* NXDN short and long data calls (SDCALL/DCALL: plain text is shown, other user data as hexadecimal)
+* dPMR slow data messages sent during a call (plain text is shown, other data as hexadecimal)
+* P25 packet data (a TMS or UTF-16 message inside an IPv4/UDP datagram, confirmed or unconfirmed blocks)
+* M17 SMS messages (packet transmissions, shown once the whole packet has passed its CRC)
+* Angel61 text messages
+
+DTMF sequences are formatted as `DTMF 123#`, once a sequence has had no new key for 2 s:
+
+* Angel61's DTMF slots, whose tones are also played in the audio, 
+* keys of AMBE tone frames (DMR, D-STAR, YSF, NXDN, dPMR, P25 Phase 2), 
+* keys found in the decoded voice (P25 Phase 1, M17, or tones a transmitter coded as voice) by a detector with ITU-T Q.24's limits.
+
+A key of an Angel61 sequence whose slots were all lost shows as `?`. The last DTMF sequence is also the `dtmf` field of the channel report in the Web API. The last 32 are kept; the button on the right clears the field. They are also logged with the events in the status text log (A.6).
+
+<h3>Symbol constellation</h3>
+
+<h3>B.1: Symbol constellation</h3>
+
+While searching, this plots every 48 kHz discriminator sample against the preceding sample, using the DMR nominal outer level of 1944 Hz as its scale.
+This keeps the display active without a lock and normally shows discriminator noise or the transition paths of a signal.
+Once locked, it changes to the matched filter output at the symbol instants: the horizontal axis is the current symbol and the vertical axis the previous one, both in units of the nominal outer level of the detected protocol.
+The grid crosses mark the four nominal levels +3, +1, -1 and -3 of the 4FSK protocols; D-Star uses only the outer two. A well received 4FSK signal is 16 tight clusters on the grid crossings, and a D-Star signal is four clusters on the outer corners.
+D-Star is GMSK: its Gaussian pulse spreads into the symbols either side, so the filter output at a symbol depends on its neighbours as well as on the symbol (the full level when both neighbours are the same, about two thirds when one differs and a third when both do).
+The display takes that out for D-Star: each point is shown two symbols late, once the decisions on either side of it are made, with their part subtracted and the rest scaled to the full level.
+A point the decoder got wrong, or one next to such a point, is then shown out of place, so scattered points between the corners are errors or noise rather than the interference of the pulse shape. Nothing is shown for a D-Star symbol received without a carrier.
+While an Angel61 transmission has the channel, the display is its equalised constellation: the payload symbols (HF: the OFDM data cells) of the frames it confirms, I against Q at unit mean power: four clusters for QPSK, sixteen for 16-QAM.
+
+The controls B.8 to B.10 set the persistence of the display.
+
+<h4>B.2: Trace length</h4>
+
+This controls the length of the trace displayed on B.1. Units are milliseconds. Practical values are between 300 and 500 ms.
+
+<h4>B.3: Trace stroke</h4>
+
+This controls the stroke of the points displayer on B.1. The trace has limited persistence based on alpha blending. This is the 8 bit unsigned integer value of the trace alpha blending (from 0 to 255). This controls the intensity of the points.
+
+<h4>B.4: Trace decay</h4>
+
+This controls the persistence decay of the points displayed on B.1. The trace has limited persistence based on alpha blending. This controls the alpha value of the black screen printed at the end of each trace and thus the decay of the points intensity. The value is 255 minus he displayed value using 8 bit unsigned integers.
 
   - A value of 0 yields no persistence
   - A value of 255 yields infinite persistence
-  - Default value is 200s
 
-<h4>B.17: Maximum expected FM deviation</h4>
+<h3>C: Protocol tab</h3>
 
-This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviation at the discriminator output. The correct value depends on the maximum deviation imposed by the modulation scheme with some guard margin. In practice you should adjust this value to make the figure on the signal scope fill the entire screen as shown in the screenshots above. The typical deviations by mode for a unit gain (1.0 at B.18) are:
+<h4>C.1: Protocol</h4>
 
-  - DMR: &#177;5.4k
-  - dPMR: &#177;2.7k
-  - D-Star: &#177;3.5k
-  - YSF: &#177;7.0k
-  - NXDN: &#177;2.7k
+Selects the protocols searched for: `Auto` (the default) searches for all of them and locks to the first synchronisation found; a single protocol (DMR, D-STAR, YSF, NXDN48, NXDN96, dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB) limits the search to its patterns, which is useful on a busy channel or when the automatic detection is misled by a signal of another kind. Angel61 NB and WB are searched on the I/Q signal alongside the FM protocols in `Auto`, by one receiver per profile: the first to confirm a frame (its CRC-12) holds the channel until its transmission ends, releasing an FM lock, and the FM decoders pause meanwhile; only its voice is played. Selecting `Angel61 NB` or `Angel61 WB` gives the I/Q signal to that profile's receiver alone, with no FM search. `Angel61 HF-NB` and `Angel61 HF-WB` are Angel61's HF profiles (OFDM, 2.5 and 5.5 kHz wide): they are never searched in `Auto`, and when one is selected the I/Q signal goes to its receiver alone.
+Use a fixed gain on the receiving device for them: a hardware AGC steps its gain inside the OFDM symbols. Its status line shows the routing, the frame type, the block error rate, the mean SNR in 3 kHz and the rate request tiers, and its events are those of Angel61 above with the profile added (`ANGEL61 EVT:START PROFILE:HF-NB`, `EVT:END ... VOICE:8 PROFILE:HF-NB`). Text, APRS messages, positions and the rate request records (profile `HF-NB` or `HF-WB`) are received; file transfers and IP tunnelling (their data groups' message fields, 142 to 912 bytes a group) are received as in Angel61 NB and WB; voice is played through the V1 decoder (vocoscodec, a frame's packets decoded together at 24 kHz, lost frames concealed, the decoder's last 60 ms at the end), or shown as unavailable when the library or its models are missing.
 
-<h4>B.18: Gain after discriminator</h4>
+<h4>C.2: Protocol and synchronisation pattern</h4>
 
-This is the gain applied to the output of the discriminator before the decoder. Normally this would be set at unit gain 1.0 while the FM deviation is adjusted. However this can be used to extend the range of FM adjustment.
+Shows the protocol locked to and the last synchronisation pattern accepted, with a green background while locked:
 
-<h4>B.19: Activate AMBE hardware feature</h4>
+  - `No Sync`: searching
+  - `DMR BS data`, `DMR BS voice`: DMR base station data or voice sync, `DMR MS data`, `DMR MS voice` mobile station, `DMR TS1 ...`, `DMR TS2 ...` direct mode time slot 1 or 2
+  - `D-STAR header`, `D-STAR voice`
+  - `YSF`
+  - `NXDN FSW`, `NXDN preamble FSW`
+  - `dPMR FS1` (header), `dPMR FS2` (superframe)
+  - `P25`
+  - `P25 Phase 2` (the ISCH sync word)
+  - `Angel61 NB`, `Angel61 WB`, `Angel61 HF-NB`, `Angel61 HF-WB`: the profile of the Angel61 signal
 
-Connects to an [AMBE Feature](../../feature/ambe/readme.md) to process AMBE frames in hardware
+<h4>C.3: Coherent detection</h4>
 
-<h4>B.20: AMBE feature index for hardware decoding</h4>
+When on (the default) every burst of the 4FSK protocols is detected a second time from the IQ samples by a coherent sequence detector (a Viterbi search over the phase trajectory of the continuous phase 4FSK signal) once the discriminator path has found its timing and levels, which is worth about 2 dB of sensitivity and equalises echoes of up to two symbols (see DESIGN.md 4.10 for the figures). D-Star is not concerned. It works on the channel filtered IQ with the filter in its channel model, so it sees the same channel as the discriminator path. It only runs on bursts the discriminator path may have got wrong (judged from its own residual noise), so it costs nothing on a strong signal; on a signal at the edge of coverage it costs about a quarter of a fast processor core per DMR channel, several times the rest of the demodulator. Uncheck it on a small machine such as a Raspberry Pi that cannot afford that, or to compare.
 
-Select the AMBE feature index used to process AMBE frames in hardware. If no AMBE feature is present then the list is empty. The list is automatically updated when an AMBE feature is added or removed.
+<h4>C.4: Measurements</h4>
+
+`Err` `-12` `Hz` &nbsp; `SNR` `21` `dB` &nbsp; `BER` `0.0` `%`
+
+Measured on the signal locked to:
+
+  - `err`: the carrier frequency error in Hz, corrected automatically within a quarter of the channel bandwidth
+  - `snr`: the symbol signal to noise ratio at the slicer in dB
+  - `ber`: the raw bit error rate on the channel in percent, from the corrections the voice frames' own codes make, whichever vocoder plays them (the AMBE feature and Codec2 included): the Golay and Hamming codes of the AMBE and IMBE frames (DMR, D-STAR, YSF full rate, NXDN, dPMR, P25), counted by decoding each frame on its hard bits, re-encoding it and comparing; M17's convolutional code; YSF V/D type 2's triple repetition; Angel61's LDPC code. Checked against the harness's known channel errors for every protocol: within about 15% up to 5%, reading low above about 10% where the codes run out of correction (the voice is gone by then). Frames that do not decode are not in it; for Angel61 those are what the status line's `BLER` counts (A12.8). D-STAR and P25 Phase 1 need mbevocoder compiled in for the count; the AMBE+2 protocols do not
+
+
+<h4>C.5: CC - Color code</h4>
+
+The **CC** selector beside the stereo button filters audio by colour code: DMR (`0` to `15`), dPMR (`0` to `63`) and, by its RAN, NXDN (`0` to `63`). Select `Any` to hear every call, or select a value to hear audio only when the decoded code matches. A value above `15` silences DMR. This does not affect synchronization, decoding, the constellation or the status display.
+
+<h4>C.5: TG - Talk Group</h4>
+
+Angel61 talkgroups to play, comma separated (9, 23). A call to another talkgroup is shown but not played. Calls to CQ and to callsigns are always played. Empty: every call is played.
+
+<h4>C.6: P25 Phase 2 system</h4>
+
+The WACN, system ID and NAC of the P25 system, in hexadecimal separated by colons (`BEE00:001:293`), from which the Phase 2 scrambling sequence is derived. Without the right values the voice and the scrambled signalling of a Phase 2 channel cannot be decoded (the lock, the timeslots and the unscrambled signalling are still reported). Trunked systems broadcast their WACN and system ID on the control channel, and their NAC is that of the site; radio reference sites list all three.
+
+<h3>D: Contacts Reporting Tab</h3>
+
+<h4>D.1: Report contacts</h4>
+
+When checked, Angel61 contacts are reported to [angel61.sdrangel.org](http://angel61.sdrangel.org/contacts), where they can be viewed on a map. Please ensure your position (Under Preferences > My Position) is correct before enabling this option. Audio and text messages are not sent to the server, only the callsigns, the time and the position of the contact.
+
+<h4>D.2: RX callsign</h4>
+
+Callsign to include in contact reports as the receiver.
+
+<h3>E: File Transfer Tab</h3>
+
+<h4>E.1: Save to</h4>
+
+The directory to save received files to.
+
+<h4>E.2: Confirm</h4>
+
+Check to confirm every file transfer before saving it. It will be held in memory until accepted or refused.
+
+<h4>E.3: Max size</h4>
+
+Largest file to accept, in kilobytes. A larger offer is refused before a block is stored. 0: no limit.
+
+<h4>E.4: Accept</h4>
+
+Accept the file awaiting confirmation.
+
+<h4>E.5 Refuse</h4>
+
+Refuse the file awaiting confirmation.
+
+<h3>F: IP Tunnel</h3>
+
+Angel61 can carry IP between two stations. The DSD Demodulator has no settings for it: the tunnel belongs to a [DSE Modulator](../../channeltx/moddse/readme.md) in the same instance, which creates the host interface and holds its peer, address, routes and filter. Everything the demodulator receivers goes to that modulator. With no modulator, or with its Tunnel off, datagrams are counted but none will reache the host. If there is more than one DSD Demodulator, the modulator's Rx selector picks which one it listens to.
+
+<h4>F.1: Heard</h4>
+
+The IP datagrams heard, valid and fully reassembled: their total size in bytes and their number. This counts them from any station and whether or not a DSE Module processes them, so a rising figure does not mean they are reaching the host. It restarts from zero each time the channel starts.
+
+<h4>F.2: Tunnel state</h4>
+
+  - The state of its tunnel, as its own IP tunnel tab shows it (`Tunnel: off`, `Tunnel: sdrangel0 to G4ABC, MTU 576`, or an error).
+  - `Delivered`: the datagrams it passed to the host, as bytes and a count, from every demodulator it listens to. This is the figure to look at to see that the tunnel is working.
+  - `refused`: the datagrams it did not pass on, because they were not from its Peer, were not valid for the tunnel's MTU, or the host would not take them. Datagrams that arrive with the tunnel closed are not counted here.
+
+Delivered and refused reset when the modulator's Tunnel is turned on.

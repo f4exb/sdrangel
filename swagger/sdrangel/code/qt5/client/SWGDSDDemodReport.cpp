@@ -34,26 +34,58 @@ SWGDSDDemodReport::SWGDSDDemodReport() {
     m_audio_sample_rate_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
-    squelch = 0;
-    m_squelch_isSet = false;
-    pll_locked = 0;
-    m_pll_locked_isSet = false;
+    sync_locked = 0;
+    m_sync_locked_isSet = false;
     slot1_on = 0;
     m_slot1_on_isSet = false;
     slot2_on = 0;
     m_slot2_on_isSet = false;
+    protocol = nullptr;
+    m_protocol_isSet = false;
     sync_type = nullptr;
     m_sync_type_isSet = false;
-    in_level = 0;
-    m_in_level_isSet = false;
-    carier_position = 0;
-    m_carier_position_isSet = false;
-    zero_crossing_position = 0;
-    m_zero_crossing_position_isSet = false;
-    sync_rate = 0;
-    m_sync_rate_isSet = false;
+    polarity = 0;
+    m_polarity_isSet = false;
+    deviation_hz = 0.0f;
+    m_deviation_hz_isSet = false;
+    frequency_error_hz = 0.0f;
+    m_frequency_error_hz_isSet = false;
+    clock_error_ppm = 0.0f;
+    m_clock_error_ppm_isSet = false;
+    snr_db = 0.0f;
+    m_snr_db_isSet = false;
+    ber_estimate = 0.0f;
+    m_ber_estimate_isSet = false;
+    sync_count = 0;
+    m_sync_count_isSet = false;
     status_text = nullptr;
     m_status_text_isSet = false;
+    dtmf = nullptr;
+    m_dtmf_isSet = false;
+    angel61_file_pending = nullptr;
+    m_angel61_file_pending_isSet = false;
+    last_message = nullptr;
+    m_last_message_isSet = false;
+    last_message_source = nullptr;
+    m_last_message_source_isSet = false;
+    last_message_destination = nullptr;
+    m_last_message_destination_isSet = false;
+    last_message_time = nullptr;
+    m_last_message_time_isSet = false;
+    last_message_protocol = nullptr;
+    m_last_message_protocol_isSet = false;
+    last_message_sequence = 0;
+    m_last_message_sequence_isSet = false;
+    voice_frames = 0;
+    m_voice_frames_isSet = false;
+    voice_frames_erased = 0;
+    m_voice_frames_erased_isSet = false;
+    corrected_bits = 0L;
+    m_corrected_bits_isSet = false;
+    protected_bits = 0L;
+    m_protected_bits_isSet = false;
+    angel61_heard_callsigns = nullptr;
+    m_angel61_heard_callsigns_isSet = false;
 }
 
 SWGDSDDemodReport::~SWGDSDDemodReport() {
@@ -68,26 +100,58 @@ SWGDSDDemodReport::init() {
     m_audio_sample_rate_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
-    squelch = 0;
-    m_squelch_isSet = false;
-    pll_locked = 0;
-    m_pll_locked_isSet = false;
+    sync_locked = 0;
+    m_sync_locked_isSet = false;
     slot1_on = 0;
     m_slot1_on_isSet = false;
     slot2_on = 0;
     m_slot2_on_isSet = false;
+    protocol = new QString("");
+    m_protocol_isSet = false;
     sync_type = new QString("");
     m_sync_type_isSet = false;
-    in_level = 0;
-    m_in_level_isSet = false;
-    carier_position = 0;
-    m_carier_position_isSet = false;
-    zero_crossing_position = 0;
-    m_zero_crossing_position_isSet = false;
-    sync_rate = 0;
-    m_sync_rate_isSet = false;
+    polarity = 0;
+    m_polarity_isSet = false;
+    deviation_hz = 0.0f;
+    m_deviation_hz_isSet = false;
+    frequency_error_hz = 0.0f;
+    m_frequency_error_hz_isSet = false;
+    clock_error_ppm = 0.0f;
+    m_clock_error_ppm_isSet = false;
+    snr_db = 0.0f;
+    m_snr_db_isSet = false;
+    ber_estimate = 0.0f;
+    m_ber_estimate_isSet = false;
+    sync_count = 0;
+    m_sync_count_isSet = false;
     status_text = new QString("");
     m_status_text_isSet = false;
+    dtmf = new QString("");
+    m_dtmf_isSet = false;
+    angel61_file_pending = new QString("");
+    m_angel61_file_pending_isSet = false;
+    last_message = new QString("");
+    m_last_message_isSet = false;
+    last_message_source = new QString("");
+    m_last_message_source_isSet = false;
+    last_message_destination = new QString("");
+    m_last_message_destination_isSet = false;
+    last_message_time = new QString("");
+    m_last_message_time_isSet = false;
+    last_message_protocol = new QString("");
+    m_last_message_protocol_isSet = false;
+    last_message_sequence = 0;
+    m_last_message_sequence_isSet = false;
+    voice_frames = 0;
+    m_voice_frames_isSet = false;
+    voice_frames_erased = 0;
+    m_voice_frames_erased_isSet = false;
+    corrected_bits = 0L;
+    m_corrected_bits_isSet = false;
+    protected_bits = 0L;
+    m_protected_bits_isSet = false;
+    angel61_heard_callsigns = new QList<QString*>();
+    m_angel61_heard_callsigns_isSet = false;
 }
 
 void
@@ -98,7 +162,9 @@ SWGDSDDemodReport::cleanup() {
 
 
 
-
+    if(protocol != nullptr) {
+        delete protocol;
+    }
     if(sync_type != nullptr) { 
         delete sync_type;
     }
@@ -106,8 +172,39 @@ SWGDSDDemodReport::cleanup() {
 
 
 
+
+
+
     if(status_text != nullptr) { 
         delete status_text;
+    }
+    if(dtmf != nullptr) {
+        delete dtmf;
+    }
+    if(angel61_file_pending != nullptr) {
+        delete angel61_file_pending;
+    }
+    if(last_message != nullptr) {
+        delete last_message;
+    }
+    if(last_message_source != nullptr) {
+        delete last_message_source;
+    }
+    if(last_message_destination != nullptr) {
+        delete last_message_destination;
+    }
+    if(last_message_time != nullptr) {
+        delete last_message_time;
+    }
+    if(last_message_protocol != nullptr) {
+        delete last_message_protocol;
+    }
+    if(angel61_heard_callsigns != nullptr) {
+        auto arr = angel61_heard_callsigns;
+        for(auto o: *arr) {
+            delete o;
+        }
+        delete angel61_heard_callsigns;
     }
 }
 
@@ -128,25 +225,57 @@ SWGDSDDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&pll_locked, pJson["pllLocked"], "qint32", "");
+    ::SWGSDRangel::setValue(&sync_locked, pJson["syncLocked"], "qint32", "");
     
     ::SWGSDRangel::setValue(&slot1_on, pJson["slot1On"], "qint32", "");
     
     ::SWGSDRangel::setValue(&slot2_on, pJson["slot2On"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "QString", "QString");
+
     ::SWGSDRangel::setValue(&sync_type, pJson["syncType"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&in_level, pJson["inLevel"], "qint32", "");
+    ::SWGSDRangel::setValue(&polarity, pJson["polarity"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&carier_position, pJson["carierPosition"], "qint32", "");
+    ::SWGSDRangel::setValue(&deviation_hz, pJson["deviationHz"], "float", "");
     
-    ::SWGSDRangel::setValue(&zero_crossing_position, pJson["zeroCrossingPosition"], "qint32", "");
+    ::SWGSDRangel::setValue(&frequency_error_hz, pJson["frequencyErrorHz"], "float", "");
     
-    ::SWGSDRangel::setValue(&sync_rate, pJson["syncRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&clock_error_ppm, pJson["clockErrorPpm"], "float", "");
+
+    ::SWGSDRangel::setValue(&snr_db, pJson["snrDB"], "float", "");
+
+    ::SWGSDRangel::setValue(&ber_estimate, pJson["berEstimate"], "float", "");
+
+    ::SWGSDRangel::setValue(&sync_count, pJson["syncCount"], "qint32", "");
     
     ::SWGSDRangel::setValue(&status_text, pJson["statusText"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&dtmf, pJson["dtmf"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&angel61_file_pending, pJson["angel61FilePending"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message, pJson["lastMessage"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message_source, pJson["lastMessageSource"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message_destination, pJson["lastMessageDestination"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message_time, pJson["lastMessageTime"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message_protocol, pJson["lastMessageProtocol"], "QString", "QString");
+
+    ::SWGSDRangel::setValue(&last_message_sequence, pJson["lastMessageSequence"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&voice_frames, pJson["voiceFrames"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&voice_frames_erased, pJson["voiceFramesErased"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&corrected_bits, pJson["correctedBits"], "qint64", "");
+
+    ::SWGSDRangel::setValue(&protected_bits, pJson["protectedBits"], "qint64", "");
+
+    ::SWGSDRangel::setValue(&angel61_heard_callsigns, pJson["angel61HeardCallsigns"], "QList", "QString");
     
 }
 
@@ -173,11 +302,8 @@ SWGDSDDemodReport::asJsonObject() {
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
     }
-    if(m_squelch_isSet){
-        obj->insert("squelch", QJsonValue(squelch));
-    }
-    if(m_pll_locked_isSet){
-        obj->insert("pllLocked", QJsonValue(pll_locked));
+    if(m_sync_locked_isSet){
+        obj->insert("syncLocked", QJsonValue(sync_locked));
     }
     if(m_slot1_on_isSet){
         obj->insert("slot1On", QJsonValue(slot1_on));
@@ -185,23 +311,74 @@ SWGDSDDemodReport::asJsonObject() {
     if(m_slot2_on_isSet){
         obj->insert("slot2On", QJsonValue(slot2_on));
     }
+    if(protocol != nullptr && *protocol != QString("")){
+        toJsonValue(QString("protocol"), protocol, obj, QString("QString"));
+    }
     if(sync_type != nullptr && *sync_type != QString("")){
         toJsonValue(QString("syncType"), sync_type, obj, QString("QString"));
     }
-    if(m_in_level_isSet){
-        obj->insert("inLevel", QJsonValue(in_level));
+    if(m_polarity_isSet){
+        obj->insert("polarity", QJsonValue(polarity));
     }
-    if(m_carier_position_isSet){
-        obj->insert("carierPosition", QJsonValue(carier_position));
+    if(m_deviation_hz_isSet){
+        obj->insert("deviationHz", QJsonValue(deviation_hz));
     }
-    if(m_zero_crossing_position_isSet){
-        obj->insert("zeroCrossingPosition", QJsonValue(zero_crossing_position));
+    if(m_frequency_error_hz_isSet){
+        obj->insert("frequencyErrorHz", QJsonValue(frequency_error_hz));
     }
-    if(m_sync_rate_isSet){
-        obj->insert("syncRate", QJsonValue(sync_rate));
+    if(m_clock_error_ppm_isSet){
+        obj->insert("clockErrorPpm", QJsonValue(clock_error_ppm));
+    }
+    if(m_snr_db_isSet){
+        obj->insert("snrDB", QJsonValue(snr_db));
+    }
+    if(m_ber_estimate_isSet){
+        obj->insert("berEstimate", QJsonValue(ber_estimate));
+    }
+    if(m_sync_count_isSet){
+        obj->insert("syncCount", QJsonValue(sync_count));
     }
     if(status_text != nullptr && *status_text != QString("")){
         toJsonValue(QString("statusText"), status_text, obj, QString("QString"));
+    }
+    if(dtmf != nullptr && *dtmf != QString("")){
+        toJsonValue(QString("dtmf"), dtmf, obj, QString("QString"));
+    }
+    if(angel61_file_pending != nullptr && *angel61_file_pending != QString("")){
+        toJsonValue(QString("angel61FilePending"), angel61_file_pending, obj, QString("QString"));
+    }
+    if(last_message != nullptr && *last_message != QString("")){
+        toJsonValue(QString("lastMessage"), last_message, obj, QString("QString"));
+    }
+    if(last_message_source != nullptr && *last_message_source != QString("")){
+        toJsonValue(QString("lastMessageSource"), last_message_source, obj, QString("QString"));
+    }
+    if(last_message_destination != nullptr && *last_message_destination != QString("")){
+        toJsonValue(QString("lastMessageDestination"), last_message_destination, obj, QString("QString"));
+    }
+    if(last_message_time != nullptr && *last_message_time != QString("")){
+        toJsonValue(QString("lastMessageTime"), last_message_time, obj, QString("QString"));
+    }
+    if(last_message_protocol != nullptr && *last_message_protocol != QString("")){
+        toJsonValue(QString("lastMessageProtocol"), last_message_protocol, obj, QString("QString"));
+    }
+    if(m_last_message_sequence_isSet){
+        obj->insert("lastMessageSequence", QJsonValue(last_message_sequence));
+    }
+    if(m_voice_frames_isSet){
+        obj->insert("voiceFrames", QJsonValue(voice_frames));
+    }
+    if(m_voice_frames_erased_isSet){
+        obj->insert("voiceFramesErased", QJsonValue(voice_frames_erased));
+    }
+    if(m_corrected_bits_isSet){
+        obj->insert("correctedBits", QJsonValue(corrected_bits));
+    }
+    if(m_protected_bits_isSet){
+        obj->insert("protectedBits", QJsonValue(protected_bits));
+    }
+    if(angel61_heard_callsigns && angel61_heard_callsigns->size() > 0){
+        toJsonArray((QList<void*>*)angel61_heard_callsigns, obj, "angel61HeardCallsigns", "QString");
     }
 
     return obj;
@@ -238,23 +415,13 @@ SWGDSDDemodReport::setChannelSampleRate(qint32 channel_sample_rate) {
 }
 
 qint32
-SWGDSDDemodReport::getSquelch() {
-    return squelch;
+SWGDSDDemodReport::getSyncLocked() {
+    return sync_locked;
 }
 void
-SWGDSDDemodReport::setSquelch(qint32 squelch) {
-    this->squelch = squelch;
-    this->m_squelch_isSet = true;
-}
-
-qint32
-SWGDSDDemodReport::getPllLocked() {
-    return pll_locked;
-}
-void
-SWGDSDDemodReport::setPllLocked(qint32 pll_locked) {
-    this->pll_locked = pll_locked;
-    this->m_pll_locked_isSet = true;
+SWGDSDDemodReport::setSyncLocked(qint32 sync_locked) {
+    this->sync_locked = sync_locked;
+    this->m_sync_locked_isSet = true;
 }
 
 qint32
@@ -278,6 +445,16 @@ SWGDSDDemodReport::setSlot2On(qint32 slot2_on) {
 }
 
 QString*
+SWGDSDDemodReport::getProtocol() {
+    return protocol;
+}
+void
+SWGDSDDemodReport::setProtocol(QString* protocol) {
+    this->protocol = protocol;
+    this->m_protocol_isSet = true;
+}
+
+QString*
 SWGDSDDemodReport::getSyncType() {
     return sync_type;
 }
@@ -288,43 +465,73 @@ SWGDSDDemodReport::setSyncType(QString* sync_type) {
 }
 
 qint32
-SWGDSDDemodReport::getInLevel() {
-    return in_level;
+SWGDSDDemodReport::getPolarity() {
+    return polarity;
 }
 void
-SWGDSDDemodReport::setInLevel(qint32 in_level) {
-    this->in_level = in_level;
-    this->m_in_level_isSet = true;
+SWGDSDDemodReport::setPolarity(qint32 polarity) {
+    this->polarity = polarity;
+    this->m_polarity_isSet = true;
+}
+
+float
+SWGDSDDemodReport::getDeviationHz() {
+    return deviation_hz;
+}
+void
+SWGDSDDemodReport::setDeviationHz(float deviation_hz) {
+    this->deviation_hz = deviation_hz;
+    this->m_deviation_hz_isSet = true;
+}
+
+float
+SWGDSDDemodReport::getFrequencyErrorHz() {
+    return frequency_error_hz;
+}
+void
+SWGDSDDemodReport::setFrequencyErrorHz(float frequency_error_hz) {
+    this->frequency_error_hz = frequency_error_hz;
+    this->m_frequency_error_hz_isSet = true;
+}
+
+float
+SWGDSDDemodReport::getClockErrorPpm() {
+    return clock_error_ppm;
+}
+void
+SWGDSDDemodReport::setClockErrorPpm(float clock_error_ppm) {
+    this->clock_error_ppm = clock_error_ppm;
+    this->m_clock_error_ppm_isSet = true;
+}
+
+float
+SWGDSDDemodReport::getSnrDb() {
+    return snr_db;
+}
+void
+SWGDSDDemodReport::setSnrDb(float snr_db) {
+    this->snr_db = snr_db;
+    this->m_snr_db_isSet = true;
+}
+
+float
+SWGDSDDemodReport::getBerEstimate() {
+    return ber_estimate;
+}
+void
+SWGDSDDemodReport::setBerEstimate(float ber_estimate) {
+    this->ber_estimate = ber_estimate;
+    this->m_ber_estimate_isSet = true;
 }
 
 qint32
-SWGDSDDemodReport::getCarierPosition() {
-    return carier_position;
+SWGDSDDemodReport::getSyncCount() {
+    return sync_count;
 }
 void
-SWGDSDDemodReport::setCarierPosition(qint32 carier_position) {
-    this->carier_position = carier_position;
-    this->m_carier_position_isSet = true;
-}
-
-qint32
-SWGDSDDemodReport::getZeroCrossingPosition() {
-    return zero_crossing_position;
-}
-void
-SWGDSDDemodReport::setZeroCrossingPosition(qint32 zero_crossing_position) {
-    this->zero_crossing_position = zero_crossing_position;
-    this->m_zero_crossing_position_isSet = true;
-}
-
-qint32
-SWGDSDDemodReport::getSyncRate() {
-    return sync_rate;
-}
-void
-SWGDSDDemodReport::setSyncRate(qint32 sync_rate) {
-    this->sync_rate = sync_rate;
-    this->m_sync_rate_isSet = true;
+SWGDSDDemodReport::setSyncCount(qint32 sync_count) {
+    this->sync_count = sync_count;
+    this->m_sync_count_isSet = true;
 }
 
 QString*
@@ -335,6 +542,136 @@ void
 SWGDSDDemodReport::setStatusText(QString* status_text) {
     this->status_text = status_text;
     this->m_status_text_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getDtmf() {
+    return dtmf;
+}
+void
+SWGDSDDemodReport::setDtmf(QString* dtmf) {
+    this->dtmf = dtmf;
+    this->m_dtmf_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getAngel61FilePending() {
+    return angel61_file_pending;
+}
+void
+SWGDSDDemodReport::setAngel61FilePending(QString* angel61_file_pending) {
+    this->angel61_file_pending = angel61_file_pending;
+    this->m_angel61_file_pending_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getLastMessage() {
+    return last_message;
+}
+void
+SWGDSDDemodReport::setLastMessage(QString* last_message) {
+    this->last_message = last_message;
+    this->m_last_message_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getLastMessageSource() {
+    return last_message_source;
+}
+void
+SWGDSDDemodReport::setLastMessageSource(QString* last_message_source) {
+    this->last_message_source = last_message_source;
+    this->m_last_message_source_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getLastMessageDestination() {
+    return last_message_destination;
+}
+void
+SWGDSDDemodReport::setLastMessageDestination(QString* last_message_destination) {
+    this->last_message_destination = last_message_destination;
+    this->m_last_message_destination_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getLastMessageTime() {
+    return last_message_time;
+}
+void
+SWGDSDDemodReport::setLastMessageTime(QString* last_message_time) {
+    this->last_message_time = last_message_time;
+    this->m_last_message_time_isSet = true;
+}
+
+QString*
+SWGDSDDemodReport::getLastMessageProtocol() {
+    return last_message_protocol;
+}
+void
+SWGDSDDemodReport::setLastMessageProtocol(QString* last_message_protocol) {
+    this->last_message_protocol = last_message_protocol;
+    this->m_last_message_protocol_isSet = true;
+}
+
+qint32
+SWGDSDDemodReport::getLastMessageSequence() {
+    return last_message_sequence;
+}
+void
+SWGDSDDemodReport::setLastMessageSequence(qint32 last_message_sequence) {
+    this->last_message_sequence = last_message_sequence;
+    this->m_last_message_sequence_isSet = true;
+}
+
+qint32
+SWGDSDDemodReport::getVoiceFrames() {
+    return voice_frames;
+}
+void
+SWGDSDDemodReport::setVoiceFrames(qint32 voice_frames) {
+    this->voice_frames = voice_frames;
+    this->m_voice_frames_isSet = true;
+}
+
+qint32
+SWGDSDDemodReport::getVoiceFramesErased() {
+    return voice_frames_erased;
+}
+void
+SWGDSDDemodReport::setVoiceFramesErased(qint32 voice_frames_erased) {
+    this->voice_frames_erased = voice_frames_erased;
+    this->m_voice_frames_erased_isSet = true;
+}
+
+qint64
+SWGDSDDemodReport::getCorrectedBits() {
+    return corrected_bits;
+}
+void
+SWGDSDDemodReport::setCorrectedBits(qint64 corrected_bits) {
+    this->corrected_bits = corrected_bits;
+    this->m_corrected_bits_isSet = true;
+}
+
+qint64
+SWGDSDDemodReport::getProtectedBits() {
+    return protected_bits;
+}
+void
+SWGDSDDemodReport::setProtectedBits(qint64 protected_bits) {
+    this->protected_bits = protected_bits;
+    this->m_protected_bits_isSet = true;
+}
+
+QList<QString*>*
+SWGDSDDemodReport::getAngel61HeardCallsigns() {
+    return angel61_heard_callsigns;
+}
+void
+SWGDSDDemodReport::setAngel61HeardCallsigns(QList<QString*>* angel61_heard_callsigns) {
+    this->angel61_heard_callsigns = angel61_heard_callsigns;
+    this->m_angel61_heard_callsigns_isSet = true;
 }
 
 
@@ -351,10 +688,7 @@ SWGDSDDemodReport::isSet(){
         if(m_channel_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_squelch_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_pll_locked_isSet){
+        if(m_sync_locked_isSet){
             isObjectUpdated = true; break;
         }
         if(m_slot1_on_isSet){
@@ -363,26 +697,76 @@ SWGDSDDemodReport::isSet(){
         if(m_slot2_on_isSet){
             isObjectUpdated = true; break;
         }
+        if(protocol && *protocol != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(sync_type && *sync_type != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_in_level_isSet){
+        if(m_polarity_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_carier_position_isSet){
+        if(m_deviation_hz_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_zero_crossing_position_isSet){
+        if(m_frequency_error_hz_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_sync_rate_isSet){
+        if(m_clock_error_ppm_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_snr_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ber_estimate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sync_count_isSet){
             isObjectUpdated = true; break;
         }
         if(status_text && *status_text != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(dtmf && *dtmf != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(angel61_file_pending && *angel61_file_pending != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(last_message && *last_message != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(last_message_source && *last_message_source != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(last_message_destination && *last_message_destination != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(last_message_time && *last_message_time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(last_message_protocol && *last_message_protocol != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_last_message_sequence_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_voice_frames_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_voice_frames_erased_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_corrected_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_protected_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(angel61_heard_callsigns && (angel61_heard_callsigns->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);
     return isObjectUpdated;
 }
 }
-

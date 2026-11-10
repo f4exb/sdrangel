@@ -1,0 +1,2587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DSEModGUI</class>
+ <widget class="RollupContents" name="DSEModGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>612</width>
+    <height>760</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>390</width>
+    <height>760</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>DSE Modulator</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>605</width>
+     <height>380</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>385</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="deltaFreqPowLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="deltaFrequencyLabel">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Df</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>125</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Shift frequency from center in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deltaUnits">
+        <property name="text">
+         <string> Hz </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="freqPowSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="channelPower">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
+        <property name="text">
+         <string>-100.0 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="txLayout">
+      <item>
+       <widget class="ButtonSwitch" name="transmit">
+        <property name="toolTip">
+         <string>Start / stop transmission (PTT)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/txoff.png</normaloff>
+          <normalon>:/txon.png</normalon>:/txoff.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="volLabel">
+        <property name="text">
+         <string>Vol</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="volume">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input gain</string>
+        </property>
+        <property name="maximum">
+         <number>30</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="volumeText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input gain value</string>
+        </property>
+        <property name="text">
+         <string>1.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterVU" name="volumeMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Speech input level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="inputSelectLayout">
+      <item>
+       <widget class="QComboBox" name="mode">
+        <property name="toolTip">
+         <string>Digital voice protocol</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>D-STAR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>YSF</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>NXDN</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>NXDN96</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>dPMR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>P25</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>P25P2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>M17</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angel61 NB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angel61 WB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angel61 HF-NB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angel61 HF-WB</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="invert">
+        <property name="toolTip">
+         <string>Invert symbol polarity</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/sort.png</normaloff>:/sort.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="mic">
+        <property name="toolTip">
+         <string>Audio input (right click to select device)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="play">
+        <property name="toolTip">
+         <string>Record file play/pause</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/pause.png</normalon>
+          <disabledoff>:/play.png</disabledoff>
+          <disabledon>:/play.png</disabledon>:/play.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="morseKeyer">
+        <property name="toolTip">
+         <string>Morse keyer at tone frequency</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/morsekey.png</normaloff>:/morsekey.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="tone">
+        <property name="toolTip">
+         <string>Tone input</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="toneFrequency">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>250</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="toneFrequencyText">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tone frequency (kHz)</string>
+        </property>
+        <property name="text">
+         <string>1.00k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="sendPosition">
+        <property name="toolTip">
+         <string>Send this station's position (SDRangel's own, from the preferences or the GPS feature): D-STAR as D-PRS slow data, DMR as a GPS Info embedded LC, Angel61 in its position slot</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/gps.png</normaloff>:/gps.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="feedbackEnable">
+        <property name="toolTip">
+         <string>Left: hear local audio before encoding, or decoded Angel61, DMR and D-STAR gateway audio during relay - Right: select audio output device</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/sound_off.png</normaloff>
+          <normalon>:/sound_on.png</normalon>:/sound_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="feedbackVolume">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio feedback volume</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="feedbackVolumeText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio feedback volume</string>
+        </property>
+        <property name="text">
+         <string>0.50</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="vocoderLayout">
+      <item>
+       <widget class="QLabel" name="vocoderLabel">
+        <property name="text">
+         <string>Voc</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="vocoder">
+        <property name="toolTip">
+         <string>Speech encoder back end</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>mbevocoder</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>AMBE</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainLabel">
+        <property name="text">
+         <string>Gain</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="vocoderGain">
+        <property name="toolTip">
+         <string>Encoder input gain (dB)</string>
+        </property>
+        <property name="minimum">
+         <number>-90</number>
+        </property>
+        <property name="maximum">
+         <number>90</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="toneDetect">
+        <property name="toolTip">
+         <string>Tone detection (mbevocoder encoder): single tones, DTMF and call progress tones are sent as tone frames instead of voice</string>
+        </property>
+        <property name="text">
+         <string>TD</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="noiseSuppress">
+        <property name="toolTip">
+         <string>Noise suppression on the speech input (mbevocoder encoder)</string>
+        </property>
+        <property name="text">
+         <string>NS</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="vocoderStatus">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Transmission status</string>
+        </property>
+        <property name="text">
+         <string>Idle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="functionsWidget">
+      <property name="toolTip">
+       <string>The selected mode's parameters, and what this station sends: the Angel61 functions when that mode is selected, and the audio file, DTMF and CW keyer of any mode</string>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::TabPosition::North</enum>
+      </property>
+      <property name="currentIndex">
+       <number>6</number>
+      </property>
+      <widget class="QWidget" name="dstarPage">
+       <attribute name="title">
+        <string>D-STAR</string>
+       </attribute>
+       <layout class="QGridLayout" name="dstarLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="dstarMyLabel">
+          <property name="text">
+           <string>MY</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="dstarMyCall">
+          <property name="toolTip">
+           <string>My callsign (8 characters max)</string>
+          </property>
+          <property name="maxLength">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="dstarSuffixLabel">
+          <property name="text">
+           <string>/</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLineEdit" name="dstarMySuffix">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>My callsign suffix (4 characters max)</string>
+          </property>
+          <property name="maxLength">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="dstarUrLabel">
+          <property name="text">
+           <string>UR</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="dstarUrCall">
+          <property name="toolTip">
+           <string>Your callsign (destination)</string>
+          </property>
+          <property name="maxLength">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="dstarRpt1Label">
+          <property name="text">
+           <string>RPT1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="dstarRpt1">
+          <property name="toolTip">
+           <string>Repeater 1 callsign</string>
+          </property>
+          <property name="maxLength">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="dstarRpt2Label">
+          <property name="text">
+           <string>RPT2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLineEdit" name="dstarRpt2">
+          <property name="toolTip">
+           <string>Repeater 2 callsign</string>
+          </property>
+          <property name="maxLength">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="dstarTextLabel">
+          <property name="text">
+           <string>Text</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="3">
+         <widget class="QLineEdit" name="dstarText">
+          <property name="toolTip">
+           <string>Slow data text message (20 characters max)</string>
+          </property>
+          <property name="maxLength">
+           <number>20</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="4">
+         <spacer name="dstarSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="dmrPage">
+       <attribute name="title">
+        <string>DMR</string>
+       </attribute>
+       <layout class="QGridLayout" name="dmrLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="dmrColorCodeLabel">
+          <property name="text">
+           <string>CC</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="dmrColorCode">
+          <property name="toolTip">
+           <string>Colour code</string>
+          </property>
+          <property name="maximum">
+           <number>15</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="dmrSlotLabel">
+          <property name="text">
+           <string>Slot</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QComboBox" name="dmrSlot">
+          <property name="toolTip">
+           <string>Voice time slot</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Slot 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Slot 2</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="dmrSourceIdLabel">
+          <property name="text">
+           <string>Src</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="dmrSourceId">
+          <property name="toolTip">
+           <string>Source (own) DMR ID</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>16777215</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="dmrDestinationIdLabel">
+          <property name="text">
+           <string>Dst</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QSpinBox" name="dmrDestinationId">
+          <property name="toolTip">
+           <string>Destination talk group or DMR ID</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>16777215</number>
+          </property>
+          <property name="value">
+           <number>9</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="dmrCallTypeLabel">
+          <property name="text">
+           <string>Call</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="dmrCallType">
+          <property name="toolTip">
+           <string>Call type</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Group</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Private</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="dmrDirectLabel">
+          <property name="text">
+           <string>Type</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QComboBox" name="dmrDirect">
+          <property name="toolTip">
+           <string>BS: continuous base station transmission, both slots with CACH (repeater output). MS: single slot bursts with the MS sync and no CACH, carrier off between bursts (radio to radio direct mode, simplex hotspot)</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>BS (repeater)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>MS (direct)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <spacer name="dmrSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="ysfPage">
+       <attribute name="title">
+        <string>YSF</string>
+       </attribute>
+       <layout class="QGridLayout" name="ysfPageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="ysfCallsignLabel">
+          <property name="text">
+           <string>Call</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="ysfCallsign">
+          <property name="toolTip">
+           <string>Source callsign (10 characters max)</string>
+          </property>
+          <property name="maxLength">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="ysfDestinationLabel">
+          <property name="text">
+           <string>Dest</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLineEdit" name="ysfDestination">
+          <property name="toolTip">
+           <string>Destination callsign, ***** for all</string>
+          </property>
+          <property name="maxLength">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="ysfDownlinkLabel">
+          <property name="text">
+           <string>Down</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="ysfDownlink">
+          <property name="toolTip">
+           <string>Downlink (repeater) callsign</string>
+          </property>
+          <property name="maxLength">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="ysfUplinkLabel">
+          <property name="text">
+           <string>Up</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLineEdit" name="ysfUplink">
+          <property name="toolTip">
+           <string>Uplink (repeater) callsign</string>
+          </property>
+          <property name="maxLength">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="ysfModeLabel">
+          <property name="text">
+           <string>Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="ysfMode">
+          <property name="toolTip">
+           <string>Voice mode: V/D type 2 (DN, what radios send by default), V/D type 1, or voice full rate (VW, IMBE)</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>V/D 2 (DN)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>V/D 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Voice FR (VW)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <spacer name="ysfSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="nxdnPage">
+       <attribute name="title">
+        <string>NXDN</string>
+       </attribute>
+       <layout class="QGridLayout" name="nxdnPageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="nxdnRanLabel">
+          <property name="text">
+           <string>RAN</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="nxdnRan">
+          <property name="toolTip">
+           <string>Radio access number</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>63</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="nxdnCallTypeLabel">
+          <property name="text">
+           <string>Call</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QComboBox" name="nxdnCallType">
+          <property name="toolTip">
+           <string>Call type</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Group</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Individual</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="nxdnSourceIdLabel">
+          <property name="text">
+           <string>Src</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="nxdnSourceId">
+          <property name="toolTip">
+           <string>Source unit ID</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="nxdnDestinationIdLabel">
+          <property name="text">
+           <string>Dst</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QSpinBox" name="nxdnDestinationId">
+          <property name="toolTip">
+           <string>Destination group or unit ID</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <spacer name="nxdnSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="dpmrPage">
+       <attribute name="title">
+        <string>dPMR</string>
+       </attribute>
+       <layout class="QGridLayout" name="dpmrPageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="dpmrColorCodeLabel">
+          <property name="text">
+           <string>CC</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="dpmrColorCode">
+          <property name="toolTip">
+           <string>Colour code</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>63</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="dpmrOwnIdLabel">
+          <property name="text">
+           <string>Own</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="dpmrOwnId">
+          <property name="toolTip">
+           <string>Own ID (24 bit)</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>16777215</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="dpmrCalledIdLabel">
+          <property name="text">
+           <string>Called</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QSpinBox" name="dpmrCalledId">
+          <property name="toolTip">
+           <string>Called ID (24 bit), 16777215 for all call</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>16777215</number>
+          </property>
+          <property name="value">
+           <number>16777215</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <spacer name="dpmrSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="p25Page">
+       <attribute name="title">
+        <string>P25</string>
+       </attribute>
+       <layout class="QGridLayout" name="p25PageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="p25NacLabel">
+          <property name="text">
+           <string>NAC</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="p25Nac">
+          <property name="toolTip">
+           <string>Network access code (12 bit, shown in decimal)</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>4095</number>
+          </property>
+          <property name="value">
+           <number>659</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="p25TalkGroupLabel">
+          <property name="text">
+           <string>TG</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="p25TalkGroup">
+          <property name="toolTip">
+           <string>Talk group (16 bit)</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="p25SourceIdLabel">
+          <property name="text">
+           <string>Src</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QSpinBox" name="p25SourceId">
+          <property name="toolTip">
+           <string>Source ID (24 bit)</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>16777215</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <spacer name="p25Spacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="angel61Page">
+       <attribute name="title">
+        <string>Angel61</string>
+       </attribute>
+       <layout class="QGridLayout" name="angel61PageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="1" column="2">
+         <widget class="QLabel" name="angel61DestinationLabel">
+          <property name="text">
+           <string>Dst</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <widget class="QLineEdit" name="angel61Path">
+          <property name="toolTip">
+           <string>Path: up to two callsigns separated by a comma, empty for none. A repeater, or a talkgroup gateway (its callsign with its SSID, M7RCE-10) to make a call to the destination callsign a private call through the network</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="angel61Source">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Source callsign: up to 17 characters of A-Z, 0-9 and / and an SSID of 0 to 15 after a dash (G4ABC-7, EA8/G4ABC/P-7), which tells apart the stations of one operator</string>
+          </property>
+          <property name="maxLength">
+           <number>20</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="4">
+         <spacer name="angel61Spacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="angel61PathLabel">
+          <property name="text">
+           <string>Via</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="angel61RateLabel">
+          <property name="text">
+           <string>Rate</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QComboBox" name="angel61Destination">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Destination callsign, with its SSID if it has one (G4ABC-7), CQ for everyone, or TG n for talkgroup n (a group call, relayed by a talkgroup gateway). With a gateway in Via, a callsign is reached through the network. The list contains callsigns heard by the selected DSD Demodulator.</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="insertPolicy">
+           <enum>QComboBox::InsertPolicy::NoInsert</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="angel61SourceLabel">
+          <property name="text">
+           <string>Src</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="angel61Rate">
+          <property name="toolTip">
+           <string>Voice rate and constellation (the tier, ANGEL61.md 2.10): Auto follows the destination's rate request heard by a DSD Demodulator (tier 0 to CQ, a talkgroup, or until one is heard), or a tier forced, whatever is asked. V1 voice at the profile's rate; WB's tier 3 is Opus audio. A network call relayed goes at this tier or the call's, whichever is lower. Changed while transmitting (as Src, Dst and Via): the transmission ends and another starts with the change</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Auto</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3.2k QPSK</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>6k 16-QAM</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="angel61DemodLabel">
+          <property name="text">
+           <string>Rx</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QComboBox" name="angel61Demod">
+          <property name="toolTip">
+           <string>The DSD Demodulator the destination's rate request is taken from for the Auto rate: Any uses whichever of them hears the destination</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Any</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="4">
+         <widget class="QLabel" name="angel61Link">
+          <property name="toolTip">
+           <string>What a DSD Demodulator in this instance heard from the destination: its rate request (1 asks for the high rate) and the request this station will send it</string>
+          </property>
+          <property name="text">
+           <string>Link: none</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="m17Page">
+       <attribute name="title">
+        <string>M17</string>
+       </attribute>
+       <layout class="QGridLayout" name="m17PageLayout" columnstretch="0,1,0,1">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="m17SourceLabel">
+          <property name="text">
+           <string>Src</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="m17Source">
+          <property name="toolTip">
+           <string>Source callsign (up to 9 characters: A-Z, 0-9, - / .)</string>
+          </property>
+          <property name="maxLength">
+           <number>9</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="m17DestinationLabel">
+          <property name="text">
+           <string>Dst</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLineEdit" name="m17Destination">
+          <property name="toolTip">
+           <string>Destination callsign, empty or ALL for everyone</string>
+          </property>
+          <property name="maxLength">
+           <number>9</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="m17CANLabel">
+          <property name="text">
+           <string>CAN</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="m17CAN">
+          <property name="toolTip">
+           <string>Channel access number (0 to 15), the M17 equivalent of a colour code</string>
+          </property>
+          <property name="maximum">
+           <number>15</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="m17MessageLabel">
+          <property name="text">
+           <string>Msg</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <layout class="QHBoxLayout" name="m17MessageLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="m17Message">
+            <property name="toolTip">
+             <string>Text message: sent as an SMS packet transmission of its own when the input is None, or by the Send button</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="m17Send">
+            <property name="toolTip">
+             <string>Send the message now as a packet transmission (keys up and down by itself)</string>
+            </property>
+            <property name="text">
+             <string>Send</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <spacer name="m17Spacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="audioFileTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>:/play.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="audioFileNameLayout" stretch="0,0,1">
+          <item>
+           <widget class="QPushButton" name="showFileDialog">
+            <property name="minimumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Open a speech file: .wav (16 bit PCM, mono or stereo, any rate) or .raw (8 kHz 16 bit signed integer LE mono)</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="ButtonSwitch" name="playLoop">
+            <property name="toolTip">
+             <string>Play file in a loop</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="recordFileText">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="playControlLayout" stretch="1,0,0,0,0,0,0">
+          <item>
+           <widget class="QSlider" name="navTimeSlider">
+            <property name="toolTip">
+             <string>Record file time navigator</string>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="linePlay1">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="relTimeLabel">
+            <property name="text">
+             <string>Cur</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="relTimeText">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Record time from start</string>
+            </property>
+            <property name="text">
+             <string>00:00:00.000</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="linePlay2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="recordLengthLabel">
+            <property name="text">
+             <string>Total</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="recordLengthText">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Total record time</string>
+            </property>
+            <property name="text">
+             <string>00:00:00</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="audioFileSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="angel61MessageTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/sms.png</normaloff>:/sms.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>Text message</string>
+       </attribute>
+       <layout class="QGridLayout" name="angel61MessageTabLayout" columnstretch="1,0">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="angel61Message">
+          <property name="toolTip">
+           <string>Text message: sent in the data slots of a voice transmission, or as a data only transmission when the input is None</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="angel61Send">
+          <property name="toolTip">
+           <string>Send the message now: in the slots of the running transmission, or as a data transmission of its own (keys up and down by itself)</string>
+          </property>
+          <property name="text">
+           <string>Send</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <spacer name="angel61MessageSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="angel61APRSTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/world.png</normaloff>:/world.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>APRS</string>
+       </attribute>
+       <layout class="QGridLayout" name="angel61APRSTabLayout" columnstretch="0,0,1,0">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="angel61SymbolLabel">
+          <property name="text">
+           <string>Symbol</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QToolButton" name="angel61Symbol">
+          <property name="toolTip">
+           <string>APRS symbol sent in the station slot. Click to select it from the symbol tables</string>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <spacer name="angel61APRSSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="angel61APRSInfoLabel">
+          <property name="text">
+           <string>Info</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLineEdit" name="angel61APRSInfo">
+          <property name="toolTip">
+           <string>An APRS information field: everything after the colon of a TNC2 line, for what the position and text cannot say - an object, a weather report, a bulletin, a message acknowledgement. The receiver puts this station's callsign in front of it</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="angel61APRSSend">
+          <property name="toolTip">
+           <string>Send the information field now as a data transmission of its own (keys up and down by itself)</string>
+          </property>
+          <property name="text">
+           <string>Send</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <spacer name="angel61APRSBottomSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="angel61FileTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/save.png</normaloff>:/save.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>File transfer</string>
+       </attribute>
+       <layout class="QGridLayout" name="angel61FileTabLayout" columnstretch="1,0">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="angel61FileName">
+          <property name="toolTip">
+           <string>The file to offer (3.4). It is sent in data frames, and the blocks the receiving station misses are sent again in the rounds that follow.</string>
+          </property>
+          <property name="placeholderText">
+           <string>File to send</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="angel61FileButtons">
+          <item>
+           <widget class="QPushButton" name="angel61FileBrowse">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Choose the file to send</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="angel61FileSend">
+            <property name="toolTip">
+             <string>Offer the file now: the transmission is keyed up for it, and again for every round the receiving station asks for</string>
+            </property>
+            <property name="text">
+             <string>Send</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QLabel" name="angel61FileStatus">
+          <property name="toolTip">
+           <string>The file transfer: the blocks sent, those still to send and the rounds the receiving station has asked for</string>
+          </property>
+          <property name="text">
+           <string>File: idle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <spacer name="angel61FileSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="angel61TunnelTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/link.png</normaloff>:/link.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>IP tunnel</string>
+       </attribute>
+       <layout class="QGridLayout" name="angel61TunnelTabLayout">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="angel61Tunnel">
+          <property name="toolTip">
+           <string>Carry IP datagrams for the peer station (ANGEL61.md 3.5). The link carries 333 bytes/s at the low rate and 900 at the high one: an interactive session, not a network connection. Needs administrator or root to create the interface.</string>
+          </property>
+          <property name="text">
+           <string>Tunnel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="angel61TunnelPeer">
+          <property name="toolTip">
+           <string>The callsign at the other end. Datagrams are only sent to this station and only accepted from it.</string>
+          </property>
+          <property name="maxLength">
+           <number>20</number>
+          </property>
+          <property name="placeholderText">
+           <string>Peer</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="angel61TunnelAddress">
+          <property name="toolTip">
+           <string>This end's address on the tunnel, with its prefix length: 10.255.0.1/32</string>
+          </property>
+          <property name="placeholderText">
+           <string>10.255.0.1/32</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QSpinBox" name="angel61TunnelMTU">
+          <property name="toolTip">
+           <string>The largest datagram carried. 576 suits the low rate (29 fragments, 1.7 s); IPv6 needs 1280, which is 65 fragments and half of them lost at 1% block error rate.</string>
+          </property>
+          <property name="minimum">
+           <number>68</number>
+          </property>
+          <property name="maximum">
+           <number>1500</number>
+          </property>
+          <property name="singleStep">
+           <number>4</number>
+          </property>
+          <property name="value">
+           <number>576</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="angel61TunnelRoutesLabel">
+          <property name="text">
+           <string>Routes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLineEdit" name="angel61TunnelRoutes">
+          <property name="toolTip">
+           <string>The prefixes routed into the tunnel and advertised to the peer, comma separated: 192.168.20.0/24, 2001:db8::/64. Nothing outside them is sent.</string>
+          </property>
+          <property name="placeholderText">
+           <string>192.168.20.0/24</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLineEdit" name="angel61TunnelInterface">
+          <property name="toolTip">
+           <string>The name of the host interface to create</string>
+          </property>
+          <property name="placeholderText">
+           <string>sdrangel0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="angel61TunnelAllowLabel">
+          <property name="text">
+           <string>Allow</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="2">
+         <widget class="QLineEdit" name="angel61TunnelAllow">
+          <property name="toolTip">
+           <string>What may be sent, comma separated: a protocol (icmp, tcp, udp, gre, esp, ah, sctp or a number) with a port or a port range for TCP, UDP and SCTP, which either port of a datagram may be in - icmp, tcp:22, udp:53. Empty: everything. What it refuses is counted below.</string>
+          </property>
+          <property name="placeholderText">
+           <string>everything (icmp, tcp:22, ...)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLineEdit" name="angel61TunnelGroups">
+          <property name="toolTip">
+           <string>Multicast groups sent all the same, comma separated (224.0.0.251, ff02::fb); every other multicast and broadcast destination is refused</string>
+          </property>
+          <property name="placeholderText">
+           <string>no multicast</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <widget class="QLabel" name="angel61TunnelStatus">
+          <property name="toolTip">
+           <string>The tunnel: datagrams sent and received, and those the filter would not carry (broadcast, multicast, or outside what the peer routes)</string>
+          </property>
+          <property name="text">
+           <string>Tunnel: off</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="4">
+         <widget class="QLabel" name="angel61TunnelTraffic">
+          <property name="toolTip">
+           <string>IP payload bytes accepted from the host for transmission and from the radio for delivery to the host. The totals reset when Tunnel is enabled.</string>
+          </property>
+          <property name="text">
+           <string>IP traffic: TX 0 B   RX 0 B</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="4">
+         <spacer name="angel61TunnelSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="dtmfTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/keyboard.png</normaloff>:/keyboard.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>DTMF</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="dtmfTabLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="dtmfLayout">
+          <item>
+           <widget class="QLabel" name="dtmfLabel">
+            <property name="text">
+             <string>DTMF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="dtmf">
+            <property name="toolTip">
+             <string>DTMF digits (0-9, A-D, *, #) sent as tone frames by the Send button, 100 ms per digit with 100 ms gaps</string>
+            </property>
+            <property name="maxLength">
+             <number>32</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="dtmfSend">
+            <property name="toolTip">
+             <string>Send the DTMF digits. Starts a transmission for the duration of the sequence if not already transmitting</string>
+            </property>
+            <property name="text">
+             <string>Send</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="dtmfSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="cwKeyerTab">
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/morsekey.png</normaloff>:/morsekey.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>CW keyer</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="cwKeyerTabLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="cwKeyerLayout">
+          <item>
+           <widget class="CWKeyerGUI" name="cwKeyerGUI" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="cwKeyerSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="fileNameLayout"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="spectrumContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>450</y>
+     <width>351</width>
+     <height>284</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Channel Spectrum</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="spectrumSourceLayout">
+      <item>
+       <widget class="ButtonSwitch" name="spectrumAudio">
+        <property name="toolTip">
+         <string>Spectrum source: IQ (unchecked) or Audio (checked)</string>
+        </property>
+        <property name="text">
+         <string>AF</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="spectrumSourceSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>250</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterVU</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CWKeyerGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/cwkeyergui.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

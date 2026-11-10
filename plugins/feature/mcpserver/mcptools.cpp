@@ -2366,7 +2366,8 @@ void MCPTools::registerInstanceTools()
 
     add("get_packets",
         "Get recently decoded packets from packet-oriented demodulators (AIS, APRS/AX.25 packet, LoRa/ChirpChat, M17, Meshtastic, "
-        "MeshCore, Inmarsat, radiosonde, DJI DroneID). Each packet has the raw bytes (hex and printable text) and, where SDRangel can decode it, "
+        "MeshCore, Inmarsat, radiosonde, DJI DroneID) and from DSDDemod, which gives D-STAR D-PRS positions and Angel61's positions, text "
+        "(an APRS message to a callsign, a status to CQ) and APRS fields as APRS packets from SOURCE>APZA61. Each packet has the raw bytes (hex and printable text) and, where SDRangel can decode it, "
         "a decoded object: AIS message type, MMSI, position, course and speed; AX.25 from/to/via and data with APRS position and "
         "comment; RS41 radiosonde serial, position and height; DroneID drone serial, model, position, altitude and speed, and pilot "
         "and home positions. Packets are kept in a buffer of the last 1000; use sinceSequence "

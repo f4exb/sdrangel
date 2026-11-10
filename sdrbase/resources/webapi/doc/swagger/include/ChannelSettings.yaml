@@ -93,6 +93,8 @@ ChannelSettings:
     DroneIDDemodSettings:
       $ref: "/doc/swagger/include/DroneIDDemod.yaml#/DroneIDDemodSettings"
       description: "DroneID demod settings configuration for Channel."
+    DSEModSettings:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModSettings"
     EndOfTrainDemodSettings:
       $ref: "/doc/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodSettings"
       description: "End of train demod settings configuration for Channel."

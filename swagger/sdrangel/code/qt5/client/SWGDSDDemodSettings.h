@@ -50,32 +50,26 @@ public:
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
-    float getFmDeviation();
-    void setFmDeviation(float fm_deviation);
-
-    float getDemodGain();
-    void setDemodGain(float demod_gain);
-
     float getVolume();
     void setVolume(float volume);
 
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
+    qint32 getProtocol();
+    void setProtocol(qint32 protocol);
 
-    qint32 getSquelchGate();
-    void setSquelchGate(qint32 squelch_gate);
+    qint32 getP25p2Wacn();
+    void setP25p2Wacn(qint32 p25p2_wacn);
 
-    float getSquelch();
-    void setSquelch(float squelch);
+    qint32 getP25p2Sysid();
+    void setP25p2Sysid(qint32 p25p2_sysid);
+
+    qint32 getP25p2Nac();
+    void setP25p2Nac(qint32 p25p2_nac);
+
+    qint32 getCoherent();
+    void setCoherent(qint32 coherent);
 
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
-
-    qint32 getEnableCosineFiltering();
-    void setEnableCosineFiltering(qint32 enable_cosine_filtering);
-
-    qint32 getSyncOrConstellation();
-    void setSyncOrConstellation(qint32 sync_or_constellation);
 
     qint32 getSlot1On();
     void setSlot1On(qint32 slot1_on);
@@ -86,14 +80,32 @@ public:
     qint32 getTdmaStereo();
     void setTdmaStereo(qint32 tdma_stereo);
 
-    qint32 getPllLock();
-    void setPllLock(qint32 pll_lock);
+    qint32 getDmrColorCode();
+    void setDmrColorCode(qint32 dmr_color_code);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
     QString* getTitle();
     void setTitle(QString* title);
+
+    QString* getAngel61FileDirectory();
+    void setAngel61FileDirectory(QString* angel61_file_directory);
+    QString* getCodecModelDirectory();
+    void setCodecModelDirectory(QString* codec_model_directory);
+    QString* getAngel61Groups();
+    void setAngel61Groups(QString* angel61_groups);
+
+    qint32 getAngel61FileMaxKb();
+    void setAngel61FileMaxKb(qint32 angel61_file_max_kb);
+
+    qint32 getAngel61FileConfirm();
+    void setAngel61FileConfirm(qint32 angel61_file_confirm);
+
+    qint32 getContactReportEnabled() const { return m_contact_report.value("contactReportEnabled").toInt(); }
+    void setContactReportEnabled(qint32 value) { m_contact_report["contactReportEnabled"] = value; }
+    QString getContactReportCallsign() const { return m_contact_report.value("contactReportCallsign").toString(); }
+    void setContactReportCallsign(const QString& value) { m_contact_report["contactReportCallsign"] = value; }
 
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
@@ -144,38 +156,33 @@ public:
     virtual bool isSet() override;
 
 private:
+    QJsonObject m_contact_report;
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
 
-    float fm_deviation;
-    bool m_fm_deviation_isSet;
-
-    float demod_gain;
-    bool m_demod_gain_isSet;
-
     float volume;
     bool m_volume_isSet;
 
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
+    qint32 protocol;
+    bool m_protocol_isSet;
 
-    qint32 squelch_gate;
-    bool m_squelch_gate_isSet;
+    qint32 p25p2_wacn;
+    bool m_p25p2_wacn_isSet;
 
-    float squelch;
-    bool m_squelch_isSet;
+    qint32 p25p2_sysid;
+    bool m_p25p2_sysid_isSet;
+
+    qint32 p25p2_nac;
+    bool m_p25p2_nac_isSet;
+
+    qint32 coherent;
+    bool m_coherent_isSet;
 
     qint32 audio_mute;
     bool m_audio_mute_isSet;
-
-    qint32 enable_cosine_filtering;
-    bool m_enable_cosine_filtering_isSet;
-
-    qint32 sync_or_constellation;
-    bool m_sync_or_constellation_isSet;
 
     qint32 slot1_on;
     bool m_slot1_on_isSet;
@@ -186,14 +193,27 @@ private:
     qint32 tdma_stereo;
     bool m_tdma_stereo_isSet;
 
-    qint32 pll_lock;
-    bool m_pll_lock_isSet;
+    qint32 dmr_color_code;
+    bool m_dmr_color_code_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
 
     QString* title;
     bool m_title_isSet;
+
+    QString* angel61_file_directory;
+    bool m_angel61_file_directory_isSet;
+    QString* codec_model_directory;
+    bool m_codec_model_directory_isSet;
+    QString* angel61_groups;
+    bool m_angel61_groups_isSet;
+
+    qint32 angel61_file_max_kb;
+    bool m_angel61_file_max_kb_isSet;
+
+    qint32 angel61_file_confirm;
+    bool m_angel61_file_confirm_isSet;
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;

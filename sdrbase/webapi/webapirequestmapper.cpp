@@ -5014,6 +5014,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDroneIdDemodSettings()->init();
             channelSettings->getDroneIdDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DSEModSettings")
+        {
+            channelSettings->setDseModSettings(new SWGSDRangel::SWGDSEModSettings());
+            channelSettings->getDseModSettings()->init();
+            channelSettings->getDseModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "EndOfTrainDemodSettings")
         {
             channelSettings->setEndOfTrainDemodSettings(new SWGSDRangel::SWGEndOfTrainDemodSettings());
@@ -5346,6 +5352,16 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setDrmDemodActions(new SWGSDRangel::SWGDRMDemodActions());
             channelActions->getDrmDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "DSDDemodActions")
+        {
+            channelActions->setDsdDemodActions(new SWGSDRangel::SWGDSDDemodActions());
+            channelActions->getDsdDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "DSEModActions")
+        {
+            channelActions->setDseModActions(new SWGSDRangel::SWGDSEModActions());
+            channelActions->getDseModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "FileSinkActions")
         {
@@ -6230,6 +6246,8 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setWefaxDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
     channelActions.setDrmDemodActions(nullptr);
+    channelActions.setDsdDemodActions(nullptr);
+    channelActions.setDseModActions(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setFreqScannerActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);

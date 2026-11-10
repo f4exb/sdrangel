@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Status text log</string>
+   <string>Status and event log</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../sdrgui/resources/res.qrc">

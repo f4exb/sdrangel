@@ -675,10 +675,18 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     m_guiMessageQueue->push(MsgReportActivePower::create(results[i].m_power));
                 }
 
-                // Wait until power drops below threshold
+                // Wait until the channel becomes inactive. DSDDemod uses decoded
+                // voice activity so an idle carrier does not hold the scanner.
                 FreqScannerSettings::FrequencySettings *frequencySettings = m_settings.getFrequencySettings(m_activeFrequency);
                 Real threshold = m_settings.getThreshold(frequencySettings);
-                if (results[i].m_power < threshold) 
+                bool active = results[i].m_power >= threshold;
+                bool dsdDemodActive;
+
+                if (getDSDDemodActive(dsdDemodActive)) {
+                    active = dsdDemodActive;
+                }
+
+                if (!active)
                 {
                     m_timeoutTimer.setSingleShot(true);
                     m_timeoutTimer.start((int)(m_settings.m_retransmitTime * 1000.0));
@@ -698,13 +706,21 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     m_guiMessageQueue->push(MsgReportActivePower::create(results[i].m_power));
                 }
 
-                // Check if power has returned to being above threshold
+                // Check if the channel has become active again. DSDDemod uses
+                // decoded voice activity rather than carrier power.
                 FreqScannerSettings::FrequencySettings *frequencySettings = m_settings.getFrequencySettings(m_activeFrequency);
                 Real threshold = m_settings.getThreshold(frequencySettings);
-                
-                if (checkThresholds(m_settings.m_voiceSquelchType, results[i], threshold, m_settings.m_voiceSquelchThreshold))
+                bool active = checkThresholds(m_settings.m_voiceSquelchType, results[i], threshold, m_settings.m_voiceSquelchThreshold);
+                bool dsdDemodActive;
+                bool usingDSDDemodActivity = getDSDDemodActive(dsdDemodActive);
+
+                if (usingDSDDemodActivity) {
+                    active = dsdDemodActive;
+                }
+
+                if (active)
                 {
-                    if (m_settings.m_voiceSquelchType != FreqScannerSettings::VoiceSquelchType::None) {
+                    if (!usingDSDDemodActivity && (m_settings.m_voiceSquelchType != FreqScannerSettings::VoiceSquelchType::None)) {
                         qDebug("FreqScanner::processScanResults: WAIT_FOR_RETRANSMISSION restart: frequency: %lld, voice score: %f", m_activeFrequency, results[i].m_voiceActivityLevel);
                     }
                     m_timeoutTimer.stop();
@@ -869,6 +885,44 @@ void FreqScanner::unmuteAll()
         }
     }
     m_autoMutedChannels.clear();
+}
+
+bool FreqScanner::getDSDDemodActive(bool& active) const
+{
+    active = false;
+
+    const std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+
+    if (m_scanDeviceSetIndex >= deviceSets.size()) {
+        return false;
+    }
+
+    DeviceSet *deviceSet = deviceSets[m_scanDeviceSetIndex];
+
+    if (!deviceSet || (m_scanChannelIndex >= (unsigned int) deviceSet->getNumberOfChannels())) {
+        return false;
+    }
+
+    ChannelAPI *channel = deviceSet->getChannelAt(m_scanChannelIndex);
+
+    if (!channel || (channel->getIdentifier() != "DSDDemod")) {
+        return false;
+    }
+
+    SWGSDRangel::SWGChannelReport channelReport;
+
+    if (!ChannelWebAPIUtils::getChannelReport(m_scanDeviceSetIndex, m_scanChannelIndex, channelReport)) {
+        return false;
+    }
+
+    SWGSDRangel::SWGDSDDemodReport *dsdDemodReport = channelReport.getDsdDemodReport();
+
+    if (!dsdDemodReport) {
+        return false;
+    }
+
+    active = (dsdDemodReport->getSlot1On() != 0) || (dsdDemodReport->getSlot2On() != 0);
+    return true;
 }
 
 bool FreqScanner::checkThresholds(

@@ -1,5 +1,63 @@
 project(dsddemod)
 
+# Demodulator core and protocol decoders: no Qt, shared with the test harness
+set(dsddemod_CORE_SOURCES
+    dsdfrontend.cpp
+    dsdsyncsearcher.cpp
+    dsdsymbolclock.cpp
+    dsdslicer.cpp
+    dsdprotocoldmr.cpp
+    dsdprotocoldstar.cpp
+    dsdprotocolysf.cpp
+    dsdprotocolnxdn.cpp
+    dsdprotocoldpmr.cpp
+    dsdprotocolp25.cpp
+    dsdp25trunking.cpp
+    dsdprotocolp25p2.cpp
+    dsdprotocolm17.cpp
+    dsddemodulator.cpp
+    dsdcoherent.cpp
+    dsdangel61hf.cpp
+    dsdangel61gateway.cpp
+    dsdangel61session.cpp
+    dsdangel61vhf.cpp
+    dsdangel61receiver.cpp
+    dsdpackettext.cpp
+    dsdvocodermbelib.cpp
+    dsdvocoderopus.cpp
+    dsdvocodervocos.cpp
+    dsdvocodercodec2.cpp
+)
+
+set(dsddemod_CORE_HEADERS
+    dsdfrontend.h
+    dsdsyncsearcher.h
+    dsdsymbolclock.h
+    dsdslicer.h
+    dsdprotocol.h
+    dsdprotocoldmr.h
+    dsdprotocoldstar.h
+    dsdprotocolysf.h
+    dsdprotocolnxdn.h
+    dsdprotocoldpmr.h
+    dsdprotocolp25.h
+    dsdp25trunking.h
+    dsdprotocolp25p2.h
+    dsdprotocolm17.h
+    dsddemodulator.h
+    dsdcoherent.h
+    dsdangel61hf.h
+    dsdangel61gateway.h
+    dsdangel61session.h
+    dsdangel61vhf.h
+    dsdangel61receiver.h
+    dsdpackettext.h
+    dsdvocodermbelib.h
+    dsdvocoderopus.h
+    dsdvocodervocos.h
+    dsdvocodercodec2.h
+)
+
 set(dsddemod_SOURCES
     dsddemod.cpp
     dsddemodplugin.cpp
@@ -8,7 +66,7 @@ set(dsddemod_SOURCES
     dsddemodsink.cpp
     dsddemodbaseband.cpp
     dsddemodwebapiadapter.cpp
-    dsddecoder.cpp
+    ${dsddemod_CORE_SOURCES}
 )
 
 set(dsddemod_HEADERS
@@ -19,14 +77,23 @@ set(dsddemod_HEADERS
     dsddemodsink.h
     dsddemodbaseband.h
     dsddemodwebapiadapter.h
-    dsddecoder.h
+    ${dsddemod_CORE_HEADERS}
 )
 
 include_directories(
+    ${CODEC2_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBDSDCC_INCLUDE_DIR}
     ${LIBMBE_INCLUDE_DIR}
 )
+
+# The coherent detector's search is dot products of float arrays: let the compiler vectorise
+# the reductions (nothing in the file relies on NaN or infinity semantics)
+if(MSVC)
+    set_source_files_properties(dsdcoherent.cpp PROPERTIES COMPILE_OPTIONS "/fp:fast")
+else()
+    set_source_files_properties(dsdcoherent.cpp PROPERTIES COMPILE_OPTIONS "-ffast-math")
+endif()
 
 if(NOT SERVER_MODE)
     set(dsddemod_SOURCES
@@ -73,9 +140,23 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-    ${LIBDSDCC_LIBRARIES}
-    ${LIBMBE_LIBRARIES}
+    ${CODEC2_LIBRARIES}
 )
+
+if(CODEC2_EXTERNAL)
+    add_dependencies(${TARGET_NAME} codec2)
+endif()
+
+if(MBEVOCODER_FOUND)
+    if(MBEVOCODER_INCLUDE_DIRS)
+        target_include_directories(${TARGET_NAME} BEFORE PRIVATE ${MBEVOCODER_INCLUDE_DIRS})
+    endif()
+    target_compile_definitions(${TARGET_NAME} PRIVATE DSDDEMOD_HAS_MBELIB MBE_STATIC)
+    target_link_libraries(${TARGET_NAME} PRIVATE ${MBEVOCODER_LIBRARY})
+    if(MBEVOCODER_EXTERNAL)
+        add_dependencies(${TARGET_NAME} mbevocoder)
+    endif()
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 

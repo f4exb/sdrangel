@@ -94,22 +94,26 @@ private:
     ScopeVisXY* m_scopeVisXY;
 
 	DSDDemod* m_dsdDemod;
-	bool m_enableCosineFiltering;
-	bool m_syncOrConstellation;
 	bool m_slot1On;
     bool m_slot2On;
     bool m_tdmaStereo;
     bool m_audioMute;
-	bool m_squelchOpen;
+	bool m_locked;              //!< Last lock state shown on the audio mute button
+    int m_scopeSampleRate;     //!< Points per second currently sent to the constellation
     int  m_audioSampleRate;
 	uint32_t m_tickCount;
 
-	float m_myLatitude;
-	float m_myLongitude;
+	float m_myLatitude = 0.0f;
+	float m_myLongitude = 0.0f;
+	bool m_myPositionSent = false;
 
 	MessageQueue m_inputMessageQueue;
 
 	DSDStatusTextDialog m_dsdStatusTextDialog;
+    QString m_lastLoggedStatus;
+    bool m_statusShown = false;     //!< The status fields show a running channel's report
+    quint64 m_lastLoggedEventSequence;
+    quint64 m_lastMessageSequence;
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~DSDDemodGUI();
@@ -117,10 +121,13 @@ private:
 	void blockApplySettings(bool block);
 	void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
+    void displayP25P2System();
+    void updateScopeTraceLength();
     void updateAMBEFeaturesList();
 	void updateMyPosition();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAngel61TunnelState();
     void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
@@ -129,28 +136,31 @@ private:
 private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
-    void on_demodGain_valueChanged(int value);
     void on_volume_valueChanged(int value);
-    void on_baudRate_currentIndexChanged(int index);
-    void on_enableCosineFiltering_toggled(bool enable);
-    void on_syncOrConstellation_toggled(bool checked);
+    void on_protocol_currentIndexChanged(int index);
+    void on_p25p2System_editingFinished();
+    void on_coherent_toggled(bool checked);
 	void on_traceLength_valueChanged(int value);
     void on_traceStroke_valueChanged(int value);
     void on_traceDecay_valueChanged(int value);
     void on_slot1On_toggled(bool checked);
     void on_slot2On_toggled(bool checked);
     void on_tdmaStereoSplit_toggled(bool checked);
-    void on_fmDeviation_valueChanged(int value);
-    void on_squelchGate_valueChanged(int value);
-    void on_squelch_valueChanged(int value);
+    void on_dmrColorCode_currentIndexChanged(int index);
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
-    void on_symbolPLLLock_toggled(bool checked);
-    void on_ambeSupport_clicked(bool checked);
-    void on_ambeFeatures_currentIndexChanged(int index);
+    void on_vocoder_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();
+    void on_clearTextMessages_clicked();
+    void on_angel61FileDirectory_editingFinished();
+    void on_angel61FileDirectoryBrowse_clicked();
+    void on_angel61FileMaxKB_valueChanged(int value);
+    void on_angel61FileConfirm_toggled(bool checked);
+    void on_angel61FileAccept_clicked();
+    void on_angel61FileReject_clicked();
+    void on_angel61Groups_editingFinished();
     void handleInputMessages();
     void audioSelect(const QPoint& p);
     void tick();

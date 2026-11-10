@@ -143,6 +143,19 @@ elseif(WIN32 OR MINGW)
   # unfortunately some libraries are dependencies of dll so we copy by hand
   # TODO check if we can use fixup_bundle() and have libraries on root path
 
+  # Wintun is loaded dynamically, so BundleUtilities cannot discover it as a
+  # dependency. Install the target-architecture DLL and its license explicitly.
+  get_property(SDRANGEL_WINTUN_DLL GLOBAL PROPERTY SDRANGEL_WINTUN_DLL)
+  if(SDRANGEL_WINTUN_DLL)
+    install(FILES "${SDRANGEL_WINTUN_DLL}"
+      DESTINATION "${INSTALL_BIN_DIR}"
+      COMPONENT Runtime)
+    install(FILES "${CMAKE_SOURCE_DIR}/external/windows/wintun/LICENSE.txt"
+      DESTINATION "${INSTALL_DOC_DIR}"
+      RENAME Wintun-LICENSE.txt
+      COMPONENT Runtime)
+  endif()
+
   # demoddatv.dll
   file(GLOB FFMPEG_DLLS "${FFMPEG_LIBRARIES}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(ffmpeg_dll ${FFMPEG_DLLS})

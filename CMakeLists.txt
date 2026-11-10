@@ -196,6 +196,7 @@ option(ENABLE_CHANNELTX_LOCALSOURCE "Enable channeltx localsource plugin" ON)
 option(ENABLE_CHANNELTX_MODDATV "Enable channeltx moddatv plugin" ON)
 option(ENABLE_CHANNELTX_MODAM "Enable channeltx modam plugin" ON)
 option(ENABLE_CHANNELTX_MODFREEDV "Enable channeltx modfreedv plugin" ON)
+option(ENABLE_CHANNELTX_MODDSE "Enable channeltx moddse plugin" ON)
 option(ENABLE_CHANNELTX_MODPACKET "Enable channeltx modpacket plugin" ON)
 option(ENABLE_CHANNELTX_MODSSB "Enable channeltx modssb plugin" ON)
 option(ENABLE_CHANNELTX_UDPSOURCE "Enable channeltx udpsource plugin" ON)
@@ -847,6 +848,7 @@ if(ENABLE_QT6)
     find_package(Qt6
                    COMPONENTS
                      Core
+                     Network
                      Widgets
                      WebSockets
                      Multimedia
@@ -859,6 +861,7 @@ else()
     find_package(Qt5 5.15
                    REQUIRED COMPONENTS
                      Core
+                     Network
                      Widgets
                      WebSockets
                      Multimedia
@@ -1018,9 +1021,10 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(FAAD) # For DAB
     find_package(Codec2)
     find_package(CM256cc)
-    find_package(LibMbe)
     find_package(SerialDV)
-    find_package(LibDSDcc)
+    find_package(LibMBEVocoder)
+    find_package(LibVocosCodec)
+    find_package(LibDSDcc) # only the DSE modulator and DSD demodulator test harnesses use it, as a reference decoder
     find_package(Sgp4)
     find_package(CSPICE)
     find_package(AptDec)
@@ -1304,7 +1308,10 @@ if (BUILD_GUI)
   if(WIN32)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
                             WIN32_EXECUTABLE ${HIDE_CONSOLE})
+    if (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD)                            
+    add_dependencies(${CMAKE_PROJECT_NAME} sdrangel-tunnel-helper)
   endif()
+endif()
 endif()
 
 ############ build sdrangel server ################
@@ -1323,6 +1330,10 @@ if (BUILD_SERVER)
         sdrsrv
         logging
     )
+
+    if(WIN32 AND (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD))
+      add_dependencies(sdrangelsrv sdrangel-tunnel-helper)
+    endif()
 
     if(HAVE_LIBUNWIND)
       target_link_libraries(sdrangelsrv ${LIBUNWIND_LIBRARIES})
