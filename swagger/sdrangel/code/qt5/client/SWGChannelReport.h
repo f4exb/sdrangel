@@ -27,7 +27,6 @@
 #include "SWGAISDemodReport.h"
 #include "SWGAISModReport.h"
 #include "SWGAMDemodReport.h"
-#include "SWGWefaxDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVDemodReport.h"
 #include "SWGATVModReport.h"
@@ -38,13 +37,12 @@
 #include "SWGChirpChatModReport.h"
 #include "SWGDABDemodReport.h"
 #include "SWGDATVDemodReport.h"
-#include "SWGDVBDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
 #include "SWGDRMDemodReport.h"
 #include "SWGDSCDemodReport.h"
-#include "SWGSELCALDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGDVBDemodReport.h"
 #include "SWGDroneIDDemodReport.h"
 #include "SWGEndOfTrainDemodReport.h"
 #include "SWGFT8DemodReport.h"
@@ -55,8 +53,8 @@
 #include "SWGFreqScannerReport.h"
 #include "SWGFreqTrackerReport.h"
 #include "SWGHeatMapReport.h"
-#include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGIEEE_802_15_4_DemodReport.h"
+#include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGILSDemodReport.h"
 #include "SWGInmarsatDemodReport.h"
 #include "SWGM17DemodReport.h"
@@ -69,17 +67,18 @@
 #include "SWGNFMModReport.h"
 #include "SWGNavtexDemodReport.h"
 #include "SWGNoiseFigureReport.h"
+#include "SWGPSK31DemodReport.h"
 #include "SWGPSK31ModReport.h"
 #include "SWGPacketDemodReport.h"
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
 #include "SWGRTTYDemodReport.h"
-#include "SWGPSK31DemodReport.h"
 #include "SWGRTTYModReport.h"
 #include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadiosondeDemodReport.h"
 #include "SWGRemoteSourceReport.h"
+#include "SWGSELCALDemodReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
 #include "SWGSigMFFileSinkReport.h"
@@ -89,6 +88,7 @@
 #include "SWGWDSPRxReport.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMModReport.h"
+#include "SWGWefaxDemodReport.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -176,9 +176,7 @@ public:
     void setDoa2Report(SWGDOA2Report* doa2_report);
 
     SWGDSCDemodReport* getDscDemodReport();
-    SWGSELCALDemodReport* getSelcalDemodReport();
     void setDscDemodReport(SWGDSCDemodReport* dsc_demod_report);
-    void setSelcalDemodReport(SWGSELCALDemodReport* selcal_demod_report);
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
@@ -189,11 +187,11 @@ public:
     SWGEndOfTrainDemodReport* getEndOfTrainDemodReport();
     void setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report);
 
-    SWGIEEE_802_15_4_ModReport* getIeee802154ModReport();
-    void setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report);
-
     SWGIEEE_802_15_4_DemodReport* getIeee802154DemodReport();
     void setIeee802154DemodReport(SWGIEEE_802_15_4_DemodReport* ieee_802_15_4_demod_report);
+
+    SWGIEEE_802_15_4_ModReport* getIeee802154ModReport();
+    void setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report);
 
     SWGFileSinkReport* getFileSinkReport();
     void setFileSinkReport(SWGFileSinkReport* file_sink_report);
@@ -273,9 +271,6 @@ public:
     SWGRTTYDemodReport* getRttyDemodReport();
     void setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report);
 
-    SWGPSK31DemodReport* getPSK31DemodReport();
-    void setPSK31DemodReport(SWGPSK31DemodReport* psk31_demod_report);
-
     SWGRTTYModReport* getRttyModReport();
     void setRttyModReport(SWGRTTYModReport* rtty_mod_report);
 
@@ -290,6 +285,9 @@ public:
 
     SWGPSK31ModReport* getPsk31ModReport();
     void setPsk31ModReport(SWGPSK31ModReport* psk31_mod_report);
+
+    SWGPSK31DemodReport* getPsk31DemodReport();
+    void setPsk31DemodReport(SWGPSK31DemodReport* psk31_demod_report);
 
     SWGSigMFFileSinkReport* getSigMfFileSinkReport();
     void setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report);
@@ -314,6 +312,9 @@ public:
 
     SWGWFMModReport* getWfmModReport();
     void setWfmModReport(SWGWFMModReport* wfm_mod_report);
+
+    SWGSELCALDemodReport* getSelcalDemodReport();
+    void setSelcalDemodReport(SWGSELCALDemodReport* selcal_demod_report);
 
 
     virtual bool isSet() override;
@@ -386,9 +387,7 @@ private:
     bool m_doa2_report_isSet;
 
     SWGDSCDemodReport* dsc_demod_report;
-    SWGSELCALDemodReport* selcal_demod_report;
     bool m_dsc_demod_report_isSet;
-    bool m_selcal_demod_report_isSet;
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
@@ -399,11 +398,11 @@ private:
     SWGEndOfTrainDemodReport* end_of_train_demod_report;
     bool m_end_of_train_demod_report_isSet;
 
-    SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report;
-    bool m_ieee_802_15_4_mod_report_isSet;
-
     SWGIEEE_802_15_4_DemodReport* ieee_802_15_4_demod_report;
     bool m_ieee_802_15_4_demod_report_isSet;
+
+    SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report;
+    bool m_ieee_802_15_4_mod_report_isSet;
 
     SWGFileSinkReport* file_sink_report;
     bool m_file_sink_report_isSet;
@@ -483,9 +482,6 @@ private:
     SWGRTTYDemodReport* rtty_demod_report;
     bool m_rtty_demod_report_isSet;
 
-    SWGPSK31DemodReport* psk31_demod_report;
-    bool m_psk31_demod_report_isSet;
-
     SWGRTTYModReport* rtty_mod_report;
     bool m_rtty_mod_report_isSet;
 
@@ -500,6 +496,9 @@ private:
 
     SWGPSK31ModReport* psk31_mod_report;
     bool m_psk31_mod_report_isSet;
+
+    SWGPSK31DemodReport* psk31_demod_report;
+    bool m_psk31_demod_report_isSet;
 
     SWGSigMFFileSinkReport* sig_mf_file_sink_report;
     bool m_sig_mf_file_sink_report_isSet;
@@ -524,6 +523,9 @@ private:
 
     SWGWFMModReport* wfm_mod_report;
     bool m_wfm_mod_report_isSet;
+
+    SWGSELCALDemodReport* selcal_demod_report;
+    bool m_selcal_demod_report_isSet;
 
 };
 

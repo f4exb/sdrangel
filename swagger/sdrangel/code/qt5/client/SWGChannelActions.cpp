@@ -128,7 +128,7 @@ SWGChannelActions::cleanup() {
     if(apt_demod_actions != nullptr) { 
         delete apt_demod_actions;
     }
-    if(wefax_demod_actions != nullptr) {
+    if(wefax_demod_actions != nullptr) { 
         delete wefax_demod_actions;
     }
     if(dvb_demod_actions != nullptr) { 

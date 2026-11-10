@@ -696,6 +696,148 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs.ACARSDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "The rate the demodulator runs at, which depends on the protocol and, for Aero, on the rate tuned"
+    },
+    "aeroEVM" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Error vector magnitude of the Aero carrier, as a fraction. Only meaningful in Aero mode, which needs a continuous carrier to average over"
+    },
+    "aeroSignalUnitRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Fraction of Aero signal units whose CRC passed, from 0 to 1. Only meaningful in Aero mode"
+    }
+  },
+  "description" : "ACARSDemod"
+};
+            defs.ACARSDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "mode" : {
+      "type" : "integer",
+      "description" : "Which protocol to demodulate: 0 ACARS, 1 VDL Mode 2, 2 HFDL, 3 Inmarsat Classic Aero, 4 Iridium"
+    },
+    "aeroChannel" : {
+      "type" : "integer",
+      "description" : "Which Aero rate and channel is tuned. 0 600 bps P, 1 1200 bps P, 2 10500 bps P, 3 600 bps R, 4 1200 bps R, 5 600 bps T, 6 1200 bps T. Only used when mode is 3"
+    },
+    "iridiumBandwidth" : {
+      "type" : "integer",
+      "description" : "How much of the band the Iridium scanner covers: 0 1 MHz, 1 2 MHz, 2 4 MHz, 3 8 MHz. The device has to be able to supply the width chosen. Only used when mode is 4"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "correlationThreshold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Pre-key detection threshold, as depth of 2400 Hz modulation from 0 to 1. Only used when mode is 0: the other protocols acquire by preamble correlation with their own thresholds"
+    },
+    "filter" : {
+      "type" : "string",
+      "description" : "Regular expression the filtered column must match for a message to be shown"
+    },
+    "filterColumn" : {
+      "type" : "integer",
+      "description" : "Which column the filter applies to: 0 registration, 1 flight, 2 label, 3 message"
+    },
+    "hideNoInfo" : {
+      "type" : "integer",
+      "description" : "Hide frames carrying no usable information - VDL-2 supervisory and acknowledgement frames, and Aero satellite housekeeping. They are still received and still held, only not shown (1 for yes, 0 for no)"
+    },
+    "showDate" : {
+      "type" : "integer",
+      "description" : "Show the date as well as the time in the Date/Time column (1 for yes, 0 for no)"
+    },
+    "displayPhotos" : {
+      "type" : "integer",
+      "description" : "Show a photograph of the selected aircraft (1 for yes, 0 for no)"
+    },
+    "displayChart" : {
+      "type" : "integer",
+      "description" : "Show the frames per second chart (1 for yes, 0 for no)"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to the specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "scopeCh1" : {
+      "type" : "integer",
+      "description" : "Which internal signal the scope shows on channel 1"
+    },
+    "scopeCh2" : {
+      "type" : "integer",
+      "description" : "Which internal signal the scope shows on channel 2"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "workspaceIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "ACARSDemod"
+};
             defs.ADSBDemodAircraftState = {
   "properties" : {
     "icao" : {
@@ -2448,6 +2590,47 @@ margin-bottom: 20px;
   },
   "description" : "APTDemod"
 };
+            defs.ATVDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "bfoLocked" : {
+      "type" : "integer",
+      "description" : "BFO PLL lock (1 for locked)."
+    },
+    "colourLocked" : {
+      "type" : "integer",
+      "description" : "Colour burst being received (1 for yes)."
+    },
+    "burstAmplitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Smoothed colour burst amplitude in IRE."
+    },
+    "carrierFrequencyError" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Vision carrier frequency error in Hz, for AM through the vestigial sideband filter."
+    },
+    "ghostDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Delay of the echo being cancelled in microseconds."
+    },
+    "ghostAmplitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Amplitude of the echo being cancelled relative to the signal (0 when none)."
+    }
+  },
+  "description" : "ATVDemod"
+};
             defs.ATVDemodSettings = {
   "properties" : {
     "fpsIndex" : {
@@ -2607,6 +2790,38 @@ margin-bottom: 20px;
       "description" : "UDP port number.",
       "minimum" : 1,
       "maximum" : 65535
+    },
+    "colourSystem" : {
+      "type" : "integer",
+      "description" : "Colour decoding\n  * 0 - Mono (luminance only)\n  * 1 - NTSC\n  * 2 - NTSC 4.43\n  * 3 - PAL\n  * 4 - PAL-M\n  * 5 - PAL-N\n  * 6 - SECAM\n",
+      "minimum" : 0,
+      "maximum" : 6
+    },
+    "colourSaturation" : {
+      "type" : "integer",
+      "description" : "Colour saturation in % of nominal."
+    },
+    "colourHue" : {
+      "type" : "integer",
+      "description" : "Hue adjustment in degrees (NTSC only)."
+    },
+    "palDelayLine" : {
+      "type" : "integer",
+      "description" : "Average the chroma of successive lines (the PAL delay line; also reduces chroma noise for NTSC).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "noiseReduction" : {
+      "type" : "integer",
+      "description" : "Temporal noise reduction strength in % (0 is off).",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "ghostCancellation" : {
+      "type" : "integer",
+      "description" : "Estimate and cancel an echo (ghost) from multipath (1 for on). AM through the vestigial sideband filter only.",
+      "minimum" : 0,
+      "maximum" : 1
     }
   },
   "description" : "ATVDemod"
@@ -2871,6 +3086,229 @@ margin-bottom: 20px;
     }
   },
   "description" : "AaroniaRTSA"
+};
+            defs.AircraftActions = {
+  "properties" : {
+    "selectIcao" : {
+      "type" : "string",
+      "description" : "Select the aircraft with this 24 bit ICAO address, written in hexadecimal (e.g. 4CA1FA)"
+    },
+    "selectRegistration" : {
+      "type" : "string",
+      "description" : "Select the aircraft with this registration (e.g. G-ABCD)"
+    },
+    "selectFlight" : {
+      "type" : "string",
+      "description" : "Select this flight number (e.g. BAW123). The most recently heard flight with that number is chosen"
+    }
+  },
+  "description" : "Aircraft"
+};
+            defs.AircraftNotificationSettings = {
+  "properties" : {
+    "matchColumn" : {
+      "type" : "integer",
+      "description" : "What the regular expression is matched against. 0 ICAO address, 1 registration, 2 flight, 3 aircraft type"
+    },
+    "regExp" : {
+      "type" : "string",
+      "description" : "Regular expression to match"
+    },
+    "speech" : {
+      "type" : "string",
+      "description" : "Text to speak when the rule matches. May contain ${icao}, ${reg}, ${flight}, ${type} and ${protocol}"
+    },
+    "command" : {
+      "type" : "string",
+      "description" : "Command to run when the rule matches"
+    }
+  },
+  "description" : "A rule matched against each aircraft, which speaks a phrase or runs a command when it matches"
+};
+            defs.AircraftProtocolReport = {
+  "properties" : {
+    "protocol" : {
+      "type" : "string",
+      "description" : "Protocol name: ADS-B, ACARS, VDL-2, HFDL or Aero"
+    },
+    "messageCount" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Reports received on this protocol this session"
+    }
+  },
+  "description" : "What one protocol has contributed this session"
+};
+            defs.AircraftReport = {
+  "properties" : {
+    "aircraftCount" : {
+      "type" : "integer",
+      "description" : "Aircraft currently held, active and archived"
+    },
+    "activeAircraftCount" : {
+      "type" : "integer",
+      "description" : "Aircraft currently being heard from"
+    },
+    "flightCount" : {
+      "type" : "integer",
+      "description" : "Flights currently held"
+    },
+    "messageCount" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Reports received this session, over every protocol"
+    },
+    "protocols" : {
+      "type" : "array",
+      "description" : "Reports received this session, per protocol",
+      "items" : {
+        "$ref" : "#/definitions/AircraftProtocolReport"
+      }
+    }
+  },
+  "description" : "Aircraft"
+};
+            defs.AircraftSettings = {
+  "properties" : {
+    "removalMins" : {
+      "type" : "integer",
+      "description" : "Archive an aircraft after this many minutes without a report"
+    },
+    "adsbPositionMins" : {
+      "type" : "integer",
+      "description" : "How long an ADS-B position stays believable, and so how long the aircraft stays on the map, in minutes"
+    },
+    "acarsPositionMins" : {
+      "type" : "integer",
+      "description" : "How long an ACARS, VDL-2, HFDL or Aero position stays believable, in minutes. Longer than the ADS-B figure because those protocols report far less often"
+    },
+    "retentionDays" : {
+      "type" : "integer",
+      "description" : "Discard archived aircraft, with their flights, after this many days. 0 keeps them for ever"
+    },
+    "flightRetentionDays" : {
+      "type" : "integer",
+      "description" : "Discard flights this many days after they were last heard, keeping their aircraft. An aircraft's most recent flight is always kept. 0 keeps flights for as long as their aircraft"
+    },
+    "atcLabels" : {
+      "type" : "integer",
+      "description" : "Display route, altitude and speed in map labels (1 for yes, 0 for no)"
+    },
+    "atcCallsigns" : {
+      "type" : "integer",
+      "description" : "Map labels use the airline's radio callsign (SPEEDBIRD 123) rather than its code (BAW123) (1 for yes, 0 for no). Only has an effect when atcLabels is set"
+    },
+    "displayMaxRangeOnMap" : {
+      "type" : "integer",
+      "description" : "Keep the aircraft that set the all time maximum range record on the map, at the position it was in when it set it (1 for yes, 0 for no)"
+    },
+    "favourLivery" : {
+      "type" : "integer",
+      "description" : "On the 3D map, prefer a similar aircraft in the correct airline livery over an exact aircraft type in the wrong one (1 for yes, 0 for no)"
+    },
+    "displayStatistics" : {
+      "type" : "integer",
+      "description" : "Show the statistics table (1 for yes, 0 for no)"
+    },
+    "displayChart" : {
+      "type" : "integer",
+      "description" : "Show the message rate chart (1 for yes, 0 for no)"
+    },
+    "displayCoverage" : {
+      "type" : "integer",
+      "description" : "Draw each protocol's polar coverage on the map (1 for yes, 0 for no)"
+    },
+    "useLiveryIcons" : {
+      "type" : "integer",
+      "description" : "Use aircraft icons in airline liveries on the 2D map, rather than black icons (1 for yes, 0 for no)"
+    },
+    "feedEnabled" : {
+      "type" : "integer",
+      "description" : "Feed received ACARS messages on to aggregators (1 for yes, 0 for no)"
+    },
+    "feedStationId" : {
+      "type" : "string",
+      "description" : "Station ident sent with each message fed to aggregators"
+    },
+    "feedAirframes" : {
+      "type" : "integer",
+      "description" : "Feed airframes.io (1 for yes, 0 for no)"
+    },
+    "feedAirframesHost" : {
+      "type" : "string",
+      "description" : "airframes.io feed host"
+    },
+    "feedAirframesPort" : {
+      "type" : "integer",
+      "description" : "airframes.io feed port"
+    },
+    "feedAirframesTcp" : {
+      "type" : "integer",
+      "description" : "Feed airframes.io over TCP rather than UDP (1 for TCP, 0 for UDP)"
+    },
+    "feedAvdelphi" : {
+      "type" : "integer",
+      "description" : "Feed avdelphi.com (1 for yes, 0 for no)"
+    },
+    "feedAvdelphiHost" : {
+      "type" : "string",
+      "description" : "avdelphi.com feed host"
+    },
+    "feedAvdelphiPort" : {
+      "type" : "integer",
+      "description" : "avdelphi.com feed port"
+    },
+    "feedAvdelphiTcp" : {
+      "type" : "integer",
+      "description" : "Feed avdelphi.com over TCP rather than UDP (1 for TCP, 0 for UDP)"
+    },
+    "databaseFilename" : {
+      "type" : "string",
+      "description" : "Where the session database is kept. Empty for the default location"
+    },
+    "disabledSources" : {
+      "type" : "array",
+      "description" : "Channel URIs not to accept reports from. Empty accepts all",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "notificationSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/AircraftNotificationSettings"
+      }
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "workspaceIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Aircraft"
 };
             defs.AirspyHFReport = {
   "properties" : {
@@ -3921,6 +4359,200 @@ margin-bottom: 20px;
   },
   "description" : "BFMDemod"
 };
+            defs.BFMModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer",
+      "description" : "Audio sample rate in samples per second."
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective sample rate delivered to the channel in samples per second."
+    }
+  },
+  "description" : "BFMMod"
+};
+            defs.BFMModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel frequency offset from the device center frequency in Hz."
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RF bandwidth in Hz (150000 to 300000)."
+    },
+    "afBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Audio-frequency bandwidth in Hz (1000 to 15000)."
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "FM frequency deviation in Hz."
+    },
+    "toneFrequency" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Tone frequency in Hz."
+    },
+    "volumeFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Volume factor setting for Broadcast FM mod."
+    },
+    "audioStereo" : {
+      "type" : "integer",
+      "description" : "Generate the 19 kHz pilot and 38 kHz stereo difference signal.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "preEmphasis" : {
+      "type" : "integer",
+      "description" : "Pre-emphasis: 0 off, 1 50 microseconds, 2 75 microseconds.",
+      "minimum" : 0,
+      "maximum" : 2
+    },
+    "pilotLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Stereo pilot amplitude relative to maximum multiplex amplitude.",
+      "minimum" : 0,
+      "maximum" : 0.2
+    },
+    "rdsActive" : {
+      "type" : "integer",
+      "description" : "Enable the 57 kHz RDS subcarrier.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rdsLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RDS subcarrier amplitude relative to maximum multiplex amplitude.",
+      "minimum" : 0,
+      "maximum" : 0.1
+    },
+    "rdsPI" : {
+      "type" : "integer",
+      "description" : "RDS programme identification code.",
+      "minimum" : 0,
+      "maximum" : 65535
+    },
+    "rdsPTY" : {
+      "type" : "integer",
+      "description" : "RDS programme type.",
+      "minimum" : 0,
+      "maximum" : 31
+    },
+    "rdsPS" : {
+      "type" : "string",
+      "description" : "RDS programme service name, up to 8 characters.",
+      "maxLength" : 8
+    },
+    "rdsRadioText" : {
+      "type" : "string",
+      "description" : "RDS RadioText, up to 64 characters.",
+      "maxLength" : 64
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "description" : "Mute the channel output (1 muted, 0 unmuted).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "playLoop" : {
+      "type" : "integer",
+      "description" : "Loop playback at end of file (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "audioDeviceName" : {
+      "type" : "string",
+      "description" : "Name of the audio device to use."
+    },
+    "feedbackAudioDeviceName" : {
+      "type" : "string",
+      "description" : "Name of the audio output device used for audio feedback."
+    },
+    "feedbackVolumeFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Audio feedback volume factor."
+    },
+    "fileName" : {
+      "type" : "string",
+      "description" : "WAV or raw audio file played when modAFInput selects the file input."
+    },
+    "feedbackAudioEnable" : {
+      "type" : "integer",
+      "description" : "Enable audio feedback (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "modAFInput" : {
+      "type" : "integer",
+      "description" : "Audio-frequency modulation input selection."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer."
+    },
+    "cwKeyer" : {
+      "description" : "CW keyer configuration.",
+      "$ref" : "#/definitions/CWKeyerSettings"
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display configuration.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "BFMMod"
+};
             defs.Bandwidth = {
   "properties" : {
     "bandwidth" : {
@@ -4709,6 +5341,18 @@ margin-bottom: 20px;
       "description" : "Apt demod actions configuration for Channel.",
       "$ref" : "#/definitions/APTDemodActions"
     },
+    "WefaxDemodActions" : {
+      "description" : "WEFAX demodulator actions for Channel.",
+      "$ref" : "#/definitions/WefaxDemodActions"
+    },
+    "DVBDemodActions" : {
+      "description" : "DVB demod actions configuration for Channel.",
+      "$ref" : "#/definitions/DVBDemodActions"
+    },
+    "DRMDemodActions" : {
+      "description" : "DRM demod actions configuration for Channel.",
+      "$ref" : "#/definitions/DRMDemodActions"
+    },
     "FileSinkActions" : {
       "description" : "File sink actions configuration for Channel.",
       "$ref" : "#/definitions/FileSinkActions"
@@ -5082,6 +5726,9 @@ margin-bottom: 20px;
       "minimum" : 0,
       "maximum" : 2
     },
+    "ACARSDemodReport" : {
+      "$ref" : "#/definitions/ACARSDemodReport"
+    },
     "ADSBDemodReport" : {
       "description" : "ADS-B demod report data for Channel.",
       "$ref" : "#/definitions/ADSBDemodReport"
@@ -5098,9 +5745,16 @@ margin-bottom: 20px;
       "description" : "Am demod report data for Channel.",
       "$ref" : "#/definitions/AMDemodReport"
     },
+    "WefaxDemodReport" : {
+      "description" : "WEFAX demodulator report data for Channel.",
+      "$ref" : "#/definitions/WefaxDemodReport"
+    },
     "AMModReport" : {
       "description" : "Am mod report data for Channel.",
       "$ref" : "#/definitions/AMModReport"
+    },
+    "ATVDemodReport" : {
+      "$ref" : "#/definitions/ATVDemodReport"
     },
     "ATVModReport" : {
       "description" : "Atv mod report data for Channel.",
@@ -5110,9 +5764,17 @@ margin-bottom: 20px;
       "description" : "BFM demod report data for Channel.",
       "$ref" : "#/definitions/BFMDemodReport"
     },
+    "BFMModReport" : {
+      "description" : "Broadcast FM mod report data for Channel.",
+      "$ref" : "#/definitions/BFMModReport"
+    },
     "DABDemodReport" : {
       "description" : "DAB demod report data for Channel.",
       "$ref" : "#/definitions/DABDemodReport"
+    },
+    "DRMDemodReport" : {
+      "description" : "DRM demod report data for Channel.",
+      "$ref" : "#/definitions/DRMDemodReport"
     },
     "ChannelPowerReport" : {
       "description" : "Channel power report data for Channel.",
@@ -5127,8 +5789,11 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/ChirpChatModReport"
     },
     "DATVDemodReport" : {
-      "description" : "Datv demod report data for Channel.",
       "$ref" : "#/definitions/DATVDemodReport"
+    },
+    "DVBDemodReport" : {
+      "description" : "Datv demod report data for Channel.",
+      "$ref" : "#/definitions/DVBDemodReport"
     },
     "DATVModReport" : {
       "description" : "Datv mod report data for Channel.",
@@ -5146,9 +5811,16 @@ margin-bottom: 20px;
       "description" : "Dsd demod report data for Channel.",
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "DroneIDDemodReport" : {
+      "description" : "DroneID demod report data for Channel.",
+      "$ref" : "#/definitions/DroneIDDemodReport"
+    },
     "EndOfTrainDemodReport" : {
       "description" : "End of train demod report data for Channel.",
       "$ref" : "#/definitions/EndOfTrainDemodReport"
+    },
+    "IEEE_802_15_4_DemodReport" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_DemodReport"
     },
     "IEEE_802_15_4_ModReport" : {
       "description" : "Ieee 802 15 4 mod report data for Channel.",
@@ -5278,6 +5950,10 @@ margin-bottom: 20px;
       "description" : "Psk31 mod report data for Channel.",
       "$ref" : "#/definitions/PSK31ModReport"
     },
+    "PSK31DemodReport" : {
+      "description" : "PSK31 demodulator report data for Channel.",
+      "$ref" : "#/definitions/PSK31DemodReport"
+    },
     "SigMFFileSinkReport" : {
       "description" : "Sig mf file sink report data for Channel.",
       "$ref" : "#/definitions/SigMFFileSinkReport"
@@ -5309,6 +5985,9 @@ margin-bottom: 20px;
     "WFMModReport" : {
       "description" : "Wfm mod report data for Channel.",
       "$ref" : "#/definitions/WFMModReport"
+    },
+    "SELCALDemodReport" : {
+      "$ref" : "#/definitions/SELCALDemodReport"
     }
   },
   "description" : "Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present."
@@ -5335,6 +6014,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the channel index from where the message comes from."
     },
+    "ACARSDemodSettings" : {
+      "$ref" : "#/definitions/ACARSDemodSettings"
+    },
     "ADSBDemodSettings" : {
       "description" : "ADS-B demod settings configuration for Channel.",
       "$ref" : "#/definitions/ADSBDemodSettings"
@@ -5359,6 +6041,10 @@ margin-bottom: 20px;
       "description" : "Apt demod settings configuration for Channel.",
       "$ref" : "#/definitions/APTDemodSettings"
     },
+    "WefaxDemodSettings" : {
+      "description" : "WEFAX demodulator settings configuration for Channel.",
+      "$ref" : "#/definitions/WefaxDemodSettings"
+    },
     "ATVDemodSettings" : {
       "description" : "Atv demod settings configuration for Channel.",
       "$ref" : "#/definitions/ATVDemodSettings"
@@ -5374,6 +6060,10 @@ margin-bottom: 20px;
     "BFMDemodSettings" : {
       "description" : "BFM demod settings configuration for Channel.",
       "$ref" : "#/definitions/BFMDemodSettings"
+    },
+    "BFMModSettings" : {
+      "description" : "Broadcast FM mod settings configuration for Channel.",
+      "$ref" : "#/definitions/BFMModSettings"
     },
     "ChannelAnalyzerSettings" : {
       "description" : "Channel analyzer settings configuration for Channel.",
@@ -5396,12 +6086,19 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/DATVModSettings"
     },
     "DATVDemodSettings" : {
-      "description" : "Datv demod settings configuration for Channel.",
       "$ref" : "#/definitions/DATVDemodSettings"
+    },
+    "DVBDemodSettings" : {
+      "description" : "Datv demod settings configuration for Channel.",
+      "$ref" : "#/definitions/DVBDemodSettings"
     },
     "DABDemodSettings" : {
       "description" : "Dab demod settings configuration for Channel.",
       "$ref" : "#/definitions/DABDemodSettings"
+    },
+    "DRMDemodSettings" : {
+      "description" : "DRM demod settings configuration for Channel.",
+      "$ref" : "#/definitions/DRMDemodSettings"
     },
     "DOA2Settings" : {
       "description" : "Doa2 settings configuration for Channel.",
@@ -5414,6 +6111,10 @@ margin-bottom: 20px;
     "DSDDemodSettings" : {
       "description" : "Dsd demod settings configuration for Channel.",
       "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "DroneIDDemodSettings" : {
+      "description" : "DroneID demod settings configuration for Channel.",
+      "$ref" : "#/definitions/DroneIDDemodSettings"
     },
     "EndOfTrainDemodSettings" : {
       "description" : "End of train demod settings configuration for Channel.",
@@ -5462,6 +6163,9 @@ margin-bottom: 20px;
     "InterferometerSettings" : {
       "description" : "Interferometer settings configuration for Channel.",
       "$ref" : "#/definitions/InterferometerSettings"
+    },
+    "IEEE_802_15_4_DemodSettings" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_DemodSettings"
     },
     "IEEE_802_15_4_ModSettings" : {
       "description" : "Ieee 802 15 4 mod settings configuration for Channel.",
@@ -5531,6 +6235,10 @@ margin-bottom: 20px;
       "description" : "Psk31 mod settings configuration for Channel.",
       "$ref" : "#/definitions/PSK31ModSettings"
     },
+    "PSK31DemodSettings" : {
+      "description" : "PSK31 demodulator settings configuration for Channel.",
+      "$ref" : "#/definitions/PSK31DemodSettings"
+    },
     "RadioAstronomySettings" : {
       "description" : "Radio astronomy settings configuration for Channel.",
       "$ref" : "#/definitions/RadioAstronomySettings"
@@ -5598,6 +6306,9 @@ margin-bottom: 20px;
     "WFMModSettings" : {
       "description" : "Wfm mod settings configuration for Channel.",
       "$ref" : "#/definitions/WFMModSettings"
+    },
+    "SELCALDemodSettings" : {
+      "$ref" : "#/definitions/SELCALDemodSettings"
     }
   },
   "description" : "Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present."
@@ -6300,20 +7011,20 @@ margin-bottom: 20px;
     },
     "frameQuality" : {
       "type" : "integer",
-      "description" : "Audio frame decode quality as a percentage.",
+      "description" : "Percentage of valid audio frames over the last status interval: for DAB+, superframes whose Fire code checks; for DAB, frames whose CRC checks.",
       "minimum" : 0,
       "maximum" : 100
     },
     "reedSolomonQuality" : {
       "type" : "integer",
-      "description" : "Reed-Solomon decode quality as a percentage.",
-      "minimum" : 0,
+      "description" : "For DAB+, percentage of Reed-Solomon codewords corrected over the last status interval. -1 for DAB.",
+      "minimum" : -1,
       "maximum" : 100
     },
     "aacQuality" : {
       "type" : "integer",
-      "description" : "AAC decode quality as a percentage.",
-      "minimum" : 0,
+      "description" : "For DAB+, percentage of AAC access units whose CRC checks over the last status interval. -1 for DAB.",
+      "minimum" : -1,
       "maximum" : 100
     },
     "fibQuality" : {
@@ -6324,11 +7035,78 @@ margin-bottom: 20px;
     },
     "tii" : {
       "type" : "integer",
-      "description" : "Decoded Transmitter Identification Information value."
+      "description" : "Transmitter Identification Information of the strongest transmitter: main ID << 8 | sub ID. -1 when none has been found: not yet, or (after a few seconds synchronized) the ensemble sends none."
     },
     "data" : {
       "type" : "string",
       "description" : "Latest dynamic text/data associated with the selected programme."
+    },
+    "cn" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Carrier to noise ratio in dB, from the null symbol (median carrier)."
+    },
+    "nullDepth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Null symbol power relative to the other symbols in dB."
+    },
+    "mscBER" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Channel bit error rate of the selected service before error correction (re-encoded Viterbi output). Errors start at about 0.1."
+    },
+    "ficBER" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Channel bit error rate of the FIC before error correction."
+    },
+    "rsCorrectedRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "DAB+ Reed-Solomon corrected bytes per second."
+    },
+    "framesLost" : {
+      "type" : "integer",
+      "description" : "Transmission frames lost since tuning."
+    },
+    "reacquisitions" : {
+      "type" : "integer",
+      "description" : "Times synchronization was lost and acquired again since tuning."
+    },
+    "inputLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Mean power of the channel input in dB relative to full scale."
+    },
+    "clipping" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Percentage of input samples at or near full scale."
+    },
+    "gainStatus" : {
+      "type" : "integer",
+      "description" : "Gain advice: 0 OK, 1 increase gain, 2 reduce gain, 3 check (MER well below C/N: overload, or multipath or interference), -1 unknown."
+    },
+    "gainAdvice" : {
+      "type" : "string",
+      "description" : "Gain advice as text."
+    },
+    "announcement" : {
+      "type" : "string",
+      "description" : "The announcement in progress for the program (Road traffic, News, Alarm...), empty for none."
+    },
+    "nowPlayingArtist" : {
+      "type" : "string",
+      "description" : "Artist of the item playing, from the DL Plus tags of the dynamic label."
+    },
+    "nowPlayingTitle" : {
+      "type" : "string",
+      "description" : "Title of the item playing, from the DL Plus tags of the dynamic label."
+    },
+    "programmeNow" : {
+      "type" : "string",
+      "description" : "The programme on now, from the Service and Programme Information (SPI)."
     }
   },
   "description" : "Live DAB demodulator, ensemble and selected-programme status. Synchronization, discovered programmes and active audio do not by themselves prove clean reception; check SNR after selecting a programme and after every receiver gain change.\n"
@@ -6375,6 +7153,16 @@ margin-bottom: 20px;
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "coherent" : {
+      "type" : "integer",
+      "description" : "Detection: 1 coherent (decoder aided; about 1 dB more sensitive, using about twice the CPU and with 0.4 s more delay), 0 three-symbol differential.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "announcementTypes" : {
+      "type" : "integer",
+      "description" : "Announcement types the audio switches to while they last, one bit per type (TS 101 756 table 14): 1 road traffic, 2 transport, 3 warning, 4 news, 5 weather, 6 event, 7 special event, 8 programme information, 9 sport, 10 financial. Alarms (bit 0) are always followed. 0 for none."
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -6943,6 +7731,728 @@ margin-bottom: 20px;
   },
   "description" : "DOA2"
 };
+            defs.DRMAFS = {
+  "properties" : {
+    "entityType" : {
+      "type" : "integer",
+      "description" : "SDC entity type: 3, 4, 7, 11, 13 or 15."
+    },
+    "listVersion" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "extension" : {
+      "type" : "integer",
+      "description" : "Entity extension, or -1 when the entity has no extension field."
+    },
+    "synchronousMultiplex" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "baseLayer" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "appliesToAllServices" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "regionOrScheduleRestricted" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "serviceRestrictionField" : {
+      "type" : "integer",
+      "description" : "Entity 3 Service Restriction field: Short Id flags in the upper four bits (msb Short Id 3). -1 when absent."
+    },
+    "regionScheduleField" : {
+      "type" : "integer",
+      "description" : "Entity 3 Region/Schedule field: Region Id in the upper four bits, Schedule Id in the lower four. -1 when absent."
+    },
+    "frequencies" : {
+      "type" : "array",
+      "description" : "Frequencies signalled by an entity 3 list.",
+      "items" : {
+        "$ref" : "#/definitions/DRMAFSFrequency"
+      }
+    }
+  },
+  "description" : "Parsed SDC alternative-frequency signalling. Automatic checking and switching are not performed."
+};
+            defs.DRMAFSFrequency = {
+  "properties" : {
+    "code" : {
+      "type" : "integer",
+      "description" : "Raw 16-bit code: the msb selects 10 kHz (mode E) rather than 1 kHz units for the lower 15 bits."
+    },
+    "frequencyKHz" : {
+      "type" : "integer",
+      "description" : "Decoded frequency in kHz."
+    }
+  },
+  "description" : "One frequency of an SDC entity 3 alternative-frequency list."
+};
+            defs.DRMCapability = {
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "enum" : [ "nativeFAC", "nativeSDC", "nativeMSC", "drmAAC", "drmXHEAAC" ]
+    }
+  },
+  "description" : "One native function or codec capability implemented in this build."
+};
+            defs.DRMDemodActions = {
+  "properties" : {
+    "reacquire" : {
+      "type" : "integer",
+      "description" : "Set to 1 to discard synchronization, signalling and audio and restart acquisition on the current channel.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "saveSlideshowImage" : {
+      "type" : "string",
+      "description" : "Write the latest slideshow image to this file path on the SDRangel host (the image's own format, as slideshowMimeType says)."
+    },
+    "saveWebsite" : {
+      "type" : "string",
+      "description" : "Write the Broadcast Website's files received so far into this directory on the SDRangel host, keeping their paths."
+    }
+  },
+  "description" : "DRMDemod"
+};
+            defs.DRMDemodReport = {
+  "properties" : {
+    "audioDecoderBackend" : {
+      "type" : "string",
+      "description" : "Runtime codec backend name, including none when a codec is unavailable."
+    },
+    "capabilities" : {
+      "type" : "array",
+      "description" : "Implemented native functions and codec capabilities available in this build. Validated RF/profile coverage is documented separately.",
+      "items" : {
+        "$ref" : "#/definitions/DRMCapability"
+      }
+    },
+    "syncState" : {
+      "type" : "string",
+      "description" : "RF/FAC synchronization state. SDC, MSC and audio readiness are reported separately.",
+      "enum" : [ "stopped", "searching", "acquiring", "locked", "reacquiring" ]
+    },
+    "epoch" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonic receiver epoch, incremented on start, explicit reset/retune and established-lock loss."
+    },
+    "facValid" : {
+      "type" : "integer",
+      "description" : "Whether the latest complete FAC result is CRC-valid.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "sdcValid" : {
+      "type" : "integer",
+      "description" : "Whether the latest SDC block is CRC-valid. Cached configuration can remain available during a block erasure.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "facAgeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonic wall-clock milliseconds since the latest observed FAC slot, valid or invalid; -1 before observation in this RF epoch."
+    },
+    "sdcAgeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonic wall-clock milliseconds since the latest attempted SDC block, valid or invalid; -1 before an attempt in this RF epoch. Skipped blocks do not renew this age."
+    },
+    "audioAgeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonic wall-clock milliseconds since successful decoded PCM production; -1 before production in this service epoch. Concealment does not renew this age."
+    },
+    "broadcastTimeAgeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonic wall-clock milliseconds since a newly received CRC-valid SDC entity-8 time/date; -1 when absent in this RF epoch. Cached SDC does not renew this age."
+    },
+    "validFACBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "CRC-valid chronological FAC slots in processed transmission windows in this RF epoch. Acquisition retries are not observations."
+    },
+    "invalidFACBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Rejected or erased chronological FAC slots in processed transmission windows in this RF epoch. The FAC denominator is validFACBlocks plus invalidFACBlocks."
+    },
+    "validSDCBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "CRC-valid attempted SDC blocks in this RF epoch."
+    },
+    "invalidSDCBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Rejected attempted SDC blocks in this RF epoch. The SDC CRC denominator is validSDCBlocks plus invalidSDCBlocks."
+    },
+    "skippedSDCBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Transmission superframes whose SDC block was skipped because fresh first-frame FAC was unavailable. Excluded from the SDC CRC denominator."
+    },
+    "mscReady" : {
+      "type" : "integer",
+      "description" : "Whether MSC decoding has valid configuration and sufficient data/interleaver fill.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "audioActive" : {
+      "type" : "integer",
+      "description" : "Whether the selected service produced decoded PCM within the last 2500 wall-clock milliseconds while RF is locked. Concealment alone does not activate this flag.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "mode" : {
+      "type" : "string",
+      "description" : "Detected DRM robustness mode A through E; empty while unavailable."
+    },
+    "occupancy" : {
+      "type" : "integer",
+      "description" : "Detected spectrum occupancy code, or -1 while unavailable."
+    },
+    "spectrumInverted" : {
+      "type" : "integer",
+      "description" : "Detected spectrum orientation: 1 mirrored (the input's I and Q swapped), 0 normal, -1 until locked. Acquisition tries both.",
+      "minimum" : -1,
+      "maximum" : 1
+    },
+    "effectiveSearchRangeHz" : {
+      "type" : "integer",
+      "description" : "Effective symmetric carrier acquisition half-range in Hz for the detected mode."
+    },
+    "internalSampleRate" : {
+      "type" : "integer",
+      "description" : "Sample rate the native modem runs at after resampling the channel: 192000, or 48000 (modes A-D only) when the channel is narrower than 192 kHz."
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Sample rate of the channel delivered by the channelizer, before resampling to internalSampleRate."
+    },
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power of the DRM band after the input filter (the candidate acquisition bands, or the locked signal) in dB, averaged over about half a second."
+    },
+    "inputFilterLowHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Lower edge of the input band filter relative to the DRM reference frequency in Hz: the union of candidate acquisition bands, or the locked occupancy."
+    },
+    "inputFilterHighHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Upper edge of the input band filter relative to the DRM reference frequency in Hz."
+    },
+    "carrierOffsetHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Estimated residual carrier offset from the requested DRM reference frequency in Hz; valid only when carrierOffsetAvailable is 1."
+    },
+    "carrierOffsetAvailable" : {
+      "type" : "integer",
+      "description" : "Whether a FAC lock has measured carrierOffsetHz in this RF epoch.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "sampleClockErrorPPM" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Pilot-derived input sample-clock error estimate in parts per million; valid only when sampleClockErrorAvailable is 1."
+    },
+    "sampleClockErrorAvailable" : {
+      "type" : "integer",
+      "description" : "Whether enough coherent frames have been received to estimate sampleClockErrorPPM.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "mscMERAvailable" : {
+      "type" : "integer",
+      "description" : "Whether the latest bounded decode produced a decision-directed MSC modulation-error-ratio measurement.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "mscMERDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Decision-directed MSC MER in dB over deinterleaver-output cells. Each equalized cell is compared with the nearest point in the signalled MSC constellation; valid only when mscMERAvailable is 1."
+    },
+    "mscMERCellCount" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Number of MSC constellation cells included in mscMERDB for the latest bounded decode operation."
+    },
+    "services" : {
+      "type" : "array",
+      "description" : "Services announced by fresh FAC in the current RF epoch (at most four, cleared at a service-count or reconfiguration boundary), enriched with current SDC labels, language/country and audio descriptors.",
+      "items" : {
+        "$ref" : "#/definitions/DRMService"
+      }
+    },
+    "selectedServiceIdentifier" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Stable 24-bit service identifier selected for MSC/audio decoding, or -1 when unavailable."
+    },
+    "captureWindows" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Decode steps since the latest start or explicit reset: cold acquisition spans followed by individual tracked transmission superframes."
+    },
+    "audioDroppedSamples" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Output stereo sample pairs rejected by the bounded audio FIFO in this service epoch. A short write preserves previously queued audio."
+    },
+    "inputDroppedSamples" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "RF sample pairs rejected by the input FIFO since channel creation. Gaps the FIFO could have held (up to about 2 seconds) are replaced by zero samples at their stream position, so tracking sees an erasure; a longer gap means decoding is slower than the input, and the receiver restarts from the newest input."
+    },
+    "processedSuperframes" : {
+      "type" : "integer",
+      "description" : "Complete transmission superframes processed in this service epoch."
+    },
+    "retainedSamples" : {
+      "type" : "integer",
+      "description" : "Samples retained after the latest successful window, including the undecoded tail and one pre-boundary guard interval used for timing tracking."
+    },
+    "decodedMultiplexFrames" : {
+      "type" : "integer",
+      "description" : "CRC/fill-valid MSC multiplex frames in this service epoch."
+    },
+    "invalidMultiplexFrames" : {
+      "type" : "integer",
+      "description" : "MSC multiplex frames rejected for invalid fill bits or stream extraction in this service epoch."
+    },
+    "parsedAudioSuperframes" : {
+      "type" : "integer",
+      "description" : "Valid DRM audio superframes in this service epoch."
+    },
+    "invalidAudioSuperframes" : {
+      "type" : "integer",
+      "description" : "DRM audio superframes rejected by transport framing or access-unit validation in this service epoch."
+    },
+    "decodedPCMFrames" : {
+      "type" : "integer"
+    },
+    "concealedPCMFrames" : {
+      "type" : "integer",
+      "description" : "Codec concealment frames delivered in this service epoch, counted separately from decoded frames."
+    },
+    "decoderAudioSampleRate" : {
+      "type" : "integer",
+      "description" : "Native sample rate of the most recently selected decoded audio stream, or zero when unavailable."
+    },
+    "outputAudioSampleRate" : {
+      "type" : "integer",
+      "description" : "Sample rate of the selected SDRangel audio output device."
+    },
+    "audioChannels" : {
+      "type" : "integer",
+      "description" : "Number of channels in the selected decoded audio stream, or zero when unavailable."
+    },
+    "textMessagePresent" : {
+      "type" : "integer",
+      "description" : "Whether a CRC-valid text message is currently available for the selected audio service.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "textMessage" : {
+      "type" : "string",
+      "description" : "Latest complete UTF-8 DRM text message."
+    },
+    "invalidTextSegments" : {
+      "type" : "integer",
+      "description" : "CRC or sequence-invalid text segments in this service epoch."
+    },
+    "slideshowPresent" : {
+      "type" : "integer",
+      "description" : "Whether the selected service has a MOT slideshow data component (SDC entity 5).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "slideshowImages" : {
+      "type" : "integer",
+      "description" : "MOT slideshow images received for the selected service in this service epoch."
+    },
+    "slideshowName" : {
+      "type" : "string",
+      "description" : "Content name of the latest slideshow image, or an empty string."
+    },
+    "slideshowMimeType" : {
+      "type" : "string",
+      "description" : "MIME type of the latest slideshow image, for example image/jpeg."
+    },
+    "slideshowSize" : {
+      "type" : "integer",
+      "description" : "Size in bytes of the latest slideshow image, or zero when none has arrived."
+    },
+    "slideshowAgeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Milliseconds since the latest slideshow image arrived, or -1 for none."
+    },
+    "slideshowValidPackets" : {
+      "type" : "integer",
+      "description" : "CRC-valid packets of the slideshow component in this service epoch."
+    },
+    "slideshowInvalidPackets" : {
+      "type" : "integer",
+      "description" : "Packets of the slideshow component's stream that failed their CRC in this service epoch."
+    },
+    "websitePresent" : {
+      "type" : "integer",
+      "description" : "1 when the selected service carries a MOT Broadcast Website.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "websiteFiles" : {
+      "type" : "integer",
+      "description" : "Files of the Broadcast Website received so far."
+    },
+    "websiteObjects" : {
+      "type" : "integer",
+      "description" : "Objects the Broadcast Website's current MOT directory describes."
+    },
+    "websiteStartPage" : {
+      "type" : "string",
+      "description" : "The Broadcast Website's start page (a file name), or an empty string."
+    },
+    "websiteValidPackets" : {
+      "type" : "integer",
+      "description" : "CRC-valid packets of the website component in this service epoch."
+    },
+    "websiteInvalidPackets" : {
+      "type" : "integer",
+      "description" : "Packets of the website component's stream that failed their CRC in this service epoch."
+    },
+    "dataService" : {
+      "type" : "integer",
+      "description" : "1 when the selected service is a data service, without audio.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "journalineServices" : {
+      "type" : "integer",
+      "description" : "Journaline news services in the multiplex (services that share one are counted once)."
+    },
+    "journalineObjects" : {
+      "type" : "integer",
+      "description" : "Journaline menus and pages received from the multiplex's services."
+    },
+    "journaline" : {
+      "type" : "array",
+      "description" : "The Journaline news received, one entry per news service.",
+      "items" : {
+        "$ref" : "#/definitions/DRMJournaline"
+      }
+    },
+    "broadcastTimeUTC" : {
+      "type" : "string",
+      "description" : "SDC entity-8 UTC date and minute in ISO-8601 form, or an empty string when absent."
+    },
+    "localTimeOffsetPresent" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "localTimeOffsetMinutes" : {
+      "type" : "integer",
+      "description" : "Signed SDC entity-8 local-time offset in minutes; valid only when localTimeOffsetPresent is 1."
+    },
+    "afsIndex" : {
+      "type" : "integer",
+      "description" : "Current SDC AFS index, or -1 while SDC is unavailable."
+    },
+    "alternativeFrequencies" : {
+      "type" : "array",
+      "description" : "Parsed AFS metadata. The receiver does not retune from these entries.",
+      "items" : {
+        "$ref" : "#/definitions/DRMAFS"
+      }
+    },
+    "error" : {
+      "type" : "string",
+      "description" : "Current reason that acquisition, signalling, MSC or audio is unavailable."
+    }
+  },
+  "description" : "Live native DRM acquisition, signalling, MSC and audio status for the current receiver epoch."
+};
+            defs.DRMDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DRM reference-frequency offset from the device center frequency in Hz."
+    },
+    "acquisitionSearchRangeHz" : {
+      "type" : "integer",
+      "description" : "Symmetric carrier acquisition half-range in Hz. Zero selects the mode default; explicit values from 100 through 5000 are valid (1 through 99 are taken as 100).",
+      "minimum" : 0,
+      "maximum" : 5000
+    },
+    "forcedMode" : {
+      "type" : "integer",
+      "description" : "Constrain acquisition to robustness mode A=0 through E=4. Minus one searches all modes.",
+      "minimum" : -1,
+      "maximum" : 4
+    },
+    "forcedOccupancy" : {
+      "type" : "integer",
+      "description" : "Constrain acquisition to the DRM spectrum-occupancy code. Minus one searches every occupancy valid for the selected mode; an occupancy the forced mode does not define is replaced by minus one.",
+      "minimum" : -1,
+      "maximum" : 5
+    },
+    "selectedServiceIdentifier" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Stable 24-bit DRM service identifier. Minus one automatically selects the first available audio service.",
+      "minimum" : -1,
+      "maximum" : 16777215
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Audio volume multiplier.",
+      "minimum" : 0,
+      "maximum" : 10
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "Mute audio output (1 muted, 0 unmuted).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "audioDeviceName" : {
+      "type" : "string",
+      "description" : "Name of the audio output device."
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "Zero-based device RX/MIMO input stream. This does not select an MSC or audio stream.",
+      "minimum" : 0
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize settings with the reverse API (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1024,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer.",
+      "minimum" : 0,
+      "maximum" : 99
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer.",
+      "minimum" : 0,
+      "maximum" : 99
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display configuration.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Native Digital Radio Mondiale receive channel settings."
+};
+            defs.DRMJournaline = {
+  "properties" : {
+    "services" : {
+      "type" : "array",
+      "description" : "The services that carry this Journaline service.",
+      "items" : {
+        "$ref" : "#/definitions/DRMJournalineService"
+      }
+    },
+    "objects" : {
+      "type" : "array",
+      "description" : "Received menus and pages, by object ID. Object 0 is the main menu; menu items link to other objects by linkId.",
+      "items" : {
+        "$ref" : "#/definitions/DRMJournalineObject"
+      }
+    }
+  },
+  "description" : "One Journaline news service of the multiplex: its menus and pages as received so far."
+};
+            defs.DRMJournalineItem = {
+  "properties" : {
+    "text" : {
+      "type" : "string"
+    },
+    "linkId" : {
+      "type" : "integer",
+      "description" : "Menus only: the object ID this entry opens (it may not have arrived yet)."
+    },
+    "newRow" : {
+      "type" : "integer",
+      "description" : "Lists only: 1 when this cell starts a new row.",
+      "minimum" : 0,
+      "maximum" : 1
+    }
+  },
+  "description" : "A menu entry, a paragraph or a list cell of a Journaline object. Line breaks are newline characters."
+};
+            defs.DRMJournalineObject = {
+  "properties" : {
+    "objectId" : {
+      "type" : "integer",
+      "description" : "Object ID (0 is the main menu)."
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "menu: items are entries linking to other objects; text: items are paragraphs; title: a title only; list: items are table cells.",
+      "enum" : [ "menu", "text", "title", "list" ]
+    },
+    "revision" : {
+      "type" : "integer",
+      "description" : "Revision number of this version of the object."
+    },
+    "staticObject" : {
+      "type" : "integer",
+      "description" : "1 when the broadcaster keeps this object ID for the same content.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "items" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/DRMJournalineItem"
+      }
+    }
+  },
+  "description" : "One Journaline object (ETSI TS 102 979): a menu, a page of text or a list."
+};
+            defs.DRMJournalineService = {
+  "properties" : {
+    "shortIdentifier" : {
+      "type" : "integer",
+      "description" : "FAC/SDC short identifier of the service."
+    },
+    "serviceIdentifier" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "24-bit DRM service identifier, or -1 until the FAC has named it."
+    },
+    "label" : {
+      "type" : "string",
+      "description" : "The service's label, or an empty string when absent."
+    }
+  },
+  "description" : "A service that carries a Journaline news service."
+};
+            defs.DRMService = {
+  "properties" : {
+    "serviceIdentifier" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Stable 24-bit DRM service identifier."
+    },
+    "shortIdentifier" : {
+      "type" : "integer",
+      "description" : "FAC/SDC short identifier used internally within the multiplex."
+    },
+    "audioService" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "conditionalAccess" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "facLanguageCode" : {
+      "type" : "integer",
+      "description" : "Raw four-bit FAC language code."
+    },
+    "facServiceDescriptor" : {
+      "type" : "integer",
+      "description" : "Raw five-bit FAC service descriptor."
+    },
+    "label" : {
+      "type" : "string",
+      "description" : "UTF-8 label from SDC entity 1, or an empty string when absent."
+    },
+    "language" : {
+      "type" : "string",
+      "description" : "Three-character language code from SDC entity 12, or an empty string when absent."
+    },
+    "country" : {
+      "type" : "string",
+      "description" : "Two-character country code from SDC entity 12, or an empty string when absent."
+    },
+    "streamId" : {
+      "type" : "integer",
+      "description" : "MSC stream identifier from SDC entity 9, or -1 for a service without a current audio descriptor."
+    },
+    "audioCoding" : {
+      "type" : "integer",
+      "description" : "Raw SDC audio coding value, or -1 when absent."
+    },
+    "audioMode" : {
+      "type" : "integer",
+      "description" : "Raw SDC audio mode value, or -1 when absent."
+    },
+    "samplingRateCode" : {
+      "type" : "integer",
+      "description" : "Raw SDC audio sampling-rate code, or -1 when absent."
+    },
+    "sbr" : {
+      "type" : "integer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "textFlag" : {
+      "type" : "integer",
+      "description" : "Whether the audio stream signals an associated text-message field.",
+      "minimum" : 0,
+      "maximum" : 1
+    }
+  },
+  "description" : "A DRM service joined from the current FAC and SDC signalling."
+};
             defs.DSCDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -6968,6 +8478,12 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "RF bandwidth in Hz."
+    },
+    "mode" : {
+      "type" : "integer",
+      "description" : "DSC demodulation mode (0 MF/HF, 1 VHF).",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "filterInvalid" : {
       "type" : "integer",
@@ -7275,6 +8791,787 @@ margin-bottom: 20px;
   },
   "description" : "DSDDemod"
 };
+            defs.DVBDemodActions = {
+  "properties" : {
+    "play" : {
+      "type" : "integer",
+      "description" : "1 to play serviceId, retuning the device to its multiplex if it's on another: to the frequency the programme guide gives or that was learned when it was received, else searching the UHF channels for it (which continues after the response)\n"
+    },
+    "record" : {
+      "type" : "integer",
+      "description" : "Record to a file, of the multiplex or the service selected, as recordMode says\n  * 0 - stop recording\n  * 1 - start recording\n"
+    },
+    "recordEvent" : {
+      "type" : "integer",
+      "description" : "A programme from the guide, given by serviceId and eventId\n  * 0 - cancel its recording\n  * 1 - record it\n"
+    },
+    "recordSeries" : {
+      "type" : "integer",
+      "description" : "The series of a programme from the guide, given by serviceId and eventId (by its series CRID): every programme of it on the service, each once (not repeats)\n  * 0 - stop recording the series (programmes already scheduled stay so)\n  * 1 - record the series\n"
+    },
+    "serviceId" : {
+      "type" : "integer",
+      "description" : "Service of the programme to record"
+    },
+    "eventId" : {
+      "type" : "integer",
+      "description" : "Event id of the programme to record, from the guide"
+    },
+    "networkId" : {
+      "type" : "integer",
+      "description" : "original_network_id of the service, from epgServiceList, where the service id alone is ambiguous. By default, the network being received, else the first with the service id\n"
+    },
+    "scan" : {
+      "type" : "integer",
+      "description" : "Scan for satellite transponders (with a satellite standard), each signal found in the spectrum tuned to, its symbol rate found and locked in Auto (DVB-S or S2), and those with a transport stream added to the programme guide with their network's services. The device is stepped across scanFrom to scanTo, or the scan is of its band if they're not given; afterwards it returns to where it was. It continues after the response: see searchText and scanTransponders in the report\n  * 0 - stop scanning\n  * 1 - start scanning\n"
+    },
+    "scanFrom" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Downlink frequency (as the device's, with any transverter delta), Hz, the scan starts at."
+    },
+    "scanTo" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Downlink frequency, Hz, the scan ends at."
+    }
+  },
+  "description" : "DVBDemod"
+};
+            defs.DVBDemodApp = {
+  "properties" : {
+    "applicationId" : {
+      "type" : "string",
+      "description" : "organisation_id.application_id, in hex."
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "HbbTV, DVB-J, DVB-HTML, or the application_type in hex."
+    },
+    "controlCode" : {
+      "type" : "string",
+      "description" : "AUTOSTART (started with the service), PRESENT (started by the user, as from the red button), KILL..."
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "url" : {
+      "type" : "string",
+      "description" : "Where it starts: an HTTP URL, or a dvb: URL of a file in an object carousel."
+    },
+    "carouselPid" : {
+      "type" : "integer",
+      "description" : "PID of the object carousel it's in, -1 if it isn't in one of this service's."
+    }
+  },
+  "description" : "An interactive application of a service, from its application information table (AIT)"
+};
+            defs.DVBDemodCarousel = {
+  "properties" : {
+    "pid" : {
+      "type" : "integer"
+    },
+    "componentTag" : {
+      "type" : "integer"
+    },
+    "carouselId" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "kind" : {
+      "type" : "string",
+      "description" : "MHEG-5, HbbTV (or both, as a broadcaster may send them in one carousel), or DSM-CC."
+    },
+    "received" : {
+      "type" : "integer",
+      "description" : "1 if its DSI has been received, so it's being received."
+    },
+    "modules" : {
+      "type" : "integer"
+    },
+    "modulesComplete" : {
+      "type" : "integer"
+    },
+    "bytes" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bytesComplete" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "files" : {
+      "type" : "integer",
+      "description" : "Files received."
+    }
+  },
+  "description" : "An object carousel of a service"
+};
+            defs.DVBDemodEPGEvent = {
+  "properties" : {
+    "eventId" : {
+      "type" : "integer",
+      "description" : "Event id, as the recordEvent action takes it."
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "start" : {
+      "type" : "string",
+      "description" : "Start, UTC, ISO 8601."
+    },
+    "duration" : {
+      "type" : "integer",
+      "description" : "Duration, in seconds."
+    },
+    "description" : {
+      "type" : "string",
+      "description" : "The short description, then any extended description."
+    },
+    "genre" : {
+      "type" : "string",
+      "description" : "Genre, from the content descriptor."
+    },
+    "minimumAge" : {
+      "type" : "integer",
+      "description" : "Minimum age, from the parental rating, if any."
+    },
+    "guidance" : {
+      "type" : "string",
+      "description" : "Guidance, as \"Contains strong language\" (UK)."
+    },
+    "hd" : {
+      "type" : "integer",
+      "description" : "1 if in HD."
+    },
+    "subtitles" : {
+      "type" : "integer",
+      "description" : "1 if subtitled."
+    },
+    "audioDescription" : {
+      "type" : "integer",
+      "description" : "1 if audio described."
+    },
+    "scheduled" : {
+      "type" : "integer",
+      "description" : "1 if a recording of it is scheduled."
+    }
+  },
+  "description" : "A programme in the DVB programme guide"
+};
+            defs.DVBDemodEPGService = {
+  "properties" : {
+    "networkId" : {
+      "type" : "integer",
+      "description" : "original_network_id"
+    },
+    "transportStreamId" : {
+      "type" : "integer",
+      "description" : "Transport stream (multiplex) the service is in, -1 if not known."
+    },
+    "serviceId" : {
+      "type" : "integer",
+      "description" : "Service id: the MPEG program number, as the play and recordEvent actions take it."
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "provider" : {
+      "type" : "string"
+    },
+    "type" : {
+      "type" : "integer",
+      "description" : "service_type (EN 300 468 table 87): 1 TV, 2 radio, 0x0C data, 0x16 to 0x19 advanced codec TV (0x19 HD)..."
+    },
+    "kind" : {
+      "type" : "string",
+      "description" : "TV, HD TV, Radio, Data or Other, from type."
+    },
+    "channel" : {
+      "type" : "integer",
+      "description" : "Logical channel number, -1 if none."
+    },
+    "visible" : {
+      "type" : "integer",
+      "description" : "0 if the broadcaster says the service shouldn't be listed (visible_service_flag)."
+    },
+    "onMultiplex" : {
+      "type" : "integer",
+      "description" : "1 if the service is in the transport stream being received."
+    },
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of its transport stream, Hz, from the network information table or learned when received, 0 if not known."
+    },
+    "events" : {
+      "type" : "integer",
+      "description" : "Events in its schedule."
+    },
+    "now" : {
+      "description" : "What's on now: the event's id, title, start and duration.",
+      "$ref" : "#/definitions/DVBDemodEPGEvent"
+    },
+    "next" : {
+      "description" : "What's on next: the event's id, title, start and duration.",
+      "$ref" : "#/definitions/DVBDemodEPGEvent"
+    }
+  },
+  "description" : "A service in the DVB programme guide"
+};
+            defs.DVBDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective sample rate delivered to the channel in samples per second."
+    },
+    "state" : {
+      "type" : "string",
+      "description" : "Receiver state: Searching, Sync, TPS (DVB-T), L1 (DVB-T2), Carrier and FEC (DVB-S), No TS, Locked, or the sample rate needed if it is wrong."
+    },
+    "standard" : {
+      "type" : "string",
+      "description" : "DVB-T, DVB-T2, DVB-T2-Lite, DVB-S or DVB-S2, once found."
+    },
+    "mode" : {
+      "type" : "string",
+      "description" : "FFT size: 2K or 8K for DVB-T, 1K to 32K for DVB-T2, with E for extended carrier mode."
+    },
+    "guardInterval" : {
+      "type" : "string",
+      "description" : "Guard interval as a fraction of the useful symbol duration, e.g. 1/32."
+    },
+    "constellation" : {
+      "type" : "string",
+      "description" : "QPSK, 16-QAM or 64-QAM, from the TPS."
+    },
+    "codeRate" : {
+      "type" : "string",
+      "description" : "Inner code rate, e.g. 2/3, from the TPS."
+    },
+    "hierarchy" : {
+      "type" : "string",
+      "description" : "Hierarchy: None, a=1, a=2 or a=4."
+    },
+    "cellId" : {
+      "type" : "integer",
+      "description" : "Cell identifier from the TPS, -1 if not signalled."
+    },
+    "mer" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Modulation error ratio (dB)"
+    },
+    "snr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Signal to noise ratio (dB), 0 if not known: DVB-T and T2 from the pilots, DVB-S2 its Es/N0 from the known symbols, DVB-S its Es/N0 from the symbols' moments. Unlike the MER, not overestimated when noise takes cells past the nearest constellation point."
+    },
+    "preViterbiBER" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Bit error rate before Viterbi decoding"
+    },
+    "postViterbiBER" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Bit error rate after Viterbi decoding. Below 2e-4 is quasi error free"
+    },
+    "frequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Carrier frequency offset (Hz)"
+    },
+    "clockOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sample clock offset (ppm)"
+    },
+    "tsSync" : {
+      "type" : "integer",
+      "description" : "1 if the transport stream is synchronised."
+    },
+    "tsBitRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Transport stream bit rate (bit/s)"
+    },
+    "tsPackets" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Transport stream packets output."
+    },
+    "searchText" : {
+      "type" : "string",
+      "description" : "What the multiplex search or the transponder scan is doing, or the last's outcome (the transponders found, or why it failed). Empty if neither has run\n"
+    },
+    "scanTransponders" : {
+      "type" : "integer",
+      "description" : "Transponders the scan has found (or found, when it ended), each added to the programme guide."
+    },
+    "rsCorrected" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Packets with errors that Reed-Solomon decoding corrected."
+    },
+    "rsFailed" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Packets with errors Reed-Solomon decoding couldn't correct."
+    },
+    "udpDatagrams" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "UDP datagrams sent."
+    },
+    "pilotPattern" : {
+      "type" : "string",
+      "description" : "DVB-T2 scattered pilot pattern, PP1 to PP8."
+    },
+    "extendedCarriers" : {
+      "type" : "integer",
+      "description" : "1 if DVB-T2 extended carrier mode is used."
+    },
+    "plpId" : {
+      "type" : "integer",
+      "description" : "DVB-T2 PLP being decoded."
+    },
+    "plpCount" : {
+      "type" : "integer",
+      "description" : "Number of DVB-T2 PLPs."
+    },
+    "rotation" : {
+      "type" : "integer",
+      "description" : "1 if the DVB-T2 PLP uses a rotated constellation."
+    },
+    "fecType" : {
+      "type" : "string",
+      "description" : "DVB-T2 and S2 LDPC block length (DVB-S2's FECFRAME size): 16K or 64K, or for a DVB-S2X VL-SNR frame 32K (its medium FECFRAME)."
+    },
+    "ldpcIterations" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Average LDPC decoder iterations (DVB-T2)"
+    },
+    "fecBlocks" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-T2 FEC blocks decoded."
+    },
+    "bchFailures" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-T2 FEC blocks with errors BCH decoding couldn't correct."
+    },
+    "l1Errors" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-T2 frames whose L1 signalling couldn't be decoded."
+    },
+    "epgServices" : {
+      "type" : "integer",
+      "description" : "Services in the programme guide, of this and other transport streams of the network."
+    },
+    "epgEvents" : {
+      "type" : "integer",
+      "description" : "Events in the programme guide's schedules."
+    },
+    "epgServiceId" : {
+      "type" : "integer",
+      "description" : "The service the now and next events are of: the one selected, or the first TV service."
+    },
+    "epgNowTitle" : {
+      "type" : "string",
+      "description" : "Title of the programme on now."
+    },
+    "epgNowStart" : {
+      "type" : "string",
+      "description" : "Start of the programme on now, UTC, ISO 8601."
+    },
+    "epgNowDuration" : {
+      "type" : "integer",
+      "description" : "Duration of the programme on now, in seconds."
+    },
+    "epgNowDescription" : {
+      "type" : "string",
+      "description" : "Description of the programme on now."
+    },
+    "epgNextTitle" : {
+      "type" : "string",
+      "description" : "Title of the next programme."
+    },
+    "epgNextStart" : {
+      "type" : "string",
+      "description" : "Start of the next programme, UTC, ISO 8601."
+    },
+    "epgNextDuration" : {
+      "type" : "integer",
+      "description" : "Duration of the next programme, in seconds."
+    },
+    "epgServiceList" : {
+      "type" : "array",
+      "description" : "The programme guide's services, of this and other transport streams of the network, in channel number order, when epgReport is 1 or 2.",
+      "items" : {
+        "$ref" : "#/definitions/DVBDemodEPGService"
+      }
+    },
+    "epgScheduleServiceId" : {
+      "type" : "integer",
+      "description" : "The service epgSchedule is of."
+    },
+    "epgScheduleNetworkId" : {
+      "type" : "integer",
+      "description" : "original_network_id of the service epgSchedule is of."
+    },
+    "epgSchedule" : {
+      "type" : "array",
+      "description" : "A service's schedule, in order, from an hour ago, when epgReport is 2.",
+      "items" : {
+        "$ref" : "#/definitions/DVBDemodEPGEvent"
+      }
+    },
+    "interactiveApps" : {
+      "type" : "array",
+      "description" : "The interactive applications (HbbTV's and others, from the AIT) of the service the report's of.",
+      "items" : {
+        "$ref" : "#/definitions/DVBDemodApp"
+      }
+    },
+    "carousels" : {
+      "type" : "array",
+      "description" : "The object carousels (MHEG-5's and HbbTV's) of the service the report's of, and how much of each has been received.",
+      "items" : {
+        "$ref" : "#/definitions/DVBDemodCarousel"
+      }
+    },
+    "recording" : {
+      "type" : "integer",
+      "description" : "Number of recordings in progress"
+    },
+    "recordingFile" : {
+      "type" : "string",
+      "description" : "File being recorded to (the first, if more than one)"
+    },
+    "recordingSize" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Bytes recorded, in all the recordings in progress"
+    },
+    "scheduledRecordings" : {
+      "type" : "integer",
+      "description" : "Programmes from the guide to be recorded"
+    },
+    "symbolRate" : {
+      "type" : "integer",
+      "description" : "DVB-S and S2: the symbol rate set, or found when automatic (0 while searching), symbols a second."
+    },
+    "measuredSymbolRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "DVB-S and S2: the symbol rate measured from the spectrum, 0 if not measured."
+    },
+    "rollOff" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "DVB-S2: the roll-off of the matched filter (from the BBHEADER, unless set)."
+    },
+    "modcod" : {
+      "type" : "string",
+      "description" : "DVB-S2: modulation and code rate of the last frame, e.g. 8PSK 2/3, or DVB-S2X's canonical name, e.g. 16APSK 2/3-L, or VL-SNR and a very low SNR frame's, e.g. VL-SNR BPSK-S 1/5."
+    },
+    "streamType" : {
+      "type" : "string",
+      "description" : "DVB-S2 and T2: the stream's type from its BBFRAMEs' headers: Transport stream, Generic packetized, Generic continuous or GSE. A generic stream (as GSE, carrying IP) isn't decoded."
+    },
+    "pilots" : {
+      "type" : "integer",
+      "description" : "DVB-S2: 1 if the frames have pilots."
+    },
+    "frameSize" : {
+      "type" : "string",
+      "description" : "DVB-S2: FECFRAME size, normal (64800) or short (16200), or medium (32400, DVB-S2X VL-SNR frames' only)."
+    },
+    "isi" : {
+      "type" : "integer",
+      "description" : "DVB-S2: input stream being decoded, -1 in a single input stream."
+    },
+    "isiCount" : {
+      "type" : "integer",
+      "description" : "DVB-S2: input streams seen, in a multiple input stream."
+    },
+    "esN0" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "DVB-S2: Es/N0 from the known symbols (header and pilots), dB."
+    },
+    "plFrames" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-S2: physical layer frames decoded."
+    },
+    "dummyFrames" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-S2: dummy physical layer frames."
+    },
+    "plHeaderMisses" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-S2: frame headers expected but not found."
+    },
+    "reacquisitions" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "DVB-S and S2: times acquisition was started again (the spectrum measured again) for want of lock."
+    }
+  },
+  "description" : "DVBDemod"
+};
+            defs.DVBDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel frequency offset from the device center frequency in Hz."
+    },
+    "bandwidth" : {
+      "type" : "integer",
+      "description" : "Channel bandwidth in Hz: 10000000 (DVB-T2 only), 8000000, 7000000, 6000000, 5000000 or 1700000 (DVB-T2 only, as for T2-Lite)."
+    },
+    "standard" : {
+      "type" : "integer",
+      "description" : "Standard to receive: 0 automatic (DVB-T or T2), 1 DVB-T, 2 DVB-T2 (T2-base, or T2-Lite if alone), 3 DVB-T2 T2-Lite profile, 4 automatic (DVB-S or S2), 5 DVB-S, 6 DVB-S2."
+    },
+    "plpId" : {
+      "type" : "integer",
+      "description" : "DVB-T2 Physical Layer Pipe to decode, -1 for the first data PLP."
+    },
+    "lowPriority" : {
+      "type" : "integer",
+      "description" : "DVB-T hierarchical modes: 1 to decode the low priority stream, 0 the high priority one."
+    },
+    "symbolRate" : {
+      "type" : "integer",
+      "description" : "DVB-S and S2 symbol rate, symbols a second, or 0 to measure it from the strongest signal in the channel. The channel's sample rate is from 2 to 4 times this, at least 1.5 times if the baseband's is less (all the baseband's, when 0)."
+    },
+    "rollOff" : {
+      "type" : "integer",
+      "description" : "DVB-S2 roll-off in hundredths (35, 25 or 20, or DVB-S2X's 15, 10 or 5), or 0 to follow the BBHEADER. DVB-S's is 0.35."
+    },
+    "codeRate" : {
+      "type" : "integer",
+      "description" : "DVB-S code rate: -1 automatic, 0 1/2, 1 2/3, 2 3/4, 3 5/6, 4 7/8."
+    },
+    "isi" : {
+      "type" : "integer",
+      "description" : "DVB-S2 input stream to decode (0 to 255), in a multiple input stream, -1 for the first received that doesn't carry only null packets."
+    },
+    "plScramblingCode" : {
+      "type" : "integer",
+      "description" : "DVB-S2 physical layer scrambling code (Gold code n), 0 to 262141. 0 for broadcasting."
+    },
+    "equaliser" : {
+      "type" : "integer",
+      "description" : "DVB-S and S2: undo the receive chain's frequency response (the device's and transponder's filters), measured once locked (1, the default) or not (0)."
+    },
+    "freesatRegion" : {
+      "type" : "integer",
+      "description" : "Freesat's regional channel numbers: the region id (from the bouquet association table), or 0 for the default region's."
+    },
+    "recordRetune" : {
+      "type" : "integer",
+      "description" : "For a scheduled recording of a service on another multiplex: retune to it when nothing else is being recorded, and back afterwards (1), or don't record it (0, the default)\n"
+    },
+    "recordFollowRunning" : {
+      "type" : "integer",
+      "description" : "Start and end scheduled recordings by the programme's running status, where the broadcaster sends it, so one that starts late or over-runs is recorded whole (1, the default), or by its time alone (0)\n"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Send the transport stream over UDP (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP destination address for the transport stream."
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP destination port for the transport stream.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "videoEnabled" : {
+      "type" : "integer",
+      "description" : "Decode and display the selected service (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "serviceId" : {
+      "type" : "integer",
+      "description" : "MPEG program number of the service to play. 0 for the first service with video."
+    },
+    "deinterlace" : {
+      "type" : "integer",
+      "description" : "Deinterlace video (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "hbbtv" : {
+      "type" : "integer",
+      "description" : "Run the service's HbbTV applications (the red button) over the video, in the GUI (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "avOffset" : {
+      "type" : "integer",
+      "description" : "Milliseconds to delay the picture relative to the sound, for lip sync. Negative to show it earlier.",
+      "minimum" : -1000,
+      "maximum" : 1000
+    },
+    "hardwareDecoding" : {
+      "type" : "integer",
+      "description" : "Decode video with the GPU, where possible (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "audioLanguage" : {
+      "type" : "string",
+      "description" : "ISO 639-2 code of the audio language to play (e.g. eng), or empty for the first"
+    },
+    "audioDescription" : {
+      "type" : "integer",
+      "description" : "Mix in audio description, where a service has it (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "audioDescriptionMixed" : {
+      "type" : "integer",
+      "description" : "With audioDescription, the broadcaster's mix of the audio and description (1), rather than the description mixed in by the receiver (0, the default), where a service has both\n",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "cleanAudio" : {
+      "type" : "integer",
+      "description" : "Play clean audio (for the hard of hearing), where a service has it (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "subtitlesHardOfHearing" : {
+      "type" : "integer",
+      "description" : "The hard of hearing subtitles rather than the normal ones, where a service has both (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "subtitles" : {
+      "type" : "integer",
+      "description" : "Show DVB subtitles, where a service has them (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "subtitleLanguage" : {
+      "type" : "string",
+      "description" : "ISO 639-2 code of the subtitle language to show (e.g. eng), or empty for the first"
+    },
+    "recordDirectory" : {
+      "type" : "string",
+      "description" : "Directory recordings are saved in"
+    },
+    "recordMode" : {
+      "type" : "integer",
+      "description" : "What's recorded\n  * 0 - the whole multiplex\n  * 1 - the service selected\n"
+    },
+    "recordStartPadding" : {
+      "type" : "integer",
+      "description" : "Seconds recordings of programmes from the guide start before the programme"
+    },
+    "recordEndPadding" : {
+      "type" : "integer",
+      "description" : "Seconds recordings of programmes from the guide continue after the programme"
+    },
+    "epgReport" : {
+      "type" : "integer",
+      "description" : "What the report gives of the programme guide, besides its size and what's on now and next on one service\n  * 0 - nothing more\n  * 1 - every service, with what's on now and next (epgServiceList)\n  * 2 - also the schedule of the service epgReportServiceId gives (epgSchedule)\n",
+      "minimum" : 0,
+      "maximum" : 2
+    },
+    "epgReportServiceId" : {
+      "type" : "integer",
+      "description" : "Service whose schedule the report gives, when epgReport is 2: its MPEG program number, or 0 for the service epgServiceId gives."
+    },
+    "epgReportNetworkId" : {
+      "type" : "integer",
+      "description" : "original_network_id of that service, or -1 for the network being received (or the first with the service id)."
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "Mute audio (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "audioVolume" : {
+      "type" : "integer",
+      "description" : "Audio volume, 0 to 100.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "audioDeviceName" : {
+      "type" : "string",
+      "description" : "Name of the audio output device."
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer."
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display configuration.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "DVBDemod"
+};
             defs.DVSerialDevice = {
   "properties" : {
     "deviceName" : {
@@ -7400,7 +9697,7 @@ margin-bottom: 20px;
   "properties" : {
     "denoiserType" : {
       "type" : "integer",
-      "description" : "Denoiser type\n  * 0 - none\n  * 1 - RNnoise\n",
+      "description" : "Denoiser type\n  * 0 - none\n  * 1 - RNnoise\n  * 2 - NVIDIA Noise Removal\n  * 3 - VST3 audio effect\n",
       "minimum" : 0,
       "maximum" : 1
     },
@@ -7409,6 +9706,32 @@ margin-bottom: 20px;
       "description" : "Enable denoiser\n  * 1 - enable\n  * 0 - disable\n",
       "minimum" : 0,
       "maximum" : 1
+    },
+    "nvidiaIntensity" : {
+      "type" : "integer",
+      "description" : "NVIDIA Noise Removal strength in percent",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "nvidiaVad" : {
+      "type" : "integer",
+      "description" : "NVIDIA voice activity detection\n  * 1 - enable\n  * 0 - disable\n"
+    },
+    "vst3ModulePath" : {
+      "type" : "string",
+      "description" : "Absolute path to the selected VST3 module or bundle"
+    },
+    "vst3ClassId" : {
+      "type" : "string",
+      "description" : "16-byte VST3 processor class ID encoded as hexadecimal"
+    },
+    "vst3Parameters" : {
+      "type" : "string",
+      "description" : "JSON object mapping numeric VST3 parameter IDs to normalized values from 0 to 1"
+    },
+    "vst3State" : {
+      "type" : "string",
+      "description" : "Opaque VST3 component and controller state, base64 encoded"
     },
     "volumeTenths" : {
       "type" : "integer",
@@ -7686,6 +10009,10 @@ margin-bottom: 20px;
       "description" : "Usrp output report data for Device.",
       "$ref" : "#/definitions/USRPOutputReport"
     },
+    "usrpMIMOReport" : {
+      "description" : "USRP MIMO report data for Device.",
+      "$ref" : "#/definitions/USRPMIMOReport"
+    },
     "xtrxInputReport" : {
       "description" : "Xtrx input report data for Device.",
       "$ref" : "#/definitions/XtrxInputReport"
@@ -7935,6 +10262,10 @@ margin-bottom: 20px;
       "description" : "Usrp output settings configuration for Device.",
       "$ref" : "#/definitions/USRPOutputSettings"
     },
+    "usrpMIMOSettings" : {
+      "description" : "USRP MIMO settings configuration for Device.",
+      "$ref" : "#/definitions/USRPMIMOSettings"
+    },
     "xtrxInputSettings" : {
       "description" : "Xtrx input settings configuration for Device.",
       "$ref" : "#/definitions/XtrxInputSettings"
@@ -7966,6 +10297,167 @@ margin-bottom: 20px;
     }
   },
   "description" : "Device running state"
+};
+            defs.DroneIDDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective sample rate delivered to the channel in samples per second."
+    },
+    "burstsDetected" : {
+      "type" : "integer",
+      "description" : "Number of bursts detected."
+    },
+    "burstsDecoded" : {
+      "type" : "integer",
+      "description" : "Number of bursts successfully decoded."
+    },
+    "burstsDropped" : {
+      "type" : "integer",
+      "description" : "Number of bursts dropped because the decoder was busy."
+    },
+    "dronesTracked" : {
+      "type" : "integer",
+      "description" : "Number of drones currently being tracked."
+    },
+    "scanLocked" : {
+      "type" : "integer",
+      "description" : "1 if scanning is paused on a channel where DroneID bursts are being received, 0 otherwise."
+    }
+  },
+  "description" : "DroneIDDemod"
+};
+            defs.DroneIDDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel frequency offset from the device center frequency in Hz."
+    },
+    "detectionThreshold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Normalised cyclic prefix correlation threshold (0-1) for burst detection."
+    },
+    "turboIterations" : {
+      "type" : "integer",
+      "description" : "Maximum number of turbo decoder iterations."
+    },
+    "filterSerial" : {
+      "type" : "string",
+      "description" : "Regular expression to filter serial numbers displayed in the table."
+    },
+    "mapTimeout" : {
+      "type" : "integer",
+      "description" : "Time in seconds after last message, before drone is removed from the map. 0 to never remove."
+    },
+    "mapAltitude" : {
+      "type" : "integer",
+      "description" : "Which value is used for the drone's altitude on the map (0 - Altitude above WGS84 ellipsoid, 1 - Height above take-off point, relative to ground)"
+    },
+    "scan" : {
+      "type" : "integer",
+      "description" : "Whether to scan DroneID channels, by changing the device center frequency",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "scanBand" : {
+      "type" : "integer",
+      "description" : "Channels to scan (0 - 2.4GHz, 1 - 5.8GHz, 2 - 2.4 and 5.8GHz)"
+    },
+    "scanDwell" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds to wait on each channel for a burst when scanning."
+    },
+    "scanHold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds to remain on a channel after the last burst was detected when scanning."
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "logFilename" : {
+      "type" : "string",
+      "description" : "Log file name or path."
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "description" : "Enable logging to the configured file (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "useFileTime" : {
+      "type" : "integer",
+      "description" : "Use time from File Input device rather than system time (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer."
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display configuration.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "DroneIDDemod"
 };
             defs.EndOfTrainDemodReport = {
   "properties" : {
@@ -8558,6 +11050,9 @@ margin-bottom: 20px;
       "description" : "Afc actions configuration for Feature.",
       "$ref" : "#/definitions/AFCActions"
     },
+    "AircraftActions" : {
+      "$ref" : "#/definitions/AircraftActions"
+    },
     "AMBEActions" : {
       "description" : "Ambe actions configuration for Feature.",
       "$ref" : "#/definitions/AMBEActions"
@@ -8744,6 +11239,9 @@ margin-bottom: 20px;
       "description" : "Afc report data for Feature.",
       "$ref" : "#/definitions/AFCReport"
     },
+    "AircraftReport" : {
+      "$ref" : "#/definitions/AircraftReport"
+    },
     "AMBEReport" : {
       "description" : "Ambe report data for Feature.",
       "$ref" : "#/definitions/AMBEReport"
@@ -8855,6 +11353,9 @@ margin-bottom: 20px;
     "AFCSettings" : {
       "description" : "Afc settings configuration for Feature.",
       "$ref" : "#/definitions/AFCSettings"
+    },
+    "AircraftSettings" : {
+      "$ref" : "#/definitions/AircraftSettings"
     },
     "AISSettings" : {
       "description" : "AIS settings configuration for Feature.",
@@ -11196,6 +13697,159 @@ margin-bottom: 20px;
     }
   },
   "description" : "HeatMap"
+};
+            defs.IEEE_802_15_4_DemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective sample rate delivered to the channel in samples per second."
+    },
+    "framesOK" : {
+      "type" : "integer",
+      "description" : "Number of frames received with a valid FCS."
+    },
+    "framesBadFCS" : {
+      "type" : "integer",
+      "description" : "Number of frames received with an invalid FCS."
+    }
+  },
+  "description" : "IEEE_802_15_4_Demod"
+};
+            defs.IEEE_802_15_4_DemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Frequency offset of the channel from the device center frequency in Hz."
+    },
+    "phy" : {
+      "type" : "string",
+      "description" : "PHY. One of: \"20kbps BPSK\", \"40kbps BPSK\", \"100kbps <1GHz O-QPSK\", \"250kbps <1GHz O-QPSK (Sine)\", \"250kbps <1GHz O-QPSK (RC)\", \"250kbps >2GHz O-QPSK\"\n"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RF bandwidth of the channel filter in Hz."
+    },
+    "samplesPerChip" : {
+      "type" : "integer",
+      "description" : "Samples per chip. The channel sample rate is this multiplied by the chip rate.",
+      "minimum" : 2,
+      "maximum" : 16
+    },
+    "maxFrequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Maximum carrier frequency offset to search for during acquisition in Hz."
+    },
+    "threshold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Preamble detection threshold.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "showBadFCS" : {
+      "type" : "integer",
+      "description" : "Show frames with invalid FCS (1 for yes, 0 for no)."
+    },
+    "filterFrameType" : {
+      "type" : "integer",
+      "description" : "Frame type filter for the GUI table: 0 - All, 1 - Beacon, 2 - Data, 3 - Ack, 4 - Command, 5 - Other.",
+      "minimum" : 0,
+      "maximum" : 5
+    },
+    "filterPANID" : {
+      "type" : "string",
+      "description" : "Regular expression to filter frames by PAN ID in the GUI table."
+    },
+    "filterAddress" : {
+      "type" : "string",
+      "description" : "Regular expression to filter frames by source or destination address in the GUI table."
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received frames to specified UDP port (1 for yes, 0 for no)."
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received frames to."
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received frames to.",
+      "minimum" : 1024,
+      "maximum" : 65535
+    },
+    "udpFormat" : {
+      "type" : "integer",
+      "description" : "Format of frames forwarded via UDP: 0 - ZEP (ZigBee Encapsulation Protocol v2), 1 - Raw MAC frame.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "logFilename" : {
+      "type" : "string",
+      "description" : "Log filename. Use .pcap extension for PCAP format, otherwise CSV format is used."
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to log received frames to a file (1 for yes, 0 for no)."
+    },
+    "useFileTime" : {
+      "type" : "integer",
+      "description" : "Use date and time from file input device rather than the system clock (1 for yes, 0 for no)."
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Channel-marker colour as an ARGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "Channel title shown in the GUI."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "Address of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "Port of the reverse API peer."
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer."
+    },
+    "scopeConfig" : {
+      "description" : "Oscilloscope-display configuration.",
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display settings.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "IEEE_802_15_4_Demod"
 };
             defs.IEEE_802_15_4_ModActions = {
   "properties" : {
@@ -13803,6 +16457,14 @@ margin-bottom: 20px;
 };
             defs.MapAircraftState = {
   "properties" : {
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time at which this complete aircraft state applies (ISO 8601 extended format). When set, the Map preserves this sample instead of coalescing it with a later update."
+    },
+    "icao" : {
+      "type" : "string",
+      "description" : "ICAO Mode S address of this aircraft as lower-case hex"
+    },
     "callsign" : {
       "type" : "string",
       "description" : "Radio callsign."
@@ -13901,7 +16563,19 @@ margin-bottom: 20px;
     },
     "tcasMode" : {
       "type" : "integer",
-      "description" : "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
+      "description" : "0 unknown, 1 Off, 2 TA only, 3 TA/RA"
+    },
+    "tcasRA" : {
+      "type" : "integer",
+      "description" : "Active TCAS resolution advisory bitfield. 0 none, bit 0 active, bit 1 corrective (vs preventive), bit 2 downward sense (descend), bit 3 positive (vs vertical speed limit), bit 4 clear of conflict, bit 5 multiple threats, bit 6 opposite-sense multiple-threat coding"
+    },
+    "tcasThreatIcao" : {
+      "type" : "string",
+      "description" : "ICAO Mode S address of the RA threat aircraft as lower-case hex, empty if not identified"
+    },
+    "squawk" : {
+      "type" : "integer",
+      "description" : "Mode A squawk code as decimal digits (e.g. 7000), -1 for unknown"
     },
     "windSpeed" : {
       "type" : "number",
@@ -13917,6 +16591,12 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Static air temperature for Map aircraft state."
+    },
+    "flightPlan" : {
+      "$ref" : "#/definitions/MapFlightPlan"
+    },
+    "datalinkMessage" : {
+      "$ref" : "#/definitions/MapDatalinkMessage"
     }
   },
   "description" : "Aircraft state for PFD/ND"
@@ -13964,6 +16644,10 @@ margin-bottom: 20px;
     "stop" : {
       "type" : "integer",
       "description" : "Stop a looped animation from playing"
+    },
+    "sound" : {
+      "type" : "string",
+      "description" : "Audio file to play when the animation starts (from the Map's audio directory, e.g. A320_gear.wav), spatially located at the map item. Empty for none"
     }
   },
   "description" : "Animation to play in the model on the 3D map"
@@ -13996,12 +16680,71 @@ margin-bottom: 20px;
   },
   "description" : "A map coordinate"
 };
+            defs.MapDatalinkMessage = {
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "description" : "Sequence number, incremented for each message for an aircraft"
+    },
+    "received" : {
+      "type" : "string",
+      "description" : "Date and time the message was received (ISO 8601 extended format)"
+    },
+    "uplink" : {
+      "type" : "integer",
+      "description" : "1 ground to air, 0 air to ground"
+    },
+    "station" : {
+      "type" : "string",
+      "description" : "Ground station / ATC facility, e.g. EDDS. Empty if unknown"
+    },
+    "text" : {
+      "type" : "string"
+    }
+  },
+  "description" : "Datalink ATC message (CPDLC / pre-departure clearance / oceanic clearance), shown on the Map's DCDU"
+};
+            defs.MapFlightPlan = {
+  "properties" : {
+    "departure" : {
+      "type" : "string",
+      "description" : "ICAO of departure airport"
+    },
+    "arrival" : {
+      "type" : "string",
+      "description" : "ICAO of arrival airport"
+    },
+    "arrivalRunway" : {
+      "type" : "string",
+      "description" : "Arrival runway, e.g. 27R. Empty if unknown"
+    },
+    "approach" : {
+      "type" : "string",
+      "description" : "Arrival approach procedure as filed, e.g. ILSY01R. Empty if unknown"
+    },
+    "activeWaypoint" : {
+      "type" : "integer",
+      "description" : "Index in to waypoints of the waypoint being flown to, -1 if unknown"
+    },
+    "waypoints" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/MapRouteWaypoint"
+      }
+    }
+  },
+  "description" : "Flight plan / cleared route, drawn on the Map's ND (Navigation Display)"
+};
             defs.MapItem = {
   "required" : [ "name" ],
   "properties" : {
     "name" : {
       "type" : "string",
       "description" : "A name for the item"
+    },
+    "group" : {
+      "type" : "string",
+      "description" : "Which of the Map's item settings groups this item belongs to - its colour, labels, minimum zoom and so on. Optional: when it is not given the item takes the group named after the plugin that sent it!"
     },
     "image" : {
       "type" : "string",
@@ -14186,6 +16929,10 @@ margin-bottom: 20px;
     "aircraftState" : {
       "description" : "Current states of aircraft tracked by the ADS-B demodulator.",
       "$ref" : "#/definitions/MapAircraftState"
+    },
+    "loopSound" : {
+      "type" : "string",
+      "description" : "Sound to loop while the item is on the 3D map, spatially located at the item. Either an engine sound-set directory below the configured 3d/Sounds directory, containing engine.json and OGG layers, or a legacy audio file name from the Map's bundled audio directory (e.g. helicopter.wav). Empty for none"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -14197,6 +16944,10 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "A name for the item"
     },
+    "group" : {
+      "type" : "string",
+      "description" : "Which of the Map's item settings groups this item belongs to - its colour, labels, minimum zoom and so on. Optional: when it is not given the item takes the group named after the plugin that sent it!"
+    },
     "image" : {
       "type" : "string",
       "description" : "Filename or URL of image to draw on the 2D map"
@@ -14380,6 +17131,10 @@ margin-bottom: 20px;
     "aircraftState" : {
       "description" : "Current states of aircraft tracked by the ADS-B demodulator.",
       "$ref" : "#/definitions/MapAircraftState"
+    },
+    "loopSound" : {
+      "type" : "string",
+      "description" : "Sound to loop while the item is on the 3D map, spatially located at the item. Either an engine sound-set directory below the configured 3d/Sounds directory, containing engine.json and OGG layers, or a legacy audio file name from the Map's bundled audio directory (e.g. helicopter.wav). Empty for none"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -14392,6 +17147,33 @@ margin-bottom: 20px;
     }
   },
   "description" : "Map"
+};
+            defs.MapRouteWaypoint = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, positive to the North. NaN if the waypoint could not be placed"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, positive to the East. NaN if the waypoint could not be placed"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Expected or constrained altitude at this waypoint in feet. NaN if unknown"
+    },
+    "eta" : {
+      "type" : "string",
+      "description" : "Estimated time over this waypoint (ISO 8601 extended format). Empty if unknown"
+    }
+  },
+  "description" : "A waypoint of a flight plan, for the Map's ND (Navigation Display)"
 };
             defs.MapSettings = {
   "properties" : {
@@ -14461,6 +17243,18 @@ margin-bottom: 20px;
       "description" : "Camera light intensity used by the 3D map.",
       "minimum" : 0
     },
+    "distantLightIntensity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Ambient light added to distant 3D models, so they are not dark silhouettes against a bright sky. 0 disables it.",
+      "minimum" : 0
+    },
+    "lowDetailModels" : {
+      "type" : "integer",
+      "description" : "Draw aircraft that are small on screen with their low detail model, where they have one (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
     "eciCamera" : {
       "type" : "integer",
       "description" : "Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).",
@@ -14506,6 +17300,11 @@ margin-bottom: 20px;
     "fps" : {
       "type" : "integer",
       "description" : "Display the 3D map frame rate (1 for yes, 0 for no).",
+      "minimum" : 0
+    },
+    "frameRate" : {
+      "type" : "integer",
+      "description" : "Frame rate to render the 3D map at, in frames per second. 0 to use the refresh rate of the display the map is on.",
       "minimum" : 0,
       "maximum" : 1
     },
@@ -14594,6 +17393,21 @@ margin-bottom: 20px;
     "defaultImagery" : {
       "type" : "string",
       "description" : "Default imagery layer for the 3D map."
+    },
+    "mapCenterLatitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) the 2D map is centred on"
+    },
+    "mapCenterLongitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) the 2D map is centred on"
+    },
+    "mapZoomLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Zoom level of the 2D map. Negative means nothing has been saved, in which case the map opens centred on My Position"
     },
     "title" : {
       "type" : "string",
@@ -16427,6 +19241,127 @@ margin-bottom: 20px;
   },
   "description" : "PER Tester settings"
 };
+            defs.PSK31DemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective sample rate delivered to the channel in samples per second."
+    },
+    "frequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Carrier-frequency estimate in Hz relative to the selected channel frequency. Only present when locked."
+    },
+    "snr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Signal-to-noise ratio in dB, normalized to a 100 Hz noise bandwidth. Only present when locked."
+    },
+    "locked" : {
+      "type" : "integer",
+      "description" : "Whether a PSK31 signal is locked and being decoded.",
+      "minimum" : 0,
+      "maximum" : 1
+    }
+  },
+  "description" : "PSK31 demodulator runtime report"
+};
+            defs.PSK31DemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel frequency offset from the device center frequency in Hz."
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RF bandwidth in Hz.",
+      "minimum" : 50,
+      "maximum" : 500
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "logFilename" : {
+      "type" : "string",
+      "description" : "Log file name or path."
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "description" : "Enable logging to the configured file (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer."
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer."
+    },
+    "scopeConfig" : {
+      "description" : "Oscilloscope-display configuration.",
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "description" : "Channel-marker display configuration.",
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "description" : "Saved expanded or collapsed state of the GUI sections.",
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "PSK31 demodulator settings"
+};
             defs.PSK31ModActions = {
   "properties" : {
     "tx" : {
@@ -16525,18 +19460,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Symbol span setting for Psk31 mod."
     },
-    "prefixCRLF" : {
-      "type" : "integer",
-      "description" : "Enable prefix crlf (1 enabled, 0 disabled).",
-      "minimum" : 0,
-      "maximum" : 1
-    },
-    "postfixCRLF" : {
-      "type" : "integer",
-      "description" : "Enable postfix crlf (1 enabled, 0 disabled).",
-      "minimum" : 0,
-      "maximum" : 1
-    },
     "udpEnabled" : {
       "type" : "integer",
       "description" : "Whether to receive text to transmit on specified UDP port",
@@ -16623,7 +19546,7 @@ margin-bottom: 20px;
     },
     "mode" : {
       "type" : "integer",
-      "description" : "Transmission mode\n  * 0 - 1200 AFSK\n"
+      "description" : "Transmission mode\n  * 0 - 1200 AFSK\n  * 1 - 9600 G3RUH scrambled FSK\n"
     },
     "rfBandwidth" : {
       "type" : "number",
@@ -16632,11 +19555,11 @@ margin-bottom: 20px;
     },
     "chase" : {
       "type" : "integer",
-      "description" : "Chase decoding depth. On CRC failure, retry inverting the n least confident symbols. 0 disables"
+      "description" : "1200 AFSK only; ignored in 9600 G3RUH mode. Chase decoding depth. On CRC failure, retry inverting the n least confident symbols. 0 disables"
     },
     "mlse" : {
       "type" : "integer",
-      "description" : "Whether to detect on the complex baseband with maximum likelihood sequence estimation instead of an FM discriminator. Worth about 9 dB. 1 by default"
+      "description" : "1200 AFSK only; ignored in 9600 G3RUH mode. Whether to detect on the complex baseband with maximum likelihood sequence estimation instead of an FM discriminator. Worth about 9 dB. 1 by default"
     },
     "udpEnabled" : {
       "type" : "integer",
@@ -17043,6 +19966,12 @@ margin-bottom: 20px;
 };
             defs.PagerDemodSettings = {
   "properties" : {
+    "modulation" : {
+      "type" : "integer",
+      "description" : "Pager protocols to receive\n  * 0 - Auto (POCSAG and FLEX)\n  * 1 - POCSAG\n  * 2 - FLEX\n",
+      "minimum" : 0,
+      "maximum" : 2
+    },
     "decode" : {
       "type" : "integer",
       "description" : "Decode mode\n  * 0 - Standard\n  * 1 - Inverted\n  * 2 - Numeric\n  * 3 - Alphanumeric\n  * 4 - Heuristic\n",
@@ -18611,7 +21540,7 @@ margin-bottom: 20px;
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float",
-      "description" : "channel RF bandwidth in Hz"
+      "description" : "Channel RF bandwidth in Hz. Should be 50 Hz for MSF, DCF77, TDF, WWVB or JJY. Should be 1000 Hz for RBU. Should be 500 Hz for PCSK-225"
     },
     "threshold" : {
       "type" : "number",
@@ -20201,6 +23130,189 @@ margin-bottom: 20px;
     }
   },
   "description" : "SDRplayV3"
+};
+            defs.SELCALDemodReport = {
+  "type" : "object",
+  "properties" : {
+    "channelPowerDb" : {
+      "type" : "number",
+      "format" : "double"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "audioSampleRate" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "squelchOpen" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Monitoring audio squelch is open"
+    },
+    "carrierLocked" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "A reliable residual USB carrier, or an AM carrier, has been detected"
+    },
+    "carrierFrequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Measured carrier error from channel tuning in Hz; valid when carrierLocked is 1"
+    },
+    "toneFrequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Common tone offset measured by the decoder, or the expected offset when no tones are present, in Hz"
+    },
+    "state" : {
+      "type" : "string"
+    },
+    "lastCode" : {
+      "type" : "string"
+    },
+    "lastTimestamp" : {
+      "type" : "string"
+    },
+    "lastFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "lastRssi" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Average channel power during the tone bursts of the last call, in dB"
+    },
+    "lastSnr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "SNR of the weaker tone of the last call, relative to the noise in a tone bin, in dB"
+    },
+    "callCount" : {
+      "type" : "integer",
+      "format" : "int64"
+    }
+  },
+  "description" : "SELCAL report"
+};
+            defs.SELCALDemodSettings = {
+  "type" : "object",
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "modulation" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "0 = USB, 1 = AM",
+      "enum" : [ 0, 1 ]
+    },
+    "toneFrequencyOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Common received audio tone offset in Hz",
+      "minimum" : -100,
+      "maximum" : 100
+    },
+    "autoToneFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Use a detected residual USB carrier within +/-100 Hz as the tone offset; otherwise tones are searched for within +/-6 Hz of the manual offset",
+      "default" : 1,
+      "enum" : [ 0, 1 ]
+    },
+    "threshold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Minimum level of each tone above the noise in a tone bin, in dB",
+      "minimum" : 6,
+      "maximum" : 20,
+      "default" : 8.0
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Monitoring audio squelch threshold in dBFS; decoding is independent of squelch",
+      "minimum" : -100,
+      "maximum" : 0,
+      "default" : -80
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "filter" : {
+      "type" : "string"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "SELCAL settings"
 };
             defs.SIDSettings = {
   "properties" : {
@@ -23741,9 +26853,212 @@ margin-bottom: 20px;
       "format" : "int8",
       "description" : "GPIO pin-state bit mask, with one bit per pin."
     },
+    "wireFormat" : {
+      "type" : "integer",
+      "description" : "Samples over USB or Ethernet: 0 16 bit (sc16), 1 8 bit (sc8: half the traffic, for high sample rates)."
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer."
+    }
+  },
+  "description" : "USRP"
+};
+            defs.USRPMIMOReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "rxStreamActive" : {
+      "type" : "integer",
+      "description" : "1 if Rx stream is active else 0"
+    },
+    "rxOverrunCount" : {
+      "type" : "integer",
+      "description" : "Number of Rx stream overrun events."
+    },
+    "rxTimeoutCount" : {
+      "type" : "integer",
+      "description" : "Number of Rx stream timeout events."
+    },
+    "txStreamActive" : {
+      "type" : "integer",
+      "description" : "1 if Tx stream is active else 0"
+    },
+    "txUnderrunCount" : {
+      "type" : "integer",
+      "description" : "Number of Tx stream underrun events."
+    },
+    "txDroppedPacketsCount" : {
+      "type" : "integer",
+      "description" : "Number of Tx dropped packets."
+    },
+    "masterClockRate" : {
+      "type" : "integer",
+      "description" : "Master clock rate (FPGA/RFIC sample rate) in samples per second."
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Board temperature in degrees C, if the device has a temperature sensor."
+    }
+  },
+  "description" : "USRP"
+};
+            defs.USRPMIMOSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible title."
+    },
+    "devSampleRate" : {
+      "type" : "integer",
+      "description" : "Device I/Q sample rate in samples per second before software decimation or interpolation. Common to Rx and Tx."
+    },
+    "clockSource" : {
+      "type" : "string",
+      "description" : "Clock source (E.g. internal, external or gpsdo)."
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "description" : "GPIO direction bit mask, with one bit per pin (0 for ATR, 1 for output)."
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "description" : "GPIO pin-state bit mask, with one bit per pin."
+    },
+    "rxCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Rx center frequency in Hz."
+    },
+    "rxLOOffset" : {
+      "type" : "integer",
+      "description" : "Rx LO offset in Hz. The LO is offset from the center frequency by this amount and a digital NCO is used to compensate."
+    },
+    "log2SoftDecim" : {
+      "type" : "integer",
+      "description" : "Base-2 exponent of the software decimation factor."
+    },
+    "rxLpfBW" : {
+      "type" : "integer",
+      "description" : "Rx analog low-pass filter bandwidth in Hz."
+    },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "Enable Rx DC offset correction (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "iqCorrection" : {
+      "type" : "integer",
+      "description" : "Enable Rx IQ imbalance correction (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rxTransverterMode" : {
+      "type" : "integer",
+      "description" : "Enable Rx transverter frequency translation (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rxTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Frequency translation applied in Rx transverter mode in Hz."
+    },
+    "rx0GainMode" : {
+      "type" : "integer",
+      "description" : "Rx channel 0 gain mode (0 automatic, 1 manual).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rx0Gain" : {
+      "type" : "integer",
+      "description" : "Rx channel 0 gain in dB."
+    },
+    "rx0AntennaPath" : {
+      "type" : "string",
+      "description" : "Rx channel 0 antenna path."
+    },
+    "rx1GainMode" : {
+      "type" : "integer",
+      "description" : "Rx channel 1 gain mode (0 automatic, 1 manual).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rx1Gain" : {
+      "type" : "integer",
+      "description" : "Rx channel 1 gain in dB."
+    },
+    "rx1AntennaPath" : {
+      "type" : "string",
+      "description" : "Rx channel 1 antenna path."
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Tx center frequency in Hz."
+    },
+    "txLOOffset" : {
+      "type" : "integer",
+      "description" : "Tx LO offset in Hz. The LO is offset from the center frequency by this amount and a digital NCO is used to compensate."
+    },
+    "log2SoftInterp" : {
+      "type" : "integer",
+      "description" : "Base-2 exponent of the software interpolation factor."
+    },
+    "txLpfBW" : {
+      "type" : "integer",
+      "description" : "Tx analog low-pass filter bandwidth in Hz."
+    },
+    "txTransverterMode" : {
+      "type" : "integer",
+      "description" : "Enable Tx transverter frequency translation (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "txTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Frequency translation applied in Tx transverter mode in Hz."
+    },
+    "tx0Gain" : {
+      "type" : "integer",
+      "description" : "Tx channel 0 gain in dB."
+    },
+    "tx0AntennaPath" : {
+      "type" : "string",
+      "description" : "Tx channel 0 antenna path."
+    },
+    "tx1Gain" : {
+      "type" : "integer",
+      "description" : "Tx channel 1 gain in dB."
+    },
+    "tx1AntennaPath" : {
+      "type" : "string",
+      "description" : "Tx channel 1 antenna path."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no).",
       "minimum" : 0,
       "maximum" : 1
     },
@@ -24716,6 +28031,307 @@ margin-bottom: 20px;
     }
   },
   "description" : "WFMMod"
+};
+            defs.WefaxDemodActions = {
+  "properties" : {
+    "startPhasing" : {
+      "type" : "integer",
+      "description" : "Start or restart phasing acquisition when non-zero"
+    },
+    "finishPhasing" : {
+      "type" : "integer",
+      "description" : "Finish phasing and begin reception when non-zero"
+    },
+    "startReceiving" : {
+      "type" : "integer",
+      "description" : "Begin reception using nominal/manual timing when non-zero"
+    },
+    "stop" : {
+      "type" : "integer",
+      "description" : "Stop the current capture when non-zero"
+    },
+    "clear" : {
+      "type" : "integer",
+      "description" : "Clear the current image when non-zero"
+    },
+    "save" : {
+      "type" : "integer",
+      "description" : "Save the current image using the configured path when non-zero"
+    }
+  },
+  "description" : "WEFAX decoder actions"
+};
+            defs.WefaxDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power received in the channel in dB"
+    },
+    "state" : {
+      "type" : "string",
+      "description" : "Decoder state (idle, phasing or receiving)"
+    },
+    "phasingLineCount" : {
+      "type" : "integer",
+      "description" : "Number of accepted phasing lines"
+    },
+    "samplesPerLine" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Applied fractional line period at the internal sample rate"
+    },
+    "clockCorrectionPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Measured line clock correction relative to the nominal rate"
+    },
+    "appliedClockCorrectionPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Line clock correction actually applied to raster timing"
+    },
+    "confidence" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Phasing fit confidence from 0 to 1"
+    },
+    "ioc" : {
+      "type" : "integer",
+      "description" : "Selected index of cooperation"
+    },
+    "linesPerMinute" : {
+      "type" : "integer",
+      "description" : "Selected nominal line rate"
+    },
+    "imageWidth" : {
+      "type" : "integer",
+      "description" : "Native raster width in pixels"
+    },
+    "imageHeight" : {
+      "type" : "integer",
+      "description" : "Current raster height in pixels"
+    },
+    "imageQueueOverflows" : {
+      "type" : "integer",
+      "description" : "Number of image rows batches rejected because the worker queue was full"
+    },
+    "imageId" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Monotonically increasing capture image identifier"
+    },
+    "completionReason" : {
+      "type" : "string",
+      "description" : "Reason the latest capture ended"
+    },
+    "lastSaveError" : {
+      "type" : "string",
+      "description" : "Most recent asynchronous PNG save error, or an empty string"
+    },
+    "tuningErrorHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Estimated FM midpoint error in Hz"
+    },
+    "slantCorrectionPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Line-clock correction in ppm applied by automatic slant correction, 0 when none"
+    },
+    "effectiveLinesPerMinute" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Line rate implied by the applied fractional line period"
+    },
+    "timingSource" : {
+      "type" : "string",
+      "description" : "Source of the applied line timing estimate"
+    },
+    "timingStatus" : {
+      "type" : "string",
+      "description" : "Acceptance status of the measured phasing timing"
+    },
+    "timingAccepted" : {
+      "type" : "integer",
+      "description" : "Whether the measured timing passed confidence and range checks"
+    },
+    "requiredBandwidthHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Estimated RF bandwidth required by the selected IOC and LPM"
+    },
+    "bandwidthSufficient" : {
+      "type" : "integer",
+      "description" : "Whether configured RF and source bandwidth cover the selected mode"
+    },
+    "complete" : {
+      "type" : "integer",
+      "description" : "Whether the latest capture ended with a confirmed stop tone"
+    },
+    "captureStartTime" : {
+      "type" : "string",
+      "description" : "UTC capture-start time from the processing clock"
+    },
+    "captureFrequencyHz" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "RF fax centre used when the capture started"
+    }
+  },
+  "description" : "WEFAX demodulator runtime report"
+};
+            defs.WefaxDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel center frequency shift from the baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Channel RF bandwidth in Hz"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Black-to-white FM shift in Hz"
+    },
+    "ioc" : {
+      "type" : "integer",
+      "description" : "Selected index of cooperation (288 or 576)"
+    },
+    "linesPerMinute" : {
+      "type" : "integer",
+      "description" : "Selected nominal line rate"
+    },
+    "autoMode" : {
+      "type" : "integer",
+      "description" : "Automatically detect IOC, LPM, start, phasing end and stop",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "inverted" : {
+      "type" : "integer",
+      "description" : "Invert black and white video levels",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "minimumPhasingLines" : {
+      "type" : "integer",
+      "description" : "Minimum consistent phasing lines required before reception"
+    },
+    "startConfirmSeconds" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sustained IOC start-tone duration required for acquisition"
+    },
+    "stopConfirmSeconds" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sustained stop-tone duration required to finalize a capture"
+    },
+    "manualClockCorrectionPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Manual line clock correction used when no phasing estimate is available"
+    },
+    "maxRows" : {
+      "type" : "integer",
+      "description" : "Maximum raster rows retained for one capture"
+    },
+    "autoSave" : {
+      "type" : "integer",
+      "description" : "Automatically save completed images",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "autoSavePath" : {
+      "type" : "string",
+      "description" : "Directory used for automatic PNG output"
+    },
+    "displayInverted" : {
+      "type" : "integer",
+      "description" : "Invert the displayed image without changing decoded pixels",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayContrast" : {
+      "type" : "integer",
+      "description" : "Display-only contrast adjustment from -100 to 100"
+    },
+    "displayThreshold" : {
+      "type" : "integer",
+      "description" : "Display-only monochrome threshold from 0 to 255, or -1 to disable"
+    },
+    "horizontalAlignment" : {
+      "type" : "integer",
+      "description" : "Display-only horizontal raster shift in pixels"
+    },
+    "displaySlantCorrectionPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Retrospective display-only line clock correction in ppm"
+    },
+    "displayRotation" : {
+      "type" : "integer",
+      "description" : "Clockwise display rotation in degrees (0, 90, 180 or 270)"
+    },
+    "displayZoomPercent" : {
+      "type" : "integer",
+      "description" : "Display zoom percent, or 0 to fit the viewport"
+    },
+    "autoScroll" : {
+      "type" : "integer",
+      "description" : "Follow newly received rows in the image view",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "autoSlant" : {
+      "type" : "integer",
+      "description" : "Straighten the image by measuring slant from its vertical lines (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "description" : "Display color encoded as an RGB integer"
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "User-visible channel title"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO stream index"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize settings with a reverse API peer",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Device-set index used by the reverse API peer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "description" : "Channel index used by the reverse API peer"
+    }
+  },
+  "description" : "WEFAX demodulator settings"
 };
             defs.WindowInfo = {
   "properties" : {
@@ -70197,7 +73813,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-15T18:30:50.537+02:00
+              Generated 2026-11-10T16:25:32.293+01:00
             </div>
           </div>
       </div>

@@ -152,4 +152,3 @@ SWGBFMModReport::isSet(){
 }
 }
 
-

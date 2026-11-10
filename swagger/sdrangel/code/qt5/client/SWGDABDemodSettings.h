@@ -71,10 +71,10 @@ public:
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
-
     qint32 getCoherent();
-    qint32 getAnnouncementTypes();
     void setCoherent(qint32 coherent);
+
+    qint32 getAnnouncementTypes();
     void setAnnouncementTypes(qint32 announcement_types);
 
     qint32 getUseReverseApi();
@@ -129,10 +129,10 @@ private:
     qint32 stream_index;
     bool m_stream_index_isSet;
 
-
     qint32 coherent;
-    qint32 announcement_types;
     bool m_coherent_isSet;
+
+    qint32 announcement_types;
     bool m_announcement_types_isSet;
 
     qint32 use_reverse_api;

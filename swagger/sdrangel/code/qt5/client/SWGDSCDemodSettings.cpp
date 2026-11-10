@@ -136,6 +136,7 @@ SWGDSCDemodSettings::cleanup() {
 
 
 
+
     if(filter != nullptr) { 
         delete filter;
     }
@@ -186,7 +187,7 @@ SWGDSCDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
-
+    
     ::SWGSDRangel::setValue(&mode, pJson["mode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_invalid, pJson["filterInvalid"], "qint32", "");
@@ -626,3 +627,4 @@ SWGDSCDemodSettings::isSet(){
     return isObjectUpdated;
 }
 }
+

@@ -91,14 +91,14 @@ SWGDABDemodReport::SWGDABDemodReport() {
     gain_status = 0;
     m_gain_status_isSet = false;
     gain_advice = nullptr;
-    announcement = nullptr;
-    now_playing_artist = nullptr;
-    now_playing_title = nullptr;
-    programme_now = nullptr;
     m_gain_advice_isSet = false;
+    announcement = nullptr;
     m_announcement_isSet = false;
+    now_playing_artist = nullptr;
     m_now_playing_artist_isSet = false;
+    now_playing_title = nullptr;
     m_now_playing_title_isSet = false;
+    programme_now = nullptr;
     m_programme_now_isSet = false;
 }
 
@@ -171,14 +171,14 @@ SWGDABDemodReport::init() {
     gain_status = 0;
     m_gain_status_isSet = false;
     gain_advice = new QString("");
-    announcement = new QString("");
-    now_playing_artist = new QString("");
-    now_playing_title = new QString("");
-    programme_now = new QString("");
     m_gain_advice_isSet = false;
+    announcement = new QString("");
     m_announcement_isSet = false;
+    now_playing_artist = new QString("");
     m_now_playing_artist_isSet = false;
+    now_playing_title = new QString("");
     m_now_playing_title_isSet = false;
+    programme_now = new QString("");
     m_programme_now_isSet = false;
 }
 
@@ -223,19 +223,29 @@ SWGDABDemodReport::cleanup() {
     if(data != nullptr) { 
         delete data;
     }
-    if(gain_advice != nullptr) {
+
+
+
+
+
+
+
+
+
+
+    if(gain_advice != nullptr) { 
         delete gain_advice;
     }
-    if(announcement != nullptr) {
+    if(announcement != nullptr) { 
         delete announcement;
     }
-    if(now_playing_artist != nullptr) {
+    if(now_playing_artist != nullptr) { 
         delete now_playing_artist;
     }
-    if(now_playing_title != nullptr) {
+    if(now_playing_title != nullptr) { 
         delete now_playing_title;
     }
-    if(programme_now != nullptr) {
+    if(programme_now != nullptr) { 
         delete programme_now;
     }
 }
@@ -314,9 +324,13 @@ SWGDABDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&gain_status, pJson["gainStatus"], "qint32", "");
     
     ::SWGSDRangel::setValue(&gain_advice, pJson["gainAdvice"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&announcement, pJson["announcement"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&now_playing_artist, pJson["nowPlayingArtist"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&now_playing_title, pJson["nowPlayingTitle"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&programme_now, pJson["programmeNow"], "QString", "QString");
     
 }
@@ -761,41 +775,45 @@ QString*
 SWGDABDemodReport::getGainAdvice() {
     return gain_advice;
 }
-QString*
-SWGDABDemodReport::getAnnouncement() {
-    return announcement;
-}
-QString*
-SWGDABDemodReport::getNowPlayingArtist() {
-    return now_playing_artist;
-}
-QString*
-SWGDABDemodReport::getNowPlayingTitle() {
-    return now_playing_title;
-}
-QString*
-SWGDABDemodReport::getProgrammeNow() {
-    return programme_now;
-}
 void
 SWGDABDemodReport::setGainAdvice(QString* gain_advice) {
     this->gain_advice = gain_advice;
     this->m_gain_advice_isSet = true;
+}
+
+QString*
+SWGDABDemodReport::getAnnouncement() {
+    return announcement;
 }
 void
 SWGDABDemodReport::setAnnouncement(QString* announcement) {
     this->announcement = announcement;
     this->m_announcement_isSet = true;
 }
+
+QString*
+SWGDABDemodReport::getNowPlayingArtist() {
+    return now_playing_artist;
+}
 void
 SWGDABDemodReport::setNowPlayingArtist(QString* now_playing_artist) {
     this->now_playing_artist = now_playing_artist;
     this->m_now_playing_artist_isSet = true;
 }
+
+QString*
+SWGDABDemodReport::getNowPlayingTitle() {
+    return now_playing_title;
+}
 void
 SWGDABDemodReport::setNowPlayingTitle(QString* now_playing_title) {
     this->now_playing_title = now_playing_title;
     this->m_now_playing_title_isSet = true;
+}
+
+QString*
+SWGDABDemodReport::getProgrammeNow() {
+    return programme_now;
 }
 void
 SWGDABDemodReport::setProgrammeNow(QString* programme_now) {

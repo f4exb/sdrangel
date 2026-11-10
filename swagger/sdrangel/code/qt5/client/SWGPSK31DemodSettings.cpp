@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    ---
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
  *
  * OpenAPI spec version: 7.0.0
  * Contact: f4exb06@gmail.com
@@ -115,41 +115,33 @@ SWGPSK31DemodSettings::cleanup() {
 
 
 
-
-
-    if(udp_address != nullptr) {
+    if(udp_address != nullptr) { 
         delete udp_address;
     }
 
-
-
-
-
-
-
-    if(log_filename != nullptr) {
+    if(log_filename != nullptr) { 
         delete log_filename;
     }
 
 
-    if(title != nullptr) {
+    if(title != nullptr) { 
         delete title;
     }
 
 
-    if(reverse_api_address != nullptr) {
+    if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
 
 
 
-    if(scope_config != nullptr) {
+    if(scope_config != nullptr) { 
         delete scope_config;
     }
-    if(channel_marker != nullptr) {
+    if(channel_marker != nullptr) { 
         delete channel_marker;
     }
-    if(rollup_state != nullptr) {
+    if(rollup_state != nullptr) { 
         delete rollup_state;
     }
 }
@@ -166,41 +158,41 @@ SWGPSK31DemodSettings::fromJson(QString &json) {
 void
 SWGPSK31DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
-
+    
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
-
+    
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&scope_config, pJson["scopeConfig"], "SWGGLScope", "SWGGLScope");
-
+    
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
-
+    
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
-
+    
 }
 
 QString
@@ -518,3 +510,4 @@ SWGPSK31DemodSettings::isSet(){
     return isObjectUpdated;
 }
 }
+
