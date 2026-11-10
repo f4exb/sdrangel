@@ -155,8 +155,6 @@ SWGPSK31ModSettings::cleanup() {
 
 
 
-
-
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -671,3 +669,4 @@ SWGPSK31ModSettings::isSet(){
     return isObjectUpdated;
 }
 }
+

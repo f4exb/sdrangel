@@ -147,6 +147,7 @@ SWGUSRPInputSettings::cleanup() {
 
 
 
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }

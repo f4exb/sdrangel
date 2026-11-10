@@ -57,8 +57,10 @@ public:
 
     QString* getVst3ModulePath();
     void setVst3ModulePath(QString* vst3_module_path);
+
     QString* getVst3ClassId();
     void setVst3ClassId(QString* vst3_class_id);
+
     QString* getVst3Parameters();
     void setVst3Parameters(QString* vst3_parameters);
 
@@ -122,8 +124,10 @@ private:
 
     QString* vst3_module_path;
     bool m_vst3_module_path_isSet;
+
     QString* vst3_class_id;
     bool m_vst3_class_id_isSet;
+
     QString* vst3_parameters;
     bool m_vst3_parameters_isSet;
 

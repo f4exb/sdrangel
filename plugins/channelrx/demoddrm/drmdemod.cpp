@@ -47,6 +47,7 @@
 #include "SWGDRMJournalineObject.h"
 #include "SWGDRMJournalineService.h"
 #include "SWGDRMService.h"
+#include "SWGDRMCapability.h"
 
 #include "drmdemod.h"
 
@@ -507,8 +508,12 @@ int DRMDemod::webapiReportGet(SWGSDRangel::SWGChannelReport& response, QString& 
     SWGSDRangel::SWGDRMDemodReport *report = response.getDrmDemodReport();
     const DRMDemodStatus status = getStatus();
     *report->getAudioDecoderBackend() = status.audioDecoderBackend;
-    for (const auto& capability : status.capabilities) {
-        report->getCapabilities()->append(new QString(capability));
+    for (const auto& capability : status.capabilities)
+    {
+        auto *cap = new SWGSDRangel::SWGDRMCapability();
+        cap->init();
+        cap->setName(new QString(capability));
+        report->getCapabilities()->append(cap);
     }
 
     *report->getSyncState() = status.syncState;

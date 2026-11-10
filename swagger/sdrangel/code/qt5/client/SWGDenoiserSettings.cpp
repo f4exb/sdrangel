@@ -125,12 +125,21 @@ SWGDenoiserSettings::init() {
 void
 SWGDenoiserSettings::cleanup() {
 
-    if(vst3_module_path != nullptr) delete vst3_module_path;
-    if(vst3_class_id != nullptr) delete vst3_class_id;
-    if(vst3_parameters != nullptr) delete vst3_parameters;
-    if(vst3_state != nullptr) delete vst3_state;
 
 
+
+    if(vst3_module_path != nullptr) { 
+        delete vst3_module_path;
+    }
+    if(vst3_class_id != nullptr) { 
+        delete vst3_class_id;
+    }
+    if(vst3_parameters != nullptr) { 
+        delete vst3_parameters;
+    }
+    if(vst3_state != nullptr) { 
+        delete vst3_state;
+    }
 
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
@@ -172,13 +181,17 @@ SWGDenoiserSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&enable_denoiser, pJson["enableDenoiser"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nvidia_intensity, pJson["nvidiaIntensity"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&nvidia_vad, pJson["nvidiaVad"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&vst3_module_path, pJson["vst3ModulePath"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&vst3_class_id, pJson["vst3ClassId"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&vst3_parameters, pJson["vst3Parameters"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&vst3_state, pJson["vst3State"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&volume_tenths, pJson["volumeTenths"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
@@ -328,29 +341,44 @@ SWGDenoiserSettings::setNvidiaVad(qint32 nvidia_vad) {
     this->m_nvidia_vad_isSet = true;
 }
 
-QString* SWGDenoiserSettings::getVst3ModulePath() { return vst3_module_path; }
-void SWGDenoiserSettings::setVst3ModulePath(QString* value) {
-    if (vst3_module_path != value) delete vst3_module_path;
-    vst3_module_path = value;
-    m_vst3_module_path_isSet = true;
+QString*
+SWGDenoiserSettings::getVst3ModulePath() {
+    return vst3_module_path;
 }
-QString* SWGDenoiserSettings::getVst3ClassId() { return vst3_class_id; }
-void SWGDenoiserSettings::setVst3ClassId(QString* value) {
-    if (vst3_class_id != value) delete vst3_class_id;
-    vst3_class_id = value;
-    m_vst3_class_id_isSet = true;
+void
+SWGDenoiserSettings::setVst3ModulePath(QString* vst3_module_path) {
+    this->vst3_module_path = vst3_module_path;
+    this->m_vst3_module_path_isSet = true;
 }
-QString* SWGDenoiserSettings::getVst3Parameters() { return vst3_parameters; }
-void SWGDenoiserSettings::setVst3Parameters(QString* value) {
-    if (vst3_parameters != value) delete vst3_parameters;
-    vst3_parameters = value;
-    m_vst3_parameters_isSet = true;
+
+QString*
+SWGDenoiserSettings::getVst3ClassId() {
+    return vst3_class_id;
 }
-QString* SWGDenoiserSettings::getVst3State() { return vst3_state; }
-void SWGDenoiserSettings::setVst3State(QString* value) {
-    if (vst3_state != value) delete vst3_state;
-    vst3_state = value;
-    m_vst3_state_isSet = true;
+void
+SWGDenoiserSettings::setVst3ClassId(QString* vst3_class_id) {
+    this->vst3_class_id = vst3_class_id;
+    this->m_vst3_class_id_isSet = true;
+}
+
+QString*
+SWGDenoiserSettings::getVst3Parameters() {
+    return vst3_parameters;
+}
+void
+SWGDenoiserSettings::setVst3Parameters(QString* vst3_parameters) {
+    this->vst3_parameters = vst3_parameters;
+    this->m_vst3_parameters_isSet = true;
+}
+
+QString*
+SWGDenoiserSettings::getVst3State() {
+    return vst3_state;
+}
+void
+SWGDenoiserSettings::setVst3State(QString* vst3_state) {
+    this->vst3_state = vst3_state;
+    this->m_vst3_state_isSet = true;
 }
 
 qint32
@@ -500,7 +528,16 @@ SWGDenoiserSettings::isSet(){
         if(m_nvidia_vad_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_vst3_module_path_isSet || m_vst3_class_id_isSet || m_vst3_parameters_isSet || m_vst3_state_isSet){
+        if(vst3_module_path && *vst3_module_path != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(vst3_class_id && *vst3_class_id != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(vst3_parameters && *vst3_parameters != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(vst3_state && *vst3_state != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_volume_tenths_isSet){
@@ -546,3 +583,4 @@ SWGDenoiserSettings::isSet(){
     return isObjectUpdated;
 }
 }
+

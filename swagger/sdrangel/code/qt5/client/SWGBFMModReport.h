@@ -68,4 +68,3 @@ private:
 }
 
 #endif /* SWGBFMModReport_H_ */
-

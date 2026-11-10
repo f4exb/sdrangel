@@ -245,13 +245,13 @@ SWGGLSpectrumHistory::asJsonObject() {
         obj->insert("thresholdDb", QJsonValue(threshold_db));
     }
     if(max_db && max_db->size() > 0){
-        toJsonArray((QList<void*>*)max_db, obj, "maxDb", "");
+        toJsonArray((QList<void*>*)max_db, obj, "maxDb", "float");
     }
     if(mean_db && mean_db->size() > 0){
-        toJsonArray((QList<void*>*)mean_db, obj, "meanDb", "");
+        toJsonArray((QList<void*>*)mean_db, obj, "meanDb", "float");
     }
     if(occupancy && occupancy->size() > 0){
-        toJsonArray((QList<void*>*)occupancy, obj, "occupancy", "");
+        toJsonArray((QList<void*>*)occupancy, obj, "occupancy", "float");
     }
     if(m_signal_count_isSet){
         obj->insert("signalCount", QJsonValue(signal_count));

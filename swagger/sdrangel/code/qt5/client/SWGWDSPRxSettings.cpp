@@ -692,10 +692,10 @@ SWGWDSPRxSettings::asJsonObject() {
         obj->insert("equalizer", QJsonValue(equalizer));
     }
     if(eq_f && eq_f->size() > 0){
-        toJsonArray((QList<void*>*)eq_f, obj, "eqF", "");
+        toJsonArray((QList<void*>*)eq_f, obj, "eqF", "float");
     }
     if(eq_g && eq_g->size() > 0){
-        toJsonArray((QList<void*>*)eq_g, obj, "eqG", "");
+        toJsonArray((QList<void*>*)eq_g, obj, "eqG", "float");
     }
     if(m_rit_isSet){
         obj->insert("rit", QJsonValue(rit));

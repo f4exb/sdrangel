@@ -190,15 +190,25 @@ SWGAircraftSettings::cleanup() {
 
 
 
+
+
+
+
     if(feed_station_id != nullptr) { 
         delete feed_station_id;
     }
+
     if(feed_airframes_host != nullptr) { 
         delete feed_airframes_host;
     }
+
+
+
     if(feed_avdelphi_host != nullptr) { 
         delete feed_avdelphi_host;
     }
+
+
     if(database_filename != nullptr) { 
         delete database_filename;
     }

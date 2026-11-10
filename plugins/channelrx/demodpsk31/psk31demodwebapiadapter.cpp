@@ -32,8 +32,8 @@ int PSK31DemodWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setPSK31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
-    response.getPSK31DemodSettings()->init();
+    response.setPsk31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
+    response.getPsk31DemodSettings()->init();
     PSK31Demod::webapiFormatChannelSettings(response, m_settings);
 
     return 200;

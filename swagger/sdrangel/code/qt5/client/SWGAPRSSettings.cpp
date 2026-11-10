@@ -308,40 +308,40 @@ SWGAPRSSettings::asJsonObject() {
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
     if(packets_table_column_indexes && packets_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)packets_table_column_indexes, obj, "packetsTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)packets_table_column_indexes, obj, "packetsTableColumnIndexes", "qint32");
     }
     if(packets_table_column_sizes && packets_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)packets_table_column_sizes, obj, "packetsTableColumnSizes", "");
+        toJsonArray((QList<void*>*)packets_table_column_sizes, obj, "packetsTableColumnSizes", "qint32");
     }
     if(weather_table_column_indexes && weather_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)weather_table_column_indexes, obj, "weatherTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)weather_table_column_indexes, obj, "weatherTableColumnIndexes", "qint32");
     }
     if(weather_table_column_sizes && weather_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)weather_table_column_sizes, obj, "weatherTableColumnSizes", "");
+        toJsonArray((QList<void*>*)weather_table_column_sizes, obj, "weatherTableColumnSizes", "qint32");
     }
     if(status_table_column_indexes && status_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)status_table_column_indexes, obj, "statusTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)status_table_column_indexes, obj, "statusTableColumnIndexes", "qint32");
     }
     if(status_table_column_sizes && status_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)status_table_column_sizes, obj, "statusTableColumnSizes", "");
+        toJsonArray((QList<void*>*)status_table_column_sizes, obj, "statusTableColumnSizes", "qint32");
     }
     if(messages_table_column_indexes && messages_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)messages_table_column_indexes, obj, "messagesTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)messages_table_column_indexes, obj, "messagesTableColumnIndexes", "qint32");
     }
     if(messages_table_column_sizes && messages_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)messages_table_column_sizes, obj, "messagesTableColumnSizes", "");
+        toJsonArray((QList<void*>*)messages_table_column_sizes, obj, "messagesTableColumnSizes", "qint32");
     }
     if(telemetry_table_column_indexes && telemetry_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)telemetry_table_column_indexes, obj, "telemetryTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)telemetry_table_column_indexes, obj, "telemetryTableColumnIndexes", "qint32");
     }
     if(telemetry_table_column_sizes && telemetry_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)telemetry_table_column_sizes, obj, "telemetryTableColumnSizes", "");
+        toJsonArray((QList<void*>*)telemetry_table_column_sizes, obj, "telemetryTableColumnSizes", "qint32");
     }
     if(motion_table_column_indexes && motion_table_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)motion_table_column_indexes, obj, "motionTableColumnIndexes", "");
+        toJsonArray((QList<void*>*)motion_table_column_indexes, obj, "motionTableColumnIndexes", "qint32");
     }
     if(motion_table_column_sizes && motion_table_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)motion_table_column_sizes, obj, "motionTableColumnSizes", "");
+        toJsonArray((QList<void*>*)motion_table_column_sizes, obj, "motionTableColumnSizes", "qint32");
     }
 
     return obj;

@@ -210,10 +210,10 @@ SWGVORLocalizerSettings::asJsonObject() {
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
     if(column_indexes && column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)column_indexes, obj, "columnIndexes", "");
+        toJsonArray((QList<void*>*)column_indexes, obj, "columnIndexes", "qint32");
     }
     if(column_sizes && column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)column_sizes, obj, "columnSizes", "");
+        toJsonArray((QList<void*>*)column_sizes, obj, "columnSizes", "qint32");
     }
 
     return obj;

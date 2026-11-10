@@ -190,7 +190,7 @@ void
 SWGDRMDemodReport::init() {
     audio_decoder_backend = new QString("");
     m_audio_decoder_backend_isSet = false;
-    capabilities = new QList<QString*>();
+    capabilities = new QList<SWGDRMCapability*>();
     m_capabilities_isSet = false;
     sync_state = new QString("");
     m_sync_state_isSet = false;
@@ -478,7 +478,7 @@ SWGDRMDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_decoder_backend, pJson["audioDecoderBackend"], "QString", "QString");
     
     
-    ::SWGSDRangel::setValue(&capabilities, pJson["capabilities"], "QList", "QString");
+    ::SWGSDRangel::setValue(&capabilities, pJson["capabilities"], "QList", "SWGDRMCapability");
     ::SWGSDRangel::setValue(&sync_state, pJson["syncState"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&epoch, pJson["epoch"], "qint64", "");
@@ -647,7 +647,7 @@ SWGDRMDemodReport::asJsonObject() {
         toJsonValue(QString("audioDecoderBackend"), audio_decoder_backend, obj, QString("QString"));
     }
     if(capabilities && capabilities->size() > 0){
-        toJsonArray((QList<void*>*)capabilities, obj, "capabilities", "QString");
+        toJsonArray((QList<void*>*)capabilities, obj, "capabilities", "SWGDRMCapability");
     }
     if(sync_state != nullptr && *sync_state != QString("")){
         toJsonValue(QString("syncState"), sync_state, obj, QString("QString"));
@@ -885,12 +885,12 @@ SWGDRMDemodReport::setAudioDecoderBackend(QString* audio_decoder_backend) {
     this->m_audio_decoder_backend_isSet = true;
 }
 
-QList<QString*>*
+QList<SWGDRMCapability*>*
 SWGDRMDemodReport::getCapabilities() {
     return capabilities;
 }
 void
-SWGDRMDemodReport::setCapabilities(QList<QString*>* capabilities) {
+SWGDRMDemodReport::setCapabilities(QList<SWGDRMCapability*>* capabilities) {
     this->capabilities = capabilities;
     this->m_capabilities_isSet = true;
 }

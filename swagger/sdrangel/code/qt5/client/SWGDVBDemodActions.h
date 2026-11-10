@@ -50,11 +50,17 @@ public:
     qint32 getRecordEvent();
     void setRecordEvent(qint32 record_event);
 
+    qint32 getRecordSeries();
+    void setRecordSeries(qint32 record_series);
+
     qint32 getServiceId();
     void setServiceId(qint32 service_id);
 
     qint32 getEventId();
     void setEventId(qint32 event_id);
+
+    qint32 getNetworkId();
+    void setNetworkId(qint32 network_id);
 
     qint32 getScan();
     void setScan(qint32 scan);
@@ -64,12 +70,6 @@ public:
 
     qint64 getScanTo();
     void setScanTo(qint64 scan_to);
-
-    qint32 getRecordSeries();
-    void setRecordSeries(qint32 record_series);
-
-    qint32 getNetworkId();
-    void setNetworkId(qint32 network_id);
 
 
     virtual bool isSet() override;
@@ -84,11 +84,17 @@ private:
     qint32 record_event;
     bool m_record_event_isSet;
 
+    qint32 record_series;
+    bool m_record_series_isSet;
+
     qint32 service_id;
     bool m_service_id_isSet;
 
     qint32 event_id;
     bool m_event_id_isSet;
+
+    qint32 network_id;
+    bool m_network_id_isSet;
 
     qint32 scan;
     bool m_scan_isSet;
@@ -98,12 +104,6 @@ private:
 
     qint64 scan_to;
     bool m_scan_to_isSet;
-
-    qint32 record_series;
-    bool m_record_series_isSet;
-
-    qint32 network_id;
-    bool m_network_id_isSet;
 
 };
 

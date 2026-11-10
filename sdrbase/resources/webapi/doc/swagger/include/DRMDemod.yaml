@@ -253,6 +253,14 @@ DRMJournalineItem:
       maximum: 1
       description: "Lists only: 1 when this cell starts a new row."
 
+DRMCapability:
+  description: "One native function or codec capability implemented in this build."
+  properties:
+    name:
+      type: string
+      enum: [nativeFAC, nativeSDC, nativeMSC, drmAAC, drmXHEAAC]
+    description: "Native functions and codec capabilities available in this build."
+
 DRMDemodReport:
   description: "Live native DRM acquisition, signalling, MSC and audio status for the current receiver epoch."
   properties:
@@ -263,8 +271,7 @@ DRMDemodReport:
       type: array
       description: "Implemented native functions and codec capabilities available in this build. Validated RF/profile coverage is documented separately."
       items:
-        type: string
-        enum: [nativeFAC, nativeSDC, nativeMSC, drmAAC, drmXHEAAC]
+        $ref: "/doc/swagger/include/DRMDemod.yaml#/DRMCapability"
     syncState:
       type: string
       enum: [stopped, searching, acquiring, locked, reacquiring]
