@@ -23,9 +23,9 @@ The protocol is detected automatically from the synchronisation patterns found i
 
 <h3>Sensitivity</h3>
 
-How much signal each mode needs before its voice is clean, measured over the air from the DSE Modulator to this demodulator, and in the test harness with white noise. Every mode is on one scale, C/N0 in dB-Hz (the signal power over the noise in one hertz), so modes of different bandwidths can be compared; lower is better. For the FM protocols clean is 1% raw bit error rate, where the vocoder's codes still correct what arrives; for Angel61 it is 1% of frames lost, every frame checked by its CRC.
+The following table shows strong a signal each protocol needs for the voice to sound clean, measured over the air from the DSE Modulator to this demodulator, and in a test harness with white noise. Every protocol is on one scale, C/N0 in dB-Hz (the signal power over the noise in one hertz), so protocols of different bandwidths can be compared; lower is better. For the FM protocols clean is 1% raw bit error rate, where the vocoder's codes still correct what arrives; for Angel61 it is 1% of frames lost, every frame checked by its CRC.
 
-| Mode | Modulation | Voice | Clean, on air (dB-Hz) | Clean, harness (dB-Hz) | On air, native |
+| Protocol | Modulation | Voice | Clean, on air (dB-Hz) | Clean, harness (dB-Hz) | On air, native |
 |---|---|---|---:|---:|---|
 | Angel61 HF-NB, tier 0 | OFDM, 2.5 kHz | V1 1.5 kbit/s | 37.6 | 38.5 | SNR3k 2.8 dB |
 | Angel61 HF-WB, tier 0 | OFDM, 5.5 kHz | V1 2.25 kbit/s | 38.7 | 38.8 | SNR3k 3.9 dB |
