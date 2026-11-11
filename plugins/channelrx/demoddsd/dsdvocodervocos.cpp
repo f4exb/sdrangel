@@ -18,6 +18,8 @@
 
 #include <algorithm>
 
+#include <QDebug>
+
 #include "dsdvocodervocos.h"
 
 DSDVocoderVocos::DSDVocoderVocos() :
@@ -45,6 +47,7 @@ bool DSDVocoderVocos::open()
     if (!m_decoder.open(m_modelDirectory))
     {
         m_error = m_decoder.getError();
+        qWarning("DSDVocoderVocos::open: %s", m_error.c_str());
         m_failed = true;    // not retried every frame; a new instance tries again
         return false;
     }

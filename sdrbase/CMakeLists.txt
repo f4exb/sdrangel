@@ -860,6 +860,25 @@ target_compile_definitions(sdrbase PRIVATE
 	-DPLUGIN_PREFIX=\"${PLUGIN_PREFIX}\"
 )
 
+# vocoscodec is loaded at run time, so merely finding it does not add its directory to
+# the dynamic loader's search path.  Keep the relocatable, application-relative lookup
+# first, but also pass the locations found by FindLibVocosCodec as fallbacks.  This is
+# particularly important when SDRangel and vocoscodec are installed under different
+# prefixes.
+if(VOCOSCODEC_LIBRARY)
+    file(TO_CMAKE_PATH "${VOCOSCODEC_LIBRARY}" VOCOSCODEC_LIBRARY_PATH)
+    target_compile_definitions(sdrbase PRIVATE
+        VOCOSCODEC_LIBRARY_PATH="${VOCOSCODEC_LIBRARY_PATH}"
+    )
+endif()
+
+if(VOCOSCODEC_MODEL_DIR)
+    file(TO_CMAKE_PATH "${VOCOSCODEC_MODEL_DIR}" VOCOSCODEC_CONFIGURED_MODEL_DIR)
+    target_compile_definitions(sdrbase PRIVATE
+        VOCOSCODEC_CONFIGURED_MODEL_DIR="${VOCOSCODEC_CONFIGURED_MODEL_DIR}"
+    )
+endif()
+
 install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})
 
 if(WIN32 AND Qt6_FOUND)

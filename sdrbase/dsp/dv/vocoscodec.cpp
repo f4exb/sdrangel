@@ -87,6 +87,9 @@ struct VocosCodec::Library
             candidates << appDir + "/../lib/vocoscodec";
         }
 
+#ifdef VOCOSCODEC_LIBRARY_PATH
+        candidates << QString::fromUtf8(VOCOSCODEC_LIBRARY_PATH);
+#endif
         candidates << "vocoscodec";
 
         for (const QString& candidate : candidates)
@@ -103,6 +106,7 @@ struct VocosCodec::Library
         if (!m_library.isLoaded())
         {
             m_error = "V1 codec library (vocoscodec) not found: " + m_error;
+            qWarning("VocosCodec::Library: %s", m_error.c_str());
             return;
         }
 
@@ -129,6 +133,7 @@ struct VocosCodec::Library
             || !m_decodeLost || !m_decoderFlush || !m_decoderIsComfortNoise || !m_decoderReset || !m_decoderDestroy)
         {
             m_error = "V1 codec library: missing symbols in " + m_library.fileName().toStdString();
+            qWarning("VocosCodec::Library: %s", m_error.c_str());
             m_library.unload();
             return;
         }
@@ -136,12 +141,14 @@ struct VocosCodec::Library
         if (m_abiVersion() != AbiVersion)
         {
             m_error = "V1 codec library: interface version " + std::to_string(m_abiVersion()) + ", expected " + std::to_string(AbiVersion);
+            qWarning("VocosCodec::Library: %s", m_error.c_str());
             m_library.unload();
             return;
         }
 
         m_loaded = true;
         m_error.clear();
+        qDebug("VocosCodec::Library: loaded %s (version %s)", qPrintable(m_library.fileName()), m_version());
     }
 
     std::string lastError() const { return m_lastError ? std::string(m_lastError()) : std::string(); }
@@ -294,6 +301,12 @@ std::string VocosCodec::defaultModelDirectory()
             }
         }
     }
+
+#ifdef VOCOSCODEC_CONFIGURED_MODEL_DIR
+    if (hasModels(VOCOSCODEC_CONFIGURED_MODEL_DIR)) {
+        return VOCOSCODEC_CONFIGURED_MODEL_DIR;
+    }
+#endif
 
     if (library()->m_loaded)
     {
