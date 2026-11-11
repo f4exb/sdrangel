@@ -243,6 +243,7 @@ SWGDSEModTransmitStatus::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&last_error, pJson["lastError"], "QString", "QString");
     
+    
     ::SWGSDRangel::setValue(&history, pJson["history"], "QList", "SWGDSEModTransmitSession");
     
     ::SWGSDRangel::setValue(&messages, pJson["messages"], "QList", "SWGDSEModMessageStatus");

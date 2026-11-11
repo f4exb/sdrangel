@@ -185,6 +185,7 @@ SWGDSEModTransmitSession::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&available_frames, pJson["availableFrames"], "qint32", "");
     
     ::SWGSDRangel::setValue(&last_error, pJson["lastError"], "QString", "QString");
+    
 }
 
 QString

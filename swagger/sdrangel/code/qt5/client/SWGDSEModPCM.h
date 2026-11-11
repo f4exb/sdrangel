@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include <QByteArray>
 #include <QString>
 
 #include "SWGObject.h"

@@ -8988,9 +8988,7 @@ margin-bottom: 20px;
     },
     "data" : {
       "type" : "string",
-      "format" : "byte",
-      "description" : "Canonical padded base64. D-Star header is 41 bytes including CRC; voice is 9 voice bytes plus 3 on-air slow-data bytes (LSB first on RF). DMR is 33 packed bytes excluding CACH, MSB first. YSF is 120 packed bytes including sync/FICH, MSB first; V/D type 2. dsrp accepts 49-byte headers and 21-byte voice packets; dmrd accepts 55 bytes; ysfd accepts 155 bytes. Poll/login/control datagrams are not traffic frames.\n",
-      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+      "description" : "Canonical padded base64. D-Star header is 41 bytes including CRC; voice is 9 voice bytes plus 3 on-air slow-data bytes (LSB first on RF). DMR is 33 packed bytes excluding CACH, MSB first. YSF is 120 packed bytes including sync/FICH, MSB first; V/D type 2. dsrp accepts 49-byte headers and 21-byte voice packets; dmrd accepts 55 bytes; ysfd accepts 155 bytes. Poll/login/control datagrams are not traffic frames.\n"
     }
   }
 };
@@ -9027,11 +9025,27 @@ margin-bottom: 20px;
     },
     "data" : {
       "type" : "string",
-      "format" : "byte",
-      "description" : "Nonempty binary application data; Angel61 standalone only, up to 5098 decoded bytes.",
-      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+      "description" : "Nonempty binary application data; Angel61 standalone only, up to 5098 decoded bytes."
     }
   }
+};
+            defs.DSEModMessageStatus = {
+  "type" : "object",
+  "properties" : {
+    "requestId" : {
+      "type" : "string"
+    },
+    "state" : {
+      "type" : "string",
+      "description" : "inBand queued means admitted to the protocol, not remote delivery.",
+      "enum" : [ "queued", "accepted", "completed", "aborted", "failed" ]
+    },
+    "error" : {
+      "type" : "string",
+      "description" : "Why a standalone message's session failed or was aborted."
+    }
+  },
+  "description" : "The status of a message action, by its requestId"
 };
             defs.DSEModPCM = {
   "type" : "object",
@@ -9052,9 +9066,7 @@ margin-bottom: 20px;
     },
     "data" : {
       "type" : "string",
-      "format" : "byte",
-      "description" : "Canonical padded base64 PCM. At most one second per request and five seconds queued. append contains only data. Empty data is permitted only on start. Chunk boundaries must fall between samples, but need not align with codec frames.\n",
-      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+      "description" : "Canonical padded base64 PCM. At most one second per request and five seconds queued. append contains only data. Empty data is permitted only on start. Chunk boundaries must fall between samples, but need not align with codec frames.\n"
     }
   }
 };
@@ -9505,6 +9517,70 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.DSEModTransmitSession = {
+  "type" : "object",
+  "properties" : {
+    "sessionId" : {
+      "type" : "string"
+    },
+    "input" : {
+      "type" : "string"
+    },
+    "state" : {
+      "type" : "string",
+      "enum" : [ "completed", "aborted", "failed" ]
+    },
+    "protocol" : {
+      "type" : "integer"
+    },
+    "sourceProtocol" : {
+      "type" : "integer",
+      "description" : "The profile of an angel61 session's frames as a mode (9 Angel61 NB, 10 Angel61 WB, 11 HF-NB, 12 HF-WB), 0 before the first."
+    },
+    "source" : {
+      "type" : "string"
+    },
+    "destination" : {
+      "type" : "string"
+    },
+    "via" : {
+      "type" : "string",
+      "description" : "The path of an angel61 session (a gateway's callsign), or empty."
+    },
+    "nextSequence" : {
+      "type" : "integer"
+    },
+    "accepted" : {
+      "type" : "number",
+      "format" : "double",
+      "description" : "Accepted input samples or protocol frames in the session."
+    },
+    "consumed" : {
+      "type" : "number",
+      "format" : "double",
+      "description" : "Input samples resampled or frames rendered; not a remote delivery acknowledgement."
+    },
+    "maxDurationMs" : {
+      "type" : "integer"
+    },
+    "queuedSamples" : {
+      "type" : "integer"
+    },
+    "queuedFrames" : {
+      "type" : "integer"
+    },
+    "availableSamples" : {
+      "type" : "integer"
+    },
+    "availableFrames" : {
+      "type" : "integer"
+    },
+    "lastError" : {
+      "type" : "string"
+    }
+  },
+  "description" : "A completed transmit session, as DSEModTransmitStatus.history lists it"
+};
             defs.DSEModTransmitStatus = {
   "type" : "object",
   "properties" : {
@@ -9531,15 +9607,21 @@ margin-bottom: 20px;
     "destination" : {
       "type" : "string"
     },
+    "via" : {
+      "type" : "string",
+      "description" : "The path of an angel61 session (a gateway's callsign), or empty."
+    },
     "nextSequence" : {
       "type" : "integer"
     },
     "accepted" : {
       "type" : "number",
+      "format" : "double",
       "description" : "Accepted input samples or protocol frames in this session."
     },
     "consumed" : {
       "type" : "number",
+      "format" : "double",
       "description" : "Input samples resampled or frames rendered; not a remote delivery acknowledgement."
     },
     "maxDurationMs" : {
@@ -9568,23 +9650,29 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Source Angel61 Opus frames decoded (to re-encode as V1) by the current or most recent session."
     },
+    "relayInvalidFrames" : {
+      "type" : "integer",
+      "description" : "Angel61 relay records refused (type, length, counter, flags or CRC) by the current or most recent session."
+    },
+    "relayHoldFrames" : {
+      "type" : "integer",
+      "description" : "Angel61 relay idle frames sent for want of the call's packets (Angel61 modes only)."
+    },
     "lastError" : {
       "type" : "string"
     },
     "history" : {
       "type" : "array",
-      "description" : "Last 16 completed sessions, without nested history.",
+      "description" : "Last 16 completed sessions.",
       "items" : {
-        "type" : "object",
-        "properties" : { }
+        "$ref" : "#/definitions/DSEModTransmitSession"
       }
     },
     "messages" : {
       "type" : "array",
-      "description" : "Last 32 message request statuses. inBand queued means admitted to the protocol, not remote delivery.",
+      "description" : "Last 32 message request statuses.",
       "items" : {
-        "type" : "object",
-        "properties" : { }
+        "$ref" : "#/definitions/DSEModMessageStatus"
       }
     }
   }
@@ -24026,8 +24114,8 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int32",
       "description" : "Use a detected residual USB carrier within +/-100 Hz as the tone offset; otherwise tones are searched for within +/-6 Hz of the manual offset",
-      "enum" : [ 0, 1 ],
-      "default" : 1
+      "default" : 1,
+      "enum" : [ 0, 1 ]
     },
     "threshold" : {
       "type" : "number",
@@ -74615,7 +74703,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-11-11T21:31:39.974+01:00
+              Generated 2026-11-11T22:41:41.466+01:00
             </div>
           </div>
       </div>

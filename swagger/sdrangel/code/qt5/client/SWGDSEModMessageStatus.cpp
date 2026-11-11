@@ -79,6 +79,7 @@ SWGDSEModMessageStatus::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&state, pJson["state"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&error, pJson["error"], "QString", "QString");
+    
 }
 
 QString
