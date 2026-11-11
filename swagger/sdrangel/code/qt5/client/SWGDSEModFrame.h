@@ -55,8 +55,8 @@ public:
     qint32 getSlot();
     void setSlot(qint32 slot);
 
-    QByteArray* getData();
-    void setData(QByteArray* data);
+    QString* getData();
+    void setData(QString* data);
 
 
     virtual bool isSet() override;
@@ -74,7 +74,7 @@ private:
     qint32 slot;
     bool m_slot_isSet;
 
-    QByteArray* data;
+    QString* data;
     bool m_data_isSet;
 
 };

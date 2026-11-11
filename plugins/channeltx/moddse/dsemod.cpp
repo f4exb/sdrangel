@@ -26,6 +26,7 @@
 #include <QBuffer>
 #include <QThread>
 #include <QRegularExpression>
+#include <QJsonArray>
 #include <algorithm>
 
 #include "dsp/dv/dvangel61file.h"
@@ -35,6 +36,10 @@
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGDSEModActions.h"
+#include "SWGDSEModCapabilities.h"
+#include "SWGDSEModMessageStatus.h"
+#include "SWGDSEModTransmitSession.h"
+#include "SWGDSEModTransmitStatus.h"
 #include "SWGCWKeyerSettings.h"
 
 #include "dsp/dspcommands.h"
@@ -2133,7 +2138,7 @@ void DSEMod::webapiUpdateChannelSettings(
         settings.m_m17Destination = *swg->getM17Destination();
     }
     if (channelSettingsKeys.contains("m17CAN")) {
-        settings.m_m17CAN = std::max(0, std::min(15, swg->getM17CAN()));
+        settings.m_m17CAN = std::max(0, std::min(15, swg->getM17Can()));
     }
     if (channelSettingsKeys.contains("m17Message")) {
         settings.m_m17Message = *swg->getM17Message();
@@ -2166,7 +2171,7 @@ void DSEMod::webapiUpdateChannelSettings(
         settings.m_angel61TunnelGroups = *swg->getAngel61TunnelGroups();
     }
     if (channelSettingsKeys.contains("angel61TunnelMTU")) {
-        settings.m_angel61TunnelMTU = std::max(68, std::min(1500, swg->getAngel61TunnelMTU()));
+        settings.m_angel61TunnelMTU = std::max(68, std::min(1500, swg->getAngel61TunnelMtu()));
     }
     if (channelSettingsKeys.contains("feedbackAudioDeviceName")) {
         settings.m_feedbackAudioDeviceName = *swg->getFeedbackAudioDeviceName();
@@ -2367,7 +2372,7 @@ void DSEMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     assignString(swg->getAngel61FileName(), settings.m_angel61FileName, [swg](QString *v) { swg->setAngel61FileName(v); });
     assignString(swg->getM17Source(), settings.m_m17Source, [swg](QString *v) { swg->setM17Source(v); });
     assignString(swg->getM17Destination(), settings.m_m17Destination, [swg](QString *v) { swg->setM17Destination(v); });
-    swg->setM17CAN(settings.m_m17CAN);
+    swg->setM17Can(settings.m_m17CAN);
     assignString(swg->getM17Message(), settings.m_m17Message, [swg](QString *v) { swg->setM17Message(v); });
     assignString(swg->getCodecModelDirectory(), settings.m_codecModelDirectory, [swg](QString *v) { swg->setCodecModelDirectory(v); });
     assignString(swg->getAudioFileName(), settings.m_audioFileName, [swg](QString *v) { swg->setAudioFileName(v); });
@@ -2378,7 +2383,7 @@ void DSEMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     assignString(swg->getAngel61TunnelRoutes(), settings.m_angel61TunnelRoutes, [swg](QString *v) { swg->setAngel61TunnelRoutes(v); });
     assignString(swg->getAngel61TunnelAllow(), settings.m_angel61TunnelAllow, [swg](QString *v) { swg->setAngel61TunnelAllow(v); });
     assignString(swg->getAngel61TunnelGroups(), settings.m_angel61TunnelGroups, [swg](QString *v) { swg->setAngel61TunnelGroups(v); });
-    swg->setAngel61TunnelMTU(settings.m_angel61TunnelMTU);
+    swg->setAngel61TunnelMtu(settings.m_angel61TunnelMTU);
     assignString(swg->getFeedbackAudioDeviceName(), settings.m_feedbackAudioDeviceName, [swg](QString *v) { swg->setFeedbackAudioDeviceName(v); });
     swg->setFeedbackVolumeFactor(settings.m_feedbackVolumeFactor);
     swg->setFeedbackAudioEnable(settings.m_feedbackAudioEnable ? 1 : 0);
@@ -2452,12 +2457,217 @@ void DSEMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 }
 
+namespace {
+
+// The processor and the transmit session report in JSON. The report's classes are generated from
+// DSEMod.yaml: they are filled through their setters, which is what marks a field as present (the
+// generated fromJsonObject() does not). Only the fields the JSON has are set.
+
+QString *swgString(const QJsonObject& json, const char *key)
+{
+    return new QString(json[key].toString());
+}
+
+QList<QString*> *swgStringList(const QJsonArray& array)
+{
+    QList<QString*> *list = new QList<QString*>();
+
+    for (const QJsonValue& value : array) {
+        list->append(new QString(value.toString()));
+    }
+
+    return list;
+}
+
+template <typename T>
+void setSessionFields(T *swg, const QJsonObject& json)
+{
+    if (json.contains("sessionId")) {
+        swg->setSessionId(swgString(json, "sessionId"));
+    }
+    if (json.contains("input")) {
+        swg->setInput(swgString(json, "input"));
+    }
+    if (json.contains("state")) {
+        swg->setState(swgString(json, "state"));
+    }
+    if (json.contains("protocol")) {
+        swg->setProtocol(json["protocol"].toInt());
+    }
+    if (json.contains("sourceProtocol")) {
+        swg->setSourceProtocol(json["sourceProtocol"].toInt());
+    }
+    if (json.contains("source")) {
+        swg->setSource(swgString(json, "source"));
+    }
+    if (json.contains("destination")) {
+        swg->setDestination(swgString(json, "destination"));
+    }
+    if (json.contains("via")) {
+        swg->setVia(swgString(json, "via"));
+    }
+    if (json.contains("nextSequence")) {
+        swg->setNextSequence(json["nextSequence"].toInt());
+    }
+    if (json.contains("accepted")) {
+        swg->setAccepted(json["accepted"].toDouble());
+    }
+    if (json.contains("consumed")) {
+        swg->setConsumed(json["consumed"].toDouble());
+    }
+    if (json.contains("maxDurationMs")) {
+        swg->setMaxDurationMs(json["maxDurationMs"].toInt());
+    }
+    if (json.contains("queuedSamples")) {
+        swg->setQueuedSamples(json["queuedSamples"].toInt());
+    }
+    if (json.contains("queuedFrames")) {
+        swg->setQueuedFrames(json["queuedFrames"].toInt());
+    }
+    if (json.contains("availableSamples")) {
+        swg->setAvailableSamples(json["availableSamples"].toInt());
+    }
+    if (json.contains("availableFrames")) {
+        swg->setAvailableFrames(json["availableFrames"].toInt());
+    }
+    if (json.contains("lastError")) {
+        swg->setLastError(swgString(json, "lastError"));
+    }
+}
+
+}
+
+void DSEMod::webapiFormatTransmitStatus(SWGSDRangel::SWGDSEModTransmitStatus *swg, const QJsonObject& json)
+{
+    setSessionFields(swg, json);
+
+    if (json.contains("pendingEncoderFrames")) {
+        swg->setPendingEncoderFrames(json["pendingEncoderFrames"].toInt());
+    }
+    if (json.contains("encodedQueueFrames")) {
+        swg->setEncodedQueueFrames(json["encodedQueueFrames"].toInt());
+    }
+    if (json.contains("transcodeDecodedFrames")) {
+        swg->setTranscodeDecodedFrames(json["transcodeDecodedFrames"].toInt());
+    }
+    if (json.contains("relayInvalidFrames")) {
+        swg->setRelayInvalidFrames(json["relayInvalidFrames"].toInt());
+    }
+    if (json.contains("relayHoldFrames")) {
+        swg->setRelayHoldFrames(json["relayHoldFrames"].toInt());
+    }
+
+    if (json.contains("history"))
+    {
+        QList<SWGSDRangel::SWGDSEModTransmitSession*> *history = new QList<SWGSDRangel::SWGDSEModTransmitSession*>();
+
+        for (const QJsonValue& value : json["history"].toArray())
+        {
+            SWGSDRangel::SWGDSEModTransmitSession *session = new SWGSDRangel::SWGDSEModTransmitSession();
+            setSessionFields(session, value.toObject());
+            history->append(session);
+        }
+
+        swg->setHistory(history);
+    }
+
+    if (json.contains("messages"))
+    {
+        QList<SWGSDRangel::SWGDSEModMessageStatus*> *messages = new QList<SWGSDRangel::SWGDSEModMessageStatus*>();
+
+        for (const QJsonValue& value : json["messages"].toArray())
+        {
+            const QJsonObject item = value.toObject();
+            SWGSDRangel::SWGDSEModMessageStatus *message = new SWGSDRangel::SWGDSEModMessageStatus();
+
+            if (item.contains("requestId")) {
+                message->setRequestId(swgString(item, "requestId"));
+            }
+            if (item.contains("state")) {
+                message->setState(swgString(item, "state"));
+            }
+            if (item.contains("error")) {
+                message->setError(swgString(item, "error"));
+            }
+
+            messages->append(message);
+        }
+
+        swg->setMessages(messages);
+    }
+}
+
+void DSEMod::webapiFormatCapabilities(SWGSDRangel::SWGDSEModCapabilities *swg, const QJsonObject& json)
+{
+    if (json.contains("pcmEncoding")) {
+        swg->setPcmEncoding(swgString(json, "pcmEncoding"));
+    }
+    if (json.contains("pcmChannels")) {
+        swg->setPcmChannels(json["pcmChannels"].toInt());
+    }
+    if (json.contains("pcmSampleRates"))
+    {
+        QList<qint32> *rates = new QList<qint32>();
+
+        for (const QJsonValue& value : json["pcmSampleRates"].toArray()) {
+            rates->append(value.toInt());
+        }
+
+        swg->setPcmSampleRates(rates);
+    }
+    if (json.contains("maxPCMChunkMs")) {
+        swg->setMaxPcmChunkMs(json["maxPCMChunkMs"].toInt());
+    }
+    if (json.contains("maxPCMQueueMs")) {
+        swg->setMaxPcmQueueMs(json["maxPCMQueueMs"].toInt());
+    }
+    if (json.contains("maxFrameBatch")) {
+        swg->setMaxFrameBatch(json["maxFrameBatch"].toInt());
+    }
+    if (json.contains("maxQueuedFrames")) {
+        swg->setMaxQueuedFrames(json["maxQueuedFrames"].toInt());
+    }
+    if (json.contains("idleTimeoutMs")) {
+        swg->setIdleTimeoutMs(json["idleTimeoutMs"].toInt());
+    }
+    if (json.contains("pcmMaxDurationMs")) {
+        swg->setPcmMaxDurationMs(json["pcmMaxDurationMs"].toInt());
+    }
+    if (json.contains("frameMaxDurationMs")) {
+        swg->setFrameMaxDurationMs(json["frameMaxDurationMs"].toInt());
+    }
+    if (json.contains("minFrameMaxDurationMs")) {
+        swg->setMinFrameMaxDurationMs(json["minFrameMaxDurationMs"].toInt());
+    }
+    if (json.contains("maxFrameMaxDurationMs")) {
+        swg->setMaxFrameMaxDurationMs(json["maxFrameMaxDurationMs"].toInt());
+    }
+    if (json.contains("frameFormats")) {
+        swg->setFrameFormats(swgStringList(json["frameFormats"].toArray()));
+    }
+    if (json.contains("angel61NetworkInput")) {
+        swg->setAngel61NetworkInput(json["angel61NetworkInput"].toBool());
+    }
+    if (json.contains("angel61TranscodeAvailable")) {
+        swg->setAngel61TranscodeAvailable(json["angel61TranscodeAvailable"].toBool());
+    }
+    if (json.contains("angel61TranscodeError")) {
+        swg->setAngel61TranscodeError(swgString(json, "angel61TranscodeError"));
+    }
+    if (json.contains("messageServices")) {
+        swg->setMessageServices(swgStringList(json["messageServices"].toArray()));
+    }
+}
+
 void DSEMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     auto processor = m_basebandSource->getProcessor();
     QJsonObject status;
     QMetaObject::invokeMethod(processor, [&]() { status = processor->getAPIReport(); }, Qt::BlockingQueuedConnection);
-    response.getDseModReport()->setTransmitStatus(status);
+    SWGSDRangel::SWGDSEModTransmitStatus *swgStatus = new SWGSDRangel::SWGDSEModTransmitStatus();
+    webapiFormatTransmitStatus(swgStatus, status);
+    delete response.getDseModReport()->getTransmitStatus();  // (the empty one of the report's init())
+    response.getDseModReport()->setTransmitStatus(swgStatus);
     QJsonObject capabilities = DSEModTxSession::capabilities(m_settings);
     // Network calls are relayed by truncating and repacking, without a vocoder (ANGEL61.md 3.1.1): only
     // an Opus call relayed at a V1 tier needs the V1 encoder, which that call checks
@@ -2466,7 +2676,10 @@ void DSEMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     if (!relayAvailable) {
         capabilities["angel61TranscodeError"] = "Selected DSEMod mode is not Angel61";
     }
-    response.getDseModReport()->setCapabilities(capabilities);
+    SWGSDRangel::SWGDSEModCapabilities *swgCapabilities = new SWGSDRangel::SWGDSEModCapabilities();
+    webapiFormatCapabilities(swgCapabilities, capabilities);
+    delete response.getDseModReport()->getCapabilities();
+    response.getDseModReport()->setCapabilities(swgCapabilities);
     SWGSDRangel::SWGDSEModReport *report = response.getDseModReport();
     report->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
     report->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
@@ -2769,7 +2982,7 @@ void DSEMod::webapiFormatChannelSettings(
         swg->setM17Destination(new QString(settings.m_m17Destination));
     }
     if (channelSettingsKeys.contains("m17CAN") || force) {
-        swg->setM17CAN(settings.m_m17CAN);
+        swg->setM17Can(settings.m_m17CAN);
     }
     if (channelSettingsKeys.contains("m17Message") || force) {
         swg->setM17Message(new QString(settings.m_m17Message));
@@ -2802,7 +3015,7 @@ void DSEMod::webapiFormatChannelSettings(
         swg->setAngel61TunnelGroups(new QString(settings.m_angel61TunnelGroups));
     }
     if (channelSettingsKeys.contains("angel61TunnelMTU") || force) {
-        swg->setAngel61TunnelMTU(settings.m_angel61TunnelMTU);
+        swg->setAngel61TunnelMtu(settings.m_angel61TunnelMTU);
     }
     if (channelSettingsKeys.contains("feedbackAudioDeviceName") || force) {
         swg->setFeedbackAudioDeviceName(new QString(settings.m_feedbackAudioDeviceName));

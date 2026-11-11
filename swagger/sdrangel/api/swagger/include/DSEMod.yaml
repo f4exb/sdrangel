@@ -432,7 +432,6 @@ DSEModPCM:
       description: Required on send/start. Mono only.
     data:
       type: string
-      format: byte
       description: >
         Canonical padded base64 PCM. At most one second per request and five seconds queued.
         append contains only data. Empty data is permitted only on start. Chunk boundaries
@@ -461,7 +460,6 @@ DSEModFrame:
       description: Required on canonical DMR bursts; must match the configured transmit slot.
     data:
       type: string
-      format: byte
       description: >
         Canonical padded base64. D-Star header is 41 bytes including CRC; voice is 9 voice
         bytes plus 3 on-air slow-data bytes (LSB first on RF). DMR is 33 packed bytes excluding
@@ -498,7 +496,6 @@ DSEModMessage:
         180 printable ASCII characters; standalone supports 5098 UTF-8 bytes. No truncation.
     data:
       type: string
-      format: byte
       description: Nonempty binary application data; Angel61 standalone only, up to 5098 decoded bytes.
 
 DSEModTransmitStatus:
@@ -520,13 +517,18 @@ DSEModTransmitStatus:
       type: string
     destination:
       type: string
+    via:
+      type: string
+      description: The path of an angel61 session (a gateway's callsign), or empty.
     nextSequence:
       type: integer
     accepted:
       type: number
+      format: double
       description: Accepted input samples or protocol frames in this session.
     consumed:
       type: number
+      format: double
       description: Input samples resampled or frames rendered; not a remote delivery acknowledgement.
     maxDurationMs:
       type: integer
@@ -546,18 +548,24 @@ DSEModTransmitStatus:
     transcodeDecodedFrames:
       type: integer
       description: Source Angel61 Opus frames decoded (to re-encode as V1) by the current or most recent session.
+    relayInvalidFrames:
+      type: integer
+      description: Angel61 relay records refused (type, length, counter, flags or CRC) by the current or most recent session.
+    relayHoldFrames:
+      type: integer
+      description: Angel61 relay idle frames sent for want of the call's packets (Angel61 modes only).
     lastError:
       type: string
     history:
       type: array
-      description: Last 16 completed sessions, without nested history.
+      description: Last 16 completed sessions.
       items:
-        type: object
+        $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModTransmitSession"
     messages:
       type: array
-      description: Last 32 message request statuses. inBand queued means admitted to the protocol, not remote delivery.
+      description: Last 32 message request statuses.
       items:
-        type: object
+        $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModMessageStatus"
 
 DSEModCapabilities:
   type: object
@@ -608,3 +616,63 @@ DSEModCapabilities:
       type: array
       items:
         type: string
+
+DSEModTransmitSession:
+  description: A completed transmit session, as DSEModTransmitStatus.history lists it
+  type: object
+  properties:
+    sessionId:
+      type: string
+    input:
+      type: string
+    state:
+      type: string
+      enum: [completed, aborted, failed]
+    protocol:
+      type: integer
+    sourceProtocol:
+      type: integer
+      description: The profile of an angel61 session's frames as a mode (9 Angel61 NB, 10 Angel61 WB, 11 HF-NB, 12 HF-WB), 0 before the first.
+    source:
+      type: string
+    destination:
+      type: string
+    via:
+      type: string
+      description: The path of an angel61 session (a gateway's callsign), or empty.
+    nextSequence:
+      type: integer
+    accepted:
+      type: number
+      format: double
+      description: Accepted input samples or protocol frames in the session.
+    consumed:
+      type: number
+      format: double
+      description: Input samples resampled or frames rendered; not a remote delivery acknowledgement.
+    maxDurationMs:
+      type: integer
+    queuedSamples:
+      type: integer
+    queuedFrames:
+      type: integer
+    availableSamples:
+      type: integer
+    availableFrames:
+      type: integer
+    lastError:
+      type: string
+
+DSEModMessageStatus:
+  description: The status of a message action, by its requestId
+  type: object
+  properties:
+    requestId:
+      type: string
+    state:
+      type: string
+      enum: [queued, accepted, completed, aborted, failed]
+      description: inBand queued means admitted to the protocol, not remote delivery.
+    error:
+      type: string
+      description: Why a standalone message's session failed or was aborted.

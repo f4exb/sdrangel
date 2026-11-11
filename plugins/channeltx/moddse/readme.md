@@ -226,13 +226,13 @@ Angel61 only. A text message and Send. With a speech input it rides in the data 
 
 Angel61 only.
 
-  - Symbol: the APRS symbol this station sends in its parameters slot. The button shows it and opens the two symbol tables as grids of their icons to pick it from, with an overlay character for the alternate table. The icons are the [APRS feature](../../../plugins/feature/aprs/readme.md)'s, read as a resource; a build without that feature shows the two characters that name the symbol instead. A receiver draws the station with it when it puts the position on the APRS network (`sdrbase/dsp/dv/ANGEL61.md` 3.3); unset means unspecified and the receiver chooses from the position itself.
+  - Symbol: the APRS symbol this station sends in its parameters slot. The button shows it and opens the two symbol tables as grids of their icons to pick it from, with an overlay character for the alternate table. A receiver draws the station with it on the map.
   - Info and Send: an APRS information field sent as data (see below).
 
 **Sending APRS.** A text message is already APRS: the receiver turns one addressed to a callsign
 into a message (`:ADDRESSEE:text`) and one to `CQ` into a status, and it turns the position slot
-into a compressed position report with the symbol, course and speed (`sdrbase/dsp/dv/ANGEL61.md`
-3.3). So the Text message tab (25) is how an APRS message is sent, and nothing else is needed for it.
+into a compressed position report with the symbol, course and speed.
+So the Text message tab (25) is how an APRS message is sent, and nothing else is needed for it.
 The **Info** field of the APRS tab is for what those native fields cannot say - an object, a
 weather report, a bulletin, telemetry, a message acknowledgement - which the format carries
 verbatim as content type 2: everything after the colon of a TNC2 line, with the receiver putting
@@ -244,11 +244,12 @@ again by itself. To relay a packet another station originated, use APRS's own th
 
 ![File transfer settings](../../../doc/img/DSEMod_plugin_file_transfer.png)
 
-Angel61 only. A file to offer (`ANGEL61.md` 3.4), picked with the `...` button. Send starts it: the transmission is keyed up, the offer and the blocks go out in data frames, and the station receiving it answers with the blocks it missed - the modulator keys up again for each of those rounds, up to five, and the label under the file name shows the state, the blocks and the round. A file sent to `CQ` or a talkgroup (`TG n`) goes once through: nobody answers a group, so the transfer is done when its last block has gone, and a station that missed blocks needs the file sent again. On VHF, at NB's 30 bytes a frame (QPSK) and 70 (16-QAM), a 100 kB file is about four and a half minutes on the air, or two.
+Angel61 only. A file to transfer, picked with the `...` button.
 
-The file transfer's progress and its rate are reported twice a second while a transfer runs. The
-rate is averaged over the transfer rather than taken between two reports, which is what it has to
-be: a report is a snapshot, and two of them close together read as megabits a second.
+Send starts it: the transmission is keyed up, the offer and the blocks go out in data frames, and the station receiving it answers with the blocks it missed - the modulator keys up again for each of those rounds, up to five, and the label under the file name shows the state, the blocks and the round. A file sent to `CQ` or a talkgroup (`TG n`) goes once through: nobody answers a group, so the transfer is done when its last block has gone, and a station that missed blocks needs the file sent again. On VHF, at NB's 30 bytes a frame (QPSK) and 70 (16-QAM), a 100 kB file is about four and a half minutes on the air, or two.
+
+The file transfer's progress and its rate are reported twice a second while a transfer runs.
+The rate is averaged over the transfer.
 
 <h3>28: IP tunnel</h3>
 
@@ -260,18 +261,18 @@ Know what it is before turning it on: the link carries
 **333 bytes/s** at the low rate and 900 at the high one. Interactive SSH is
 comfortable, a web page is not.
 
-The fields of the tab (the unlabelled ones show what they are for when empty):
+The fields of the tab:
 
-| Field | What it is |
-|---|---|
-| **Tunnel** | Turns it on. The host interface is created when Angel61 first needs it, which needs administrator or root. On Windows, accept the UAC prompt for the bundled tunnel helper; SDRangel itself does not restart or become elevated, and the signed `wintun.dll` must be beside the executables. The helper stays open while Tunnel remains ticked, so changing away from and back to Angel61 does not prompt again |
-| **Peer** | The callsign at the other end. A datagram is only sent to that station and only accepted from it |
-| **Address** | This end's address on the tunnel with its prefix length, `10.255.0.1/32`. The other station uses a different one |
-| **MTU** | 576 suits the low rate (29 fragments, 1.7 s a datagram). IPv6 needs 1280, which is 65 fragments and, at 1% block error rate, about half of them lost |
-| **Routes** | The prefixes routed into the tunnel and advertised to the peer, comma separated: `192.168.20.0/24, 2001:db8::/64`. Nothing outside them is sent |
+| Field         | Description |
+|---------------|-------------|
+| **Tunnel**    | Turns it on. The host interface is created when Angel61 first needs it, which needs administrator or root. On Windows, accept the UAC prompt for the bundled tunnel helper; SDRangel itself does not restart or become elevated, and the signed `wintun.dll` must be beside the executables. The helper stays open while Tunnel remains ticked, so changing away from and back to Angel61 does not prompt again |
+| **Peer**      | The callsign at the other end. A datagram is only sent to that station and only accepted from it |
+| **Address**   | This end's address on the tunnel with its prefix length, `10.255.0.1/32`. The other station uses a different one |
+| **MTU**       | 576 suits the low rate (29 fragments, 1.7 s a datagram). IPv6 needs 1280, which is 65 fragments and, at 1% block error rate, about half of them lost |
+| **Routes**    | The prefixes routed into the tunnel and advertised to the peer, comma separated: `192.168.20.0/24, 2001:db8::/64`. Nothing outside them is sent |
 | **Interface** | The name of the host interface to create (`sdrangel0`) |
-| **Allow** | What may be sent, comma separated: a protocol (`icmp`, `tcp`, `udp`, `gre`, `esp`, `ah`, `sctp` or a number) with a port or a port range for TCP, UDP and SCTP, which either port of a datagram may be in, so that a session's replies pass too: `icmp, tcp:22, udp:53`. Empty: everything. A list that cannot be read sends nothing, and says which term it could not read. Web API `angel61TunnelAllow` |
-| **Groups** | Multicast groups sent all the same, comma separated (`224.0.0.251, ff02::fb`), still subject to Allow; every other multicast and broadcast destination is refused. Web API `angel61TunnelGroups` |
+| **Allow**     | What may be sent, comma separated: a protocol (`icmp`, `tcp`, `udp`, `gre`, `esp`, `ah`, `sctp` or a number) with a port or a port range for TCP, UDP and SCTP, which either port of a datagram may be in, so that a session's replies pass too: `icmp, tcp:22, udp:53`. Empty: everything. A list that cannot be read sends nothing, and says which term it could not read. Web API `angel61TunnelAllow` |
+| **Groups**    | Multicast groups sent all the same, comma separated (`224.0.0.251, ff02::fb`), still subject to Allow; every other multicast and broadcast destination is refused. |
 
 The receiving side is a **DSD Demodulator** in the same instance, with Angel61
 in its protocol list; it passes what it hears to this modulator over the
@@ -281,7 +282,7 @@ The demodulator's IP tunnel tab shows what it heard beside what this modulator d
 
 To join two LANs, give each station a different address, enable IP forwarding
 on both hosts, permit it in their firewalls, and add a route on each LAN's own
-router through its local tunnel host - `../../../sdrbase/tun/README.md` has further information.
+router through its local tunnel host - (further information)[../../../sdrbase/tun/README.md].
 
 Broadcast and multicast are not supported, as the link is too slow for most protocols.
 There is no encryption, in keeping with amateur radio regulations.
@@ -292,7 +293,7 @@ There is no encryption, in keeping with amateur radio regulations.
 
 Enter up to 32 DTMF digits (0-9, A-D, * and #) and press Send. The digits are sent as AMBE dual tone frames, 100 ms per digit with 100 ms gaps, with the mbevocoder back end (with the other back ends the digits are synthesised as audio and voice coded). If a transmission is in progress the digits replace the speech input while they are sent. If not, a transmission is started for the sequence and stopped after it, so a repeater or an EchoLink node can be controlled with a single click. Releasing the PTT (3) drops the remaining digits.
 
-On the Angel61 modes the digits are data, never voice (`sdrbase/dsp/dv/ANGEL61.md` 3.8): they go in the DTMF slot, each at least twice, and the receiver plays them again as tones of the same length and shows them as text. While they play the frames are idle, the speech input not coded, and the transmission lasts until they have played; a Send with no transmission in progress makes a transmission of its own for them. A relay (the `angel61` network input) sends the DTMF of the call it relays in its own slots.
+On the Angel61 modes the digits are data, never voice: they go in the DTMF slot, each at least twice, and the receiver plays them again as tones of the same length and shows them as text. While they play the frames are idle, the speech input not coded, and the transmission lasts until they have played; a Send with no transmission in progress makes a transmission of its own for them. A relay (the `angel61` network input) sends the DTMF of the call it relays in its own slots.
 
 <h3>30: CW keyer</h3>
 

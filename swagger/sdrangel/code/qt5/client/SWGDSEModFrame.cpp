@@ -92,7 +92,7 @@ SWGDSEModFrame::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&slot, pJson["slot"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&data, pJson["data"], "QByteArray", "QByteArray");
+    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
 }
 
@@ -123,10 +123,7 @@ SWGDSEModFrame::asJsonObject() {
         obj->insert("slot", QJsonValue(slot));
     }
     if(data != nullptr && *data != QString("")){
-        toJsonValue(QString("data"), data, obj, QString("QByteArray"));
-    }
-    if(data != nullptr) {
-        obj->insert("data", QJsonValue(*data));
+        toJsonValue(QString("data"), data, obj, QString("QString"));
     }
 
     return obj;
@@ -172,12 +169,12 @@ SWGDSEModFrame::setSlot(qint32 slot) {
     this->m_slot_isSet = true;
 }
 
-QByteArray*
+QString*
 SWGDSEModFrame::getData() {
     return data;
 }
 void
-SWGDSEModFrame::setData(QByteArray* data) {
+SWGDSEModFrame::setData(QString* data) {
     this->data = data;
     this->m_data_isSet = true;
 }

@@ -114,7 +114,7 @@ SWGDSEModMessage::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&data, pJson["data"], "QByteArray", "QByteArray");
+    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
 }
 
@@ -151,10 +151,7 @@ SWGDSEModMessage::asJsonObject() {
         toJsonValue(QString("text"), text, obj, QString("QString"));
     }
     if(data != nullptr && *data != QString("")){
-        toJsonValue(QString("data"), data, obj, QString("QByteArray"));
-    }
-    if(data != nullptr) {
-        obj->insert("data", QJsonValue(*data));
+        toJsonValue(QString("data"), data, obj, QString("QString"));
     }
 
     return obj;
@@ -220,12 +217,12 @@ SWGDSEModMessage::setText(QString* text) {
     this->m_text_isSet = true;
 }
 
-QByteArray*
+QString*
 SWGDSEModMessage::getData() {
     return data;
 }
 void
-SWGDSEModMessage::setData(QByteArray* data) {
+SWGDSEModMessage::setData(QString* data) {
     this->data = data;
     this->m_data_isSet = true;
 }

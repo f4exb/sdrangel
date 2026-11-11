@@ -52,8 +52,8 @@ public:
     qint32 getChannels();
     void setChannels(qint32 channels);
 
-    QByteArray* getData();
-    void setData(QByteArray* data);
+    QString* getData();
+    void setData(QString* data);
 
 
     virtual bool isSet() override;
@@ -68,7 +68,7 @@ private:
     qint32 channels;
     bool m_channels_isSet;
 
-    QByteArray* data;
+    QString* data;
     bool m_data_isSet;
 
 };

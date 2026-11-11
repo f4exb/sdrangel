@@ -55,6 +55,11 @@ class MessageQueue;
 
 class IPTunnel;
 
+namespace SWGSDRangel {
+    class SWGDSEModTransmitStatus;
+    class SWGDSEModCapabilities;
+}
+
 class DSEMod : public BasebandSampleSource, public ChannelAPI {
 public:
     class MsgConfigureDSEMod : public Message {
@@ -371,6 +376,11 @@ public:
             DSEModSettings& settings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
+
+    //! The processor's transmit status (getAPIReport) into the report's generated class, through its setters
+    static void webapiFormatTransmitStatus(SWGSDRangel::SWGDSEModTransmitStatus *swg, const QJsonObject& status);
+    //! DSEModTxSession::capabilities and the transcode fields into the report's generated class
+    static void webapiFormatCapabilities(SWGSDRangel::SWGDSEModCapabilities *swg, const QJsonObject& capabilities);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     double getMagSq() const;

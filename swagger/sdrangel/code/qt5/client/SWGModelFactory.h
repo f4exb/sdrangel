@@ -143,10 +143,12 @@
 #include "SWGDSEModCapabilities.h"
 #include "SWGDSEModFrame.h"
 #include "SWGDSEModMessage.h"
+#include "SWGDSEModMessageStatus.h"
 #include "SWGDSEModPCM.h"
 #include "SWGDSEModReport.h"
 #include "SWGDSEModSettings.h"
 #include "SWGDSEModTransmit.h"
+#include "SWGDSEModTransmitSession.h"
 #include "SWGDSEModTransmitStatus.h"
 #include "SWGDVBDemodActions.h"
 #include "SWGDVBDemodApp.h"
@@ -1127,6 +1129,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDSEModMessageStatus").compare(type) == 0) {
+      SWGDSEModMessageStatus *obj = new SWGDSEModMessageStatus();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDSEModPCM").compare(type) == 0) {
       SWGDSEModPCM *obj = new SWGDSEModPCM();
       obj->init();
@@ -1144,6 +1151,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDSEModTransmit").compare(type) == 0) {
       SWGDSEModTransmit *obj = new SWGDSEModTransmit();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModTransmitSession").compare(type) == 0) {
+      SWGDSEModTransmitSession *obj = new SWGDSEModTransmitSession();
       obj->init();
       return obj;
     }

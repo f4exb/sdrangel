@@ -22,8 +22,8 @@
 #include <QJsonObject>
 
 
-#include "SWGNumber.h"
-#include "SWGObject.h"
+#include "SWGDSEModMessageStatus.h"
+#include "SWGDSEModTransmitSession.h"
 #include <QList>
 #include <QString>
 
@@ -66,14 +66,17 @@ public:
     QString* getDestination();
     void setDestination(QString* destination);
 
+    QString* getVia();
+    void setVia(QString* via);
+
     qint32 getNextSequence();
     void setNextSequence(qint32 next_sequence);
 
-    SWGNumber* getAccepted();
-    void setAccepted(SWGNumber* accepted);
+    double getAccepted();
+    void setAccepted(double accepted);
 
-    SWGNumber* getConsumed();
-    void setConsumed(SWGNumber* consumed);
+    double getConsumed();
+    void setConsumed(double consumed);
 
     qint32 getMaxDurationMs();
     void setMaxDurationMs(qint32 max_duration_ms);
@@ -99,14 +102,20 @@ public:
     qint32 getTranscodeDecodedFrames();
     void setTranscodeDecodedFrames(qint32 transcode_decoded_frames);
 
+    qint32 getRelayInvalidFrames();
+    void setRelayInvalidFrames(qint32 relay_invalid_frames);
+
+    qint32 getRelayHoldFrames();
+    void setRelayHoldFrames(qint32 relay_hold_frames);
+
     QString* getLastError();
     void setLastError(QString* last_error);
 
-    QList<SWGObject*>* getHistory();
-    void setHistory(QList<SWGObject*>* history);
+    QList<SWGDSEModTransmitSession*>* getHistory();
+    void setHistory(QList<SWGDSEModTransmitSession*>* history);
 
-    QList<SWGObject*>* getMessages();
-    void setMessages(QList<SWGObject*>* messages);
+    QList<SWGDSEModMessageStatus*>* getMessages();
+    void setMessages(QList<SWGDSEModMessageStatus*>* messages);
 
 
     virtual bool isSet() override;
@@ -133,13 +142,16 @@ private:
     QString* destination;
     bool m_destination_isSet;
 
+    QString* via;
+    bool m_via_isSet;
+
     qint32 next_sequence;
     bool m_next_sequence_isSet;
 
-    SWGNumber* accepted;
+    double accepted;
     bool m_accepted_isSet;
 
-    SWGNumber* consumed;
+    double consumed;
     bool m_consumed_isSet;
 
     qint32 max_duration_ms;
@@ -166,13 +178,19 @@ private:
     qint32 transcode_decoded_frames;
     bool m_transcode_decoded_frames_isSet;
 
+    qint32 relay_invalid_frames;
+    bool m_relay_invalid_frames_isSet;
+
+    qint32 relay_hold_frames;
+    bool m_relay_hold_frames_isSet;
+
     QString* last_error;
     bool m_last_error_isSet;
 
-    QList<SWGObject*>* history;
+    QList<SWGDSEModTransmitSession*>* history;
     bool m_history_isSet;
 
-    QList<SWGObject*>* messages;
+    QList<SWGDSEModMessageStatus*>* messages;
     bool m_messages_isSet;
 
 };

@@ -83,7 +83,7 @@ SWGDSEModPCM::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channels, pJson["channels"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&data, pJson["data"], "QByteArray", "QByteArray");
+    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
 }
 
@@ -111,10 +111,7 @@ SWGDSEModPCM::asJsonObject() {
         obj->insert("channels", QJsonValue(channels));
     }
     if(data != nullptr && *data != QString("")){
-        toJsonValue(QString("data"), data, obj, QString("QByteArray"));
-    }
-    if(data != nullptr) {
-        obj->insert("data", QJsonValue(*data));
+        toJsonValue(QString("data"), data, obj, QString("QString"));
     }
 
     return obj;
@@ -150,12 +147,12 @@ SWGDSEModPCM::setChannels(qint32 channels) {
     this->m_channels_isSet = true;
 }
 
-QByteArray*
+QString*
 SWGDSEModPCM::getData() {
     return data;
 }
 void
-SWGDSEModPCM::setData(QByteArray* data) {
+SWGDSEModPCM::setData(QString* data) {
     this->data = data;
     this->m_data_isSet = true;
 }

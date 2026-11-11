@@ -42,11 +42,13 @@ SWGDSEModTransmitStatus::SWGDSEModTransmitStatus() {
     m_source_isSet = false;
     destination = nullptr;
     m_destination_isSet = false;
+    via = nullptr;
+    m_via_isSet = false;
     next_sequence = 0;
     m_next_sequence_isSet = false;
-    accepted = nullptr;
+    accepted = 0.0;
     m_accepted_isSet = false;
-    consumed = nullptr;
+    consumed = 0.0;
     m_consumed_isSet = false;
     max_duration_ms = 0;
     m_max_duration_ms_isSet = false;
@@ -64,6 +66,10 @@ SWGDSEModTransmitStatus::SWGDSEModTransmitStatus() {
     m_encoded_queue_frames_isSet = false;
     transcode_decoded_frames = 0;
     m_transcode_decoded_frames_isSet = false;
+    relay_invalid_frames = 0;
+    m_relay_invalid_frames_isSet = false;
+    relay_hold_frames = 0;
+    m_relay_hold_frames_isSet = false;
     last_error = nullptr;
     m_last_error_isSet = false;
     history = nullptr;
@@ -92,6 +98,8 @@ SWGDSEModTransmitStatus::init() {
     m_source_isSet = false;
     destination = new QString("");
     m_destination_isSet = false;
+    via = new QString("");
+    m_via_isSet = false;
     next_sequence = 0;
     m_next_sequence_isSet = false;
     accepted = 0.0;
@@ -114,11 +122,15 @@ SWGDSEModTransmitStatus::init() {
     m_encoded_queue_frames_isSet = false;
     transcode_decoded_frames = 0;
     m_transcode_decoded_frames_isSet = false;
+    relay_invalid_frames = 0;
+    m_relay_invalid_frames_isSet = false;
+    relay_hold_frames = 0;
+    m_relay_hold_frames_isSet = false;
     last_error = new QString("");
     m_last_error_isSet = false;
-    history = new QList<SWGObject*>();
+    history = new QList<SWGDSEModTransmitSession*>();
     m_history_isSet = false;
-    messages = new QList<SWGObject*>();
+    messages = new QList<SWGDSEModMessageStatus*>();
     m_messages_isSet = false;
 }
 
@@ -141,13 +153,14 @@ SWGDSEModTransmitStatus::cleanup() {
     if(destination != nullptr) { 
         delete destination;
     }
+    if(via != nullptr) { 
+        delete via;
+    }
 
-    if(accepted != nullptr) { 
-        delete accepted;
-    }
-    if(consumed != nullptr) { 
-        delete consumed;
-    }
+
+
+
+
 
 
 
@@ -200,11 +213,13 @@ SWGDSEModTransmitStatus::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&destination, pJson["destination"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&via, pJson["via"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&next_sequence, pJson["nextSequence"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&accepted, pJson["accepted"], "SWGNumber", "SWGNumber");
+    ::SWGSDRangel::setValue(&accepted, pJson["accepted"], "double", "");
     
-    ::SWGSDRangel::setValue(&consumed, pJson["consumed"], "SWGNumber", "SWGNumber");
+    ::SWGSDRangel::setValue(&consumed, pJson["consumed"], "double", "");
     
     ::SWGSDRangel::setValue(&max_duration_ms, pJson["maxDurationMs"], "qint32", "");
     
@@ -222,12 +237,15 @@ SWGDSEModTransmitStatus::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&transcode_decoded_frames, pJson["transcodeDecodedFrames"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&relay_invalid_frames, pJson["relayInvalidFrames"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&relay_hold_frames, pJson["relayHoldFrames"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&last_error, pJson["lastError"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&history, pJson["history"], "QList", "SWGDSEModTransmitSession");
     
-    ::SWGSDRangel::setValue(&history, pJson["history"], "QList", "SWGObject");
-    
-    ::SWGSDRangel::setValue(&messages, pJson["messages"], "QList", "SWGObject");
+    ::SWGSDRangel::setValue(&messages, pJson["messages"], "QList", "SWGDSEModMessageStatus");
 }
 
 QString
@@ -265,14 +283,17 @@ SWGDSEModTransmitStatus::asJsonObject() {
     if(destination != nullptr && *destination != QString("")){
         toJsonValue(QString("destination"), destination, obj, QString("QString"));
     }
+    if(via != nullptr && *via != QString("")){
+        toJsonValue(QString("via"), via, obj, QString("QString"));
+    }
     if(m_next_sequence_isSet){
         obj->insert("nextSequence", QJsonValue(next_sequence));
     }
-    if((accepted != nullptr) && (accepted->isSet())){
-        toJsonValue(QString("accepted"), accepted, obj, QString("SWGNumber"));
+    if(m_accepted_isSet){
+        obj->insert("accepted", QJsonValue(accepted));
     }
-    if((consumed != nullptr) && (consumed->isSet())){
-        toJsonValue(QString("consumed"), consumed, obj, QString("SWGNumber"));
+    if(m_consumed_isSet){
+        obj->insert("consumed", QJsonValue(consumed));
     }
     if(m_max_duration_ms_isSet){
         obj->insert("maxDurationMs", QJsonValue(max_duration_ms));
@@ -298,14 +319,20 @@ SWGDSEModTransmitStatus::asJsonObject() {
     if(m_transcode_decoded_frames_isSet){
         obj->insert("transcodeDecodedFrames", QJsonValue(transcode_decoded_frames));
     }
+    if(m_relay_invalid_frames_isSet){
+        obj->insert("relayInvalidFrames", QJsonValue(relay_invalid_frames));
+    }
+    if(m_relay_hold_frames_isSet){
+        obj->insert("relayHoldFrames", QJsonValue(relay_hold_frames));
+    }
     if(last_error != nullptr && *last_error != QString("")){
         toJsonValue(QString("lastError"), last_error, obj, QString("QString"));
     }
     if(history && history->size() > 0){
-        toJsonArray((QList<void*>*)history, obj, "history", "SWGObject");
+        toJsonArray((QList<void*>*)history, obj, "history", "SWGDSEModTransmitSession");
     }
     if(messages && messages->size() > 0){
-        toJsonArray((QList<void*>*)messages, obj, "messages", "SWGObject");
+        toJsonArray((QList<void*>*)messages, obj, "messages", "SWGDSEModMessageStatus");
     }
 
     return obj;
@@ -381,6 +408,16 @@ SWGDSEModTransmitStatus::setDestination(QString* destination) {
     this->m_destination_isSet = true;
 }
 
+QString*
+SWGDSEModTransmitStatus::getVia() {
+    return via;
+}
+void
+SWGDSEModTransmitStatus::setVia(QString* via) {
+    this->via = via;
+    this->m_via_isSet = true;
+}
+
 qint32
 SWGDSEModTransmitStatus::getNextSequence() {
     return next_sequence;
@@ -391,22 +428,22 @@ SWGDSEModTransmitStatus::setNextSequence(qint32 next_sequence) {
     this->m_next_sequence_isSet = true;
 }
 
-SWGNumber*
+double
 SWGDSEModTransmitStatus::getAccepted() {
     return accepted;
 }
 void
-SWGDSEModTransmitStatus::setAccepted(SWGNumber* accepted) {
+SWGDSEModTransmitStatus::setAccepted(double accepted) {
     this->accepted = accepted;
     this->m_accepted_isSet = true;
 }
 
-SWGNumber*
+double
 SWGDSEModTransmitStatus::getConsumed() {
     return consumed;
 }
 void
-SWGDSEModTransmitStatus::setConsumed(SWGNumber* consumed) {
+SWGDSEModTransmitStatus::setConsumed(double consumed) {
     this->consumed = consumed;
     this->m_consumed_isSet = true;
 }
@@ -491,6 +528,26 @@ SWGDSEModTransmitStatus::setTranscodeDecodedFrames(qint32 transcode_decoded_fram
     this->m_transcode_decoded_frames_isSet = true;
 }
 
+qint32
+SWGDSEModTransmitStatus::getRelayInvalidFrames() {
+    return relay_invalid_frames;
+}
+void
+SWGDSEModTransmitStatus::setRelayInvalidFrames(qint32 relay_invalid_frames) {
+    this->relay_invalid_frames = relay_invalid_frames;
+    this->m_relay_invalid_frames_isSet = true;
+}
+
+qint32
+SWGDSEModTransmitStatus::getRelayHoldFrames() {
+    return relay_hold_frames;
+}
+void
+SWGDSEModTransmitStatus::setRelayHoldFrames(qint32 relay_hold_frames) {
+    this->relay_hold_frames = relay_hold_frames;
+    this->m_relay_hold_frames_isSet = true;
+}
+
 QString*
 SWGDSEModTransmitStatus::getLastError() {
     return last_error;
@@ -501,22 +558,22 @@ SWGDSEModTransmitStatus::setLastError(QString* last_error) {
     this->m_last_error_isSet = true;
 }
 
-QList<SWGObject*>*
+QList<SWGDSEModTransmitSession*>*
 SWGDSEModTransmitStatus::getHistory() {
     return history;
 }
 void
-SWGDSEModTransmitStatus::setHistory(QList<SWGObject*>* history) {
+SWGDSEModTransmitStatus::setHistory(QList<SWGDSEModTransmitSession*>* history) {
     this->history = history;
     this->m_history_isSet = true;
 }
 
-QList<SWGObject*>*
+QList<SWGDSEModMessageStatus*>*
 SWGDSEModTransmitStatus::getMessages() {
     return messages;
 }
 void
-SWGDSEModTransmitStatus::setMessages(QList<SWGObject*>* messages) {
+SWGDSEModTransmitStatus::setMessages(QList<SWGDSEModMessageStatus*>* messages) {
     this->messages = messages;
     this->m_messages_isSet = true;
 }
@@ -547,13 +604,16 @@ SWGDSEModTransmitStatus::isSet(){
         if(destination && *destination != QString("")){
             isObjectUpdated = true; break;
         }
+        if(via && *via != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_next_sequence_isSet){
             isObjectUpdated = true; break;
         }
-        if(accepted && accepted->isSet()){
+        if(m_accepted_isSet){
             isObjectUpdated = true; break;
         }
-        if(consumed && consumed->isSet()){
+        if(m_consumed_isSet){
             isObjectUpdated = true; break;
         }
         if(m_max_duration_ms_isSet){
@@ -578,6 +638,12 @@ SWGDSEModTransmitStatus::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_transcode_decoded_frames_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_relay_invalid_frames_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_relay_hold_frames_isSet){
             isObjectUpdated = true; break;
         }
         if(last_error && *last_error != QString("")){

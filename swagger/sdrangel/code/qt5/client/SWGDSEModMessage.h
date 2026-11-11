@@ -61,8 +61,8 @@ public:
     QString* getText();
     void setText(QString* text);
 
-    QByteArray* getData();
-    void setData(QByteArray* data);
+    QString* getData();
+    void setData(QString* data);
 
 
     virtual bool isSet() override;
@@ -86,7 +86,7 @@ private:
     QString* text;
     bool m_text_isSet;
 
-    QByteArray* data;
+    QString* data;
     bool m_data_isSet;
 
 };
