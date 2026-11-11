@@ -51,7 +51,7 @@
 #include "SWGChannelReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGFeatureReport.h"
-#include "SWGDSGatewayReport.h"
+//#include "SWGDSGatewayReport.h"
 #include "feature/feature.h"
 #include "feature/featureset.h"
 #include "ui_dsemodgui.h"
@@ -1475,6 +1475,7 @@ void DSEModGUI::updateAngel61Destinations()
     QHash<QString, QString> codes;
     const QString channelId = QString("T%1:%2").arg(m_dseMod->getDeviceSetIndex()).arg(m_dseMod->getIndexInDeviceSet());
 
+    /*
     for (FeatureSet *featureSet : MainCore::instance()->getFeatureeSets())
     {
         for (int i = 0; featureSet && (i < featureSet->getNumberOfFeatures()); i++)
@@ -1508,6 +1509,7 @@ void DSEModGUI::updateAngel61Destinations()
             }
         }
     }
+    */
 
     m_angel61DestinationCodes = codes;
 
