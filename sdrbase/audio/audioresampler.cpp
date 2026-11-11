@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "audioresampler.h"
 
 AudioResampler::AudioResampler() :
@@ -51,10 +53,14 @@ bool AudioResampler::downSample(qint16 sampleIn, qint16& sampleOut)
         return true;
     }
 
+    // Every sample through the low-pass, at the rate it is designed for, and one in m_decimation kept:
+    // filtering only the kept ones left the band above the new Nyquist to alias in, and ran the
+    // filter at the low rate, which put its cut off m_decimation times lower
+    float lpSample = m_audioFilter.run(sampleIn / 32768.0f);
+
     if (m_decimationCount >= m_decimation - 1)
     {
-        float lpSample = m_audioFilter.run(sampleIn / 32768.0f);
-        sampleOut = lpSample * 32768.0f;
+        sampleOut = std::max(-32768.0f, std::min(32767.0f, lpSample * 32768.0f));
         m_decimationCount = 0;
         return true;
     }
