@@ -597,7 +597,11 @@ void GLSpectrumView::setFreqScaleTruncationMode(bool mode)
 void GLSpectrumView::setLinear(bool linear)
 {
     m_mutex.lock();
+    const bool changed = m_linear != linear;
     m_linear = linear;
+    if (changed && m_measurements) {
+        m_measurements->reset();
+    }
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -606,7 +610,11 @@ void GLSpectrumView::setLinear(bool linear)
 void GLSpectrumView::setUseCalibration(bool useCalibration)
 {
     m_mutex.lock();
+    const bool changed = m_useCalibration != useCalibration;
     m_useCalibration = useCalibration;
+    if (changed && m_measurements) {
+        m_measurements->reset();
+    }
     m_changesPending = true;
     m_mutex.unlock();
     if (m_messageQueueToGUI) {
@@ -629,6 +637,13 @@ void GLSpectrumView::setMeasurementParams(
 )
 {
     m_mutex.lock();
+    const bool definitionChanged =
+        (m_measurement != measurement)
+        || (m_measurementCenterFrequencyOffset != centerFrequencyOffset)
+        || (m_measurementBandwidth != bandwidth)
+        || (m_measurementChSpacing != chSpacing)
+        || (m_measurementAdjChBandwidth != adjChBandwidth)
+        || (m_measurementHarmonics != harmonics);
     m_measurement = measurement;
     m_measurementCenterFrequencyOffset = centerFrequencyOffset;
     m_measurementBandwidth = bandwidth;
@@ -642,6 +657,9 @@ void GLSpectrumView::setMeasurementParams(
     m_changesPending = true;
     if (m_measurements) {
         m_measurements->setMeasurementParams(measurement, peaks, precision, memoryMask);
+        if (definitionChanged) {
+            m_measurements->reset();
+        }
     }
     m_mutex.unlock();
     update();
@@ -650,6 +668,9 @@ void GLSpectrumView::setMeasurementParams(
 void GLSpectrumView::resetMeasurements()
 {
     m_mutex.lock();
+    if (m_measurements) {
+        m_measurements->reset();
+    }
     for (std::size_t i = 0; i < m_maskFails.size(); ++i)
     {
         m_maskTestCount[i] = 0;
@@ -1040,29 +1061,30 @@ void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
 void GLSpectrumView::measure(const Real *spectrum, bool updateGUI)
 {
     m_measurementResults.m_measurement = m_measurement;
+    const Real *displayedSpectrum = &spectrum[m_fftMin];
 
     switch (m_measurement)
     {
     case SpectrumSettings::MeasurementPeaks:
         if (updateGUI) {
-            measurePeaks(spectrum);
+            measurePeaks(displayedSpectrum);
         }
         break;
     case SpectrumSettings::MeasurementChannelPower:
-        measureChannelPower(spectrum, updateGUI);
+        measureChannelPower(displayedSpectrum, updateGUI);
         break;
     case SpectrumSettings::MeasurementAdjacentChannelPower:
-        measureAdjacentChannelPower(spectrum, updateGUI);
+        measureAdjacentChannelPower(displayedSpectrum, updateGUI);
         break;
     case SpectrumSettings::MeasurementOccupiedBandwidth:
-        measureOccupiedBandwidth(spectrum, updateGUI);
+        measureOccupiedBandwidth(displayedSpectrum, updateGUI);
         break;
     case SpectrumSettings::Measurement3dBBandwidth:
-        measure3dBBandwidth(spectrum, updateGUI);
+        measure3dBBandwidth(displayedSpectrum, updateGUI);
         break;
     case SpectrumSettings::MeasurementSNR:
-        measureSNR(spectrum, updateGUI);
-        measureSFDR(spectrum, updateGUI);
+        measureSNR(displayedSpectrum, updateGUI);
+        measureSFDR(displayedSpectrum, updateGUI);
         break;
     case SpectrumSettings::MeasurementMask:
         measureMask(spectrum, m_fftSize, updateGUI);
@@ -2412,7 +2434,7 @@ void GLSpectrumView::paintGL()
     }
 
     if (m_currentSpectrum) {
-        measure(&m_currentSpectrum[m_fftMin], true);
+        measure(m_currentSpectrum, true);
     }
 
     m_mutex.unlock();
@@ -2915,7 +2937,7 @@ void GLSpectrumView::measureOccupiedBandwidth(const Real *spectrum, bool updateG
             if (m_linear) {
                 power += spectrum[idx] * gain;
             } else {
-                power += CalcDb::powerFromdB(spectrum[idx]) + shift;
+                power += CalcDb::powerFromdB(spectrum[idx] + shift);
             }
             width++;
         }
@@ -3036,7 +3058,7 @@ float GLSpectrumView::calPower(float power) const
     if (m_linear) {
         return power * (m_useCalibration ? m_calibrationGain : 1.0f);
     } else {
-        return CalcDb::powerFromdB(power) + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+        return CalcDb::powerFromdB(power + (m_useCalibration ? m_calibrationShiftdB : 0.0f));
     }
 }
 
@@ -3112,7 +3134,7 @@ void GLSpectrumView::measureSNR(const Real *spectrum, bool updateGUI)
         if (m_linear) {
             power = spectrum[i] * gain;
         } else {
-            power = CalcDb::powerFromdB(spectrum[i]) + shift;
+            power = CalcDb::powerFromdB(spectrum[i] + shift);
         }
 
         // Signal power
@@ -3277,7 +3299,7 @@ float GLSpectrumView::calcChannelPower(const Real *spectrum, int64_t centerFrequ
     {
         float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
         for (int i = start; i < end; i++) {
-            power += CalcDb::powerFromdB(spectrum[i]) + shift;
+            power += CalcDb::powerFromdB(spectrum[i] + shift);
         }
     }
 

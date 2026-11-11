@@ -197,6 +197,5 @@ void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
 
 void GLSpectrum::resetMeasurements()
 {
-    m_measurements->reset();
     m_spectrum->resetMeasurements();
 }

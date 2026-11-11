@@ -591,6 +591,7 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
         m_table = nullptr;
         delete m_maskTable;
         m_maskTable = nullptr;
+        m_measurements.clear();
 
         m_measurement = measurement;
         m_precision = precision;
@@ -738,9 +739,14 @@ void SpectrumMeasurements::updateMeasurement(int row, float value, bool updateGU
     }
     else
     {
+        if (!m_measurements[row].hasValues()) {
+            return;
+        }
+
+        const float current = m_measurements[row].m_current;
         double mean = m_measurements[row].mean();
 
-        m_table->item(row, COL_CURRENT)->setData(Qt::DisplayRole, value);
+        m_table->item(row, COL_CURRENT)->setData(Qt::DisplayRole, current);
         m_table->item(row, COL_MEAN)->setData(Qt::DisplayRole, mean);
         m_table->item(row, COL_MIN)->setData(Qt::DisplayRole, m_measurements[row].m_min);
         m_table->item(row, COL_MAX)->setData(Qt::DisplayRole, m_measurements[row].m_max);
@@ -749,7 +755,7 @@ void SpectrumMeasurements::updateMeasurement(int row, float value, bool updateGU
         m_table->item(row, COL_COUNT)->setData(Qt::DisplayRole, m_measurements[row].m_values.size());
 
         QString spec = m_table->item(row, COL_SPEC)->text();
-        bool valueOK = checkSpec(spec, value);
+        bool valueOK = checkSpec(spec, current);
         bool meanOK = checkSpec(spec, mean);
         bool minOK = checkSpec(spec, m_measurements[row].m_min);
         bool mmaxOK = checkSpec(spec, m_measurements[row].m_max);
