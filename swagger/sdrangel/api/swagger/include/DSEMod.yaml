@@ -280,21 +280,21 @@ DSEModSettings:
     reverseAPIChannelIndex:
       type: integer
     cwKeyer:
-      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
     spectrumConfig:
-      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     channelMarker:
-      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
-      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
 DSEModReport:
   description: DSEMod
   properties:
     transmitStatus:
-      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModTransmitStatus"
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModTransmitStatus"
     capabilities:
-      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModCapabilities"
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModCapabilities"
     channelPowerDB:
       description: power transmitted in channel (dB)
       type: number
@@ -344,9 +344,9 @@ DSEModActions:
         Transmission is started for the duration of the sequence if it is not already in progress.
       type: string
     transmit:
-      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModTransmit"
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModTransmit"
     message:
-      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModMessage"
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModMessage"
     aprs:
       description: >
         Send an APRS information field over Angel61 (content type 2), e.g. an object, a weather
@@ -407,12 +407,12 @@ DSEModTransmit:
       maximum: 1000000
       description: Required on append, starting at zero. Retry the same chunk without advancing after 429.
     pcm:
-      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModPCM"
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModPCM"
     frames:
       type: array
       maxItems: 50
       items:
-        $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModFrame"
+        $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModFrame"
 
 DSEModPCM:
   type: object
