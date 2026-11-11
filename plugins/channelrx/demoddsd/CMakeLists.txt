@@ -61,7 +61,6 @@ set(dsddemod_CORE_HEADERS
 set(dsddemod_SOURCES
     dsddemod.cpp
     dsddemodplugin.cpp
-    dsddemodbaudrates.cpp
     dsddemodsettings.cpp
     dsddemodsink.cpp
     dsddemodbaseband.cpp
@@ -72,7 +71,6 @@ set(dsddemod_SOURCES
 set(dsddemod_HEADERS
     dsddemod.h
     dsddemodplugin.h
-    dsddemodbaudrates.h
     dsddemodsettings.h
     dsddemodsink.h
     dsddemodbaseband.h
@@ -83,8 +81,6 @@ set(dsddemod_HEADERS
 include_directories(
     ${CODEC2_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${LIBDSDCC_INCLUDE_DIR}
-    ${LIBMBE_INCLUDE_DIR}
 )
 
 # The coherent detector's search is dot products of float arrays: let the compiler vectorise
@@ -131,12 +127,9 @@ if(NOT BUILD_SHARED_LIBS)
     set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
 endif()
 
-if(LIBDSDCC_EXTERNAL)
-    add_dependencies(${TARGET_NAME} dsdcc mbelib)
-endif()
-
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
+    Qt::Positioning
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
