@@ -104,6 +104,42 @@ void FreqScannerAddRangeDialog::accept()
         };
         m_frequencies.append(hfFreqs);
     }
+    else if (ui->preset->currentText() == "UK 2m Channels")
+    {
+        // Repeater transmit frequencies (RV46-RV63).
+        for (qint64 f = 145575000; f <= 145787500; f += 12500) {
+            m_frequencies.append(f);
+        }
+    }
+    else if (ui->preset->currentText() == "UK 70cm Channels")
+    {
+        // Repeater transmit frequencies. RB channels are a subset of the RBW
+        // frequencies, so only add the latter to avoid duplicate scan entries.
+        for (qint64 f = 430250000; f <= 430300000; f += 12500) { // DVU-R20-DVU-R24
+            m_frequencies.append(f);
+        }
+        for (qint64 f = 430812500; f <= 430987500; f += 12500) { // RU65-RU79
+            m_frequencies.append(f);
+        }
+        for (qint64 f = 433000000; f <= 433375000; f += 12500) { // RBW00-RBW30 and RB00-RB15
+            m_frequencies.append(f);
+        }
+
+        // 70cm simplex channels listed alongside the repeater allocations.
+        m_frequencies.append({434018750, 434050000}); // U321A, U324
+
+        m_frequencies.append({
+            438350000, 438362500, 438375000, 438387500, 438400000, 438437500, // UR60-UR64, UR67
+            439125000, 439137500, 439150000, 439162500,                     // DVU10-DVU13
+            439218750                                                       // DVU17A
+        });
+        for (qint64 f = 439325000; f <= 439537500; f += 12500) { // DMU26-DMU31, DVU32-DVU43
+            m_frequencies.append(f);
+        }
+        for (qint64 f = 439562500; f <= 439775000; f += 12500) { // DVU45-DVU62
+            m_frequencies.append(f);
+        }
+    }
     else
     {
         qint64 start = ui->start->getValue();
@@ -165,6 +201,10 @@ void FreqScannerAddRangeDialog::on_preset_currentTextChanged(const QString& text
         enableManAdjust = false;
     }
     else if (text == "HF ATC")
+    {
+        enableManAdjust = false;
+    }
+    else if ((text == "UK 2m Channels") || (text == "UK 70cm Channels"))
     {
         enableManAdjust = false;
     }
