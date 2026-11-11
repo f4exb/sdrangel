@@ -41,10 +41,10 @@ DSDProtocolP25P2::DSDProtocolP25P2(const DSDSymbolHistory& history) :
     m_silent(0),
     m_absent(0),
     m_hasSystem(false),
-    m_systemLearned(false),
     m_wacn(0),
     m_sysid(0),
     m_nac(0),
+    m_systemLearned(false),
     m_lastDuid(-1)
 {
 }
@@ -145,7 +145,7 @@ DVP25P2::ISCHType DSDProtocolP25P2::readISCH(int64_t burstStart, int& distance)
         int predicted = timeslotAt(burstStart);
 
         if (dsdDebug() && (predicted >= 0) && (predicted != isch.getTimeslot())) {
-            fprintf(stderr, "P25P2 timeslot %d at %lld, %d expected\n", isch.getTimeslot(), burstStart, predicted);
+            fprintf(stderr, "P25P2 timeslot %d at %lld, %d expected\n", isch.getTimeslot(), (long long) burstStart, predicted);
         }
 
         m_timeslot = isch.getTimeslot();
@@ -158,7 +158,7 @@ DVP25P2::ISCHType DSDProtocolP25P2::readISCH(int64_t burstStart, int& distance)
         if ((predicted >= 0) && !DVP25P2::timeslotHasSync(predicted))
         {
             if (dsdDebug()) {
-                fprintf(stderr, "P25P2 sync at %lld in timeslot %d: timeslot lost\n", burstStart, predicted);
+                fprintf(stderr, "P25P2 sync at %lld in timeslot %d: timeslot lost\n", (long long) burstStart, predicted);
             }
 
             m_timeslot = -1;
@@ -295,7 +295,7 @@ void DSDProtocolP25P2::processBurst()
     m_burstValid = (ischType != DVP25P2::ISCHNone) && (duidDistance <= 1);
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25P2 burst at %lld: ISCH %s (%d) timeslot %d DUID %s (%d)\n", burstStart,
+        fprintf(stderr, "P25P2 burst at %lld: ISCH %s (%d) timeslot %d DUID %s (%d)\n", (long long) burstStart,
             ischType == DVP25P2::ISCHSync ? "sync" : ischType == DVP25P2::ISCHInfo ? "info" : "none", ischDistance, timeslot,
             DVP25P2::duidName(duid), duidDistance);
     }
@@ -481,7 +481,7 @@ void DSDProtocolP25P2::processACCH(int64_t burstStart, int duid, int channel)
     if (corrected < 0)
     {
         if (dsdDebug()) {
-            fprintf(stderr, "P25P2 %s at %lld channel %d: failed\n", DVP25P2::duidName(duid), burstStart, channel);
+            fprintf(stderr, "P25P2 %s at %lld channel %d: failed\n", DVP25P2::duidName(duid), (long long) burstStart, channel);
         }
 
         return;
@@ -496,7 +496,7 @@ void DSDProtocolP25P2::processACCH(int64_t burstStart, int duid, int channel)
     m_burstValid = true;
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25P2 %s at %lld channel %d: %s (%d) TG %u from %u\n", DVP25P2::duidName(duid), burstStart, channel, ch.m_macText, corrected, ch.m_group, ch.m_source);
+        fprintf(stderr, "P25P2 %s at %lld channel %d: %s (%d) TG %u from %u\n", DVP25P2::duidName(duid), (long long) burstStart, channel, ch.m_macText, corrected, ch.m_group, ch.m_source);
     }
 }
 
@@ -522,7 +522,7 @@ void DSDProtocolP25P2::processLCCH(int64_t burstStart, int channel)
     if (corrected < 0)
     {
         if (dsdDebug()) {
-            fprintf(stderr, "P25P2 LCCH at %lld channel %d: failed\n", burstStart, channel);
+            fprintf(stderr, "P25P2 LCCH at %lld channel %d: failed\n", (long long) burstStart, channel);
         }
 
         return;
@@ -536,7 +536,7 @@ void DSDProtocolP25P2::processLCCH(int64_t burstStart, int channel)
     m_burstValid = true;
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25P2 LCCH at %lld channel %d: %s (%d) NAC %03X: %s\n", burstStart, channel, m_channels[channel].m_macText, corrected,
+        fprintf(stderr, "P25P2 LCCH at %lld channel %d: %s (%d) NAC %03X: %s\n", (long long) burstStart, channel, m_channels[channel].m_macText, corrected,
             (unsigned) DVBits::getBits(pdu, 152, 12), m_signallingText.c_str());
     }
 }

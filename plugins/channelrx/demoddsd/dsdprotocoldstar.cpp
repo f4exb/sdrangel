@@ -258,7 +258,7 @@ bool DSDProtocolDStar::pushSymbol(int64_t index, const DSDSoftSymbol& symbol, in
         && matchPattern(index, DVSync::DStarEnd, index == m_frameBase + 24 ? 8 : 6))
     {
         if (dsdDebug()) {
-            fprintf(stderr, "D-STAR end at symbol %lld\n", index);
+            fprintf(stderr, "D-STAR end at symbol %lld\n", (long long) index);
         }
 
         m_active = false;
@@ -350,7 +350,7 @@ void DSDProtocolDStar::processHeader()
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "D-STAR header at %lld..%lld: %s (%d corrected) %s\n", m_burstFirst, m_burstLast, corrected >= 0 ? "ok" : "failed", corrected,
+        fprintf(stderr, "D-STAR header at %lld..%lld: %s (%d corrected) %s\n", (long long) m_burstFirst, (long long) m_burstLast, corrected >= 0 ? "ok" : "failed", corrected,
             corrected >= 0 ? getStatusText().c_str() : "");
     }
 }

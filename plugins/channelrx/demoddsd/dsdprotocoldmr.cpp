@@ -339,7 +339,7 @@ bool DSDProtocolDMR::checkEmb(int64_t centre, int& colorCode, int& lcss, bool& p
         : ((differences <= 1) && ((m_colorCode < 0) || (colorCode == m_colorCode)));
 
     if (dsdDebug() && !ok) {
-        fprintf(stderr, "DMR EMB at %lld failed: %d differences CC %d (known %d) LCSS %d\n", centre, differences, colorCode, m_colorCode, lcss);
+        fprintf(stderr, "DMR EMB at %lld failed: %d differences CC %d (known %d) LCSS %d\n", (long long) centre, differences, colorCode, m_colorCode, lcss);
     }
 
     return ok;
@@ -548,7 +548,7 @@ void DSDProtocolDMR::decodeBurst(int64_t centre)
 
     if (dsdDebug())
     {
-        fprintf(stderr, "DMR burst: centre %lld kind %d station %d history %lld..%lld reliability", centre, (int) m_kind, (int) m_station, start, m_history.newest());
+        fprintf(stderr, "DMR burst: centre %lld kind %d station %d history %lld..%lld reliability", (long long) centre, (int) m_kind, (int) m_station, (long long) start, (long long) m_history.newest());
 
         for (int i = 10; i < 18 && m_history.has(start + i); i++) {
             fprintf(stderr, " %d:%.2f", i, m_history.at(start + i).m_reliability);
@@ -1002,7 +1002,7 @@ void DSDProtocolDMR::emitVoiceFrame(int64_t firstDibit, int64_t secondDibit, int
     m_frames.push_back(frame);
 
     if (dsdDebug()) {
-        fprintf(stderr, "DMR voice frame at sample %lld slot %d\n", sample, slot);
+        fprintf(stderr, "DMR voice frame at sample %lld slot %d\n", (long long) sample, slot);
     }
 }
 

@@ -403,7 +403,7 @@ void DSDProtocolDPMR::processHeader(int64_t first)
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "dPMR header at %lld: HI %s CC %d called %u own %u\n", first, corrected >= 0 ? "ok" : "failed", cc, m_calledId, m_ownId);
+        fprintf(stderr, "dPMR header at %lld: HI %s CC %d called %u own %u\n", (long long) first, corrected >= 0 ? "ok" : "failed", cc, m_calledId, m_ownId);
     }
 }
 
@@ -488,7 +488,7 @@ void DSDProtocolDPMR::processPayload(int64_t first, int frameNumber)
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "dPMR payload frame %d at %lld\n", frameNumber, first);
+        fprintf(stderr, "dPMR payload frame %d at %lld\n", frameNumber, (long long) first);
     }
 
     // Four traffic channels
@@ -535,7 +535,7 @@ void DSDProtocolDPMR::processEnd(int64_t first)
     m_burstValid = corrected >= 0;
 
     if (dsdDebug()) {
-        fprintf(stderr, "dPMR end at %lld: %s\n", first, corrected >= 0 ? "ok" : "failed");
+        fprintf(stderr, "dPMR end at %lld: %s\n", (long long) first, corrected >= 0 ? "ok" : "failed");
     }
 }
 

@@ -37,23 +37,23 @@ DSDProtocolP25::DSDProtocolP25(const DSDSymbolHistory& history) :
     m_unitLength(0),
     m_blocks(1),
     m_lastBlock(false),
+    m_blocksDecoded(0),
     m_packetCount(0),
     m_packetFailed(0),
     m_metadataRevision(0),
-    m_blocksDecoded(0),
     m_tsbkCount(0),
     m_tsbkFailed(0),
     m_grantAt(0),
     m_duid(-1),
     m_nac(-1),
     m_nidValid(false),
-    m_proven(false),
     m_pendingStart(-1),
     m_pendingLength(0),
     m_pendingDuid(-1),
     m_pendingValid(false),
     m_burstValid(false),
     m_lastDuid(-1),
+    m_proven(false),
     m_misses(0),
     m_silent(0),
     m_absent(0),
@@ -278,7 +278,7 @@ void DSDProtocolP25::readNID()
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25 NID at %lld: %s NAC %03X DUID %X length %d\n", m_unitStart, corrected >= 0 ? "ok" : "failed", nac, m_duid, m_unitLength);
+        fprintf(stderr, "P25 NID at %lld: %s NAC %03X DUID %X length %d\n", (long long) m_unitStart, corrected >= 0 ? "ok" : "failed", nac, m_duid, m_unitLength);
     }
 }
 
@@ -329,7 +329,7 @@ bool DSDProtocolP25::pushSymbol(int64_t index, const DSDSoftSymbol& symbol, int6
                 m_tsbkFailed++;
 
                 if (dsdDebug()) {
-                    fprintf(stderr, "P25 TSBK %d at %lld: failed\n", k, m_unitStart);
+                    fprintf(stderr, "P25 TSBK %d at %lld: failed\n", k, (long long) m_unitStart);
                 }
             }
             else
@@ -339,7 +339,7 @@ bool DSDProtocolP25::pushSymbol(int64_t index, const DSDSoftSymbol& symbol, int6
                 m_lastBlock = last == 1;
 
                 if (dsdDebug()) {
-                    fprintf(stderr, "P25 TSBK %d at %lld: op %02X mfid %02X %s [%02X %02X %02X %02X %02X %02X %02X %02X]\n", k, m_unitStart, block[0] & 0x3F, block[1], m_tsbkText.c_str(),
+                    fprintf(stderr, "P25 TSBK %d at %lld: op %02X mfid %02X %s [%02X %02X %02X %02X %02X %02X %02X %02X]\n", k, (long long) m_unitStart, block[0] & 0x3F, block[1], m_tsbkText.c_str(),
                         block[2], block[3], block[4], block[5], block[6], block[7], block[8], block[9]);
                 }
             }
@@ -462,7 +462,7 @@ void DSDProtocolP25::processHDU(int64_t unitStart)
     m_typeText = "HDU";
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25 HDU at %lld: %s TG %u ALGID %02X\n", unitStart, corrected >= 0 ? "ok" : "failed", tgid, algid);
+        fprintf(stderr, "P25 HDU at %lld: %s TG %u ALGID %02X\n", (long long) unitStart, corrected >= 0 ? "ok" : "failed", tgid, algid);
     }
 }
 
@@ -539,7 +539,7 @@ void DSDProtocolP25::processLDU(int64_t unitStart, int duid)
     DVP25::lsdDecode(lsdBits, lsd);
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25 %s at %lld: LC %s TG %u from %u\n", m_typeText.c_str(), unitStart, m_lcValid ? "ok" : "none", m_destination, m_source);
+        fprintf(stderr, "P25 %s at %lld: LC %s TG %u from %u\n", m_typeText.c_str(), (long long) unitStart, m_lcValid ? "ok" : "none", m_destination, m_source);
     }
 }
 
@@ -605,7 +605,7 @@ void DSDProtocolP25::decodePacketBlock(int k)
             m_packetFailed++;
 
             if (dsdDebug()) {
-                fprintf(stderr, "P25 PDU header at %lld: failed\n", m_unitStart);
+                fprintf(stderr, "P25 PDU header at %lld: failed\n", (long long) m_unitStart);
             }
 
             return;
@@ -626,7 +626,7 @@ void DSDProtocolP25::decodePacketBlock(int k)
         // header's block count now sets; the blocks are decoded here as they complete
 
         if (dsdDebug()) {
-            fprintf(stderr, "P25 PDU header at %lld: format %02X sap %02X mfid %02X llid %u %s blocks %d pad %d offset %d\n", m_unitStart,
+            fprintf(stderr, "P25 PDU header at %lld: format %02X sap %02X mfid %02X llid %u %s blocks %d pad %d offset %d\n", (long long) m_unitStart,
                 m_packet.m_format, m_packet.m_sap, m_packet.m_mfid, m_packet.m_address, m_packet.m_outbound ? "out" : "in", m_packet.m_blocks, m_packet.m_padOctets, m_packet.m_offset);
         }
 
@@ -671,7 +671,7 @@ void DSDProtocolP25::decodePacketBlock(int k)
         m_packetFailed++;
 
         if (dsdDebug()) {
-            fprintf(stderr, "P25 PDU block %d at %lld: failed\n", k, m_unitStart);
+            fprintf(stderr, "P25 PDU block %d at %lld: failed\n", k, (long long) m_unitStart);
         }
 
         return;
@@ -703,7 +703,7 @@ void DSDProtocolP25::finishPacket()
         m_packetFailed++;
 
         if (dsdDebug()) {
-            fprintf(stderr, "P25 PDU at %lld: CRC-32 failed (%d bytes)\n", m_unitStart, total);
+            fprintf(stderr, "P25 PDU at %lld: CRC-32 failed (%d bytes)\n", (long long) m_unitStart, total);
         }
 
         return;
@@ -751,7 +751,7 @@ void DSDProtocolP25::finishPacket()
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "P25 PDU at %lld: %d bytes sap %02X %s\n", m_unitStart, nbBytes, sap, packet.m_confirmed ? "confirmed" : "unconfirmed");
+        fprintf(stderr, "P25 PDU at %lld: %d bytes sap %02X %s\n", (long long) m_unitStart, nbBytes, sap, packet.m_confirmed ? "confirmed" : "unconfirmed");
     }
 
     std::string text, kind;

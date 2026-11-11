@@ -45,14 +45,14 @@ DSDAngel61Receiver::DSDAngel61Receiver(DVAngel61::Profile profile) :
     m_mixedIm(2 * m_layout->m_rrcTaps),
     m_ring(RingSize),
     m_metric(RingSize),
+    m_windowOnly(getenv("DSD_ANGEL61_WINDOW") != nullptr),
     m_searchThreshold(0.62f),
     m_lockedThreshold(0.45f),
     m_hypotheses(3),
     m_decisionFeedback(true),
-    m_windowOnly(getenv("DSD_ANGEL61_WINDOW") != nullptr),
-    m_amplitudeAware(getenv("DSD_VHF_AMPLITUDE") && (atoi(getenv("DSD_VHF_AMPLITUDE")) != 0)),
     m_debug(false),
     m_scopeEnabled(false),
+    m_amplitudeAware(getenv("DSD_VHF_AMPLITUDE") && (atoi(getenv("DSD_VHF_AMPLITUDE")) != 0)),
     m_llr(MaxCodedBits)
 {
     // VHF's pulse (2.1): the root raised cosine of NB's or WB's symbol rate
@@ -418,7 +418,7 @@ void DSDAngel61Receiver::search()
             }
 
             if (m_debug) {
-                printf("angel61: lock at sample %lld metric %.2f frequency %.0f Hz\n", start, m, m_frequencyHz);
+                printf("angel61: lock at sample %lld metric %.2f frequency %.0f Hz\n", (long long) start, m, m_frequencyHz);
             }
         }
     }

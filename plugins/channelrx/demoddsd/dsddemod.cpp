@@ -72,9 +72,9 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_basebandSink(nullptr),
         m_running(false),
-        m_connectedAMBEFeature(nullptr),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
+        m_connectedAMBEFeature(nullptr),
         m_scopeXYSink(nullptr)
 {
     qDebug("DSDDemod::DSDDemod");

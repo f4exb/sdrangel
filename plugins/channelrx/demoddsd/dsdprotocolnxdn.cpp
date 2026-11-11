@@ -409,7 +409,7 @@ void DSDProtocolNXDN::decodeFrame(int64_t syncIndex)
         m_lastFrameValid = cacOk;
 
         if (dsdDebug()) {
-            fprintf(stderr, "NXDN frame at %lld: LICH ok (rf 0 func %d option %d) CAC %s: %s\n", syncIndex, functional, option, cacOk ? "ok" : "bad", m_controlText.c_str());
+            fprintf(stderr, "NXDN frame at %lld: LICH ok (rf 0 func %d option %d) CAC %s: %s\n", (long long) syncIndex, functional, option, cacOk ? "ok" : "bad", m_controlText.c_str());
         }
 
         return;
@@ -427,7 +427,7 @@ void DSDProtocolNXDN::decodeFrame(int64_t syncIndex)
         m_lastFrameValid = udchOk;
 
         if (dsdDebug()) {
-            fprintf(stderr, "NXDN frame at %lld: LICH ok (rf %d func %d option %d) UDCH %s\n", syncIndex, rfChannel, functional, option, udchOk ? "ok" : "bad");
+            fprintf(stderr, "NXDN frame at %lld: LICH ok (rf %d func %d option %d) UDCH %s\n", (long long) syncIndex, rfChannel, functional, option, udchOk ? "ok" : "bad");
         }
 
         return;
@@ -450,7 +450,7 @@ void DSDProtocolNXDN::decodeFrame(int64_t syncIndex)
     m_lastFrameValid = frameValid;
 
     if (dsdDebug()) {
-        fprintf(stderr, "NXDN frame at %lld: LICH %s (rf %d func %d option %d) SACCH %s\n", syncIndex, lichOk ? "ok" : "bad", rfChannel, functional, option, sacchOk ? "ok" : "bad");
+        fprintf(stderr, "NXDN frame at %lld: LICH %s (rf %d func %d option %d) SACCH %s\n", (long long) syncIndex, lichOk ? "ok" : "bad", rfChannel, functional, option, sacchOk ? "ok" : "bad");
     }
 
     if ((m_frameCount == 1) && !lichOk && !sacchOk)

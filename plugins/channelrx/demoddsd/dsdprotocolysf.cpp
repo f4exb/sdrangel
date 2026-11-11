@@ -222,7 +222,7 @@ void DSDProtocolYSF::decodeFrame(int64_t syncIndex)
     int corrected = DVYSF::fichDecodeSoft(llr, fich);
 
     if (dsdDebug()) {
-        fprintf(stderr, "YSF frame at %lld: FICH %s FI %d DT %d FN %d FT %d\n", syncIndex, corrected >= 0 ? "ok" : "failed", fich.m_fi, fich.m_dt, fich.m_fn, fich.m_ft);
+        fprintf(stderr, "YSF frame at %lld: FICH %s FI %d DT %d FN %d FT %d\n", (long long) syncIndex, corrected >= 0 ? "ok" : "failed", fich.m_fi, fich.m_dt, fich.m_fn, fich.m_ft);
     }
 
     if (corrected < 0)

@@ -39,10 +39,10 @@ DSDDemodulator::DSDDemodulator() :
     m_protocolSelection(ProtocolAuto),
     m_rfBandwidth(12500.0f),
     m_narrowFilter(true),
+    m_coherentFiltered(true),
     m_coherentGate(0.02),
     m_coherentRuns(0),
     m_coherentSkips(0),
-    m_coherentFiltered(true),
     m_filterCutoffHz(0.0f),
     m_state(StateSearching),
     m_chain(nullptr),
@@ -67,14 +67,6 @@ DSDDemodulator::DSDDemodulator() :
     m_inverted(false),
     m_misses(0),
     m_silentBursts(0),
-    m_powerRing(16384, 0.0f),
-    m_blockPower(0.0f),
-    m_blockCount(0),
-    m_blockHistory(200, 0.0f),
-    m_blockIndex(0),
-    m_blocksFilled(0),
-    m_noiseFloor(0.0f),
-    m_signalPower(0.0f),
     m_confirmed(0),
     m_nextCallId(0),
     m_callId(0),
@@ -85,6 +77,14 @@ DSDDemodulator::DSDDemodulator() :
     m_lockIndex(0),
     m_rejectedDecoder(nullptr),
     m_rejectedUntil(0),
+    m_powerRing(16384, 0.0f),
+    m_blockPower(0.0f),
+    m_blockCount(0),
+    m_blockHistory(200, 0.0f),
+    m_blockIndex(0),
+    m_blocksFilled(0),
+    m_noiseFloor(0.0f),
+    m_signalPower(0.0f),
     m_lastSyncIndex(-1),
     m_lastSyncCentre(0.0),
     m_expectedSyncIndex(-1),
@@ -701,7 +701,7 @@ void DSDDemodulator::process(const std::complex<float> *input, int n)
             m_expectedPending = false;
 
             if (dsdDebug()) {
-                fprintf(stderr, "DSD no sync at symbol %lld (present %d%s: power %.3g threshold %.3g floor %.3g signal %.3g)\n", m_expectedSyncIndex, present,
+                fprintf(stderr, "DSD no sync at symbol %lld (present %d%s: power %.3g threshold %.3g floor %.3g signal %.3g)\n", (long long) m_expectedSyncIndex, present,
                     doubtful ? ", doubtful" : "", power, presenceThreshold(), m_noiseFloor, m_signalPower);
             }
 
@@ -925,7 +925,7 @@ void DSDDemodulator::handleDetection(const DSDSyncSearcher::Detection& detection
             lock(detection, chain, decoder);
         } else if (dsdDebugLevel() >= 2) {
             fprintf(stderr, "DSD candidate: %s at sample %lld rho %.3f scale %.1f (nominal %.1f) offset %.1f\n",
-                DVSync::get(detection.m_pattern).m_name, detection.m_sample, detection.m_rho, detection.m_scale, nominal, detection.m_offset);
+                DVSync::get(detection.m_pattern).m_name, (long long) detection.m_sample, detection.m_rho, detection.m_scale, nominal, detection.m_offset);
         }
 
         return;
@@ -1016,7 +1016,7 @@ void DSDDemodulator::handleDetection(const DSDSyncSearcher::Detection& detection
 
         if (dsdDebug()) {
             fprintf(stderr, "DSD resync: %s at sample %lld symbol %lld (expected %lld) rho %.3f outer %.1f offset %.1f corr %.1f rate %.4f power %.3g\n",
-                DVSync::get(detection.m_pattern).m_name, detection.m_sample, index, m_expectedSyncIndex, detection.m_rho,
+                DVSync::get(detection.m_pattern).m_name, (long long) detection.m_sample, (long long) index, (long long) m_expectedSyncIndex, detection.m_rho,
                 m_slicer.getOuterLevel(), m_slicer.getOffset(), m_frontEnd.getCorrection(), m_clock->getRate(), spanPower(index));
         }
     }
@@ -1029,7 +1029,7 @@ void DSDDemodulator::handleDetection(const DSDSyncSearcher::Detection& detection
     {
         // (logged after the takeover's test: before it, DSD_DEBUG stopped a takeover it only meant to report)
         fprintf(stderr, "DSD detection ignored: %s at sample %lld symbol %lld (expected %lld) rho %.3f inverted %d\n",
-            DVSync::get(detection.m_pattern).m_name, detection.m_sample, index, m_expectedSyncIndex, detection.m_rho, detection.m_inverted);
+            DVSync::get(detection.m_pattern).m_name, (long long) detection.m_sample, (long long) index, (long long) m_expectedSyncIndex, detection.m_rho, detection.m_inverted);
     }
 }
 
@@ -1112,8 +1112,8 @@ void DSDDemodulator::lock(const DSDSyncSearcher::Detection& detection, Chain *ch
 
     if (dsdDebug()) {
         fprintf(stderr, "DSD lock: pattern %s at sample %lld (+%.2f) rho %.3f scale %.1f offset %.1f sigma %.1f symbol %lld\n",
-            DVSync::get(detection.m_pattern).m_name, detection.m_sample, detection.m_fraction, detection.m_rho, detection.m_scale,
-            detection.m_offset, std::sqrt(detection.m_sigma2), m_lastSymbolIndex);
+            DVSync::get(detection.m_pattern).m_name, (long long) detection.m_sample, detection.m_fraction, detection.m_rho, detection.m_scale,
+            detection.m_offset, std::sqrt(detection.m_sigma2), (long long) m_lastSymbolIndex);
     }
 
     decoder->start(detection.m_pattern, m_lastSymbolIndex);
@@ -1122,7 +1122,7 @@ void DSDDemodulator::lock(const DSDSyncSearcher::Detection& detection, Chain *ch
 void DSDDemodulator::unlock()
 {
     if (dsdDebug() && (m_state == StateLocked)) {
-        fprintf(stderr, "DSD unlock at sample %lld symbol %lld misses %d silent %d\n", m_sampleIndex, m_lastSymbolIndex, m_misses, m_silentBursts);
+        fprintf(stderr, "DSD unlock at sample %lld symbol %lld misses %d silent %d\n", (long long) m_sampleIndex, (long long) m_lastSymbolIndex, m_misses, m_silentBursts);
     }
 
     if (m_decoder && m_protocolPublished)
@@ -1174,7 +1174,7 @@ void DSDDemodulator::confirmLock()
     if (!m_status.m_locked && m_decoder->isProven())
     {
         if (dsdDebug()) {
-            fprintf(stderr, "DSD confirmed: %s at symbol %lld, %d voice frames held%c", m_decoder->getName(), m_lastSymbolIndex, (int) m_pendingFrames.size(), 10);
+            fprintf(stderr, "DSD confirmed: %s at symbol %lld, %d voice frames held%c", m_decoder->getName(), (long long) m_lastSymbolIndex, (int) m_pendingFrames.size(), 10);
         }
 
         m_status.m_locked = true;
@@ -1538,7 +1538,7 @@ void DSDDemodulator::refineBurst(int64_t first, int64_t last)
             m_history.replace(k, refined, position); // later refinements measure from the corrected positions
 
             if ((pass == 1) && (dsdDebugLevel() >= 2)) {
-                fprintf(stderr, "  k %lld y %.0f isi %.0f u %.2f dibit %d llr %.0f %.0f present %d pos %.2f%s", k, y, isi, (y - isi - m_slicer.getOffset()) / (m_slicer.getOuterLevel() / 3.0f), refined.m_dibit, refined.m_llrMsb, refined.m_llrLsb, refined.m_present, position, "\n");
+                fprintf(stderr, "  k %lld y %.0f isi %.0f u %.2f dibit %d llr %.0f %.0f present %d pos %.2f%s", (long long) k, y, isi, (y - isi - m_slicer.getOffset()) / (m_slicer.getOuterLevel() / 3.0f), refined.m_dibit, refined.m_llrMsb, refined.m_llrLsb, refined.m_present, position, "\n");
             }
         }
     }
@@ -1569,13 +1569,13 @@ void DSDDemodulator::refineBurst(int64_t first, int64_t last)
             m_coherentSkips++;
 
             if (dsdDebugLevel() >= 2) {
-                fprintf(stderr, "DSD coherent %lld..%lld: skipped, sigma/level %.3f expects %.4f errors\n", first, last, q, expectedErrors);
+                fprintf(stderr, "DSD coherent %lld..%lld: skipped, sigma/level %.3f expects %.4f errors\n", (long long) first, (long long) last, q, expectedErrors);
             }
         }
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "DSD refine %lld..%lld: tau %+.2f %+.2f slope %+.4f move %+.2f loop %+.2f outer %.1f offset %.1f sigma %.1f rho %.3f rate %.4f taps", first, last,
+        fprintf(stderr, "DSD refine %lld..%lld: tau %+.2f %+.2f slope %+.4f move %+.2f loop %+.2f outer %.1f offset %.1f sigma %.1f rho %.3f rate %.4f taps", (long long) first, (long long) last,
             tau[0], tau[1], slope, movement, loopCorrection, 3.0 * a, b, std::sqrt(rss / std::max(1, n - P)), rho, m_clock->getRate());
 
         for (int j = -L; j <= L; j++) {
@@ -1679,7 +1679,7 @@ void DSDDemodulator::coherentBurst(int64_t first, int64_t last, const std::vecto
     if (disagreements > (last - first + 1) / 4)
     {
         if (dsdDebug()) {
-            fprintf(stderr, "DSD coherent %lld..%lld: rejected, %d disagreements\n", first, last, disagreements);
+            fprintf(stderr, "DSD coherent %lld..%lld: rejected, %d disagreements\n", (long long) first, (long long) last, disagreements);
         }
 
         return;
@@ -1699,7 +1699,7 @@ void DSDDemodulator::coherentBurst(int64_t first, int64_t last, const std::vecto
         changed += r.m_dibit != s.m_dibit;
 
         if ((r.m_dibit != s.m_dibit) && (dsdDebugLevel() >= 2)) {
-            fprintf(stderr, "  coherent k %lld (%lld of %lld): dibit %d -> %d llr %.0f %.0f -> %.0f %.0f rel %.2f\n", k, k - first, last - first, s.m_dibit, r.m_dibit, s.m_llrMsb, s.m_llrLsb, r.m_llrMsb, r.m_llrLsb, s.m_reliability);
+            fprintf(stderr, "  coherent k %lld (%lld of %lld): dibit %d -> %d llr %.0f %.0f -> %.0f %.0f rel %.2f\n", (long long) k, (long long) (k - first), (long long) (last - first), s.m_dibit, r.m_dibit, s.m_llrMsb, s.m_llrLsb, r.m_llrMsb, r.m_llrLsb, s.m_reliability);
         }
         s.m_dibit = r.m_dibit;
         s.m_llrMsb = r.m_llrMsb;
@@ -1709,7 +1709,7 @@ void DSDDemodulator::coherentBurst(int64_t first, int64_t last, const std::vecto
     }
 
     if (dsdDebug()) {
-        fprintf(stderr, "DSD coherent %lld..%lld: %d decisions changed%s snr %.1f dB residual %.1f Hz\n", first, last, changed, detector.wasDispersive() ? " (dispersive channel)" : "",
+        fprintf(stderr, "DSD coherent %lld..%lld: %d decisions changed%s snr %.1f dB residual %.1f Hz\n", (long long) first, (long long) last, changed, detector.wasDispersive() ? " (dispersive channel)" : "",
             10.0 * std::log10(std::max(1e-9f, detector.getChannelEnergy() / std::max(1e-12f, detector.getNoisePower()))), detector.getFrequencyHz());
     }
 }
