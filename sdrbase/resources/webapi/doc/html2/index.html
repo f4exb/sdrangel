@@ -5353,6 +5353,13 @@ margin-bottom: 20px;
       "description" : "DRM demod actions configuration for Channel.",
       "$ref" : "#/definitions/DRMDemodActions"
     },
+    "DSDDemodActions" : {
+      "description" : "DSD demod actions: the operator's decision on an Angel61 file offer",
+      "$ref" : "#/definitions/DSDDemodActions"
+    },
+    "DSEModActions" : {
+      "$ref" : "#/definitions/DSEModActions"
+    },
     "FileSinkActions" : {
       "description" : "File sink actions configuration for Channel.",
       "$ref" : "#/definitions/FileSinkActions"
@@ -5815,6 +5822,9 @@ margin-bottom: 20px;
       "description" : "DroneID demod report data for Channel.",
       "$ref" : "#/definitions/DroneIDDemodReport"
     },
+    "DSEModReport" : {
+      "$ref" : "#/definitions/DSEModReport"
+    },
     "EndOfTrainDemodReport" : {
       "description" : "End of train demod report data for Channel.",
       "$ref" : "#/definitions/EndOfTrainDemodReport"
@@ -6115,6 +6125,9 @@ margin-bottom: 20px;
     "DroneIDDemodSettings" : {
       "description" : "DroneID demod settings configuration for Channel.",
       "$ref" : "#/definitions/DroneIDDemodSettings"
+    },
+    "DSEModSettings" : {
+      "$ref" : "#/definitions/DSEModSettings"
     },
     "EndOfTrainDemodSettings" : {
       "description" : "End of train demod settings configuration for Channel.",
@@ -8580,6 +8593,15 @@ margin-bottom: 20px;
   },
   "description" : "DSCDemod"
 };
+            defs.DSDDemodActions = {
+  "properties" : {
+    "angel61File" : {
+      "type" : "string",
+      "description" : "The operator's decision on the Angel61 file offer awaiting confirmation (DSDDemodReport.angel61FilePending): \"accept\" or \"reject\". 409 when none is awaiting\n"
+    }
+  },
+  "description" : "DSDDemod"
+};
             defs.DSDDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -8588,20 +8610,14 @@ margin-bottom: 20px;
       "description" : "power transmitted in channel (dB)"
     },
     "audioSampleRate" : {
-      "type" : "integer",
-      "description" : "Audio sample rate in samples per second."
+      "type" : "integer"
     },
     "channelSampleRate" : {
-      "type" : "integer",
-      "description" : "Effective sample rate delivered to the channel in samples per second."
+      "type" : "integer"
     },
-    "squelch" : {
+    "syncLocked" : {
       "type" : "integer",
-      "description" : "squelch status (1 if open else 0)"
-    },
-    "pllLocked" : {
-      "type" : "integer",
-      "description" : "symbol PLL status (1 if locked else 0)"
+      "description" : "1 when locked on a transmission, 0 while searching"
     },
     "slot1On" : {
       "type" : "integer",
@@ -8611,29 +8627,107 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "slot 2 status (1 if voice active else 0)"
     },
+    "protocol" : {
+      "type" : "string",
+      "description" : "protocol locked to (DMR, D-STAR, YSF, NXDN48, NXDN96, dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB, Angel61 HF-NB, Angel61 HF-WB), empty while searching"
+    },
     "syncType" : {
       "type" : "string",
-      "description" : "type of frame synchronized"
+      "description" : "name of the last sync pattern accepted"
     },
-    "inLevel" : {
+    "polarity" : {
       "type" : "integer",
-      "description" : "decoder input level after discriminator. Percent of mid scale (aim 100)."
+      "description" : "0 normal, 1 inverted (the received symbol levels are negated)"
     },
-    "carierPosition" : {
-      "type" : "integer",
-      "description" : "position of carrier relative to discriminator center. Percent of scale (aim 0)."
+    "deviationHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "measured outer symbol level (peak frequency deviation) in Hz"
     },
-    "zeroCrossingPosition" : {
-      "type" : "integer",
-      "description" : "position of symbol synchronizer zero crossing in number of samples (aim 0)."
+    "frequencyErrorHz" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "measured carrier frequency error in Hz (corrected internally)"
     },
-    "syncRate" : {
+    "clockErrorPpm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "measured symbol clock error in ppm"
+    },
+    "snrDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "symbol signal to noise ratio at the slicer in dB"
+    },
+    "berEstimate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "raw bit error rate estimated from the vocoder's error corrections (software vocoder only)"
+    },
+    "syncCount" : {
       "type" : "integer",
-      "description" : "successful synchronization rate. Percent of expected symbols (aim 100)."
+      "description" : "number of syncs accepted since the channel started"
+    },
+    "voiceFrames" : {
+      "type" : "integer",
+      "description" : "Voice frames received since the channel started (all protocols and slots), erased ones aside"
+    },
+    "voiceFramesErased" : {
+      "type" : "integer",
+      "description" : "Voice frames the decoder knew were lost since the channel started (Angel61's missing packets, P25 Phase 2's uncorrectable codewords), played as erasures\n"
+    },
+    "correctedBits" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel bit errors the voice frames' codes corrected since the channel started; over protectedBits it is the raw bit error rate of an interval (the difference of two reports)\n"
+    },
+    "protectedBits" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "The bits those codes protected since the channel started"
     },
     "statusText" : {
       "type" : "string",
       "description" : "mode dependent status messages (ref UI documentation)"
+    },
+    "dtmf" : {
+      "type" : "string",
+      "description" : "the keys of the last DTMF sequence received, on any protocol (Angel61's DTMF slots, AMBE tone frames, or tones detected in the decoded voice)"
+    },
+    "angel61FilePending" : {
+      "type" : "string",
+      "description" : "An Angel61 file offer awaiting the operator's confirmation (\"name (size bytes) from callsign\"), empty for none"
+    },
+    "lastMessage" : {
+      "type" : "string",
+      "description" : "The text of the last text message received on any protocol (D-STAR slow data, DMR text and TMS, YSF, NXDN, dPMR, M17, P25, Angel61; Angel61 binary data as \"[N bytes of binary data]\"), empty until one is. DTMF is reported in dtmf instead\n"
+    },
+    "lastMessageProtocol" : {
+      "type" : "string",
+      "description" : "The last text message's protocol as the message log names it (DMR, D-STAR, YSF, NXDN, dPMR, M17, P25, Angel61 NB, Angel61 WB, Angel61 HF-NB, Angel61 HF-WB)"
+    },
+    "lastMessageSource" : {
+      "type" : "string",
+      "description" : "The last text message's source (a callsign, or a radio ID for DMR, NXDN, dPMR and P25)"
+    },
+    "lastMessageDestination" : {
+      "type" : "string",
+      "description" : "The last text message's destination (a callsign, CQ, a radio ID, or \"TG n\" for a talkgroup)"
+    },
+    "lastMessageTime" : {
+      "type" : "string",
+      "description" : "When the last text message was received (UTC, ISO 8601 with milliseconds)"
+    },
+    "lastMessageSequence" : {
+      "type" : "integer",
+      "description" : "Increases with every text message received, so that a repeated text is told from no new one (0 until the first)"
+    },
+    "angel61HeardCallsigns" : {
+      "type" : "array",
+      "description" : "Angel61 source callsigns heard by this channel, most recently heard first (maximum 32)",
+      "items" : {
+        "type" : "string"
+      }
     }
   },
   "description" : "DSDDemod"
@@ -8642,89 +8736,92 @@ margin-bottom: 20px;
   "properties" : {
     "inputFrequencyOffset" : {
       "type" : "integer",
-      "format" : "int64",
-      "description" : "Channel frequency offset from the device center frequency in Hz."
+      "format" : "int64"
     },
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float",
-      "description" : "RF bandwidth in Hz."
-    },
-    "fmDeviation" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "FM frequency deviation in Hz."
-    },
-    "demodGain" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "Demod gain setting for Dsd demod."
+      "description" : "Channel bandwidth (Hz). Sets the search filter and bounds the automatic frequency correction"
     },
     "volume" : {
       "type" : "number",
-      "format" : "float",
-      "description" : "Audio volume multiplier."
+      "format" : "float"
     },
-    "baudRate" : {
+    "protocol" : {
       "type" : "integer",
-      "description" : "Serial-port baud rate in bits per second."
+      "description" : "Protocols searched for\n  * 0 - Automatic (all)\n  * 1 - DMR\n  * 2 - D-STAR\n  * 3 - YSF\n  * 4 - NXDN48 (2400 symbols/s, 4800 bit/s)\n  * 5 - NXDN96 (4800 symbols/s, 9600 bit/s)\n  * 6 - dPMR\n  * 7 - P25 Phase 1\n  * 8 - P25 Phase 2 (TDMA, 6000 symbols/s)\n  * 9 - M17\n  * 10 - Angel61 NB (6.25 kHz linear QPSK / 16-QAM, V1 voice)\n  * 11 - Angel61 WB (12.5 kHz linear QPSK / 16-QAM, V1 voice or Opus audio)\n  * 12 - Angel61 HF-NB (OFDM, 2.5 kHz, V1 voice; only when selected)\n  * 13 - Angel61 HF-WB (OFDM, 5.5 kHz, V1 voice; only when selected)\nAuto (0) searches every protocol but HF.\n"
     },
-    "squelchGate" : {
+    "p25p2Wacn" : {
       "type" : "integer",
-      "description" : "Squelch gate duration."
+      "description" : "P25 Phase 2 scrambling - WACN of the system (20 bits)"
     },
-    "squelch" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "Squelch threshold in dB."
+    "p25p2Sysid" : {
+      "type" : "integer",
+      "description" : "P25 Phase 2 scrambling - system ID (12 bits)"
+    },
+    "p25p2Nac" : {
+      "type" : "integer",
+      "description" : "P25 Phase 2 scrambling - NAC (12 bits)"
+    },
+    "coherent" : {
+      "type" : "integer",
+      "description" : "coherent re-detection of the 4FSK bursts from the IQ (1 on, 0 off)"
     },
     "audioMute" : {
-      "type" : "integer",
-      "description" : "Mute audio output (1 muted, 0 unmuted).",
-      "minimum" : 0,
-      "maximum" : 1
-    },
-    "enableCosineFiltering" : {
-      "type" : "integer",
-      "description" : "Enable cosine filtering (1 enabled, 0 disabled).",
-      "minimum" : 0,
-      "maximum" : 1
-    },
-    "syncOrConstellation" : {
-      "type" : "integer",
-      "description" : "Sync or constellation setting for Dsd demod."
+      "type" : "integer"
     },
     "slot1On" : {
-      "type" : "integer",
-      "description" : "Slot1 on setting for Dsd demod."
+      "type" : "integer"
     },
     "slot2On" : {
-      "type" : "integer",
-      "description" : "Slot2 on setting for Dsd demod."
+      "type" : "integer"
     },
     "tdmaStereo" : {
-      "type" : "integer",
-      "description" : "Tdma stereo setting for Dsd demod."
+      "type" : "integer"
     },
-    "pllLock" : {
+    "dmrColorCode" : {
       "type" : "integer",
-      "description" : "Pll lock setting for Dsd demod."
+      "description" : "Audio filter on the DMR or dPMR colour code or the NXDN RAN (-1 accepts any, otherwise 0 to 63; DMR stops at 15)"
+    },
+    "angel61FileDirectory" : {
+      "type" : "string",
+      "description" : "Directory Angel61 file transfers are written to, empty: files are decoded but not stored"
+    },
+    "angel61FileMaxKB" : {
+      "type" : "integer",
+      "description" : "Largest Angel61 file this station accepts in kilobytes, 0 for no limit"
+    },
+    "angel61FileConfirm" : {
+      "type" : "integer",
+      "description" : "1 when the operator confirms every Angel61 file offer before the file is kept (ANGEL61.md 3.4): until accepted (DSDDemodActions.angel61File) its blocks are held in memory, no answer goes back and nothing is saved. 0 takes every offer within angel61FileMaxKB\n"
+    },
+    "angel61Groups" : {
+      "type" : "string",
+      "description" : "Angel61 talkgroups played, comma separated numbers (9, 23); empty plays every call. Calls to CQ and to callsigns are always played"
+    },
+    "codecModelDirectory" : {
+      "type" : "string",
+      "description" : "Directory of Angel61's V1 models (vocoscodec: encodec_encoder.bin, encodec_codebooks.bin, vocos_decoder.bin), empty for the default (VOCOSCODEC_MODEL_DIR, then vocos beside the executable)\n"
+    },
+    "contactReportEnabled" : {
+      "type" : "integer",
+      "description" : "Opt in to Angel61 RF contact reporting to angel61.sdrangel.org, with the station position (1 on, 0 off)"
+    },
+    "contactReportCallsign" : {
+      "type" : "string",
+      "description" : "Callsign to include in contact reports as the receiver"
     },
     "rgbColor" : {
-      "type" : "integer",
-      "description" : "Display color encoded as an RGB integer."
+      "type" : "integer"
     },
     "title" : {
-      "type" : "string",
-      "description" : "User-visible title."
+      "type" : "string"
     },
     "audioDeviceName" : {
-      "type" : "string",
-      "description" : "Name of the audio device to use."
+      "type" : "string"
     },
     "highPassFilter" : {
-      "type" : "integer",
-      "description" : "High pass filter setting for Dsd demod."
+      "type" : "integer"
     },
     "traceLengthMutliplier" : {
       "type" : "integer",
@@ -8732,15 +8829,11 @@ margin-bottom: 20px;
     },
     "traceStroke" : {
       "type" : "integer",
-      "description" : "0 to 255",
-      "minimum" : 0,
-      "maximum" : 255
+      "description" : "0 to 255"
     },
     "traceDecay" : {
       "type" : "integer",
-      "description" : "0 to 255",
-      "minimum" : 0,
-      "maximum" : 255
+      "description" : "0 to 255"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -8748,34 +8841,24 @@ margin-bottom: 20px;
     },
     "useReverseAPI" : {
       "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
-      "minimum" : 0,
-      "maximum" : 1
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
     },
     "reverseAPIAddress" : {
-      "type" : "string",
-      "description" : "IPv4 address or host name of the reverse API peer."
+      "type" : "string"
     },
     "reverseAPIPort" : {
-      "type" : "integer",
-      "description" : "TCP port of the reverse API peer.",
-      "minimum" : 1,
-      "maximum" : 65535
+      "type" : "integer"
     },
     "reverseAPIDeviceIndex" : {
-      "type" : "integer",
-      "description" : "Device-set index used by the reverse API peer."
+      "type" : "integer"
     },
     "reverseAPIChannelIndex" : {
-      "type" : "integer",
-      "description" : "Channel index used by the reverse API peer."
+      "type" : "integer"
     },
     "channelMarker" : {
-      "description" : "Channel-marker display configuration.",
       "$ref" : "#/definitions/ChannelMarker"
     },
     "rollupState" : {
-      "description" : "Saved expanded or collapsed state of the GUI sections.",
       "$ref" : "#/definitions/RollupState"
     },
     "ambeFeatureIndex" : {
@@ -8784,12 +8867,727 @@ margin-bottom: 20px;
     },
     "connectAMBE" : {
       "type" : "integer",
-      "description" : "Decode frames with AMBE feature\n  * 0 - Do not decode frames with AMBE feature\n  * 1 - Decode frames with AMBE feature\n",
-      "minimum" : 0,
-      "maximum" : 1
+      "description" : "Decode frames with AMBE feature\n  * 0 - Do not decode frames with AMBE feature\n  * 1 - Decode frames with AMBE feature\n"
     }
   },
   "description" : "DSDDemod"
+};
+            defs.DSEModActions = {
+  "properties" : {
+    "dtmf" : {
+      "type" : "string",
+      "description" : "Send DTMF digits (0-9, A-D, *, #) as AMBE tone frames. An empty string sends the dtmfSequence setting. Transmission is started for the duration of the sequence if it is not already in progress.\n"
+    },
+    "transmit" : {
+      "$ref" : "#/definitions/DSEModTransmit"
+    },
+    "message" : {
+      "$ref" : "#/definitions/DSEModMessage"
+    },
+    "aprs" : {
+      "type" : "string",
+      "description" : "Send an APRS information field over Angel61 (content type 2), e.g. an object, a weather report or a message with its acknowledgement. Transmission is started for it if it is not already in progress.\n"
+    },
+    "file" : {
+      "type" : "string",
+      "description" : "Offer a file over Angel61 (3.4). The path of the file, or an empty string for the angel61FileName setting. Transmission is started for it, and again for every round the receiving station asks for.\n"
+    }
+  },
+  "description" : "Exactly one action is required. The transmit device must already be running. 202 means accepted, not transmitted. Poll DSEModReport.transmitStatus for completion. Transient payloads and sessions are not saved or sent through Reverse API. The former angel61Message action is replaced by message.\n"
+};
+            defs.DSEModCapabilities = {
+  "type" : "object",
+  "properties" : {
+    "pcmEncoding" : {
+      "type" : "string"
+    },
+    "pcmChannels" : {
+      "type" : "integer"
+    },
+    "pcmSampleRates" : {
+      "type" : "array",
+      "items" : {
+        "type" : "integer"
+      }
+    },
+    "maxPCMChunkMs" : {
+      "type" : "integer"
+    },
+    "maxPCMQueueMs" : {
+      "type" : "integer"
+    },
+    "maxFrameBatch" : {
+      "type" : "integer"
+    },
+    "maxQueuedFrames" : {
+      "type" : "integer"
+    },
+    "idleTimeoutMs" : {
+      "type" : "integer"
+    },
+    "pcmMaxDurationMs" : {
+      "type" : "integer"
+    },
+    "frameMaxDurationMs" : {
+      "type" : "integer",
+      "description" : "Effective configured maximum for new gateway-frame sessions."
+    },
+    "minFrameMaxDurationMs" : {
+      "type" : "integer"
+    },
+    "maxFrameMaxDurationMs" : {
+      "type" : "integer"
+    },
+    "frameFormats" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "angel61NetworkInput" : {
+      "type" : "boolean",
+      "description" : "The API takes network Angel61 calls (input angel61) of either profile."
+    },
+    "angel61TranscodeAvailable" : {
+      "type" : "boolean",
+      "description" : "Network Angel61 calls can be sent: the selected mode is Angel61. V1 is relayed by repacking and needs no codec; an Opus call relayed at a V1 tier needs the V1 encoder, checked per call.\n"
+    },
+    "angel61TranscodeError" : {
+      "type" : "string",
+      "description" : "Reason network Angel61 calls cannot be sent."
+    },
+    "messageServices" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  }
+};
+            defs.DSEModFrame = {
+  "type" : "object",
+  "required" : [ "data", "format" ],
+  "properties" : {
+    "format" : {
+      "type" : "string",
+      "enum" : [ "dstar-header", "dstar-voice", "dmr-burst", "ysf-frame", "angel61-frame", "dsrp", "dmrd", "ysfd" ]
+    },
+    "frameType" : {
+      "type" : "string",
+      "description" : "D-Star voice uses voice or end. DMR requires voice-sync, voice, or data-N (N=0..11). Gateway datagrams derive this from their headers. YSF derives termination from FICH.\n"
+    },
+    "sequence" : {
+      "type" : "integer",
+      "description" : "D-Star superframe position 0..20; DMR voice burst index 0..5. Separate from API chunk sequence.",
+      "minimum" : 0,
+      "maximum" : 255
+    },
+    "slot" : {
+      "type" : "integer",
+      "description" : "Required on canonical DMR bursts; must match the configured transmit slot."
+    },
+    "data" : {
+      "type" : "string",
+      "format" : "byte",
+      "description" : "Canonical padded base64. D-Star header is 41 bytes including CRC; voice is 9 voice bytes plus 3 on-air slow-data bytes (LSB first on RF). DMR is 33 packed bytes excluding CACH, MSB first. YSF is 120 packed bytes including sync/FICH, MSB first; V/D type 2. dsrp accepts 49-byte headers and 21-byte voice packets; dmrd accepts 55 bytes; ysfd accepts 155 bytes. Poll/login/control datagrams are not traffic frames.\n",
+      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+    }
+  }
+};
+            defs.DSEModMessage = {
+  "type" : "object",
+  "required" : [ "delivery", "requestId", "type" ],
+  "properties" : {
+    "requestId" : {
+      "type" : "string",
+      "description" : "Idempotency ID; also the sessionId for a standalone message.",
+      "pattern" : "^[A-Za-z0-9_.:-]{1,64}$"
+    },
+    "type" : {
+      "type" : "string",
+      "enum" : [ "text", "data" ]
+    },
+    "delivery" : {
+      "type" : "string",
+      "description" : "standalone sends a finite transmission. inBand queues text on an open API PCM session.",
+      "enum" : [ "standalone", "inBand" ]
+    },
+    "sessionId" : {
+      "type" : "string",
+      "description" : "Required for inBand and prohibited for standalone."
+    },
+    "service" : {
+      "type" : "string",
+      "description" : "Optional for text, required for data. Must match the selected protocol and message type.",
+      "enum" : [ "dstar-text", "angel61-text", "angel61-data" ]
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "Nonempty text. D-Star supports 20 printable ASCII characters. Angel61 inBand supports 180 printable ASCII characters; standalone supports 5098 UTF-8 bytes. No truncation.\n"
+    },
+    "data" : {
+      "type" : "string",
+      "format" : "byte",
+      "description" : "Nonempty binary application data; Angel61 standalone only, up to 5098 decoded bytes.",
+      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+    }
+  }
+};
+            defs.DSEModPCM = {
+  "type" : "object",
+  "required" : [ "data" ],
+  "properties" : {
+    "encoding" : {
+      "type" : "string",
+      "description" : "Required on send/start. Signed 16-bit little-endian raw PCM; no WAV header.",
+      "enum" : [ "s16le" ]
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Required on send/start. Resampling state persists across chunks."
+    },
+    "channels" : {
+      "type" : "integer",
+      "description" : "Required on send/start. Mono only."
+    },
+    "data" : {
+      "type" : "string",
+      "format" : "byte",
+      "description" : "Canonical padded base64 PCM. At most one second per request and five seconds queued. append contains only data. Empty data is permitted only on start. Chunk boundaries must fall between samples, but need not align with codec frames.\n",
+      "pattern" : "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+    }
+  }
+};
+            defs.DSEModReport = {
+  "properties" : {
+    "transmitStatus" : {
+      "$ref" : "#/definitions/DSEModTransmitStatus"
+    },
+    "capabilities" : {
+      "$ref" : "#/definitions/DSEModCapabilities"
+    },
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "transmitting" : {
+      "type" : "integer",
+      "description" : "1 if a transmission is in progress"
+    },
+    "vocoderReady" : {
+      "type" : "integer",
+      "description" : "1 if the speech encoder back end is available"
+    },
+    "encodedFrames" : {
+      "type" : "integer",
+      "description" : "number of vocoder frames received in the current transmission"
+    },
+    "underrunFrames" : {
+      "type" : "integer",
+      "description" : "number of frames replaced by silence because no vocoder frame was available"
+    },
+    "overrunFrames" : {
+      "type" : "integer",
+      "description" : "number of vocoder frames dropped because the queue reached its 1 s bound (the audio source runs far ahead of the transmitter)"
+    },
+    "trimFrames" : {
+      "type" : "integer",
+      "description" : "number of vocoder frames dropped by the delay control to take excess delay out of the queue (normal, a few at the start of a transmission)"
+    },
+    "txFrames" : {
+      "type" : "integer",
+      "description" : "number of protocol frames transmitted in the current transmission"
+    },
+    "audioUnderruns" : {
+      "type" : "integer",
+      "description" : "microphone input, current transmission - 20 ms frames that were short of samples (zero filled)"
+    },
+    "audioOverruns" : {
+      "type" : "integer",
+      "description" : "microphone input, current transmission - blocks discarded because the buffer was full"
+    }
+  },
+  "description" : "DSEMod"
+};
+            defs.DSEModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "mode" : {
+      "type" : "integer",
+      "description" : "Digital voice protocol\n  * 0 - D-STAR\n  * 1 - DMR\n  * 2 - YSF\n  * 3 - NXDN\n  * 4 - NXDN96 (4800 symbols/s, 12.5 kHz)\n  * 5 - dPMR\n  * 6 - P25\n  * 7 - P25 Phase 2 (TDMA, 6000 symbols/s)\n  * 8 - M17\n  * 9 - Angel61 NB (QPSK / 16-QAM at 4800 symbols/s, V1 voice, 6.25 kHz)\n  * 10 - Angel61 WB (QPSK / 16-QAM at 9600 symbols/s, V1 voice or Opus, 12.5 kHz)\n  * 11 - Angel61 HF-NB (OFDM, 2.5 kHz, V1 voice)\n  * 12 - Angel61 HF-WB (OFDM, 5.5 kHz, V1 voice)\n"
+    },
+    "transmit" : {
+      "type" : "integer",
+      "description" : "Start (1) or stop (0) transmission"
+    },
+    "invert" : {
+      "type" : "integer",
+      "description" : "Invert symbol polarity (1 for yes, 0 for no)"
+    },
+    "modAFInput" : {
+      "type" : "integer",
+      "description" : "Speech input\n  * 0 - None\n  * 1 - Tone\n  * 2 - File\n  * 3 - Audio input\n  * 4 - CW tone\n  * 5 - Silence\n"
+    },
+    "toneFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volumeFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "playLoop" : {
+      "type" : "integer"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "vocoder" : {
+      "type" : "integer",
+      "description" : "Speech encoder back end\n  * 0 - mbevocoder (software)\n  * 1 - AMBE feature (DVSI device)\n"
+    },
+    "ambeFeatureIndex" : {
+      "type" : "integer",
+      "description" : "index of AMBE controller feature to be used for encoding"
+    },
+    "connectAMBE" : {
+      "type" : "integer",
+      "description" : "Encode with AMBE feature\n  * 0 - Do not use AMBE feature\n  * 1 - Use AMBE feature\n"
+    },
+    "vocoderGain" : {
+      "type" : "integer",
+      "description" : "Encoder input gain (dB)"
+    },
+    "toneDetect" : {
+      "type" : "integer",
+      "description" : "mbevocoder encoder tone detection. Single tones, DTMF and call progress tones are sent as tone frames (1) or as voice (0). Default 1."
+    },
+    "noiseSuppress" : {
+      "type" : "integer",
+      "description" : "mbevocoder encoder noise suppression on the speech input (1) or off (0). Default 0."
+    },
+    "dtmfSequence" : {
+      "type" : "string",
+      "description" : "DTMF digits (0-9, A-D, *,"
+    },
+    "dstarMyCall" : {
+      "type" : "string"
+    },
+    "dstarMySuffix" : {
+      "type" : "string"
+    },
+    "dstarUrCall" : {
+      "type" : "string"
+    },
+    "dstarRpt1" : {
+      "type" : "string"
+    },
+    "dstarRpt2" : {
+      "type" : "string"
+    },
+    "dstarText" : {
+      "type" : "string",
+      "description" : "Slow data text message (20 characters)"
+    },
+    "dstarFlag1" : {
+      "type" : "integer"
+    },
+    "dstarFlag2" : {
+      "type" : "integer"
+    },
+    "dstarFlag3" : {
+      "type" : "integer"
+    },
+    "dmrColorCode" : {
+      "type" : "integer"
+    },
+    "dmrSourceId" : {
+      "type" : "integer"
+    },
+    "dmrDestinationId" : {
+      "type" : "integer"
+    },
+    "dmrGroupCall" : {
+      "type" : "integer",
+      "description" : "Group call (1) or private call (0)"
+    },
+    "dmrSlot" : {
+      "type" : "integer",
+      "description" : "Voice time slot (1 or 2)"
+    },
+    "dmrDirect" : {
+      "type" : "integer",
+      "description" : "Transmission type\n  * 0 - Base station (BS): continuous, both slots with CACH, idle bursts in the other slot (repeater output)\n  * 1 - Mobile station (MS): single slot bursts with the MS sync patterns and no CACH, carrier off between bursts (direct mode radio to radio, simplex hotspot)\n"
+    },
+    "dmrFid" : {
+      "type" : "integer"
+    },
+    "dmrServiceOptions" : {
+      "type" : "integer"
+    },
+    "ysfCallsign" : {
+      "type" : "string"
+    },
+    "ysfDestination" : {
+      "type" : "string"
+    },
+    "ysfDownlink" : {
+      "type" : "string"
+    },
+    "ysfUplink" : {
+      "type" : "string"
+    },
+    "ysfMode" : {
+      "type" : "integer",
+      "description" : "YSF voice mode (the FICH data type):\n  * 0 - V/D type 2 (DN, AMBE+2 2450, what radios send by default)\n  * 1 - V/D type 1 (AMBE+2 3600x2450)\n  * 2 - voice full rate (VW, IMBE 7200x4400)\n"
+    },
+    "nxdnRan" : {
+      "type" : "integer"
+    },
+    "nxdnSourceId" : {
+      "type" : "integer"
+    },
+    "nxdnDestinationId" : {
+      "type" : "integer"
+    },
+    "nxdnGroupCall" : {
+      "type" : "integer"
+    },
+    "dpmrColorCode" : {
+      "type" : "integer"
+    },
+    "dpmrOwnId" : {
+      "type" : "integer"
+    },
+    "dpmrCalledId" : {
+      "type" : "integer"
+    },
+    "p25Nac" : {
+      "type" : "integer"
+    },
+    "p25TalkGroup" : {
+      "type" : "integer"
+    },
+    "p25SourceId" : {
+      "type" : "integer"
+    },
+    "p25p2Wacn" : {
+      "type" : "integer",
+      "description" : "P25 Phase 2 scrambling - WACN of the system (20 bits)"
+    },
+    "p25p2Sysid" : {
+      "type" : "integer",
+      "description" : "P25 Phase 2 scrambling - system ID (12 bits)"
+    },
+    "angel61Rate" : {
+      "type" : "integer",
+      "description" : "Angel61 voice rate (the tier of ANGEL61.md 2.10), V1 voice unless said:\n  * 0 - automatic (the correspondent's rate request, else tier 0)\n  * 1 - tier 0 (NB 2.25k, WB 4.5k, HF-NB 1.5k, HF-WB 2.25k; QPSK)\n  * 3 - tier 1 (NB 3.0k, WB 9.0k, HF-WB 4.5k on QPSK; HF-NB 2.25k on 16-QAM)\n  * 2 - tier 2 (NB 4.5k, WB 12k, HF-NB 3.0k, HF-WB 6.0k; NB on QPSK, the others 16-QAM)\n  * 4 - tier 3 (NB 9.0k, WB Opus 18.4k, HF-NB 4.5k, HF-WB 9.0k; 16-QAM)\n"
+    },
+    "angel61Source" : {
+      "type" : "string",
+      "description" : "Angel61 own callsign (up to 9 characters of A-Z 0-9 - / ., or up to 17 of A-Z 0-9 / and an SSID, e.g. EA8/G4ABC/QRP-7)"
+    },
+    "angel61Destination" : {
+      "type" : "string",
+      "description" : "Angel61 destination callsign, CQ for all"
+    },
+    "angel61Path" : {
+      "type" : "string",
+      "description" : "Angel61 repeater path, up to two callsigns separated by a comma, empty for none"
+    },
+    "angel61Message" : {
+      "type" : "string",
+      "description" : "Angel61 text sent by the message action when it carries none"
+    },
+    "sendPosition" : {
+      "type" : "integer",
+      "description" : "Send the station's position (SDRangel's own, from the preferences or the GPS feature) in the modes that carry one - D-STAR as a D-PRS (GPS-A) sentence in the slow data, DMR as a GPS Info embedded LC, Angel61 in its position slot - (1) or not (0)"
+    },
+    "angel61Demod" : {
+      "type" : "string",
+      "description" : "Id of the DSD Demodulator the Angel61 rate request is taken from (e.g. R0:2), empty for any of them"
+    },
+    "angel61Symbol" : {
+      "type" : "string",
+      "description" : "Angel61 APRS symbol, the table character and the code (e.g. /- for a house)"
+    },
+    "angel61FileName" : {
+      "type" : "string",
+      "description" : "File offered by the Angel61 file transfer, empty for none"
+    },
+    "m17Source" : {
+      "type" : "string",
+      "description" : "M17 source callsign (up to 9 characters of A-Z 0-9 - / .)"
+    },
+    "m17Destination" : {
+      "type" : "string",
+      "description" : "M17 destination callsign, empty or ALL for everyone"
+    },
+    "m17CAN" : {
+      "type" : "integer",
+      "description" : "M17 channel access number (0 to 15)"
+    },
+    "m17Message" : {
+      "type" : "string",
+      "description" : "M17 text sent as an SMS packet transmission"
+    },
+    "codecModelDirectory" : {
+      "type" : "string",
+      "description" : "Directory of Angel61's V1 models (vocoscodec: encodec_encoder.bin, encodec_codebooks.bin, vocos_decoder.bin), empty for the default (VOCOSCODEC_MODEL_DIR, then vocos beside the executable)\n"
+    },
+    "audioFileName" : {
+      "type" : "string",
+      "description" : "Speech file of the file input (.wav 16 bit PCM mono or stereo at any rate, or .raw 8 kHz 16 bit mono), empty for none"
+    },
+    "angel61Tunnel" : {
+      "type" : "integer",
+      "description" : "Angel61 IP tunnel (3.5) to the peer (1) or not (0)"
+    },
+    "angel61TunnelPeer" : {
+      "type" : "string",
+      "description" : "Callsign at the other end of the Angel61 tunnel"
+    },
+    "angel61TunnelInterface" : {
+      "type" : "string",
+      "description" : "Host network interface the tunnel creates (e.g. sdrangel0)"
+    },
+    "angel61TunnelAddress" : {
+      "type" : "string",
+      "description" : "This end's tunnel address and prefix length (e.g. 10.255.0.1/32)"
+    },
+    "angel61TunnelRoutes" : {
+      "type" : "string",
+      "description" : "Prefixes routed into the tunnel, comma separated"
+    },
+    "angel61TunnelAllow" : {
+      "type" : "string",
+      "description" : "What the tunnel may send (ANGEL61.md 3.5), comma separated: a protocol (icmp, tcp, udp, gre, esp, ah, sctp or a number) with a port or a port range for TCP, UDP and SCTP, which either port of a datagram may be in, as \"icmp, tcp:22, udp:53\". Empty: everything. A list that cannot be read sends nothing\n"
+    },
+    "angel61TunnelGroups" : {
+      "type" : "string",
+      "description" : "Multicast groups the tunnel sends all the same, comma separated (\"224.0.0.251, ff02::fb\")"
+    },
+    "angel61TunnelMTU" : {
+      "type" : "integer",
+      "description" : "Tunnel MTU (576 at the low rate, 1280 at the high one)"
+    },
+    "feedbackAudioDeviceName" : {
+      "type" : "string",
+      "description" : "Audio output device the operator hears what is being encoded on"
+    },
+    "feedbackVolumeFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Volume of the audio feedback (0.0 to 1.0)"
+    },
+    "feedbackAudioEnable" : {
+      "type" : "integer",
+      "description" : "Audio feedback (1) or not (0)"
+    },
+    "spectrumAudio" : {
+      "type" : "integer",
+      "description" : "Spectrum display source - the speech input as given to the encoder (1) or the modulated IQ (0)"
+    },
+    "frameSessionMaxDurationMs" : {
+      "type" : "integer",
+      "description" : "Maximum duration of an externally supplied gateway-frame transmit session. Latched when the session starts; PCM keeps its fixed 180 second limit.",
+      "minimum" : 180000,
+      "maximum" : 86400000
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "cwKeyer" : {
+      "$ref" : "#/definitions/CWKeyerSettings"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "DSEMod (Digital Speech Encoder modulator)"
+};
+            defs.DSEModTransmit = {
+  "type" : "object",
+  "required" : [ "operation", "sessionId" ],
+  "properties" : {
+    "operation" : {
+      "type" : "string",
+      "description" : "send is a finite transmission. start opens a stream; append adds numbered chunks. finish closes input and drains it before sending a protocol terminator. abort discards remaining input; samples already passed downstream cannot be recalled. finish and abort accept only operation and sessionId.\n",
+      "enum" : [ "send", "start", "append", "finish", "abort" ]
+    },
+    "sessionId" : {
+      "type" : "string",
+      "description" : "Client-generated unique ID. Retries with identical content do not rekey.",
+      "pattern" : "^[A-Za-z0-9_.:-]{1,64}$"
+    },
+    "input" : {
+      "type" : "string",
+      "description" : "Required on send/start, omitted on append. angel61 is a network Angel61 call (the talkgroup gateway): records of any profile, the call's profile being its frames'. DSEMod sends its own preamble with the routing given, then relays the V1 voice in its own profile's frames renumbered, at its tier or below (the packets cut to the tier's codebooks), and decodes and re-encodes only Opus (WB's tier 3) into V1.\n",
+      "enum" : [ "pcm", "frames", "angel61" ]
+    },
+    "protocol" : {
+      "type" : "integer",
+      "description" : "Required for frame send/start, where it must equal the selected mode. Not used by angel61.\n"
+    },
+    "source" : {
+      "type" : "string",
+      "description" : "Required for angel61 start; the source callsign of the routing preamble DSEMod sends."
+    },
+    "destination" : {
+      "type" : "string",
+      "description" : "Required for angel61 start; the destination of the routing preamble, CQ, TG n or a callsign."
+    },
+    "via" : {
+      "type" : "string",
+      "description" : "angel61 start only, optional. A callsign sent as the call's path: in the preamble and in place of the relayed frames' path slots. A gateway relaying a private call names itself.\n"
+    },
+    "sequence" : {
+      "type" : "integer",
+      "description" : "Required on append, starting at zero. Retry the same chunk without advancing after 429.",
+      "minimum" : 0,
+      "maximum" : 1000000
+    },
+    "pcm" : {
+      "$ref" : "#/definitions/DSEModPCM"
+    },
+    "frames" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/DSEModFrame"
+      },
+      "maxItems" : 50
+    }
+  }
+};
+            defs.DSEModTransmitStatus = {
+  "type" : "object",
+  "properties" : {
+    "sessionId" : {
+      "type" : "string"
+    },
+    "input" : {
+      "type" : "string"
+    },
+    "state" : {
+      "type" : "string",
+      "enum" : [ "idle", "buffering", "transmitting", "draining", "completed", "aborted", "failed" ]
+    },
+    "protocol" : {
+      "type" : "integer"
+    },
+    "sourceProtocol" : {
+      "type" : "integer",
+      "description" : "The profile of an angel61 session's frames as a mode (9 Angel61 NB, 10 Angel61 WB, 11 HF-NB, 12 HF-WB), 0 before the first."
+    },
+    "source" : {
+      "type" : "string"
+    },
+    "destination" : {
+      "type" : "string"
+    },
+    "nextSequence" : {
+      "type" : "integer"
+    },
+    "accepted" : {
+      "type" : "number",
+      "description" : "Accepted input samples or protocol frames in this session."
+    },
+    "consumed" : {
+      "type" : "number",
+      "description" : "Input samples resampled or frames rendered; not a remote delivery acknowledgement."
+    },
+    "maxDurationMs" : {
+      "type" : "integer",
+      "description" : "Maximum duration latched for this session."
+    },
+    "queuedSamples" : {
+      "type" : "integer"
+    },
+    "queuedFrames" : {
+      "type" : "integer"
+    },
+    "availableSamples" : {
+      "type" : "integer"
+    },
+    "availableFrames" : {
+      "type" : "integer"
+    },
+    "pendingEncoderFrames" : {
+      "type" : "integer"
+    },
+    "encodedQueueFrames" : {
+      "type" : "integer"
+    },
+    "transcodeDecodedFrames" : {
+      "type" : "integer",
+      "description" : "Source Angel61 Opus frames decoded (to re-encode as V1) by the current or most recent session."
+    },
+    "lastError" : {
+      "type" : "string"
+    },
+    "history" : {
+      "type" : "array",
+      "description" : "Last 16 completed sessions, without nested history.",
+      "items" : {
+        "type" : "object",
+        "properties" : { }
+      }
+    },
+    "messages" : {
+      "type" : "array",
+      "description" : "Last 32 message request statuses. inBand queued means admitted to the protocol, not remote delivery.",
+      "items" : {
+        "type" : "object",
+        "properties" : { }
+      }
+    }
+  }
 };
             defs.DVBDemodActions = {
   "properties" : {
@@ -9639,6 +10437,10 @@ margin-bottom: 20px;
     "recordSilenceTime" : {
       "type" : "integer",
       "description" : "Record silence time before stopping recording in 10ths of seconds"
+    },
+    "realSpectrum" : {
+      "type" : "integer",
+      "description" : "Real signal (audio) spectrum display\n  * 1 - positive frequencies only (0 to half the sample rate)\n  * 0 - complex spectrum\n"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -23224,8 +24026,8 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int32",
       "description" : "Use a detected residual USB carrier within +/-100 Hz as the tone offset; otherwise tones are searched for within +/-6 Hz of the manual offset",
-      "default" : 1,
-      "enum" : [ 0, 1 ]
+      "enum" : [ 0, 1 ],
+      "default" : 1
     },
     "threshold" : {
       "type" : "number",
@@ -73813,7 +74615,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-11-10T16:25:32.293+01:00
+              Generated 2026-11-11T21:31:39.974+01:00
             </div>
           </div>
       </div>

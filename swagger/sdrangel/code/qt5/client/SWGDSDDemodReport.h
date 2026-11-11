@@ -88,6 +88,18 @@ public:
     qint32 getSyncCount();
     void setSyncCount(qint32 sync_count);
 
+    qint32 getVoiceFrames();
+    void setVoiceFrames(qint32 voice_frames);
+
+    qint32 getVoiceFramesErased();
+    void setVoiceFramesErased(qint32 voice_frames_erased);
+
+    qint64 getCorrectedBits();
+    void setCorrectedBits(qint64 corrected_bits);
+
+    qint64 getProtectedBits();
+    void setProtectedBits(qint64 protected_bits);
+
     QString* getStatusText();
     void setStatusText(QString* status_text);
 
@@ -100,6 +112,9 @@ public:
     QString* getLastMessage();
     void setLastMessage(QString* last_message);
 
+    QString* getLastMessageProtocol();
+    void setLastMessageProtocol(QString* last_message_protocol);
+
     QString* getLastMessageSource();
     void setLastMessageSource(QString* last_message_source);
 
@@ -109,23 +124,8 @@ public:
     QString* getLastMessageTime();
     void setLastMessageTime(QString* last_message_time);
 
-    QString* getLastMessageProtocol();
-    void setLastMessageProtocol(QString* last_message_protocol);
-
     qint32 getLastMessageSequence();
     void setLastMessageSequence(qint32 last_message_sequence);
-
-    qint32 getVoiceFrames();
-    void setVoiceFrames(qint32 voice_frames);
-
-    qint32 getVoiceFramesErased();
-    void setVoiceFramesErased(qint32 voice_frames_erased);
-
-    qint64 getCorrectedBits();
-    void setCorrectedBits(qint64 corrected_bits);
-
-    qint64 getProtectedBits();
-    void setProtectedBits(qint64 protected_bits);
 
     QList<QString*>* getAngel61HeardCallsigns();
     void setAngel61HeardCallsigns(QList<QString*>* angel61_heard_callsigns);
@@ -179,6 +179,18 @@ private:
     qint32 sync_count;
     bool m_sync_count_isSet;
 
+    qint32 voice_frames;
+    bool m_voice_frames_isSet;
+
+    qint32 voice_frames_erased;
+    bool m_voice_frames_erased_isSet;
+
+    qint64 corrected_bits;
+    bool m_corrected_bits_isSet;
+
+    qint64 protected_bits;
+    bool m_protected_bits_isSet;
+
     QString* status_text;
     bool m_status_text_isSet;
 
@@ -191,6 +203,9 @@ private:
     QString* last_message;
     bool m_last_message_isSet;
 
+    QString* last_message_protocol;
+    bool m_last_message_protocol_isSet;
+
     QString* last_message_source;
     bool m_last_message_source_isSet;
 
@@ -200,23 +215,8 @@ private:
     QString* last_message_time;
     bool m_last_message_time_isSet;
 
-    QString* last_message_protocol;
-    bool m_last_message_protocol_isSet;
-
     qint32 last_message_sequence;
     bool m_last_message_sequence_isSet;
-
-    qint32 voice_frames;
-    bool m_voice_frames_isSet;
-
-    qint32 voice_frames_erased;
-    bool m_voice_frames_erased_isSet;
-
-    qint64 corrected_bits;
-    bool m_corrected_bits_isSet;
-
-    qint64 protected_bits;
-    bool m_protected_bits_isSet;
 
     QList<QString*>* angel61_heard_callsigns;
     bool m_angel61_heard_callsigns_isSet;

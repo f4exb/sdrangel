@@ -11,7 +11,6 @@
  */
 
 
-
 #include "SWGDSDDemodActions.h"
 
 #include "SWGHelpers.h"
@@ -45,7 +44,7 @@ SWGDSDDemodActions::init() {
 
 void
 SWGDSDDemodActions::cleanup() {
-    if(angel61_file != nullptr) {
+    if(angel61_file != nullptr) { 
         delete angel61_file;
     }
 }
@@ -62,7 +61,7 @@ SWGDSDDemodActions::fromJson(QString &json) {
 void
 SWGDSDDemodActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&angel61_file, pJson["angel61File"], "QString", "QString");
-
+    
 }
 
 QString

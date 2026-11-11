@@ -46,10 +46,10 @@ SWGChannelActions::SWGChannelActions() {
     m_dvb_demod_actions_isSet = false;
     drm_demod_actions = nullptr;
     m_drm_demod_actions_isSet = false;
-    dse_mod_actions = nullptr;
-    m_dse_mod_actions_isSet = false;
     dsd_demod_actions = nullptr;
     m_dsd_demod_actions_isSet = false;
+    dse_mod_actions = nullptr;
+    m_dse_mod_actions_isSet = false;
     file_sink_actions = nullptr;
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
@@ -96,10 +96,10 @@ SWGChannelActions::init() {
     m_dvb_demod_actions_isSet = false;
     drm_demod_actions = new SWGDRMDemodActions();
     m_drm_demod_actions_isSet = false;
-    dse_mod_actions = new SWGDSEModActions();
-    m_dse_mod_actions_isSet = false;
     dsd_demod_actions = new SWGDSDDemodActions();
     m_dsd_demod_actions_isSet = false;
+    dse_mod_actions = new SWGDSEModActions();
+    m_dse_mod_actions_isSet = false;
     file_sink_actions = new SWGFileSinkActions();
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
@@ -145,11 +145,11 @@ SWGChannelActions::cleanup() {
     if(drm_demod_actions != nullptr) { 
         delete drm_demod_actions;
     }
-    if(dse_mod_actions != nullptr) {
-        delete dse_mod_actions;
-    }
-    if(dsd_demod_actions != nullptr) {
+    if(dsd_demod_actions != nullptr) { 
         delete dsd_demod_actions;
+    }
+    if(dse_mod_actions != nullptr) { 
+        delete dse_mod_actions;
     }
     if(file_sink_actions != nullptr) { 
         delete file_sink_actions;
@@ -212,9 +212,10 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&drm_demod_actions, pJson["DRMDemodActions"], "SWGDRMDemodActions", "SWGDRMDemodActions");
     
-    ::SWGSDRangel::setValue(&dse_mod_actions, pJson["DSEModActions"], "SWGDSEModActions", "SWGDSEModActions");
     ::SWGSDRangel::setValue(&dsd_demod_actions, pJson["DSDDemodActions"], "SWGDSDDemodActions", "SWGDSDDemodActions");
-
+    
+    ::SWGSDRangel::setValue(&dse_mod_actions, pJson["DSEModActions"], "SWGDSEModActions", "SWGDSEModActions");
+    
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
@@ -278,11 +279,11 @@ SWGChannelActions::asJsonObject() {
     if((drm_demod_actions != nullptr) && (drm_demod_actions->isSet())){
         toJsonValue(QString("DRMDemodActions"), drm_demod_actions, obj, QString("SWGDRMDemodActions"));
     }
-    if((dse_mod_actions != nullptr) && (dse_mod_actions->isSet())){
-        toJsonValue(QString("DSEModActions"), dse_mod_actions, obj, QString("SWGDSEModActions"));
-    }
     if((dsd_demod_actions != nullptr) && (dsd_demod_actions->isSet())){
         toJsonValue(QString("DSDDemodActions"), dsd_demod_actions, obj, QString("SWGDSDDemodActions"));
+    }
+    if((dse_mod_actions != nullptr) && (dse_mod_actions->isSet())){
+        toJsonValue(QString("DSEModActions"), dse_mod_actions, obj, QString("SWGDSEModActions"));
     }
     if((file_sink_actions != nullptr) && (file_sink_actions->isSet())){
         toJsonValue(QString("FileSinkActions"), file_sink_actions, obj, QString("SWGFileSinkActions"));
@@ -408,16 +409,6 @@ SWGChannelActions::setDrmDemodActions(SWGDRMDemodActions* drm_demod_actions) {
     this->m_drm_demod_actions_isSet = true;
 }
 
-SWGDSEModActions*
-SWGChannelActions::getDseModActions() {
-    return dse_mod_actions;
-}
-void
-SWGChannelActions::setDseModActions(SWGDSEModActions* dse_mod_actions) {
-    this->dse_mod_actions = dse_mod_actions;
-    this->m_dse_mod_actions_isSet = true;
-}
-
 SWGDSDDemodActions*
 SWGChannelActions::getDsdDemodActions() {
     return dsd_demod_actions;
@@ -426,6 +417,16 @@ void
 SWGChannelActions::setDsdDemodActions(SWGDSDDemodActions* dsd_demod_actions) {
     this->dsd_demod_actions = dsd_demod_actions;
     this->m_dsd_demod_actions_isSet = true;
+}
+
+SWGDSEModActions*
+SWGChannelActions::getDseModActions() {
+    return dse_mod_actions;
+}
+void
+SWGChannelActions::setDseModActions(SWGDSEModActions* dse_mod_actions) {
+    this->dse_mod_actions = dse_mod_actions;
+    this->m_dse_mod_actions_isSet = true;
 }
 
 SWGFileSinkActions*
@@ -560,10 +561,10 @@ SWGChannelActions::isSet(){
         if(drm_demod_actions && drm_demod_actions->isSet()){
             isObjectUpdated = true; break;
         }
-        if(dse_mod_actions && dse_mod_actions->isSet()){
+        if(dsd_demod_actions && dsd_demod_actions->isSet()){
             isObjectUpdated = true; break;
         }
-        if(dsd_demod_actions && dsd_demod_actions->isSet()){
+        if(dse_mod_actions && dse_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_sink_actions && file_sink_actions->isSet()){

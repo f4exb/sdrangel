@@ -42,8 +42,6 @@ SWGDemodAnalyzerSettings::SWGDemodAnalyzerSettings() {
     m_record_silence_time_isSet = false;
     real_spectrum = 0;
     m_real_spectrum_isSet = false;
-    real_spectrum = 0;
-    m_real_spectrum_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -80,6 +78,8 @@ SWGDemodAnalyzerSettings::init() {
     m_record_to_file_isSet = false;
     record_silence_time = 0;
     m_record_silence_time_isSet = false;
+    real_spectrum = 0;
+    m_real_spectrum_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -108,6 +108,7 @@ SWGDemodAnalyzerSettings::cleanup() {
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
+
 
 
 
@@ -150,7 +151,7 @@ SWGDemodAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&record_to_file, pJson["recordToFile"], "qint32", "");
     
     ::SWGSDRangel::setValue(&record_silence_time, pJson["recordSilenceTime"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&real_spectrum, pJson["realSpectrum"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");

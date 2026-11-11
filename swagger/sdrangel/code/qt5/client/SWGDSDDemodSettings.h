@@ -83,18 +83,8 @@ public:
     qint32 getDmrColorCode();
     void setDmrColorCode(qint32 dmr_color_code);
 
-    qint32 getRgbColor();
-    void setRgbColor(qint32 rgb_color);
-
-    QString* getTitle();
-    void setTitle(QString* title);
-
     QString* getAngel61FileDirectory();
     void setAngel61FileDirectory(QString* angel61_file_directory);
-    QString* getCodecModelDirectory();
-    void setCodecModelDirectory(QString* codec_model_directory);
-    QString* getAngel61Groups();
-    void setAngel61Groups(QString* angel61_groups);
 
     qint32 getAngel61FileMaxKb();
     void setAngel61FileMaxKb(qint32 angel61_file_max_kb);
@@ -102,10 +92,23 @@ public:
     qint32 getAngel61FileConfirm();
     void setAngel61FileConfirm(qint32 angel61_file_confirm);
 
-    qint32 getContactReportEnabled() const { return m_contact_report.value("contactReportEnabled").toInt(); }
-    void setContactReportEnabled(qint32 value) { m_contact_report["contactReportEnabled"] = value; }
-    QString getContactReportCallsign() const { return m_contact_report.value("contactReportCallsign").toString(); }
-    void setContactReportCallsign(const QString& value) { m_contact_report["contactReportCallsign"] = value; }
+    QString* getAngel61Groups();
+    void setAngel61Groups(QString* angel61_groups);
+
+    QString* getCodecModelDirectory();
+    void setCodecModelDirectory(QString* codec_model_directory);
+
+    qint32 getContactReportEnabled();
+    void setContactReportEnabled(qint32 contact_report_enabled);
+
+    QString* getContactReportCallsign();
+    void setContactReportCallsign(QString* contact_report_callsign);
+
+    qint32 getRgbColor();
+    void setRgbColor(qint32 rgb_color);
+
+    QString* getTitle();
+    void setTitle(QString* title);
 
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
@@ -156,7 +159,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    QJsonObject m_contact_report;
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
@@ -196,24 +198,32 @@ private:
     qint32 dmr_color_code;
     bool m_dmr_color_code_isSet;
 
-    qint32 rgb_color;
-    bool m_rgb_color_isSet;
-
-    QString* title;
-    bool m_title_isSet;
-
     QString* angel61_file_directory;
     bool m_angel61_file_directory_isSet;
-    QString* codec_model_directory;
-    bool m_codec_model_directory_isSet;
-    QString* angel61_groups;
-    bool m_angel61_groups_isSet;
 
     qint32 angel61_file_max_kb;
     bool m_angel61_file_max_kb_isSet;
 
     qint32 angel61_file_confirm;
     bool m_angel61_file_confirm_isSet;
+
+    QString* angel61_groups;
+    bool m_angel61_groups_isSet;
+
+    QString* codec_model_directory;
+    bool m_codec_model_directory_isSet;
+
+    qint32 contact_report_enabled;
+    bool m_contact_report_enabled_isSet;
+
+    QString* contact_report_callsign;
+    bool m_contact_report_callsign_isSet;
+
+    qint32 rgb_color;
+    bool m_rgb_color_isSet;
+
+    QString* title;
+    bool m_title_isSet;
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;

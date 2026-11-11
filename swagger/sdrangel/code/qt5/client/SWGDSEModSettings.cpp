@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    ---
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
  *
  * OpenAPI spec version: 7.0.0
  * Contact: f4exb06@gmail.com
@@ -154,14 +154,14 @@ SWGDSEModSettings::SWGDSEModSettings() {
     m_m17_source_isSet = false;
     m17_destination = nullptr;
     m_m17_destination_isSet = false;
+    m17_can = 0;
+    m_m17_can_isSet = false;
     m17_message = nullptr;
     m_m17_message_isSet = false;
     codec_model_directory = nullptr;
     m_codec_model_directory_isSet = false;
     audio_file_name = nullptr;
     m_audio_file_name_isSet = false;
-    frame_session_max_duration_ms = 0;
-    m_frame_session_max_duration_ms_isSet = false;
     angel61_tunnel = 0;
     m_angel61_tunnel_isSet = false;
     angel61_tunnel_peer = nullptr;
@@ -186,8 +186,8 @@ SWGDSEModSettings::SWGDSEModSettings() {
     m_feedback_audio_enable_isSet = false;
     spectrum_audio = 0;
     m_spectrum_audio_isSet = false;
-    m17_can = 0;
-    m_m17_can_isSet = false;
+    frame_session_max_duration_ms = 0;
+    m_frame_session_max_duration_ms_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -346,14 +346,14 @@ SWGDSEModSettings::init() {
     m_m17_source_isSet = false;
     m17_destination = new QString("");
     m_m17_destination_isSet = false;
+    m17_can = 0;
+    m_m17_can_isSet = false;
     m17_message = new QString("");
     m_m17_message_isSet = false;
     codec_model_directory = new QString("");
     m_codec_model_directory_isSet = false;
     audio_file_name = new QString("");
     m_audio_file_name_isSet = false;
-    frame_session_max_duration_ms = 0;
-    m_frame_session_max_duration_ms_isSet = false;
     angel61_tunnel = 0;
     m_angel61_tunnel_isSet = false;
     angel61_tunnel_peer = new QString("");
@@ -378,8 +378,8 @@ SWGDSEModSettings::init() {
     m_feedback_audio_enable_isSet = false;
     spectrum_audio = 0;
     m_spectrum_audio_isSet = false;
-    m17_can = 0;
-    m_m17_can_isSet = false;
+    frame_session_max_duration_ms = 0;
+    m_frame_session_max_duration_ms_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -458,6 +458,7 @@ SWGDSEModSettings::cleanup() {
 
 
 
+
     if(ysf_callsign != nullptr) { 
         delete ysf_callsign;
     }
@@ -483,63 +484,73 @@ SWGDSEModSettings::cleanup() {
 
 
 
-    if(angel61_source != nullptr) {
+
+    if(angel61_source != nullptr) { 
         delete angel61_source;
     }
-    if(angel61_destination != nullptr) {
+    if(angel61_destination != nullptr) { 
         delete angel61_destination;
     }
-    if(angel61_path != nullptr) {
+    if(angel61_path != nullptr) { 
         delete angel61_path;
     }
-    if(angel61_message != nullptr) {
+    if(angel61_message != nullptr) { 
         delete angel61_message;
     }
-    if(angel61_demod != nullptr) {
+
+    if(angel61_demod != nullptr) { 
         delete angel61_demod;
     }
-    if(angel61_symbol != nullptr) {
+    if(angel61_symbol != nullptr) { 
         delete angel61_symbol;
     }
-    if(angel61_file_name != nullptr) {
+    if(angel61_file_name != nullptr) { 
         delete angel61_file_name;
     }
-    if(m17_source != nullptr) {
+    if(m17_source != nullptr) { 
         delete m17_source;
     }
-    if(m17_destination != nullptr) {
+    if(m17_destination != nullptr) { 
         delete m17_destination;
     }
-    if(m17_message != nullptr) {
+
+    if(m17_message != nullptr) { 
         delete m17_message;
     }
-    if(codec_model_directory != nullptr) {
+    if(codec_model_directory != nullptr) { 
         delete codec_model_directory;
     }
-    if(audio_file_name != nullptr) {
+    if(audio_file_name != nullptr) { 
         delete audio_file_name;
     }
-    if(angel61_tunnel_peer != nullptr) {
+
+    if(angel61_tunnel_peer != nullptr) { 
         delete angel61_tunnel_peer;
     }
-    if(angel61_tunnel_interface != nullptr) {
+    if(angel61_tunnel_interface != nullptr) { 
         delete angel61_tunnel_interface;
     }
-    if(angel61_tunnel_address != nullptr) {
+    if(angel61_tunnel_address != nullptr) { 
         delete angel61_tunnel_address;
     }
-    if(angel61_tunnel_routes != nullptr) {
+    if(angel61_tunnel_routes != nullptr) { 
         delete angel61_tunnel_routes;
     }
-    if(angel61_tunnel_allow != nullptr) {
+    if(angel61_tunnel_allow != nullptr) { 
         delete angel61_tunnel_allow;
     }
-    if(angel61_tunnel_groups != nullptr) {
+    if(angel61_tunnel_groups != nullptr) { 
         delete angel61_tunnel_groups;
     }
-    if(feedback_audio_device_name != nullptr) {
+
+    if(feedback_audio_device_name != nullptr) { 
         delete feedback_audio_device_name;
     }
+
+
+
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -629,7 +640,6 @@ SWGDSEModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dstar_flag2, pJson["dstarFlag2"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dstar_flag3, pJson["dstarFlag3"], "qint32", "");
-
     
     ::SWGSDRangel::setValue(&dmr_color_code, pJson["dmrColorCode"], "qint32", "");
     
@@ -640,7 +650,7 @@ SWGDSEModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dmr_group_call, pJson["dmrGroupCall"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dmr_slot, pJson["dmrSlot"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&dmr_direct, pJson["dmrDirect"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dmr_fid, pJson["dmrFid"], "qint32", "");
@@ -680,18 +690,17 @@ SWGDSEModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&p25p2_wacn, pJson["p25p2Wacn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&p25p2_sysid, pJson["p25p2Sysid"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&angel61_rate, pJson["angel61Rate"], "qint32", "");
-
-
+    
     ::SWGSDRangel::setValue(&angel61_source, pJson["angel61Source"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&angel61_destination, pJson["angel61Destination"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&angel61_path, pJson["angel61Path"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&angel61_message, pJson["angel61Message"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&send_position, pJson["sendPosition"], "qint32", "");
     
     ::SWGSDRangel::setValue(&angel61_demod, pJson["angel61Demod"], "QString", "QString");
@@ -704,13 +713,13 @@ SWGDSEModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&m17_destination, pJson["m17Destination"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&m17_can, pJson["m17CAN"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&m17_message, pJson["m17Message"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&codec_model_directory, pJson["codecModelDirectory"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&audio_file_name, pJson["audioFileName"], "QString", "QString");
-
-    ::SWGSDRangel::setValue(&frame_session_max_duration_ms, pJson["frameSessionMaxDurationMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&angel61_tunnel, pJson["angel61Tunnel"], "qint32", "");
     
@@ -733,10 +742,10 @@ SWGDSEModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&feedback_volume_factor, pJson["feedbackVolumeFactor"], "float", "");
     
     ::SWGSDRangel::setValue(&feedback_audio_enable, pJson["feedbackAudioEnable"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&spectrum_audio, pJson["spectrumAudio"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&m17_can, pJson["m17CAN"], "qint32", "");
+    ::SWGSDRangel::setValue(&frame_session_max_duration_ms, pJson["frameSessionMaxDurationMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -967,6 +976,9 @@ SWGDSEModSettings::asJsonObject() {
     if(m17_destination != nullptr && *m17_destination != QString("")){
         toJsonValue(QString("m17Destination"), m17_destination, obj, QString("QString"));
     }
+    if(m_m17_can_isSet){
+        obj->insert("m17CAN", QJsonValue(m17_can));
+    }
     if(m17_message != nullptr && *m17_message != QString("")){
         toJsonValue(QString("m17Message"), m17_message, obj, QString("QString"));
     }
@@ -975,9 +987,6 @@ SWGDSEModSettings::asJsonObject() {
     }
     if(audio_file_name != nullptr && *audio_file_name != QString("")){
         toJsonValue(QString("audioFileName"), audio_file_name, obj, QString("QString"));
-    }
-    if(m_frame_session_max_duration_ms_isSet){
-        obj->insert("frameSessionMaxDurationMs", QJsonValue(frame_session_max_duration_ms));
     }
     if(m_angel61_tunnel_isSet){
         obj->insert("angel61Tunnel", QJsonValue(angel61_tunnel));
@@ -1015,8 +1024,8 @@ SWGDSEModSettings::asJsonObject() {
     if(m_spectrum_audio_isSet){
         obj->insert("spectrumAudio", QJsonValue(spectrum_audio));
     }
-    if(m_m17_can_isSet){
-        obj->insert("m17CAN", QJsonValue(m17_can));
+    if(m_frame_session_max_duration_ms_isSet){
+        obj->insert("frameSessionMaxDurationMs", QJsonValue(frame_session_max_duration_ms));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -1688,6 +1697,16 @@ SWGDSEModSettings::setM17Destination(QString* m17_destination) {
     this->m_m17_destination_isSet = true;
 }
 
+qint32
+SWGDSEModSettings::getM17Can() {
+    return m17_can;
+}
+void
+SWGDSEModSettings::setM17Can(qint32 m17_can) {
+    this->m17_can = m17_can;
+    this->m_m17_can_isSet = true;
+}
+
 QString*
 SWGDSEModSettings::getM17Message() {
     return m17_message;
@@ -1716,16 +1735,6 @@ void
 SWGDSEModSettings::setAudioFileName(QString* audio_file_name) {
     this->audio_file_name = audio_file_name;
     this->m_audio_file_name_isSet = true;
-}
-
-qint32
-SWGDSEModSettings::getFrameSessionMaxDurationMs() {
-    return frame_session_max_duration_ms;
-}
-void
-SWGDSEModSettings::setFrameSessionMaxDurationMs(qint32 frame_session_max_duration_ms) {
-    this->frame_session_max_duration_ms = frame_session_max_duration_ms;
-    this->m_frame_session_max_duration_ms_isSet = true;
 }
 
 qint32
@@ -1799,11 +1808,11 @@ SWGDSEModSettings::setAngel61TunnelGroups(QString* angel61_tunnel_groups) {
 }
 
 qint32
-SWGDSEModSettings::getAngel61TunnelMTU() {
+SWGDSEModSettings::getAngel61TunnelMtu() {
     return angel61_tunnel_mtu;
 }
 void
-SWGDSEModSettings::setAngel61TunnelMTU(qint32 angel61_tunnel_mtu) {
+SWGDSEModSettings::setAngel61TunnelMtu(qint32 angel61_tunnel_mtu) {
     this->angel61_tunnel_mtu = angel61_tunnel_mtu;
     this->m_angel61_tunnel_mtu_isSet = true;
 }
@@ -1849,13 +1858,13 @@ SWGDSEModSettings::setSpectrumAudio(qint32 spectrum_audio) {
 }
 
 qint32
-SWGDSEModSettings::getM17CAN() {
-    return m17_can;
+SWGDSEModSettings::getFrameSessionMaxDurationMs() {
+    return frame_session_max_duration_ms;
 }
 void
-SWGDSEModSettings::setM17CAN(qint32 m17_can) {
-    this->m17_can = m17_can;
-    this->m_m17_can_isSet = true;
+SWGDSEModSettings::setFrameSessionMaxDurationMs(qint32 frame_session_max_duration_ms) {
+    this->frame_session_max_duration_ms = frame_session_max_duration_ms;
+    this->m_frame_session_max_duration_ms_isSet = true;
 }
 
 qint32
@@ -2172,6 +2181,9 @@ SWGDSEModSettings::isSet(){
         if(m17_destination && *m17_destination != QString("")){
             isObjectUpdated = true; break;
         }
+        if(m_m17_can_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m17_message && *m17_message != QString("")){
             isObjectUpdated = true; break;
         }
@@ -2179,9 +2191,6 @@ SWGDSEModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(audio_file_name && *audio_file_name != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_frame_session_max_duration_ms_isSet){
             isObjectUpdated = true; break;
         }
         if(m_angel61_tunnel_isSet){
@@ -2220,7 +2229,7 @@ SWGDSEModSettings::isSet(){
         if(m_spectrum_audio_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_m17_can_isSet){
+        if(m_frame_session_max_duration_ms_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
@@ -2263,3 +2272,4 @@ SWGDSEModSettings::isSet(){
     return isObjectUpdated;
 }
 }
+

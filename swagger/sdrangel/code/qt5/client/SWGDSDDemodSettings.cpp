@@ -28,7 +28,7 @@ SWGDSDDemodSettings::SWGDSDDemodSettings(QString* json) {
 }
 
 SWGDSDDemodSettings::SWGDSDDemodSettings() {
-    input_frequency_offset = 0;
+    input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
@@ -54,20 +54,24 @@ SWGDSDDemodSettings::SWGDSDDemodSettings() {
     m_tdma_stereo_isSet = false;
     dmr_color_code = 0;
     m_dmr_color_code_isSet = false;
-    rgb_color = 0;
-    m_rgb_color_isSet = false;
-    title = nullptr;
-    m_title_isSet = false;
     angel61_file_directory = nullptr;
     m_angel61_file_directory_isSet = false;
-    codec_model_directory = nullptr;
-    m_codec_model_directory_isSet = false;
-    angel61_groups = nullptr;
-    m_angel61_groups_isSet = false;
     angel61_file_max_kb = 0;
     m_angel61_file_max_kb_isSet = false;
     angel61_file_confirm = 0;
     m_angel61_file_confirm_isSet = false;
+    angel61_groups = nullptr;
+    m_angel61_groups_isSet = false;
+    codec_model_directory = nullptr;
+    m_codec_model_directory_isSet = false;
+    contact_report_enabled = 0;
+    m_contact_report_enabled_isSet = false;
+    contact_report_callsign = nullptr;
+    m_contact_report_callsign_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
     high_pass_filter = 0;
@@ -106,7 +110,7 @@ SWGDSDDemodSettings::~SWGDSDDemodSettings() {
 
 void
 SWGDSDDemodSettings::init() {
-    input_frequency_offset = 0;
+    input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
@@ -132,20 +136,24 @@ SWGDSDDemodSettings::init() {
     m_tdma_stereo_isSet = false;
     dmr_color_code = 0;
     m_dmr_color_code_isSet = false;
-    rgb_color = 0;
-    m_rgb_color_isSet = false;
-    title = new QString("");
-    m_title_isSet = false;
     angel61_file_directory = new QString("");
     m_angel61_file_directory_isSet = false;
-    codec_model_directory = new QString("");
-    m_codec_model_directory_isSet = false;
-    angel61_groups = new QString("");
-    m_angel61_groups_isSet = false;
     angel61_file_max_kb = 0;
     m_angel61_file_max_kb_isSet = false;
     angel61_file_confirm = 0;
     m_angel61_file_confirm_isSet = false;
+    angel61_groups = new QString("");
+    m_angel61_groups_isSet = false;
+    codec_model_directory = new QString("");
+    m_codec_model_directory_isSet = false;
+    contact_report_enabled = 0;
+    m_contact_report_enabled_isSet = false;
+    contact_report_callsign = new QString("");
+    m_contact_report_callsign_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = new QString("");
+    m_title_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
     high_pass_filter = 0;
@@ -193,17 +201,24 @@ SWGDSDDemodSettings::cleanup() {
 
 
 
-    if(title != nullptr) { 
-        delete title;
-    }
     if(angel61_file_directory != nullptr) { 
         delete angel61_file_directory;
+    }
+
+
+    if(angel61_groups != nullptr) { 
+        delete angel61_groups;
     }
     if(codec_model_directory != nullptr) { 
         delete codec_model_directory;
     }
-    if(angel61_groups != nullptr) { 
-        delete angel61_groups;
+
+    if(contact_report_callsign != nullptr) { 
+        delete contact_report_callsign;
+    }
+
+    if(title != nullptr) { 
+        delete title;
     }
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
@@ -241,10 +256,6 @@ SWGDSDDemodSettings::fromJson(QString &json) {
 
 void
 SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
-    m_contact_report = QJsonObject();
-    for (const char *key : {"contactReportEnabled", "contactReportCallsign"}) {
-        if (pJson.contains(key)) m_contact_report[key] = pJson.value(key);
-    }
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
@@ -268,20 +279,26 @@ SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&slot2_on, pJson["slot2On"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tdma_stereo, pJson["tdmaStereo"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&dmr_color_code, pJson["dmrColorCode"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
-    
     ::SWGSDRangel::setValue(&angel61_file_directory, pJson["angel61FileDirectory"], "QString", "QString");
-    ::SWGSDRangel::setValue(&codec_model_directory, pJson["codecModelDirectory"], "QString", "QString");
-    ::SWGSDRangel::setValue(&angel61_groups, pJson["angel61Groups"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&angel61_file_max_kb, pJson["angel61FileMaxKB"], "qint32", "");
     
     ::SWGSDRangel::setValue(&angel61_file_confirm, pJson["angel61FileConfirm"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&angel61_groups, pJson["angel61Groups"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&codec_model_directory, pJson["codecModelDirectory"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&contact_report_enabled, pJson["contactReportEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&contact_report_callsign, pJson["contactReportCallsign"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
@@ -368,26 +385,32 @@ SWGDSDDemodSettings::asJsonObject() {
     if(m_dmr_color_code_isSet){
         obj->insert("dmrColorCode", QJsonValue(dmr_color_code));
     }
-    if(m_rgb_color_isSet){
-        obj->insert("rgbColor", QJsonValue(rgb_color));
-    }
-    if(title != nullptr && *title != QString("")){
-        toJsonValue(QString("title"), title, obj, QString("QString"));
-    }
     if(angel61_file_directory != nullptr && *angel61_file_directory != QString("")){
         toJsonValue(QString("angel61FileDirectory"), angel61_file_directory, obj, QString("QString"));
-    }
-    if(codec_model_directory != nullptr && *codec_model_directory != QString("")){
-        toJsonValue(QString("codecModelDirectory"), codec_model_directory, obj, QString("QString"));
-    }
-    if(angel61_groups != nullptr && *angel61_groups != QString("")){
-        toJsonValue(QString("angel61Groups"), angel61_groups, obj, QString("QString"));
     }
     if(m_angel61_file_max_kb_isSet){
         obj->insert("angel61FileMaxKB", QJsonValue(angel61_file_max_kb));
     }
     if(m_angel61_file_confirm_isSet){
         obj->insert("angel61FileConfirm", QJsonValue(angel61_file_confirm));
+    }
+    if(angel61_groups != nullptr && *angel61_groups != QString("")){
+        toJsonValue(QString("angel61Groups"), angel61_groups, obj, QString("QString"));
+    }
+    if(codec_model_directory != nullptr && *codec_model_directory != QString("")){
+        toJsonValue(QString("codecModelDirectory"), codec_model_directory, obj, QString("QString"));
+    }
+    if(m_contact_report_enabled_isSet){
+        obj->insert("contactReportEnabled", QJsonValue(contact_report_enabled));
+    }
+    if(contact_report_callsign != nullptr && *contact_report_callsign != QString("")){
+        toJsonValue(QString("contactReportCallsign"), contact_report_callsign, obj, QString("QString"));
+    }
+    if(m_rgb_color_isSet){
+        obj->insert("rgbColor", QJsonValue(rgb_color));
+    }
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
@@ -435,8 +458,6 @@ SWGDSDDemodSettings::asJsonObject() {
         obj->insert("connectAMBE", QJsonValue(connect_ambe));
     }
 
-    for (auto it = m_contact_report.constBegin(); it != m_contact_report.constEnd(); ++it)
-        obj->insert(it.key(), it.value());
     return obj;
 }
 
@@ -570,52 +591,14 @@ SWGDSDDemodSettings::setDmrColorCode(qint32 dmr_color_code) {
     this->m_dmr_color_code_isSet = true;
 }
 
-qint32
-SWGDSDDemodSettings::getRgbColor() {
-    return rgb_color;
-}
-void
-SWGDSDDemodSettings::setRgbColor(qint32 rgb_color) {
-    this->rgb_color = rgb_color;
-    this->m_rgb_color_isSet = true;
-}
-
-QString*
-SWGDSDDemodSettings::getTitle() {
-    return title;
-}
-void
-SWGDSDDemodSettings::setTitle(QString* title) {
-    this->title = title;
-    this->m_title_isSet = true;
-}
-
 QString*
 SWGDSDDemodSettings::getAngel61FileDirectory() {
     return angel61_file_directory;
-}
-QString*
-SWGDSDDemodSettings::getCodecModelDirectory() {
-    return codec_model_directory;
-}
-QString*
-SWGDSDDemodSettings::getAngel61Groups() {
-    return angel61_groups;
 }
 void
 SWGDSDDemodSettings::setAngel61FileDirectory(QString* angel61_file_directory) {
     this->angel61_file_directory = angel61_file_directory;
     this->m_angel61_file_directory_isSet = true;
-}
-void
-SWGDSDDemodSettings::setCodecModelDirectory(QString* codec_model_directory) {
-    this->codec_model_directory = codec_model_directory;
-    this->m_codec_model_directory_isSet = true;
-}
-void
-SWGDSDDemodSettings::setAngel61Groups(QString* angel61_groups) {
-    this->angel61_groups = angel61_groups;
-    this->m_angel61_groups_isSet = true;
 }
 
 qint32
@@ -636,6 +619,66 @@ void
 SWGDSDDemodSettings::setAngel61FileConfirm(qint32 angel61_file_confirm) {
     this->angel61_file_confirm = angel61_file_confirm;
     this->m_angel61_file_confirm_isSet = true;
+}
+
+QString*
+SWGDSDDemodSettings::getAngel61Groups() {
+    return angel61_groups;
+}
+void
+SWGDSDDemodSettings::setAngel61Groups(QString* angel61_groups) {
+    this->angel61_groups = angel61_groups;
+    this->m_angel61_groups_isSet = true;
+}
+
+QString*
+SWGDSDDemodSettings::getCodecModelDirectory() {
+    return codec_model_directory;
+}
+void
+SWGDSDDemodSettings::setCodecModelDirectory(QString* codec_model_directory) {
+    this->codec_model_directory = codec_model_directory;
+    this->m_codec_model_directory_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getContactReportEnabled() {
+    return contact_report_enabled;
+}
+void
+SWGDSDDemodSettings::setContactReportEnabled(qint32 contact_report_enabled) {
+    this->contact_report_enabled = contact_report_enabled;
+    this->m_contact_report_enabled_isSet = true;
+}
+
+QString*
+SWGDSDDemodSettings::getContactReportCallsign() {
+    return contact_report_callsign;
+}
+void
+SWGDSDDemodSettings::setContactReportCallsign(QString* contact_report_callsign) {
+    this->contact_report_callsign = contact_report_callsign;
+    this->m_contact_report_callsign_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getRgbColor() {
+    return rgb_color;
+}
+void
+SWGDSDDemodSettings::setRgbColor(qint32 rgb_color) {
+    this->rgb_color = rgb_color;
+    this->m_rgb_color_isSet = true;
+}
+
+QString*
+SWGDSDDemodSettings::getTitle() {
+    return title;
+}
+void
+SWGDSDDemodSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 QString*
@@ -791,7 +834,6 @@ SWGDSDDemodSettings::setConnectAmbe(qint32 connect_ambe) {
 
 bool
 SWGDSDDemodSettings::isSet(){
-    if (!m_contact_report.isEmpty()) return true;
     bool isObjectUpdated = false;
     do{
         if(m_input_frequency_offset_isSet){
@@ -833,25 +875,31 @@ SWGDSDDemodSettings::isSet(){
         if(m_dmr_color_code_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rgb_color_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(title && *title != QString("")){
-            isObjectUpdated = true; break;
-        }
         if(angel61_file_directory && *angel61_file_directory != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(codec_model_directory && *codec_model_directory != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(angel61_groups && *angel61_groups != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_angel61_file_max_kb_isSet){
             isObjectUpdated = true; break;
         }
         if(m_angel61_file_confirm_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(angel61_groups && *angel61_groups != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(codec_model_directory && *codec_model_directory != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_contact_report_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(contact_report_callsign && *contact_report_callsign != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
             isObjectUpdated = true; break;
         }
         if(audio_device_name && *audio_device_name != QString("")){
@@ -903,3 +951,4 @@ SWGDSDDemodSettings::isSet(){
     return isObjectUpdated;
 }
 }
+

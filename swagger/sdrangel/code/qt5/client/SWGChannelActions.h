@@ -25,9 +25,9 @@
 #include "SWGAISModActions.h"
 #include "SWGAPTDemodActions.h"
 #include "SWGDRMDemodActions.h"
-#include "SWGDVBDemodActions.h"
-#include "SWGDSEModActions.h"
 #include "SWGDSDDemodActions.h"
+#include "SWGDSEModActions.h"
+#include "SWGDVBDemodActions.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
 #include "SWGFreqScannerActions.h"
@@ -86,11 +86,11 @@ public:
     SWGDRMDemodActions* getDrmDemodActions();
     void setDrmDemodActions(SWGDRMDemodActions* drm_demod_actions);
 
-    SWGDSEModActions* getDseModActions();
-    void setDseModActions(SWGDSEModActions* dse_mod_actions);
-
     SWGDSDDemodActions* getDsdDemodActions();
     void setDsdDemodActions(SWGDSDDemodActions* dsd_demod_actions);
+
+    SWGDSEModActions* getDseModActions();
+    void setDseModActions(SWGDSEModActions* dse_mod_actions);
 
     SWGFileSinkActions* getFileSinkActions();
     void setFileSinkActions(SWGFileSinkActions* file_sink_actions);
@@ -146,17 +146,18 @@ private:
 
     SWGWefaxDemodActions* wefax_demod_actions;
     bool m_wefax_demod_actions_isSet;
-    SWGDSEModActions* dse_mod_actions;
-    bool m_dse_mod_actions_isSet;
-
-    SWGDSDDemodActions* dsd_demod_actions;
-    bool m_dsd_demod_actions_isSet;
 
     SWGDVBDemodActions* dvb_demod_actions;
     bool m_dvb_demod_actions_isSet;
 
     SWGDRMDemodActions* drm_demod_actions;
     bool m_drm_demod_actions_isSet;
+
+    SWGDSDDemodActions* dsd_demod_actions;
+    bool m_dsd_demod_actions_isSet;
+
+    SWGDSEModActions* dse_mod_actions;
+    bool m_dse_mod_actions_isSet;
 
     SWGFileSinkActions* file_sink_actions;
     bool m_file_sink_actions_isSet;

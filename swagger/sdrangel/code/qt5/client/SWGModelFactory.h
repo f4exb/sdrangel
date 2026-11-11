@@ -136,12 +136,18 @@
 #include "SWGDRMService.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSCDemodSettings.h"
+#include "SWGDSDDemodActions.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
-#include "SWGDSDDemodActions.h"
 #include "SWGDSEModActions.h"
+#include "SWGDSEModCapabilities.h"
+#include "SWGDSEModFrame.h"
+#include "SWGDSEModMessage.h"
+#include "SWGDSEModPCM.h"
 #include "SWGDSEModReport.h"
 #include "SWGDSEModSettings.h"
+#include "SWGDSEModTransmit.h"
+#include "SWGDSEModTransmitStatus.h"
 #include "SWGDVBDemodActions.h"
 #include "SWGDVBDemodApp.h"
 #include "SWGDVBDemodCarousel.h"
@@ -1086,6 +1092,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDSDDemodActions").compare(type) == 0) {
+      SWGDSDDemodActions *obj = new SWGDSDDemodActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDSDDemodReport").compare(type) == 0) {
       SWGDSDDemodReport *obj = new SWGDSDDemodReport();
       obj->init();
@@ -1093,6 +1104,51 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDSDDemodSettings").compare(type) == 0) {
       SWGDSDDemodSettings *obj = new SWGDSDDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModActions").compare(type) == 0) {
+      SWGDSEModActions *obj = new SWGDSEModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModCapabilities").compare(type) == 0) {
+      SWGDSEModCapabilities *obj = new SWGDSEModCapabilities();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModFrame").compare(type) == 0) {
+      SWGDSEModFrame *obj = new SWGDSEModFrame();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModMessage").compare(type) == 0) {
+      SWGDSEModMessage *obj = new SWGDSEModMessage();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModPCM").compare(type) == 0) {
+      SWGDSEModPCM *obj = new SWGDSEModPCM();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModReport").compare(type) == 0) {
+      SWGDSEModReport *obj = new SWGDSEModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModSettings").compare(type) == 0) {
+      SWGDSEModSettings *obj = new SWGDSEModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModTransmit").compare(type) == 0) {
+      SWGDSEModTransmit *obj = new SWGDSEModTransmit();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSEModTransmitStatus").compare(type) == 0) {
+      SWGDSEModTransmitStatus *obj = new SWGDSEModTransmitStatus();
       obj->init();
       return obj;
     }
@@ -1128,26 +1184,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDVBDemodSettings").compare(type) == 0) {
       SWGDVBDemodSettings *obj = new SWGDVBDemodSettings();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGDSDDemodActions").compare(type) == 0) {
-      SWGDSDDemodActions *obj = new SWGDSDDemodActions();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGDSEModActions").compare(type) == 0) {
-      SWGDSEModActions *obj = new SWGDSEModActions();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGDSEModReport").compare(type) == 0) {
-      SWGDSEModReport *obj = new SWGDSEModReport();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGDSEModSettings").compare(type) == 0) {
-      SWGDSEModSettings *obj = new SWGDSEModSettings();
       obj->init();
       return obj;
     }

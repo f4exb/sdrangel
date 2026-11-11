@@ -13,7 +13,7 @@
 /*
  * SWGDSEModSettings.h
  *
- * DSEMod
+ * DSEMod (Digital Speech Encoder modulator)
  */
 
 #ifndef SWGDSEModSettings_H_
@@ -235,6 +235,9 @@ public:
     QString* getM17Destination();
     void setM17Destination(QString* m17_destination);
 
+    qint32 getM17Can();
+    void setM17Can(qint32 m17_can);
+
     QString* getM17Message();
     void setM17Message(QString* m17_message);
 
@@ -243,9 +246,6 @@ public:
 
     QString* getAudioFileName();
     void setAudioFileName(QString* audio_file_name);
-
-    qint32 getFrameSessionMaxDurationMs();
-    void setFrameSessionMaxDurationMs(qint32 frame_session_max_duration_ms);
 
     qint32 getAngel61Tunnel();
     void setAngel61Tunnel(qint32 angel61_tunnel);
@@ -268,8 +268,8 @@ public:
     QString* getAngel61TunnelGroups();
     void setAngel61TunnelGroups(QString* angel61_tunnel_groups);
 
-    qint32 getAngel61TunnelMTU();
-    void setAngel61TunnelMTU(qint32 angel61_tunnel_mtu);
+    qint32 getAngel61TunnelMtu();
+    void setAngel61TunnelMtu(qint32 angel61_tunnel_mtu);
 
     QString* getFeedbackAudioDeviceName();
     void setFeedbackAudioDeviceName(QString* feedback_audio_device_name);
@@ -283,8 +283,8 @@ public:
     qint32 getSpectrumAudio();
     void setSpectrumAudio(qint32 spectrum_audio);
 
-    qint32 getM17CAN();
-    void setM17CAN(qint32 m17_can);
+    qint32 getFrameSessionMaxDurationMs();
+    void setFrameSessionMaxDurationMs(qint32 frame_session_max_duration_ms);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -515,6 +515,9 @@ private:
     QString* m17_destination;
     bool m_m17_destination_isSet;
 
+    qint32 m17_can;
+    bool m_m17_can_isSet;
+
     QString* m17_message;
     bool m_m17_message_isSet;
 
@@ -523,9 +526,6 @@ private:
 
     QString* audio_file_name;
     bool m_audio_file_name_isSet;
-
-    qint32 frame_session_max_duration_ms;
-    bool m_frame_session_max_duration_ms_isSet;
 
     qint32 angel61_tunnel;
     bool m_angel61_tunnel_isSet;
@@ -563,8 +563,8 @@ private:
     qint32 spectrum_audio;
     bool m_spectrum_audio_isSet;
 
-    qint32 m17_can;
-    bool m_m17_can_isSet;
+    qint32 frame_session_max_duration_ms;
+    bool m_frame_session_max_duration_ms_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
