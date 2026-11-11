@@ -180,6 +180,25 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="realSpectrum">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Real signal (audio): the spectrum shows the positive frequencies only, 0 to half the sample rate, instead of the mirrored complex spectrum</string>
+        </property>
+        <property name="text">
+         <string>Re</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="sinkSampleRateText">
         <property name="toolTip">
          <string>Analyzer (sink) sample rate</string>
