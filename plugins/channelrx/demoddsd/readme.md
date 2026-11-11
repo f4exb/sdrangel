@@ -32,7 +32,7 @@ The following table shows strong a signal each protocol needs for the voice to s
 | Angel61 NB, tier 0 | QPSK 4800 sym/s | V1 2.25 kbit/s | 39.1 | 39.7 | Es/N0 2.3 dB |
 | Angel61 WB, tier 0 | QPSK 9600 sym/s | V1 4.5 kbit/s | 41.0 | 41.7 | Es/N0 1.2 dB |
 | dPMR | 4FSK 2400 sym/s | AMBE+2 2.45 kbit/s | 42.8 | 44.6 | C/N 2.4 dB |
-| NXDN48 * | 4FSK 2400 sym/s | AMBE+2 2.45 kbit/s | 44.3 | 44.6 | C/N 3.9 dB |
+| NXDN48 | 4FSK 2400 sym/s | AMBE+2 2.45 kbit/s | 44.3 | 44.6 | C/N 3.9 dB |
 | D-STAR | GMSK 4800 bit/s | AMBE 2.4 kbit/s | 44.6 | 45.1 | C/N 4.3 dB |
 | M17 | 4FSK 4800 sym/s | Codec2 3.2 kbit/s | 44.8 | 45.7 | C/N 4.5 dB |
 | NXDN96 | 4FSK 4800 sym/s | AMBE+2 2.45 kbit/s | 46.0 | 46.1 | C/N 5.6 dB |
@@ -83,7 +83,11 @@ The receiver's DC (the DC spike of an SDR tuned to the channel) is removed befor
 
 Total power in dB relative to a +/- 1.0 amplitude signal generated in the pass band.
 
-<h4>A.4: Channel power bar graph</h4>
+<h4>A.4: Level meter in dB</h4>
+
+  - top bar (green): average value
+  - bottom bar (blue green): instantaneous peak value
+  - tip vertical bar (bright green): peak hold value
 
 <h4>A.5: Activate status text log</h4>
 
@@ -148,7 +152,7 @@ Talker Alias supports the ETSI 7-bit, ISO-8859-1, UTF-8 and UTF-16BE formats. GP
 
 <h4>A.7: Vocoder</h4>
 
-Selects what decodes the received AMBE and IMBE frames: `mbevocoder` in software, or a hardware device through an AMBE feature (`AMBE F:0` and so on). The list is updated when features are added or removed. It shows `none` in place of `mbevocoder` when that is not built in, and `(absent)` after a selected feature that is not there now: decoding is then in software and goes back to the feature when it returns. M17 and Angel61 do not use this setting. Web API: `connectAMBE` and `ambeFeatureIndex`.
+Selects what decodes the received AMBE and IMBE frames: `mbevocoder` in software, or a hardware device through an AMBE feature (`AMBE F:0` and so on). The list is updated when features are added or removed. It shows `none` in place of `mbevocoder` when that is not built in, and `(absent)` after a selected feature that is not there now: decoding is then in software and goes back to the feature when it returns. M17 and Angel61 do not use this setting.
 
 <h4>A.8 to A.10: Two slot TDMA handling</h4>
 
@@ -275,26 +279,6 @@ and the symbol is the one the station sent in its slot.
 A call to a talkgroup shows as `G4ABC > TG 9`. The **TG** field beside the Files setting is a group list, as a DMR radio's RX group list: talkgroups separated by commas (`9, 23`).
 A call to a talkgroup not in it is shown and logged but not played; calls to `CQ` and to callsigns are always played, and with the field empty every call is. Its Web API setting is `angel61Groups`.
 
-A file transfer is received into the directory of the Files setting, when one is set: the offer, the file and the answers are logged as events, the name is sanitised (no path separators, no leading dot),
-a file larger than the limit is refused before a block is stored, and nothing is opened or executed. The answer this station owes the transmitter - the blocks that did not arrive,
-or that the file is complete - is sent to the DSE Modulators of this instance through the `angel61` pipe, and the modulator transmits it to the file's sender, keying up for it by itself.
-A file sent to `CQ` or a talkgroup is received in the same way but never answered.
-
-With **Confirm** checked (Web API `angel61FileConfirm`), every offer waits for the operator: the offer's event says `AWAITING CONFIRMATION`,
-**Accept** and **Refuse** light up (their tooltips name the file, its size and its sender), and until one is pressed the blocks are held in memory only - no answer goes back,
-nothing is saved, and the sender, hearing nothing, offers again. Accept sends the answer that was held back (the missing blocks, or complete) and keeps the file;
-Refuse tells the sender it was refused by the operator. The Web API reports the offer waiting as `angel61FilePending` and takes the decision as the channel action `DSDDemodActions` `{"angel61File": "accept"}` (or `"reject"`).
-
-A transfer that does not finish is kept for a day in the `.angel61-partial` directory under the Files directory (one `.a61p` file each, at most 16),
-and a later offer of the same file - from the same station, with the same size and CRC-32 - takes what arrived, even with a new transfer id,
-another block size or after SDRangel has been restarted: the offer's event says `RESUMED:n`, and only the rest is asked for.
-
-IP datagrams received over the radio are counted on the IP tunnel tab (F). DSDDemod is the receive side; the DSE Modulator owns the host tunnel and displays its transmit and receive totals.
-
-The rate request records are also passed to any DSE Modulator in the instance, as `ANGEL61 source destination requested send profile` on the `angel61` pipe,
-which uses them for its `Auto` rate: it takes the record of its own destination callsign, and only when that station was heard addressing it
-(see the [DSE Modulator](../../channeltx/moddse/readme.md) 12e).
-
 <h4>A.15: Text messages / DTMF</h4>
 
 Shows received text messages and DTMF sequences. Text messages are formatted as: `protocol source > destination: text`: 
@@ -322,14 +306,15 @@ A key of an Angel61 sequence whose slots were all lost shows as `?`. The last DT
 
 While searching, this plots every 48 kHz discriminator sample against the preceding sample, using the DMR nominal outer level of 1944 Hz as its scale.
 This keeps the display active without a lock and normally shows discriminator noise or the transition paths of a signal.
+
 Once locked, it changes to the matched filter output at the symbol instants: the horizontal axis is the current symbol and the vertical axis the previous one, both in units of the nominal outer level of the detected protocol.
 The grid crosses mark the four nominal levels +3, +1, -1 and -3 of the 4FSK protocols; D-Star uses only the outer two. A well received 4FSK signal is 16 tight clusters on the grid crossings, and a D-Star signal is four clusters on the outer corners.
-D-Star is GMSK: its Gaussian pulse spreads into the symbols either side, so the filter output at a symbol depends on its neighbours as well as on the symbol (the full level when both neighbours are the same, about two thirds when one differs and a third when both do).
-The display takes that out for D-Star: each point is shown two symbols late, once the decisions on either side of it are made, with their part subtracted and the rest scaled to the full level.
+
 A point the decoder got wrong, or one next to such a point, is then shown out of place, so scattered points between the corners are errors or noise rather than the interference of the pulse shape. Nothing is shown for a D-Star symbol received without a carrier.
+
 While an Angel61 transmission has the channel, the display is its equalised constellation: the payload symbols (HF: the OFDM data cells) of the frames it confirms, I against Q at unit mean power: four clusters for QPSK, sixteen for 16-QAM.
 
-The controls B.8 to B.10 set the persistence of the display.
+The controls B.2 to B.4 set the persistence of the display.
 
 <h4>B.2: Trace length</h4>
 
@@ -350,8 +335,9 @@ This controls the persistence decay of the points displayed on B.1. The trace ha
 
 <h4>C.1: Protocol</h4>
 
-Selects the protocols searched for: `Auto` (the default) searches for all of them and locks to the first synchronisation found; a single protocol (DMR, D-STAR, YSF, NXDN48, NXDN96, dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB) limits the search to its patterns, which is useful on a busy channel or when the automatic detection is misled by a signal of another kind. Angel61 NB and WB are searched on the I/Q signal alongside the FM protocols in `Auto`, by one receiver per profile: the first to confirm a frame (its CRC-12) holds the channel until its transmission ends, releasing an FM lock, and the FM decoders pause meanwhile; only its voice is played. Selecting `Angel61 NB` or `Angel61 WB` gives the I/Q signal to that profile's receiver alone, with no FM search. `Angel61 HF-NB` and `Angel61 HF-WB` are Angel61's HF profiles (OFDM, 2.5 and 5.5 kHz wide): they are never searched in `Auto`, and when one is selected the I/Q signal goes to its receiver alone.
-Use a fixed gain on the receiving device for them: a hardware AGC steps its gain inside the OFDM symbols. Its status line shows the routing, the frame type, the block error rate, the mean SNR in 3 kHz and the rate request tiers, and its events are those of Angel61 above with the profile added (`ANGEL61 EVT:START PROFILE:HF-NB`, `EVT:END ... VOICE:8 PROFILE:HF-NB`). Text, APRS messages, positions and the rate request records (profile `HF-NB` or `HF-WB`) are received; file transfers and IP tunnelling (their data groups' message fields, 142 to 912 bytes a group) are received as in Angel61 NB and WB; voice is played through the V1 decoder (vocoscodec, a frame's packets decoded together at 24 kHz, lost frames concealed, the decoder's last 60 ms at the end), or shown as unavailable when the library or its models are missing.
+Selects the protocols searched for: `Auto` searches for all of them and locks to the first synchronisation found; a single protocol (DMR, D-STAR, YSF, NXDN48, NXDN96, dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB) limits the search to that protocol only, which is useful on a busy channel or when the automatic detection is misled by a signal of another kind.
+
+`Angel61 HF-NB` and `Angel61 HF-WB` are not searched for in `Auto`, and must be selected manually. Use a fixed gain on the receiving device for these, as a hardware AGC can adjust its gain inside the OFDM symbols.
 
 <h4>C.2: Protocol and synchronisation pattern</h4>
 
