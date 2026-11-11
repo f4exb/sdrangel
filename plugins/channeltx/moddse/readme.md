@@ -75,7 +75,7 @@ When on, sends this station's position (from Preferences > My position, or the G
 
   - D-STAR as a D-PRS sentence in the slow data (16),
   - DMR as a GPS Info embedded LC (17),
-  - Angel61 in its position slot (22).
+  - Angel61 in its position slot (23).
 
 The button is hidden for protocols that do not support it (YSF, NXDN, dPMR, P25 and M17).
 
@@ -276,7 +276,7 @@ The fields of the tab (the unlabelled ones show what they are for when empty):
 The receiving side is a **DSD Demodulator** in the same instance, with Angel61
 in its protocol list; it passes what it hears to this modulator over the
 `angel61` pipe, the same one the rate requests and file transfer answers use.
-Pick which demodulator with the **Rx** selector (22) if there is more than one.
+Pick which demodulator with the **Rx** selector (23) if there is more than one.
 The demodulator's IP tunnel tab shows what it heard beside what this modulator did with it.
 
 To join two LANs, give each station a different address, enable IP forwarding

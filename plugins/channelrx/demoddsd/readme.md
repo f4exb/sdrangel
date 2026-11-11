@@ -21,6 +21,30 @@ The protocol is detected automatically from the synchronisation patterns found i
 
 &#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required for the demodulator/decoder to work correctly.
 
+<h3>Sensitivity</h3>
+
+How much signal each mode needs before its voice is clean, measured over the air from the DSE Modulator to this demodulator, and in the test harness with white noise. Every mode is on one scale, C/N0 in dB-Hz (the signal power over the noise in one hertz), so modes of different bandwidths can be compared; lower is better. For the FM protocols clean is 1% raw bit error rate, where the vocoder's codes still correct what arrives; for Angel61 it is 1% of frames lost, every frame checked by its CRC.
+
+| Mode | Modulation | Voice | Clean, on air (dB-Hz) | Clean, harness (dB-Hz) | On air, native |
+|---|---|---|---:|---:|---|
+| Angel61 HF-NB, tier 0 | OFDM, 2.5 kHz | V1 1.5 kbit/s | 37.6 | 38.5 | SNR3k 2.8 dB |
+| Angel61 HF-WB, tier 0 | OFDM, 5.5 kHz | V1 2.25 kbit/s | 38.7 | 38.8 | SNR3k 3.9 dB |
+| Angel61 NB, tier 0 | QPSK 4800 sym/s | V1 2.25 kbit/s | 39.1 | 39.7 | Es/N0 2.3 dB |
+| Angel61 WB, tier 0 | QPSK 9600 sym/s | V1 4.5 kbit/s | 41.0 | 41.7 | Es/N0 1.2 dB |
+| dPMR | 4FSK 2400 sym/s | AMBE+2 2.45 kbit/s | 42.8 | 44.6 | C/N 2.4 dB |
+| NXDN48 * | 4FSK 2400 sym/s | AMBE+2 2.45 kbit/s | 44.3 | 44.6 | C/N 3.9 dB |
+| D-STAR | GMSK 4800 bit/s | AMBE 2.4 kbit/s | 44.6 | 45.1 | C/N 4.3 dB |
+| M17 | 4FSK 4800 sym/s | Codec2 3.2 kbit/s | 44.8 | 45.7 | C/N 4.5 dB |
+| NXDN96 | 4FSK 4800 sym/s | AMBE+2 2.45 kbit/s | 46.0 | 46.1 | C/N 5.6 dB |
+| DMR | 4FSK 4800 sym/s, TDMA | AMBE+2 2.45 kbit/s | 46.4 | 46.6 | C/N 6.1 dB |
+| YSF (V/D type 2) | 4FSK 4800 sym/s | AMBE+2 2.45 kbit/s | 46.5 | 46.5 | C/N 6.2 dB |
+| P25 Phase 1 | C4FM 4800 sym/s | IMBE 4.4 kbit/s | 47.0 | 46.5 | C/N 6.7 dB |
+| Angel61 NB, tier 3 | 16-QAM 4800 sym/s | V1 9.0 kbit/s | 47.5 | 47.6 | Es/N0 10.7 dB |
+| P25 Phase 2 | 6000 sym/s, TDMA | AMBE+2 2.45 kbit/s | 47.7 | 47.7 | C/N 7.3 dB |
+| Angel61 WB, tier 3 | 16-QAM 9600 sym/s | Opus 18.4 kbit/s | 48.7 | 48.8 | Es/N0 8.9 dB |
+
+The native figure is each mode's own measure: C/N for the FM protocols, in the 10.8 kHz noise bandwidth of the 12.5 kHz reference filter (C/N0 = C/N + 40.4 dB); Es/N0 for Angel61 NB and WB (C/N0 = Es/N0 + 36.8 dB and + 39.8 dB); SNR3k for Angel61 HF (C/N0 = SNR3k + 34.8 dB). An FM protocol's frames already arrive 1 to 5 dB below its clean figure (fewer than 10% lost), but carry more errors than its codes correct, so the voice is degraded there.
+
 <h2>AMBE Voice decoding</h2>
 
 For protocols using the AMBE vocoder (which is all apart from M17 and Angel61), there are two ways of turning the received voice frames into audio:
