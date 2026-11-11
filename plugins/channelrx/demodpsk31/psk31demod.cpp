@@ -366,8 +366,8 @@ int PSK31Demod::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setPSK31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
-    response.getPSK31DemodSettings()->init();
+    response.setPsk31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
+    response.getPsk31DemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -411,8 +411,8 @@ int PSK31Demod::webapiReportGet(
             QString& errorMessage)
 {
     (void) errorMessage;
-    response.setPSK31DemodReport(new SWGSDRangel::SWGPSK31DemodReport());
-    response.getPSK31DemodReport()->init();
+    response.setPsk31DemodReport(new SWGSDRangel::SWGPSK31DemodReport());
+    response.getPsk31DemodReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
@@ -423,138 +423,138 @@ void PSK31Demod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getPSK31DemodSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getPsk31DemodSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = PSK31DemodSettings::validateRFBandwidth(
-            response.getPSK31DemodSettings()->getRfBandwidth());
+            response.getPsk31DemodSettings()->getRfBandwidth());
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getPSK31DemodSettings()->getUdpEnabled();
+        settings.m_udpEnabled = response.getPsk31DemodSettings()->getUdpEnabled();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getPSK31DemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getPsk31DemodSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getPSK31DemodSettings()->getUdpPort();
+        settings.m_udpPort = response.getPsk31DemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getPSK31DemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getPsk31DemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getPSK31DemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getPsk31DemodSettings()->getLogEnabled();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getPSK31DemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getPsk31DemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getPSK31DemodSettings()->getTitle();
+        settings.m_title = *response.getPsk31DemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getPSK31DemodSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getPsk31DemodSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getPSK31DemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getPsk31DemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getPSK31DemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getPsk31DemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getPSK31DemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getPsk31DemodSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getPSK31DemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getPsk31DemodSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getPSK31DemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getPsk31DemodSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
-        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getPSK31DemodSettings()->getScopeConfig());
+        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getPsk31DemodSettings()->getScopeConfig());
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getPSK31DemodSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getPsk31DemodSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getPSK31DemodSettings()->getRollupState());
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getPsk31DemodSettings()->getRollupState());
     }
 }
 
 void PSK31Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PSK31DemodSettings& settings)
 {
-    response.getPSK31DemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getPSK31DemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getPSK31DemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    if (response.getPSK31DemodSettings()->getUdpAddress()) {
-        *response.getPSK31DemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    response.getPsk31DemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getPsk31DemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getPsk31DemodSettings()->setUdpEnabled(settings.m_udpEnabled);
+    if (response.getPsk31DemodSettings()->getUdpAddress()) {
+        *response.getPsk31DemodSettings()->getUdpAddress() = settings.m_udpAddress;
     } else {
-        response.getPSK31DemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+        response.getPsk31DemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
-    response.getPSK31DemodSettings()->setUdpPort(settings.m_udpPort);
-    if (response.getPSK31DemodSettings()->getLogFilename()) {
-        *response.getPSK31DemodSettings()->getLogFilename() = settings.m_logFilename;
+    response.getPsk31DemodSettings()->setUdpPort(settings.m_udpPort);
+    if (response.getPsk31DemodSettings()->getLogFilename()) {
+        *response.getPsk31DemodSettings()->getLogFilename() = settings.m_logFilename;
     } else {
-        response.getPSK31DemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+        response.getPsk31DemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     }
-    response.getPSK31DemodSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getPsk31DemodSettings()->setLogEnabled(settings.m_logEnabled);
 
-    response.getPSK31DemodSettings()->setRgbColor(settings.m_rgbColor);
-    if (response.getPSK31DemodSettings()->getTitle()) {
-        *response.getPSK31DemodSettings()->getTitle() = settings.m_title;
+    response.getPsk31DemodSettings()->setRgbColor(settings.m_rgbColor);
+    if (response.getPsk31DemodSettings()->getTitle()) {
+        *response.getPsk31DemodSettings()->getTitle() = settings.m_title;
     } else {
-        response.getPSK31DemodSettings()->setTitle(new QString(settings.m_title));
-    }
-
-    response.getPSK31DemodSettings()->setStreamIndex(settings.m_streamIndex);
-    response.getPSK31DemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
-
-    if (response.getPSK31DemodSettings()->getReverseApiAddress()) {
-        *response.getPSK31DemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
-    } else {
-        response.getPSK31DemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getPsk31DemodSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getPSK31DemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getPSK31DemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getPSK31DemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getPsk31DemodSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getPsk31DemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getPsk31DemodSettings()->getReverseApiAddress()) {
+        *response.getPsk31DemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getPsk31DemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getPsk31DemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getPsk31DemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getPsk31DemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_scopeGUI)
     {
-        if (response.getPSK31DemodSettings()->getScopeConfig())
+        if (response.getPsk31DemodSettings()->getScopeConfig())
         {
-            settings.m_scopeGUI->formatTo(response.getPSK31DemodSettings()->getScopeConfig());
+            settings.m_scopeGUI->formatTo(response.getPsk31DemodSettings()->getScopeConfig());
         }
         else
         {
-            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            auto *swgGLScope = new SWGSDRangel::SWGGLScope();
             settings.m_scopeGUI->formatTo(swgGLScope);
-            response.getPSK31DemodSettings()->setScopeConfig(swgGLScope);
+            response.getPsk31DemodSettings()->setScopeConfig(swgGLScope);
         }
     }
     if (settings.m_channelMarker)
     {
-        if (response.getPSK31DemodSettings()->getChannelMarker())
+        if (response.getPsk31DemodSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.getPSK31DemodSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getPsk31DemodSettings()->getChannelMarker());
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.getPSK31DemodSettings()->setChannelMarker(swgChannelMarker);
+            response.getPsk31DemodSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.getPSK31DemodSettings()->getRollupState())
+        if (response.getPsk31DemodSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getPSK31DemodSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getPsk31DemodSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getPSK31DemodSettings()->setRollupState(swgRollupState);
+            response.getPsk31DemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -565,21 +565,21 @@ void PSK31Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getPSK31DemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getPSK31DemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    response.getPSK31DemodReport()->setLocked(isLocked() ? 1 : 0);
+    response.getPsk31DemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getPsk31DemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    response.getPsk31DemodReport()->setLocked(isLocked() ? 1 : 0);
 
     // Only meaningful when a signal is being received
     if (isLocked())
     {
-        response.getPSK31DemodReport()->setFrequencyOffset(getFrequencyOffset());
-        response.getPSK31DemodReport()->setSnr(getSNR());
+        response.getPsk31DemodReport()->setFrequencyOffset(getFrequencyOffset());
+        response.getPsk31DemodReport()->setSnr(getSNR());
     }
 }
 
 void PSK31Demod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const PSK31DemodSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -617,8 +617,8 @@ void PSK31Demod::webapiFormatChannelSettings(
     } else {
         swgChannelSettings->setChannelType(new QString("PSK31Demod"));
     }
-    swgChannelSettings->setPSK31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
-    SWGSDRangel::SWGPSK31DemodSettings *swgPSK31DemodSettings = swgChannelSettings->getPSK31DemodSettings();
+    swgChannelSettings->setPsk31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
+    SWGSDRangel::SWGPSK31DemodSettings *swgPSK31DemodSettings = swgChannelSettings->getPsk31DemodSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 

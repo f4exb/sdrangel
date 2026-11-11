@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 /*
  * SWGIEEE_802_15_4_DemodReport.h
  *

@@ -111,11 +111,11 @@ public:
     float getFeedbackVolumeFactor();
     void setFeedbackVolumeFactor(float feedback_volume_factor);
 
-    qint32 getFeedbackAudioEnable();
-    void setFeedbackAudioEnable(qint32 feedback_audio_enable);
-
     QString* getFileName();
     void setFileName(QString* file_name);
+
+    qint32 getFeedbackAudioEnable();
+    void setFeedbackAudioEnable(qint32 feedback_audio_enable);
 
     qint32 getModAfInput();
     void setModAfInput(qint32 mod_af_input);
@@ -171,20 +171,28 @@ private:
 
     qint32 audio_stereo;
     bool m_audio_stereo_isSet;
+
     qint32 pre_emphasis;
     bool m_pre_emphasis_isSet;
+
     float pilot_level;
     bool m_pilot_level_isSet;
+
     qint32 rds_active;
     bool m_rds_active_isSet;
+
     float rds_level;
     bool m_rds_level_isSet;
+
     qint32 rds_pi;
     bool m_rds_pi_isSet;
+
     qint32 rds_pty;
     bool m_rds_pty_isSet;
+
     QString* rds_ps;
     bool m_rds_ps_isSet;
+
     QString* rds_radio_text;
     bool m_rds_radio_text_isSet;
 
@@ -209,11 +217,11 @@ private:
     float feedback_volume_factor;
     bool m_feedback_volume_factor_isSet;
 
-    qint32 feedback_audio_enable;
-    bool m_feedback_audio_enable_isSet;
-
     QString* file_name;
     bool m_file_name_isSet;
+
+    qint32 feedback_audio_enable;
+    bool m_feedback_audio_enable_isSet;
 
     qint32 mod_af_input;
     bool m_mod_af_input_isSet;

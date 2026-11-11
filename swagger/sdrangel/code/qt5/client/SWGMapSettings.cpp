@@ -280,6 +280,9 @@ SWGMapSettings::cleanup() {
 
 
 
+
+
+
     if(nasa_global_imagery_identifier != nullptr) { 
         delete nasa_global_imagery_identifier;
     }
@@ -347,7 +350,7 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sun_light_enabled, pJson["sunLightEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "float", "");
-
+    
     ::SWGSDRangel::setValue(&distant_light_intensity, pJson["distantLightIntensity"], "float", "");
     
     ::SWGSDRangel::setValue(&low_detail_models, pJson["lowDetailModels"], "qint32", "");
@@ -692,36 +695,6 @@ SWGMapSettings::setTerrain(QString* terrain) {
     this->m_terrain_isSet = true;
 }
 
-float
-SWGMapSettings::getMapCenterLatitude() {
-    return map_center_latitude;
-}
-void
-SWGMapSettings::setMapCenterLatitude(float map_center_latitude) {
-    this->map_center_latitude = map_center_latitude;
-    this->m_map_center_latitude_isSet = true;
-}
-
-float
-SWGMapSettings::getMapCenterLongitude() {
-    return map_center_longitude;
-}
-void
-SWGMapSettings::setMapCenterLongitude(float map_center_longitude) {
-    this->map_center_longitude = map_center_longitude;
-    this->m_map_center_longitude_isSet = true;
-}
-
-float
-SWGMapSettings::getMapZoomLevel() {
-    return map_zoom_level;
-}
-void
-SWGMapSettings::setMapZoomLevel(float map_zoom_level) {
-    this->map_zoom_level = map_zoom_level;
-    this->m_map_zoom_level_isSet = true;
-}
-
 QString*
 SWGMapSettings::getBuildings() {
     return buildings;
@@ -1010,6 +983,36 @@ void
 SWGMapSettings::setDefaultImagery(QString* default_imagery) {
     this->default_imagery = default_imagery;
     this->m_default_imagery_isSet = true;
+}
+
+float
+SWGMapSettings::getMapCenterLatitude() {
+    return map_center_latitude;
+}
+void
+SWGMapSettings::setMapCenterLatitude(float map_center_latitude) {
+    this->map_center_latitude = map_center_latitude;
+    this->m_map_center_latitude_isSet = true;
+}
+
+float
+SWGMapSettings::getMapCenterLongitude() {
+    return map_center_longitude;
+}
+void
+SWGMapSettings::setMapCenterLongitude(float map_center_longitude) {
+    this->map_center_longitude = map_center_longitude;
+    this->m_map_center_longitude_isSet = true;
+}
+
+float
+SWGMapSettings::getMapZoomLevel() {
+    return map_zoom_level;
+}
+void
+SWGMapSettings::setMapZoomLevel(float map_zoom_level) {
+    this->map_zoom_level = map_zoom_level;
+    this->m_map_zoom_level_isSet = true;
 }
 
 QString*

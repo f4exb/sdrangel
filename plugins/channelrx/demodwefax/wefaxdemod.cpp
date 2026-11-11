@@ -474,7 +474,7 @@ int WefaxDemod::webapiActionsPost(
     SWGSDRangel::SWGChannelActions& query,
     QString& errorMessage)
 {
-    const auto *actions = query.getWefaxDemodActions();
+    auto *actions = query.getWefaxDemodActions();
     if (!actions)
     {
         errorMessage = "Missing WefaxDemodActions in query";
@@ -519,7 +519,7 @@ void WefaxDemod::webapiUpdateChannelSettings(
     const QStringList& keys,
     SWGSDRangel::SWGChannelSettings& response)
 {
-    const auto *api = response.getWefaxDemodSettings();
+    auto *api = response.getWefaxDemodSettings();
     if (!api) {
         return;
     }

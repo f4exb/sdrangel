@@ -29,7 +29,6 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGAPTDemodSettings.h"
-#include "SWGWefaxDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
@@ -41,13 +40,12 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
-#include "SWGDVBDemodSettings.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Settings.h"
 #include "SWGDRMDemodSettings.h"
 #include "SWGDSCDemodSettings.h"
-#include "SWGSELCALDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDVBDemodSettings.h"
 #include "SWGDroneIDDemodSettings.h"
 #include "SWGDSEModSettings.h"
 #include "SWGEndOfTrainDemodSettings.h"
@@ -59,8 +57,8 @@
 #include "SWGFreqScannerSettings.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGHeatMapSettings.h"
-#include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGIEEE_802_15_4_DemodSettings.h"
+#include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGILSDemodSettings.h"
 #include "SWGInmarsatDemodSettings.h"
 #include "SWGInterferometerSettings.h"
@@ -76,12 +74,12 @@
 #include "SWGNFMModSettings.h"
 #include "SWGNavtexDemodSettings.h"
 #include "SWGNoiseFigureSettings.h"
+#include "SWGPSK31DemodSettings.h"
 #include "SWGPSK31ModSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
 #include "SWGRTTYDemodSettings.h"
-#include "SWGPSK31DemodSettings.h"
 #include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
@@ -89,6 +87,7 @@
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
 #include "SWGRemoteTCPSinkSettings.h"
+#include "SWGSELCALDemodSettings.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGSigMFFileSinkSettings.h"
@@ -98,6 +97,7 @@
 #include "SWGWDSPRxSettings.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModSettings.h"
+#include "SWGWefaxDemodSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -200,9 +200,7 @@ public:
     void setDoa2Settings(SWGDOA2Settings* doa2_settings);
 
     SWGDSCDemodSettings* getDscDemodSettings();
-    SWGSELCALDemodSettings* getSelcalDemodSettings();
     void setDscDemodSettings(SWGDSCDemodSettings* dsc_demod_settings);
-    void setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -249,11 +247,11 @@ public:
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
 
-    SWGIEEE_802_15_4_ModSettings* getIeee802154ModSettings();
-    void setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings);
-
     SWGIEEE_802_15_4_DemodSettings* getIeee802154DemodSettings();
     void setIeee802154DemodSettings(SWGIEEE_802_15_4_DemodSettings* ieee_802_15_4_demod_settings);
+
+    SWGIEEE_802_15_4_ModSettings* getIeee802154ModSettings();
+    void setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings);
 
     SWGM17DemodSettings* getM17DemodSettings();
     void setM17DemodSettings(SWGM17DemodSettings* m17_demod_settings);
@@ -303,6 +301,9 @@ public:
     SWGPSK31ModSettings* getPsk31ModSettings();
     void setPsk31ModSettings(SWGPSK31ModSettings* psk31_mod_settings);
 
+    SWGPSK31DemodSettings* getPsk31DemodSettings();
+    void setPsk31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings);
+
     SWGRadioAstronomySettings* getRadioAstronomySettings();
     void setRadioAstronomySettings(SWGRadioAstronomySettings* radio_astronomy_settings);
 
@@ -323,9 +324,6 @@ public:
 
     SWGRTTYDemodSettings* getRttyDemodSettings();
     void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
-
-    SWGPSK31DemodSettings* getPSK31DemodSettings();
-    void setPSK31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings);
 
     SWGRTTYModSettings* getRttyModSettings();
     void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
@@ -356,6 +354,9 @@ public:
 
     SWGWFMModSettings* getWfmModSettings();
     void setWfmModSettings(SWGWFMModSettings* wfm_mod_settings);
+
+    SWGSELCALDemodSettings* getSelcalDemodSettings();
+    void setSelcalDemodSettings(SWGSELCALDemodSettings* selcal_demod_settings);
 
 
     virtual bool isSet() override;
@@ -443,9 +444,7 @@ private:
     bool m_doa2_settings_isSet;
 
     SWGDSCDemodSettings* dsc_demod_settings;
-    SWGSELCALDemodSettings* selcal_demod_settings;
     bool m_dsc_demod_settings_isSet;
-    bool m_selcal_demod_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
@@ -492,11 +491,11 @@ private:
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
 
-    SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings;
-    bool m_ieee_802_15_4_mod_settings_isSet;
-
     SWGIEEE_802_15_4_DemodSettings* ieee_802_15_4_demod_settings;
     bool m_ieee_802_15_4_demod_settings_isSet;
+
+    SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings;
+    bool m_ieee_802_15_4_mod_settings_isSet;
 
     SWGM17DemodSettings* m17_demod_settings;
     bool m_m17_demod_settings_isSet;
@@ -546,6 +545,9 @@ private:
     SWGPSK31ModSettings* psk31_mod_settings;
     bool m_psk31_mod_settings_isSet;
 
+    SWGPSK31DemodSettings* psk31_demod_settings;
+    bool m_psk31_demod_settings_isSet;
+
     SWGRadioAstronomySettings* radio_astronomy_settings;
     bool m_radio_astronomy_settings_isSet;
 
@@ -566,9 +568,6 @@ private:
 
     SWGRTTYDemodSettings* rtty_demod_settings;
     bool m_rtty_demod_settings_isSet;
-
-    SWGPSK31DemodSettings* psk31_demod_settings;
-    bool m_psk31_demod_settings_isSet;
 
     SWGRTTYModSettings* rtty_mod_settings;
     bool m_rtty_mod_settings_isSet;
@@ -599,6 +598,9 @@ private:
 
     SWGWFMModSettings* wfm_mod_settings;
     bool m_wfm_mod_settings_isSet;
+
+    SWGSELCALDemodSettings* selcal_demod_settings;
+    bool m_selcal_demod_settings_isSet;
 
 };
 

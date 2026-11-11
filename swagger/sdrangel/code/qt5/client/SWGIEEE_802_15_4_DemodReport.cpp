@@ -11,7 +11,6 @@
  */
 
 
-
 #include "SWGIEEE_802_15_4_DemodReport.h"
 
 #include "SWGHelpers.h"

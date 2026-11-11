@@ -34,20 +34,20 @@ SWGDVBDemodActions::SWGDVBDemodActions() {
     m_record_isSet = false;
     record_event = 0;
     m_record_event_isSet = false;
+    record_series = 0;
+    m_record_series_isSet = false;
     service_id = 0;
     m_service_id_isSet = false;
     event_id = 0;
     m_event_id_isSet = false;
+    network_id = 0;
+    m_network_id_isSet = false;
     scan = 0;
     m_scan_isSet = false;
     scan_from = 0L;
     m_scan_from_isSet = false;
     scan_to = 0L;
     m_scan_to_isSet = false;
-    record_series = 0;
-    m_record_series_isSet = false;
-    network_id = 0;
-    m_network_id_isSet = false;
 }
 
 SWGDVBDemodActions::~SWGDVBDemodActions() {
@@ -62,24 +62,28 @@ SWGDVBDemodActions::init() {
     m_record_isSet = false;
     record_event = 0;
     m_record_event_isSet = false;
+    record_series = 0;
+    m_record_series_isSet = false;
     service_id = 0;
     m_service_id_isSet = false;
     event_id = 0;
     m_event_id_isSet = false;
+    network_id = 0;
+    m_network_id_isSet = false;
     scan = 0;
     m_scan_isSet = false;
     scan_from = 0L;
     m_scan_from_isSet = false;
     scan_to = 0L;
     m_scan_to_isSet = false;
-    record_series = 0;
-    m_record_series_isSet = false;
-    network_id = 0;
-    m_network_id_isSet = false;
 }
 
 void
 SWGDVBDemodActions::cleanup() {
+
+
+
+
 
 
 
@@ -105,18 +109,19 @@ SWGDVBDemodActions::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&record_event, pJson["recordEvent"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&record_series, pJson["recordSeries"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&service_id, pJson["serviceId"], "qint32", "");
     
     ::SWGSDRangel::setValue(&event_id, pJson["eventId"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&network_id, pJson["networkId"], "qint32", "");
     
     ::SWGSDRangel::setValue(&scan, pJson["scan"], "qint32", "");
     
     ::SWGSDRangel::setValue(&scan_from, pJson["scanFrom"], "qint64", "");
     
     ::SWGSDRangel::setValue(&scan_to, pJson["scanTo"], "qint64", "");
-    ::SWGSDRangel::setValue(&record_series, pJson["recordSeries"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&network_id, pJson["networkId"], "qint32", "");
     
 }
 
@@ -143,11 +148,17 @@ SWGDVBDemodActions::asJsonObject() {
     if(m_record_event_isSet){
         obj->insert("recordEvent", QJsonValue(record_event));
     }
+    if(m_record_series_isSet){
+        obj->insert("recordSeries", QJsonValue(record_series));
+    }
     if(m_service_id_isSet){
         obj->insert("serviceId", QJsonValue(service_id));
     }
     if(m_event_id_isSet){
         obj->insert("eventId", QJsonValue(event_id));
+    }
+    if(m_network_id_isSet){
+        obj->insert("networkId", QJsonValue(network_id));
     }
     if(m_scan_isSet){
         obj->insert("scan", QJsonValue(scan));
@@ -157,12 +168,6 @@ SWGDVBDemodActions::asJsonObject() {
     }
     if(m_scan_to_isSet){
         obj->insert("scanTo", QJsonValue(scan_to));
-    }
-    if(m_record_series_isSet){
-        obj->insert("recordSeries", QJsonValue(record_series));
-    }
-    if(m_network_id_isSet){
-        obj->insert("networkId", QJsonValue(network_id));
     }
 
     return obj;
@@ -199,6 +204,16 @@ SWGDVBDemodActions::setRecordEvent(qint32 record_event) {
 }
 
 qint32
+SWGDVBDemodActions::getRecordSeries() {
+    return record_series;
+}
+void
+SWGDVBDemodActions::setRecordSeries(qint32 record_series) {
+    this->record_series = record_series;
+    this->m_record_series_isSet = true;
+}
+
+qint32
 SWGDVBDemodActions::getServiceId() {
     return service_id;
 }
@@ -216,6 +231,16 @@ void
 SWGDVBDemodActions::setEventId(qint32 event_id) {
     this->event_id = event_id;
     this->m_event_id_isSet = true;
+}
+
+qint32
+SWGDVBDemodActions::getNetworkId() {
+    return network_id;
+}
+void
+SWGDVBDemodActions::setNetworkId(qint32 network_id) {
+    this->network_id = network_id;
+    this->m_network_id_isSet = true;
 }
 
 qint32
@@ -248,26 +273,6 @@ SWGDVBDemodActions::setScanTo(qint64 scan_to) {
     this->m_scan_to_isSet = true;
 }
 
-qint32
-SWGDVBDemodActions::getRecordSeries() {
-    return record_series;
-}
-void
-SWGDVBDemodActions::setRecordSeries(qint32 record_series) {
-    this->record_series = record_series;
-    this->m_record_series_isSet = true;
-}
-
-qint32
-SWGDVBDemodActions::getNetworkId() {
-    return network_id;
-}
-void
-SWGDVBDemodActions::setNetworkId(qint32 network_id) {
-    this->network_id = network_id;
-    this->m_network_id_isSet = true;
-}
-
 
 bool
 SWGDVBDemodActions::isSet(){
@@ -282,10 +287,16 @@ SWGDVBDemodActions::isSet(){
         if(m_record_event_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_record_series_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_service_id_isSet){
             isObjectUpdated = true; break;
         }
         if(m_event_id_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_network_id_isSet){
             isObjectUpdated = true; break;
         }
         if(m_scan_isSet){
@@ -295,12 +306,6 @@ SWGDVBDemodActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_scan_to_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_record_series_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_network_id_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

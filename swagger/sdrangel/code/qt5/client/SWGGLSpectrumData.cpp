@@ -181,7 +181,7 @@ SWGGLSpectrumData::asJsonObject() {
         toJsonValue(QString("reduce"), reduce, obj, QString("QString"));
     }
     if(power && power->size() > 0){
-        toJsonArray((QList<void*>*)power, obj, "power", "");
+        toJsonArray((QList<void*>*)power, obj, "power", "float");
     }
 
     return obj;

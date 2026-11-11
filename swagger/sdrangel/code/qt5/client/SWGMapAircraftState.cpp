@@ -168,10 +168,10 @@ SWGMapAircraftState::init() {
 
 void
 SWGMapAircraftState::cleanup() {
-    if(date_time != nullptr) {
+    if(date_time != nullptr) { 
         delete date_time;
     }
-    if(icao != nullptr) {
+    if(icao != nullptr) { 
         delete icao;
     }
     if(callsign != nullptr) { 
@@ -179,9 +179,6 @@ SWGMapAircraftState::cleanup() {
     }
     if(aircraft_type != nullptr) { 
         delete aircraft_type;
-    }
-    if(tcas_threat_icao != nullptr) {
-        delete tcas_threat_icao;
     }
 
 
@@ -210,6 +207,11 @@ SWGMapAircraftState::cleanup() {
 
 
 
+    if(tcas_threat_icao != nullptr) { 
+        delete tcas_threat_icao;
+    }
+
+
 
 
     if(flight_plan != nullptr) { 
@@ -232,15 +234,15 @@ SWGMapAircraftState::fromJson(QString &json) {
 void
 SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&date_time, pJson["dateTime"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&icao, pJson["icao"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&callsign, pJson["callsign"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&aircraft_type, pJson["aircraftType"], "QString", "QString");
-
+    
     ::SWGSDRangel::setValue(&on_surface, pJson["onSurface"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&airspeed, pJson["airspeed"], "float", "");
     
     ::SWGSDRangel::setValue(&airspeed_date_time, pJson["airspeedDateTime"], "QString", "QString");
@@ -836,3 +838,4 @@ SWGMapAircraftState::isSet(){
     return isObjectUpdated;
 }
 }
+

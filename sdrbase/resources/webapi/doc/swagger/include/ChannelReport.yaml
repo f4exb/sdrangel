@@ -13,6 +13,8 @@ ChannelReport:
       type: integer
       minimum: 0
       maximum: 2
+    ACARSDemodReport:
+      $ref: "/doc/swagger/include/ACARSDemod.yaml#/ACARSDemodReport"
     ADSBDemodReport:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
       description: "ADS-B demod report data for Channel."

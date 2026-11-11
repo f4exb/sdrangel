@@ -134,6 +134,7 @@ SWGPagerDemodSettings::cleanup() {
 
 
 
+
     if(udp_address != nullptr) { 
         delete udp_address;
     }

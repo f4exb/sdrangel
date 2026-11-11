@@ -170,10 +170,10 @@ SWGAISSettings::asJsonObject() {
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
     if(vessel_column_indexes && vessel_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)vessel_column_indexes, obj, "vesselColumnIndexes", "");
+        toJsonArray((QList<void*>*)vessel_column_indexes, obj, "vesselColumnIndexes", "qint32");
     }
     if(vessel_column_sizes && vessel_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)vessel_column_sizes, obj, "vesselColumnSizes", "");
+        toJsonArray((QList<void*>*)vessel_column_sizes, obj, "vesselColumnSizes", "qint32");
     }
 
     return obj;

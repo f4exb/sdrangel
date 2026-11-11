@@ -72,10 +72,10 @@ SWGBFMModSettings::SWGBFMModSettings() {
     m_feedback_audio_device_name_isSet = false;
     feedback_volume_factor = 0.0f;
     m_feedback_volume_factor_isSet = false;
-    feedback_audio_enable = 0;
-    m_feedback_audio_enable_isSet = false;
     file_name = nullptr;
     m_file_name_isSet = false;
+    feedback_audio_enable = 0;
+    m_feedback_audio_enable_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
     stream_index = 0;
@@ -148,10 +148,10 @@ SWGBFMModSettings::init() {
     m_feedback_audio_device_name_isSet = false;
     feedback_volume_factor = 0.0f;
     m_feedback_volume_factor_isSet = false;
-    feedback_audio_enable = 0;
-    m_feedback_audio_enable_isSet = false;
     file_name = new QString("");
     m_file_name_isSet = false;
+    feedback_audio_enable = 0;
+    m_feedback_audio_enable_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
     stream_index = 0;
@@ -177,18 +177,24 @@ SWGBFMModSettings::init() {
 void
 SWGBFMModSettings::cleanup() {
 
-    if(rds_ps != nullptr) {
+
+
+
+
+
+
+
+
+
+
+
+
+    if(rds_ps != nullptr) { 
         delete rds_ps;
     }
-    if(rds_radio_text != nullptr) {
+    if(rds_radio_text != nullptr) { 
         delete rds_radio_text;
     }
-
-
-
-
-
-
 
 
 
@@ -201,9 +207,11 @@ SWGBFMModSettings::cleanup() {
     if(feedback_audio_device_name != nullptr) { 
         delete feedback_audio_device_name;
     }
-    if(file_name != nullptr) {
+
+    if(file_name != nullptr) { 
         delete file_name;
     }
+
 
 
 
@@ -246,14 +254,23 @@ SWGBFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tone_frequency, pJson["toneFrequency"], "float", "");
     
     ::SWGSDRangel::setValue(&volume_factor, pJson["volumeFactor"], "float", "");
+    
     ::SWGSDRangel::setValue(&audio_stereo, pJson["audioStereo"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&pre_emphasis, pJson["preEmphasis"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&pilot_level, pJson["pilotLevel"], "float", "");
+    
     ::SWGSDRangel::setValue(&rds_active, pJson["rdsActive"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rds_level, pJson["rdsLevel"], "float", "");
+    
     ::SWGSDRangel::setValue(&rds_pi, pJson["rdsPI"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rds_pty, pJson["rdsPTY"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rds_ps, pJson["rdsPS"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&rds_radio_text, pJson["rdsRadioText"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&channel_mute, pJson["channelMute"], "qint32", "");
@@ -270,9 +287,9 @@ SWGBFMModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&feedback_volume_factor, pJson["feedbackVolumeFactor"], "float", "");
     
-    ::SWGSDRangel::setValue(&feedback_audio_enable, pJson["feedbackAudioEnable"], "qint32", "");
-
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feedback_audio_enable, pJson["feedbackAudioEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
     
@@ -328,15 +345,33 @@ SWGBFMModSettings::asJsonObject() {
     if(m_volume_factor_isSet){
         obj->insert("volumeFactor", QJsonValue(volume_factor));
     }
-    if(m_audio_stereo_isSet){ obj->insert("audioStereo", QJsonValue(audio_stereo)); }
-    if(m_pre_emphasis_isSet){ obj->insert("preEmphasis", QJsonValue(pre_emphasis)); }
-    if(m_pilot_level_isSet){ obj->insert("pilotLevel", QJsonValue(pilot_level)); }
-    if(m_rds_active_isSet){ obj->insert("rdsActive", QJsonValue(rds_active)); }
-    if(m_rds_level_isSet){ obj->insert("rdsLevel", QJsonValue(rds_level)); }
-    if(m_rds_pi_isSet){ obj->insert("rdsPI", QJsonValue(rds_pi)); }
-    if(m_rds_pty_isSet){ obj->insert("rdsPTY", QJsonValue(rds_pty)); }
-    if(rds_ps != nullptr && *rds_ps != QString("")){ toJsonValue(QString("rdsPS"), rds_ps, obj, QString("QString")); }
-    if(rds_radio_text != nullptr && *rds_radio_text != QString("")){ toJsonValue(QString("rdsRadioText"), rds_radio_text, obj, QString("QString")); }
+    if(m_audio_stereo_isSet){
+        obj->insert("audioStereo", QJsonValue(audio_stereo));
+    }
+    if(m_pre_emphasis_isSet){
+        obj->insert("preEmphasis", QJsonValue(pre_emphasis));
+    }
+    if(m_pilot_level_isSet){
+        obj->insert("pilotLevel", QJsonValue(pilot_level));
+    }
+    if(m_rds_active_isSet){
+        obj->insert("rdsActive", QJsonValue(rds_active));
+    }
+    if(m_rds_level_isSet){
+        obj->insert("rdsLevel", QJsonValue(rds_level));
+    }
+    if(m_rds_pi_isSet){
+        obj->insert("rdsPI", QJsonValue(rds_pi));
+    }
+    if(m_rds_pty_isSet){
+        obj->insert("rdsPTY", QJsonValue(rds_pty));
+    }
+    if(rds_ps != nullptr && *rds_ps != QString("")){
+        toJsonValue(QString("rdsPS"), rds_ps, obj, QString("QString"));
+    }
+    if(rds_radio_text != nullptr && *rds_radio_text != QString("")){
+        toJsonValue(QString("rdsRadioText"), rds_radio_text, obj, QString("QString"));
+    }
     if(m_channel_mute_isSet){
         obj->insert("channelMute", QJsonValue(channel_mute));
     }
@@ -358,11 +393,11 @@ SWGBFMModSettings::asJsonObject() {
     if(m_feedback_volume_factor_isSet){
         obj->insert("feedbackVolumeFactor", QJsonValue(feedback_volume_factor));
     }
+    if(file_name != nullptr && *file_name != QString("")){
+        toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
+    }
     if(m_feedback_audio_enable_isSet){
         obj->insert("feedbackAudioEnable", QJsonValue(feedback_audio_enable));
-    }
-    if(file_name != nullptr && m_file_name_isSet){
-        toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
     }
     if(m_mod_af_input_isSet){
         obj->insert("modAFInput", QJsonValue(mod_af_input));
@@ -458,24 +493,95 @@ SWGBFMModSettings::setVolumeFactor(float volume_factor) {
     this->m_volume_factor_isSet = true;
 }
 
-qint32 SWGBFMModSettings::getAudioStereo() { return audio_stereo; }
-void SWGBFMModSettings::setAudioStereo(qint32 value) { audio_stereo = value; m_audio_stereo_isSet = true; }
-qint32 SWGBFMModSettings::getPreEmphasis() { return pre_emphasis; }
-void SWGBFMModSettings::setPreEmphasis(qint32 value) { pre_emphasis = value; m_pre_emphasis_isSet = true; }
-float SWGBFMModSettings::getPilotLevel() { return pilot_level; }
-void SWGBFMModSettings::setPilotLevel(float value) { pilot_level = value; m_pilot_level_isSet = true; }
-qint32 SWGBFMModSettings::getRdsActive() { return rds_active; }
-void SWGBFMModSettings::setRdsActive(qint32 value) { rds_active = value; m_rds_active_isSet = true; }
-float SWGBFMModSettings::getRdsLevel() { return rds_level; }
-void SWGBFMModSettings::setRdsLevel(float value) { rds_level = value; m_rds_level_isSet = true; }
-qint32 SWGBFMModSettings::getRdsPi() { return rds_pi; }
-void SWGBFMModSettings::setRdsPi(qint32 value) { rds_pi = value; m_rds_pi_isSet = true; }
-qint32 SWGBFMModSettings::getRdsPty() { return rds_pty; }
-void SWGBFMModSettings::setRdsPty(qint32 value) { rds_pty = value; m_rds_pty_isSet = true; }
-QString* SWGBFMModSettings::getRdsPs() { return rds_ps; }
-void SWGBFMModSettings::setRdsPs(QString* value) { rds_ps = value; m_rds_ps_isSet = true; }
-QString* SWGBFMModSettings::getRdsRadioText() { return rds_radio_text; }
-void SWGBFMModSettings::setRdsRadioText(QString* value) { rds_radio_text = value; m_rds_radio_text_isSet = true; }
+qint32
+SWGBFMModSettings::getAudioStereo() {
+    return audio_stereo;
+}
+void
+SWGBFMModSettings::setAudioStereo(qint32 audio_stereo) {
+    this->audio_stereo = audio_stereo;
+    this->m_audio_stereo_isSet = true;
+}
+
+qint32
+SWGBFMModSettings::getPreEmphasis() {
+    return pre_emphasis;
+}
+void
+SWGBFMModSettings::setPreEmphasis(qint32 pre_emphasis) {
+    this->pre_emphasis = pre_emphasis;
+    this->m_pre_emphasis_isSet = true;
+}
+
+float
+SWGBFMModSettings::getPilotLevel() {
+    return pilot_level;
+}
+void
+SWGBFMModSettings::setPilotLevel(float pilot_level) {
+    this->pilot_level = pilot_level;
+    this->m_pilot_level_isSet = true;
+}
+
+qint32
+SWGBFMModSettings::getRdsActive() {
+    return rds_active;
+}
+void
+SWGBFMModSettings::setRdsActive(qint32 rds_active) {
+    this->rds_active = rds_active;
+    this->m_rds_active_isSet = true;
+}
+
+float
+SWGBFMModSettings::getRdsLevel() {
+    return rds_level;
+}
+void
+SWGBFMModSettings::setRdsLevel(float rds_level) {
+    this->rds_level = rds_level;
+    this->m_rds_level_isSet = true;
+}
+
+qint32
+SWGBFMModSettings::getRdsPi() {
+    return rds_pi;
+}
+void
+SWGBFMModSettings::setRdsPi(qint32 rds_pi) {
+    this->rds_pi = rds_pi;
+    this->m_rds_pi_isSet = true;
+}
+
+qint32
+SWGBFMModSettings::getRdsPty() {
+    return rds_pty;
+}
+void
+SWGBFMModSettings::setRdsPty(qint32 rds_pty) {
+    this->rds_pty = rds_pty;
+    this->m_rds_pty_isSet = true;
+}
+
+QString*
+SWGBFMModSettings::getRdsPs() {
+    return rds_ps;
+}
+void
+SWGBFMModSettings::setRdsPs(QString* rds_ps) {
+    this->rds_ps = rds_ps;
+    this->m_rds_ps_isSet = true;
+}
+
+QString*
+SWGBFMModSettings::getRdsRadioText() {
+    return rds_radio_text;
+}
+void
+SWGBFMModSettings::setRdsRadioText(QString* rds_radio_text) {
+    this->rds_radio_text = rds_radio_text;
+    this->m_rds_radio_text_isSet = true;
+}
 
 qint32
 SWGBFMModSettings::getChannelMute() {
@@ -547,16 +653,6 @@ SWGBFMModSettings::setFeedbackVolumeFactor(float feedback_volume_factor) {
     this->m_feedback_volume_factor_isSet = true;
 }
 
-qint32
-SWGBFMModSettings::getFeedbackAudioEnable() {
-    return feedback_audio_enable;
-}
-void
-SWGBFMModSettings::setFeedbackAudioEnable(qint32 feedback_audio_enable) {
-    this->feedback_audio_enable = feedback_audio_enable;
-    this->m_feedback_audio_enable_isSet = true;
-}
-
 QString*
 SWGBFMModSettings::getFileName() {
     return file_name;
@@ -565,6 +661,16 @@ void
 SWGBFMModSettings::setFileName(QString* file_name) {
     this->file_name = file_name;
     this->m_file_name_isSet = true;
+}
+
+qint32
+SWGBFMModSettings::getFeedbackAudioEnable() {
+    return feedback_audio_enable;
+}
+void
+SWGBFMModSettings::setFeedbackAudioEnable(qint32 feedback_audio_enable) {
+    this->feedback_audio_enable = feedback_audio_enable;
+    this->m_feedback_audio_enable_isSet = true;
 }
 
 qint32
@@ -690,11 +796,31 @@ SWGBFMModSettings::isSet(){
         if(m_volume_factor_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_audio_stereo_isSet || m_pre_emphasis_isSet || m_pilot_level_isSet
-        || m_rds_active_isSet || m_rds_level_isSet || m_rds_pi_isSet || m_rds_pty_isSet){
+        if(m_audio_stereo_isSet){
             isObjectUpdated = true; break;
         }
-        if((rds_ps && *rds_ps != QString("")) || (rds_radio_text && *rds_radio_text != QString(""))){
+        if(m_pre_emphasis_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pilot_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_active_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_pi_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_pty_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rds_ps && *rds_ps != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(rds_radio_text && *rds_radio_text != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_channel_mute_isSet){
@@ -718,10 +844,10 @@ SWGBFMModSettings::isSet(){
         if(m_feedback_volume_factor_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_feedback_audio_enable_isSet){
+        if(file_name && *file_name != QString("")){
             isObjectUpdated = true; break;
         }
-        if(file_name && m_file_name_isSet){
+        if(m_feedback_audio_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_mod_af_input_isSet){

@@ -23,6 +23,7 @@
 
 
 #include "SWGDRMAFS.h"
+#include "SWGDRMCapability.h"
 #include "SWGDRMJournaline.h"
 #include "SWGDRMService.h"
 #include <QList>
@@ -49,8 +50,8 @@ public:
     QString* getAudioDecoderBackend();
     void setAudioDecoderBackend(QString* audio_decoder_backend);
 
-    QList<QString*>* getCapabilities();
-    void setCapabilities(QList<QString*>* capabilities);
+    QList<SWGDRMCapability*>* getCapabilities();
+    void setCapabilities(QList<SWGDRMCapability*>* capabilities);
 
     QString* getSyncState();
     void setSyncState(QString* sync_state);
@@ -281,7 +282,7 @@ private:
     QString* audio_decoder_backend;
     bool m_audio_decoder_backend_isSet;
 
-    QList<QString*>* capabilities;
+    QList<SWGDRMCapability*>* capabilities;
     bool m_capabilities_isSet;
 
     QString* sync_state;

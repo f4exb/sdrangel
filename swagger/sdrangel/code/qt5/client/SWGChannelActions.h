@@ -24,7 +24,6 @@
 
 #include "SWGAISModActions.h"
 #include "SWGAPTDemodActions.h"
-#include "SWGWefaxDemodActions.h"
 #include "SWGDRMDemodActions.h"
 #include "SWGDVBDemodActions.h"
 #include "SWGDSEModActions.h"
@@ -39,6 +38,7 @@
 #include "SWGRTTYModActions.h"
 #include "SWGRadioAstronomyActions.h"
 #include "SWGSigMFFileSinkActions.h"
+#include "SWGWefaxDemodActions.h"
 #include <QString>
 
 #include "SWGObject.h"

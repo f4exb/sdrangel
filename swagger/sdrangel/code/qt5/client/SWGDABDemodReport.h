@@ -138,14 +138,18 @@ public:
     void setGainStatus(qint32 gain_status);
 
     QString* getGainAdvice();
-    QString* getAnnouncement();
-    QString* getNowPlayingArtist();
-    QString* getNowPlayingTitle();
-    QString* getProgrammeNow();
     void setGainAdvice(QString* gain_advice);
+
+    QString* getAnnouncement();
     void setAnnouncement(QString* announcement);
+
+    QString* getNowPlayingArtist();
     void setNowPlayingArtist(QString* now_playing_artist);
+
+    QString* getNowPlayingTitle();
     void setNowPlayingTitle(QString* now_playing_title);
+
+    QString* getProgrammeNow();
     void setProgrammeNow(QString* programme_now);
 
 
@@ -246,14 +250,18 @@ private:
     bool m_gain_status_isSet;
 
     QString* gain_advice;
-    QString* announcement;
-    QString* now_playing_artist;
-    QString* now_playing_title;
-    QString* programme_now;
     bool m_gain_advice_isSet;
+
+    QString* announcement;
     bool m_announcement_isSet;
+
+    QString* now_playing_artist;
     bool m_now_playing_artist_isSet;
+
+    QString* now_playing_title;
     bool m_now_playing_title_isSet;
+
+    QString* programme_now;
     bool m_programme_now_isSet;
 
 };
