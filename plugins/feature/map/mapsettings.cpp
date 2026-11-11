@@ -64,6 +64,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("APTDemod"),
     QStringLiteral("DSCDemod"),
     QStringLiteral("DroneIDDemod"),
+    QStringLiteral("DSDDemod"),
     QStringLiteral("FT8Demod"),
     QStringLiteral("HeatMap"),
     QStringLiteral("ILSDemod"),
@@ -85,6 +86,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.channel.dscdemod"),
     QStringLiteral("sdrangel.channel.droneiddemod"),
+    QStringLiteral("sdrangel.channel.dsddemod"),
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.channel.ilsdemod"),
@@ -170,6 +172,9 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("APRS", aprsSettings);
     m_itemSettings.insert("DSCDemod", new MapItemSettings("DSCDemod", true,  QColor(181, 230, 29), true, true, 3));
     m_itemSettings.insert("DroneIDDemod", new MapItemSettings("DroneIDDemod", true, QColor(255, 128, 0), true, false, 11, modelMinPixelSize));
+    MapItemSettings *dsdSettings = new MapItemSettings("DSDDemod", true, QColor(0, 220, 250), true, false, 11);
+    dsdSettings->m_extrapolate = 0;
+    m_itemSettings.insert("DSDDemod", dsdSettings);
     m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", true,  QColor(230, 230, 230), true, true, 3));
     m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", true, QColor(0, 0, 255), true, false, 0, modelMinPixelSize));
     m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", true, QColor(255, 0, 0), false, true, 8));
