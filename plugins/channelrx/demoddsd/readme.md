@@ -10,14 +10,14 @@ This plugin demodulates and decodes digital voice modes. It is the receive count
   - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard, both the 4800 bit/s (2400 Baud, 6.25 kHz, "NXDN48") and the 9600 bit/s (4800 Baud, 12.5 kHz, "NXDN96") versions. The full rate vocoder (EFR) of NXDN96 is decoded by the AMBE feature only.
   - dPMR (ETSI TS 102 490): 4FSK, 2400 symbols/s, AMBE+2 3600x2450.  
   - P25 Phase 1: C4FM, 4800 symbols/s, IMBE 7200x4400. the APCO Project 25 FDMA standard used by public safety networks in North America, clear (unencrypted) voice.
-  - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450. The two slot TDMA version of Project 25 used by trunked systems for their voice channels. The voice is scrambled with a sequence derived from the system's identity (WACN, system ID and NAC), which must be entered (B.13); the values are broadcast on the system's control channel and listed by the usual radio reference sites.
+  - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450. The two slot TDMA version of Project 25 used by trunked systems for their voice channels. The voice is scrambled with a sequence derived from the system's identity (WACN, system ID and NAC), which must be entered (C.7); the values are broadcast on the system's control channel and listed by the usual radio reference sites.
   - [M17](https://spec.m17project.org): 4FSK at 4800 symbols/s in 12.5 kHz, 40 ms frames, Codec2 3200 voice with the callsigns in a link setup frame and packet transmissions carrying SMS text or APRS. This is SDRangel's second M17 receiver: the [M17 Demodulator](../demodm17/readme.md) has its own modem, this one decodes M17 in the same chain as the other protocols here, so a scanner or a recording can switch between them, and the two can be compared on the same measurements.
   - Angel61: SDRangel's own amateur digital voice protocol in four profiles:
     - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM), 
     - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM) 
-    - with 24kHz V1 speech (vocoscodec) at four tiers (from 1.5kpbs to 12kbps) and WB's top tier using Opus audio at 18.4 kbit/s, LDPC coding, callsign routing, text messages, positions, file transfers and IP tunneling.
+    - with 24 kHz V1 speech (vocoscodec) at four tiers (from 1.5kpbs to 12kbps) and WB's top tier using Opus audio at 18.4 kbit/s, LDPC coding, callsign routing, text messages, positions, file transfers and IP tunneling.
 
-The protocol is detected automatically from the synchronisation patterns found in the signal, at all three symbol rates, or the search can be limited to one protocol (B.2). The receiver measures the frequency deviation, the carrier frequency error and the symbol clock error of the signal it locks to and corrects them itself, so there is nothing to adjust for a given radio or channel plan beyond the channel bandwidth.
+The protocol is detected automatically from the synchronisation patterns found in the signal, at all three symbol rates, or the search can be limited to one protocol (C.1). The receiver measures the frequency deviation, the carrier frequency error and the symbol clock error of the signal it locks to and corrects them itself, so there is nothing to adjust for a given radio or channel plan beyond the channel bandwidth.
 
 &#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required for the demodulator/decoder to work correctly.
 
@@ -33,7 +33,7 @@ For protocols using the AMBE vocoder (which is all apart from M17 and Angel61), 
 
 You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network. This is supported via the [AMBE feature](../../feature/ambe/readme.md).
 
-When an AMBE feature is selected as the vocoder (B.11) the received frames go to the feature as hard bits and its device decodes them. IMBE (P25) decoding depends on the device firmware. If the selected feature is not there, or mbevocoder is selected, decoding takes place in software with mbevocoder.
+When an AMBE feature is selected as the vocoder (A.7) the received frames go to the feature as hard bits and its device decodes them. IMBE (P25) decoding depends on the device firmware. If the selected feature is not there, or mbevocoder is selected, decoding takes place in software with mbevocoder.
 
 The decoded audio (mono, at the audio device rate, after the volume and the slot selection) is also available to features that take a channel's demodulated signal, such as the Demod Analyzer and the Morse Decoder. Audio decoded by the AMBE feature goes straight to the audio device and is not on that path.
 
@@ -63,7 +63,7 @@ Total power in dB relative to a +/- 1.0 amplitude signal generated in the pass b
 
 <h4>A.5: Activate status text log</h4>
 
-Check to send the status text lines (A.12) and DMR events to the log. Uncheck to dismiss sending.
+Check to send the status text lines (A.14) and DMR events to the log. Uncheck to dismiss sending.
 DMR events are emitted when a call starts or ends, when link-control details become available or change, and when a complete standard Talker Alias, in-band GPS position or text message is decoded.
 Repeated voice bursts and unchanged metadata do not produce repeated rows; changing GPS positions are limited to one row per second per slot.
 
@@ -107,7 +107,7 @@ Standard Talker Alias, in-band GPS link control and text messages produce rows s
 
 `DMR S1 CC:1 EVT:TEXT SRC:1234567 DST:7654321 TYPE:UNIT FORMAT:UTF-16BE/IP TEXT:"On my way"`
 
-An Angel61 transmission logs its start and end, its text messages (from the data slots or the message field of data frames), the positions it sends and, at its end, the rate request record kept for its source (see A12.8):
+An Angel61 transmission logs its start and end, its text messages (from the data slots or the message field of data frames), the positions it sends and, at its end, the rate request record kept for its source (see A14.8):
 
 `ANGEL61 EVT:START`
 
@@ -199,7 +199,7 @@ A D-PRS sentence whose CRC checks is an APRS packet, whatever it carries (a posi
   - the data type from the FICH: `V/D 1`, `data FR`, `V/D 2` or `voice FR`; `no FICH` while none has been decoded
   - the source and destination callsigns from the header or the data channel of the communication frames, then the downlink and uplink repeater callsigns
 
-<h4>A12.5: NXDN status display</h4>
+<h4>A14.5: NXDN status display</h4>
 
 `RAN 1 VCALL group 1234 > 5678`
 
@@ -219,14 +219,14 @@ On a trunking control channel (a stream of TSDUs) the display becomes:
 
 `NAC 1A0 system BEE00:1AE:1A0 TSDU GRP_V_CH_GRANT_UPDT TG 20400 500.7000 MHz`
 
-  - `system`: the WACN, system ID and NAC from the network status broadcast, in the form the P25 Phase 2 setting (B.13) takes
+  - `system`: the WACN, system ID and NAC from the network status broadcast, in the form the P25 Phase 2 setting (C.7) takes
   - the last trunking signalling block decoded: its opcode name (TIA-102.AABC) and, for the channel grants, the talkgroup (or unit) and the frequency (from the identifier update broadcasts; the raw channel field until they have been seen, and the slot for a TDMA channel), for the status broadcasts the system, RFSS and site. A channel grant stays on display for a few seconds; the vendor specific blocks show as `MFID xx op yy`.
 
 <h4>A14.7: P25 Phase 2 status display</h4>
 
 `S1: 4V PTT TG 4321 from 1234567 S2: SACCH IDLE`
 
-For each of the two channels (slots): the last burst type (`4V`, `2V` voice, `SACCH`, `FACCH`, `LCCH`), the last MAC message decoded from a SACCH or FACCH (`PTT`, `END`, `IDLE`, `ACTIVE`, `HANGTIME`), and from the last PTT the talkgroup and the source ID, followed by the encryption algorithm name when the voice is encrypted (only clear voice is decoded). `TS ?` at the start means the timeslot is not yet known (the first bursts after a lock, until an information ISCH is read); `no system` means the WACN, system ID and NAC (B.13) are not set, in which case only the unscrambled signalling is decoded.
+For each of the two channels (slots): the last burst type (`4V`, `2V` voice, `SACCH`, `FACCH`, `LCCH`), the last MAC message decoded from a SACCH or FACCH (`PTT`, `END`, `IDLE`, `ACTIVE`, `HANGTIME`), and from the last PTT the talkgroup and the source ID, followed by the encryption algorithm name when the voice is encrypted (only clear voice is decoded). `TS ?` at the start means the timeslot is not yet known (the first bursts after a lock, until an information ISCH is read); `no system` means the WACN, system ID and NAC (C.7) are not set, in which case only the unscrambled signalling is decoded.
 
 <h4>A14.8: Angel61 status display</h4>
 
@@ -355,22 +355,24 @@ Measured on the signal locked to:
 
   - `err`: the carrier frequency error in Hz, corrected automatically within a quarter of the channel bandwidth
   - `snr`: the symbol signal to noise ratio at the slicer in dB
-  - `ber`: the raw bit error rate on the channel in percent, from the corrections the voice frames' own codes make, whichever vocoder plays them (the AMBE feature and Codec2 included): the Golay and Hamming codes of the AMBE and IMBE frames (DMR, D-STAR, YSF full rate, NXDN, dPMR, P25), counted by decoding each frame on its hard bits, re-encoding it and comparing; M17's convolutional code; YSF V/D type 2's triple repetition; Angel61's LDPC code. Checked against the harness's known channel errors for every protocol: within about 15% up to 5%, reading low above about 10% where the codes run out of correction (the voice is gone by then). Frames that do not decode are not in it; for Angel61 those are what the status line's `BLER` counts (A12.8). D-STAR and P25 Phase 1 need mbevocoder compiled in for the count; the AMBE+2 protocols do not
+  - `ber`: the raw bit error rate on the channel in percent, from the corrections the voice frames' own codes make, whichever vocoder plays them (the AMBE feature and Codec2 included): the Golay and Hamming codes of the AMBE and IMBE frames (DMR, D-STAR, YSF full rate, NXDN, dPMR, P25), counted by decoding each frame on its hard bits, re-encoding it and comparing; M17's convolutional code; YSF V/D type 2's triple repetition; Angel61's LDPC code. Checked against the harness's known channel errors for every protocol: within about 15% up to 5%, reading low above about 10% where the codes run out of correction (the voice is gone by then). Frames that do not decode are not in it; for Angel61 those are what the status line's `BLER` counts (A14.8). D-STAR and P25 Phase 1 need mbevocoder compiled in for the count; the AMBE+2 protocols do not
 
 
 <h4>C.5: CC - Color code</h4>
 
 The **CC** selector beside the stereo button filters audio by colour code: DMR (`0` to `15`), dPMR (`0` to `63`) and, by its RAN, NXDN (`0` to `63`). Select `Any` to hear every call, or select a value to hear audio only when the decoded code matches. A value above `15` silences DMR. This does not affect synchronization, decoding, the constellation or the status display.
 
-<h4>C.5: TG - Talk Group</h4>
+<h4>C.6: TG - Talk Group</h4>
 
 Angel61 talkgroups to play, comma separated (9, 23). A call to another talkgroup is shown but not played. Calls to CQ and to callsigns are always played. Empty: every call is played.
 
-<h4>C.6: P25 Phase 2 system</h4>
+<h4>C.7: P25 Phase 2 system</h4>
 
 The WACN, system ID and NAC of the P25 system, in hexadecimal separated by colons (`BEE00:001:293`), from which the Phase 2 scrambling sequence is derived. Without the right values the voice and the scrambled signalling of a Phase 2 channel cannot be decoded (the lock, the timeslots and the unscrambled signalling are still reported). Trunked systems broadcast their WACN and system ID on the control channel, and their NAC is that of the site; radio reference sites list all three.
 
 <h3>D: Contacts Reporting Tab</h3>
+
+![Contacts Reporting Tab](../../../doc/img/DSDdemod_contact_reporting.png)
 
 <h4>D.1: Report contacts</h4>
 
@@ -381,6 +383,8 @@ When checked, Angel61 contacts are reported to [angel61.sdrangel.org](http://ang
 Callsign to include in contact reports as the receiver.
 
 <h3>E: File Transfer Tab</h3>
+
+![File Transfer Tab](../../../doc/img/DSDdemod_file_transfer.png)
 
 <h4>E.1: Save to</h4>
 
@@ -403,6 +407,8 @@ Accept the file awaiting confirmation.
 Refuse the file awaiting confirmation.
 
 <h3>F: IP Tunnel</h3>
+
+![IP Tunneling Tab](../../../doc/img/DSDdemod_ip_tunneling.png)
 
 Angel61 can carry IP between two stations. The DSD Demodulator has no settings for it: the tunnel belongs to a [DSE Modulator](../../channeltx/moddse/readme.md) in the same instance, which creates the host interface and holds its peer, address, routes and filter. Everything the demodulator receivers goes to that modulator. With no modulator, or with its Tunnel off, datagrams are counted but none will reache the host. If there is more than one DSD Demodulator, the modulator's Rx selector picks which one it listens to.
 

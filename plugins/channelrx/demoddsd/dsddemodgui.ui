@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>611</width>
+    <width>595</width>
     <height>437</height>
    </rect>
   </property>
@@ -617,7 +617,7 @@
     <rect>
      <x>0</x>
      <y>180</y>
-     <width>587</width>
+     <width>571</width>
      <height>239</height>
     </rect>
    </property>
@@ -1361,13 +1361,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="contactReportStatus">
-          <property name="text">
-           <string>Contact reporting: Off</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="contactReportEnabledLabel">
           <property name="text">
@@ -1386,6 +1379,20 @@
           <property name="icon">
            <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="contactReportStatusLabel">
+          <property name="text">
+           <string>Status</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="contactReportStatus">
+          <property name="text">
+           <string>Off</string>
           </property>
          </widget>
         </item>

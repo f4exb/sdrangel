@@ -63,6 +63,9 @@ public:
     qint32 getRecordSilenceTime();
     void setRecordSilenceTime(qint32 record_silence_time);
 
+    qint32 getRealSpectrum();
+    void setRealSpectrum(qint32 real_spectrum);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -108,6 +111,9 @@ private:
 
     qint32 record_silence_time;
     bool m_record_silence_time_isSet;
+
+    qint32 real_spectrum;
+    bool m_real_spectrum_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

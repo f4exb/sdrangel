@@ -12,7 +12,10 @@ This plugin is the transmit counterpart of the [DSD Demodulator](../../../plugin
   - P25 Phase 1: C4FM, 4800 symbols/s, IMBE 7200x4400.
   - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450.
   - [M17](https://spec.m17project.org): 4FSK at 4800 symbols/s in 12.5 kHz with Codec2 3200. A text message with no voice input is sent as an SMS packet transmission.
-  - Angel61: SDRangel's own digital voice protocol in four profiles. On VHF/UHF, linear signals rather than FM: **Angel61 NB** in a 6.25 kHz channel (QPSK or 16-QAM at 4800 symbols/s) and **Angel61 WB** in a 12.5 kHz channel (9600 symbols/s). On HF, OFDM: **Angel61 HF-NB** (2.5 kHz) and **Angel61 HF-WB** (5.5 kHz). All four have LDPC coding, V1 speech (vocoscodec) at four tiers each (WB's top tier is Opus audio at 18.4 kbit/s instead), callsign routing (source, destination, up to two repeaters), the station's position and text messages in its data slots, data under the voice, or a message, file or datagram alone as a data transmission.
+  - Angel61: SDRangel's own amateur digital voice protocol in four profiles:
+    - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM), 
+    - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM) 
+    - with 24 kHz V1 speech (vocoscodec) at four tiers (from 1.5kpbs to 12kbps) and WB's top tier using Opus audio at 18.4 kbit/s, LDPC coding, callsign routing, text messages, positions, file transfers and IP tunneling.
 
 The AMBE and IMBE speech encoder of the D-STAR, DMR, YSF, NXDN, dPMR and P25 modes can be either:
 
@@ -26,8 +29,6 @@ M17 encodes with Codec2 and Angel61 with V1 or Opus.
 The top and bottom bars of the channel window are described in the [Channel window](../../../sdrgui/channel/readme.md) documentation.
 
 ![DSE Modulator plugin GUI](../../../doc/img/DSEMod_plugin.png)
-
-The settings are in rows at the top of the window: frequency and power (1, 2), PTT and input level (3 to 5), protocol and inputs (6 to 10), and the vocoder (11 to 15). Below them, a tab bar holds the selected protocol's parameters (16 to 23) and the functions available to it: the audio file (24), the Angel61 data functions (25 to 28) when an Angel61 mode is selected, DTMF (29) and the CW keyer (30). Selecting an input that has a tab (the audio file or the Morse keyer) brings its tab to the front. The spectrum (31) is in its own rollup at the bottom.
 
 <h3>1: Frequency shift from center frequency of transmission</h3>
 

@@ -721,7 +721,7 @@ void DSDDemodGUI::audioSelect(const QPoint& p)
 void DSDDemodGUI::tick()
 {
     updateMyPosition();   // the preferences' position, when it changes
-    ui->contactReportStatus->setText(tr("Contact reporting: %1").arg(m_dsdDemod->contactReportStatus()));
+    ui->contactReportStatus->setText(tr("%1").arg(m_dsdDemod->contactReportStatus()));
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     m_dsdDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
