@@ -24,6 +24,12 @@ DemodAnalyzerSettings:
     recordSilenceTime:
       type: integer
       description: Record silence time before stopping recording in 10ths of seconds
+    realSpectrum:
+      type: integer
+      description: >
+        Real signal (audio) spectrum display
+          * 1 - positive frequencies only (0 to half the sample rate)
+          * 0 - complex spectrum
     useReverseAPI:
       type: integer
       minimum: 0

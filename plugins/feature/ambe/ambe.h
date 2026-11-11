@@ -23,8 +23,11 @@
 #include <QNetworkRequest>
 #include <QSet>
 
+#include <memory>
+
 #include "feature/feature.h"
 #include "util/message.h"
+#include "dsp/dspcommands.h"
 
 #include "ambeengine.h"
 #include "ambesettings.h"
@@ -130,6 +133,7 @@ public:
 private:
     AMBESettings m_settings;
     AMBEEngine m_ambeEngine;
+    std::shared_ptr<MbeEncoderPort> m_encoderPort; //!< Handle for encode clients calling from other threads
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

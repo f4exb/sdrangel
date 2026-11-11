@@ -45,6 +45,8 @@ AMBE::AMBE(WebAPIAdapterInterface *webAPIAdapterInterface) :
     setObjectName(m_featureId);
     setState(StIdle);
     m_errorMessage = "AMBE error";
+    m_encoderPort = std::make_shared<MbeEncoderPort>();
+    m_encoderPort->setProvider([this](const Message& msg) { return handleMessage(msg); });
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -56,6 +58,7 @@ AMBE::AMBE(WebAPIAdapterInterface *webAPIAdapterInterface) :
 
 AMBE::~AMBE()
 {
+    m_encoderPort->setProvider(nullptr); // encode clients calling from their threads now get false
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -107,6 +110,30 @@ bool AMBE::handleMessage(const Message& cmd)
             cfg.getUpsampling(),
             cfg.getAudioFifo()
         );
+        return true;
+    }
+    else if (DSPPushMbeAudio::match(cmd))
+    {
+        DSPPushMbeAudio& req = (DSPPushMbeAudio&) cmd;
+        m_ambeEngine.pushMbeAudio(
+            req.getAudio(),
+            req.getMbeRateIndex(),
+            req.getGain(),
+            req.getSequence(),
+            req.getClient(),
+            req.getReplyQueue()
+        );
+        return true;
+    }
+    else if (DSPReleaseMbeClient::match(cmd))
+    {
+        DSPReleaseMbeClient& req = (DSPReleaseMbeClient&) cmd;
+        m_ambeEngine.releaseEncodeClient(req.getClient());
+        return true;
+    }
+    else if (DSPGetMbeEncoderPort::match(cmd))
+    {
+        ((DSPGetMbeEncoderPort&) cmd).setPort(m_encoderPort);
         return true;
     }
 

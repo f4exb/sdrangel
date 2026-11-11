@@ -21,6 +21,12 @@
 #define INCLUDE_DSPCOMMANDS_H
 
 #include <QString>
+#include <QMutex>
+
+#include <algorithm>
+#include <functional>
+#include <memory>
+
 #include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "export.h"
@@ -30,6 +36,7 @@ class BasebandSampleSink;
 class DeviceSampleSink;
 class BasebandSampleSource;
 class AudioFifo;
+class MessageQueue;
 
 class SDRBASE_API DSPAcquisitionInit : public Message {
 	MESSAGE_CLASS_DECLARATION
@@ -423,6 +430,165 @@ private:
     bool m_useHP;
     int m_upsampling;
     AudioFifo *m_audioFifo;
+};
+
+
+/**
+ * Push one 160 sample 16 bit PCM frame (8 kHz) to an AMBE encoder (feature).
+ * The receiver copies the audio synchronously. The encoded frame is returned
+ * asynchronously as a DSPReportMbeFrame on the reply queue.
+ */
+class SDRBASE_API DSPPushMbeAudio : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPPushMbeAudio(
+        const short *audio,
+        int mbeRateIndex,
+        int gain,
+        unsigned int sequence,
+        const void *client,
+        MessageQueue *replyQueue
+    ) :
+        Message(),
+        m_audio(audio),
+        m_mbeRateIndex(mbeRateIndex),
+        m_gain(gain),
+        m_sequence(sequence),
+        m_client(client),
+        m_replyQueue(replyQueue)
+    { }
+
+    const short *getAudio() const { return m_audio; }      //!< 160 samples
+    int getMbeRateIndex() const { return m_mbeRateIndex; } //!< SerialDV::DVRate compatible
+    int getGain() const { return m_gain; }                 //!< encoder input gain (dB)
+    unsigned int getSequence() const { return m_sequence; }
+    const void *getClient() const { return m_client; }
+    MessageQueue *getReplyQueue() const { return m_replyQueue; }
+
+private:
+    const short *m_audio;
+    int m_mbeRateIndex;
+    int m_gain;
+    unsigned int m_sequence;
+    const void *m_client;
+    MessageQueue *m_replyQueue;
+};
+
+/**
+ * Reply to DSPPushMbeAudio carrying the encoded MBE frame (DVSI order)
+ */
+class SDRBASE_API DSPReportMbeFrame : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    static const int m_maxFrameBytes = 18;
+
+    DSPReportMbeFrame(
+        const unsigned char *mbeFrame,
+        int nbBytes,
+        unsigned int sequence,
+        const void *client,
+        bool ok
+    ) :
+        Message(),
+        m_nbBytes(nbBytes),
+        m_sequence(sequence),
+        m_client(client),
+        m_ok(ok)
+    {
+        std::fill(m_mbeFrame, m_mbeFrame + m_maxFrameBytes, 0);
+
+        if (mbeFrame && (nbBytes > 0)) {
+            std::copy(mbeFrame, mbeFrame + std::min(nbBytes, m_maxFrameBytes), m_mbeFrame);
+        }
+    }
+
+    const unsigned char *getMbeFrame() const { return m_mbeFrame; }
+    int getNbBytes() const { return m_nbBytes; }
+    unsigned int getSequence() const { return m_sequence; }
+    const void *getClient() const { return m_client; }
+    bool isOK() const { return m_ok; }
+
+private:
+    unsigned char m_mbeFrame[m_maxFrameBytes];
+    int m_nbBytes;
+    unsigned int m_sequence;
+    const void *m_client;
+    bool m_ok;
+};
+
+/**
+ * Tell an AMBE feature that a client is done with it: an encoder's client (its reply queue must
+ * not be used any more), or a decoder's AudioFifo (it must not be written any more; the call
+ * returns once that is so, and queued frames for it are dropped). Sent through MbeEncoderPort.
+ */
+class SDRBASE_API DSPReleaseMbeClient : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPReleaseMbeClient(const void *client) :
+        Message(),
+        m_client(client)
+    { }
+
+    const void *getClient() const { return m_client; }
+
+private:
+    const void *m_client;
+};
+
+/**
+ * Thread safe handle on an MBE provider (the AMBE feature) for clients that call it from their
+ * own threads: encoders (DSPPushMbeAudio) and decoders (DSPPushMbeFrame, the DSD Demodulator's
+ * sink) alike. The provider creates it, hands it out with DSPGetMbeEncoderPort and closes it in
+ * its destructor: a call in flight completes before the provider goes away and later calls return
+ * false. Clients keep it by shared pointer so it outlives both sides.
+ */
+class SDRBASE_API MbeEncoderPort
+{
+public:
+    MbeEncoderPort() : m_provider(nullptr) { }
+
+    //! Provider side: set at construction, cleared (blocking on calls in flight) at destruction
+    void setProvider(std::function<bool(const Message&)> provider)
+    {
+        QMutexLocker locker(&m_mutex);
+        m_provider = provider;
+    }
+
+    //! Client side: forward a message to the provider. Returns false if the provider is gone.
+    bool handleMessage(const Message& msg)
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_provider ? m_provider(msg) : false;
+    }
+
+    bool isOpen()
+    {
+        QMutexLocker locker(&m_mutex);
+        return (bool) m_provider;
+    }
+
+private:
+    QMutex m_mutex;
+    std::function<bool(const Message&)> m_provider;
+};
+
+/**
+ * Ask an MBE encoder provider for its port (handled synchronously: the provider fills the port).
+ */
+class SDRBASE_API DSPGetMbeEncoderPort : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPGetMbeEncoderPort() : Message() { }
+
+    std::shared_ptr<MbeEncoderPort> getPort() const { return m_port; }
+    void setPort(std::shared_ptr<MbeEncoderPort> port) { m_port = port; }
+
+private:
+    std::shared_ptr<MbeEncoderPort> m_port;
 };
 
 #endif // INCLUDE_DSPCOMMANDS_H
