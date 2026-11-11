@@ -58,6 +58,8 @@ class IPTunnel;
 namespace SWGSDRangel {
     class SWGDSEModTransmitStatus;
     class SWGDSEModCapabilities;
+    class SWGDSEModTransmit;
+    class SWGDSEModMessage;
 }
 
 class DSEMod : public BasebandSampleSource, public ChannelAPI {
@@ -381,6 +383,10 @@ public:
     static void webapiFormatTransmitStatus(SWGSDRangel::SWGDSEModTransmitStatus *swg, const QJsonObject& status);
     //! DSEModTxSession::capabilities and the transcode fields into the report's generated class
     static void webapiFormatCapabilities(SWGSDRangel::SWGDSEModCapabilities *swg, const QJsonObject& capabilities);
+    //! A transmit action of the generated model as the JSON request DSEModTxSession takes (see dsemod.cpp)
+    static QJsonObject webapiTransmitToJson(SWGSDRangel::SWGDSEModTransmit *transmit);
+    //! A message action of the generated model as the JSON request DSEModProcessor takes
+    static QJsonObject webapiMessageToJson(SWGSDRangel::SWGDSEModMessage *message);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     double getMagSq() const;

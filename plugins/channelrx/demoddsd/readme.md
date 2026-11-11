@@ -23,7 +23,7 @@ The protocol is detected automatically from the synchronisation patterns found i
 
 <h3>Sensitivity</h3>
 
-The following table shows strong a signal each protocol needs for the voice to sound clean, measured over the air from the DSE Modulator to this demodulator, and in a test harness with white noise. Every protocol is on one scale, C/N0 in dB-Hz (the signal power over the noise in one hertz), so protocols of different bandwidths can be compared; lower is better. For the FM protocols clean is 1% raw bit error rate, where the vocoder's codes still correct what arrives; for Angel61 it is 1% of frames lost, every frame checked by its CRC.
+The following table shows how strong a signal each protocol needs for the voice to sound clean, measured over the air from the DSE Modulator to this demodulator, and in a test harness with white noise. Every protocol is on one scale, C/N0 in dB-Hz (the signal power over the noise in one hertz), so protocols of different bandwidths can be compared; lower is better. For the FM protocols clean is 1% raw bit error rate, where the vocoder's codes still correct what arrives; for Angel61 it is 1% of frames lost, every frame checked by its CRC.
 
 | Protocol | Modulation | Voice | Clean, on air (dB-Hz) | Clean, harness (dB-Hz) | On air, native |
 |---|---|---|---:|---:|---|
@@ -365,8 +365,7 @@ Measured on the signal locked to:
 
   - `err`: the carrier frequency error in Hz, corrected automatically within a quarter of the channel bandwidth
   - `snr`: the symbol signal to noise ratio at the slicer in dB
-  - `ber`: the raw bit error rate on the channel in percent, from the corrections the voice frames' own codes make, whichever vocoder plays them (the AMBE feature and Codec2 included): the Golay and Hamming codes of the AMBE and IMBE frames (DMR, D-STAR, YSF full rate, NXDN, dPMR, P25), counted by decoding each frame on its hard bits, re-encoding it and comparing; M17's convolutional code; YSF V/D type 2's triple repetition; Angel61's LDPC code. Checked against the harness's known channel errors for every protocol: within about 15% up to 5%, reading low above about 10% where the codes run out of correction (the voice is gone by then). Frames that do not decode are not in it; for Angel61 those are what the status line's `BLER` counts (A14.8). D-STAR and P25 Phase 1 need mbevocoder compiled in for the count; the AMBE+2 protocols do not
-
+  - `ber`: the raw bit error rate on the channel in percent, from the corrections the voice frames' own codes make, whichever vocoder plays them (the AMBE feature and Codec2 included): the Golay and Hamming codes of the AMBE and IMBE frames (DMR, D-STAR, YSF full rate, NXDN, dPMR, P25), counted by decoding each frame on its hard bits, re-encoding it and comparing; M17's convolutional code; YSF V/D type 2's triple repetition; Angel61's LDPC code. Frames that do not decode are not in it; for Angel61 those are what the status line's `BLER` counts (A14.8). D-STAR and P25 Phase 1 need mbevocoder compiled in for the count; the AMBE+2 protocols do not.
 
 <h4>C.5: CC - Color code</h4>
 
@@ -394,7 +393,7 @@ Callsign to include in contact reports as the receiver.
 
 <h3>E: File Transfer Tab</h3>
 
-![File Transfer Tab](../../../doc/img/DSDdemod_file_transfer.png)
+![File Transfer Tab](../../../doc/img/DSDdemod_file_transfers.png)
 
 <h4>E.1: Save to</h4>
 
@@ -433,3 +432,7 @@ The IP datagrams heard, valid and fully reassembled: their total size in bytes a
   - `refused`: the datagrams it did not pass on, because they were not from its Peer, were not valid for the tunnel's MTU, or the host would not take them. Datagrams that arrive with the tunnel closed are not counted here.
 
 Delivered and refused reset when the modulator's Tunnel is turned on.
+
+<h2>Attribution</h2>
+
+This code was mostly written by AI, so thanks to everyone whose code it was trained on.

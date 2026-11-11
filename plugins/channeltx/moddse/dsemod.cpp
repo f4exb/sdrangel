@@ -36,6 +36,10 @@
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGDSEModActions.h"
+#include "SWGDSEModTransmit.h"
+#include "SWGDSEModMessage.h"
+#include "SWGDSEModPCM.h"
+#include "SWGDSEModFrame.h"
 #include "SWGDSEModCapabilities.h"
 #include "SWGDSEModMessageStatus.h"
 #include "SWGDSEModTransmitSession.h"
@@ -507,18 +511,18 @@ int DSEMod::webapiActionsPost(
         return 400;
     }
 
-    (void) channelActionsKeys;
-    std::unique_ptr<QJsonObject> action(swgActions->asJsonObject());
-    if (action->size() != 1) {
+    // The keys of the request's DSEModActions object as sent: the generated model reads an absent string
+    // as an empty one, and an empty dtmf or file is an action of its own (the configured sequence or file)
+    if (channelActionsKeys.size() != 1) {
         errorMessage = "Exactly one DSEMod action is required"; return 400;
     }
+    const QString actionKey = channelActionsKeys.first();
     if (!m_thread->isRunning()) { errorMessage = "Transmit device is not running"; return 503; }
     auto processor = m_basebandSource->getProcessor();
-    if (action->contains("dtmf"))
+    if (actionKey == "dtmf")
     {
         if (processor->isAPIActive()) { errorMessage = "API transmission owns the channel"; return 409; }
-        if (!(*action)["dtmf"].isString()) { errorMessage = "dtmf must be a string"; return 400; }
-        QString digits = (*action)["dtmf"].toString();
+        QString digits = swgActions->getDtmf() ? *swgActions->getDtmf() : QString();
         if (digits.isEmpty()) { digits = m_settings.m_dtmfSequence; }
         if (!QRegularExpression("^[0-9A-D*#]{1,64}$").match(digits).hasMatch()) {
             errorMessage = "DTMF requires 1-64 digits (0-9, A-D, *, #)"; return 400;
@@ -526,24 +530,22 @@ int DSEMod::webapiActionsPost(
         getInputMessageQueue()->push(DSEModSource::MsgSendDTMF::create(digits));
         return 202;
     }
-    if (action->contains("aprs"))
+    if (actionKey == "aprs")
     {
         // An APRS information field (3.3) as a data transmission of content type 2
         if (processor->isAPIActive()) { errorMessage = "API transmission owns the channel"; return 409; }
-        if (!(*action)["aprs"].isString()) { errorMessage = "aprs must be a string"; return 400; }
-        QString info = (*action)["aprs"].toString();
+        QString info = swgActions->getAprs() ? *swgActions->getAprs() : QString();
         if (info.isEmpty() || !DSEModSettings::isAngel61(m_settings.m_mode)) {
             errorMessage = "aprs requires an information field and the Angel61 mode"; return 400;
         }
         getInputMessageQueue()->push(DSEModSource::MsgSendAPRS::create(info));
         return 202;
     }
-    if (action->contains("file"))
+    if (actionKey == "file")
     {
         // A file transfer (3.4): the path, or the angel61FileName setting when it is empty
         if (processor->isAPIActive()) { errorMessage = "API transmission owns the channel"; return 409; }
-        if (!(*action)["file"].isString()) { errorMessage = "file must be a string"; return 400; }
-        QString path = (*action)["file"].toString();
+        QString path = swgActions->getFile() ? *swgActions->getFile() : QString();
         if (path.isEmpty()) { path = m_settings.m_angel61FileName; }
         if (path.isEmpty() || !DSEModSettings::isAngel61(m_settings.m_mode)) {
             errorMessage = "file requires a path and the Angel61 mode"; return 400;
@@ -563,9 +565,122 @@ int DSEMod::webapiActionsPost(
         return 202;
     }
 
+    // transmit and message: the session and the processor validate the request as JSON. Anything else is
+    // passed on as it is, which they refuse
+    QJsonObject action;
+
+    if (actionKey == "transmit") {
+        action["transmit"] = swgActions->getTransmit() ? QJsonValue(webapiTransmitToJson(swgActions->getTransmit())) : QJsonValue();
+    } else if (actionKey == "message") {
+        action["message"] = swgActions->getMessage() ? QJsonValue(webapiMessageToJson(swgActions->getMessage())) : QJsonValue();
+    } else {
+        action[actionKey] = QJsonValue();
+    }
+
     int status = 500;
-    QMetaObject::invokeMethod(processor, [&]() { status = processor->submitAction(*action, errorMessage); }, Qt::BlockingQueuedConnection);
+    QMetaObject::invokeMethod(processor, [&]() { status = processor->submitAction(action, errorMessage); }, Qt::BlockingQueuedConnection);
     return status;
+}
+
+// The generated model cannot say which of a request's fields were sent: an absent string arrives empty,
+// an absent number as 0 (and fromJsonObject marks no field present), and the pcm object and frames array
+// are there empty when not sent (the model factory init()s the transmit object it creates). The request
+// DSEModTxSession takes is rebuilt with each field where it has a meaning: strings when not empty;
+// sequence only on append and protocol only with frames input (their presence elsewhere is refused); on
+// an opening request (start, send) the pcm object for pcm input and the frames for frames or angel61
+// input, even empty (an empty start is valid), and otherwise either when it carries something; the PCM
+// sample rate and channel count when not 0 (they are only on the opening request) and its data always;
+// a frame's slot when not 0 and its sequence always.
+QJsonObject DSEMod::webapiTransmitToJson(SWGSDRangel::SWGDSEModTransmit *transmit)
+{
+    QJsonObject json;
+    auto text = [](QString *value) { return value ? *value : QString(); };
+    auto putString = [](QJsonObject& object, const char *key, QString *value) {
+        if (value && !value->isEmpty()) {
+            object[key] = *value;
+        }
+    };
+
+    putString(json, "operation", transmit->getOperation());
+    putString(json, "sessionId", transmit->getSessionId());
+    putString(json, "input", transmit->getInput());
+    putString(json, "source", transmit->getSource());
+    putString(json, "destination", transmit->getDestination());
+    putString(json, "via", transmit->getVia());
+
+    if (text(transmit->getOperation()) == "append") {
+        json["sequence"] = transmit->getSequence();
+    }
+    if (text(transmit->getInput()) == "frames") {
+        json["protocol"] = transmit->getProtocol();
+    }
+
+    const QString operation = text(transmit->getOperation());
+    const QString input = text(transmit->getInput());
+    const bool opening = (operation == "start") || (operation == "send");
+    SWGSDRangel::SWGDSEModPCM *pcm = transmit->getPcm();
+    QList<SWGSDRangel::SWGDSEModFrame*> *frames = transmit->getFrames();
+    const bool pcmSent = pcm && (opening ? (input == "pcm") : !text(pcm->getData()).isEmpty());
+    const bool framesSent = frames && (opening ? ((input == "frames") || (input == "angel61")) : !frames->isEmpty());
+
+    if (pcmSent)
+    {
+        QJsonObject pcmJson;
+        putString(pcmJson, "encoding", pcm->getEncoding());
+
+        if (pcm->getSampleRate() != 0) {
+            pcmJson["sampleRate"] = pcm->getSampleRate();
+        }
+        if (pcm->getChannels() != 0) {
+            pcmJson["channels"] = pcm->getChannels();
+        }
+
+        pcmJson["data"] = text(pcm->getData());
+        json["pcm"] = pcmJson;
+    }
+
+    if (framesSent)
+    {
+        QJsonArray framesJson;
+
+        for (SWGSDRangel::SWGDSEModFrame *frame : *frames)
+        {
+            QJsonObject frameJson;
+            putString(frameJson, "format", frame->getFormat());
+            putString(frameJson, "frameType", frame->getFrameType());
+
+            if (frame->getSlot() != 0) {
+                frameJson["slot"] = frame->getSlot();
+            }
+
+            frameJson["sequence"] = frame->getSequence();
+            frameJson["data"] = text(frame->getData());
+            framesJson.append(frameJson);
+        }
+
+        json["frames"] = framesJson;
+    }
+
+    return json;
+}
+
+QJsonObject DSEMod::webapiMessageToJson(SWGSDRangel::SWGDSEModMessage *message)
+{
+    QJsonObject json;
+    auto putString = [&json](const char *key, QString *value) {
+        if (value && !value->isEmpty()) {
+            json[key] = *value;
+        }
+    };
+
+    putString("requestId", message->getRequestId());
+    putString("type", message->getType());
+    putString("delivery", message->getDelivery());
+    putString("sessionId", message->getSessionId());
+    putString("service", message->getService());
+    putString("text", message->getText());
+    putString("data", message->getData());
+    return json;
 }
 
 void DSEMod::openFileStream()

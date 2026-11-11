@@ -670,8 +670,8 @@ void DSDDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("contactReportEnabled"))
         settings.m_contactReportEnabled = response.getDsdDemodSettings()->getContactReportEnabled() != 0;
-    if (channelSettingsKeys.contains("contactReportCallsign"))
-        settings.m_contactReportCallsign = response.getDsdDemodSettings()->getContactReportCallsign();
+    if (channelSettingsKeys.contains("contactReportCallsign") && response.getDsdDemodSettings()->getContactReportCallsign())
+        settings.m_contactReportCallsign = *response.getDsdDemodSettings()->getContactReportCallsign();
     if (channelSettingsKeys.contains("dmrColorCode"))
     {
         int colorCode = response.getDsdDemodSettings()->getDmrColorCode();
@@ -762,7 +762,11 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDsdDemodSettings()->setAngel61FileConfirm(settings.m_angel61FileConfirm ? 1 : 0);
     response.getDsdDemodSettings()->setAngel61Groups(new QString(settings.m_angel61Groups));
     response.getDsdDemodSettings()->setContactReportEnabled(settings.m_contactReportEnabled ? 1 : 0);
-    response.getDsdDemodSettings()->setContactReportCallsign(settings.m_contactReportCallsign);
+    if (response.getDsdDemodSettings()->getContactReportCallsign()) {
+        *response.getDsdDemodSettings()->getContactReportCallsign() = settings.m_contactReportCallsign;
+    } else {
+        response.getDsdDemodSettings()->setContactReportCallsign(new QString(settings.m_contactReportCallsign));
+    }
     response.getDsdDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getDsdDemodSettings()->getTitle()) {
@@ -1035,7 +1039,7 @@ void DSDDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("contactReportEnabled") || force)
         swgDSDDemodSettings->setContactReportEnabled(settings.m_contactReportEnabled ? 1 : 0);
     if (channelSettingsKeys.contains("contactReportCallsign") || force)
-        swgDSDDemodSettings->setContactReportCallsign(settings.m_contactReportCallsign);
+        swgDSDDemodSettings->setContactReportCallsign(new QString(settings.m_contactReportCallsign));
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgDSDDemodSettings->setRgbColor(settings.m_rgbColor);
     }
