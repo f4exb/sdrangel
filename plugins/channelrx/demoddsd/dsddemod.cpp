@@ -312,7 +312,7 @@ QList<DSDDemod::Angel61Tunnel> DSDDemod::getAngel61Tunnels()
     QHash<const QObject*, Angel61Tunnel> present;
     MainCore *mainCore = MainCore::instance();
 
-    for (int d = 0; d < mainCore->getDeviceSets().size(); d++)
+    for (int d = 0; d < (int) mainCore->getDeviceSets().size(); d++)
     {
         DeviceSet *deviceSet = mainCore->getDeviceSets()[d];
 

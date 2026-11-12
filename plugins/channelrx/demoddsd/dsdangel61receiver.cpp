@@ -1929,7 +1929,6 @@ float DSDAngel61Receiver::trackGains(DVAngel61::Constellation constellation, std
     using namespace std;
     const int N = m_frameSymbols;
     const int NT = m_nextUwValid ? m_extendedSymbols : N;   // symbols tracked: the next UW anchors the tail when it is there
-    const int NH = m_layout->m_headerSymbols;
     bool known[MaxExtendedSymbols];
     bool formatKnown[MaxExtendedSymbols];
     complex<float> ref[MaxExtendedSymbols];

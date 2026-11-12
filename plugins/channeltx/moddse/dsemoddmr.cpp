@@ -50,10 +50,6 @@ DSEModDMR::DSEModDMR() :
     m_direct(false),
     m_colorCode(1),
     m_voiceSlot(0),
-    m_stateFrameCount(0),
-    m_superframeIndex(0),
-    m_cachLcssIndex(0),
-    m_voiceFrameCount(0),
     m_positionValid(false),
     m_sendPosition(false),
     m_latitude(0.0),
@@ -61,7 +57,11 @@ DSEModDMR::DSEModDMR() :
     m_positionError(7),
     m_gpsPending(false),
     m_gpsSuperframe(false),
-    m_superframeCount(0)
+    m_superframeCount(0),
+    m_stateFrameCount(0),
+    m_superframeIndex(0),
+    m_cachLcssIndex(0),
+    m_voiceFrameCount(0)
 {
     std::fill(m_lc, m_lc + 9, 0);
     std::fill(m_vlcInfo, m_vlcInfo + m_infoBits, 0);

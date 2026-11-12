@@ -808,7 +808,7 @@ void DSEMod::scanDSDDemodulators()
 {
     MainCore *mainCore = MainCore::instance();
 
-    for (int d = 0; d < mainCore->getDeviceSets().size(); d++)
+    for (int d = 0; d < (int) mainCore->getDeviceSets().size(); d++)
     {
         DeviceSet *deviceSet = mainCore->getDeviceSets()[d];
 
@@ -1218,7 +1218,7 @@ void DSEMod::reportTunnelToDemodulators()
     // preset's load announces the removals after the deletions (DeviceSet::clearChannels)
     MainCore *mainCore = MainCore::instance();
 
-    for (int d = 0; d < mainCore->getDeviceSets().size(); d++)
+    for (int d = 0; d < (int) mainCore->getDeviceSets().size(); d++)
     {
         DeviceSet *deviceSet = mainCore->getDeviceSets()[d];
 
@@ -1893,7 +1893,7 @@ void DSEMod::applySettings(const QStringList& settingsKeys, const DSEModSettings
             updateTunnelFilter(current);
         }
 
-        for (const QString& key : { "angel61Tunnel", "angel61TunnelPeer", "angel61TunnelInterface",
+        for (const char *key : { "angel61Tunnel", "angel61TunnelPeer", "angel61TunnelInterface",
             "angel61TunnelAddress", "angel61TunnelRoutes", "angel61TunnelMTU", "mode", "angel61Source" }) {
             tunnelKeys = tunnelKeys || settingsKeys.contains(key);
         }
