@@ -581,14 +581,6 @@ elseif(ANDROID)
   set(FAAD_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/include" CACHE INTERNAL "")
   set(FAAD_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/lib/liblibfaadstatic.a" CACHE INTERNAL "")
 
-  set(LIBMBE_FOUND ON CACHE INTERNAL "")
-  set(LIBMBE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/mbelib/include/" CACHE INTERNAL "")
-  set(LIBMBE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/mbelib/lib/libmbe.a" CACHE INTERNAL "")
-
-  set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
-  set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/include/" CACHE INTERNAL "")
-  set(LIBDSDCC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so" CACHE INTERNAL "")
-
   set(FFMPEG_FOUND ON CACHE INTERNAL "")
   set(FFMPEG_SKIP_CHECK ON CACHE INTERNAL "")
   set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/include" CACHE INTERNAL "")
@@ -691,7 +683,6 @@ elseif(ANDROID)
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswresample.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswscale.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libc++_shared.so
-      ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libunrooted_android.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libusb1.0.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/cm256cc/lib/libcm256cc.so
@@ -769,7 +760,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libusb1.0.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/flac/lib/libFLAC.so
@@ -781,7 +771,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libusb1.0.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/flac/lib/libFLAC.so
@@ -1308,10 +1297,10 @@ if (BUILD_GUI)
   if(WIN32)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
                             WIN32_EXECUTABLE ${HIDE_CONSOLE})
-    if (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD)                            
-    add_dependencies(${CMAKE_PROJECT_NAME} sdrangel-tunnel-helper)
+    if (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD)
+      add_dependencies(${CMAKE_PROJECT_NAME} sdrangel-tunnel-helper)
+    endif()
   endif()
-endif()
 endif()
 
 ############ build sdrangel server ################
