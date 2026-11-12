@@ -45,6 +45,7 @@ static const QStringList packetURIs = {
     QStringLiteral("sdrangel.channel.inmarsatdemod"),
     QStringLiteral("sdrangel.channel.radiosondedemod"),
     QStringLiteral("sdrangel.channel.droneiddemod"),
+    QStringLiteral("sdrangel.channel.dsddemod"),
 };
 static const QStringList packetPipes = {"packets", "ais", "radiosonde"};
 
@@ -414,7 +415,7 @@ QJsonObject MCPDataFeed::decodePacket(const QString& sourceType, const QByteArra
             delete msg;
         }
     }
-    else if ((sourceType == "PacketDemod") || (sourceType == "ChirpChatDemod") || (sourceType == "M17Demod"))
+    else if ((sourceType == "PacketDemod") || (sourceType == "ChirpChatDemod") || (sourceType == "M17Demod") || (sourceType == "DSDDemod"))
     {
         AX25Packet ax25;
 

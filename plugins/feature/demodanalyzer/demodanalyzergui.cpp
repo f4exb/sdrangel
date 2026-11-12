@@ -90,6 +90,7 @@ bool DemodAnalyzerGUI::handleMessage(const Message& message)
         ui->scopeGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
+        applyRealSpectrum();
 
         return true;
     }
@@ -188,6 +189,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_settings.setRollupState(&m_rollupState);
 
     displaySettings();
+    applyRealSpectrum();
 	applySettings(true);
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
@@ -218,6 +220,7 @@ void DemodAnalyzerGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->realSpectrum->setChecked(m_settings.m_realSpectrum);
     ui->record->setChecked(m_settings.m_recordToFile);
     ui->fileNameText->setText(m_settings.m_fileRecordName);
     ui->showFileDialog->setEnabled(!m_settings.m_recordToFile);
@@ -329,6 +332,27 @@ void DemodAnalyzerGUI::on_channelApply_clicked()
     }
 }
 
+void DemodAnalyzerGUI::applyRealSpectrum()
+{
+    // A real signal's spectrum is symmetric: show its positive half, 0 to half the sample rate, as
+    // the SSB demodulator does: the scope feeds the spectrum its positive frequencies only, the
+    // spectrum settings carry the flag (for the web socket spectrum) and the view sets its scale
+    m_scopeVis->setSSBSpectrum(m_settings.m_realSpectrum);
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_ssb = m_settings.m_realSpectrum;
+    m_spectrumVis->getInputMessageQueue()->push(SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false));
+    ui->glSpectrum->setLsbDisplay(false);
+    ui->glSpectrum->setSsbSpectrum(m_settings.m_realSpectrum);
+}
+
+void DemodAnalyzerGUI::on_realSpectrum_toggled(bool checked)
+{
+    m_settings.m_realSpectrum = checked;
+    applyRealSpectrum();
+    m_settingsKeys.append("realSpectrum");
+    applySettings();
+}
+
 void DemodAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
 {
     if ((index < 0) || (index > 6)) {
@@ -416,6 +440,7 @@ void DemodAnalyzerGUI::makeUIConnections()
 	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_channels_currentIndexChanged);
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_channelApply_clicked);
 	QObject::connect(ui->log2Decim, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_log2Decim_currentIndexChanged);
+	QObject::connect(ui->realSpectrum, &ButtonSwitch::toggled, this, &DemodAnalyzerGUI::on_realSpectrum_toggled);
     QObject::connect(ui->record, &ButtonSwitch::toggled, this, &DemodAnalyzerGUI::on_record_toggled);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_showFileDialog_clicked);
     QObject::connect(ui->recordSilenceTime, &QSlider::valueChanged, this, &DemodAnalyzerGUI::on_recordSilenceTime_valueChanged);

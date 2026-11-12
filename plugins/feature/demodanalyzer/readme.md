@@ -74,6 +74,10 @@ Applies or re-applies channel selection (A.3) so that the channel gets effective
 
 This combo can select half-band decimation from baseband sample rate by a power of two.
 
+<h3>A.5a: Real signal spectrum</h3>
+
+Toggle this (`Re`) when the channel sends a real signal, which is the case for audio (the voice demodulators, the DSD demodulator): the spectrum of a real signal is symmetric about zero, so only its positive half, from 0 to half the analyzer sample rate, is displayed. Leave it off for a complex (I/Q) signal such as the binaural output of the SSB demodulator.
+
 <h3>A.6: Analyzer sample rate</h3>
 
 This is the resulting sample rate after possible decimation that is used by the spectrum and scope visualizations

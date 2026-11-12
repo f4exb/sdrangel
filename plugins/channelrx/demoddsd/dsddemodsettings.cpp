@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2017-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2021, 2026 Jon Beniston, M7RCE <jon@beniston.com>               //
 //                                                                               //
-// This program is free som_udpCopyAudioftware; you can redistribute it and/or modify          //
+// This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
 // (at your option) any later version.                                           //
@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+
+#include <algorithm>
+#include <cmath>
 
 #include <QColor>
 
@@ -34,19 +37,24 @@ void DSDDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500.0;
-    m_fmDeviation = 3500.0;
-    m_demodGain = 1.0;
     m_volume = 2.0;
-    m_baudRate = 4800;
-    m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
-    m_squelch = -40.0;
+    m_protocol = ProtocolAuto;
+    m_p25p2Wacn = 0xBEE00;
+    m_p25p2Sysid = 0x001;
+    m_p25p2Nac = 0x293;
+    m_coherent = true;
     m_audioMute = false;
-    m_enableCosineFiltering = false;
-    m_syncOrConstellation = false;
     m_slot1On = true;
     m_slot2On = false;
     m_tdmaStereo = false;
-    m_pllLock = true;
+    m_dmrColorCode = -1;
+    m_angel61FileDirectory = "";
+    m_codecModelDirectory = "";
+    m_angel61FileMaxKB = 1024;
+    m_angel61FileConfirm = false;
+    m_angel61Groups = "";
+    m_contactReportEnabled = false;
+    m_contactReportCallsign = "";
     m_rgbColor = QColor(0, 255, 255).rgb();
     m_title = "DSD Demodulator";
     m_highPassFilter = false;
@@ -66,21 +74,22 @@ void DSDDemodSettings::resetToDefaults()
     m_connectAMBE = false;
 }
 
+const char *DSDDemodSettings::getProtocolName(int protocol)
+{
+    static const char *names[NbProtocols] = { "Auto", "DMR", "D-STAR", "YSF", "NXDN48", "NXDN96", "dPMR", "P25", "P25P2", "M17", "Angel61 NB", "Angel61 WB",
+        "Angel61 HF-NB", "Angel61 HF-WB" };
+    return ((protocol >= 0) && (protocol < NbProtocols)) ? names[protocol] : "Auto";
+}
+
 QByteArray DSDDemodSettings::serialize() const
 {
-    SimpleSerializer s(1);
+    // Version 2: the discriminator, filter, PLL, AFC, baud rate, squelch and squelch gate settings of the
+    // DSDcc based receiver are gone; the protocol selection replaces the baud rate
+    SimpleSerializer s(2);
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_rfBandwidth/100.0);
-    s.writeS32(3, m_demodGain*100.0);
-    s.writeS32(4, m_fmDeviation/100.0);
-    s.writeS32(5, m_squelch);
-    s.writeBool(6, m_pllLock);
     s.writeU32(7, m_rgbColor);
-    s.writeS32(8, m_squelchGate);
-    s.writeS32(9, m_volume*10.0);
-    s.writeS32(11, m_baudRate);
-    s.writeBool(12, m_enableCosineFiltering);
-    s.writeBool(13, m_syncOrConstellation);
+    s.writeS32(9, (int) std::lround(m_volume * 10.0));   // (rounded: 0.7 was saved as 6)
     s.writeBool(14, m_slot1On);
     s.writeBool(15, m_slot2On);
     s.writeBool(16, m_tdmaStereo);
@@ -112,6 +121,19 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeBool(34, m_hidden);
     s.writeS32(35, m_ambeFeatureIndex);
     s.writeBool(36, m_connectAMBE);
+    s.writeS32(38, m_protocol);
+    s.writeS32(39, m_p25p2Wacn);
+    s.writeS32(40, m_p25p2Sysid);
+    s.writeS32(41, m_p25p2Nac);
+    s.writeBool(42, m_coherent);
+    s.writeS32(43, m_dmrColorCode);
+    s.writeString(44, m_angel61FileDirectory);
+    s.writeString(51, m_codecModelDirectory);
+    s.writeS32(45, m_angel61FileMaxKB);
+    s.writeBool(52, m_angel61FileConfirm);
+    s.writeString(46, m_angel61Groups);
+    s.writeBool(47, m_contactReportEnabled);
+    s.writeString(50, m_contactReportCallsign);
 
     return s.final();
 }
@@ -126,8 +148,9 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         return false;
     }
 
-    if (d.getVersion() == 1)
+    if ((d.getVersion() == 1) || (d.getVersion() == 2))
     {
+        // Version 1 presets carry the removed settings under keys that are simply not read
         QByteArray bytetmp;
         QString strtmp;
         qint32 tmp;
@@ -142,22 +165,11 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readS32(2, &tmp, 125);
-        m_rfBandwidth = tmp * 100.0;
-        d.readS32(3, &tmp, 125);
-        m_demodGain = tmp / 100.0;
-        d.readS32(4, &tmp, 50);
-        m_fmDeviation = tmp * 100.0;
-        d.readS32(5, &tmp, -40);
-        m_squelch = tmp < -100 ? tmp / 10.0 : tmp;
-        d.readBool(6, &m_pllLock, true);
-        d.readU32(7, &m_rgbColor);
-        d.readS32(8, &m_squelchGate, 5);
+        m_rfBandwidth = std::max(1000.0, std::min(50000.0, tmp * 100.0));   // the GUI's range
+        d.readU32(7, &m_rgbColor, QColor(0, 255, 255).rgb());
         d.readS32(9, &tmp, 20);
-        m_volume = tmp / 10.0;
-        d.readS32(11, &m_baudRate, 4800);
-        d.readBool(12, &m_enableCosineFiltering, false);
-        d.readBool(13, &m_syncOrConstellation, false);
-        d.readBool(14, &m_slot1On, false);
+        m_volume = std::max(0.0, std::min(10.0, tmp / 10.0));
+        d.readBool(14, &m_slot1On, true);
         d.readBool(15, &m_slot2On, false);
         d.readBool(16, &m_tdmaStereo, false);
         d.readString(18, &m_title, "DSD Demodulator");
@@ -197,6 +209,22 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readBool(34, &m_hidden, false);
         d.readS32(35, &m_ambeFeatureIndex, -1);
         d.readBool(36, &m_connectAMBE, false);
+        d.readS32(38, &tmp, ProtocolAuto);
+        m_protocol = protocolOf(tmp);
+        d.readS32(39, &m_p25p2Wacn, 0xBEE00);
+        d.readS32(40, &m_p25p2Sysid, 0x001);
+        d.readS32(41, &m_p25p2Nac, 0x293);
+        d.readBool(42, &m_coherent, true);
+        d.readS32(43, &tmp, -1);
+        m_dmrColorCode = ((tmp >= 0) && (tmp <= 63)) ? tmp : -1;
+        d.readString(44, &m_angel61FileDirectory, "");
+        d.readString(51, &m_codecModelDirectory, "");
+        d.readS32(45, &m_angel61FileMaxKB, 1024);
+        m_angel61FileMaxKB = std::max(0, std::min(65536, m_angel61FileMaxKB));
+        d.readBool(52, &m_angel61FileConfirm, false);
+        d.readString(46, &m_angel61Groups, "");
+        d.readBool(47, &m_contactReportEnabled, false);
+        d.readString(50, &m_contactReportCallsign, "");
 
         return true;
     }
@@ -215,32 +243,26 @@ void DSDDemodSettings::applySettings(const QStringList& settingsKeys, const DSDD
     if (settingsKeys.contains("rfBandwidth")) {
         m_rfBandwidth = settings.m_rfBandwidth;
     }
-    if (settingsKeys.contains("fmDeviation")) {
-        m_fmDeviation = settings.m_fmDeviation;
-    }
-    if (settingsKeys.contains("demodGain")) {
-        m_demodGain = settings.m_demodGain;
-    }
     if (settingsKeys.contains("volume")) {
         m_volume = settings.m_volume;
     }
-    if (settingsKeys.contains("baudRate")) {
-        m_baudRate = settings.m_baudRate;
+    if (settingsKeys.contains("protocol")) {
+        m_protocol = settings.m_protocol;
     }
-    if (settingsKeys.contains("squelchGate")) {
-        m_squelchGate = settings.m_squelchGate;
+    if (settingsKeys.contains("p25p2Wacn")) {
+        m_p25p2Wacn = settings.m_p25p2Wacn;
     }
-    if (settingsKeys.contains("squelch")) {
-        m_squelch = settings.m_squelch;
+    if (settingsKeys.contains("p25p2Sysid")) {
+        m_p25p2Sysid = settings.m_p25p2Sysid;
+    }
+    if (settingsKeys.contains("p25p2Nac")) {
+        m_p25p2Nac = settings.m_p25p2Nac;
+    }
+    if (settingsKeys.contains("coherent")) {
+        m_coherent = settings.m_coherent;
     }
     if (settingsKeys.contains("audioMute")) {
         m_audioMute = settings.m_audioMute;
-    }
-    if (settingsKeys.contains("enableCosineFiltering")) {
-        m_enableCosineFiltering = settings.m_enableCosineFiltering;
-    }
-    if (settingsKeys.contains("syncOrConstellation")) {
-        m_syncOrConstellation = settings.m_syncOrConstellation;
     }
     if (settingsKeys.contains("slot1On")) {
         m_slot1On = settings.m_slot1On;
@@ -251,8 +273,25 @@ void DSDDemodSettings::applySettings(const QStringList& settingsKeys, const DSDD
     if (settingsKeys.contains("tdmaStereo")) {
         m_tdmaStereo = settings.m_tdmaStereo;
     }
-    if (settingsKeys.contains("pllLock")) {
-        m_pllLock = settings.m_pllLock;
+    if (settingsKeys.contains("angel61FileDirectory")) {
+        m_angel61FileDirectory = settings.m_angel61FileDirectory;
+    }
+    if (settingsKeys.contains("codecModelDirectory")) {
+        m_codecModelDirectory = settings.m_codecModelDirectory;
+    }
+    if (settingsKeys.contains("angel61FileMaxKB")) {
+        m_angel61FileMaxKB = settings.m_angel61FileMaxKB;
+    }
+    if (settingsKeys.contains("angel61FileConfirm")) {
+        m_angel61FileConfirm = settings.m_angel61FileConfirm;
+    }
+    if (settingsKeys.contains("angel61Groups")) {
+        m_angel61Groups = settings.m_angel61Groups;
+    }
+    if (settingsKeys.contains("contactReportEnabled")) m_contactReportEnabled = settings.m_contactReportEnabled;
+    if (settingsKeys.contains("contactReportCallsign")) m_contactReportCallsign = settings.m_contactReportCallsign;
+    if (settingsKeys.contains("dmrColorCode")) {
+        m_dmrColorCode = settings.m_dmrColorCode;
     }
     if (settingsKeys.contains("rgbColor")) {
         m_rgbColor = settings.m_rgbColor;
@@ -317,32 +356,26 @@ QString DSDDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;
     }
-    if (settingsKeys.contains("fmDeviation") || force) {
-        ostr << " m_fmDeviation: " << m_fmDeviation;
-    }
-    if (settingsKeys.contains("demodGain") || force) {
-        ostr << " m_demodGain: " << m_demodGain;
-    }
     if (settingsKeys.contains("volume") || force) {
         ostr << " m_volume: " << m_volume;
     }
-    if (settingsKeys.contains("baudRate") || force) {
-        ostr << " m_baudRate: " << m_baudRate;
+    if (settingsKeys.contains("protocol") || force) {
+        ostr << " m_protocol: " << getProtocolName(m_protocol);
     }
-    if (settingsKeys.contains("squelchGate") || force) {
-        ostr << " m_squelchGate: " << m_squelchGate;
+    if (settingsKeys.contains("p25p2Wacn") || force) {
+        ostr << " m_p25p2Wacn: " << m_p25p2Wacn;
     }
-    if (settingsKeys.contains("squelch") || force) {
-        ostr << " m_squelch: " << m_squelch;
+    if (settingsKeys.contains("p25p2Sysid") || force) {
+        ostr << " m_p25p2Sysid: " << m_p25p2Sysid;
+    }
+    if (settingsKeys.contains("p25p2Nac") || force) {
+        ostr << " m_p25p2Nac: " << m_p25p2Nac;
+    }
+    if (settingsKeys.contains("coherent") || force) {
+        ostr << " m_coherent: " << m_coherent;
     }
     if (settingsKeys.contains("audioMute") || force) {
         ostr << " m_audioMute: " << m_audioMute;
-    }
-    if (settingsKeys.contains("enableCosineFiltering") || force) {
-        ostr << " m_enableCosineFiltering: " << m_enableCosineFiltering;
-    }
-    if (settingsKeys.contains("syncOrConstellation") || force) {
-        ostr << " m_syncOrConstellation: " << m_syncOrConstellation;
     }
     if (settingsKeys.contains("slot1On") || force) {
         ostr << " m_slot1On: " << m_slot1On;
@@ -353,8 +386,25 @@ QString DSDDemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("tdmaStereo") || force) {
         ostr << " m_tdmaStereo: " << m_tdmaStereo;
     }
-    if (settingsKeys.contains("pllLock") || force) {
-        ostr << " m_pllLock: " << m_pllLock;
+    if (settingsKeys.contains("angel61FileConfirm") || force) {
+        ostr << " m_angel61FileConfirm: " << m_angel61FileConfirm;
+    }
+    if (settingsKeys.contains("angel61FileDirectory") || force) {
+        ostr << " m_angel61FileDirectory: " << m_angel61FileDirectory.toStdString();
+    }
+    if (settingsKeys.contains("codecModelDirectory") || force) {
+        ostr << " m_codecModelDirectory: " << m_codecModelDirectory.toStdString();
+    }
+    if (settingsKeys.contains("angel61FileMaxKB") || force) {
+        ostr << " m_angel61FileMaxKB: " << m_angel61FileMaxKB;
+    }
+    if (settingsKeys.contains("angel61Groups") || force) {
+        ostr << " m_angel61Groups: " << m_angel61Groups.toStdString();
+    }
+    if (settingsKeys.contains("contactReportEnabled") || force) ostr << " m_contactReportEnabled: " << m_contactReportEnabled;
+    if (settingsKeys.contains("contactReportCallsign") || force) ostr << " m_contactReportCallsign: " << m_contactReportCallsign.toStdString();
+    if (settingsKeys.contains("dmrColorCode") || force) {
+        ostr << " m_dmrColorCode: " << m_dmrColorCode;
     }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;

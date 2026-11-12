@@ -501,6 +501,7 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
 
     response.getDemodAnalyzerSettings()->setRecordToFile(settings.m_recordToFile ? 1 : 0);
     response.getDemodAnalyzerSettings()->setRecordSilenceTime(settings.m_recordSilenceTime);
+    response.getDemodAnalyzerSettings()->setRealSpectrum(settings.m_realSpectrum ? 1 : 0);
 
     if (settings.m_spectrumGUI)
     {
@@ -592,6 +593,9 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("recordSilenceTime")) {
         settings.m_recordSilenceTime = response.getDemodAnalyzerSettings()->getRecordSilenceTime();
     }
+    if (featureSettingsKeys.contains("realSpectrum")) {
+        settings.m_realSpectrum = response.getDemodAnalyzerSettings()->getRealSpectrum() != 0;
+    }
 }
 
 void DemodAnalyzer::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force)
@@ -622,6 +626,9 @@ void DemodAnalyzer::webapiReverseSendSettings(const QList<QString>& featureSetti
     }
     if (featureSettingsKeys.contains("recordSilenceTime") || force) {
         swgDemodAnalyzerSettings->setRecordSilenceTime(settings.m_recordSilenceTime);
+    }
+    if (featureSettingsKeys.contains("realSpectrum") || force) {
+        swgDemodAnalyzerSettings->setRealSpectrum(settings.m_realSpectrum ? 1 : 0);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")

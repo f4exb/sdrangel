@@ -95,6 +95,11 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 void ScopeVisXY::start()
 {
+	m_pixelCount = 0;
+	m_tvScreen->resetImage();
+	drawGraticule();
+	m_tvScreen->setAlphaReset();
+	m_tvScreen->renderImage(nullptr);
 }
 
 void ScopeVisXY::stop()
@@ -161,4 +166,3 @@ void ScopeVisXY::drawGraticule()
         m_tvScreen->setDataColor(*colIt, qRed(m_gridRGB), qGreen(m_gridRGB), qBlue(m_gridRGB));
     }
 }
-

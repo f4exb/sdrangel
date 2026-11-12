@@ -54,8 +54,8 @@ Specifies the time in seconds that the Frequency Scanner will average its power 
 
 <h3>8: t_rtx - Retransmission Time / t_rx Receive Time</h3>
 
-t_rtx: When Run Mode (11) is not Multiplex, specifies the time in seconds that the Frequency Scanner will wait after the power on the active frequency falls below the threshold, before restarting
-scanning. This enables the channel to remain tuned to a single frequency while there is a temporary break in transmission.
+t_rtx: When Run Mode (11) is not Multiplex, specifies the time in seconds that the Frequency Scanner will wait after the active frequency becomes inactive before restarting
+scanning. This enables the channel to remain tuned to a single frequency while there is a temporary break in transmission. For a DSD Demod channel, activity is determined by decoded voice on either slot rather than received power, so an idle digital carrier is considered inactive.
 
 t_rx: When Run Mode (11) is Multiplex, specifies the time in seconds the channel will be tuned to each frequency.
 
@@ -91,7 +91,7 @@ Total is potentially more useful for wideband signals, that are close to the noi
 Specifies the run mode:
 
 - Single: All frequencies are scanned once. Channel (1) is tuned to the active frequency at the end of the scan. The scan does not repeat.
-- Continuous: All frequencies scanned, with channel (1) being tuned to active frequency at the end of the scan. Scan repeats once the power on the active frequency falls below the threshold (4) for longer than the retransmission time (7).
+- Continuous: All frequencies scanned, with channel (1) being tuned to active frequency at the end of the scan. Scan repeats once the active frequency is inactive for longer than the retransmission time (7). For a DSD Demod channel, either voice slot must be active; idle digital carriers do not keep the scanner stopped.
 - Scan only: All frequencies are scanned repeatedly. The channel will not be tuned. This mode is just for counting how often frequencies are active, which can be seen in the Active Count column in the frequency table (14).
 - Multiplex: Frequencies will be stepped through sequentially and repeatedly, with the channel (1) being tuned for the time specified by t_rx (7).
 
@@ -160,6 +160,7 @@ Press to add a single row to the frequency table (14).
 
 Press to add a range of frequencies to the frequency table. A dialog is displayed with start and stop frequencies, as well as a step value.
 The step value should typically be an integer multiple of the channel bandwidth (8).
+Preset channel lists are also available, including the UK 2m and 70cm allocations from the [UK Repeater channel-frequency list](https://ukrepeater.net/repeater_channels.html).
 
 <h3>22: Remove</h3>
 

@@ -34,6 +34,7 @@
 class QThread;
 class AMBEWorker;
 class AudioFifo;
+class MessageQueue;
 
 class AMBEEngine : public QObject
 {
@@ -65,6 +66,17 @@ public:
             bool useHP,
             int upsampling,
             AudioFifo *audioFifo);
+
+    //! Push audio to encode. The encoded frame is returned on the reply queue as a DSPReportMbeFrame.
+    void pushMbeAudio(
+            const short *audio,
+            int mbeRateIndex,
+            int gain,
+            unsigned int sequence,
+            const void *client,
+            MessageQueue *replyQueue);
+    //! Client done: an encoder client's reply queue is not used any more, a decoder's AudioFifo not written
+    void releaseEncodeClient(const void *client);
 
 private:
     struct AMBEController

@@ -17,6 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include <QRegularExpression>
 #include <QStringList>
 #include <QDateTime>
@@ -68,44 +70,57 @@ bool APRSPacket::decode(AX25Packet packet)
             // First byte of information field is data type ID
             char dataType = data[0].toLatin1();
             int idx = 1;
+
+            // Third party traffic: the packet inside is the one to show, with its own addresses
+            // (an APRS-IS gateway, or a relay over another protocol). One level only
+            if (dataType == '}')
+            {
+                QString inner = data.mid(idx);
+                int colon = inner.indexOf(':');
+                int arrow = inner.indexOf('>');
+
+                if ((colon < 1) || (arrow < 1) || (arrow > colon) || (colon + 1 >= inner.length())) {
+                    return false;
+                }
+
+                QString header = inner.left(colon);
+                QString path = header.mid(arrow + 1);
+                int comma = path.indexOf(',');
+                m_from = header.left(arrow);
+                m_to = comma < 0 ? path : path.left(comma);
+                m_via = comma < 0 ? QString() : path.mid(comma + 1);
+                data = inner.mid(colon + 1);
+                dataType = data[0].toLatin1();
+                idx = 1;
+            }
+
             switch (dataType)
             {
             case '!': // Position without timestamp or  Ultimeter 2000 WX Station
-                parsePosition(data, idx);
-                if (m_symbolCode == '_')
-                    parseWeather(data, idx, false);
-                else if (m_symbolCode == '@')
-                    parseStorm(data, idx);
-                else
-                {
-                    parseDataExension(data, idx);
-                    parseComment(data, idx);
-                }
+                parsePositionReport(data, idx);
                 break;
             case '#': // Peet Bros U-II Weather Station
             case '$': // Raw GPS data or Ultimeter 2000
             case '%': // Agrelo DFJr / MicroFinder
                 break;
             case ')': // Item
+            {
+                bool compressed = false;
                 parseItem(data, idx);
-                parsePosition(data, idx);
-                parseDataExension(data, idx);
+                parsePosition(data, idx, &compressed);
+
+                if (!compressed) {
+                    parseDataExension(data, idx);
+                }
+
                 parseComment(data, idx);
                 break;
+            }
             case '*': // Peet Bros U-II Weather Station
                 break;
             case '/': // Position with timestamp (no APRS messaging)
                 parseTime(data, idx);
-                parsePosition(data, idx);
-                if (m_symbolCode == '_')
-                    parseWeather(data, idx, false);
-                else if (m_symbolCode == '@')
-                    parseStorm(data, idx);
-                else
-                {
-                    parseDataExension(data, idx);
-                    parseComment(data, idx);
-                }
+                parsePositionReport(data, idx);
                 break;
             case ':': // Message
                 parseMessage(data, idx);
@@ -113,30 +128,12 @@ bool APRSPacket::decode(AX25Packet packet)
             case ';': // Object
                 parseObject(data, idx);
                 parseTime(data, idx);
-                parsePosition(data, idx);
-                if (m_symbolCode == '_')
-                    parseWeather(data, idx, false);
-                else if (m_symbolCode == '@')
-                    parseStorm(data, idx);
-                else
-                {
-                    parseDataExension(data, idx);
-                    parseComment(data, idx);
-                }
+                parsePositionReport(data, idx);
                 break;
             case '<': // Station Capabilities
                 break;
             case '=': // Position without timestamp (with APRS messaging)
-                parsePosition(data, idx);
-                if (m_symbolCode == '_')
-                    parseWeather(data, idx, false);
-                else if (m_symbolCode == '@')
-                    parseStorm(data, idx);
-                else
-                {
-                    parseDataExension(data, idx);
-                    parseComment(data, idx);
-                }
+                parsePositionReport(data, idx);
                 break;
             case '>': // Status
                 parseStatus(data, idx);
@@ -145,16 +142,7 @@ bool APRSPacket::decode(AX25Packet packet)
                 break;
             case '@': // Position with timestamp (with APRS messaging)
                 parseTime(data, idx);
-                parsePosition(data, idx);
-                if (m_symbolCode == '_')
-                    parseWeather(data, idx, false);
-                else if (m_symbolCode == '@')
-                    parseStorm(data, idx);
-                else
-                {
-                    parseDataExension(data, idx);
-                    parseComment(data, idx);
-                }
+                parsePositionReport(data, idx);
                 break;
             case 'T': // Telemetry data
                 parseTelemetry(data, idx);
@@ -316,12 +304,149 @@ bool APRSPacket::isLatLongChar(const QChar c)
     return (c.isDigit() || c == ' ');
 }
 
-bool APRSPacket::parsePosition(QString& info, int& idx)
+// A printable Base91 digit of a compressed position: '!' (0) to '{' (90)
+static bool isBase91Char(const QChar c)
+{
+    return (c >= QChar('!')) && (c <= QChar('{'));
+}
+
+static int base91ToInt(const QString& info, int idx, int length)
+{
+    int value = 0;
+
+    for (int i = 0; i < length; i++) {
+        value = value * 91 + (info[idx + i].toLatin1() - '!');
+    }
+
+    return value;
+}
+
+// A compressed position (APRS 1.01 chapter 9): 13 bytes rather than the 19 of the uncompressed
+// form, about 0.3 m of resolution instead of 18 m, with the course and speed (or a radio range,
+// or an altitude) in two of them rather than in a data extension after the position
+bool APRSPacket::parseCompressedPosition(QString& info, int& idx)
+{
+    if (info.length() < idx + 13) {
+        return false;
+    }
+
+    // The symbol table, or the overlay character that stands in for it ('a' to 'j' are the digits)
+    char table = info[idx].toLatin1();
+
+    if (!((table == '/') || (table == '\\')
+        || ((table >= 'A') && (table <= 'Z')) || ((table >= 'a') && (table <= 'j')))) {
+        return false;
+    }
+
+    for (int i = 1; i <= 9; i++)
+    {
+        if (!isBase91Char(info[idx + i])) {
+            return false;
+        }
+    }
+
+    int latitudeValue = base91ToInt(info, idx + 1, 4);
+    int longitudeValue = base91ToInt(info, idx + 5, 4);
+
+    if ((latitudeValue > 180 * 380926) || (longitudeValue > 360 * 190463)) {
+        return false;
+    }
+
+    m_latitude = 90.0f - latitudeValue / 380926.0f;
+    m_longitude = -180.0f + longitudeValue / 190463.0f;
+    m_hasPosition = true;
+    m_symbolTable = ((table >= 'a') && (table <= 'j')) ? (char) ('0' + table - 'a') : table;
+    m_symbolCode = info[idx + 9].toLatin1();
+    m_hasSymbol = true;
+
+    char c = info[idx + 10].toLatin1();
+    char s = info[idx + 11].toLatin1();
+    char t = info[idx + 12].toLatin1();
+    idx += 13;
+
+    if (c == ' ') {
+        return true; // no course, speed, range or altitude in this packet
+    }
+
+    if (c == '{')
+    {
+        m_radioRangeMiles = (int) std::round(2.0 * std::pow(1.08, s - '!'));
+        m_hasRadioRange = true;
+    }
+    else if (((t - '!') & 0x18) == 0x10)
+    {
+        // The compression type says the packet came from a GGA sentence: the two bytes are an altitude
+        m_altitudeFt = (float) std::pow(1.002, (c - '!') * 91 + (s - '!'));
+        m_hasAltitude = true;
+    }
+    else
+    {
+        int course = (c - '!') * 4; // 0: unknown, otherwise 4 to 360 degrees
+        int speed = (int) std::round(std::pow(1.08, s - '!') - 1.0); // knots
+
+        if (course > 0)
+        {
+            if (m_symbolCode == '_')
+            {
+                // A weather station: the wind, in the units the rest of a weather report uses
+                m_windDirection = course;
+                m_hasWindDirection = true;
+                m_windSpeed = Units::knotsToIntegerMPH((float) speed);
+                m_hasWindSpeed = true;
+            }
+            else
+            {
+                m_course = course;
+                m_speed = speed;
+                m_hasCourseAndSpeed = true;
+            }
+        }
+    }
+
+    return true;
+}
+
+void APRSPacket::parsePositionReport(QString& info, int& idx)
+{
+    bool compressed = false;
+    parsePosition(info, idx, &compressed);
+
+    if (m_symbolCode == '_') {
+        parseWeather(info, idx, compressed); // compressed: the wind came with the position
+    } else if (m_symbolCode == '@') {
+        parseStorm(info, idx);
+    } else {
+        if (!compressed) {
+            parseDataExension(info, idx);
+        }
+
+        parseComment(info, idx);
+    }
+}
+
+bool APRSPacket::parsePosition(QString& info, int& idx, bool *compressed)
 {
     float latitude;
     float longitude;
     char table;
     char code;
+
+    if (compressed) {
+        *compressed = false;
+    }
+
+    // An uncompressed position starts with the two digits of the latitude's degrees and a
+    // compressed one with its symbol table or overlay, so the forms cannot be confused
+    if ((idx < info.length()) && !info[idx].isDigit())
+    {
+        bool ok = parseCompressedPosition(info, idx);
+
+        if (compressed) {
+            *compressed = ok;
+        }
+
+        return ok;
+    }
 
     if (info.length() < idx+8+1+9+1)
         return false;

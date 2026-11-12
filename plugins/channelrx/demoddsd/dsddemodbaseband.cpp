@@ -130,6 +130,7 @@ bool DSDDemodBaseband::handleMessage(const Message& cmd)
         qDebug() << "DSDDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer.setBasebandSampleRate(notif.getSampleRate());
+        m_sink.setDeviceCenterFrequency(notif.getCenterFrequency());
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
         if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
@@ -139,6 +140,22 @@ bool DSDDemodBaseband::handleMessage(const Message& cmd)
         }
 
 		return true;
+    }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        // The output device's rate changed in the preferences (the audio device manager tells the
+        // queue the FIFOs were added with): the voice would otherwise play at the old one's speed
+        QMutexLocker mutexLocker(&m_mutex);
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        const int audioSampleRate = cfg.getSampleRate();
+
+        if ((audioSampleRate > 0) && (m_sink.getAudioSampleRate() != audioSampleRate))
+        {
+            qDebug("DSDDemodBaseband::handleMessage: DSPConfigureAudio: new sample rate %d", audioSampleRate);
+            m_sink.applyAudioSampleRate(audioSampleRate);
+        }
+
+        return true;
     }
     else
     {

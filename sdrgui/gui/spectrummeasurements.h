@@ -41,6 +41,7 @@ class SDRGUI_API SpectrumMeasurements : public QWidget {
         QList<float> m_values;
         float m_min;
         float m_max;
+        float m_current;
         double m_sum;
         int m_fails;
         QString m_units;
@@ -55,12 +56,14 @@ class SDRGUI_API SpectrumMeasurements : public QWidget {
             m_values.clear();
             m_min = std::numeric_limits<float>::max();
             m_max = -std::numeric_limits<float>::max();
+            m_current = 0.0f;
             m_sum = 0.0;
             m_fails = 0;
         }
 
         void add(float value)
         {
+            m_current = value;
             m_min = std::min(value, m_min);
             m_max = std::max(value, m_max);
             m_sum += value;
@@ -69,8 +72,10 @@ class SDRGUI_API SpectrumMeasurements : public QWidget {
 
         double mean() const
         {
-            return m_sum / m_values.size();
+            return m_values.isEmpty() ? 0.0 : m_sum / m_values.size();
         }
+
+        bool hasValues() const { return !m_values.isEmpty(); }
 
         double stdDev() const
         {

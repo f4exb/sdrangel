@@ -25,12 +25,16 @@
 #include <string.h>
 #include <stdio.h>
 #include <complex.h>
+#include <cmath>
 
 #include <QTime>
 #include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QDateTime>
+#include <QJsonDocument>
+#include <QUrl>
 #include <QThread>
 #include <QMutexLocker>
 
@@ -39,9 +43,12 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGChannelActions.h"
+#include "SWGDSDDemodActions.h"
 
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
+#include "device/deviceset.h"
 #include "feature/feature.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
@@ -54,6 +61,8 @@ MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgQueryAvailableAMBEFeatures, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgReportAvailableAMBEFeatures, Message)
 
+static const char* const DSEModURI = "sdrangel.channeltx.moddse"; //!< They own the Angel61 IP tunnel
+
 const char* const DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
 const char* const DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
@@ -65,6 +74,7 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         m_running(false),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
+        m_connectedAMBEFeature(nullptr),
         m_scopeXYSink(nullptr)
 {
     qDebug("DSDDemod::DSDDemod");
@@ -76,6 +86,10 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
+    m_contactNetwork = new QNetworkAccessManager();
+    m_contactTimer.setInterval(1000);
+    QObject::connect(&m_contactTimer, &QTimer::timeout, this, [this] { pumpContacts(); });
+    m_contactTimer.start();
     QObject::connect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -107,6 +121,8 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
 
 DSDDemod::~DSDDemod()
 {
+    m_contactTimer.stop();
+    delete m_contactNetwork;
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -180,6 +196,11 @@ void DSDDemod::start()
     );
 
     m_basebandSink->setScopeXYSink(m_scopeXYSink);
+    m_basebandSink->setAMBEPort(m_connectedAMBEPort); // a fresh sink, the connection as before the stop
+    // and the station's position (the preferences'), whatever the GUI last sent: a GUI made while the
+    // channel was stopped, or a restart, left the new sink without one
+    m_basebandSink->configureMyPosition(MainCore::instance()->getSettings().getLatitude(),
+        MainCore::instance()->getSettings().getLongitude());
 
     m_thread->start();
 
@@ -257,10 +278,59 @@ bool DSDDemod::handleMessage(const Message& cmd)
         notifyUpdateAMBEFeatures();
         return true;
     }
+    else if (MainCore::MsgPacket::match(cmd))
+    {
+        // "ANGEL61TUNNEL listening datagrams bytes refused status", from a DSE Modulator
+        const MainCore::MsgPacket& packet = (const MainCore::MsgPacket&) cmd;
+        const QString text = QString::fromUtf8(packet.getPacket());
+
+        if (text.section(' ', 0, 0) != QStringLiteral("ANGEL61TUNNEL")) {
+            return false;
+        }
+
+        Angel61Tunnel tunnel;
+        tunnel.m_listening = text.section(' ', 1, 1) != QStringLiteral("0");
+        tunnel.m_datagrams = text.section(' ', 2, 2).toULongLong();
+        tunnel.m_bytes = text.section(' ', 3, 3).toULongLong();
+        tunnel.m_refused = text.section(' ', 4, 4).toULongLong();
+        tunnel.m_status = text.section(' ', 5);
+        m_angel61Tunnels.insert(packet.getPipeSource(), tunnel);
+
+        return true;
+    }
 	else
 	{
 		return false;
 	}
+}
+
+QList<DSDDemod::Angel61Tunnel> DSDDemod::getAngel61Tunnels()
+{
+    // The modulators there are now, rather than those that spoke: one that was deleted says nothing
+    // more, and a preset's load announces no removal until after the deletions
+    QList<Angel61Tunnel> tunnels;
+    QHash<const QObject*, Angel61Tunnel> present;
+    MainCore *mainCore = MainCore::instance();
+
+    for (int d = 0; d < (int) mainCore->getDeviceSets().size(); d++)
+    {
+        DeviceSet *deviceSet = mainCore->getDeviceSets()[d];
+
+        for (int c = 0; c < deviceSet->getNumberOfChannels(); c++)
+        {
+            ChannelAPI *channel = deviceSet->getChannelAt(c);
+
+            if (channel && (channel->getURI() == DSEModURI))
+            {
+                const Angel61Tunnel tunnel = m_angel61Tunnels.value(channel);
+                present.insert(channel, tunnel);
+                tunnels.append(tunnel);
+            }
+        }
+    }
+
+    m_angel61Tunnels = present;
+    return tunnels;
 }
 
 void DSDDemod::setCenterFrequency(qint64 frequency)
@@ -283,21 +353,21 @@ void DSDDemod::applySettings(const QStringList& settingsKeys, const DSDDemodSett
     if ((settingsKeys.contains("connectAMBE") && (m_settings.m_connectAMBE != settings.m_connectAMBE))
     ||  (settingsKeys.contains("ambeFeatureIndex") && (m_settings.m_ambeFeatureIndex != settings.m_ambeFeatureIndex)) || force)
     {
+        // The feature the settings select, or none: an index that matches nothing disconnects
+        // rather than leaving the previous feature in place
+        Feature *selected = nullptr;
+
         if (settings.m_connectAMBE)
         {
             for (const auto& feature : m_availableAMBEFeatures)
             {
-                if (m_running && (feature.m_featureIndex == settings.m_ambeFeatureIndex)) {
-                    m_basebandSink->setAMBEFeature(feature.m_feature);
+                if (feature.m_featureIndex == settings.m_ambeFeatureIndex) {
+                    selected = feature.m_feature;
                 }
             }
         }
-        else
-        {
-            if (m_running) {
-                m_basebandSink->setAMBEFeature(nullptr);
-            }
-        }
+
+        connectAMBEFeature(selected);
     }
 
     if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
@@ -341,6 +411,90 @@ void DSDDemod::applySettings(const QStringList& settingsKeys, const DSDDemodSett
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
+}
+
+void DSDDemod::pumpContacts()
+{
+    if (m_running) {
+        const QVector<QJsonObject> received = m_basebandSink->takeContactReports();
+        if (m_settings.m_contactReportEnabled) {
+            for (QJsonObject contact : received) {
+                if (m_pendingContacts.size() >= 64) m_pendingContacts.dequeue();
+                m_pendingContacts.enqueue(contact);
+            }
+        }
+    }
+    if (!m_settings.m_contactReportEnabled) {
+        m_pendingContacts.clear();
+        m_contactStatus = "Off";
+        return;
+    }
+    if (m_pendingContacts.isEmpty() && !m_contactInFlight) {
+        if (m_contactStatus == "Off") m_contactStatus = "Ready";
+        return;
+    }
+    if (m_contactInFlight || m_pendingContacts.isEmpty()
+        || QDateTime::currentMSecsSinceEpoch() < m_contactNextAttemptMs) return;
+
+    if (m_settings.m_contactReportCallsign.trimmed().isEmpty()) {
+        m_contactStatus = "Configure RX callsign";
+        return;
+    }
+    // the public server; the station's position goes with every report (reporting implies it)
+    const QUrl url(QStringLiteral("http://angel61.sdrangel.org/api/v1/contacts"));
+    QJsonObject contact = m_pendingContacts.head();
+    contact["rxCallsign"] = m_settings.m_contactReportCallsign.trimmed().toUpper();
+    const double latitude = MainCore::instance()->getSettings().getLatitude();
+    const double longitude = MainCore::instance()->getSettings().getLongitude();
+    if (std::isfinite(latitude) && std::isfinite(longitude)
+        && latitude >= -90.0 && latitude <= 90.0 && longitude >= -180.0 && longitude <= 180.0) {
+        contact["rxLat"] = latitude;
+        contact["rxLon"] = longitude;
+    }
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
+    QNetworkReply *reply = m_contactNetwork->post(request, QJsonDocument(contact).toJson(QJsonDocument::Compact));
+    m_contactInFlight = true;
+    m_contactStatus = QString("Sending (%1 queued)").arg(m_pendingContacts.size());
+    QTimer::singleShot(5000, reply, [reply] { if (!reply->isFinished()) reply->abort(); });
+    // The report sent is removed by its id when the server has it: the queue may have moved on
+    // meanwhile (the oldest dropped at 64, or all of it when reporting was turned off and on)
+    const QString sentId = contact["id"].toString();
+    auto removeSent = [this, sentId] {
+        for (int i = 0; i < m_pendingContacts.size(); i++)
+        {
+            if (m_pendingContacts[i]["id"].toString() == sentId)
+            {
+                m_pendingContacts.removeAt(i);
+                return;
+            }
+        }
+    };
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, removeSent] {
+        m_contactInFlight = false;
+        const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const bool success = status >= 200 && status < 300;
+        if (success) {
+            removeSent();
+            m_contactFailures = 0;
+            m_contactNextAttemptMs = 0;
+            m_contactStatus = QString("Last report sent; %1 queued").arg(m_pendingContacts.size());
+        } else if (status == 400 || status == 413 || status == 415) {
+            removeSent();
+            m_contactFailures = 0;
+            m_contactNextAttemptMs = 0;
+            m_contactStatus = QString("Report rejected (%1); %2 queued").arg(status).arg(m_pendingContacts.size());
+        } else {
+            ++m_contactFailures;
+            m_contactNextAttemptMs = QDateTime::currentMSecsSinceEpoch()
+                + qMin(60000, 1000 * (1 << qMin(m_contactFailures, 6)));
+            m_contactStatus = ((status >= 300) && (status < 400)) ? QString("Server redirected (%1), not followed; retrying").arg(status)
+                : status ? QString("Server returned %1; retrying").arg(status)
+                : QString("Connection failed; retrying");
+        }
+        reply->deleteLater();
+    });
 }
 
 QByteArray DSDDemod::serialize() const
@@ -464,34 +618,31 @@ void DSDDemod::webapiUpdateChannelSettings(
         settings.m_inputFrequencyOffset = response.getDsdDemodSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getDsdDemodSettings()->getRfBandwidth();
-    }
-    if (channelSettingsKeys.contains("fmDeviation")) {
-        settings.m_fmDeviation = response.getDsdDemodSettings()->getFmDeviation();
-    }
-    if (channelSettingsKeys.contains("demodGain")) {
-        settings.m_demodGain = response.getDsdDemodSettings()->getDemodGain();
+        // (to the GUI's ranges: a value beyond them the GUI clamped, kept and saved over the one set)
+        settings.m_rfBandwidth = std::max(1000.0f, std::min(50000.0f, response.getDsdDemodSettings()->getRfBandwidth()));
     }
     if (channelSettingsKeys.contains("volume")) {
-        settings.m_volume = response.getDsdDemodSettings()->getVolume();
+        settings.m_volume = std::max(0.0f, std::min(10.0f, response.getDsdDemodSettings()->getVolume()));
     }
-    if (channelSettingsKeys.contains("baudRate")) {
-        settings.m_baudRate = response.getDsdDemodSettings()->getBaudRate();
+    if (channelSettingsKeys.contains("protocol"))
+    {
+        // 0 to 13; another value is Auto
+        settings.m_protocol = DSDDemodSettings::protocolOf(response.getDsdDemodSettings()->getProtocol());
     }
-    if (channelSettingsKeys.contains("squelchGate")) {
-        settings.m_squelchGate = response.getDsdDemodSettings()->getSquelchGate();
+    if (channelSettingsKeys.contains("p25p2Wacn")) {
+        settings.m_p25p2Wacn = response.getDsdDemodSettings()->getP25p2Wacn() & 0xFFFFF;
     }
-    if (channelSettingsKeys.contains("squelch")) {
-        settings.m_squelch = response.getDsdDemodSettings()->getSquelch();
+    if (channelSettingsKeys.contains("p25p2Sysid")) {
+        settings.m_p25p2Sysid = response.getDsdDemodSettings()->getP25p2Sysid() & 0xFFF;
+    }
+    if (channelSettingsKeys.contains("p25p2Nac")) {
+        settings.m_p25p2Nac = response.getDsdDemodSettings()->getP25p2Nac() & 0xFFF;
+    }
+    if (channelSettingsKeys.contains("coherent")) {
+        settings.m_coherent = response.getDsdDemodSettings()->getCoherent() != 0;
     }
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getDsdDemodSettings()->getAudioMute() != 0;
-    }
-    if (channelSettingsKeys.contains("enableCosineFiltering")) {
-        settings.m_enableCosineFiltering = response.getDsdDemodSettings()->getEnableCosineFiltering() != 0;
-    }
-    if (channelSettingsKeys.contains("syncOrConstellation")) {
-        settings.m_syncOrConstellation = response.getDsdDemodSettings()->getSyncOrConstellation() != 0;
     }
     if (channelSettingsKeys.contains("slot1On")) {
         settings.m_slot1On = response.getDsdDemodSettings()->getSlot1On() != 0;
@@ -502,8 +653,29 @@ void DSDDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("tdmaStereo")) {
         settings.m_tdmaStereo = response.getDsdDemodSettings()->getTdmaStereo() != 0;
     }
-    if (channelSettingsKeys.contains("pllLock")) {
-        settings.m_pllLock = response.getDsdDemodSettings()->getPllLock() != 0;
+    if (channelSettingsKeys.contains("angel61FileDirectory")) {
+        settings.m_angel61FileDirectory = *response.getDsdDemodSettings()->getAngel61FileDirectory();
+    }
+    if (channelSettingsKeys.contains("codecModelDirectory")) {
+        settings.m_codecModelDirectory = *response.getDsdDemodSettings()->getCodecModelDirectory();
+    }
+    if (channelSettingsKeys.contains("angel61FileConfirm")) {
+        settings.m_angel61FileConfirm = response.getDsdDemodSettings()->getAngel61FileConfirm() != 0;
+    }
+    if (channelSettingsKeys.contains("angel61FileMaxKB")) {
+        settings.m_angel61FileMaxKB = std::max(0, std::min(65536, response.getDsdDemodSettings()->getAngel61FileMaxKb()));
+    }
+    if (channelSettingsKeys.contains("angel61Groups")) {
+        settings.m_angel61Groups = *response.getDsdDemodSettings()->getAngel61Groups();
+    }
+    if (channelSettingsKeys.contains("contactReportEnabled"))
+        settings.m_contactReportEnabled = response.getDsdDemodSettings()->getContactReportEnabled() != 0;
+    if (channelSettingsKeys.contains("contactReportCallsign") && response.getDsdDemodSettings()->getContactReportCallsign())
+        settings.m_contactReportCallsign = *response.getDsdDemodSettings()->getContactReportCallsign();
+    if (channelSettingsKeys.contains("dmrColorCode"))
+    {
+        int colorCode = response.getDsdDemodSettings()->getDmrColorCode();
+        settings.m_dmrColorCode = ((colorCode >= 0) && (colorCode <= 63)) ? colorCode : -1;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getDsdDemodSettings()->getRgbColor();
@@ -573,19 +745,28 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getDsdDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getDsdDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getDsdDemodSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getDsdDemodSettings()->setDemodGain(settings.m_demodGain);
     response.getDsdDemodSettings()->setVolume(settings.m_volume);
-    response.getDsdDemodSettings()->setBaudRate(settings.m_baudRate);
-    response.getDsdDemodSettings()->setSquelchGate(settings.m_squelchGate);
-    response.getDsdDemodSettings()->setSquelch(settings.m_squelch);
+    response.getDsdDemodSettings()->setProtocol(settings.m_protocol);
+    response.getDsdDemodSettings()->setP25p2Wacn(settings.m_p25p2Wacn);
+    response.getDsdDemodSettings()->setP25p2Sysid(settings.m_p25p2Sysid);
+    response.getDsdDemodSettings()->setP25p2Nac(settings.m_p25p2Nac);
+    response.getDsdDemodSettings()->setCoherent(settings.m_coherent ? 1 : 0);
     response.getDsdDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getDsdDemodSettings()->setEnableCosineFiltering(settings.m_enableCosineFiltering ? 1 : 0);
-    response.getDsdDemodSettings()->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
     response.getDsdDemodSettings()->setSlot1On(settings.m_slot1On ? 1 : 0);
     response.getDsdDemodSettings()->setSlot2On(settings.m_slot2On ? 1 : 0);
     response.getDsdDemodSettings()->setTdmaStereo(settings.m_tdmaStereo ? 1 : 0);
-    response.getDsdDemodSettings()->setPllLock(settings.m_pllLock ? 1 : 0);
+    response.getDsdDemodSettings()->setDmrColorCode(settings.m_dmrColorCode);
+    response.getDsdDemodSettings()->setAngel61FileDirectory(new QString(settings.m_angel61FileDirectory));
+    response.getDsdDemodSettings()->setCodecModelDirectory(new QString(settings.m_codecModelDirectory));
+    response.getDsdDemodSettings()->setAngel61FileMaxKb(settings.m_angel61FileMaxKB);
+    response.getDsdDemodSettings()->setAngel61FileConfirm(settings.m_angel61FileConfirm ? 1 : 0);
+    response.getDsdDemodSettings()->setAngel61Groups(new QString(settings.m_angel61Groups));
+    response.getDsdDemodSettings()->setContactReportEnabled(settings.m_contactReportEnabled ? 1 : 0);
+    if (response.getDsdDemodSettings()->getContactReportCallsign()) {
+        *response.getDsdDemodSettings()->getContactReportCallsign() = settings.m_contactReportCallsign;
+    } else {
+        response.getDsdDemodSettings()->setContactReportCallsign(new QString(settings.m_contactReportCallsign));
+    }
     response.getDsdDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getDsdDemodSettings()->getTitle()) {
@@ -648,6 +829,44 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 }
 
+int DSDDemod::webapiActionsPost(
+        const QStringList& channelActionsKeys,
+        SWGSDRangel::SWGChannelActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGDSDDemodActions *actions = query.getDsdDemodActions();
+
+    if (!actions)
+    {
+        errorMessage = "Missing DSDDemodActions in query";
+        return 400;
+    }
+
+    if (channelActionsKeys.contains("angel61File"))
+    {
+        // The operator's decision on an Angel61 file offer awaiting confirmation (3.4)
+        const QString decision = actions->getAngel61File() ? actions->getAngel61File()->trimmed().toLower() : QString();
+
+        if ((decision != "accept") && (decision != "reject"))
+        {
+            errorMessage = "angel61File must be \"accept\" or \"reject\"";
+            return 400;
+        }
+
+        if (getReport().m_angel61FilePending.isEmpty())
+        {
+            errorMessage = "No Angel61 file offer is awaiting confirmation";
+            return 409;
+        }
+
+        angel61FileDecision(decision == "accept");
+        return 202;
+    }
+
+    errorMessage = "Unknown DSDDemodActions";
+    return 400;
+}
+
 void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     if (!m_running) {
@@ -659,24 +878,37 @@ void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
     response.getDsdDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
     response.getDsdDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    response.getDsdDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getDsdDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getDsdDemodReport()->setPllLocked(getDecoder().getSymbolPLLLocked() ? 1 : 0);
-    response.getDsdDemodReport()->setSlot1On(getDecoder().getVoice1On() ? 1 : 0);
-    response.getDsdDemodReport()->setSlot2On(getDecoder().getVoice2On() ? 1 : 0);
-    if (response.getDsdDemodReport()->getSyncType()) {
-        *response.getDsdDemodReport()->getSyncType() = getDecoder().getFrameTypeText();
-    } else {
-        response.getDsdDemodReport()->setSyncType(new QString(getDecoder().getFrameTypeText()));
-    }
-    response.getDsdDemodReport()->setInLevel(getDecoder().getInLevel());
-    response.getDsdDemodReport()->setCarierPosition(getDecoder().getCarrierPos());
-    response.getDsdDemodReport()->setZeroCrossingPosition(getDecoder().getZeroCrossingPos());
-    response.getDsdDemodReport()->setSyncRate(getDecoder().getSymbolSyncQuality());
-    if (response.getDsdDemodReport()->getStatusText()) {
-        *response.getDsdDemodReport()->getStatusText() = updateAndGetStatusText();
-    } else {
-        response.getDsdDemodReport()->setStatusText(new QString(updateAndGetStatusText()));
+    DSDDemodSink::Report report = getReport();
+    response.getDsdDemodReport()->setSyncLocked(report.m_locked ? 1 : 0);
+    response.getDsdDemodReport()->setSlot1On(report.m_slot1Voice ? 1 : 0);
+    response.getDsdDemodReport()->setSlot2On(report.m_slot2Voice ? 1 : 0);
+    response.getDsdDemodReport()->setProtocol(new QString(report.m_protocol));
+    response.getDsdDemodReport()->setSyncType(new QString(report.m_syncType));
+    response.getDsdDemodReport()->setPolarity(report.m_inverted ? 1 : 0);
+    response.getDsdDemodReport()->setDeviationHz(report.m_deviationHz);
+    response.getDsdDemodReport()->setFrequencyErrorHz(report.m_frequencyErrorHz);
+    response.getDsdDemodReport()->setClockErrorPpm(report.m_clockPpm);
+    response.getDsdDemodReport()->setSnrDb(report.m_snrDB);
+    response.getDsdDemodReport()->setBerEstimate(report.m_berEstimate);
+    response.getDsdDemodReport()->setSyncCount(report.m_syncCount);
+    response.getDsdDemodReport()->setVoiceFrames(report.m_voiceFrames);
+    response.getDsdDemodReport()->setVoiceFramesErased(report.m_voiceFramesErased);
+    response.getDsdDemodReport()->setCorrectedBits(report.m_correctedBits);
+    response.getDsdDemodReport()->setProtectedBits(report.m_protectedBits);
+    response.getDsdDemodReport()->setStatusText(new QString(report.m_statusText));
+    response.getDsdDemodReport()->setDtmf(new QString(report.m_dtmf));
+    response.getDsdDemodReport()->setAngel61FilePending(new QString(report.m_angel61FilePending));
+    response.getDsdDemodReport()->setLastMessage(new QString(report.m_lastMessage.m_text));
+    response.getDsdDemodReport()->setLastMessageProtocol(new QString(report.m_lastMessage.m_protocol));
+    response.getDsdDemodReport()->setLastMessageSource(new QString(report.m_lastMessage.m_source));
+    response.getDsdDemodReport()->setLastMessageDestination(new QString(report.m_lastMessage.m_destination));
+    response.getDsdDemodReport()->setLastMessageTime(new QString(report.m_lastMessageTime));
+    response.getDsdDemodReport()->setLastMessageSequence((qint32) report.m_lastMessage.m_sequence);
+
+    QList<QString*> *heardCallsigns = response.getDsdDemodReport()->getAngel61HeardCallsigns();
+    for (const QString& callsign : report.m_angel61HeardCallsigns) {
+        heardCallsigns->append(new QString(callsign));
     }
 }
 
@@ -756,32 +988,26 @@ void DSDDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgDSDDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
-    if (channelSettingsKeys.contains("fmDeviation") || force) {
-        swgDSDDemodSettings->setFmDeviation(settings.m_fmDeviation);
-    }
-    if (channelSettingsKeys.contains("demodGain") || force) {
-        swgDSDDemodSettings->setDemodGain(settings.m_demodGain);
-    }
     if (channelSettingsKeys.contains("volume") || force) {
         swgDSDDemodSettings->setVolume(settings.m_volume);
     }
-    if (channelSettingsKeys.contains("baudRate") || force) {
-        swgDSDDemodSettings->setBaudRate(settings.m_baudRate);
+    if (channelSettingsKeys.contains("protocol") || force) {
+        swgDSDDemodSettings->setProtocol(settings.m_protocol);
     }
-    if (channelSettingsKeys.contains("squelchGate") || force) {
-        swgDSDDemodSettings->setSquelchGate(settings.m_squelchGate);
+    if (channelSettingsKeys.contains("p25p2Wacn") || force) {
+        swgDSDDemodSettings->setP25p2Wacn(settings.m_p25p2Wacn);
     }
-    if (channelSettingsKeys.contains("squelch") || force) {
-        swgDSDDemodSettings->setSquelch(settings.m_squelch);
+    if (channelSettingsKeys.contains("p25p2Sysid") || force) {
+        swgDSDDemodSettings->setP25p2Sysid(settings.m_p25p2Sysid);
+    }
+    if (channelSettingsKeys.contains("p25p2Nac") || force) {
+        swgDSDDemodSettings->setP25p2Nac(settings.m_p25p2Nac);
+    }
+    if (channelSettingsKeys.contains("coherent") || force) {
+        swgDSDDemodSettings->setCoherent(settings.m_coherent ? 1 : 0);
     }
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgDSDDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("enableCosineFiltering") || force) {
-        swgDSDDemodSettings->setEnableCosineFiltering(settings.m_enableCosineFiltering ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("syncOrConstellation") || force) {
-        swgDSDDemodSettings->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
     }
     if (channelSettingsKeys.contains("slot1On") || force) {
         swgDSDDemodSettings->setSlot1On(settings.m_slot1On ? 1 : 0);
@@ -792,9 +1018,28 @@ void DSDDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("tdmaStereo") || force) {
         swgDSDDemodSettings->setTdmaStereo(settings.m_tdmaStereo ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("pllLock") || force) {
-        swgDSDDemodSettings->setPllLock(settings.m_pllLock ? 1 : 0);
+    if (channelSettingsKeys.contains("dmrColorCode") || force) {
+        swgDSDDemodSettings->setDmrColorCode(settings.m_dmrColorCode);
     }
+    if (channelSettingsKeys.contains("angel61FileDirectory") || force) {
+        swgDSDDemodSettings->setAngel61FileDirectory(new QString(settings.m_angel61FileDirectory));
+    }
+    if (channelSettingsKeys.contains("codecModelDirectory") || force) {
+        swgDSDDemodSettings->setCodecModelDirectory(new QString(settings.m_codecModelDirectory));
+    }
+    if (channelSettingsKeys.contains("angel61FileMaxKB") || force) {
+        swgDSDDemodSettings->setAngel61FileMaxKb(settings.m_angel61FileMaxKB);
+    }
+    if (channelSettingsKeys.contains("angel61FileConfirm") || force) {
+        swgDSDDemodSettings->setAngel61FileConfirm(settings.m_angel61FileConfirm ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("angel61Groups") || force) {
+        swgDSDDemodSettings->setAngel61Groups(new QString(settings.m_angel61Groups));
+    }
+    if (channelSettingsKeys.contains("contactReportEnabled") || force)
+        swgDSDDemodSettings->setContactReportEnabled(settings.m_contactReportEnabled ? 1 : 0);
+    if (channelSettingsKeys.contains("contactReportCallsign") || force)
+        swgDSDDemodSettings->setContactReportCallsign(new QString(settings.m_contactReportCallsign));
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgDSDDemodSettings->setRgbColor(settings.m_rgbColor);
     }
@@ -884,6 +1129,29 @@ void DSDDemod::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setAudioFifoLabel(fifoLabel);
 }
 
+void DSDDemod::connectAMBEFeature(Feature *feature)
+{
+    // The port, asked for here in the feature's own (the main) thread; a feature without one is
+    // not connected
+    std::shared_ptr<MbeEncoderPort> port;
+
+    if (feature)
+    {
+        DSPGetMbeEncoderPort msg;
+
+        if (feature->handleMessage(msg)) {
+            port = msg.getPort();
+        }
+    }
+
+    m_connectedAMBEFeature = port ? feature : nullptr;
+    m_connectedAMBEPort = port;
+
+    if (m_running) {
+        m_basebandSink->setAMBEPort(port);
+    }
+}
+
 void DSDDemod::handleFeatureAdded(int featureSetIndex, Feature *feature)
 {
     if (featureSetIndex != 0) {
@@ -894,8 +1162,9 @@ void DSDDemod::handleFeatureAdded(int featureSetIndex, Feature *feature)
     {
         m_availableAMBEFeatures[feature] = DSDDemodSettings::AvailableAMBEFeature{feature->getIndexInFeatureSet(), feature};
 
-        if (m_running && m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet())) {
-            m_basebandSink->setAMBEFeature(feature);
+        if (m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet()))
+        {
+            connectAMBEFeature(feature);
         }
 
         notifyUpdateAMBEFeatures();
@@ -908,17 +1177,15 @@ void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
         return;
     }
 
+    // The feature's port is closed already (its destructor, if it is gone); the connection ends here.
+    // The settings keep asking for it: when a feature at that index comes back it is connected again
+    // (handleFeatureAdded), and the GUI shows the box unchecked meanwhile
+    if (feature == m_connectedAMBEFeature) {
+        connectAMBEFeature(nullptr);
+    }
+
     if (m_availableAMBEFeatures.contains(feature))
     {
-        if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[feature].m_featureIndex)
-        {
-            m_settings.m_connectAMBE = false;
-
-            if (m_running) {
-                m_basebandSink->setAMBEFeature(nullptr);
-            }
-        }
-
         m_availableAMBEFeatures.remove(feature);
         notifyUpdateAMBEFeatures();
     }

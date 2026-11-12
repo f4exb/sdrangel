@@ -71,16 +71,16 @@ public:
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     double getMagSq() { return m_sink.getMagSq(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
-    bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     void setBasebandSampleRate(int sampleRate);
 	void setScopeXYSink(BasebandSampleSink* scopeSink) { m_sink.setScopeXYSink(scopeSink); }
 	void configureMyPosition(float myLatitude, float myLongitude) { m_sink.configureMyPosition(myLatitude, myLongitude); }
-   	const DSDDecoder& getDecoder() const { return m_sink.getDecoder(); }
-    const char *updateAndGetStatusText() { return m_sink.updateAndGetStatusText(); }
+	QVector<QJsonObject> takeContactReports() { return m_sink.takeContactReports(); }
+    DSDDemodSink::Report getReport() const { return m_sink.getReport(); }
+    void setAngel61FileDecision(bool accept) { m_sink.setAngel61FileDecision(accept); }
     void setChannel(ChannelAPI *channel);
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
     void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
-    void setAMBEFeature(Feature *ambeFeature) { m_sink.setAmbeFeature(ambeFeature); }
+    void setAMBEPort(std::shared_ptr<MbeEncoderPort> port) { m_sink.setAmbePort(port); }
 
 private:
     SampleSinkFifo m_sampleFifo;

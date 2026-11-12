@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,6 +22,7 @@
 #define PLUGINS_CHANNELRX_DEMODDSD_DSDDEMODSETTINGS_H_
 
 #include <QByteArray>
+#include <QString>
 
 class Serializable;
 class Feature;
@@ -38,21 +39,46 @@ struct DSDDemodSettings
         AvailableAMBEFeature& operator=(const AvailableAMBEFeature&) = default;
     };
 
+    //! Protocols searched for: automatic detection or one protocol only
+    enum Protocol
+    {
+        ProtocolAuto,
+        ProtocolDMR,
+        ProtocolDStar,
+        ProtocolYSF,
+        ProtocolNXDN48,
+        ProtocolNXDN96,
+        ProtocolDPMR,
+        ProtocolP25,
+        ProtocolP25P2,
+        ProtocolM17,
+        ProtocolAngel61,        //!< Angel61 NB (6.25 kHz; in Auto too)
+        ProtocolAngel61WB,      //!< Angel61 WB (12.5 kHz; in Auto too)
+        ProtocolAngel61HFNB,    //!< Angel61 HF-NB (OFDM, 2.5 kHz): selected only, never in Auto
+        ProtocolAngel61HFWB,    //!< Angel61 HF-WB (OFDM, 5.5 kHz)
+        NbProtocols
+    };
+
     qint64 m_inputFrequencyOffset;
     Real  m_rfBandwidth;
-    Real  m_fmDeviation;
-    Real  m_demodGain;
     Real  m_volume;
-    int  m_baudRate;
-    int  m_squelchGate;
-    Real m_squelch;
+    int  m_protocol;
+    int m_p25p2Wacn;    //!< P25 Phase 2 scrambling: WACN (20 bits), system ID (12 bits) and NAC (12 bits) of the system
+    int m_p25p2Sysid;
+    int m_p25p2Nac;
+    bool m_coherent;    //!< Coherent re-detection of the 4FSK bursts from the IQ (about 2 dB, echo equalisation)
     bool m_audioMute;
-    bool m_enableCosineFiltering;
-    bool m_syncOrConstellation;
     bool m_slot1On;
     bool m_slot2On;
     bool m_tdmaStereo;
-    bool m_pllLock;
+    int m_dmrColorCode; //!< Audio filter on the DMR or dPMR colour code or the NXDN RAN: -1 accepts any; otherwise 0..63 (DMR stops at 15)
+    QString m_angel61FileDirectory; //!< Where Angel61 file transfers are written, empty: not stored
+    QString m_codecModelDirectory;  //!< Angel61's V1 models (vocoscodec); empty for the default lookup (VocosCodec::defaultModelDirectory)
+    int m_angel61FileMaxKB;         //!< The largest Angel61 file this station takes, 0 for no limit
+    bool m_angel61FileConfirm;      //!< The operator confirms every Angel61 file offer before the file is kept (3.4)
+    QString m_angel61Groups;        //!< Angel61 talkgroups played, "9, 23"; empty: every call (ANGEL61.md 2.6)
+    bool m_contactReportEnabled;    //!< Opt-in RF contact reporting to angel61.sdrangel.org, with the station's position
+    QString m_contactReportCallsign;
     quint32 m_rgbColor;
     QString m_title;
     bool m_highPassFilter;
@@ -83,6 +109,9 @@ struct DSDDemodSettings
     bool deserialize(const QByteArray& data);
     void applySettings(const QStringList& settingsKeys, const DSDDemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+    static const char *getProtocolName(int protocol);
+    //! A stored or requested protocol: out of range is Auto
+    static int protocolOf(int value) { return (value >= 0) && (value < NbProtocols) ? value : ProtocolAuto; }
 };
 
 

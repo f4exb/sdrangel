@@ -20,9 +20,12 @@
 #ifndef SDRBASE_AMBE_AMBEWORKER_H_
 #define SDRBASE_AMBE_AMBEWORKER_H_
 
+#include <algorithm>
+
 #include <QObject>
 #include <QDebug>
 #include <QDateTime>
+#include <QMutex>
 
 #include "export.h"
 #include "dvcontroller.h"
@@ -37,6 +40,15 @@ class AudioFifo;
 
 class AMBEWorker : public QObject {
     Q_OBJECT
+
+    // SerialDV 1.1.5 exposes 160 samples per vocoder frame, but its transport
+    // implementation reads/writes the AMBE-3000 packet maximum of 192 samples.
+    // Keep the public 160-sample frame size for processing and pad the backing
+    // storage so that the library cannot overrun the adjacent object members.
+    static constexpr unsigned int m_serialDVAudioBlockSize = 192U;
+    static_assert(m_serialDVAudioBlockSize >= SerialDV::MBE_AUDIO_BLOCK_SIZE,
+        "SerialDV transport buffer must hold a public audio block");
+
 public:
     class MsgTest : public Message
     {
@@ -99,8 +111,66 @@ public:
         }
     };
 
+    class MsgMbeEncode : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const short *getAudio() const { return m_audio; }
+        SerialDV::DVRate getMbeRate() const { return m_mbeRate; }
+        int getGain() const { return m_gain; }
+        unsigned int getSequence() const { return m_sequence; }
+        const void *getClient() const { return m_client; }
+
+        static MsgMbeEncode* create(
+                const short *audio,
+                int mbeRateIndex,
+                int gain,
+                unsigned int sequence,
+                const void *client)
+        {
+            return new MsgMbeEncode(audio, (SerialDV::DVRate) mbeRateIndex, gain, sequence, client);
+        }
+
+    private:
+        short m_audio[m_serialDVAudioBlockSize];
+        SerialDV::DVRate m_mbeRate;
+        int m_gain;
+        unsigned int m_sequence;
+        const void *m_client;
+
+        MsgMbeEncode(const short *audio,
+                SerialDV::DVRate mbeRate,
+                int gain,
+                unsigned int sequence,
+                const void *client) :
+            Message(),
+            m_mbeRate(mbeRate),
+            m_gain(gain),
+            m_sequence(sequence),
+            m_client(client)
+        {
+            std::fill(m_audio, m_audio + m_serialDVAudioBlockSize, 0);
+            memcpy((void *) m_audio, (const void *) audio, SerialDV::MBE_AUDIO_BLOCK_SIZE * sizeof(short));
+        }
+    };
+
     AMBEWorker();
     ~AMBEWorker();
+
+    //! Push audio to encode. The encoded frame is returned on the reply queue as a DSPReportMbeFrame
+    void pushMbeAudio(const short *audio,
+            int mbeRateIndex,
+            int gain,
+            unsigned int sequence,
+            const void *client,
+            MessageQueue *replyQueue);
+    bool hasEncodeClient(const void *client);
+    bool isAvailableForEncode();
+    bool hasDecodeFifo() const { return m_audioFifo != nullptr; }
+    void releaseEncodeClient(const void *client);
+    void releaseDecodeFifo(const void *fifo); //!< The FIFO is not written after this returns, frames still queued for it are dropped
+    uint32_t getEncodeSuccessCount() const { return m_encodeSuccessCount; }
+    uint32_t getEncodeFailureCount() const { return m_encodeFailureCount; }
 
     void pushMbeFrame(const unsigned char *mbeFrame,
             int mbeRateIndex,
@@ -137,6 +207,7 @@ private:
     void upsample(int upsampling, short *in, int nbSamplesIn, unsigned char channels);
     void noUpsample(short *in, int nbSamplesIn, unsigned char channels);
     void setVolumeFactors();
+    void writeAudio(AudioFifo *audioFifo); //!< The buffer to the FIFO unless it was released, then empties it
 
     SerialDV::DVController m_dvController;
     AudioFifo *m_audioFifo;
@@ -144,7 +215,7 @@ private:
     volatile bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
-    short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
+    short m_dvAudioSamples[m_serialDVAudioBlockSize];
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     float m_upsamplerLastValue;
@@ -156,6 +227,15 @@ private:
     AudioCompressor m_compressor;
     uint32_t m_successCount;
     uint32_t m_failureCount;
+
+    QMutex m_encodeMutex;
+    QMutex m_decodeMutex; //!< Guards m_audioFifo against its release while the worker writes to it
+    const void *m_encodeClient;
+    MessageQueue *m_encodeReplyQueue;
+    QDateTime m_encodeTimestamp;
+    unsigned char m_encodedFrame[SerialDV::MBE_FRAME_MAX_LENGTH_BYTES];
+    uint32_t m_encodeSuccessCount;
+    uint32_t m_encodeFailureCount;
 };
 
 #endif // SDRBASE_AMBE_AMBEWORKER_H_

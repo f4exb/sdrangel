@@ -34,6 +34,11 @@ ChannelActions:
     DRMDemodActions:
       $ref: "http://swgserver:8081/api/swagger/include/DRMDemod.yaml#/DRMDemodActions"
       description: "DRM demod actions configuration for Channel."
+    DSDDemodActions:
+      $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodActions"
+      description: "DSD demod actions: the operator's decision on an Angel61 file offer"
+    DSEModActions:
+      $ref: "http://swgserver:8081/api/swagger/include/DSEMod.yaml#/DSEModActions"
     FileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

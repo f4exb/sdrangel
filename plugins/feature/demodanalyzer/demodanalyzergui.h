@@ -79,6 +79,7 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
+	void applyRealSpectrum();
 	void displaySampleRate(int sampleRate);
 	void updateChannelList();
 	bool handleMessage(const Message& message);
@@ -92,6 +93,7 @@ private slots:
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
 	void on_log2Decim_currentIndexChanged(int index);
+	void on_realSpectrum_toggled(bool checked);
 	void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
     void on_recordSilenceTime_valueChanged(int value);

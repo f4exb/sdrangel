@@ -45,6 +45,7 @@
 #include "SWGDRMDemodSettings.h"
 #include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDSEModSettings.h"
 #include "SWGDVBDemodSettings.h"
 #include "SWGDroneIDDemodSettings.h"
 #include "SWGEndOfTrainDemodSettings.h"
@@ -206,6 +207,9 @@ public:
 
     SWGDroneIDDemodSettings* getDroneIdDemodSettings();
     void setDroneIdDemodSettings(SWGDroneIDDemodSettings* drone_id_demod_settings);
+
+    SWGDSEModSettings* getDseModSettings();
+    void setDseModSettings(SWGDSEModSettings* dse_mod_settings);
 
     SWGEndOfTrainDemodSettings* getEndOfTrainDemodSettings();
     void setEndOfTrainDemodSettings(SWGEndOfTrainDemodSettings* end_of_train_demod_settings);
@@ -447,6 +451,9 @@ private:
 
     SWGDroneIDDemodSettings* drone_id_demod_settings;
     bool m_drone_id_demod_settings_isSet;
+
+    SWGDSEModSettings* dse_mod_settings;
+    bool m_dse_mod_settings_isSet;
 
     SWGEndOfTrainDemodSettings* end_of_train_demod_settings;
     bool m_end_of_train_demod_settings_isSet;

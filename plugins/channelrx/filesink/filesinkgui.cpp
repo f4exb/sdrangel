@@ -269,6 +269,7 @@ void FileSinkGUI::displaySettings()
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_basebandSampleRate / (1<<m_settings.m_log2Decim));
     m_channelMarker.setTitle(m_settings.m_title);
+    m_channelMarker.setVisible(m_settings.m_log2Decim != 0);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
@@ -437,6 +438,7 @@ void FileSinkGUI::on_deltaFrequency_changed(qint64 value)
 void FileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    m_channelMarker.setVisible(index != 0);
     applyDecimation();
     displayRate();
     displayPos();

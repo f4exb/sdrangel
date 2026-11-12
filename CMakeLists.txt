@@ -196,6 +196,7 @@ option(ENABLE_CHANNELTX_LOCALSOURCE "Enable channeltx localsource plugin" ON)
 option(ENABLE_CHANNELTX_MODDATV "Enable channeltx moddatv plugin" ON)
 option(ENABLE_CHANNELTX_MODAM "Enable channeltx modam plugin" ON)
 option(ENABLE_CHANNELTX_MODFREEDV "Enable channeltx modfreedv plugin" ON)
+option(ENABLE_CHANNELTX_MODDSE "Enable channeltx moddse plugin" ON)
 option(ENABLE_CHANNELTX_MODPACKET "Enable channeltx modpacket plugin" ON)
 option(ENABLE_CHANNELTX_MODSSB "Enable channeltx modssb plugin" ON)
 option(ENABLE_CHANNELTX_UDPSOURCE "Enable channeltx udpsource plugin" ON)
@@ -580,14 +581,6 @@ elseif(ANDROID)
   set(FAAD_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/include" CACHE INTERNAL "")
   set(FAAD_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/faad2/lib/liblibfaadstatic.a" CACHE INTERNAL "")
 
-  set(LIBMBE_FOUND ON CACHE INTERNAL "")
-  set(LIBMBE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/mbelib/include/" CACHE INTERNAL "")
-  set(LIBMBE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/mbelib/lib/libmbe.a" CACHE INTERNAL "")
-
-  set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
-  set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/include/" CACHE INTERNAL "")
-  set(LIBDSDCC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so" CACHE INTERNAL "")
-
   set(FFMPEG_FOUND ON CACHE INTERNAL "")
   set(FFMPEG_SKIP_CHECK ON CACHE INTERNAL "")
   set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/include" CACHE INTERNAL "")
@@ -690,7 +683,6 @@ elseif(ANDROID)
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswresample.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswscale.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libc++_shared.so
-      ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libunrooted_android.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libusb1.0.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/cm256cc/lib/libcm256cc.so
@@ -768,7 +760,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libusb1.0.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/flac/lib/libFLAC.so
@@ -780,7 +771,6 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswresample.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libswscale.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libc++_shared.so
-        ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libusb1.0.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/flac/lib/libFLAC.so
@@ -847,6 +837,7 @@ if(ENABLE_QT6)
     find_package(Qt6
                    COMPONENTS
                      Core
+                     Network
                      Widgets
                      WebSockets
                      Multimedia
@@ -859,6 +850,7 @@ else()
     find_package(Qt5 5.15
                    REQUIRED COMPONENTS
                      Core
+                     Network
                      Widgets
                      WebSockets
                      Multimedia
@@ -1018,9 +1010,10 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(FAAD) # For DAB
     find_package(Codec2)
     find_package(CM256cc)
-    find_package(LibMbe)
     find_package(SerialDV)
-    find_package(LibDSDcc)
+    find_package(LibMBEVocoder)
+    find_package(LibVocosCodec)
+    find_package(LibDSDcc) # only the DSE modulator and DSD demodulator test harnesses use it, as a reference decoder
     find_package(Sgp4)
     find_package(CSPICE)
     find_package(AptDec)
@@ -1304,6 +1297,9 @@ if (BUILD_GUI)
   if(WIN32)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
                             WIN32_EXECUTABLE ${HIDE_CONSOLE})
+    if (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD)
+      add_dependencies(${CMAKE_PROJECT_NAME} sdrangel-tunnel-helper)
+    endif()
   endif()
 endif()
 
@@ -1323,6 +1319,10 @@ if (BUILD_SERVER)
         sdrsrv
         logging
     )
+
+    if(WIN32 AND (ENABLE_CHANNELTX_MODDSE OR ENABLE_CHANNELRX_DEMODDSD))
+      add_dependencies(sdrangelsrv sdrangel-tunnel-helper)
+    endif()
 
     if(HAVE_LIBUNWIND)
       target_link_libraries(sdrangelsrv ${LIBUNWIND_LIBRARIES})

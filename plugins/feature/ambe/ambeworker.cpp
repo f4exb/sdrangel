@@ -22,9 +22,11 @@
 #include <thread>
 
 #include "audio/audiofifo.h"
+#include "dsp/dspcommands.h"
 #include "ambeworker.h"
 
 MESSAGE_CLASS_DEFINITION(AMBEWorker::MsgMbeDecode, Message)
+MESSAGE_CLASS_DEFINITION(AMBEWorker::MsgMbeEncode, Message)
 MESSAGE_CLASS_DEFINITION(AMBEWorker::MsgTest, Message)
 
 AMBEWorker::AMBEWorker() :
@@ -36,12 +38,16 @@ AMBEWorker::AMBEWorker() :
     m_upsampling(1),
     m_volume(1.0f),
     m_successCount(0),
-    m_failureCount(0)
+    m_failureCount(0),
+    m_encodeClient(nullptr),
+    m_encodeReplyQueue(nullptr),
+    m_encodeSuccessCount(0),
+    m_encodeFailureCount(0)
 {
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
     m_audioFifo = 0;
-    std::fill(m_dvAudioSamples, m_dvAudioSamples+SerialDV::MBE_AUDIO_BLOCK_SIZE, 0);
+    std::fill(m_dvAudioSamples, m_dvAudioSamples + m_serialDVAudioBlockSize, 0);
     setVolumeFactors();
 }
 
@@ -116,15 +122,8 @@ void AMBEWorker::handleInputMessages()
 
                 audioFifo = decodeMsg->getAudioFifo();
 
-                if (audioFifo && (m_audioBufferFill >= m_audioBuffer.size() - 960))
-                {
-                    uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-                    if (res != m_audioBufferFill) {
-                        qDebug("AMBEWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
-                    }
-
-                    m_audioBufferFill = 0;
+                if (audioFifo && (m_audioBufferFill >= m_audioBuffer.size() - 960)) {
+                    writeAudio(audioFifo);
                 }
 
                 m_successCount++;
@@ -133,6 +132,31 @@ void AMBEWorker::handleInputMessages()
             {
                 qDebug("AMBEWorker::handleInputMessages: MsgMbeDecode: decode failed");
                 m_failureCount++;
+            }
+        }
+        else if (MsgMbeEncode::match(*message))
+        {
+            MsgMbeEncode *encodeMsg = (MsgMbeEncode *) message;
+            bool ok = m_dvController.encode(encodeMsg->getAudio(), m_encodedFrame, encodeMsg->getMbeRate(), encodeMsg->getGain());
+            int nbBytes = SerialDV::DVController::getNbMbeBytes(encodeMsg->getMbeRate());
+
+            if (ok) {
+                m_encodeSuccessCount++;
+            } else {
+                m_encodeFailureCount++;
+            }
+
+            QMutexLocker locker(&m_encodeMutex);
+
+            if ((m_encodeClient == encodeMsg->getClient()) && m_encodeReplyQueue)
+            {
+                m_encodeReplyQueue->push(new DSPReportMbeFrame(
+                    m_encodedFrame,
+                    nbBytes,
+                    encodeMsg->getSequence(),
+                    encodeMsg->getClient(),
+                    ok
+                ));
             }
         }
         else
@@ -150,18 +174,28 @@ void AMBEWorker::handleInputMessages()
         }
     }
 
-    if (audioFifo)
+    if (audioFifo) {
+        writeAudio(audioFifo);
+    }
+
+    m_timestamp = QDateTime::currentDateTime();
+}
+
+void AMBEWorker::writeAudio(AudioFifo *audioFifo)
+{
+    QMutexLocker locker(&m_decodeMutex);
+
+    // A FIFO that is no longer the current one may be gone: its client released it (releaseDecodeFifo)
+    if (audioFifo == m_audioFifo)
     {
         uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
         if (res != m_audioBufferFill) {
-            qDebug("AMBEWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
+            qDebug("AMBEWorker::writeAudio: %u/%u audio samples written", res, m_audioBufferFill);
         }
-
-        m_audioBufferFill = 0;
     }
 
-    m_timestamp = QDateTime::currentDateTime();
+    m_audioBufferFill = 0;
 }
 
 void AMBEWorker::pushMbeFrame(const unsigned char *mbeFrame,
@@ -172,8 +206,66 @@ void AMBEWorker::pushMbeFrame(const unsigned char *mbeFrame,
         int upsampling,
         AudioFifo *audioFifo)
 {
-    m_audioFifo = audioFifo;
+    {
+        QMutexLocker locker(&m_decodeMutex);
+        m_audioFifo = audioFifo;
+    }
+
     m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, upsampling, audioFifo));
+}
+
+void AMBEWorker::pushMbeAudio(const short *audio,
+        int mbeRateIndex,
+        int gain,
+        unsigned int sequence,
+        const void *client,
+        MessageQueue *replyQueue)
+{
+    {
+        QMutexLocker locker(&m_encodeMutex);
+        m_encodeClient = client;
+        m_encodeReplyQueue = replyQueue;
+        m_encodeTimestamp = QDateTime::currentDateTime();
+    }
+
+    m_inputMessageQueue.push(MsgMbeEncode::create(audio, mbeRateIndex, gain, sequence, client));
+}
+
+bool AMBEWorker::hasEncodeClient(const void *client)
+{
+    QMutexLocker locker(&m_encodeMutex);
+    return m_encodeClient == client;
+}
+
+bool AMBEWorker::isAvailableForEncode()
+{
+    QMutexLocker locker(&m_encodeMutex);
+
+    if (m_encodeClient == nullptr) {
+        return true;
+    }
+
+    return m_encodeTimestamp.msecsTo(QDateTime::currentDateTime()) > 1000; // 1 second inactivity timeout
+}
+
+void AMBEWorker::releaseEncodeClient(const void *client)
+{
+    QMutexLocker locker(&m_encodeMutex);
+
+    if (m_encodeClient == client)
+    {
+        m_encodeClient = nullptr;
+        m_encodeReplyQueue = nullptr;
+    }
+}
+
+void AMBEWorker::releaseDecodeFifo(const void *fifo)
+{
+    QMutexLocker locker(&m_decodeMutex); // a write in progress finishes first, and later ones are skipped
+
+    if (m_audioFifo == fifo) {
+        m_audioFifo = nullptr;
+    }
 }
 
 bool AMBEWorker::isAvailable()

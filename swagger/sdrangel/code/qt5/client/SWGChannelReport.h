@@ -42,6 +42,7 @@
 #include "SWGDRMDemodReport.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGDSEModReport.h"
 #include "SWGDVBDemodReport.h"
 #include "SWGDroneIDDemodReport.h"
 #include "SWGEndOfTrainDemodReport.h"
@@ -183,6 +184,9 @@ public:
 
     SWGDroneIDDemodReport* getDroneIdDemodReport();
     void setDroneIdDemodReport(SWGDroneIDDemodReport* drone_id_demod_report);
+
+    SWGDSEModReport* getDseModReport();
+    void setDseModReport(SWGDSEModReport* dse_mod_report);
 
     SWGEndOfTrainDemodReport* getEndOfTrainDemodReport();
     void setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report);
@@ -394,6 +398,9 @@ private:
 
     SWGDroneIDDemodReport* drone_id_demod_report;
     bool m_drone_id_demod_report_isSet;
+
+    SWGDSEModReport* dse_mod_report;
+    bool m_dse_mod_report_isSet;
 
     SWGEndOfTrainDemodReport* end_of_train_demod_report;
     bool m_end_of_train_demod_report_isSet;

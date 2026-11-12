@@ -2,15 +2,17 @@
 
 <h2>Introduction</h2>
 
-The APRS plugin displays APRS (Automatic Packet Reporting System) packets. APRS packets can be received over RF via one or more Packet Demodulator or ChirpChat Demodulator source channels or from the Internet via an APRS-IS IGate.
+The APRS plugin displays APRS (Automatic Packet Reporting System) packets. APRS packets can be received over RF via one or more Packet Demodulator, ChirpChat Demodulator, M17 Demodulator or DSD Demodulator (D-PRS in the D-STAR slow data, and the positions, messages, status and information fields of Angel61) source channels or from the Internet via an APRS-IS IGate.
 
 <h2>Interface</h2>
 
 ![APRS feature plugin GUI](../../../doc/img/APRS_plugin.png)
 
+Third party traffic (`}` - a packet another station originated, relayed by a gateway or over another protocol) is decoded as the packet inside it, with its own addresses. Both the uncompressed (`4930.00N/07245.00W`) and the Base91 compressed (`/5L!!<*e7>`) position formats are decoded, the compressed one with the course and speed, pre-calculated radio range or GPS altitude it carries in place of a data extension, and with overlay characters in place of the symbol table.
+
 <h3>1: Source channels</h3>
 
-This displays a list of the Packet Demodulator or ChirpChat Demodulator channels the APRS feature is receiving packets from.
+This displays a list of the Packet Demodulator, ChirpChat Demodulator, M17 Demodulator and DSD Demodulator channels the APRS feature is receiving packets from.
 
 <h3>2: Enable APRS-IS IGate</h3>
 

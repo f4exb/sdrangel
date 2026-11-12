@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -51,11 +52,8 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
-    qint32 getSquelch();
-    void setSquelch(qint32 squelch);
-
-    qint32 getPllLocked();
-    void setPllLocked(qint32 pll_locked);
+    qint32 getSyncLocked();
+    void setSyncLocked(qint32 sync_locked);
 
     qint32 getSlot1On();
     void setSlot1On(qint32 slot1_on);
@@ -63,23 +61,74 @@ public:
     qint32 getSlot2On();
     void setSlot2On(qint32 slot2_on);
 
+    QString* getProtocol();
+    void setProtocol(QString* protocol);
+
     QString* getSyncType();
     void setSyncType(QString* sync_type);
 
-    qint32 getInLevel();
-    void setInLevel(qint32 in_level);
+    qint32 getPolarity();
+    void setPolarity(qint32 polarity);
 
-    qint32 getCarierPosition();
-    void setCarierPosition(qint32 carier_position);
+    float getDeviationHz();
+    void setDeviationHz(float deviation_hz);
 
-    qint32 getZeroCrossingPosition();
-    void setZeroCrossingPosition(qint32 zero_crossing_position);
+    float getFrequencyErrorHz();
+    void setFrequencyErrorHz(float frequency_error_hz);
 
-    qint32 getSyncRate();
-    void setSyncRate(qint32 sync_rate);
+    float getClockErrorPpm();
+    void setClockErrorPpm(float clock_error_ppm);
+
+    float getSnrDb();
+    void setSnrDb(float snr_db);
+
+    float getBerEstimate();
+    void setBerEstimate(float ber_estimate);
+
+    qint32 getSyncCount();
+    void setSyncCount(qint32 sync_count);
+
+    qint32 getVoiceFrames();
+    void setVoiceFrames(qint32 voice_frames);
+
+    qint32 getVoiceFramesErased();
+    void setVoiceFramesErased(qint32 voice_frames_erased);
+
+    qint64 getCorrectedBits();
+    void setCorrectedBits(qint64 corrected_bits);
+
+    qint64 getProtectedBits();
+    void setProtectedBits(qint64 protected_bits);
 
     QString* getStatusText();
     void setStatusText(QString* status_text);
+
+    QString* getDtmf();
+    void setDtmf(QString* dtmf);
+
+    QString* getAngel61FilePending();
+    void setAngel61FilePending(QString* angel61_file_pending);
+
+    QString* getLastMessage();
+    void setLastMessage(QString* last_message);
+
+    QString* getLastMessageProtocol();
+    void setLastMessageProtocol(QString* last_message_protocol);
+
+    QString* getLastMessageSource();
+    void setLastMessageSource(QString* last_message_source);
+
+    QString* getLastMessageDestination();
+    void setLastMessageDestination(QString* last_message_destination);
+
+    QString* getLastMessageTime();
+    void setLastMessageTime(QString* last_message_time);
+
+    qint32 getLastMessageSequence();
+    void setLastMessageSequence(qint32 last_message_sequence);
+
+    QList<QString*>* getAngel61HeardCallsigns();
+    void setAngel61HeardCallsigns(QList<QString*>* angel61_heard_callsigns);
 
 
     virtual bool isSet() override;
@@ -94,11 +143,8 @@ private:
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
 
-    qint32 squelch;
-    bool m_squelch_isSet;
-
-    qint32 pll_locked;
-    bool m_pll_locked_isSet;
+    qint32 sync_locked;
+    bool m_sync_locked_isSet;
 
     qint32 slot1_on;
     bool m_slot1_on_isSet;
@@ -106,23 +152,74 @@ private:
     qint32 slot2_on;
     bool m_slot2_on_isSet;
 
+    QString* protocol;
+    bool m_protocol_isSet;
+
     QString* sync_type;
     bool m_sync_type_isSet;
 
-    qint32 in_level;
-    bool m_in_level_isSet;
+    qint32 polarity;
+    bool m_polarity_isSet;
 
-    qint32 carier_position;
-    bool m_carier_position_isSet;
+    float deviation_hz;
+    bool m_deviation_hz_isSet;
 
-    qint32 zero_crossing_position;
-    bool m_zero_crossing_position_isSet;
+    float frequency_error_hz;
+    bool m_frequency_error_hz_isSet;
 
-    qint32 sync_rate;
-    bool m_sync_rate_isSet;
+    float clock_error_ppm;
+    bool m_clock_error_ppm_isSet;
+
+    float snr_db;
+    bool m_snr_db_isSet;
+
+    float ber_estimate;
+    bool m_ber_estimate_isSet;
+
+    qint32 sync_count;
+    bool m_sync_count_isSet;
+
+    qint32 voice_frames;
+    bool m_voice_frames_isSet;
+
+    qint32 voice_frames_erased;
+    bool m_voice_frames_erased_isSet;
+
+    qint64 corrected_bits;
+    bool m_corrected_bits_isSet;
+
+    qint64 protected_bits;
+    bool m_protected_bits_isSet;
 
     QString* status_text;
     bool m_status_text_isSet;
+
+    QString* dtmf;
+    bool m_dtmf_isSet;
+
+    QString* angel61_file_pending;
+    bool m_angel61_file_pending_isSet;
+
+    QString* last_message;
+    bool m_last_message_isSet;
+
+    QString* last_message_protocol;
+    bool m_last_message_protocol_isSet;
+
+    QString* last_message_source;
+    bool m_last_message_source_isSet;
+
+    QString* last_message_destination;
+    bool m_last_message_destination_isSet;
+
+    QString* last_message_time;
+    bool m_last_message_time_isSet;
+
+    qint32 last_message_sequence;
+    bool m_last_message_sequence_isSet;
+
+    QList<QString*>* angel61_heard_callsigns;
+    bool m_angel61_heard_callsigns_isSet;
 
 };
 

@@ -108,6 +108,7 @@ apps:
             SPA_PLUGIN_DIR: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/spa-0.2
             QTWEBENGINE_DISABLE_SANDBOX: "1"
             QTWEBENGINEPROCESS_PATH: $SNAP/usr/lib/qt6/libexec/QtWebEngineProcess
+            VOCOSCODEC_MODEL_DIR: $SNAP/opt/install/sdrangel/share/vocoscodec/model
     sdrangelsrv:
         command: opt/install/sdrangel/bin/sdrangelsrv
         plugs:
@@ -123,6 +124,7 @@ apps:
             PIPEWIRE_CONFIG_DIR: $SNAP/usr/share/pipewire
             PIPEWIRE_MODULE_DIR: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pipewire-0.3
             SPA_PLUGIN_DIR: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/spa-0.2
+            VOCOSCODEC_MODEL_DIR: $SNAP/opt/install/sdrangel/share/vocoscodec/model
 
 
 layout:
@@ -169,7 +171,7 @@ parts:
         override-pull: |
             craftctl default
             craftctl set version="$(git describe --tags --abbrev=0 | sed 's/v//')"
-        after: [apt, mbelib, serialdv, dsdcc, codec2, sgp4, cspice, inmarsatc, libacars, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        after: [apt, mbevocoder, vocoscodec, serialdv, codec2, sgp4, cspice, inmarsatc, libacars, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
@@ -190,9 +192,7 @@ parts:
             - -DUHD_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DAPT_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DCM256CC_DIR=$CRAFT_STAGE/opt/install/sdrangel
-            - -DDSDCC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DSERIALDV_DIR=$CRAFT_STAGE/opt/install/sdrangel
-            - -DMBE_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DCODEC2_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DSGP4_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DCSPICE_DIR=$CRAFT_STAGE/opt/install/sdrangel
@@ -200,6 +200,8 @@ parts:
             - -DLIBACARS_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DLIBSIGMF_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DFDKAAC_DIR=$CRAFT_STAGE/opt/install/sdrangel
+            - -DMBEVOCODER_DIR=$CRAFT_STAGE/opt/install/sdrangel
+            - -DVOCOSCODEC_DIR=$CRAFT_STAGE/opt/install/sdrangel
             - -DARCH_OPT=nehalem
         build-packages:
             - libfftw3-dev
@@ -438,13 +440,47 @@ parts:
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
-    mbelib:
+    mbevocoder:
         plugin: cmake
-        source: https://github.com/srcejon/mbelib.git
+        source: https://github.com/srcejon/mbevocoder.git
         source-type: git
-        source-branch: lib
+        source-tag: v3.0.0
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCMAKE_INSTALL_LIBDIR=lib
+            - -DCMAKE_INSTALL_DOCDIR=share/licenses/mbevocoder
+            - -DMBEVOCODER_BUILD_TOOLS=OFF
+            - -DMBEVOCODER_BUILD_TESTS=OFF
+        prime:
+            # a static library: sdrangel links it, nothing of it is needed at run time but its licence
+            - -opt/install/sdrangel/include/mbevocoder
+            - -opt/install/sdrangel/include/mbelib
+            - -opt/install/sdrangel/include/mbelib-neo
+            - -opt/install/sdrangel/lib/libmbevocoder.a
+            - -opt/install/sdrangel/lib/pkgconfig/mbevocoder.pc
+            - -opt/install/sdrangel/lib/pkgconfig/libmbe-neo.pc
+            - -opt/install/sdrangel/lib/cmake/mbevocoder
+            - -opt/install/sdrangel/lib/cmake/mbe-neo
+
+    # vocoscodec (EnCodec + Vocos): Angel61's V1 voice codec, which sdrangel loads at run time from
+    # lib/libvocoscodec.so beside its bin, with its models in share/vocoscodec/model
+    # (VOCOSCODEC_MODEL_DIR in the apps' environment). The pin is VOCOSCODEC_TAG in
+    # external/CMakeLists.txt
+    vocoscodec:
+        plugin: cmake
+        source: https://github.com/srcejon/vocoscodec.git
+        source-type: git
+        source-tag: v1
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCMAKE_INSTALL_LIBDIR=lib
+            - -DVOCOSCODEC_BUILD_RUNTIME=ON
+            - -DVOCOSCODEC_BUILD_TESTS=OFF
+            - -DVOCOSCODEC_BUILD_TOOLS=OFF
+        prime:
+            - -opt/install/sdrangel/include/vocoscodec
+            - -opt/install/sdrangel/lib/libvocoscodec_codec.a
+            - -opt/install/sdrangel/lib/cmake/Vocoscodec
 
     serialdv:
         plugin: cmake
@@ -454,21 +490,6 @@ parts:
         cmake-parameters:
             - -DCMAKE_CXX_FLAGS="-std=c++11"
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
-
-    dsdcc:
-        plugin: cmake
-        source: https://github.com/f4exb/dsdcc.git
-        source-type: git
-        source-tag: v1.9.6
-        after: [mbelib, serialdv]
-        cmake-parameters:
-            - -DUSE_MBELIB=ON
-            - -DCMAKE_CXX_FLAGS="-std=c++11"
-            - -DCMAKE_INSTALL_PREFIX=/usr
-            - -DLIBMBE_INCLUDE_DIR=$CRAFT_STAGE/opt/install/sdrangel/include
-            - -DLIBMBE_LIBRARY=$CRAFT_STAGE/opt/install/sdrangel/lib/libmbe.so
-            - -DLIBSERIALDV_INCLUDE_DIR=$CRAFT_STAGE/opt/install/sdrangel/include/serialdv
-            - -DLIBSERIALDV_LIBRARY=$CRAFT_STAGE/opt/install/sdrangel/lib/libserialdv.so
 
     codec2:
         plugin: cmake

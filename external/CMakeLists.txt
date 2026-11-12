@@ -10,9 +10,9 @@
 # which version/tag/checkout to use
 set(CODEC2_TAG "v1.1.1")
 set(CM256CC_TAG "v1.1.2")
-set(MBELIB_TAG "lib")
+set(MBEVOCODER_TAG "v3.0.0")
+set(VOCOSCODEC_TAG "v1")
 set(SERIALDV_TAG "v1.1.5")
-set(DSDCC_TAG "v1.9.6")
 set(LIMESUITE_TAG 524cd2e548b11084e6f739b2dfe0f958c2e30354)
 set(BLADERF_TAG "2025.10")
 if (ENABLE_LIBIIO_V1 AND LINUX)
@@ -42,6 +42,7 @@ set(UHD_TAG "v4.9.0.1")
 set(BOOST_TAG "1.86.0")
 set(BOOST_TAG2 "1_86_0")
 set(FDKAAC_TAG "v2.0.3")
+set(OPUS_TAG "v1.6.1")
 
 # For some external project macros
 include(ExternalProject)
@@ -272,9 +273,13 @@ endif ()
 if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opus
             GIT_REPOSITORY https://github.com/xiph/opus
-            GIT_TAG v1.5.2
+            GIT_TAG ${OPUS_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/opus"
-            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOPUS_BUILD_SHARED_LIBRARY=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            # The weights of the neural networks OPUS_OSCE builds (Deep PLC, LACE, NoLACE, the
+            # bandwidth extension) are not in git: fetch then as autogen does (opus_model.cmake).
+            PATCH_COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/opus_model.cmake"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOPUS_OSCE=ON -DCMAKE_C_FLAGS_INIT=-DENABLE_OSCE_BWE -DOPUS_BUILD_SHARED_LIBRARY=OFF
+                -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             TEST_COMMAND ""
             )
     ExternalProject_Get_Property(opus install_dir)
@@ -284,12 +289,9 @@ if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     set(OPUS_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
     set(OPUS_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig" CACHE INTERNAL "")
     if (WIN32)
-        set(OPUS_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libopus.lib" CACHE INTERNAL "")
-    elseif (LINUX)
-        set(OPUS_LIBRARIES "${install_dir}/lib${LIB_SUFFIX}/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    elseif (APPLE)
-        set(OPUS_LIBRARIES "${install_dir}/lib/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        set(OPUS_LIBRARIES "${install_dir}/lib/opus.lib" CACHE INTERNAL "")
+    else ()
+        set(OPUS_LIBRARIES "${install_dir}/lib/libopus.a" CACHE INTERNAL "")
     endif ()
 endif (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
@@ -697,38 +699,69 @@ if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
     endif ()
 endif (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
 
-if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EXTERNAL))
-    set(USE_MBELIB OFF)
-    if (WIN32)
-        set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libmbe.lib" CACHE INTERNAL "")
-    elseif (LINUX)
-        set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    elseif (APPLE)
-        set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/mbelib/src/mbelib-build/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+# mbevocoder: the AMBE, AMBE+2 and IMBE vocoder of the DSD demodulator and the DSE modulator.
+if ((ENABLE_CHANNELRX_DEMODDSD OR ENABLE_CHANNELTX_MODDSE) AND (NOT MBEVOCODER_FOUND OR MBEVOCODER_EXTERNAL))
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(MBEVOCODER_POSTFIX "d")
     endif ()
-    ExternalProject_Add(mbelib
-            GIT_REPOSITORY https://github.com/srcejon/mbelib.git
-            GIT_TAG ${MBELIB_TAG}
-            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
-            CMAKE_ARGS -DDISABLE_TEST=ON ${COMMON_CMAKE_ARGS}
-            BUILD_BYPRODUCTS "${LIBMBE_LIBRARIES}"
+    set(MBEVOCODER_INSTALL_DIR "${EXTERNAL_BUILD_LIBRARIES}/mbevocoder")
+    if (WIN32)
+        set(MBEVOCODER_LIBRARY_FILE "${MBEVOCODER_INSTALL_DIR}/lib/mbevocoder${MBEVOCODER_POSTFIX}.lib")
+    else ()
+        set(MBEVOCODER_LIBRARY_FILE "${MBEVOCODER_INSTALL_DIR}/lib/libmbevocoder${MBEVOCODER_POSTFIX}.a")
+    endif ()
+    ExternalProject_Add(mbevocoder
+            GIT_REPOSITORY https://github.com/srcejon/mbevocoder.git
+            GIT_TAG ${MBEVOCODER_TAG}
+            PREFIX "${MBEVOCODER_INSTALL_DIR}"
+            INSTALL_DIR "${MBEVOCODER_INSTALL_DIR}"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DMBEVOCODER_BUILD_TOOLS=OFF -DMBEVOCODER_BUILD_TESTS=OFF
+                -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            BUILD_BYPRODUCTS "${MBEVOCODER_LIBRARY_FILE}"
+            TEST_COMMAND ""
+            )
+    set_global(MBEVOCODER_DEPENDS mbevocoder)
+    set_global_cache(MBEVOCODER_FOUND ON)
+    set(MBEVOCODER_EXTERNAL ON CACHE INTERNAL "")
+    set_global_cache(MBEVOCODER_INCLUDE_DIRS "${MBEVOCODER_INSTALL_DIR}/include")
+    set_global_cache(MBEVOCODER_LIBRARY "${MBEVOCODER_LIBRARY_FILE}")
+endif ((ENABLE_CHANNELRX_DEMODDSD OR ENABLE_CHANNELTX_MODDSE) AND (NOT MBEVOCODER_FOUND OR MBEVOCODER_EXTERNAL))
+
+# vocoscodec (EnCodec + Vocos) for Angel61's V1 voice, loaded at run time
+if((ENABLE_CHANNELRX_DEMODDSD OR ENABLE_CHANNELTX_MODDSE) AND VOCOSCODEC_TAG AND (NOT VOCOSCODEC_FOUND OR VOCOSCODEC_EXTERNAL))
+    if (WIN32)
+        set(VOCOSCODEC_RUNTIME_LIBRARY "${SDRANGEL_BINARY_BIN_DIR}/vocoscodec${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(VOCOSCODEC_RUNTIME_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libvocoscodec${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(VOCOSCODEC_RUNTIME_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/vocoscodec/src/vocoscodec-build/vocoscodec/libvocoscodec${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(vocoscodec
+            GIT_REPOSITORY https://github.com/srcejon/vocoscodec.git
+            GIT_TAG ${VOCOSCODEC_TAG}
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/vocoscodec"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                -DVOCOSCODEC_BUILD_RUNTIME=ON
+                -DVOCOSCODEC_BUILD_TESTS=OFF
+                -DVOCOSCODEC_BUILD_TOOLS=OFF
+            BUILD_BYPRODUCTS "${VOCOSCODEC_RUNTIME_LIBRARY}"
             INSTALL_COMMAND ""
             TEST_COMMAND ""
             )
-    ExternalProject_Get_Property(mbelib source_dir binary_dir)
-    set(USE_MBELIB ON)
-    set_global(DSDCC_DEPENDS mbelib)
-    set_global_cache(LIBMBE_FOUND ON)
-    set(LIBMBE_EXTERNAL ON CACHE INTERNAL "")
-    set(LIBMBE_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
-    if (WIN32)
-        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    elseif (APPLE)
-        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-                FILES_MATCHING PATTERN "libmbe*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
-    endif ()
-endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EXTERNAL))
+    ExternalProject_Get_Property(vocoscodec source_dir)
+    set(VOCOSCODEC_MODEL_DIR "${source_dir}/model" CACHE INTERNAL "")
+    set_global_cache(VOCOSCODEC_FOUND ON)
+    set(VOCOSCODEC_EXTERNAL ON CACHE INTERNAL "")
+    install(FILES "${VOCOSCODEC_RUNTIME_LIBRARY}" DESTINATION "${INSTALL_LIB_DIR}")
+    if(WIN32)
+        install(DIRECTORY "${VOCOSCODEC_MODEL_DIR}/" DESTINATION "${INSTALL_BIN_DIR}/vocoscodec"
+            FILES_MATCHING PATTERN "*.bin" PATTERN "SHA256SUMS")
+    else()
+        install(DIRECTORY "${VOCOSCODEC_MODEL_DIR}/" DESTINATION "${INSTALL_DOC_DIR}/vocoscodec"
+            FILES_MATCHING PATTERN "*.bin" PATTERN "SHA256SUMS")
+    endif()
+endif ()
+
 
 if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
     # Works on MacOS with a dummy serialDV
@@ -769,42 +802,6 @@ if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
     endif ()
 endif (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
 
-if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
-    if (WIN32)
-        set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
-    elseif (LINUX)
-        set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-        # set the RPATH so that the built dsdcc can find libmbe.so.1 (https://github.com/f4exb/sdrangel/issues/777)
-        # Would probably be better to change this so INSTALL_COMMAND isn't set to "" and the install step is done
-        set(LIBDSDCC_ARGS "-DCMAKE_BUILD_RPATH=${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
-    elseif (APPLE)
-        set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src/dsdcc-build/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    endif ()
-    ExternalProject_Add(dsdcc
-            GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
-            GIT_TAG ${DSDCC_TAG}
-            DEPENDS ${DSDCC_DEPENDS}
-            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
-            CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${LIBDSDCC_ARGS}
-            -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB}
-            -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR}
-            -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES}            
-            BUILD_BYPRODUCTS "${LIBDSDCC_LIBRARIES}"
-            INSTALL_COMMAND ""
-            TEST_COMMAND ""
-            )
-    ExternalProject_Get_Property(dsdcc source_dir binary_dir)
-    set_global_cache(LIBDSDCC_FOUND ON)
-    set(LIBDSDCC_EXTERNAL ON CACHE INTERNAL "")
-    set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src" CACHE INTERNAL "")
-    if (WIN32)
-        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    elseif (APPLE)
-        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-                FILES_MATCHING PATTERN "libdsdcc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
-    endif ()
-endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 
 if ((LINUX OR APPLE) AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
     set(LIBSIGMF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/liblibsigmf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")

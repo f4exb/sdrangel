@@ -40,6 +40,7 @@ struct DemodAnalyzerSettings
     QString m_fileRecordName;
     bool m_recordToFile;
     int m_recordSilenceTime; //!< 100's ms
+    bool m_realSpectrum;     //!< The signal is real (audio): show the positive frequencies only (SSB spectrum)
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;

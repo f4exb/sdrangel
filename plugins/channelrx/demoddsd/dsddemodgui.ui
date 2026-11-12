@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
-    <height>392</height>
+    <width>595</width>
+    <height>437</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>750</width>
-    <height>392</height>
+    <height>500</height>
    </size>
   </property>
   <property name="font">
@@ -42,8 +42,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>648</width>
-     <height>172</height>
+     <width>500</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -124,7 +124,7 @@
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
           <property name="toolTip">
            <string>Demod shift frequency from center in Hz</string>
@@ -137,11 +137,18 @@
            <string>Hz </string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="rfBWLabel">
@@ -155,6 +162,9 @@
         <property name="toolTip">
          <string>Bandwidth (kHz) before discriminator</string>
         </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
         <property name="maximum">
          <number>500</number>
         </property>
@@ -165,7 +175,7 @@
          <number>100</number>
         </property>
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -181,14 +191,14 @@
          <string>00.0k</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -216,13 +226,13 @@
          <string>Channel power (dB)</string>
         </property>
         <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
+         <enum>Qt::LayoutDirection::RightToLeft</enum>
         </property>
         <property name="text">
          <string>-100.0 dB</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -269,7 +279,7 @@
       <item>
        <widget class="QCheckBox" name="activateStatusLog">
         <property name="toolTip">
-         <string>Activate status text log</string>
+         <string>Activate status and DMR call event log</string>
         </property>
         <property name="text">
          <string/>
@@ -291,7 +301,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>View status text log</string>
+         <string>View status and DMR call event log</string>
         </property>
         <property name="text">
          <string/>
@@ -303,9 +313,16 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -316,9 +333,84 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="vocoderLabel">
+        <property name="text">
+         <string>Voc</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="vocoder">
+        <property name="toolTip">
+         <string>Vocoder that decodes AMBE and IMBE voice: mbevocoder in software, or a device through an AMBE feature</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="slot1On">
+        <property name="toolTip">
+         <string>TDMA slot1 or FDMA unique slot voice on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/slot1_off.png</normaloff>
+          <normalon>:/slot1_on.png</normalon>:/slot1_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="slot2On">
+        <property name="toolTip">
+         <string>TDMA slot2 voice on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/slot2_off.png</normaloff>
+          <normalon>:/slot2_on.png</normalon>:/slot2_off.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="tdmaStereoSplit">
+        <property name="toolTip">
+         <string>Stereo split: slot 1 left, slot 2 right (else both channels)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/mono.png</normaloff>
+          <normalon>:/stereo.png</normalon>:/mono.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -372,115 +464,7 @@
          <string>10.0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="squelchLabel">
-        <property name="text">
-         <string> Sq</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="squelch">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch threshold (dB)</string>
-        </property>
-        <property name="minimum">
-         <number>-100</number>
-        </property>
-        <property name="maximum">
-         <number>0</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>-40</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="squelchText">
-        <property name="minimumSize">
-         <size>
-          <width>30</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch threshold (dB)</string>
-        </property>
-        <property name="text">
-         <string>-100</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="squelchGate">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch gate (ms)</string>
-        </property>
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-        <property name="sliderPosition">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="squelchGateText">
-        <property name="minimumSize">
-         <size>
-          <width>25</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Squelch gate (ms)</string>
-        </property>
-        <property name="text">
-         <string>000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -547,10 +531,10 @@
          <string>Status text</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::Box</enum>
+         <enum>QFrame::Shape::Box</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
+         <enum>QFrame::Shadow::Sunken</enum>
         </property>
         <property name="lineWidth">
          <number>2</number>
@@ -562,15 +546,79 @@
       </item>
      </layout>
     </item>
+    <item>
+     <layout class="QHBoxLayout" name="textMessagesLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QPlainTextEdit" name="textMessages">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Text messages received</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Text messages</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearTextMessages">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Clear the text messages</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="contactReportLayout"/>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="scopeWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>180</y>
-     <width>480</width>
-     <height>210</height>
+     <width>571</width>
+     <height>239</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -596,663 +644,970 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="TVScreen" name="screenTV" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>200</height>
-       </size>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="constellationLayout">
+      <item>
+       <widget class="TVScreen" name="screenTV" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="traceLayout">
+        <item>
+         <widget class="QDial" name="traceLength">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Trace length (ms)</string>
+          </property>
+          <property name="minimum">
+           <number>2</number>
+          </property>
+          <property name="maximum">
+           <number>30</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>6</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="traceLengthText">
+          <property name="toolTip">
+           <string>Trace length (ms)</string>
+          </property>
+          <property name="text">
+           <string>300</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDial" name="traceStroke">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Trace stroke intensity</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="traceStrokeText">
+          <property name="toolTip">
+           <string>Trace stroke intensity</string>
+          </property>
+          <property name="text">
+           <string>100</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDial" name="traceDecay">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Trace decay</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>200</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="traceDecayText">
+          <property name="toolTip">
+           <string>Trace decay</string>
+          </property>
+          <property name="text">
+           <string>200</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="traceSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QFrame" name="frame">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+     <widget class="QTabWidget" name="settingsTabWidget">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QComboBox" name="baudRate">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>59</width>
-         <height>20</height>
-        </rect>
-       </property>
+      <widget class="QWidget" name="protocolTab">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="toolTip">
-        <string>Baud rate: 2.4k: NXDN48, dPMR 4.8k: DMR, D-Star, YSF, NXDN96</string>
+        <string>DV Protocol Settings</string>
        </property>
-       <item>
-        <property name="text">
-         <string>2.4k</string>
+       <attribute name="title">
+        <string>Protocol</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="leftMargin">
+         <number>3</number>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4.8k</string>
+        <property name="topMargin">
+         <number>3</number>
         </property>
-       </item>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QFrame" name="protocolFrame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="frameLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="protocolLayout">
+             <item>
+              <widget class="QComboBox" name="protocol">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Protocols searched for: Auto (all but Angel61 HF) or one of DMR, D-STAR, YSF, NXDN48 (2400 Baud), NXDN96 (4800 Baud), dPMR, P25, P25P2, M17, Angel61 NB, Angel61 WB, and Angel61 HF-NB and HF-WB (selected only)</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Auto</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>DMR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>D-STAR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>YSF</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NXDN48</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NXDN96</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>dPMR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P25</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>P25P2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>M17</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Angel61 NB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Angel61 WB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Angel61 HF-NB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Angel61 HF-WB</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="ButtonSwitch" name="coherent">
+               <property name="toolTip">
+                <string>Coherent detection for 4FSK (about 2 dB better than the discriminator, but requires more CPU)</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../../../sdrgui/resources/res.qrc">
+                 <normaloff>:/coherent.png</normaloff>:/coherent.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="syncText">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>110</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Liberation Mono</family>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Protocol locked to and its last sync pattern</string>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::Box</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Sunken</enum>
+             </property>
+             <property name="lineWidth">
+              <number>2</number>
+             </property>
+             <property name="text">
+              <string>No Sync</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="demodStatusLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="frequencyErrorLabel">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Carrier frequency error in Hz</string>
+               </property>
+               <property name="text">
+                <string>Err</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="frequencyErrorText">
+               <property name="minimumSize">
+                <size>
+                 <width>40</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Carrier frequency error in Hz</string>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::NoFrame</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Shadow::Sunken</enum>
+               </property>
+               <property name="text">
+                <string>----</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="frequencyErrorUnit">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Carrier frequency error in Hz</string>
+               </property>
+               <property name="text">
+                <string>Hz</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Policy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>14</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="snrLabel">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Symbol signal-to-noise ratio in dB</string>
+               </property>
+               <property name="text">
+                <string>SNR</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="snrText">
+               <property name="minimumSize">
+                <size>
+                 <width>24</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Symbol signal-to-noise ratio in dB</string>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::NoFrame</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Shadow::Sunken</enum>
+               </property>
+               <property name="text">
+                <string>--</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="snrUnit">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Symbol signal-to-noise ratio in dB</string>
+               </property>
+               <property name="text">
+                <string>dB</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Policy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>14</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="berLabel">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Raw bit error rate estimate in percent</string>
+               </property>
+               <property name="text">
+                <string>BER</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="berText">
+               <property name="minimumSize">
+                <size>
+                 <width>30</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Raw bit error rate estimate in percent</string>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Shape::NoFrame</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Shadow::Sunken</enum>
+               </property>
+               <property name="text">
+                <string>---</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="berUnit">
+               <property name="font">
+                <font>
+                 <family>Liberation Mono</family>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Raw bit error rate estimate in percent</string>
+               </property>
+               <property name="text">
+                <string>%</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="channelSelectLayout">
+             <item>
+              <widget class="QLabel" name="dmrColorCodeLabel">
+               <property name="toolTip">
+                <string>Colour code audio filter (DMR and dPMR), or RAN (NXDN)</string>
+               </property>
+               <property name="text">
+                <string>CC</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="dmrColorCode">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Only output DMR or dPMR audio with this colour code, or NXDN audio with this RAN (DMR codes stop at 15); Any disables filtering</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="angel61GroupsLabel">
+               <property name="text">
+                <string>TG</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="angel61Groups">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>90</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Angel61 talkgroups to play, comma separated (9, 23). A call to another talkgroup is shown but not played. Calls to CQ and to callsigns are always played. Empty: every call is played.</string>
+               </property>
+               <property name="placeholderText">
+                <string>all groups</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="p25p2SystemLayout">
+             <item>
+              <widget class="QLabel" name="p25p2SystemLabel">
+               <property name="toolTip">
+                <string>P25 Phase 2 system: WACN, system ID and NAC (hexadecimal) the voice scrambling derives from</string>
+               </property>
+               <property name="text">
+                <string>P25P2</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="p25p2System">
+               <property name="toolTip">
+                <string>P25 Phase 2 system: WACN, system ID and NAC (hexadecimal) the voice scrambling derives from</string>
+               </property>
+               <property name="placeholderText">
+                <string>WACN:SYS:NAC</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </widget>
-      <widget class="QLabel" name="syncText">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>10</y>
-         <width>110</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>110</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Liberation Mono</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
+      <widget class="QWidget" name="contactReportingTab">
        <property name="toolTip">
-        <string>Synchronized on this frame type</string>
+        <string>Report Angel61 contacts</string>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::Box</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-       <property name="lineWidth">
-        <number>2</number>
-       </property>
-       <property name="text">
-        <string>No Sync______</string>
-       </property>
-      </widget>
-      <widget class="QToolButton" name="symbolPLLLock">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>10</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Symbol PLL toggle (green: PLL locked)</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
+       <attribute name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/unlocked.png</normaloff>
-         <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="symbolSyncQualityText">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Symbol synchronization rate (%)</string>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="zcPosText">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Zero crossing relative position in number of samples (&lt;0 sampling point lags, &gt;0 it leads)</string>
-       </property>
-       <property name="text">
-        <string>-00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="ButtonSwitch" name="enableCosineFiltering">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>10</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Enable cosine filtering</string>
-       </property>
-       <property name="text">
+         <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+       </attribute>
+       <attribute name="title">
         <string/>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="1" column="0">
+         <widget class="QLabel" name="contactReportCallsignLabel">
+          <property name="text">
+           <string>RX callsign</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="contactReportCallsign">
+          <property name="toolTip">
+           <string>Callsign to include in contact reports as the receiver</string>
+          </property>
+          <property name="placeholderText">
+           <string>RX callsign</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="contactReportEnabledLabel">
+          <property name="text">
+           <string>Report contacts</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="ButtonSwitch" name="contactReportEnabled">
+          <property name="toolTip">
+           <string>Toggle sending Angel61 contact reports, with the station position from Preferences &gt; My Position, to angel61.sdrangel.org.</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="contactReportStatusLabel">
+          <property name="text">
+           <string>Status</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="contactReportStatus">
+          <property name="text">
+           <string>Off</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="fileTab">
+       <property name="toolTip">
+        <string>File Transfer Settings</string>
        </property>
-       <property name="icon">
+       <attribute name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
-       </property>
-      </widget>
-      <widget class="QLabel" name="inCarrierPosText">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Carrier relative position (%) when synchronized</string>
-       </property>
-       <property name="text">
-        <string>-00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="inLevelText">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Carrier input level (%) when synchronized</string>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QToolButton" name="syncOrConstellation">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Toggle between transition constellation and symbol synchronization displays</string>
-       </property>
-       <property name="text">
+         <normaloff>:/save.png</normaloff>:/save.png</iconset>
+       </attribute>
+       <attribute name="title">
         <string/>
-       </property>
-       <property name="icon">
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="angel61FileDirectoryBrowse">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Choose the directory file transfers are written to</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="angel61FileMaxKB">
+            <property name="toolTip">
+             <string>Largest file this station accepts, in kilobytes. A larger offer is refused before a block is stored. 0: no limit.</string>
+            </property>
+            <property name="suffix">
+             <string> kB</string>
+            </property>
+            <property name="maximum">
+             <number>65536</number>
+            </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="angel61FileDirectory">
+            <property name="toolTip">
+             <string>Directory file transfers are written to. Empty: a file is decoded and reported but not stored.</string>
+            </property>
+            <property name="placeholderText">
+             <string>Directory to save received files to</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="angel61FileDirectoryLabel">
+            <property name="text">
+             <string>Save to</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="angel61FileConfirm">
+            <property name="toolTip">
+             <string>Confirm every file transfer before the file is kept: until Accept, its blocks are held in memory, no answer goes back and nothing is saved</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="angel61FileConfirmLabel">
+            <property name="text">
+             <string>Confirm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="angel61FileMaxKBLabel">
+            <property name="text">
+             <string>Max size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="angel61FileAccept">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Accept the file awaiting confirmation</string>
+              </property>
+              <property name="text">
+               <string>Accept</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="angel61FileReject">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Refuse the file awaiting confirmation</string>
+              </property>
+              <property name="text">
+               <string>Refuse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tunnelTab">
+       <attribute name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/constellation.png</normaloff>
-         <normalon>:/slopep_icon.png</normalon>:/constellation.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QSlider" name="fmDeviation">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>107</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Maximum frequency deviation (kHz)</string>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>35</number>
-       </property>
-       <property name="sliderPosition">
-        <number>35</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="fmDeviationLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>100</y>
-         <width>25</width>
-         <height>29</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>FMd</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="fmDeviationText">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>100</y>
-         <width>50</width>
-         <height>29</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>+00.0k</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="demodGainLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>28</width>
-         <height>30</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Gain</string>
-       </property>
-      </widget>
-      <widget class="QSlider" name="demodGain">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>137</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Gain after discriminator</string>
-       </property>
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="sliderPosition">
-        <number>100</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QToolButton" name="slot1On">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>40</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>TDMA slot1 or FDMA unique slot voice on/off</string>
-       </property>
-       <property name="text">
+         <normaloff>:/link.png</normaloff>:/link.png</iconset>
+       </attribute>
+       <attribute name="title">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/slot1_off.png</normaloff>
-         <normalon>:/slot1_on.png</normalon>:/slot1_off.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QToolButton" name="slot2On">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>40</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>TDMA slot2 voice on/off</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/slot2_off.png</normaloff>
-         <normalon>:/slot2_on.png</normalon>:/slot2_off.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QToolButton" name="tdmaStereoSplit">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>40</y>
-         <width>23</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Split TDMA channels on left (slot 1) and right (slot 2) audio stereo channels or merge as mono</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/mono.png</normaloff>
-         <normalon>:/stereo.png</normalon>:/mono.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QDial" name="traceLength">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>68</y>
-         <width>24</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Display trace length (ms)</string>
-       </property>
-       <property name="minimum">
-        <number>6</number>
-       </property>
-       <property name="maximum">
-        <number>30</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>6</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="traceLengthText">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>73</y>
-         <width>31</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Display trace length (ms)</string>
-       </property>
-       <property name="text">
-        <string>0000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="demodGainText">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>130</y>
-         <width>50</width>
-         <height>29</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QDial" name="traceStroke">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>70</y>
-         <width>24</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trace stroke [0..255]</string>
-       </property>
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>255</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>100</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="traceStrokeText">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>73</y>
-         <width>31</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Trace stroke value</string>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QDial" name="traceDecay">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>70</y>
-         <width>24</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trace decay [0..255]</string>
-       </property>
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>255</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>200</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="traceDecayText">
-       <property name="geometry">
-        <rect>
-         <x>190</x>
-         <y>73</y>
-         <width>31</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Trace decay value</string>
-       </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="ambeSupport">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>170</y>
-         <width>71</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>AMBE</string>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="ambeFeatures">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>170</y>
-         <width>50</width>
-         <height>20</height>
-        </rect>
-       </property>
+       </attribute>
+       <attribute name="toolTip">
+        <string>IP tunnel</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Angel61 IP Tunneling</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="angel61IPTraffic">
+             <property name="toolTip">
+              <string>Valid, fully reassembled IP datagrams heard on Angel61, from any station. Being heard does not mean they reached the host: the DSE Modulator decides that, and shows it below.</string>
+             </property>
+             <property name="text">
+              <string>Heard: 0 B (0 datagrams)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QLabel" name="angel61TunnelState">
+             <property name="toolTip">
+              <string>The state of the DSE Modulator's tunnel, which owns the host interface and has the settings, and what it did with the datagrams heard: delivered to the host, or refused (not from its peer, not valid, or the host would not take them)</string>
+             </property>
+             <property name="text">
+              <string>No DSE Modulator: what is received will not reach the host</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -1260,11 +1615,6 @@
   </widget>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
   <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
@@ -1276,6 +1626,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>

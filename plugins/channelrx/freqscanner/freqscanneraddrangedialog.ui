@@ -223,6 +223,16 @@
           <string>HF 80m</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>UK 2m Channels</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>UK 70cm Channels</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="0">

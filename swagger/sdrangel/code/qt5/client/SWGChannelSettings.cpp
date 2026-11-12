@@ -88,6 +88,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_dsd_demod_settings_isSet = false;
     drone_id_demod_settings = nullptr;
     m_drone_id_demod_settings_isSet = false;
+    dse_mod_settings = nullptr;
+    m_dse_mod_settings_isSet = false;
     end_of_train_demod_settings = nullptr;
     m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = nullptr;
@@ -254,6 +256,8 @@ SWGChannelSettings::init() {
     m_dsd_demod_settings_isSet = false;
     drone_id_demod_settings = new SWGDroneIDDemodSettings();
     m_drone_id_demod_settings_isSet = false;
+    dse_mod_settings = new SWGDSEModSettings();
+    m_dse_mod_settings_isSet = false;
     end_of_train_demod_settings = new SWGEndOfTrainDemodSettings();
     m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = new SWGFileSinkSettings();
@@ -439,6 +443,9 @@ SWGChannelSettings::cleanup() {
     }
     if(drone_id_demod_settings != nullptr) { 
         delete drone_id_demod_settings;
+    }
+    if(dse_mod_settings != nullptr) { 
+        delete dse_mod_settings;
     }
     if(end_of_train_demod_settings != nullptr) { 
         delete end_of_train_demod_settings;
@@ -660,6 +667,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&drone_id_demod_settings, pJson["DroneIDDemodSettings"], "SWGDroneIDDemodSettings", "SWGDroneIDDemodSettings");
     
+    ::SWGSDRangel::setValue(&dse_mod_settings, pJson["DSEModSettings"], "SWGDSEModSettings", "SWGDSEModSettings");
+    
     ::SWGSDRangel::setValue(&end_of_train_demod_settings, pJson["EndOfTrainDemodSettings"], "SWGEndOfTrainDemodSettings", "SWGEndOfTrainDemodSettings");
     
     ::SWGSDRangel::setValue(&file_sink_settings, pJson["FileSinkSettings"], "SWGFileSinkSettings", "SWGFileSinkSettings");
@@ -863,6 +872,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((drone_id_demod_settings != nullptr) && (drone_id_demod_settings->isSet())){
         toJsonValue(QString("DroneIDDemodSettings"), drone_id_demod_settings, obj, QString("SWGDroneIDDemodSettings"));
+    }
+    if((dse_mod_settings != nullptr) && (dse_mod_settings->isSet())){
+        toJsonValue(QString("DSEModSettings"), dse_mod_settings, obj, QString("SWGDSEModSettings"));
     }
     if((end_of_train_demod_settings != nullptr) && (end_of_train_demod_settings->isSet())){
         toJsonValue(QString("EndOfTrainDemodSettings"), end_of_train_demod_settings, obj, QString("SWGEndOfTrainDemodSettings"));
@@ -1313,6 +1325,16 @@ void
 SWGChannelSettings::setDroneIdDemodSettings(SWGDroneIDDemodSettings* drone_id_demod_settings) {
     this->drone_id_demod_settings = drone_id_demod_settings;
     this->m_drone_id_demod_settings_isSet = true;
+}
+
+SWGDSEModSettings*
+SWGChannelSettings::getDseModSettings() {
+    return dse_mod_settings;
+}
+void
+SWGChannelSettings::setDseModSettings(SWGDSEModSettings* dse_mod_settings) {
+    this->dse_mod_settings = dse_mod_settings;
+    this->m_dse_mod_settings_isSet = true;
 }
 
 SWGEndOfTrainDemodSettings*
@@ -1898,6 +1920,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(drone_id_demod_settings && drone_id_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dse_mod_settings && dse_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(end_of_train_demod_settings && end_of_train_demod_settings->isSet()){

@@ -542,7 +542,12 @@ private:
     bool parseTime(QString& info, int& idx);
     bool parseTimeMDHM(QString& info, int& idx);
     bool isLatLongChar(const QChar c);
-    bool parsePosition(QString& info, int& idx);
+    //! compressed, when given, says whether the position was in the Base91 compressed form,
+    //! which carries the course and speed itself and so has no data extension after it
+    bool parsePosition(QString& info, int& idx, bool *compressed = nullptr);
+    bool parseCompressedPosition(QString& info, int& idx);
+    //! The position of a packet and what follows it: weather, a storm, or the data extension and comment
+    void parsePositionReport(QString& info, int& idx);
     bool parseDataExension(QString& info, int& idx);
     bool parseComment(QString& info, int& idx);
     bool parseInt(QString& info, int& idx, int chars, int& value, bool& hasValue);

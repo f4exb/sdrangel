@@ -78,6 +78,8 @@ SWGChannelReport::SWGChannelReport() {
     m_dsd_demod_report_isSet = false;
     drone_id_demod_report = nullptr;
     m_drone_id_demod_report_isSet = false;
+    dse_mod_report = nullptr;
+    m_dse_mod_report_isSet = false;
     end_of_train_demod_report = nullptr;
     m_end_of_train_demod_report_isSet = false;
     ieee_802_15_4_demod_report = nullptr;
@@ -224,6 +226,8 @@ SWGChannelReport::init() {
     m_dsd_demod_report_isSet = false;
     drone_id_demod_report = new SWGDroneIDDemodReport();
     m_drone_id_demod_report_isSet = false;
+    dse_mod_report = new SWGDSEModReport();
+    m_dse_mod_report_isSet = false;
     end_of_train_demod_report = new SWGEndOfTrainDemodReport();
     m_end_of_train_demod_report_isSet = false;
     ieee_802_15_4_demod_report = new SWGIEEE_802_15_4_DemodReport();
@@ -388,6 +392,9 @@ SWGChannelReport::cleanup() {
     }
     if(drone_id_demod_report != nullptr) { 
         delete drone_id_demod_report;
+    }
+    if(dse_mod_report != nullptr) { 
+        delete dse_mod_report;
     }
     if(end_of_train_demod_report != nullptr) { 
         delete end_of_train_demod_report;
@@ -584,6 +591,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&drone_id_demod_report, pJson["DroneIDDemodReport"], "SWGDroneIDDemodReport", "SWGDroneIDDemodReport");
     
+    ::SWGSDRangel::setValue(&dse_mod_report, pJson["DSEModReport"], "SWGDSEModReport", "SWGDSEModReport");
+    
     ::SWGSDRangel::setValue(&end_of_train_demod_report, pJson["EndOfTrainDemodReport"], "SWGEndOfTrainDemodReport", "SWGEndOfTrainDemodReport");
     
     ::SWGSDRangel::setValue(&ieee_802_15_4_demod_report, pJson["IEEE_802_15_4_DemodReport"], "SWGIEEE_802_15_4_DemodReport", "SWGIEEE_802_15_4_DemodReport");
@@ -762,6 +771,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((drone_id_demod_report != nullptr) && (drone_id_demod_report->isSet())){
         toJsonValue(QString("DroneIDDemodReport"), drone_id_demod_report, obj, QString("SWGDroneIDDemodReport"));
+    }
+    if((dse_mod_report != nullptr) && (dse_mod_report->isSet())){
+        toJsonValue(QString("DSEModReport"), dse_mod_report, obj, QString("SWGDSEModReport"));
     }
     if((end_of_train_demod_report != nullptr) && (end_of_train_demod_report->isSet())){
         toJsonValue(QString("EndOfTrainDemodReport"), end_of_train_demod_report, obj, QString("SWGEndOfTrainDemodReport"));
@@ -1147,6 +1159,16 @@ void
 SWGChannelReport::setDroneIdDemodReport(SWGDroneIDDemodReport* drone_id_demod_report) {
     this->drone_id_demod_report = drone_id_demod_report;
     this->m_drone_id_demod_report_isSet = true;
+}
+
+SWGDSEModReport*
+SWGChannelReport::getDseModReport() {
+    return dse_mod_report;
+}
+void
+SWGChannelReport::setDseModReport(SWGDSEModReport* dse_mod_report) {
+    this->dse_mod_report = dse_mod_report;
+    this->m_dse_mod_report_isSet = true;
 }
 
 SWGEndOfTrainDemodReport*
@@ -1667,6 +1689,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(drone_id_demod_report && drone_id_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dse_mod_report && dse_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(end_of_train_demod_report && end_of_train_demod_report->isSet()){

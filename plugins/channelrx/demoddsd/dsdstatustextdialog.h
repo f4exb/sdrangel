@@ -33,11 +33,16 @@ public:
     explicit DSDStatusTextDialog(QWidget* parent = 0);
     ~DSDStatusTextDialog();
 
+    //! A status line: skipped when it repeats the last status line (the status is polled)
     void addLine(const QString& line);
+    //! An event: every one, repeats too (the events are counted, not polled)
+    void addEvent(const QString& line);
 
 private:
     Ui::DSDStatusTextDialog* ui;
     QString m_lastLine;
+
+    void appendLine(const QString& line);
 
 private slots:
     void on_clear_clicked();

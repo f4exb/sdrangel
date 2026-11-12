@@ -23,15 +23,20 @@
 
 #include <vector>
 
+#include <QHash>
+#include <QList>
 #include <QNetworkRequest>
+#include <QJsonObject>
+#include <QQueue>
 #include <QRecursiveMutex>
+#include <QTimer>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
 #include "dsddemodsettings.h"
-#include "dsddecoder.h"
+#include "dsddemodsink.h"
 #include "dsddemodbaseband.h"
 
 class QNetworkAccessManager;
@@ -152,6 +157,11 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& channelActionsKeys,
+            SWGSDRangel::SWGChannelActions& query,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const DSDDemodSettings& settings);
@@ -165,8 +175,10 @@ public:
 	void setScopeXYSink(BasebandSampleSink* sampleSink);
 	void configureMyPosition(float myLatitude, float myLongitude) { if (m_running) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); } }
 	double getMagSq() { return m_running ? m_basebandSink->getMagSq() : 0.0; }
-	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
-	const DSDDecoder& getDecoder() const { return m_basebandSink->getDecoder(); }
+    //! Demodulator and decoder status (a copy, safe from any thread)
+    DSDDemodSink::Report getReport() const { return m_running ? m_basebandSink->getReport() : DSDDemodSink::Report(); }
+    //! The operator's decision on the Angel61 file offer awaiting confirmation (the report's angel61FilePending)
+    void angel61FileDecision(bool accept) { if (m_running) { m_basebandSink->setAngel61FileDecision(accept); } }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -177,12 +189,25 @@ public:
         }
     }
 
-    const char *updateAndGetStatusText() { return m_running ? m_basebandSink->updateAndGetStatusText() : nullptr; }
     int getAudioSampleRate() const override { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
     bool isRunning() { return m_running; }
+    QString contactReportStatus() const { return m_contactStatus; }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
+
+    //! What a DSE Modulator of the instance makes of the IP datagrams heard (3.5)
+    struct Angel61Tunnel
+    {
+        bool m_listening = true;           //!< False when its Rx selector names another demodulator
+        quint64 m_datagrams = 0;           //!< Delivered to the host, from any demodulator it listens to
+        quint64 m_bytes = 0;
+        quint64 m_refused = 0;             //!< Heard and refused: not the peer, not valid, host would not take it
+        QString m_status = QStringLiteral("Tunnel: off");
+    };
+
+    //! The DSE Modulators of the instance, in channel order: none if there is none
+    QList<Angel61Tunnel> getAngel61Tunnels();
 
 private:
 	DeviceAPI *m_deviceAPI;
@@ -194,9 +219,19 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
     QHash<Feature*, DSDDemodSettings::AvailableAMBEFeature> m_availableAMBEFeatures;
+    Feature *m_connectedAMBEFeature;   //!< The feature the sink was given, whatever the settings now say (identity only)
+    std::shared_ptr<MbeEncoderPort> m_connectedAMBEPort;   //!< Its port, which the sink calls
     BasebandSampleSink *m_scopeXYSink;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QNetworkAccessManager *m_contactNetwork;
+    QTimer m_contactTimer;
+    QQueue<QJsonObject> m_pendingContacts;
+    bool m_contactInFlight = false;
+    qint64 m_contactNextAttemptMs = 0;
+    int m_contactFailures = 0;
+    QString m_contactStatus = QStringLiteral("Off");
+    QHash<const QObject*, Angel61Tunnel> m_angel61Tunnels; //!< By modulator (identity only): what each last said
 
     static const int m_udpBlockSize;
 
@@ -205,6 +240,7 @@ private:
     void scanAvailableAMBEFeatures();
     void notifyUpdateAMBEFeatures();
     void sendSampleRateToDemodAnalyzer();
+    void pumpContacts();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
     void sendChannelSettings(
@@ -225,6 +261,8 @@ private slots:
     void handleIndexInDeviceSetChanged(int index);
     void handleFeatureAdded(int featureSetIndex, Feature *feature);
     void handleFeatureRemoved(int featureSetIndex, Feature *feature);
+    //! The sink's AMBE feature (none: nullptr), through the port the feature hands out
+    void connectAMBEFeature(Feature *feature);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

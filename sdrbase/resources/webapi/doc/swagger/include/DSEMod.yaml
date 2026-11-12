@@ -1,0 +1,678 @@
+DSEModSettings:
+  description: DSEMod (Digital Speech Encoder modulator)
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    mode:
+      description: >
+        Digital voice protocol
+          * 0 - D-STAR
+          * 1 - DMR
+          * 2 - YSF
+          * 3 - NXDN
+          * 4 - NXDN96 (4800 symbols/s, 12.5 kHz)
+          * 5 - dPMR
+          * 6 - P25
+          * 7 - P25 Phase 2 (TDMA, 6000 symbols/s)
+          * 8 - M17
+          * 9 - Angel61 NB (QPSK / 16-QAM at 4800 symbols/s, V1 voice, 6.25 kHz)
+          * 10 - Angel61 WB (QPSK / 16-QAM at 9600 symbols/s, V1 voice or Opus, 12.5 kHz)
+          * 11 - Angel61 HF-NB (OFDM, 2.5 kHz, V1 voice)
+          * 12 - Angel61 HF-WB (OFDM, 5.5 kHz, V1 voice)
+      type: integer
+    transmit:
+      description: Start (1) or stop (0) transmission
+      type: integer
+    invert:
+      description: Invert symbol polarity (1 for yes, 0 for no)
+      type: integer
+    modAFInput:
+      description: >
+        Speech input
+          * 0 - None
+          * 1 - Tone
+          * 2 - File
+          * 3 - Audio input
+          * 4 - CW tone
+          * 5 - Silence
+      type: integer
+    toneFrequency:
+      type: number
+      format: float
+    volumeFactor:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    playLoop:
+      type: integer
+    audioDeviceName:
+      type: string
+    vocoder:
+      description: >
+        Speech encoder back end
+          * 0 - mbevocoder (software)
+          * 1 - AMBE feature (DVSI device)
+      type: integer
+    ambeFeatureIndex:
+      type: integer
+      description: index of AMBE controller feature to be used for encoding
+    connectAMBE:
+      type: integer
+      description: >
+        Encode with AMBE feature
+          * 0 - Do not use AMBE feature
+          * 1 - Use AMBE feature
+    vocoderGain:
+      description: Encoder input gain (dB)
+      type: integer
+    toneDetect:
+      description: mbevocoder encoder tone detection. Single tones, DTMF and call progress tones are sent as tone frames (1) or as voice (0). Default 1.
+      type: integer
+    noiseSuppress:
+      description: mbevocoder encoder noise suppression on the speech input (1) or off (0). Default 0.
+      type: integer
+    dtmfSequence:
+      description: DTMF digits (0-9, A-D, *, #) sent by the DTMF send action when it carries no digits of its own
+      type: string
+    dstarMyCall:
+      type: string
+    dstarMySuffix:
+      type: string
+    dstarUrCall:
+      type: string
+    dstarRpt1:
+      type: string
+    dstarRpt2:
+      type: string
+    dstarText:
+      description: Slow data text message (20 characters)
+      type: string
+    dstarFlag1:
+      type: integer
+    dstarFlag2:
+      type: integer
+    dstarFlag3:
+      type: integer
+    dmrColorCode:
+      type: integer
+    dmrSourceId:
+      type: integer
+    dmrDestinationId:
+      type: integer
+    dmrGroupCall:
+      description: Group call (1) or private call (0)
+      type: integer
+    dmrSlot:
+      description: Voice time slot (1 or 2)
+      type: integer
+    dmrDirect:
+      description: >
+        Transmission type
+          * 0 - Base station (BS): continuous, both slots with CACH, idle bursts in the other slot (repeater output)
+          * 1 - Mobile station (MS): single slot bursts with the MS sync patterns and no CACH, carrier off between bursts (direct mode radio to radio, simplex hotspot)
+      type: integer
+    dmrFid:
+      type: integer
+    dmrServiceOptions:
+      type: integer
+    ysfCallsign:
+      type: string
+    ysfDestination:
+      type: string
+    ysfDownlink:
+      type: string
+    ysfUplink:
+      type: string
+    ysfMode:
+      description: >
+        YSF voice mode (the FICH data type):
+          * 0 - V/D type 2 (DN, AMBE+2 2450, what radios send by default)
+          * 1 - V/D type 1 (AMBE+2 3600x2450)
+          * 2 - voice full rate (VW, IMBE 7200x4400)
+      type: integer
+    nxdnRan:
+      type: integer
+    nxdnSourceId:
+      type: integer
+    nxdnDestinationId:
+      type: integer
+    nxdnGroupCall:
+      type: integer
+    dpmrColorCode:
+      type: integer
+    dpmrOwnId:
+      type: integer
+    dpmrCalledId:
+      type: integer
+    p25Nac:
+      type: integer
+    p25TalkGroup:
+      type: integer
+    p25SourceId:
+      type: integer
+    p25p2Wacn:
+      description: P25 Phase 2 scrambling - WACN of the system (20 bits)
+      type: integer
+    p25p2Sysid:
+      description: P25 Phase 2 scrambling - system ID (12 bits)
+      type: integer
+    angel61Rate:
+      description: >
+        Angel61 voice rate (the tier of ANGEL61.md 2.10), V1 voice unless said:
+          * 0 - automatic (the correspondent's rate request, else tier 0)
+          * 1 - tier 0 (NB 2.25k, WB 4.5k, HF-NB 1.5k, HF-WB 2.25k; QPSK)
+          * 3 - tier 1 (NB 3.0k, WB 9.0k, HF-WB 4.5k on QPSK; HF-NB 2.25k on 16-QAM)
+          * 2 - tier 2 (NB 4.5k, WB 12k, HF-NB 3.0k, HF-WB 6.0k; NB on QPSK, the others 16-QAM)
+          * 4 - tier 3 (NB 9.0k, WB Opus 18.4k, HF-NB 4.5k, HF-WB 9.0k; 16-QAM)
+      type: integer
+    angel61Source:
+      description: Angel61 own callsign (up to 9 characters of A-Z 0-9 - / ., or up to 17 of A-Z 0-9 / and an SSID, e.g. EA8/G4ABC/QRP-7)
+      type: string
+    angel61Destination:
+      description: Angel61 destination callsign, CQ for all
+      type: string
+    angel61Path:
+      description: Angel61 repeater path, up to two callsigns separated by a comma, empty for none
+      type: string
+    angel61Message:
+      description: Angel61 text sent by the message action when it carries none
+      type: string
+    sendPosition:
+      description: Send the station's position (SDRangel's own, from the preferences or the GPS feature) in the modes that carry one - D-STAR as a D-PRS (GPS-A) sentence in the slow data, DMR as a GPS Info embedded LC, Angel61 in its position slot - (1) or not (0)
+      type: integer
+    angel61Demod:
+      description: Id of the DSD Demodulator the Angel61 rate request is taken from (e.g. R0:2), empty for any of them
+      type: string
+    angel61Symbol:
+      description: Angel61 APRS symbol, the table character and the code (e.g. /- for a house)
+      type: string
+    angel61FileName:
+      description: File offered by the Angel61 file transfer, empty for none
+      type: string
+    m17Source:
+      description: M17 source callsign (up to 9 characters of A-Z 0-9 - / .)
+      type: string
+    m17Destination:
+      description: M17 destination callsign, empty or ALL for everyone
+      type: string
+    m17CAN:
+      description: M17 channel access number (0 to 15)
+      type: integer
+    m17Message:
+      description: M17 text sent as an SMS packet transmission
+      type: string
+    codecModelDirectory:
+      description: >
+        Directory of Angel61's V1 models (vocoscodec: encodec_encoder.bin, encodec_codebooks.bin,
+        vocos_decoder.bin), empty for the default (VOCOSCODEC_MODEL_DIR, then vocos beside the executable)
+      type: string
+    audioFileName:
+      description: Speech file of the file input (.wav 16 bit PCM mono or stereo at any rate, or .raw 8 kHz 16 bit mono), empty for none
+      type: string
+    angel61Tunnel:
+      description: Angel61 IP tunnel (3.5) to the peer (1) or not (0)
+      type: integer
+    angel61TunnelPeer:
+      description: Callsign at the other end of the Angel61 tunnel
+      type: string
+    angel61TunnelInterface:
+      description: Host network interface the tunnel creates (e.g. sdrangel0)
+      type: string
+    angel61TunnelAddress:
+      description: This end's tunnel address and prefix length (e.g. 10.255.0.1/32)
+      type: string
+    angel61TunnelRoutes:
+      description: Prefixes routed into the tunnel, comma separated
+      type: string
+    angel61TunnelAllow:
+      description: >
+        What the tunnel may send (ANGEL61.md 3.5), comma separated: a protocol (icmp, tcp, udp, gre,
+        esp, ah, sctp or a number) with a port or a port range for TCP, UDP and SCTP, which either
+        port of a datagram may be in, as "icmp, tcp:22, udp:53". Empty: everything. A list that
+        cannot be read sends nothing
+      type: string
+    angel61TunnelGroups:
+      description: Multicast groups the tunnel sends all the same, comma separated ("224.0.0.251, ff02::fb")
+      type: string
+    angel61TunnelMTU:
+      description: Tunnel MTU (576 at the low rate, 1280 at the high one)
+      type: integer
+    feedbackAudioDeviceName:
+      description: Audio output device the operator hears what is being encoded on
+      type: string
+    feedbackVolumeFactor:
+      description: Volume of the audio feedback (0.0 to 1.0)
+      type: number
+      format: float
+    feedbackAudioEnable:
+      description: Audio feedback (1) or not (0)
+      type: integer
+    spectrumAudio:
+      description: Spectrum display source - the speech input as given to the encoder (1) or the modulated IQ (0)
+      type: integer
+    frameSessionMaxDurationMs:
+      description: Maximum duration of an externally supplied gateway-frame transmit session. Latched when the session starts; PCM keeps its fixed 180 second limit.
+      type: integer
+      default: 180000
+      minimum: 180000
+      maximum: 86400000
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    cwKeyer:
+      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+DSEModReport:
+  description: DSEMod
+  properties:
+    transmitStatus:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModTransmitStatus"
+    capabilities:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModCapabilities"
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+    transmitting:
+      description: 1 if a transmission is in progress
+      type: integer
+    vocoderReady:
+      description: 1 if the speech encoder back end is available
+      type: integer
+    encodedFrames:
+      description: number of vocoder frames received in the current transmission
+      type: integer
+    underrunFrames:
+      description: number of frames replaced by silence because no vocoder frame was available
+      type: integer
+    overrunFrames:
+      description: number of vocoder frames dropped because the queue reached its 1 s bound (the audio source runs far ahead of the transmitter)
+      type: integer
+    trimFrames:
+      description: number of vocoder frames dropped by the delay control to take excess delay out of the queue (normal, a few at the start of a transmission)
+      type: integer
+    txFrames:
+      description: number of protocol frames transmitted in the current transmission
+      type: integer
+    audioUnderruns:
+      description: microphone input, current transmission - 20 ms frames that were short of samples (zero filled)
+      type: integer
+    audioOverruns:
+      description: microphone input, current transmission - blocks discarded because the buffer was full
+      type: integer
+
+DSEModActions:
+  description: >
+    Exactly one action is required. The transmit device must already be running.
+    202 means accepted, not transmitted. Poll DSEModReport.transmitStatus for completion.
+    Transient payloads and sessions are not saved or sent through Reverse API.
+    The former angel61Message action is replaced by message.
+  properties:
+    dtmf:
+      description: >
+        Send DTMF digits (0-9, A-D, *, #) as AMBE tone frames. An empty string sends the dtmfSequence setting.
+        Transmission is started for the duration of the sequence if it is not already in progress.
+      type: string
+    transmit:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModTransmit"
+    message:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModMessage"
+    aprs:
+      description: >
+        Send an APRS information field over Angel61 (content type 2), e.g. an object, a weather
+        report or a message with its acknowledgement. Transmission is started for it if it is not
+        already in progress.
+      type: string
+    file:
+      description: >
+        Offer a file over Angel61 (3.4). The path of the file, or an empty string for the
+        angel61FileName setting. Transmission is started for it, and again for every round the
+        receiving station asks for.
+      type: string
+
+DSEModTransmit:
+  type: object
+  required: [operation, sessionId]
+  properties:
+    operation:
+      type: string
+      enum: [send, start, append, finish, abort]
+      description: >
+        send is a finite transmission. start opens a stream; append adds numbered chunks.
+        finish closes input and drains it before sending a protocol terminator. abort discards
+        remaining input; samples already passed downstream cannot be recalled.
+        finish and abort accept only operation and sessionId.
+    sessionId:
+      type: string
+      pattern: '^[A-Za-z0-9_.:-]{1,64}$'
+      description: Client-generated unique ID. Retries with identical content do not rekey.
+    input:
+      type: string
+      enum: [pcm, frames, angel61]
+      description: >
+        Required on send/start, omitted on append. angel61 is a network Angel61 call (the
+        talkgroup gateway): records of any profile, the call's profile being its frames'.
+        DSEMod sends its own preamble with the routing given, then relays the V1 voice in its
+        own profile's frames renumbered, at its tier or below (the packets cut to the tier's
+        codebooks), and decodes and re-encodes only Opus (WB's tier 3) into V1.
+    protocol:
+      type: integer
+      description: >
+        Required for frame send/start, where it must equal the selected mode. Not used
+        by angel61.
+    source:
+      type: string
+      description: Required for angel61 start; the source callsign of the routing preamble DSEMod sends.
+    destination:
+      type: string
+      description: Required for angel61 start; the destination of the routing preamble, CQ, TG n or a callsign.
+    via:
+      type: string
+      description: >
+        angel61 start only, optional. A callsign sent as the call's path: in the preamble and in
+        place of the relayed frames' path slots. A gateway relaying a private call names itself.
+    sequence:
+      type: integer
+      minimum: 0
+      maximum: 1000000
+      description: Required on append, starting at zero. Retry the same chunk without advancing after 429.
+    pcm:
+      $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModPCM"
+    frames:
+      type: array
+      maxItems: 50
+      items:
+        $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModFrame"
+
+DSEModPCM:
+  type: object
+  required: [data]
+  properties:
+    encoding:
+      type: string
+      enum: [s16le]
+      description: Required on send/start. Signed 16-bit little-endian raw PCM; no WAV header.
+    sampleRate:
+      type: integer
+      enum: [8000, 16000, 48000]
+      description: Required on send/start. Resampling state persists across chunks.
+    channels:
+      type: integer
+      enum: [1]
+      description: Required on send/start. Mono only.
+    data:
+      type: string
+      description: >
+        Canonical padded base64 PCM. At most one second per request and five seconds queued.
+        append contains only data. Empty data is permitted only on start. Chunk boundaries
+        must fall between samples, but need not align with codec frames.
+
+DSEModFrame:
+  type: object
+  required: [format, data]
+  properties:
+    format:
+      type: string
+      enum: [dstar-header, dstar-voice, dmr-burst, ysf-frame, angel61-frame, dsrp, dmrd, ysfd]
+    frameType:
+      type: string
+      description: >
+        D-Star voice uses voice or end. DMR requires voice-sync, voice, or data-N (N=0..11).
+        Gateway datagrams derive this from their headers. YSF derives termination from FICH.
+    sequence:
+      type: integer
+      minimum: 0
+      maximum: 255
+      description: D-Star superframe position 0..20; DMR voice burst index 0..5. Separate from API chunk sequence.
+    slot:
+      type: integer
+      enum: [1, 2]
+      description: Required on canonical DMR bursts; must match the configured transmit slot.
+    data:
+      type: string
+      description: >
+        Canonical padded base64. D-Star header is 41 bytes including CRC; voice is 9 voice
+        bytes plus 3 on-air slow-data bytes (LSB first on RF). DMR is 33 packed bytes excluding
+        CACH, MSB first. YSF is 120 packed bytes including sync/FICH, MSB first; V/D type 2.
+        dsrp accepts 49-byte headers and 21-byte voice packets; dmrd accepts 55 bytes;
+        ysfd accepts 155 bytes. Poll/login/control datagrams are not traffic frames.
+
+DSEModMessage:
+  type: object
+  required: [requestId, type, delivery]
+  properties:
+    requestId:
+      type: string
+      pattern: '^[A-Za-z0-9_.:-]{1,64}$'
+      description: Idempotency ID; also the sessionId for a standalone message.
+    type:
+      type: string
+      enum: [text, data]
+    delivery:
+      type: string
+      enum: [standalone, inBand]
+      description: standalone sends a finite transmission. inBand queues text on an open API PCM session.
+    sessionId:
+      type: string
+      description: Required for inBand and prohibited for standalone.
+    service:
+      type: string
+      enum: [dstar-text, angel61-text, angel61-data]
+      description: Optional for text, required for data. Must match the selected protocol and message type.
+    text:
+      type: string
+      description: >
+        Nonempty text. D-Star supports 20 printable ASCII characters. Angel61 inBand supports
+        180 printable ASCII characters; standalone supports 5098 UTF-8 bytes. No truncation.
+    data:
+      type: string
+      description: Nonempty binary application data; Angel61 standalone only, up to 5098 decoded bytes.
+
+DSEModTransmitStatus:
+  type: object
+  properties:
+    sessionId:
+      type: string
+    input:
+      type: string
+    state:
+      type: string
+      enum: [idle, buffering, transmitting, draining, completed, aborted, failed]
+    protocol:
+      type: integer
+    sourceProtocol:
+      type: integer
+      description: The profile of an angel61 session's frames as a mode (9 Angel61 NB, 10 Angel61 WB, 11 HF-NB, 12 HF-WB), 0 before the first.
+    source:
+      type: string
+    destination:
+      type: string
+    via:
+      type: string
+      description: The path of an angel61 session (a gateway's callsign), or empty.
+    nextSequence:
+      type: integer
+    accepted:
+      type: number
+      format: double
+      description: Accepted input samples or protocol frames in this session.
+    consumed:
+      type: number
+      format: double
+      description: Input samples resampled or frames rendered; not a remote delivery acknowledgement.
+    maxDurationMs:
+      type: integer
+      description: Maximum duration latched for this session.
+    queuedSamples:
+      type: integer
+    queuedFrames:
+      type: integer
+    availableSamples:
+      type: integer
+    availableFrames:
+      type: integer
+    pendingEncoderFrames:
+      type: integer
+    encodedQueueFrames:
+      type: integer
+    transcodeDecodedFrames:
+      type: integer
+      description: Source Angel61 Opus frames decoded (to re-encode as V1) by the current or most recent session.
+    relayInvalidFrames:
+      type: integer
+      description: Angel61 relay records refused (type, length, counter, flags or CRC) by the current or most recent session.
+    relayHoldFrames:
+      type: integer
+      description: Angel61 relay idle frames sent for want of the call's packets (Angel61 modes only).
+    lastError:
+      type: string
+    history:
+      type: array
+      description: Last 16 completed sessions.
+      items:
+        $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModTransmitSession"
+    messages:
+      type: array
+      description: Last 32 message request statuses.
+      items:
+        $ref: "/doc/swagger/include/DSEMod.yaml#/DSEModMessageStatus"
+
+DSEModCapabilities:
+  type: object
+  properties:
+    pcmEncoding:
+      type: string
+    pcmChannels:
+      type: integer
+    pcmSampleRates:
+      type: array
+      items:
+        type: integer
+    maxPCMChunkMs:
+      type: integer
+    maxPCMQueueMs:
+      type: integer
+    maxFrameBatch:
+      type: integer
+    maxQueuedFrames:
+      type: integer
+    idleTimeoutMs:
+      type: integer
+    pcmMaxDurationMs:
+      type: integer
+    frameMaxDurationMs:
+      type: integer
+      description: Effective configured maximum for new gateway-frame sessions.
+    minFrameMaxDurationMs:
+      type: integer
+    maxFrameMaxDurationMs:
+      type: integer
+    frameFormats:
+      type: array
+      items:
+        type: string
+    angel61NetworkInput:
+      type: boolean
+      description: The API takes network Angel61 calls (input angel61) of either profile.
+    angel61TranscodeAvailable:
+      type: boolean
+      description: >
+        Network Angel61 calls can be sent: the selected mode is Angel61. V1 is relayed by repacking and needs no
+        codec; an Opus call relayed at a V1 tier needs the V1 encoder, checked per call.
+    angel61TranscodeError:
+      type: string
+      description: Reason network Angel61 calls cannot be sent.
+    messageServices:
+      type: array
+      items:
+        type: string
+
+DSEModTransmitSession:
+  description: A completed transmit session, as DSEModTransmitStatus.history lists it
+  type: object
+  properties:
+    sessionId:
+      type: string
+    input:
+      type: string
+    state:
+      type: string
+      enum: [completed, aborted, failed]
+    protocol:
+      type: integer
+    sourceProtocol:
+      type: integer
+      description: The profile of an angel61 session's frames as a mode (9 Angel61 NB, 10 Angel61 WB, 11 HF-NB, 12 HF-WB), 0 before the first.
+    source:
+      type: string
+    destination:
+      type: string
+    via:
+      type: string
+      description: The path of an angel61 session (a gateway's callsign), or empty.
+    nextSequence:
+      type: integer
+    accepted:
+      type: number
+      format: double
+      description: Accepted input samples or protocol frames in the session.
+    consumed:
+      type: number
+      format: double
+      description: Input samples resampled or frames rendered; not a remote delivery acknowledgement.
+    maxDurationMs:
+      type: integer
+    queuedSamples:
+      type: integer
+    queuedFrames:
+      type: integer
+    availableSamples:
+      type: integer
+    availableFrames:
+      type: integer
+    lastError:
+      type: string
+
+DSEModMessageStatus:
+  description: The status of a message action, by its requestId
+  type: object
+  properties:
+    requestId:
+      type: string
+    state:
+      type: string
+      enum: [queued, accepted, completed, aborted, failed]
+      description: inBand queued means admitted to the protocol, not remote delivery.
+    error:
+      type: string
+      description: Why a standalone message's session failed or was aborted.
