@@ -8,13 +8,13 @@ This plugin demodulates and decodes digital voice modes. It is the receive count
   - DMR: 4FSK, 4800 symbols/s, AMBE+2 3600x2450. ETSI two slot TDMA standard (base station, mobile station and direct mode). MOTOTRBO is a popular implementation of this standard.
   - Yaesu System Fusion (YSF): C4FM, 4800 symbols/s. Developed and promoted by Yaesu for Amateur Radio customers. Voice/data type 2 (the usual narrow mode) is decoded to audio; the other data types are identified only.
   - NXDN: A joint Icom (IDAS) and Kenwood (Nexedge) standard, both the 4800 bit/s (2400 Baud, 6.25 kHz, "NXDN48") and the 9600 bit/s (4800 Baud, 12.5 kHz, "NXDN96") versions. The full rate vocoder (EFR) of NXDN96 is decoded by the AMBE feature only.
-  - dPMR (ETSI TS 102 490): 4FSK, 2400 symbols/s, AMBE+2 3600x2450.  
+  - dPMR (ETSI TS 102 490): 4FSK, 2400 symbols/s, AMBE+2 3600x2450.
   - P25 Phase 1: C4FM, 4800 symbols/s, IMBE 7200x4400. the APCO Project 25 FDMA standard used by public safety networks in North America, clear (unencrypted) voice.
   - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450. The two slot TDMA version of Project 25 used by trunked systems for their voice channels. The voice is scrambled with a sequence derived from the system's identity (WACN, system ID and NAC), which must be entered (C.7); the values are broadcast on the system's control channel and listed by the usual radio reference sites.
   - [M17](https://spec.m17project.org): 4FSK at 4800 symbols/s in 12.5 kHz, 40 ms frames, Codec2 3200 voice with the callsigns in a link setup frame and packet transmissions carrying SMS text or APRS. This is SDRangel's second M17 receiver: the [M17 Demodulator](../demodm17/readme.md) has its own modem, this one decodes M17 in the same chain as the other protocols here, so a scanner or a recording can switch between them, and the two can be compared on the same measurements.
   - Angel61: SDRangel's own amateur digital voice protocol in four profiles:
-    - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM), 
-    - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM) 
+    - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM),
+    - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM)
     - with 24 kHz V1 speech (vocoscodec) at four tiers (from 1.5kpbs to 12kbps) and WB's top tier using Opus audio at 18.4 kbit/s, LDPC coding, callsign routing, text messages, positions, file transfers and IP tunneling.
 
 The protocol is detected automatically from the synchronisation patterns found in the signal, at all three symbol rates, or the search can be limited to one protocol (C.1). The receiver measures the frequency deviation, the carrier frequency error and the symbol clock error of the signal it locks to and corrects them itself, so there is nothing to adjust for a given radio or channel plan beyond the channel bandwidth.
@@ -261,10 +261,10 @@ For each of the two channels (slots): the last burst type (`4V`, `2V` voice, `SA
 `M7RCE > CQ | NB V1 4.5k (V1, next tier 2) | BLER 0.0% | Es/N0 min 11.0 dB | req 2 send 3 | IO91XJ:123/4.5km`
 
 * The source and destination callsigns of the transmission (`CQ` for everyone; a callsign longer than 9 characters, such as `EA8/G4ABC/QRP-7`,
-arrives in a slot of its own every 2 s: until it has, it shows as its base callsign and `...`, `G4ABC...`, or as `#` and a hash for a special event callsign), 
+arrives in a slot of its own every 2 s: until it has, it shows as its base callsign and `...`, `G4ABC...`, or as `#` and a hash for a special event callsign),
 * the frame type (`NB V1 2.25k` to `NB V1 9.0k`, `NB voice + data`, `NB data`, `NB data 16-QAM` or `NB idle`, and the same for WB,
 whose top tier is `WB Opus 18.4k`, and for HF, whose data goes in groups, `HF-NB data tier 0` and so on) with what the station slot announces (the codec family of the voice the station uses next and its tier),
-* the block error rate (BLER) since the lock, 
+* the block error rate (BLER) since the lock,
 * the least Es/N0 of the transmission (the mean SNR in 3 kHz on HF),
 * the rate request tiers (`req` the tier the source asks of its destination, `send` the tier this station would ask of the source from what it has received.
 On VHF the judgement steps one tier at a time: up when a transmission of a second or more came in with under 1% of blocks lost and a least Es/N0 3 dB above the next tier's threshold, down after over 3% or two consecutive lost blocks,
@@ -281,7 +281,7 @@ A call to a talkgroup not in it is shown and logged but not played; calls to `CQ
 
 <h4>A.15: Text messages / DTMF</h4>
 
-Shows received text messages and DTMF sequences. Text messages are formatted as: `protocol source > destination: text`: 
+Shows received text messages and DTMF sequences. Text messages are formatted as: `protocol source > destination: text`:
 
 * DMR text messages (UDT and IP: the ETSI service on UDP port 5016 and Motorola's TMS on port 4007, see A.6.5)
 * D-STAR 20 character slow data text
@@ -294,8 +294,8 @@ Shows received text messages and DTMF sequences. Text messages are formatted as:
 
 DTMF sequences are formatted as `DTMF 123#`, once a sequence has had no new key for 2 s:
 
-* Angel61's DTMF slots, whose tones are also played in the audio, 
-* keys of AMBE tone frames (DMR, D-STAR, YSF, NXDN, dPMR, P25 Phase 2), 
+* Angel61's DTMF slots, whose tones are also played in the audio,
+* keys of AMBE tone frames (DMR, D-STAR, YSF, NXDN, dPMR, P25 Phase 2),
 * keys found in the decoded voice (P25 Phase 1, M17, or tones a transmitter coded as voice) by a detector with ITU-T Q.24's limits.
 
 A key of an Angel61 sequence whose slots were all lost shows as `?`. The last DTMF sequence is also the `dtmf` field of the channel report in the Web API. The last 32 are kept; the button on the right clears the field. They are also logged with the events in the status text log (A.6).

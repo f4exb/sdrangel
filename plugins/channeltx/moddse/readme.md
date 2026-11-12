@@ -13,8 +13,8 @@ This plugin is the transmit counterpart of the [DSD Demodulator](../../../plugin
   - P25 Phase 2: 4FSK at 6000 symbols/s, AMBE+2 3600x2450.
   - [M17](https://spec.m17project.org): 4FSK at 4800 symbols/s in 12.5 kHz with Codec2 3200. A text message with no voice input is sent as an SMS packet transmission.
   - Angel61: SDRangel's own amateur digital voice protocol in four profiles:
-    - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM), 
-    - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM) 
+    - on VHF/UHF Angel61 NB, 6.25 kHz (4800 symbols/s QPSK or 16-QAM), and Angel61 WB, 12.5 kHz (9600 symbols/s QPSK or 16-QAM),
+    - on HF Angel61 HF-NB, 2.7 kHz (50-carrier OFDM), and HF-WB, 6 kHz (110-carrier OFDM)
     - with 24 kHz V1 speech (vocoscodec) at four tiers (from 1.5kpbs to 12kbps) and WB's top tier using Opus audio at 18.4 kbit/s, LDPC coding, callsign routing, text messages, positions, file transfers and IP tunneling.
 
 The AMBE and IMBE speech encoder of the D-STAR, DMR, YSF, NXDN, dPMR and P25 modes can be either:

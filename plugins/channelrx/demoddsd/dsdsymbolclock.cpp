@@ -201,4 +201,3 @@ void DSDSymbolClock::update(float u, int d, float reliability)
     m_lastReliability = reliability;
     m_lastReliable = true;
 }
-
