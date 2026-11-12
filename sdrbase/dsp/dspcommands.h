@@ -482,7 +482,7 @@ class SDRBASE_API DSPReportMbeFrame : public Message {
     MESSAGE_CLASS_DECLARATION
 
 public:
-    static const int m_maxFrameBytes = 18;
+    static constexpr int m_maxFrameBytes = 18;
 
     DSPReportMbeFrame(
         const unsigned char *mbeFrame,

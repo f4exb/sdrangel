@@ -54,15 +54,15 @@ public:
         RateOpus80 = 10       //!< Angel61 WB tier 3 audio (O1): one 80 ms Opus packet of 184 bytes, 48 kHz audio
     };                        // (4, 5, 7 and 8 were Angel61 revision 2's, ANGEL61.md 12)
 
-    static const int m_maxFrameBytes = 184;    //!< the largest packet: the O1 packet (ANGEL61.md 3.1.2)
+    static constexpr int m_maxFrameBytes = 184;    //!< the largest packet: the O1 packet (ANGEL61.md 3.1.2)
     //! In a V1 packet's buffer, after its 20 bytes: the codebooks it carries when a relay gives it
     //! fewer than the encoder's 16 (ANGEL61.md 3.1.1's truncation), 0 for all 16
-    static const int m_vocosCodebooksByte = 20;
+    static constexpr int m_vocosCodebooksByte = 20;
 
     //! Row (low) and column (high) frequencies of a DTMF key (0-9, A-D, *, #). Returns false for other characters.
     static bool dtmfFrequencies(char digit, float& low, float& high);
-    static const int m_pcmFrameSize = 160;     //!< PCM samples per frame of the 8 kHz rates
-    static const int m_maxPcmFrameSize = 960;  //!< of any rate (20 ms at 48 kHz, Opus)
+    static constexpr int m_pcmFrameSize = 160;     //!< PCM samples per frame of the 8 kHz rates
+    static constexpr int m_maxPcmFrameSize = 960;  //!< of any rate (20 ms at 48 kHz, Opus)
     static bool isOpus(Rate rate) { return rate == RateOpus80; }
     static bool isVocos(Rate rate) { return rate == RateVocos; }
     //! The audio fed to the encoder: 20 ms frames at 8 kHz (MBE, Codec2), 24 kHz (V1) or 48 kHz (Opus)

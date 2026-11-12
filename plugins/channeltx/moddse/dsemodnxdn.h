@@ -81,22 +81,22 @@ public:
         OptionStealNone = 3  //!< 4 x VCH
     };
 
-    static const int m_frameSymbols = 192;
-    static const int m_fswBits = 20;
-    static const int m_lichBits = 16;
-    static const int m_sacchBits = 60;
-    static const int m_vchBits = 72;
-    static const int m_facch1Bits = 144;
-    static const int m_payloadBits = 288;      //!< 4 x VCH or 2 x FACCH1
-    static const int m_scrambledSymbols = 182; //!< LICH + SACCH + payload
-    static const int m_frameBits = 384;
-    static const int m_messageBits = 72;       //!< layer 3 message in a SACCH superframe
-    static const int m_sacchFragmentBits = 18;
-    static const int m_framesPerSuperframe = 4;
-    static const int m_preambleSymbols = 48;
-    static const int m_releaseFrames = 4;
-    static const int m_lichInfoBits = 8;
-    static const unsigned int m_pnSeed = 0xe4;  //!< dsdcc DSDNXDN: TS 1A v0103 section 4.6
+    static constexpr int m_frameSymbols = 192;
+    static constexpr int m_fswBits = 20;
+    static constexpr int m_lichBits = 16;
+    static constexpr int m_sacchBits = 60;
+    static constexpr int m_vchBits = 72;
+    static constexpr int m_facch1Bits = 144;
+    static constexpr int m_payloadBits = 288;      //!< 4 x VCH or 2 x FACCH1
+    static constexpr int m_scrambledSymbols = 182; //!< LICH + SACCH + payload
+    static constexpr int m_frameBits = 384;
+    static constexpr int m_messageBits = 72;       //!< layer 3 message in a SACCH superframe
+    static constexpr int m_sacchFragmentBits = 18;
+    static constexpr int m_framesPerSuperframe = 4;
+    static constexpr int m_preambleSymbols = 48;
+    static constexpr int m_releaseFrames = 4;
+    static constexpr int m_lichInfoBits = 8;
+    static constexpr unsigned int m_pnSeed = 0xe4;  //!< dsdcc DSDNXDN: TS 1A v0103 section 4.6
 
     //! fast: 4800 symbols/s (NXDN96, 12.5 kHz) instead of 2400 (NXDN48, 6.25 kHz); voice frames alternate with FACCH1 frames
     DSEModNXDN(bool fast = false);

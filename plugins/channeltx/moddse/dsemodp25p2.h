@@ -42,7 +42,7 @@
 class DSEModP25P2 : public DSEModProtocol
 {
 public:
-    static const int m_burstDibits = 180;
+    static constexpr int m_burstDibits = 180;
 
     DSEModP25P2();
     virtual ~DSEModP25P2();

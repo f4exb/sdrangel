@@ -32,12 +32,12 @@
 class SDRBASE_API DVDStar
 {
 public:
-    static const int m_headerBytes = 41;
-    static const int m_headerDataBits = 330;   //!< 328 header bits + 2 flush bits
-    static const int m_headerBits = 660;
-    static const int m_voiceBits = 72;
-    static const int m_dataBits = 24;          //!< Slow data per frame
-    static const int m_framesPerSuperframe = 21;
+    static constexpr int m_headerBytes = 41;
+    static constexpr int m_headerDataBits = 330;   //!< 328 header bits + 2 flush bits
+    static constexpr int m_headerBits = 660;
+    static constexpr int m_voiceBits = 72;
+    static constexpr int m_dataBits = 24;          //!< Slow data per frame
+    static constexpr int m_framesPerSuperframe = 21;
 
     //! CRC over the first 39 header bytes; stored in bytes 39 (low) and 40 (high)
     static uint16_t headerCRC(const uint8_t *header);

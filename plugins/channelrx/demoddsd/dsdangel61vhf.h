@@ -37,10 +37,10 @@
 class DSDAngel61Vhf : public DSDAngel61Session
 {
 public:
-    static const int MinimumFrames = 13;
+    static constexpr int MinimumFrames = 13;
     static constexpr float VhfUpgradeBler = 0.01f;
     static constexpr float VhfDowngradeBler = 0.03f;
-    static const int VhfDowngradeConsecutive = 2;
+    static constexpr int VhfDowngradeConsecutive = 2;
     static constexpr float VhfUpgradeMarginDB = 3.0f;
 
     //! A tier's threshold (Es/N0 dB, 1% of frames lost on AWGN, the built receiver)

@@ -32,9 +32,9 @@ struct CODEC2;
 class DSDVocoderCodec2
 {
 public:
-    static const int m_samplesPerFrame = 160;
-    static const int m_sampleRate = 8000;
-    static const int m_frameBytes = 8;
+    static constexpr int m_samplesPerFrame = 160;
+    static constexpr int m_sampleRate = 8000;
+    static constexpr int m_frameBytes = 8;
 
     DSDVocoderCodec2();
     ~DSDVocoderCodec2();

@@ -54,27 +54,27 @@ public:
         DUIDTDULC = 0xF
     };
 
-    static const int m_syncBits = 48;
-    static const int m_nidBits = 64;
-    static const int m_imbeBits = 144;
-    static const int m_imbeFramesPerLDU = 9;
-    static const int m_lcBits = 240;              //!< Encoded LC or ESS in an LDU
-    static const int m_lsdBits = 32;              //!< Encoded low speed data in an LDU
-    static const int m_headerBits = 648;          //!< Encoded HDU payload
-    static const int m_hduDataBits = 760;         //!< Before status symbols and null padding
-    static const int m_hduBits = 792;             //!< On air
-    static const int m_lduDataBits = 1680;
-    static const int m_lduBits = 1728;
-    static const int m_tduDataBits = 140;
-    static const int m_tduBits = 144;
-    static const int m_tdulcDataBits = 400;
-    static const int m_tdulcBits = 432;
-    static const int m_maxDataBits = m_lduDataBits;
-    static const int m_maxFrameBits = m_lduBits;
-    static const int m_dataDibitsPerStatus = 35;
+    static constexpr int m_syncBits = 48;
+    static constexpr int m_nidBits = 64;
+    static constexpr int m_imbeBits = 144;
+    static constexpr int m_imbeFramesPerLDU = 9;
+    static constexpr int m_lcBits = 240;              //!< Encoded LC or ESS in an LDU
+    static constexpr int m_lsdBits = 32;              //!< Encoded low speed data in an LDU
+    static constexpr int m_headerBits = 648;          //!< Encoded HDU payload
+    static constexpr int m_hduDataBits = 760;         //!< Before status symbols and null padding
+    static constexpr int m_hduBits = 792;             //!< On air
+    static constexpr int m_lduDataBits = 1680;
+    static constexpr int m_lduBits = 1728;
+    static constexpr int m_tduDataBits = 140;
+    static constexpr int m_tduBits = 144;
+    static constexpr int m_tdulcDataBits = 400;
+    static constexpr int m_tdulcBits = 432;
+    static constexpr int m_maxDataBits = m_lduDataBits;
+    static constexpr int m_maxFrameBits = m_lduBits;
+    static constexpr int m_dataDibitsPerStatus = 35;
     //! Status symbol value: 00 = "unknown, use for talk-around" (a stand alone transmitter)
-    static const uint8_t m_statusSymbol = 0x0;
-    static const uint64_t m_frameSync = 0x5575F5FF77FFULL;
+    static constexpr uint8_t m_statusSymbol = 0x0;
+    static constexpr uint64_t m_frameSync = 0x5575F5FF77FFULL;
 
     DSEModP25();
     virtual ~DSEModP25();

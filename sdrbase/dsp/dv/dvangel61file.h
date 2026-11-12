@@ -42,10 +42,10 @@ struct SDRBASE_API DVAngel61FileOffer
     std::string m_name;            //!< UTF-8, sanitised by the receiver before it is used
     std::string m_mediaType;       //!< optional
 
-    static const uint32_t MaxBlocks = 65536;   //!< what a 16 bit block index holds
+    static constexpr uint32_t MaxBlocks = 65536;   //!< what a 16 bit block index holds
     //! The largest block: the largest message field of any profile, revision 3's HF-WB tier 3 data
     //! group (912 bytes), rounded up. Revision 2 had 54, its NB 16-QAM data frame's field
-    static const int MaxBlockSize = 1024;
+    static constexpr int MaxBlockSize = 1024;
 
     /**
      * The blocks the file needs, in 64 bits. In 32 bits a file size near the top of the range
@@ -127,8 +127,8 @@ struct SDRBASE_API DVAngel61FilePartial
 class SDRBASE_API DVAngel61FilePartials
 {
 public:
-    static const int MaxPartials = 16;
-    static const int64_t MaxAgeSec = 86400;   //!< a day (3.4)
+    static constexpr int MaxPartials = 16;
+    static constexpr int64_t MaxAgeSec = 86400;   //!< a day (3.4)
 
     const DVAngel61FilePartial *find(uint64_t source, uint32_t fileSize, uint32_t crc) const;
     //! Kept (replacing the same file's), the oldest going when there are too many
@@ -160,8 +160,8 @@ class SDRBASE_API DVAngel61FileSender
 {
 public:
     enum State { Idle, Sending, Waiting, Done, Failed };
-    static const int OfferIntervalFrames = 33;   //!< about 2 s of VHF's 80 ms frames: the default interval
-    static const int DefaultMaxRounds = 5;
+    static constexpr int OfferIntervalFrames = 33;   //!< about 2 s of VHF's 80 ms frames: the default interval
+    static constexpr int DefaultMaxRounds = 5;
 
     DVAngel61FileSender();
 
@@ -236,7 +236,7 @@ class SDRBASE_API DVAngel61FileReceiver
 {
 public:
     enum State { Idle, Receiving, Complete, Rejected };
-    static const int MaxRangesPerControl = 32;
+    static constexpr int MaxRangesPerControl = 32;
 
     DVAngel61FileReceiver();
 

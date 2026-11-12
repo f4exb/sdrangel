@@ -33,10 +33,10 @@
 class DSDVocoderOpus
 {
 public:
-    static const int m_maxSamplesPerFrame = DVOpus::FrameSamples;
-    static const int m_sampleRate = DVOpus::SampleRate;
+    static constexpr int m_maxSamplesPerFrame = DVOpus::FrameSamples;
+    static constexpr int m_sampleRate = DVOpus::SampleRate;
     //! Consecutive packets lost after which the concealment has faded out (240 ms)
-    static const int m_fadedPackets = 3;
+    static constexpr int m_fadedPackets = 3;
 
     DSDVocoderOpus();
     DSDVocoderOpus(const DSDVocoderOpus&) = delete;

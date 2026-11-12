@@ -87,8 +87,8 @@ public:
         uint64_t m_revision = 0;
     };
 
-    static const int m_burstDibits = 144;
-    static const int m_syncEndOffset = 89;   //!< Dibit index of the last sync symbol in a burst
+    static constexpr int m_burstDibits = 144;
+    static constexpr int m_syncEndOffset = 89;   //!< Dibit index of the last sync symbol in a burst
 
     DSDProtocolDMR(const DSDSymbolHistory& history);
 

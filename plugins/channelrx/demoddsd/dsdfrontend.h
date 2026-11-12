@@ -33,7 +33,7 @@
 class DSDFrontEnd
 {
 public:
-    static const int m_sampleRate = 48000;
+    static constexpr int m_sampleRate = 48000;
 
     DSDFrontEnd();
 

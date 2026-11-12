@@ -32,18 +32,18 @@
 class SDRBASE_API DVDPMR
 {
 public:
-    static const int m_frameBits = 384;          //!< Payload or header frame (80 ms)
-    static const int m_fs1Bits = 48;
-    static const int m_fs2Bits = 24;
-    static const int m_fs3Bits = 24;
-    static const int m_ccBits = 24;              //!< Colour code field
-    static const int m_hiInfoBits = 72;          //!< Header information before CRC8
-    static const int m_hiCodedBits = 120;
-    static const int m_cchInfoBits = 41;         //!< CCH information before CRC7
-    static const int m_cchCodedBits = 72;
-    static const int m_endInfoBits = 17;         //!< END information before CRC7
-    static const int m_endCodedBits = 72;
-    static const int m_tchBits = 72;             //!< One AMBE+2 vocoder frame
+    static constexpr int m_frameBits = 384;          //!< Payload or header frame (80 ms)
+    static constexpr int m_fs1Bits = 48;
+    static constexpr int m_fs2Bits = 24;
+    static constexpr int m_fs3Bits = 24;
+    static constexpr int m_ccBits = 24;              //!< Colour code field
+    static constexpr int m_hiInfoBits = 72;          //!< Header information before CRC8
+    static constexpr int m_hiCodedBits = 120;
+    static constexpr int m_cchInfoBits = 41;         //!< CCH information before CRC7
+    static constexpr int m_cchCodedBits = 72;
+    static constexpr int m_endInfoBits = 17;         //!< END information before CRC7
+    static constexpr int m_endCodedBits = 72;
+    static constexpr int m_tchBits = 72;             //!< One AMBE+2 vocoder frame
 
     // ---- Coding primitives (clause 7) --------------------------------------------
     //! Append a CRC7 (x^7 + x^3 + 1) to bits[0..nbBits-1]

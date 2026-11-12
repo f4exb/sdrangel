@@ -37,10 +37,10 @@ struct OpusDecoder;
 class SDRBASE_API DVOpus
 {
 public:
-    static const int SampleRate = 48000;
-    static const int FrameSamples = 3840;   //!< 80 ms
-    static const int PacketBytes = 184;     //!< 1472 bits, WB tier 3's (ANGEL61.md 2.3)
-    static const int BitRate = 18400;
+    static constexpr int SampleRate = 48000;
+    static constexpr int FrameSamples = 3840;   //!< 80 ms
+    static constexpr int PacketBytes = 184;     //!< 1472 bits, WB tier 3's (ANGEL61.md 2.3)
+    static constexpr int BitRate = 18400;
     /**
      * The decoder's default complexity: 5, Deep PLC, the neural concealment of lost packets of
      * libopus 1.5 and later built with it (OPUS_OSCE or OPUS_DRED). Measured on revision 2's
@@ -48,7 +48,7 @@ public:
      * same when none is; 0.2% of real time in all. LACE and NoLACE (6, 7) add nothing at 18.4
      * kbit/s; the bandwidth extension is not measured by PESQ and stays off until it is listened to.
      */
-    static const int DefaultComplexity = 5;
+    static constexpr int DefaultComplexity = 5;
 
     //! The library's version ("libopus 1.6.1")
     static std::string getVersion();

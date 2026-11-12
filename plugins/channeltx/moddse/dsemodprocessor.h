@@ -357,18 +357,18 @@ public:
     bool isAPIDraining() const { return m_apiDraining.load(); }
     void outputDrained() { m_apiOutputDrained = true; }
 
-    static const int m_samplesPerAudioFrame = 960; //!< 20 ms at 48 kS/s: the audio is fed to every vocoder in 20 ms frames
-    static const int m_fifoSize = 48000;      //!< 1 s
-    static const int m_fifoLowWater = 2400;   //!< 50 ms
-    static const int m_fifoHighWater = 9600;  //!< 200 ms
-    static const int16_t m_fifoOff = -32768;  //!< FIFO sample meaning "carrier off" (the FM path never produces it)
-    static const int m_maxQueuedFrames = 50;
-    static const int m_depthWindowSamples = 48000;  //!< Time over which the minimum queue depth is measured (1 s)
-    static const int m_depthSlackSamples = 1920;    //!< Minimum depth the priming aims for (40 ms)
+    static constexpr int m_samplesPerAudioFrame = 960; //!< 20 ms at 48 kS/s: the audio is fed to every vocoder in 20 ms frames
+    static constexpr int m_fifoSize = 48000;      //!< 1 s
+    static constexpr int m_fifoLowWater = 2400;   //!< 50 ms
+    static constexpr int m_fifoHighWater = 9600;  //!< 200 ms
+    static constexpr int16_t m_fifoOff = -32768;  //!< FIFO sample meaning "carrier off" (the FM path never produces it)
+    static constexpr int m_maxQueuedFrames = 50;
+    static constexpr int m_depthWindowSamples = 48000;  //!< Time over which the minimum queue depth is measured (1 s)
+    static constexpr int m_depthSlackSamples = 1920;    //!< Minimum depth the priming aims for (40 ms)
     //! Allowance above the slack before the delay control trims (60 ms): the prime credits keep a margin
     //! for devices that read the FIFO in blocks (File Output: 50 ms), which a device reading it smoothly
     //! keeps, and trimming it took packets out of the first seconds of speech
-    static const int m_depthJitterSamples = 2880;
+    static constexpr int m_depthJitterSamples = 2880;
 
 private slots:
     void handleInputMessages();

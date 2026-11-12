@@ -35,9 +35,9 @@
 class SDRBASE_API DVAMBE
 {
 public:
-    static const int m_frameBits = 72;
-    static const int m_frameBytes = 9;
-    static const int m_paramBits = 49;
+    static constexpr int m_frameBits = 72;
+    static constexpr int m_frameBytes = 9;
+    static constexpr int m_paramBits = 49;
 
     //! 72 on-air bits -> fr[4][24] bit planes (DMR interleave)
     static void bitsToFrame(const uint8_t *bits, uint8_t fr[4][24]);

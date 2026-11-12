@@ -87,7 +87,7 @@ public:
         int m_syncCount = 0;
     };
 
-    static const int m_sampleRate = 48000;
+    static constexpr int m_sampleRate = 48000;
     //! A symbol is present when its envelope power exceeds this multiple of the noise floor: at a
     //! post filter C/N of 6 dB the signal plus noise power is 5 times the floor, and the power
     //! over one symbol of noise alone scatters by a third of the floor
@@ -266,7 +266,7 @@ private:
     float m_lastScopeY;
     //! The GMSK scope's last symbols (the sample and its decision, as sliced), the newest last: the
     //! one in the middle is shown, with its neighbours' intersymbol interference taken out
-    static const int GmskScopeSpan = 5;
+    static constexpr int GmskScopeSpan = 5;
     float m_gmskScopeY[GmskScopeSpan];
     float m_gmskScopeD[GmskScopeSpan];
     bool m_gmskScopePresent[GmskScopeSpan];

@@ -75,7 +75,7 @@ public:
         bool m_fourLevel;      //!< 4FSK (false: GMSK)
     };
 
-    static const int m_maxLength = 48;
+    static constexpr int m_maxLength = 48;
 
     static const Info& get(Pattern pattern);
 

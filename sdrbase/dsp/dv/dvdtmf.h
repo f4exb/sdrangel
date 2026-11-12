@@ -52,7 +52,7 @@ public:
     // ---- AMBE tone frames (mbelib 3's docs/tone-frames.md) ------------------------------------
     //! AMBE+2 tone ids: 5 to 122 single tones, 128 to 143 DTMF (128 + value), 144 to 159 KNOX,
     //! 160 to 163 call progress (dial, ring, busy, reorder)
-    static const int ToneIdDTMF = 128;
+    static constexpr int ToneIdDTMF = 128;
     /**
      * The tone id of AMBE+2 (3600x2450) parameter bits, 49 of them one per byte in mbelib's order
      * (`ambe_d`), as mbelib's decoder classifies a frame: `111111` at the head of u0, and u3's last
@@ -147,8 +147,8 @@ public:
         int64_t samples() const { return m_samples; }
 
     private:
-        static const int StartWindows = 5;
-        static const int EndWindows = 4;
+        static constexpr int StartWindows = 5;
+        static constexpr int EndWindows = 4;
         enum State { StateIdle, StateSounding };
 
         int m_sampleRate;

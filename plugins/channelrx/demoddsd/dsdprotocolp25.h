@@ -46,14 +46,14 @@ class DSDProtocolP25 : public DSDProtocol
 public:
     enum DUID { DUIDHDU = 0x0, DUIDTDU = 0x3, DUIDLDU1 = 0x5, DUIDTSDU = 0x7, DUIDLDU2 = 0xA, DUIDPDU = 0xC, DUIDTDULC = 0xF };
 
-    static const int m_syncDibits = 24;
-    static const int m_nidDibits = 32;
-    static const int m_hduDibits = 396;
-    static const int m_lduDibits = 864;
-    static const int m_tduDibits = 72;
-    static const int m_tdulcDibits = 216;
-    static const int m_tsduDataDibits = 56;   //!< Sync and NID; a TSDU or PDU carries 1 to 3 (TSDU) 98 dibit blocks after them
-    static const int m_blockDibits = 98;
+    static constexpr int m_syncDibits = 24;
+    static constexpr int m_nidDibits = 32;
+    static constexpr int m_hduDibits = 396;
+    static constexpr int m_lduDibits = 864;
+    static constexpr int m_tduDibits = 72;
+    static constexpr int m_tdulcDibits = 216;
+    static constexpr int m_tsduDataDibits = 56;   //!< Sync and NID; a TSDU or PDU carries 1 to 3 (TSDU) 98 dibit blocks after them
+    static constexpr int m_blockDibits = 98;
 
     DSDProtocolP25(const DSDSymbolHistory& history);
 

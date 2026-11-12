@@ -64,17 +64,17 @@ public:
         DTVoiceFullRate = 3
     };
 
-    static const int m_frameDibits = 480;
-    static const int m_syncDibits = 20;
-    static const int m_fichDibits = 100;
-    static const int m_payloadDibits = 360;
-    static const int m_dchChunkDibits = 36;      //!< Header/terminator DCH1/DCH2 chunk
-    static const int m_vd2BlockDibits = 72;      //!< V/D type 2 block: 20 DCH + 52 voice
-    static const int m_vd2DCHSliceDibits = 20;
-    static const int m_voiceFramesPerFrame = 5;
-    static const int m_framesPerSuperframe = 8;  //!< FN 0..7 (FT = 7)
-    static const int m_callsignLength = 10;
-    static const int m_preambleDibits = 96;      //!< 20 ms of alternating +3/-3 before the header
+    static constexpr int m_frameDibits = 480;
+    static constexpr int m_syncDibits = 20;
+    static constexpr int m_fichDibits = 100;
+    static constexpr int m_payloadDibits = 360;
+    static constexpr int m_dchChunkDibits = 36;      //!< Header/terminator DCH1/DCH2 chunk
+    static constexpr int m_vd2BlockDibits = 72;      //!< V/D type 2 block: 20 DCH + 52 voice
+    static constexpr int m_vd2DCHSliceDibits = 20;
+    static constexpr int m_voiceFramesPerFrame = 5;
+    static constexpr int m_framesPerSuperframe = 8;  //!< FN 0..7 (FT = 7)
+    static constexpr int m_callsignLength = 10;
+    static constexpr int m_preambleDibits = 96;      //!< 20 ms of alternating +3/-3 before the header
 
     //! dataType: the voice mode, V/D type 2 (DN, the default), V/D type 1 or voice full rate (VW)
     explicit DSEModYSF(DataType dataType = DTVoiceData2);

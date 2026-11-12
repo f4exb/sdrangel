@@ -460,7 +460,7 @@ private:
         QDateTime m_heard;
     };
     QMap<QString, Angel61Station> m_angel61Stations; //!< By callsign
-    static const int MaxAngel61Stations = 256;
+    static constexpr int MaxAngel61Stations = 256;
     QSet<ChannelAPI*> m_angel61Demodulators;         //!< DSD Demodulators listened to
     AvailableChannelOrFeatureList m_availableDemodulators; //!< The same, for the GUI's combo
     const QObject *m_angel61DemodSelected;           //!< The one the angel61Demod setting names, null for any of them

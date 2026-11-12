@@ -53,7 +53,7 @@ public:
     //! The icon of a symbol, or a null pixmap when the APRS feature's resources are not there
     static QPixmap symbolPixmap(const QString& symbol);
 
-    static const int NbSymbols = 94;   //!< the codes '!' to '~' of each table
+    static constexpr int NbSymbols = 94;   //!< the codes '!' to '~' of each table
 
 private slots:
     void tableChanged(int index);

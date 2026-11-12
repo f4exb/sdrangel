@@ -93,7 +93,7 @@ private:
     std::vector<uint32_t> m_parityOfData;   //!< Parity word (p bits) contributed by each data bit
     std::vector<uint32_t> m_syndromeTable;  //!< 2^p entries: error pattern (n bit word) or m_noPattern
     std::vector<uint32_t> m_codewords;      //!< 2^k codewords for soft decoding
-    static const uint32_t m_noPattern = 0xFFFFFFFFu;
+    static constexpr uint32_t m_noPattern = 0xFFFFFFFFu;
 
     void build();
     uint32_t parityOf(uint32_t data) const;

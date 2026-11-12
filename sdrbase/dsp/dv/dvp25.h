@@ -44,13 +44,13 @@ public:
         DUIDTDULC = 0xF
     };
 
-    static const int m_syncBits = 48;
-    static const int m_nidBits = 64;
-    static const int m_imbeBits = 144;
-    static const int m_lcBits = 240;      //!< Encoded LC or ESS in an LDU
-    static const int m_lsdBits = 32;      //!< Encoded low speed data in an LDU
-    static const int m_headerBits = 648;  //!< Encoded HDU payload
-    static const uint64_t m_frameSync = 0x5575F5FF77FFULL;
+    static constexpr int m_syncBits = 48;
+    static constexpr int m_nidBits = 64;
+    static constexpr int m_imbeBits = 144;
+    static constexpr int m_lcBits = 240;      //!< Encoded LC or ESS in an LDU
+    static constexpr int m_lsdBits = 32;      //!< Encoded low speed data in an LDU
+    static constexpr int m_headerBits = 648;  //!< Encoded HDU payload
+    static constexpr uint64_t m_frameSync = 0x5575F5FF77FFULL;
 
     // ---- Network identifier: BCH(63,16) + parity bit ---------------------------------------
     //! NAC (12 bits) and DUID (4 bits) -> 64 bit NID, MSB first on air. The last bit is
@@ -88,8 +88,8 @@ public:
     static int tdulcDecode(const uint8_t *bits288, uint8_t *lc9);
 
     // ---- Trunking and data blocks: rate 1/2 trellis, 196 bits per 96 bit block -----------------
-    static const int m_blockBits = 196;
-    static const int m_blockBytes = 12;   //!< 10 payload bytes and a CRC-16
+    static constexpr int m_blockBits = 196;
+    static constexpr int m_blockBytes = 12;   //!< 10 payload bytes and a CRC-16
     //! 12 byte block (the CRC is computed here over the first 10) -> 196 interleaved trellis bits
     static void blockEncode(const uint8_t *bytes12, uint8_t *bits196);
     //! 12 bytes as they are (an unconfirmed packet data block: no CRC) -> 196 bits
@@ -102,7 +102,7 @@ public:
     static uint16_t blockCrc(const uint8_t *bytes, int nbBytes);
 
     // ---- Confirmed packet data blocks: rate 3/4 trellis, 196 bits per 144 bit block ------------
-    static const int m_block34Bytes = 18; //!< serial number (7 bits), CRC-9 and 16 data bytes
+    static constexpr int m_block34Bytes = 18; //!< serial number (7 bits), CRC-9 and 16 data bytes
     //! 18 byte block (the CRC-9 over the serial number and the data is computed here) -> 196 bits
     static void block34Encode(const uint8_t *bytes18, uint8_t *bits196);
     //! 196 LLRs -> 18 byte block. Returns the hard decision disagreements, or -1 when the CRC-9 fails

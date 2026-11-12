@@ -34,23 +34,23 @@
 class SDRBASE_API DVNXDN
 {
 public:
-    static const int m_frameBits = 384;
-    static const int m_fswBits = 20;
-    static const int m_lichBits = 16;
-    static const int m_sacchInfoBits = 26;    //!< structure (2) + RAN (6) + 18 message bits
-    static const int m_sacchCodedBits = 36;   //!< info + CRC6 + 4 tail bits
-    static const int m_sacchTxBits = 60;
-    static const int m_facch1InfoBits = 80;
-    static const int m_facch1CodedBits = 96;  //!< info + CRC12 + 4 tail bits
-    static const int m_facch1TxBits = 144;
-    static const int m_udchInfoBits = 184;    //!< structure (2) + RAN (6) + 176 message bits
-    static const int m_udchCodedBits = 203;   //!< info + CRC15 + 4 tail bits
-    static const int m_udchTxBits = 348;      //!< the SACCH and payload area of a frame
-    static const int m_cacInfoBits = 155;     //!< SR (8) + 144 message bits + 3 null
-    static const int m_cacCodedBits = 175;    //!< info + CRC16 + 4 tail bits
-    static const int m_cacTxBits = 300;       //!< the outbound RCCH frame after the LICH
-    static const int m_vchBits = 72;
-    static const int m_scrambledSymbols = 182; //!< LICH to end of frame
+    static constexpr int m_frameBits = 384;
+    static constexpr int m_fswBits = 20;
+    static constexpr int m_lichBits = 16;
+    static constexpr int m_sacchInfoBits = 26;    //!< structure (2) + RAN (6) + 18 message bits
+    static constexpr int m_sacchCodedBits = 36;   //!< info + CRC6 + 4 tail bits
+    static constexpr int m_sacchTxBits = 60;
+    static constexpr int m_facch1InfoBits = 80;
+    static constexpr int m_facch1CodedBits = 96;  //!< info + CRC12 + 4 tail bits
+    static constexpr int m_facch1TxBits = 144;
+    static constexpr int m_udchInfoBits = 184;    //!< structure (2) + RAN (6) + 176 message bits
+    static constexpr int m_udchCodedBits = 203;   //!< info + CRC15 + 4 tail bits
+    static constexpr int m_udchTxBits = 348;      //!< the SACCH and payload area of a frame
+    static constexpr int m_cacInfoBits = 155;     //!< SR (8) + 144 message bits + 3 null
+    static constexpr int m_cacCodedBits = 175;    //!< info + CRC16 + 4 tail bits
+    static constexpr int m_cacTxBits = 300;       //!< the outbound RCCH frame after the LICH
+    static constexpr int m_vchBits = 72;
+    static constexpr int m_scrambledSymbols = 182; //!< LICH to end of frame
 
     // ---- Convolutional code -----------------------------------------------------------------
     //! Rate 1/2 K=5: G1 = 1 + D^3 + D^4, G2 = 1 + D + D^2 + D^4. Output 2*nbBits, G1 then G2.

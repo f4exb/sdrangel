@@ -50,8 +50,8 @@
 class DSDProtocolP25P2 : public DSDProtocol
 {
 public:
-    static const int m_burstDibits = DVP25P2::m_burstDibits;
-    static const int m_ischDibits = DVP25P2::m_ischDibits;
+    static constexpr int m_burstDibits = DVP25P2::m_burstDibits;
+    static constexpr int m_ischDibits = DVP25P2::m_ischDibits;
 
     DSDProtocolP25P2(const DSDSymbolHistory& history);
 

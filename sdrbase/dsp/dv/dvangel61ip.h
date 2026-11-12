@@ -97,9 +97,9 @@ public:
         std::string toString() const;
     };
 
-    static const int MaxPrefixes = 16;
-    static const int MinMTU = 64;
-    static const int MaxMTU = 1500;
+    static constexpr int MaxPrefixes = 16;
+    static constexpr int MinMTU = 64;
+    static constexpr int MaxMTU = 1500;
 
     //! The largest datagram message fields of fieldBytes payload bytes can carry (3.2: 255 fragments)
     static int maxDatagram(int fieldBytes) { return 255 * fieldBytes - 2; }

@@ -66,14 +66,14 @@ public:
     //! The preamble and header (159 ms) take no voice, less two frames kept as margin (getPrimeCredit)
     virtual int getPrimeCredit() const { return 5; }
 
-    static const int m_headerBytes = 41;
-    static const int m_headerBits = 660;
-    static const int m_voiceBits = 72;
-    static const int m_dataBits = 24;
-    static const int m_framesPerSuperframe = 21;
-    static const int m_endBits = 48;
-    static const int m_bitSyncSymbols = 80;
-    static const int m_frameSyncSymbols = 24;
+    static constexpr int m_headerBytes = 41;
+    static constexpr int m_headerBits = 660;
+    static constexpr int m_voiceBits = 72;
+    static constexpr int m_dataBits = 24;
+    static constexpr int m_framesPerSuperframe = 21;
+    static constexpr int m_endBits = 48;
+    static constexpr int m_bitSyncSymbols = 80;
+    static constexpr int m_frameSyncSymbols = 24;
 
     //! Build the 41 byte radio header including CRC (exposed for tests)
     static void buildHeader(const DSEModSettings& settings, uint8_t *header);
@@ -82,7 +82,7 @@ public:
     //! Build a D-PRS (GPS-A) position sentence "$$CRChhhh,CALL>APZSDR,DSTAR*:/hhmmssh...\r\n" (exposed for tests)
     static QByteArray buildDPRS(const QString& callsign, double latitude, double longitude, float altitude, const QDateTime& utc);
 
-    static const int m_positionIntervalSuperframes = 24; //!< About 10 s between position sentences
+    static constexpr int m_positionIntervalSuperframes = 24; //!< About 10 s between position sentences
 
     //! Sync patterns as dsdcc symbol values (1 = positive, 3 = negative)
     static const uint8_t m_headerSync[m_frameSyncSymbols];

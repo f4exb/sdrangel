@@ -39,7 +39,7 @@
 class DSEModShaper
 {
 public:
-    static const int m_sampleRate = 48000;
+    static constexpr int m_sampleRate = 48000;
 
     DSEModShaper(int samplesPerSymbol) : m_samplesPerSymbol(samplesPerSymbol) {}
     virtual ~DSEModShaper() {}
@@ -50,7 +50,7 @@ public:
     virtual void flush(std::vector<float>& out) = 0;
     int getSamplesPerSymbol() const { return m_samplesPerSymbol; }
 
-    static const int8_t m_levelOff = 127;     //!< Level value meaning "carrier off" for one symbol period (burst protocols)
+    static constexpr int8_t m_levelOff = 127;     //!< Level value meaning "carrier off" for one symbol period (burst protocols)
     static constexpr float m_sampleOff = -8.0f; //!< Output sample meaning "carrier off" (far outside the shaped signal)
 
     //! The FM FIFO carries the frequency over this many peak deviations: a 4FSK symbol stream through the

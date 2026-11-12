@@ -312,11 +312,11 @@ public:
     void applySettings(const QStringList& settingsKeys, const DSEModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
-    static const int m_basebandSampleRate = 48000; //!< Modulator baseband sample rate
+    static constexpr int m_basebandSampleRate = 48000; //!< Modulator baseband sample rate
     //! The vocoder's audio rate: 8 kHz for the MBE codecs, 24 kHz for V1 (Angel61), 48 for Opus, set by the mode's protocol
     int getPcmSampleRate() const { return m_pcmSampleRate; }
-    static const int m_dtmfToneFrames = 5;         //!< DTMF digit duration in 20 ms frames (100 ms)
-    static const int m_dtmfGapFrames = 5;          //!< Silence between DTMF digits in 20 ms frames (100 ms)
+    static constexpr int m_dtmfToneFrames = 5;         //!< DTMF digit duration in 20 ms frames (100 ms)
+    static constexpr int m_dtmfGapFrames = 5;          //!< Silence between DTMF digits in 20 ms frames (100 ms)
 
 private:
     int m_channelSampleRate;
@@ -331,7 +331,7 @@ private:
     NCO m_toneNco;
     float m_modPhasor;
     float m_envelope;                           //!< Carrier amplitude 0..1 (ramped at burst edges)
-    static const int m_envelopeSamples = 24;    //!< Ramp length: 0.5 ms
+    static constexpr int m_envelopeSamples = 24;    //!< Ramp length: 0.5 ms
     Complex m_modSample;
     int m_peakDeviation;
 

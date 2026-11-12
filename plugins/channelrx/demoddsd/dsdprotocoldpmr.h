@@ -41,15 +41,15 @@
 class DSDProtocolDPMR : public DSDProtocol
 {
 public:
-    static const int m_frameSymbols = 192;
-    static const int m_fs1Symbols = 24;
-    static const int m_fs2Symbols = 12;
-    static const int m_ccSymbols = 12;
-    static const int m_hiSymbols = 60;
-    static const int m_cchSymbols = 36;
-    static const int m_tchSymbols = 36;
-    static const int m_endSymbols = 36;
-    static const int m_headerSymbols = 132;  //!< After FS1: HI, CC, HI
+    static constexpr int m_frameSymbols = 192;
+    static constexpr int m_fs1Symbols = 24;
+    static constexpr int m_fs2Symbols = 12;
+    static constexpr int m_ccSymbols = 12;
+    static constexpr int m_hiSymbols = 60;
+    static constexpr int m_cchSymbols = 36;
+    static constexpr int m_tchSymbols = 36;
+    static constexpr int m_endSymbols = 36;
+    static constexpr int m_headerSymbols = 132;  //!< After FS1: HI, CC, HI
 
     DSDProtocolDPMR(const DSDSymbolHistory& history);
 
@@ -90,7 +90,7 @@ public:
     };
 
     const TextMessage& getTextMessage() const { return m_textMessage; }
-    static const int m_maxSlowDataBytes = 256;
+    static constexpr int m_maxSlowDataBytes = 256;
 
 private:
     enum Burst { BurstNone, BurstHeader, BurstPayload, BurstEnd };

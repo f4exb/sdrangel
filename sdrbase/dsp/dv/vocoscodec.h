@@ -41,13 +41,13 @@
 class SDRBASE_API VocosCodec
 {
 public:
-    static const int SampleRate = 24000;
-    static const int SamplesPerFrame = 320;
-    static const int MaxCodebooks = 16;
-    static const int BitsPerCodebook = 10;
-    static const int MaxPacketBytes = 20;
-    static const int AbiVersion = 1;
-    static const int DefaultLookahead = 3;     //!< frames the decoder looks ahead (60 ms of its delay)
+    static constexpr int SampleRate = 24000;
+    static constexpr int SamplesPerFrame = 320;
+    static constexpr int MaxCodebooks = 16;
+    static constexpr int BitsPerCodebook = 10;
+    static constexpr int MaxPacketBytes = 20;
+    static constexpr int AbiVersion = 1;
+    static constexpr int DefaultLookahead = 3;     //!< frames the decoder looks ahead (60 ms of its delay)
     static const char *const ModelFiles[3];
     static const char *const ModelSha256[3];
 

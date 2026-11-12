@@ -42,10 +42,10 @@ class DSDBlanker
 {
 public:
     static constexpr float DefaultThresholdDB = 15.0f;   //!< 18 let a +20 dB click's tail through (HF results section 40)
-    static const int MaxRun = 12;           //!< samples above the threshold in a row that are still a click
-    static const int Hold = 4;              //!< samples blanked after the last one above it
+    static constexpr int MaxRun = 12;           //!< samples above the threshold in a row that are still a click
+    static constexpr int Hold = 4;              //!< samples blanked after the last one above it
     static constexpr float Alpha = 1.0f / 2400.0f;   //!< the mean's time constant: 50 ms at 48 kS/s
-    static const int WarmUp = 480;          //!< samples averaged for the first mean (10 ms), none blanked
+    static constexpr int WarmUp = 480;          //!< samples averaged for the first mean (10 ms), none blanked
 
     DSDBlanker() { setThresholdDB(DefaultThresholdDB); }
 

@@ -58,19 +58,19 @@ public:
         LCSSContinuation = 3
     };
 
-    static const int m_slotBits = 288;      //!< CACH + burst
-    static const int m_cachBits = 24;
-    static const int m_burstBits = 264;
-    static const int m_syncBits = 48;
-    static const int m_infoBits = 196;
-    static const int m_voiceFrameBits = 72;
-    static const int m_burstsPerSuperframe = 6;
-    static const int m_headerBursts = 2;
-    static const int m_terminatorBursts = 2;
-    static const int m_startFrames = 2;
-    static const int m_hangFrames = 16;
+    static constexpr int m_slotBits = 288;      //!< CACH + burst
+    static constexpr int m_cachBits = 24;
+    static constexpr int m_burstBits = 264;
+    static constexpr int m_syncBits = 48;
+    static constexpr int m_infoBits = 196;
+    static constexpr int m_voiceFrameBits = 72;
+    static constexpr int m_burstsPerSuperframe = 6;
+    static constexpr int m_headerBursts = 2;
+    static constexpr int m_terminatorBursts = 2;
+    static constexpr int m_startFrames = 2;
+    static constexpr int m_hangFrames = 16;
     //! Superframes between GPS Info embedded LCs: about 1.8 s, the rest carrying the voice LC
-    static const int m_positionIntervalSuperframes = 5;
+    static constexpr int m_positionIntervalSuperframes = 5;
 
     DSEModDMR();
     virtual ~DSEModDMR();

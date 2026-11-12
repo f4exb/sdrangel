@@ -43,9 +43,9 @@
 class DSDVocoderVocos
 {
 public:
-    static const int m_sampleRate = VocosCodec::SampleRate;
-    static const int m_samplesPerPacket = VocosCodec::SamplesPerFrame;
-    static const int m_maxSamples = 18 * VocosCodec::SamplesPerFrame + 1600;   //!< an HF frame, or a flush
+    static constexpr int m_sampleRate = VocosCodec::SampleRate;
+    static constexpr int m_samplesPerPacket = VocosCodec::SamplesPerFrame;
+    static constexpr int m_maxSamples = 18 * VocosCodec::SamplesPerFrame + 1600;   //!< an HF frame, or a flush
 
     DSDVocoderVocos();
     ~DSDVocoderVocos();

@@ -49,10 +49,10 @@
 class DSDProtocolYSF : public DSDProtocol
 {
 public:
-    static const int m_frameDibits = 480;
-    static const int m_syncDibits = 20;
-    static const int m_fichDibits = 100;
-    static const int m_payloadDibits = 360;
+    static constexpr int m_frameDibits = 480;
+    static constexpr int m_syncDibits = 20;
+    static constexpr int m_fichDibits = 100;
+    static constexpr int m_payloadDibits = 360;
 
     DSDProtocolYSF(const DSDSymbolHistory& history);
 
@@ -123,8 +123,8 @@ public:
     static std::string describe(const uint8_t *m, int length, bool& isText, std::string& kind);
     static const char *radioName(int model);
 
-    static const int m_dataBlockBytes = 260;    //!< A block's bytes (FT 7): later blocks lead with a 0x00 filler
-    static const int m_maxDataBlocks = 4;
+    static constexpr int m_dataBlockBytes = 260;    //!< A block's bytes (FT 7): later blocks lead with a 0x00 filler
+    static constexpr int m_maxDataBlocks = 4;
 
 private:
     bool m_active;

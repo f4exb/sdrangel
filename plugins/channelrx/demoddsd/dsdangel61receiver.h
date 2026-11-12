@@ -86,13 +86,13 @@ public:
     };
     static const Layout& layout(DVAngel61::Profile profile);
 
-    static const int UWSymbols = 16;
-    static const int MaxFrameSymbols = 768;
-    static const int MaxPayloadSymbols = 664;
-    static const int MaxHeaderSymbols = 48;
-    static const int MaxGroups = 48;
-    static const int MaxCodedBits = 4 * MaxPayloadSymbols;
-    static const int MaxRrcTaps = DVAngel61::MaxRrcTaps;
+    static constexpr int UWSymbols = 16;
+    static constexpr int MaxFrameSymbols = 768;
+    static constexpr int MaxPayloadSymbols = 664;
+    static constexpr int MaxHeaderSymbols = 48;
+    static constexpr int MaxGroups = 48;
+    static constexpr int MaxCodedBits = 4 * MaxPayloadSymbols;
+    static constexpr int MaxRrcTaps = DVAngel61::MaxRrcTaps;
 
     struct Frame
     {
@@ -162,21 +162,21 @@ public:
     //! 2 the frame's residual frequency from it, the estimator otherwise the receiver's own
     void setGenie(std::function<std::complex<float>(double)> genie, int mode) { m_genie = genie; m_genieMode = mode; }
 
-    static const int SampleRate = 48000;
+    static constexpr int SampleRate = 48000;
     //! A frame and the next frame's UW, the tail's anchor, in the larger profile: fixed buffers
-    static const int MaxExtendedSymbols = MaxFrameSymbols + UWSymbols;
+    static constexpr int MaxExtendedSymbols = MaxFrameSymbols + UWSymbols;
 
 private:
-    static const int RingSize = 8192;                                //!< Filtered samples kept (> a frame + margins)
-    static const int RingMask = RingSize - 1;
-    static const int PeakLookahead = 6;                              //!< Samples after a candidate before it is called a peak
-    static const int LockedWindow = 6;                               //!< +- samples searched for the UW when locked
-    static const int LockedMetricWindow = LockedWindow + 8;          //!< +- samples around an expected UW whose metrics are worked out when locked
-    static const int MaxMisses = 5;
+    static constexpr int RingSize = 8192;                                //!< Filtered samples kept (> a frame + margins)
+    static constexpr int RingMask = RingSize - 1;
+    static constexpr int PeakLookahead = 6;                              //!< Samples after a candidate before it is called a peak
+    static constexpr int LockedWindow = 6;                               //!< +- samples searched for the UW when locked
+    static constexpr int LockedMetricWindow = LockedWindow + 8;          //!< +- samples around an expected UW whose metrics are worked out when locked
+    static constexpr int MaxMisses = 5;
     static constexpr float AliasMargin = 1.2f;                      //!< An acquisition's slope alias taken when its known symbols are this much more coherent
-    static const int AliasScanSteps = 64;                            //!< The alias scan's steps a turn
+    static constexpr int AliasScanSteps = 64;                            //!< The alias scan's steps a turn
     static constexpr float AliasCoherence = 0.75f;                  //!< ... and when its coherent sum is this much of the known symbols' magnitudes (a steady channel)
-    static const int MaxPending = 8;                                 //!< UW candidates awaiting their frame while searching (4 let a first frame's own side peaks, 0.84 to 0.88 at other frequencies, push its UW out: VHF results section 13)
+    static constexpr int MaxPending = 8;                                 //!< UW candidates awaiting their frame while searching (4 let a first frame's own side peaks, 0.84 to 0.88 at other frequencies, push its UW out: VHF results section 13)
     static constexpr double EstimateRatioKnee = 1.2;                 //!< The fit's error, against the noise, beyond which the decoder is told more of it (trackGains)
     static constexpr double EstimateScaleMax = 4.0;                  //!< ... at most this many times as much
     static constexpr double TimingGain = 0.05;                       //!< Frame clock loop: proportional gain on the UW's position error
@@ -247,9 +247,9 @@ private:
     static constexpr float FadingFrequencyGain = 0.25f;              //!< In fading, the tracked frequency's pull per frame towards the frame's known symbols' estimate
     static constexpr float FitFadingHz = 100.0f;                     //!< A fit that chose this Doppler or more is used whatever the window's residual, and the frame is fading (no phase slope removed)
     static constexpr float FadingSlopeHz = 100.0f;                   //!< A frame whose window is short and whose fit chose this Doppler or more is fading: no phase slope is removed from it
-    static const int DecodingRounds = 6;                             //!< Further channel estimate + decode rounds after a failed payload
+    static constexpr int DecodingRounds = 6;                             //!< Further channel estimate + decode rounds after a failed payload
     static constexpr float HeaderCopyGate = 0.2f;                    //!< Least correlation of the header copies' LLRs for the Golay words to be decoded
-    static const int LocalAnchors = 24;                              //!< Anchors of the local fit of a decoding round (localFit)
+    static constexpr int LocalAnchors = 24;                              //!< Anchors of the local fit of a decoding round (localFit)
     static constexpr float ReferenceConfidence = 2.0f;               //!< Smallest posterior |LLR| of a re-encoded symbol's bits for it to serve as a reference
 
     // The profile (2.1): its layout and what follows from it

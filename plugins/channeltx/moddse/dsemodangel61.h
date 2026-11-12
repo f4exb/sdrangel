@@ -118,13 +118,13 @@ public:
     virtual bool queueFileControl(const DVAngel61FileControl& control, const std::string& destination);
     virtual bool fileNoAnswer() { return m_fileSender.handleNoAnswer(); }
     //! HF: the offer every this many data groups (about 8 s on HF-NB): a field is a whole group
-    static const int HFOfferIntervalGroups = 8;
+    static constexpr int HFOfferIntervalGroups = 8;
     //! A transmission keyed up for the tunnel is no longer than this, so that the peer can answer (3.5)
-    static const int MaxTunnelBurstMs = 30000;
+    static constexpr int MaxTunnelBurstMs = 30000;
     //! The advertise goes at the head of a transmission this long after the last (3.5)
-    static const int TunnelAdvertiseMs = 30000;
+    static constexpr int TunnelAdvertiseMs = 30000;
     //! A repair request is answered this long after the transmission it is for (TunnelRepairWindow, 3.5)
-    static const int TunnelRepairWindowMs = 10000;
+    static constexpr int TunnelRepairWindowMs = 10000;
     int getRepairsSent() const { return m_repairsSent; }
     virtual const DVAngel61FileSender& getFileSender() const { return m_fileSender; }
     virtual bool fileWantsTransmission() const { return m_fileSender.getState() == DVAngel61FileSender::Sending; }
@@ -164,11 +164,11 @@ public:
     int getRelayedMessages() const { return m_relayedMessages; }
     //! Idle frames a relay sent in its call for want of the call's packets (voiceBlock)
     int getRelayHoldFrames() const { return m_relayHoldFrames; }
-    static const int MaxRelayedMessages = 16;   //!< A relay's messages waiting at most
-    static const int MaxOtherFields = 8;        //!< Fields a part sent message lets go by before it is fragmented again
+    static constexpr int MaxRelayedMessages = 16;   //!< A relay's messages waiting at most
+    static constexpr int MaxOtherFields = 8;        //!< Fields a part sent message lets go by before it is fragmented again
     virtual void setDataOnlyNext(bool forMessage) { m_dataOnlyNext = true; m_dataOnlyNextMessage = m_dataOnlyNextMessage || forMessage; }
     //! A relay goes on after its call's last frame for its text and messages at most this long
-    static const int RelayDrainMs = 15000;
+    static constexpr int RelayDrainMs = 15000;
     int getDTMFSlotsSent() const { return m_slots.getDTMFSlotsSent(); }
     bool tunnelWantsTransmission() const { return m_tunnelEnabled && !m_messages.empty(); }
     int getTunnelDropped() const { return m_tunnelDropped; }
@@ -271,7 +271,7 @@ private:
     std::vector<uint8_t> m_apiData;
     int m_apiContentType;
     //! About 30 s of data: past that a tunnel's datagrams are dropped here, not aged on the air (3.5)
-    static const int MaxTunnelFragments = 32;
+    static constexpr int MaxTunnelFragments = 32;
     int m_burstFrames;                  //!< the frames a tunnel's transmission may last, 0 for no limit
     int64_t m_lastAdvertiseMs;          //!< steady clock
     bool m_tunnelEnabled;

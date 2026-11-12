@@ -37,13 +37,13 @@
 class DSDProtocolDStar : public DSDProtocol
 {
 public:
-    static const int m_headerBits = 660;
-    static const int m_voiceBits = 72;
-    static const int m_dataBits = 24;
-    static const int m_frameBits = 96;
-    static const int m_framesPerSuperframe = 21;
-    static const int m_superframeBits = 2016;
-    static const int m_headerBytes = 41;
+    static constexpr int m_headerBits = 660;
+    static constexpr int m_voiceBits = 72;
+    static constexpr int m_dataBits = 24;
+    static constexpr int m_frameBits = 96;
+    static constexpr int m_framesPerSuperframe = 21;
+    static constexpr int m_superframeBits = 2016;
+    static constexpr int m_headerBytes = 41;
 
     DSDProtocolDStar(const DSDSymbolHistory& history);
 

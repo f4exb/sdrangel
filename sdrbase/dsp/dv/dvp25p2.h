@@ -44,11 +44,11 @@
 class SDRBASE_API DVP25P2
 {
 public:
-    static const int m_burstDibits = 180;
-    static const int m_ischDibits = 20;
-    static const int m_timeslots = 12;
-    static const int m_superframeDibits = 12 * 180;
-    static const uint64_t m_syncISCH = 0x575D57F7FFULL;
+    static constexpr int m_burstDibits = 180;
+    static constexpr int m_ischDibits = 20;
+    static constexpr int m_timeslots = 12;
+    static constexpr int m_superframeDibits = 12 * 180;
+    static constexpr uint64_t m_syncISCH = 0x575D57F7FFULL;
 
     //! Data unit identifiers as the (8,4) DUID code carries them
     enum DUID
@@ -80,7 +80,7 @@ public:
 
     static const int m_duidDibits[4];       //!< Burst dibits carrying the DUID: 20, 57, 142, 179
     static const int m_voiceDibits[4];      //!< First burst dibit of the four voice codewords (36 dibits each)
-    static const int m_essBDibit = 94;      //!< ESS-B: 12 dibits (4 hexbits) in a 4V burst; ESS-A: 28 hexbits from the same dibit in a 2V burst
+    static constexpr int m_essBDibit = 94;      //!< ESS-B: 12 dibits (4 hexbits) in a 4V burst; ESS-A: 28 hexbits from the same dibit in a 2V burst
 
     static int timeslotChannel(int timeslot);
     static bool timeslotHasSync(int timeslot) { return (timeslot % 4) >= 2; }
@@ -108,10 +108,10 @@ public:
     // interleave table reduces to the DMR one, see dvtest): DVAMBE handles them.
 
     // ---- SACCH and FACCH --------------------------------------------------------------------
-    static const int m_sacchBits = 312;     //!< Coded SACCH bits in a burst
-    static const int m_sacchPduBits = 168;
-    static const int m_facchBits = 270;
-    static const int m_facchPduBits = 144;
+    static constexpr int m_sacchBits = 312;     //!< Coded SACCH bits in a burst
+    static constexpr int m_sacchPduBits = 168;
+    static constexpr int m_facchBits = 270;
+    static constexpr int m_facchPduBits = 144;
     //! Burst dibit of coded bit pair k (the DUID dibits and, for the FACCH, dibits 89-109 are skipped)
     static int sacchDibit(int k);
     static int facchDibit(int k);
@@ -121,7 +121,7 @@ public:
     //! The LCCH (the TDMA control channel's outbound signalling, DUID 13): coded as the SACCH, but
     //! its 180 information bits are a 164 bit MAC PDU (its colour code in bits 152-163) and a
     //! CRC-16 (CCITT, from zero, inverted) rather than 168 and a CRC-12 (OP25, SDRTrunk)
-    static const int m_lcchPduBits = 164;
+    static constexpr int m_lcchPduBits = 164;
     static int lcchDecode(const uint8_t *bits, uint8_t *pdu);
     static void lcchEncode(const uint8_t *pdu, uint8_t *bits);
     static uint16_t crc16(const uint8_t *bits, int nbBits);

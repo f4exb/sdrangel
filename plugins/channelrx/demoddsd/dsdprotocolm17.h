@@ -101,9 +101,9 @@ public:
     bool takeAPRSPacket(std::string& packet);
 
 private:
-    static const int m_payloadSymbols = 184;   //!< After the 8 sync symbols
+    static constexpr int m_payloadSymbols = 184;   //!< After the 8 sync symbols
 
-    static const int ProvenSyncRun = 4;  //!< Frames that have to arrive on time before a lock with no CRC behind it is shown (2 and 3 still let noise through: 50 and 4 locks an hour)
+    static constexpr int ProvenSyncRun = 4;  //!< Frames that have to arrive on time before a lock with no CRC behind it is shown (2 and 3 still let noise through: 50 and 4 locks an hour)
     bool m_active;
     int64_t m_syncIndex;          //!< Last symbol of the sync of the frame being received
     int64_t m_pendingSync;

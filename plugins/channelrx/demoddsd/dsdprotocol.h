@@ -109,8 +109,8 @@ struct DSDVoiceFrame
         RateOpus80      //!< Angel61 WB tier 3 (O1): an 80 ms Opus packet (184 bytes), 3840 samples at 48 kHz
     };
 
-    static const int MaxBytes = 360;    //!< a V1 frame of HF: 18 packets of up to 20 bytes (an Opus packet is 184)
-    static const int MaxLlrs = 144;     //!< soft decisions are kept for the MBE frames only (IMBE the longest)
+    static constexpr int MaxBytes = 360;    //!< a V1 frame of HF: 18 packets of up to 20 bytes (an Opus packet is 184)
+    static constexpr int MaxLlrs = 144;     //!< soft decisions are kept for the MBE frames only (IMBE the longest)
 
     int64_t m_sample = 0;      //!< Sample index of the last symbol of the frame
     int m_slot = 0;

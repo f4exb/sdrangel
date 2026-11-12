@@ -38,7 +38,7 @@ public:
         bool m_tone = false;
     };
 
-    static const int m_samplesPerFrame = 160;
+    static constexpr int m_samplesPerFrame = 160;
 
     DSDVocoderMbelib();
     ~DSDVocoderMbelib();

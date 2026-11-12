@@ -65,9 +65,9 @@ public:
         ExtensionAckRequest = 0x04  //!< the compressor asks for tunnel control kind 5
     };
 
-    static const int DefaultContexts = 16;
-    static const int RefreshPackets = 16;   //!< a full header at least every 16 packets of a context
-    static const int RefreshMs = 30000;     //!< and every 30 s
+    static constexpr int DefaultContexts = 16;
+    static constexpr int RefreshPackets = 16;   //!< a full header at least every 16 packets of a context
+    static constexpr int RefreshMs = 30000;     //!< and every 30 s
 
     //! The compression byte of an advertise
     static int capability(bool tcp, bool udp, bool sendsState, int contexts);

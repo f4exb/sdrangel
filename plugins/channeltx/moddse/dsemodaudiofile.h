@@ -38,7 +38,7 @@
 class DSEModAudioFile
 {
 public:
-    static const int RawSampleRate = 8000;
+    static constexpr int RawSampleRate = 8000;
 
     DSEModAudioFile();
     ~DSEModAudioFile();

@@ -69,16 +69,16 @@
 class DSDAngel61Session
 {
 public:
-    static const int SampleRate = 48000;
-    static const int HeardTierFrames = 3;           //!< agreeing headers that judge a tier nothing of which was confirmed
-    static const int EndAfterFrames = 8;            //!< frame periods without a confirmed frame that end a transmission (HF 1.9 s, VHF 0.64 s)
+    static constexpr int SampleRate = 48000;
+    static constexpr int HeardTierFrames = 3;           //!< agreeing headers that judge a tier nothing of which was confirmed
+    static constexpr int EndAfterFrames = 8;            //!< frame periods without a confirmed frame that end a transmission (HF 1.9 s, VHF 0.64 s)
     static constexpr float DowngradeBler = 0.04f;
-    static const int DowngradeConsecutive = 3;
+    static constexpr int DowngradeConsecutive = 3;
     static constexpr float UpgradeBler = 0.01f;
     static constexpr float UpgradeMarginDB = 3.0f;
-    static const int HoldStartMs = 60000;
-    static const int HoldMaxMs = 16 * 60000;
-    static const int ExpiryMs = 60000;               //!< a send tier older than this is back to 0 (as revision 2)
+    static constexpr int HoldStartMs = 60000;
+    static constexpr int HoldMaxMs = 16 * 60000;
+    static constexpr int ExpiryMs = 60000;               //!< a send tier older than this is back to 0 (as revision 2)
 
     struct Message
     {
@@ -120,10 +120,10 @@ public:
         int m_gapMs = 100;
         int64_t m_sample = 0;
     };
-    static const int DTMFSequenceEndMs = 2000;      //!< a sequence has ended when no new key came for this long
-    static const int DTMFMaxKeys = 64;              //!< keys held for a sequence (3.8)
-    static const int DTMFMaxText = 256;             //!< a sequence's text (a long transmission may repeat keys without end)
-    static const int DTMFSkipFrames = 4;            //!< frame periods a later key waits before a missing one is given up
+    static constexpr int DTMFSequenceEndMs = 2000;      //!< a sequence has ended when no new key came for this long
+    static constexpr int DTMFMaxKeys = 64;              //!< keys held for a sequence (3.8)
+    static constexpr int DTMFMaxText = 256;             //!< a sequence's text (a long transmission may repeat keys without end)
+    static constexpr int DTMFSkipFrames = 4;            //!< frame periods a later key waits before a missing one is given up
 
     struct PositionReport
     {
@@ -259,7 +259,7 @@ public:
      * flagged last. The caller takes them as they come; at most MaxGatewayRecords wait.
      */
     std::vector<std::vector<uint8_t>> takeGatewayRecords();
-    static const int MaxGatewayRecords = 64;
+    static constexpr int MaxGatewayRecords = 64;
     /**
      * The messages for a gateway that no record carries (plan C7): a text, binary or APRS message
      * completed from HF data groups (a group's block is beyond a record), as
@@ -267,18 +267,18 @@ public:
      * frames goes in their records. At most MaxGatewayMessages wait.
      */
     std::vector<std::vector<uint8_t>> takeGatewayMessages();
-    static const int MaxGatewayMessages = 16;
+    static constexpr int MaxGatewayMessages = 16;
     //! The stations kept by received callsign (their rate records, their compression contexts): each
     //! transmission may name a new one, so the least recently heard goes beyond these
-    static const int MaxCorrespondents = 256;
-    static const int MaxDecompressorSources = 32;
+    static constexpr int MaxCorrespondents = 256;
+    static constexpr int MaxDecompressorSources = 32;
     const std::map<uint64_t, Correspondent>& getCorrespondents() const { return m_correspondents; }
     //! Transmissions begun and ended since the last call (for the sink's events)
     int takeBegins() { int n = m_begins; m_begins = 0; return n; }
     int takeEnds() { int n = m_ends; m_ends = 0; return n; }
     //! The transmissions that ended since the last call, as they were (at most MaxEnded kept)
     std::vector<Ended> takeEnded() { std::vector<Ended> e; e.swap(m_ended); return e; }
-    static const int MaxEnded = 16;
+    static constexpr int MaxEnded = 16;
 
 protected:
     //! The rate rule on a transmission judged at `tier` that ended at `sample` (the record's

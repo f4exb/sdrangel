@@ -70,7 +70,7 @@ private:
     //! device's queue outlasting a transmission) has a tag no longer waited for
     uint32_t m_nextTag = 0;
     std::deque<std::pair<uint32_t, uint32_t>> m_pending;    //!< tag, sequence
-    static const int MaxPending = 256;
+    static constexpr int MaxPending = 256;
 
     void release();
 };

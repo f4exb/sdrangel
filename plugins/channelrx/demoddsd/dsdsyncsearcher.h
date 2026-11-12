@@ -72,7 +72,7 @@ public:
      */
     static float thresholdFor(float base, int symbols) { return symbols <= ShortPattern ? std::max(base, ShortPatternRho) : base; }
 
-    static const int ShortPattern = 12;                 //!< A pattern of this many symbols or fewer is short
+    static constexpr int ShortPattern = 12;                 //!< A pattern of this many symbols or fewer is short
     static constexpr float ShortPatternRho = 0.9f;      //!< and has to reach this |rho| (real M17 syncs come in at 0.99 median, 0.78 worst of 45 at C/N 6 dB)
     //! Forget the samples; the fits wait for the window to fill plus settleSamples more (the
     //! matched filter ahead of the searcher settling after a gap in its input)

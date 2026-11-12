@@ -36,23 +36,23 @@
 class SDRBASE_API DVM17
 {
 public:
-    static const int SymbolRate = 4800;
-    static const int FrameSymbols = 192;       //!< 40 ms
-    static const int FrameMs = 40;
-    static const int SyncSymbols = 8;
-    static const int SyncBits = 16;
-    static const int FrameBits = 384;
-    static const int PayloadBits = 368;        //!< After the sync: what is interleaved and randomised
-    static const int LSFBytes = 30;
-    static const int LSFBits = 240;            //!< Destination (48), source (48), type (16), meta (112), CRC (16)
-    static const int StreamDataBits = 144;     //!< Frame number (16) and payload (128)
-    static const int StreamCodedBits = 272;    //!< After P2
-    static const int PacketDataBits = 206;     //!< 25 bytes, an end of packet flag and a 5 bit counter
-    static const int PacketBytes = 25;
-    static const int LICHBits = 96;            //!< Four Golay(24,12) codewords of a sixth of the LSF
-    static const int LICHSegments = 6;
-    static const int FlushBits = 4;            //!< Tail bits returning the encoder to state 0
-    static const int PeakDeviationHz = 2400;   //!< Outer symbols; the inner ones are a third of it
+    static constexpr int SymbolRate = 4800;
+    static constexpr int FrameSymbols = 192;       //!< 40 ms
+    static constexpr int FrameMs = 40;
+    static constexpr int SyncSymbols = 8;
+    static constexpr int SyncBits = 16;
+    static constexpr int FrameBits = 384;
+    static constexpr int PayloadBits = 368;        //!< After the sync: what is interleaved and randomised
+    static constexpr int LSFBytes = 30;
+    static constexpr int LSFBits = 240;            //!< Destination (48), source (48), type (16), meta (112), CRC (16)
+    static constexpr int StreamDataBits = 144;     //!< Frame number (16) and payload (128)
+    static constexpr int StreamCodedBits = 272;    //!< After P2
+    static constexpr int PacketDataBits = 206;     //!< 25 bytes, an end of packet flag and a 5 bit counter
+    static constexpr int PacketBytes = 25;
+    static constexpr int LICHBits = 96;            //!< Four Golay(24,12) codewords of a sixth of the LSF
+    static constexpr int LICHSegments = 6;
+    static constexpr int FlushBits = 4;            //!< Tail bits returning the encoder to state 0
+    static constexpr int PeakDeviationHz = 2400;   //!< Outer symbols; the inner ones are a third of it
     static const double RrcAlpha;              //!< 0.5, over 8 symbols
 
     //! Sync words, most significant bit first (the first symbol is the two most significant bits)
@@ -71,7 +71,7 @@ public:
     //! The 8 symbols of a sync word
     static void syncLevels(int syncWord, int8_t *levels);
 
-    static const uint64_t CallsignBroadcast = 0xFFFFFFFFFFFFull;
+    static constexpr uint64_t CallsignBroadcast = 0xFFFFFFFFFFFFull;
     //! Base-40 over up to 9 characters (the encoding Angel61 borrowed); "ALL" and "" are the broadcast
     static uint64_t encodeCallsign(const std::string& callsign);
     static std::string decodeCallsign(uint64_t code);
@@ -156,7 +156,7 @@ public:
         ProtocolSMS = 0x05,
         ProtocolWinlink = 0x06
     };
-    static const int MaxPacketBytes = 823;   //!< 33 frames of 25 bytes, CRC included
+    static constexpr int MaxPacketBytes = 823;   //!< 33 frames of 25 bytes, CRC included
 
     //! protocol byte, content, CRC-16: what a packet transmission's frames carry
     static std::vector<uint8_t> buildPacket(int protocol, const std::vector<uint8_t>& content);

@@ -51,15 +51,15 @@ public:
         int m_sq = 0;    //!< Squelch code (7 bits)
     };
 
-    static const int m_frameDibits = 480;
-    static const int m_syncDibits = 20;
-    static const int m_fichBits = 32;
-    static const int m_fichDibits = 100;
-    static const int m_headerDCHDibits = 180;   //!< One DCH of a header/terminator frame (CSD1 or CSD2)
-    static const int m_vd2DCHDibits = 100;      //!< DCH of a V/D type 2 communication frame
-    static const int m_vd2VoiceBits = 104;
-    static const int m_vd2VoiceDibits = 52;
-    static const int m_ambeBits = 49;
+    static constexpr int m_frameDibits = 480;
+    static constexpr int m_syncDibits = 20;
+    static constexpr int m_fichBits = 32;
+    static constexpr int m_fichDibits = 100;
+    static constexpr int m_headerDCHDibits = 180;   //!< One DCH of a header/terminator frame (CSD1 or CSD2)
+    static constexpr int m_vd2DCHDibits = 100;      //!< DCH of a V/D type 2 communication frame
+    static constexpr int m_vd2VoiceBits = 104;
+    static constexpr int m_vd2VoiceDibits = 52;
+    static constexpr int m_ambeBits = 49;
 
     // ---- FICH ------------------------------------------------------------------
     static void fichToBits(const FICH& fich, uint8_t *bits);

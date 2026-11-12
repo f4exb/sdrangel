@@ -38,13 +38,13 @@
 class SDRBASE_API DVAngel61OFDM
 {
 public:
-    static const int SampleRate = 48000;
-    static const int UsefulSamples = 960;        //!< 20 ms
-    static const int PrefixSamples = 192;        //!< 4 ms
-    static const int SymbolSamples = UsefulSamples + PrefixSamples;
-    static const int TaperSamples = 48;          //!< 1 ms WOLA (2.1)
-    static const int FrameSymbols = 10;
-    static const int FrameSamples = FrameSymbols * SymbolSamples;   //!< 240 ms
+    static constexpr int SampleRate = 48000;
+    static constexpr int UsefulSamples = 960;        //!< 20 ms
+    static constexpr int PrefixSamples = 192;        //!< 4 ms
+    static constexpr int SymbolSamples = UsefulSamples + PrefixSamples;
+    static constexpr int TaperSamples = 48;          //!< 1 ms WOLA (2.1)
+    static constexpr int FrameSymbols = 10;
+    static constexpr int FrameSamples = FrameSymbols * SymbolSamples;   //!< 240 ms
     static constexpr double CarrierSpacing = 50.0;
 
     static int carriers(DVAngel61::Profile profile) { return DVAngel61::layout(profile).m_carriers; }
@@ -183,7 +183,7 @@ public:
          */
         void setScopeEnabled(bool enable);
         std::vector<std::complex<float>> takeScopeSymbols();
-        static const int ScopeSymbols = 4096;
+        static constexpr int ScopeSymbols = 4096;
         /**
          * The detection threshold on acquisition: the pilot diagonal's coherence at the best timing,
          * frame phase and carrier hypothesis: the mean of the unit phasors u v* / |u v*| over the

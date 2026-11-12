@@ -35,15 +35,15 @@
 class SDRBASE_API DVDMR
 {
 public:
-    static const int m_burstBits = 264;
-    static const int m_cachBits = 24;
-    static const int m_syncBits = 48;
-    static const int m_payloadBits = 108;
-    static const int m_bptcBits = 196;
-    static const int m_infoBits = 96;
-    static const int m_lcBytes = 9;
-    static const int m_embeddedLcBits = 128;
-    static const int m_vocoderFrameBits = 72;
+    static constexpr int m_burstBits = 264;
+    static constexpr int m_cachBits = 24;
+    static constexpr int m_syncBits = 48;
+    static constexpr int m_payloadBits = 108;
+    static constexpr int m_bptcBits = 196;
+    static constexpr int m_infoBits = 96;
+    static constexpr int m_lcBytes = 9;
+    static constexpr int m_embeddedLcBits = 128;
+    static constexpr int m_vocoderFrameBits = 72;
 
     enum DataType
     {
@@ -62,12 +62,12 @@ public:
     };
 
     //! CRC masks applied to the RS(12,9) parity of a full LC (B.3.12) and to the CCITT CRC of data PDUs (B.3.13)
-    static const uint8_t m_maskVoiceLCHeader = 0x96;
-    static const uint8_t m_maskTerminatorWithLC = 0x99;
-    static const uint8_t m_maskPIHeader = 0x69;
-    static const uint16_t m_maskCSBK = 0xA5A5;
-    static const uint16_t m_maskMBCHeader = 0xAAAA;
-    static const uint16_t m_maskDataHeader = 0xCCCC;
+    static constexpr uint8_t m_maskVoiceLCHeader = 0x96;
+    static constexpr uint8_t m_maskTerminatorWithLC = 0x99;
+    static constexpr uint8_t m_maskPIHeader = 0x69;
+    static constexpr uint16_t m_maskCSBK = 0xA5A5;
+    static constexpr uint16_t m_maskMBCHeader = 0xAAAA;
+    static constexpr uint16_t m_maskDataHeader = 0xCCCC;
 
     // ---- Block product turbo code (B.1.1) ----------------------------------------------
     //! 96 information bits (I(95) first) -> 196 transmit bits

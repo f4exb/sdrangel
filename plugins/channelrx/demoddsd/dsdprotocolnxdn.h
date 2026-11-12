@@ -43,13 +43,13 @@
 class DSDProtocolNXDN : public DSDProtocol
 {
 public:
-    static const int m_frameSymbols = 192;
-    static const int m_fswSymbols = 10;
-    static const int m_lichSymbols = 8;
-    static const int m_sacchSymbols = 30;
-    static const int m_payloadSymbols = 144;
-    static const int m_vchSymbols = 36;
-    static const int m_facchSymbols = 72;
+    static constexpr int m_frameSymbols = 192;
+    static constexpr int m_fswSymbols = 10;
+    static constexpr int m_lichSymbols = 8;
+    static constexpr int m_sacchSymbols = 30;
+    static constexpr int m_payloadSymbols = 144;
+    static constexpr int m_vchSymbols = 36;
+    static constexpr int m_facchSymbols = 72;
 
     //! symbolRate 2400 (NXDN48) or 4800 (NXDN96)
     DSDProtocolNXDN(const DSDSymbolHistory& history, int symbolRate = 2400);

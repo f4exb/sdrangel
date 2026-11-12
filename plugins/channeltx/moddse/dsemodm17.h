@@ -40,7 +40,7 @@
 class DSEModM17 : public DSEModProtocol
 {
 public:
-    static const int m_preambleSymbols = 192;   //!< One frame of +3 -3, as the specification has it
+    static constexpr int m_preambleSymbols = 192;   //!< One frame of +3 -3, as the specification has it
 
     DSEModM17();
     virtual ~DSEModM17();

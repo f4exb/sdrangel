@@ -74,27 +74,27 @@ public:
         CommFormatP2P = 1          //!< Peer to peer
     };
 
-    static const int m_frameBits = 384;          //!< Payload or header frame (80 ms)
-    static const int m_frameSymbols = 192;
-    static const int m_preambleBits = 72;        //!< Minimum preamble in the header frame
-    static const int m_fs1Bits = 48;
-    static const int m_fs2Bits = 24;
-    static const int m_fs3Bits = 24;
-    static const int m_ccBits = 24;              //!< Colour code field
-    static const int m_hiInfoBits = 72;          //!< Header information before CRC8
-    static const int m_hiCodedBits = 120;
-    static const int m_cchInfoBits = 41;         //!< CCH information before CRC7
-    static const int m_cchCodedBits = 72;
-    static const int m_endInfoBits = 17;         //!< END information before CRC7
-    static const int m_endCodedBits = 72;
-    static const int m_tchBits = 72;             //!< One AMBE+2 vocoder frame
-    static const int m_tchPerFrame = 4;
-    static const int m_framesPerSuperframe = 4;
-    static const int m_endFrameBits = 96;        //!< FS3 + END
-    static const int m_tailBits = 72;            //!< Preamble pattern sent after the end frame
-    static const int m_preambleFrames = 1;       //!< Extra 80 ms frames of preamble before the header frame
-    static const uint32_t m_allCallId = 0xFFFFFF;
-    static const uint8_t m_preambleByte = 0x5F;
+    static constexpr int m_frameBits = 384;          //!< Payload or header frame (80 ms)
+    static constexpr int m_frameSymbols = 192;
+    static constexpr int m_preambleBits = 72;        //!< Minimum preamble in the header frame
+    static constexpr int m_fs1Bits = 48;
+    static constexpr int m_fs2Bits = 24;
+    static constexpr int m_fs3Bits = 24;
+    static constexpr int m_ccBits = 24;              //!< Colour code field
+    static constexpr int m_hiInfoBits = 72;          //!< Header information before CRC8
+    static constexpr int m_hiCodedBits = 120;
+    static constexpr int m_cchInfoBits = 41;         //!< CCH information before CRC7
+    static constexpr int m_cchCodedBits = 72;
+    static constexpr int m_endInfoBits = 17;         //!< END information before CRC7
+    static constexpr int m_endCodedBits = 72;
+    static constexpr int m_tchBits = 72;             //!< One AMBE+2 vocoder frame
+    static constexpr int m_tchPerFrame = 4;
+    static constexpr int m_framesPerSuperframe = 4;
+    static constexpr int m_endFrameBits = 96;        //!< FS3 + END
+    static constexpr int m_tailBits = 72;            //!< Preamble pattern sent after the end frame
+    static constexpr int m_preambleFrames = 1;       //!< Extra 80 ms frames of preamble before the header frame
+    static constexpr uint32_t m_allCallId = 0xFFFFFF;
+    static constexpr uint8_t m_preambleByte = 0x5F;
 
     DSEModDPMR();
     virtual ~DSEModDPMR();
@@ -117,7 +117,7 @@ public:
     //! 001, two bytes a frame, each with a flag marking the message's last byte), while the call runs
     virtual bool queueMessage(const std::string& text);
 
-    static const int m_maxSlowDataBytes = 256;
+    static constexpr int m_maxSlowDataBytes = 256;
 
     // ---- Coding primitives (TS 102 490 clause 7, see DVDPMR) ---------------------
 

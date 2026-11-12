@@ -38,7 +38,7 @@
 class DSDAngel61HF : public DSDAngel61Session
 {
 public:
-    static const int MinimumFrames = 5;
+    static constexpr int MinimumFrames = 5;
 
     //! The poor-channel 10% point (SNR3k, dB) of a tier, the raise rule's reference (2.9)
     static float poorThresholdDB(DVAngel61::Profile profile, int tier);

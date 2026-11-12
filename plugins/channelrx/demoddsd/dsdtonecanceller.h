@@ -42,8 +42,8 @@
 class DSDToneCanceller
 {
 public:
-    static const int FFTSize = 4096;
-    static const int MaxTones = 3;
+    static constexpr int FFTSize = 4096;
+    static constexpr int MaxTones = 3;
     static constexpr float DetectDB = 12.0f;     //!< a line this far above the band's median is a carrier
     static constexpr float DropDB = 3.0f;        //!< ... and one below this, gone
     static constexpr float Mu = 1.0f / 1200.0f;  //!< the amplitude's average: 25 ms at 48 kS/s

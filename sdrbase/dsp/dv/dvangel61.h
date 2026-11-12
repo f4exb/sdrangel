@@ -45,9 +45,9 @@ class SDRBASE_API DVAngel61
 {
 public:
     // ---- Pulse shaping (2.1) ----------------------------------------------------------------
-    static const int RrcSpan = 24;            //!< symbols
-    static const int MaxSamplesPerSymbol = 10;
-    static const int MaxRrcTaps = RrcSpan * MaxSamplesPerSymbol + 1;
+    static constexpr int RrcSpan = 24;            //!< symbols
+    static constexpr int MaxSamplesPerSymbol = 10;
+    static constexpr int MaxRrcTaps = RrcSpan * MaxSamplesPerSymbol + 1;
     static const float RrcAlpha;
     //! The pulse's taps at samplesPerSymbol: 241 at 10 (NB), 121 at 5 (WB)
     static int rrcTapCount(int samplesPerSymbol) { return RrcSpan * samplesPerSymbol + 1; }
@@ -69,13 +69,13 @@ public:
     enum CodecFamily { CodecFamilyNone = 0, CodecFamilyL1 = 1, CodecFamilyO1 = 2, CodecFamilyV1 = 3 };
 
     // ---- Callsigns (2.6) --------------------------------------------------------------------
-    static const uint64_t CallsignNone = 0;
-    static const uint64_t CallsignBroadcast = 0xFFFFFFFFFFFFull;
-    static const uint64_t CallsignLongFirst = 262144000000000ull;                //!< 40^9: the first long code
-    static const uint64_t CallsignLongEnd = CallsignLongFirst + (1ull << 44);  //!< past the last one
-    static const uint64_t CallsignTalkgroupFirst = CallsignLongEnd;             //!< talkgroup 0 (2.6)
-    static const uint64_t CallsignTalkgroupEnd = CallsignTalkgroupFirst + (1ull << 32);
-    static const int LongCallsignCharacters = 17;  //!< of A-Z, 0-9 and "/", before the SSID
+    static constexpr uint64_t CallsignNone = 0;
+    static constexpr uint64_t CallsignBroadcast = 0xFFFFFFFFFFFFull;
+    static constexpr uint64_t CallsignLongFirst = 262144000000000ull;                //!< 40^9: the first long code
+    static constexpr uint64_t CallsignLongEnd = CallsignLongFirst + (1ull << 44);  //!< past the last one
+    static constexpr uint64_t CallsignTalkgroupFirst = CallsignLongEnd;             //!< talkgroup 0 (2.6)
+    static constexpr uint64_t CallsignTalkgroupEnd = CallsignTalkgroupFirst + (1ull << 32);
+    static constexpr int LongCallsignCharacters = 17;  //!< of A-Z, 0-9 and "/", before the SSID
     /**
      * A callsign in 48 bits (2.6). Up to 9 characters of base-40 (M17's alphabet: A-Z, 0-9,
      * "-", "/", "."): the characters themselves. Longer, up to 17 of A-Z, 0-9 and "/" and an
@@ -121,8 +121,8 @@ public:
     static bool sameStation(const std::string& a, const std::string& b);
 
     // ---- Data slots (2.5) --------------------------------------------------------------------
-    static const int SlotBits = 100;
-    static const int SlotContentBits = 96;
+    static constexpr int SlotBits = 100;
+    static constexpr int SlotContentBits = 96;
 
     enum SlotID {
         SlotIdle = 0x0,
@@ -160,10 +160,10 @@ public:
         int m_course = CourseUnknown;  //!< degrees true
         int m_fixAge = NoFix;          //!< seconds, 0..126, NoFix = no position
         int m_source = 0;              //!< 0 GNSS, 1 by hand, 2 network or other
-        static const int AltitudeUnknown = -100000;
-        static const int SpeedUnknown = -1;
-        static const int CourseUnknown = -1;
-        static const int NoFix = 0x7F;
+        static constexpr int AltitudeUnknown = -100000;
+        static constexpr int SpeedUnknown = -1;
+        static constexpr int CourseUnknown = -1;
+        static constexpr int NoFix = 0x7F;
     };
     struct TextFragment
     {
@@ -171,7 +171,7 @@ public:
         int m_index = 0;               //!< 0..15
         int m_total = 1;               //!< 1..15
         std::string m_text;            //!< up to 12 characters of 7 bit ASCII
-        static const int Characters = 12;
+        static constexpr int Characters = 12;
     };
     struct Ack { int m_messageId = 0; uint64_t m_receiver = 0; int m_blockErrorRate = 0; };
     //! The DTMF slot (3.8): a window of up to 17 keys of a sequence, sharing a tone length and gap
@@ -182,9 +182,9 @@ public:
         int m_toneMs = 100;            //!< 20..620, in steps of 20
         int m_gapMs = 100;             //!< 20..620, in steps of 20
         std::string m_keys;            //!< 1..17 keys: 0-9, A-D, *, #
-        static const int MaxKeys = 17;
-        static const int UnitMs = 20;
-        static const int MaxUnits = 31;
+        static constexpr int MaxKeys = 17;
+        static constexpr int UnitMs = 20;
+        static constexpr int MaxUnits = 31;
     };
 
     static int slotID(const uint8_t *slot) { return (slot[0] << 3) | (slot[1] << 2) | (slot[2] << 1) | slot[3]; }
@@ -247,11 +247,11 @@ public:
 
     // ---- Profiles (2.1) ---------------------------------------------------------------------
     enum Profile { ProfileNB = 0, ProfileWB = 1, ProfileHFNB = 2, ProfileHFWB = 3 };
-    static const int NbProfiles = 4;
+    static constexpr int NbProfiles = 4;
     static bool isHF(Profile profile) { return profile >= ProfileHFNB; }
     static const char *profileName(Profile profile);
-    static const int ProtocolVersion = 3;
-    static const int CodecModelV1 = 1;
+    static constexpr int ProtocolVersion = 3;
+    static constexpr int CodecModelV1 = 1;
 
     // ---- Frame types (2.4): type = profile << 5 | kind ----------------------------------------
     enum Kind {
@@ -284,8 +284,8 @@ public:
     static const char *typeName(int type);
 
     // ---- V1 packets (3.1.1) ------------------------------------------------------------------
-    static const int CodebookBits = 10;
-    static const int OpusBits = 1472;            //!< one 80 ms Opus packet, 184 bytes (WB tier 3)
+    static constexpr int CodebookBits = 10;
+    static constexpr int OpusBits = 1472;            //!< one 80 ms Opus packet, 184 bytes (WB tier 3)
     static int packetsPerFrame(Profile profile) { return isHF(profile) ? 18 : 6; }
     //! Codebooks of a tier's voice: NB 3 4 6 12, WB 6 12 16 (tier 3 Opus: 0), HF-NB 2 3 4 6, HF-WB 3 6 8 12
     static int tierCodebooks(Profile profile, int tier);
@@ -363,7 +363,7 @@ public:
     static const Layout& layout(Profile profile);
 
     // ---- Payload block (2.3): offsets within the K information bits --------------------------
-    static const int FieldHeaderBits = 32;
+    static constexpr int FieldHeaderBits = 32;
     static int voiceBits(int type);              //!< the voice field: packets x 10 codebooks, or Opus
     static int slotsOf(int type);                //!< 1, 2 (NB and WB tier 0... 2.3), or 4 (a data group)
     static int slotOffset(int type, int slot) { return voiceBits(type) + slot * SlotBits; }
@@ -382,10 +382,10 @@ public:
         std::vector<DVAngel61::MessageFragment>& fragments, int flags = 0);
 
     // ---- Header (2.4, 2.7) -------------------------------------------------------------------
-    static const int HeaderFieldBits = 16;
-    static const int HeaderInfoBits = 24;
-    static const int HeaderCodedBits = 48;       //!< two Golay(24,12) words, bit interleaved, scrambled
-    static const int HeaderCells = 24;           //!< QPSK cells of one copy: cell c carries bits 2c, 2c + 1
+    static constexpr int HeaderFieldBits = 16;
+    static constexpr int HeaderInfoBits = 24;
+    static constexpr int HeaderCodedBits = 48;       //!< two Golay(24,12) words, bit interleaved, scrambled
+    static constexpr int HeaderCells = 24;           //!< QPSK cells of one copy: cell c carries bits 2c, 2c + 1
     struct Header
     {
         int m_type = 0;
@@ -431,14 +431,14 @@ public:
      * cannot come back through a gateway, 2.6), up to MaxRelayMessageBytes: the network's packet
      * holds it in base64 within 1200 bytes.
      */
-    static const int MaxRelayMessageBytes = 700;
+    static constexpr int MaxRelayMessageBytes = 700;
     static bool relayable(int contentType) { return (contentType == ContentText) || (contentType == ContentBinary) || (contentType == ContentAPRS); }
     static std::vector<uint8_t> packRelayMessage(int contentType, int flags, const std::vector<uint8_t>& message);
     //! False unless the content type is relayable, the flags four bits and the message 1 to MaxRelayMessageBytes
     static bool unpackRelayMessage(const uint8_t *bytes, int size, int& contentType, int& flags, std::vector<uint8_t>& message);
 
     // ---- Data groups (2.3) --------------------------------------------------------------------
-    static const int GroupFrames = 4;
+    static constexpr int GroupFrames = 4;
     //! A group starts at counter c with c mod 4 == 2: the position of a frame in its group
     static int groupIndex(int counter) { return (counter + 2) & 3; }
     /**
@@ -518,7 +518,7 @@ public:
 class SDRBASE_API DVAngel61Reassembler
 {
 public:
-    static const int ExpiryMs = 30000;
+    static constexpr int ExpiryMs = 30000;
 
     struct Message
     {
@@ -624,8 +624,8 @@ public:
     void clearText() { m_fragments.clear(); m_lastMessage.clear(); m_repeatPending = false; }
     //! Queued at most: a relay's text and keys come from the network, and a key's index is 6 bits
     //! with a receiver's window half of them (DSDAngel61Session)
-    static const int MaxTextFragments = 64;
-    static const int MaxDTMFKeys = 32;
+    static constexpr int MaxTextFragments = 64;
+    static constexpr int MaxDTMFKeys = 32;
     //! The current sequence's id, -1 before the first
     int getDTMFSequence() const { return m_dtmfSequence; }
     int getDTMFSlotsSent() const { return m_dtmfSlotsSent; }
@@ -644,7 +644,7 @@ public:
 
 private:
     enum Item { ItemStation, ItemPosition, ItemPath, ItemLong0, ItemLong1, ItemLong2, ItemLong3, ItemCount };
-    static const int LookaheadMs = 500;
+    static constexpr int LookaheadMs = 500;
 
     DVAngel61::Profile m_profile;
     DVAngel61::Routing m_routing;
