@@ -70,6 +70,7 @@ if(BUILD_MCP_BUNDLE)
     add_executable(sdrangel-mcp-tools-dump
         "${MCPTOOLSDUMP_DIR}/toolsdump.cpp"
         "${MCPTOOLSDUMP_DIR}/mcptools.cpp"
+        "${MCPTOOLSDUMP_DIR}/mcptoolcatalog.cpp"
         "${MCPTOOLSDUMP_DIR}/mcpdocs.cpp"
         "${MCPTOOLSDUMP_DIR}/mcpdatafeed.cpp"
         "${MCPTOOLSDUMP_DIR}/mcpcapture.cpp"
