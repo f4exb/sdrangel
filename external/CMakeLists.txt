@@ -520,7 +520,7 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
         ExternalProject_Get_Property(lame install_dir)
         set_global(LAME_DEPENDS lame)
         # ffmpeg doesn't try to use pkg-config for lame, as it doesn't include a .pc file
-        #set(LAME_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        #set(LAME_PKG_CONFIG_DIR '${install_dir}/lib/pkgconfig')
         set(LAME_EXTRA_CFLAGS "-I${install_dir}/include")
         if (APPLE AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL arm64))
             set(LAME_EXTRA_LDFLAGS "-L${install_dir}/lib -Wl,-ld_classic")
@@ -654,7 +654,7 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
     elseif (APPLE)
-        # some source include "codec2/comp.h" and some without codec2
+        # some source include 'codec2/comp.h' and some without codec2
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
@@ -1446,7 +1446,7 @@ if (WIN32 OR APPLE)
 
     if (ENABLE_LIMESUITE)
         # needs pkgconfig, libusb
-        # We have to install this, as makeCopy("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
+        # We have to install this, as makeCopy('${source_dir}/src/limeRFE/limeRFE.h' '${source_dir}/src/lime/limeRFE.h' limesuite)
         # causes git stash to fail
         if (WIN32)
             set(LIMESUITE_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/LimeSuite.lib" CACHE INTERNAL "")
@@ -1641,12 +1641,12 @@ if (WIN32 OR APPLE)
         set(LIBHACKRF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBHACKRF_INCLUDE_DIR "${source_dir}/host/libhackrf" CACHE INTERNAL "")
         if (WIN32)
-            # include "libhackrf/hackrf.h"
+            # include 'libhackrf/hackrf.h'
             makeCopyHeaders("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/hackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(LIBHACKRF_LIBRARIES "${binary_dir}/src/libhackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-            # include "libhackrf/hackrf.h"
+            # include 'libhackrf/hackrf.h'
             makeLink("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
             install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"

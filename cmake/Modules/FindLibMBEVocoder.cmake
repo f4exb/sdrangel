@@ -49,7 +49,7 @@ else()
                   /usr/local/include
         )
 
-        # The debug build of Windows has a "d" postfix
+        # The debug build of Windows has a 'd' postfix
         find_library(MBEVOCODER_LIBRARY_FILE
             NAMES mbevocoder mbevocoderd
             HINTS ${MBEVOCODER_DIR}/lib
