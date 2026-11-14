@@ -259,7 +259,7 @@ DRMCapability:
     name:
       type: string
       enum: [nativeFAC, nativeSDC, nativeMSC, drmAAC, drmXHEAAC]
-    description: "Native functions and codec capabilities available in this build."
+      description: "Native functions and codec capabilities available in this build."
 
 DRMDemodReport:
   description: "Live native DRM acquisition, signalling, MSC and audio status for the current receiver epoch."

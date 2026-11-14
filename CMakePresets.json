@@ -33,6 +33,8 @@
         "GGMORSE_DIR": "/opt/install/ggmorse",
         "RNNOISE_DIR": "/opt/install/rnnoise",
         "INMARSATC_DIR": "/opt/install/inmarsatc",
+        "MBEVOCODER_DIR": "/opt/install/mbevocoder",
+        "VOCOSCODEC_DIR": "/opt/install/vocoscodec",
         "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
       },
       "warnings": {

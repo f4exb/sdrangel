@@ -129,7 +129,7 @@ find_path(
 find_package(Threads QUIET)
 
 ###
-# Compute the "I don't care which backend" library
+# Compute the 'I don't care which backend' library
 ###
 set(HIDAPI_LIBRARY)
 

@@ -1,4 +1,4 @@
-# Works the same as find_package, but forwards the "REQUIRED" and "QUIET" arguments
+# Works the same as find_package, but forwards the 'REQUIRED' and 'QUIET' arguments
 # used for the current package. For this to work, the first parameter must be the
 # prefix of the current package, then the prefix of the new package etc, which are
 # passed to find_package.
