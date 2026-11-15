@@ -502,7 +502,7 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
                         FixReal nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
                         FixReal x = a.real()/den + nom*(b.real()/den);
                         FixReal y = a.imag()/den + nom*(b.imag()/den);
-                        return Sample{x, y};
+                        return Sample(x, y);
                     }
                 );
             }
