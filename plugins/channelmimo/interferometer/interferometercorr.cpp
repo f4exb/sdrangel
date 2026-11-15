@@ -50,15 +50,15 @@ Sample sSecond(const Sample& a, const Sample& b) {
 
 Sample sSecondInv(const Sample& a, const Sample& b) {
     (void) a;
-    return Sample{-b.real(), -b.imag()};
+    return Sample(-b.real(), -b.imag());
 }
 
 Sample sAdd(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{(a.real()+b.real())/2, (a.imag()+b.imag())/2};
+    return Sample((a.real()+b.real())/2, (a.imag()+b.imag())/2);
 }
 
 Sample sAddInv(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{(a.real()-b.real())/2, (a.imag()+b.imag())/2};
+    return Sample((a.real()-b.real())/2, (a.imag()+b.imag())/2);
 }
 
 Sample sMulConj(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
@@ -188,7 +188,7 @@ bool InterferometerCorrelator::performCorr(
                 {
                     FixReal sx = s.real()*m_gain;
                     FixReal sy = s.imag()*m_gain;
-                    return Sample{sx, sy};
+                    return Sample(sx, sy);
                 }
             );
         }
