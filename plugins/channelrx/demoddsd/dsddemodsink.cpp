@@ -33,6 +33,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dv/dvambe.h"
 #include "dsp/dv/dvframe.h"
 #include "dsp/dv/dvbits.h"
 #include "feature/feature.h"
@@ -53,6 +54,9 @@
 #include "dsddemodsink.h"
 
 namespace {
+
+//! The AMBE+2 silence frame as transmitted (9 bytes, MSB first)
+const uint8_t ambe2SilenceFrame[DVAMBE::m_frameBytes] = { 0xB9, 0xE8, 0x81, 0x52, 0x61, 0x73, 0x00, 0x2A, 0x6B };
 
 //! For a quoted field of the event log
 QString escapeEventText(const std::string& text)
@@ -523,7 +527,9 @@ void DSDDemodSink::processFrame(const DSDVoiceFrame& frame)
         default: return;
         }
 
-        DSPPushMbeFrame msg(frame.m_bytes, rateIndex, (int) std::lround(m_settings.m_volume * 10.0f), channels, m_settings.m_highPassFilter, m_upsampling, fifo);
+        // The chip has no lost frame input: an erased AMBE+2 frame plays as silence
+        const bool erasedAmbe2 = frame.m_erasure && (frame.m_rate == DSDVoiceFrame::RateAMBE3600x2450);
+        DSPPushMbeFrame msg(erasedAmbe2 ? ambe2SilenceFrame : frame.m_bytes, rateIndex, (int) std::lround(m_settings.m_volume * 10.0f), channels, m_settings.m_highPassFilter, m_upsampling, fifo);
         if (port->handleMessage(msg)) {
             return;
         }

@@ -1013,7 +1013,6 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(SerialDV)
     find_package(LibMBEVocoder)
     find_package(LibVocosCodec)
-    find_package(LibDSDcc) # only the DSE modulator and DSD demodulator test harnesses use it, as a reference decoder
     find_package(Sgp4)
     find_package(CSPICE)
     find_package(AptDec)

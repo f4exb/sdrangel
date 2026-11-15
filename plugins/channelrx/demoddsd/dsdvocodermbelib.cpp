@@ -85,6 +85,15 @@ bool DSDVocoderMbelib::decode(const DSDVoiceFrame& frame, float *audio, Result& 
     result = Result();
     int status = -1;
 
+    if (frame.m_erasure && ((frame.m_rate == DSDVoiceFrame::RateAMBE3600x2400) || (frame.m_rate == DSDVoiceFrame::RateAMBE3600x2450)
+        || (frame.m_rate == DSDVoiceFrame::RateAMBE2450) || (frame.m_rate == DSDVoiceFrame::RateIMBE7200x4400)))
+    {
+        // A frame known lost: the previous model repeated, a fade to silence after three
+        mbe_processLostFramef(audio, &r, &m_state->m_current, &m_state->m_previous, &m_state->m_previousEnhanced);
+        result.m_muted = true;
+        return true;
+    }
+
     switch (frame.m_rate)
     {
     case DSDVoiceFrame::RateAMBE3600x2400:
