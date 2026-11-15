@@ -204,6 +204,7 @@ private:
     void processVoice(int64_t start, int slot);
     void emitProtocolBurst(int64_t start, int slot, const std::string& type, int sequence);
     void emitVoiceFrame(int64_t firstDibit, int64_t secondDibit, int nbFirst, int slot, int64_t sample);
+    void eraseFilledBurst();
     bool checkEmb(int64_t centre, int& colorCode, int& lcss, bool& pi) const;
     void parseLC(const uint8_t *lc, SlotState& slot);
     void parseTalkerAlias(const uint8_t *lc, int flco, SlotState& slot);

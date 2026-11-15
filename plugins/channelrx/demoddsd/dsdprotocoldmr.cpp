@@ -24,6 +24,7 @@
 
 static bool dsdDebug() { static int d = getenv("DSD_DEBUG") ? 1 : 0; return d != 0; }
 
+#include "dsp/dv/dvambe.h"
 #include "dsp/dv/dvbits.h"
 #include "dsp/dv/dvcrc.h"
 #include "dsp/dv/dvdmr.h"
@@ -1068,6 +1069,43 @@ void DSDProtocolDMR::processVoice(int64_t start, int slot)
     emitVoiceFrame(start + 12, 0, 36, slot, m_history.sampleAt(start + 47));
     emitVoiceFrame(start + 48, start + 90, 18, slot, m_history.sampleAt(start + 107));
     emitVoiceFrame(start + 108, 0, 36, slot, m_history.sampleAt(start + 143));
+    eraseFilledBurst();
+}
+
+void DSDProtocolDMR::eraseFilledBurst()
+{
+    // A burst whose three frames are bit for bit the same and still not codewords was filled by the
+    // sender, not damaged by the channel: noise cannot leave three copies wrong in the same way. Seen
+    // on air from network relays: burst F of every third superframe of MOTOTRBO calls (the transmit
+    // interrupt window) and runs of one fixed block before a call's terminator. Played, each is 60 ms
+    // of noise; as erasures the vocoder conceals them.
+    const size_t n = m_frames.size();
+
+    if (n < 3) {
+        return;
+    }
+
+    DSDVoiceFrame *frames = &m_frames[n - 3];
+
+    if ((std::memcmp(frames[0].m_bytes, frames[1].m_bytes, DVAMBE::m_frameBytes) != 0)
+        || (std::memcmp(frames[0].m_bytes, frames[2].m_bytes, DVAMBE::m_frameBytes) != 0)) {
+        return;
+    }
+
+    uint8_t params[DVAMBE::m_paramBits];
+
+    if (DVAMBE::bytesToParams(frames[0].m_bytes, params) == 0) {
+        return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        frames[i].m_erasure = true;
+    }
+
+    if (dsdDebug()) {
+        fprintf(stderr, "DMR voice burst at sample %lld slot %d: three identical frames that are not codewords, erased\n",
+            (long long) frames[0].m_sample, frames[0].m_slot);
+    }
 }
 
 void DSDProtocolDMR::emitProtocolBurst(int64_t start, int slot, const std::string& type, int sequence)
