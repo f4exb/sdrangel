@@ -177,6 +177,9 @@ Item {
     Component {
         id: imageComponent
         MapQuickItem {
+            // This overlay has no pointer handlers. Keeping it out of pointer delivery also
+            // avoids Qt Location hit-testing it before its zoom transform has been polished.
+            enabled: false
             coordinate: position
             anchorPoint.x: imageId.width/2
             anchorPoint.y: imageId.height/2
@@ -203,6 +206,8 @@ Item {
     Component {
         id: polygonNameComponent
         MapQuickItem {
+            // Labels are display-only, so they need not participate in pointer hit-testing.
+            enabled: false
             coordinate: position
             anchorPoint.x: polygonText.width/2
             anchorPoint.y: polygonText.height/2
@@ -236,6 +241,8 @@ Item {
     Component {
         id: polylineNameComponent
         MapQuickItem {
+            // Labels are display-only, so they need not participate in pointer hit-testing.
+            enabled: false
             coordinate: position
             anchorPoint.x: polylineText.width/2
             anchorPoint.y: polylineText.height/2
@@ -261,11 +268,20 @@ Item {
         MapQuickItem {
             id: mapElement
             z: zOrder                       // Move to front / move to back
-            anchorPoint.x: imageBounds.width/2
-            anchorPoint.y: imageBounds.height/2
+            // QDeclarativeGeoMapQuickItem::contains() assumes that its internal matrix
+            // already exists whenever zoomLevel is non-zero. MapItemView can expose a new
+            // delegate to pointer delivery before Qt has polished it and created that matrix,
+            // so rapid wheel events can dereference a null matrix. Keep interactive markers
+            // screen-aligned (zoomLevel 0) and apply the equivalent low-zoom scale using the
+            // ordinary QQuickItem transform, which is safe to hit-test immediately.
+            property real mapScale: (typeof mapImageMinZoom !== 'undefined' && mapZoomLevel < mapImageMinZoom)
+                                    ? Math.pow(2, mapZoomLevel - mapImageMinZoom) : 1
+            transformOrigin: Item.TopLeft
+            scale: mapScale
+            anchorPoint.x: imageBounds.width/2 * mapScale
+            anchorPoint.y: imageBounds.height/2 * mapScale
             coordinate: position
-            // when zooming, mapImageMinZoom can be temporarily undefined. Not sure why
-            zoomLevel: (typeof mapImageMinZoom !== 'undefined') ? (mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom) : zoomLevel
+            zoomLevel: 0
             autoFadeIn: false               // not in 5.12
 
 
