@@ -158,6 +158,12 @@ ChannelReport:
     RadioClockReport:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockReport"
       description: "Radio clock report data for Channel."
+    RadioPagingDemodReport:
+      $ref: "/doc/swagger/include/RadioPagingDemod.yaml#/RadioPagingDemodReport"
+      description: "Radio paging demodulator report data for Channel."
+    RadioPagingModReport:
+      $ref: "/doc/swagger/include/RadioPagingMod.yaml#/RadioPagingModReport"
+      description: "Radio paging modulator report data for Channel."
     RadiosondeDemodReport:
       $ref: "/doc/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodReport"
       description: "Radiosonde demod report data for Channel."

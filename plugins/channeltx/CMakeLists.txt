@@ -48,6 +48,10 @@ if (ENABLE_CHANNELTX_MODPACKET)
     add_subdirectory(modpacket)
 endif()
 
+if (ENABLE_CHANNELTX_MODRADIOPAGING)
+    add_subdirectory(modradiopaging)
+endif()
+
 if (ENABLE_CHANNELTX_MOD802.15.4)
     add_subdirectory(mod802.15.4)
 endif()

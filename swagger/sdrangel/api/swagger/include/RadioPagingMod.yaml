@@ -1,0 +1,380 @@
+RadioPagingModSettings:
+  description: "Radio paging modulator: one protocol per channel; the protocol settings are the defaults of the messages sent"
+  type: object
+  properties:
+    inputFrequencyOffset:
+      description: Channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    protocol:
+      description: "Protocol transmitted: 0 POCSAG, 1 FLEX, 2 GSC"
+      type: integer
+      format: int32
+    mode:
+      description: "0 one-shot (carrier on for each transmission, off after it), 1 network (carrier on all the time, idle signal between messages). GSC has no network mode: it is one-shot whatever the setting"
+      type: integer
+      format: int32
+    deviation:
+      description: Frequency deviation of the outer symbol in Hz, 500 to 10000
+      type: number
+      format: float
+    gain:
+      description: Gain in dB, -60 to 0
+      type: number
+      format: float
+    channelMute:
+      description: "Mute the channel (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    rampUpMs:
+      description: Power ramp at the start of a transmission in milliseconds, 0 to 100
+      type: number
+      format: float
+    rampDownMs:
+      description: Power ramp at the end of a transmission in milliseconds, 0 to 100
+      type: number
+      format: float
+    rampRange:
+      description: Range of the power ramps in dB
+      type: integer
+      format: int32
+    pocsagSpeed:
+      description: "POCSAG speed in baud: 512, 1200 or 2400"
+      type: integer
+      format: int32
+    pocsagInverted:
+      description: "POCSAG polarity: 0 normal (binary 1 is a negative deviation), 1 inverted"
+      type: integer
+      format: int32
+    flexMode:
+      description: "FLEX mode: 0 1600/2, 1 3200/2, 2 3200/4, 3 6400/4"
+      type: integer
+      format: int32
+    flexInverted:
+      description: "FLEX polarity: 0 normal (symbol 3 is the highest frequency), 1 inverted"
+      type: integer
+      format: int32
+    flexCollapse:
+      description: "FLEX collapse 0 to 7: the emergency re-synchronization lasts at least 2^collapse frames. Network: pagers listen to one frame in 2^collapse. One-shot: the frames are sent with collapse 0"
+      type: integer
+      format: int32
+    flexRoaming:
+      description: "FLEX roaming: send the system ID words (STD-43A 3.7.2 and 6.1.1): the first in every frame, the second in frames 0 to 3, and set the roaming flag of the frame information word. The frames 0 to 3 have to be sent (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    ssidLocalId:
+      description: "Roaming: local ID, 0 to 511"
+      type: integer
+      format: int32
+    ssidCoverageZone:
+      description: "Roaming: coverage zone, 0 to 31"
+      type: integer
+      format: int32
+    ssidCountryCode:
+      description: "Roaming: country code (ITU-T E.212), 0 to 1023"
+      type: integer
+      format: int32
+    ssidTrafficFlags:
+      description: "Roaming: traffic management flags announced in the second system ID word, 0 to 15 (bit 0 is T0). Only announced, the addresses are not filtered"
+      type: integer
+      format: int32
+    flexTime:
+      description: "FLEX: send the date and time in block information words 001 (date), 010 (time) and 101 (time zone) (STD-43A 3.7.2): 1 for yes. They fill the block information words left free in every frame, taking turns when they do not all fit"
+      type: integer
+      format: int32
+    flexTimeFrameZero:
+      description: "FLEX time: 1 the time of frame 0 of the cycle (the standard), 0 the time of the frame that carries it"
+      type: integer
+      format: int32
+    flexTimeZoneMinutes:
+      description: "FLEX time: offset of the standard time of the zone from UTC in minutes, one of STD-43A Table 3.7.2-3 (-660 to 720, with 210, 270, 330, 345, 390, 570, -210)"
+      type: integer
+      format: int32
+    flexTimeSendZone:
+      description: "FLEX time: send the time zone word (zone, daylight saving flag, extended seconds), 1 for yes"
+      type: integer
+      format: int32
+    flexTimeDaylightSaving:
+      description: "FLEX time: 1 the time is daylight saving time, one hour ahead of the standard time (L0 = 0)"
+      type: integer
+      format: int32
+    flexTimeOffsetSeconds:
+      description: "FLEX time: seconds added to the time of the frame grid (UTC from the computer clock), to send any date and time"
+      type: integer
+      format: int64
+    flexTimeEquivalentYear:
+      description: "FLEX time: 1 a year outside 1994-2025 (the period of the year field) is sent as the latest year of the period with the same calendar (leap year, weekday of January 1), so the pager shows the right weekday; 0 the year modulo 32"
+      type: integer
+      format: int32
+    flexTimeExtendedSeconds:
+      description: "FLEX time: extended second S5-S3 of the time zone word, 0-7 steps of 1/64 minute (0.9375 s), to correct the time a pager shows when the frames are not aligned to the second"
+      type: integer
+      format: int32
+    maxQueued:
+      description: "Queue size: messages not sent yet before new ones are refused, 1 to 100000 (default 10000). Lowered below the messages queued: they stay, new ones are refused until the queue is down"
+      type: integer
+      format: int32
+    flexNumbering:
+      description: "FLEX message numbering of the network (STD-43A 8.4, optional): 1 the alphanumeric, HEX/binary and numbered short messages of each address are numbered 0, 1 ... flexMaxMessageNumber, 0 ... with R = 1; 0 the network does not number them: N = 0 and R = 0 (a message in fragments takes a number apart from the other messages of the address in progress) and numbered short messages are refused"
+      type: integer
+      format: int32
+    flexMaxMessageNumber:
+      description: "FLEX largest message number of the network, 0 to 63 (the pagers are set to it): after it the numbers of an address start from 0 again"
+      type: integer
+      format: int32
+    pocsagCharset:
+      description: "Codepage of the POCSAG alphanumeric messages of the pages without one (default generic, generic, ascii)"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    flexCharset:
+      description: "Codepage of the FLEX alphanumeric messages of the pages without one"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    gscCharset:
+      description: "Codepage of the GSC alphanumeric messages of the pages without one"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    gscMode:
+      description: "GSC transmissions (one-shot only, GSC has no network mode): 0 auto (a batch of messages of the same preamble value, a message alone after its own preamble), 1 single (one message per transmission), 2 batch (a batch even for one message), 3 non battery saver (all queued messages of a polarity after one 1100 pattern)"
+      type: integer
+      format: int32
+    gscInverted:
+      description: "GSC polarity: 0 normal (binary 1 is a positive deviation), 1 inverted"
+      type: integer
+      format: int32
+    gscVoiceSeconds:
+      description: "GSC voice pages: the length of the voice in seconds (1 to 50). A longer sound file is cut at this length, a voice from the microphone ends at this length"
+      type: integer
+      format: int32
+    gscVoiceDirectory:
+      description: "Directory of the files of the voice sent. Empty: radiopaging/voice/tx in the application data directory"
+      type: string
+    gscVoiceKeepDays:
+      description: "Files of the voice sent older than this many days are deleted when a new one is written (0 to keep them all). The newest gscVoiceKeepMin files are kept whatever their age"
+      type: integer
+      format: int32
+    gscVoiceKeepMin:
+      description: "The number of the newest files of the voice sent that are not deleted"
+      type: integer
+      format: int32
+    mixPocsag:
+      description: "FLEX network: mixing with POCSAG (1 for yes, 0 for no). POCSAG messages are sent in the time between FLEX frames with the POCSAG settings (STD-43A Chapter 7). Frames 0 to 3 of the cycle are always FLEX"
+      type: integer
+      format: int32
+    pocsagDeviation:
+      description: "Frequency deviation of POCSAG when mixed with FLEX in Hz, 500 to 10000 (FLEX: the deviation setting)"
+      type: number
+      format: float
+    mixFramesPerMinute:
+      description: "Mixing: 0 the first 2^flexCollapse frames of each minute are FLEX (7.1.1); N (1 to 32, 128 on a shared channel) the first N frames, with system collapse 5 (7 shared), capcodes of the other frames refused (7.1.2)"
+      type: integer
+      format: int32
+    mixShared:
+      description: "Mixing: shared channel, the minute is 4 minutes (128 frames) (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    mixSwitchMs512:
+      description: "Mixing: duration in ms of the 750 bps 1,0 pattern before 512 bps POCSAG after FLEX (STD-43A 7.2.1: at least 400)"
+      type: integer
+      format: int32
+    mixSwitchMs1200:
+      description: "Mixing: duration in ms of the 750 bps 1,0 pattern before 1200 bps POCSAG after FLEX (STD-43A 7.2.2: at least 200)"
+      type: integer
+      format: int32
+    mixSwitchMs2400:
+      description: "Mixing: duration in ms of the 750 bps 1,0 pattern before 2400 bps POCSAG after FLEX (not in the standard: 100, extrapolated from 512 and 1200)"
+      type: integer
+      format: int32
+    rgbColor:
+      type: integer
+      format: int32
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+      format: int32
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      format: int32
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+      format: int32
+    reverseAPIDeviceIndex:
+      type: integer
+      format: int32
+    reverseAPIChannelIndex:
+      type: integer
+      format: int32
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+RadioPagingModReport:
+  description: Radio paging modulator
+  type: object
+  properties:
+    channelPowerDB:
+      description: Power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      format: int32
+    state:
+      description: "0 idle, 1 ramp up, 2 transmitting, 3 ramp down"
+      type: integer
+      format: int32
+    queued:
+      description: Messages waiting
+      type: integer
+      format: int32
+    inFlight:
+      description: Messages being sent
+      type: integer
+      format: int32
+    currentId:
+      description: Id of the message being sent, 0 if none
+      type: integer
+      format: int64
+    lastSentId:
+      description: Id of the last message sent completely, 0 if none
+      type: integer
+      format: int64
+    sent:
+      description: Messages sent completely since the channel was created
+      type: integer
+      format: int64
+    dropped:
+      description: Messages cleared, aborted or dropped by a change of protocol or mode since the channel was created
+      type: integer
+      format: int64
+    refused:
+      description: Requests refused (not valid, queue full) since the channel was created, from the GUI, the Message Center or the WebAPI
+      type: integer
+      format: int64
+    sampleCounter:
+      description: Channel samples produced since the channel was created (not while muted)
+      type: integer
+      format: int64
+    ers:
+      description: "FLEX emergency re-synchronization on air (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    ersMs:
+      description: Length of the last FLEX emergency re-synchronization in milliseconds
+      type: integer
+      format: int32
+    ersCount:
+      description: FLEX emergency re-synchronizations sent since the channel was created
+      type: integer
+      format: int64
+
+RadioPagingModActions:
+  description: Radio paging modulator
+  type: object
+  properties:
+    tx:
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingMod.yaml#/RadioPagingModTx"
+    clear:
+      description: "Drop the messages waiting (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    abort:
+      description: "Drop the messages waiting; one-shot: end the transmission being sent (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    systemEvent:
+      description: "FLEX network: System Event Notification (STD-43A 3.8.2.4), the event flags e10-e0 (1 to 2047; e0 traffic split by SSID TMF, e1 traffic split by NID TMF, e2 change of the Channel Set Up Instruction, e3 a new frequency of the NID, e4 a new frequency of the SSID coverage zone, e5-e10 reserved) announced in every phase of each frame for systemEventFrames; 0 stops it"
+      type: integer
+      format: int32
+    systemEventFrames:
+      description: "Frames of the System Event Notification, 128 (one cycle, the default) to 512 (the 4 cycles of the notice)"
+      type: integer
+      format: int32
+
+RadioPagingModTx:
+  description: "A message to transmit in the protocol of the channel. Speed and polarity default to the channel settings; FLEX is sent in the mode of the network (channel setting)"
+  type: object
+  properties:
+    address:
+      description: "The address as a string, as in the posts of the Message Center. POCSAG: the 21-bit address 0 to 2097151. FLEX: the capcode, short 1 to 1933312 or long 2101249 to 4297068542, digits or a form with letters of STD-43A Appendix A ([P|Q|R|S][fff][b]<letter><address>, e.g. 3E005237593); only the address is sent. GSC: the cap code, up to 6 digits zero padded (index, group, 3 address digits; 5 digits: index 0) or 7 digits with the suffix digit, that gives the function (1-4 and 5-8: A-D, 9 and 0: A and B) over function"
+      type: string
+    function:
+      description: "POCSAG: function 0 to 3 (A to D). GSC: function 0 to 3 (A to D), the address number 1 to 4"
+      type: integer
+      format: int32
+    priority:
+      description: "FLEX: address in the priority part of the address field (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    protocol:
+      description: "pocsag, flex or gsc: the protocol of the message. Omitted: the protocol of the channel. A FLEX channel in network mode with mixing also takes pocsag messages"
+      type: string
+    type:
+      description: "tone, numeric or alphanumeric. GSC also voice: text is the path of a WAV file, sent after a 2 s alert, cut at gscVoiceSeconds. FLEX also short_message (STD-43A 3.9.2, see shortType), special_numeric, numbered_numeric and numbered_special_numeric (3.9.6, numbered ones with message numbering), binary (HEX/binary message, 3.10.1.2) and secure (3.10.1.4, see secureType); FLEX tone is a short message with the tone only payload, every digit a space (3.9.2)"
+      type: string
+    shortType:
+      description: "FLEX short_message type (STD-43A Table 3.9.2-1): 0 numeric, text up to 3 numeric characters (8 for a long address), an empty text is the tone only payload; 1 source code; 2 source code and the message number of the address, with the retrieval flag"
+      type: integer
+      format: int32
+    source:
+      description: "FLEX short_message types 1 and 2: source code 0 to 7"
+      type: integer
+      format: int32
+    blocking:
+      description: "FLEX binary: blocking length B, bits of a character 1 to 16 (16 is sent as 0000). 0 or omitted: 1, the default of the standard. The bits of the text (4 a hex digit) are a multiple of it"
+      type: integer
+      format: int32
+    mailDrop:
+      description: "FLEX binary: mail drop flag M (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    rightToLeft:
+      description: "FLEX binary: display direction D, 1 right to left, 0 left to right; not allowed with a blocking length of 1"
+      type: integer
+      format: int32
+    headerMessage:
+      description: "FLEX binary: header message flag H, 1 if a transparent message of the same number follows"
+      type: integer
+      format: int32
+    statusInfo:
+      description: "FLEX binary: status information field enabler I, 1 if the first 8 data bits name the encoding method (reserved in the standard)"
+      type: integer
+      format: int32
+    secureType:
+      description: "FLEX secure type t1 t0 (STD-43A 3.10.1.4): 0 alphanumeric (7-bit characters), 1 data defined separately (hex digits, not terminated), 2 binary (hex digits)"
+      type: integer
+      format: int32
+    groupMembers:
+      description: "FLEX group message (STD-43A 5.2): the capcodes of the pagers, 2 to 5461, separated by commas (digits or the forms with letters of STD-43A Appendix A, only the address is used). The address is not used. The message (numeric, alphanumeric, tone or a short message that is not numbered) goes to a temporary address that a short instruction tells the pagers; one temporary address for each phase of the pagers, so a group is limited by the 16 addresses of the network. Network collapse 6 or less, no copies"
+      type: string
+    retransmit:
+      description: "Network mode only. Number of copies sent after the message: POCSAG 0 to 10; FLEX 0 to 15, numbered types (alphanumeric, binary, numbered short message) on a channel with message numbering, sent with the same message number and R = 0 (STD-43A 3.10.1.1). 0 or omitted: none"
+      type: integer
+      format: int32
+    retransmitInterval:
+      description: "Network mode only. Seconds between the copies, 0 to 3600. Negative or omitted: 10 s for POCSAG, 128 frames (240 s) for FLEX. FLEX is rounded up to whole frames of 1.875 s, at least 1"
+      type: number
+      format: float
+    sendDelay:
+      description: "Network mode only. Seconds from the queueing to the first transmission, 0 to 3600. 0 or omitted: none. FLEX is rounded up to whole frames of 1.875 s"
+      type: number
+      format: float
+    text:
+      description: "Numeric: 0-9, space, U, -, ], [ (GSC: 0-9 A-H J L N P R U space -). Alphanumeric: the characters of the codepage (charset), <0xNN> for any code. FLEX binary and secure types 1 and 2: hex digits, digit i the data bits 4i to 4i+3, the least significant bit sent first"
+      type: string
+    charset:
+      description: "Alphanumeric (and FLEX secure type 0): the codepage of the text in the protocol of the message. Omitted: the codepage of the channel for the protocol. A character without a code in it is refused"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    speed:
+      description: "POCSAG speed in baud: 512, 1200 or 2400. 0 or omitted: the channel setting"
+      type: integer
+      format: int32
+    id:
+      description: "Id of the page of the message center this message is: the records of the message have this id, and its states (transmitted, sent, aborted, released, rejected) are reported on the messages pipe"
+      type: string
+    polarity:
+      description: "normal or inverted. Empty or omitted: the channel setting. FLEX: the other polarity than the network's is sent in the frames the network has nothing mandatory in. GSC: a transmission has one polarity"
+      type: string

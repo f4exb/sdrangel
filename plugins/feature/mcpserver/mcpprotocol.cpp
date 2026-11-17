@@ -345,7 +345,9 @@ QString MCPProtocol::instructions()
         "Recording: record_iq writes baseband IQ for a fixed time, start_iq_recording/stop_iq_recording for longer; capture_audio "
         "writes a demodulator's audio to WAV and says whether it was silent. Files go under the capture directory shown by "
         "get_server_status. Live data: get_packets (AIS, APRS, LoRa, M17, Meshtastic, Inmarsat, radiosondes) and get_map_items "
-        "(aircraft, ships, sondes, satellites) return what running plugins have decoded.\n"
+        "(aircraft, ships, sondes, satellites) return what running plugins have decoded; get_paging_messages the POCSAG, FLEX "
+        "and GSC messages of the Radio Paging channels. The Message Center routes those messages (get_message_center, "
+        "set_message_center_routing) and queues pages to transmit (message_center_post_page).\n"
         "\n"
         "Frequencies are in Hz. Direction is \"rx\" or \"tx\". Creation tools wait for SDRangel to finish and return the new index; "
         "setting changes are applied asynchronously.";

@@ -32,6 +32,7 @@
 #include "SWGLimeRFEReport.h"
 #include "SWGMCPServerReport.h"
 #include "SWGMapReport.h"
+#include "SWGMessageCenterReport.h"
 #include "SWGPERTesterReport.h"
 #include "SWGRadiosondeReport.h"
 #include "SWGRigCtlServerReport.h"
@@ -93,6 +94,9 @@ public:
     SWGMapReport* getMapReport();
     void setMapReport(SWGMapReport* map_report);
 
+    SWGMessageCenterReport* getMessageCenterReport();
+    void setMessageCenterReport(SWGMessageCenterReport* message_center_report);
+
     SWGPERTesterReport* getPerTesterReport();
     void setPerTesterReport(SWGPERTesterReport* per_tester_report);
 
@@ -153,6 +157,9 @@ private:
 
     SWGMapReport* map_report;
     bool m_map_report_isSet;
+
+    SWGMessageCenterReport* message_center_report;
+    bool m_message_center_report_isSet;
 
     SWGPERTesterReport* per_tester_report;
     bool m_per_tester_report_isSet;

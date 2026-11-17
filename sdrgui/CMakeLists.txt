@@ -39,6 +39,10 @@ set(sdrgui_SOURCES
     gui/dialogpositioner.cpp
     gui/journalinebrowser.cpp
     gui/messagedialog.cpp
+    gui/pagingmessagetable.cpp
+    gui/pagingcomposer.cpp
+    gui/pagingcodepagetable.cpp
+    gui/pagingvoiceplayer.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
     gui/fastheaderview.cpp
@@ -194,6 +198,10 @@ set(sdrgui_HEADERS
     gui/dialogpositioner.h
     gui/journalinebrowser.h
     gui/messagedialog.h
+    gui/pagingmessagetable.h
+    gui/pagingcomposer.h
+    gui/pagingcodepagetable.h
+    gui/pagingvoiceplayer.h
     gui/dialpopup.h
     gui/dmsspinbox.h
     gui/doublevalidator.h
@@ -402,6 +410,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/logging
   ${CMAKE_SOURCE_DIR}/httpserver
   ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+  ${CMAKE_SOURCE_DIR}/modemradiopaging
   ${Boost_INCLUDE_DIRS}
 )
 if(NOT ANDROID)
@@ -438,6 +447,7 @@ target_link_libraries(sdrgui
   sdrbase
   logging
   modemdr
+  modemradiopaging
   )
 if (Qt6_FOUND)
   target_link_libraries(sdrgui

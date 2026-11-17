@@ -33,6 +33,9 @@ FeatureActions:
     MorseDecoderActions:
       $ref: "/doc/swagger/include/MorseDecoder.yaml#/MorseDecoderActions"
       description: "Morse decoder actions configuration for Feature."
+    MessageCenterActions:
+      $ref: "/doc/swagger/include/MessageCenter.yaml#/MessageCenterActions"
+      description: "Message center actions configuration for Feature."
     PERTesterActions:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterActions"
       description: "Per tester actions configuration for Feature."

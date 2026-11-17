@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadioPagingDemodNotificationDialog</class>
+ <widget class="QDialog" name="RadioPagingDemodNotificationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::ContextMenuPolicy::PreventContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Notifications</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QVBoxLayout" name="groupLayout">
+      <item>
+       <widget class="QTableWidget" name="table">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>Match</string>
+         </property>
+         <property name="toolTip">
+          <string>Field of the message matched: address, message text, protocol (pocsag, flex, gsc), type (alphanumeric, numeric, tone, voice...),&#10;channel alias, or any (address, message, protocol, type and channel separated by spaces)</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Reg Exp</string>
+         </property>
+         <property name="toolTip">
+          <string>Regular expression the field must match (anywhere in it, use ^ and $ to anchor)</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Speech</string>
+         </property>
+         <property name="toolTip">
+          <string>Text the computer reads when the message matches. ${address}, ${message}, ${protocol}, ${type}, ${channel}&#10;and ${0}, ${1}... (the captures of the regular expression) are replaced</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Command</string>
+         </property>
+         <property name="toolTip">
+          <string>Command run when the message matches, with the same replacements as the speech</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Highlight</string>
+         </property>
+         <property name="toolTip">
+          <string>Background colour of the row of a message that matches</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Plot on Map</string>
+         </property>
+         <property name="toolTip">
+          <string>A position (latitude and longitude) in the message is plotted on the Map, named by the address</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="buttonsHorizontalLayout">
+        <item>
+         <widget class="QToolButton" name="add">
+          <property name="toolTip">
+           <string>Add a notification</string>
+          </property>
+          <property name="text">
+           <string>+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="remove">
+          <property name="toolTip">
+           <string>Remove the selected notification</string>
+          </property>
+          <property name="text">
+           <string>-</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="buttonsHorizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>table</tabstop>
+  <tabstop>add</tabstop>
+  <tabstop>remove</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

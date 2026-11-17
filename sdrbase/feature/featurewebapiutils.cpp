@@ -316,6 +316,42 @@ bool FeatureWebAPIUtils::openSkyMapAndFind(const QString& target)
     return SkyMapOpener::open(target);
 }
 
+bool FeatureWebAPIUtils::openMessageCenter()
+{
+    // The feature is added by the main message queue: a request made in the last seconds is still in progress
+    static qint64 requestedMs = 0;
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    int featureSetIndex = -1;
+    int featureIndex = -1;
+    MainCore *mainCore = MainCore::instance();
+
+    if (getFeature(featureSetIndex, featureIndex, "sdrangel.feature.messagecenter")) {
+        return true;
+    }
+    if ((requestedMs != 0) && (now - requestedMs < 10000)) {
+        return true;
+    }
+    if (mainCore->getFeatureeSets().empty()) {
+        return false;
+    }
+
+    PluginAPI::FeatureRegistrations *featureRegistrations = mainCore->getPluginManager()->getFeatureRegistrations();
+
+    for (int index = 0; index < featureRegistrations->size(); index++)
+    {
+        if (featureRegistrations->at(index).m_featureId == "MessageCenter")
+        {
+            qDebug("FeatureWebAPIUtils::openMessageCenter: adding a Message Center to feature set 0");
+            mainCore->getMainMessageQueue()->push(MainCore::MsgAddFeature::create(0, index));
+            requestedMs = now;
+            return true;
+        }
+    }
+
+    qWarning("FeatureWebAPIUtils::openMessageCenter: Message Center feature not available");
+    return false;
+}
+
 bool SkyMapOpener::open(const QString& target)
 {
     // Create a SkyMap feature
