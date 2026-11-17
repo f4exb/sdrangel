@@ -164,6 +164,18 @@ parts:
             sdrangel_wrapper.sh: bin/
             locale-gen: bin/
 
+    libmirisdr:
+        plugin: cmake
+        source: https://github.com/BertoldVdb/libmirisdr-6.git
+        source-type: git
+        source-tag: v1.2.0
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCMAKE_INSTALL_LIBDIR=lib
+            - -DENABLE_SOAPY=OFF
+
     sdrangel:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
@@ -171,7 +183,7 @@ parts:
         override-pull: |
             craftctl default
             craftctl set version="$(git describe --tags --abbrev=0 | sed 's/v//')"
-        after: [apt, mbevocoder, vocoscodec, serialdv, codec2, sgp4, cspice, inmarsatc, libacars, cm265cc, fdkaac, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        after: [apt, mbevocoder, vocoscodec, serialdv, codec2, sgp4, cspice, inmarsatc, libacars, cm265cc, fdkaac, libmirisdr, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE

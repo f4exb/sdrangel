@@ -43,6 +43,14 @@ void SDRPlaySettings::resetToDefaults()
     m_lnaOn = false;
     m_mixerAmpOn = false;
     m_basebandGain = 29;
+    m_tunerIndex = 0;
+    m_antenna = 0;
+    m_biasT = false;
+    m_notchMask = 0;
+    m_directSampling = 0;
+    m_attenuator = 0;
+    m_frontEndFlags = 0;
+    m_amplifierBypass = false;
     m_iqOrder = true;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -74,6 +82,14 @@ QByteArray SDRPlaySettings::serialize() const
     s.writeU32(18, m_reverseAPIDeviceIndex);
     s.writeBool(19, m_iqOrder);
     s.writeString(20, m_title);
+    s.writeU32(21, m_tunerIndex);
+    s.writeS32(22, m_antenna);
+    s.writeBool(23, m_biasT);
+    s.writeS32(24, m_notchMask);
+    s.writeS32(25, m_directSampling);
+    s.writeS32(26, m_attenuator);
+    s.writeU32(27, m_frontEndFlags);
+    s.writeBool(28, m_amplifierBypass);
 
 	return s.final();
 }
@@ -122,6 +138,14 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(19, &m_iqOrder, true);
         d.readString(20, &m_title, "SDRplayV3");
+        d.readU32(21, &m_tunerIndex, 0);
+        d.readS32(22, &m_antenna, 0);
+        d.readBool(23, &m_biasT, false);
+        d.readS32(24, &m_notchMask, 0);
+        d.readS32(25, &m_directSampling, 0);
+        d.readS32(26, &m_attenuator, 0);
+        d.readU32(27, &m_frontEndFlags, 0);
+        d.readBool(28, &m_amplifierBypass, false);
 
 		return true;
 	}
@@ -145,6 +169,9 @@ void SDRPlaySettings::applySettings(const QStringList& settingsKeys, const SDRPl
     }
     if (settingsKeys.contains("LOppmTenths")) {
         m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("frequencyBandIndex")) {
+        m_frequencyBandIndex = settings.m_frequencyBandIndex;
     }
     if (settingsKeys.contains("ifFrequencyIndex")) {
         m_ifFrequencyIndex = settings.m_ifFrequencyIndex;
@@ -178,6 +205,30 @@ void SDRPlaySettings::applySettings(const QStringList& settingsKeys, const SDRPl
     }
     if (settingsKeys.contains("basebandGain")) {
         m_basebandGain = settings.m_basebandGain;
+    }
+    if (settingsKeys.contains("tunerIndex")) {
+        m_tunerIndex = settings.m_tunerIndex;
+    }
+    if (settingsKeys.contains("antenna")) {
+        m_antenna = settings.m_antenna;
+    }
+    if (settingsKeys.contains("biasT")) {
+        m_biasT = settings.m_biasT;
+    }
+    if (settingsKeys.contains("notchMask")) {
+        m_notchMask = settings.m_notchMask;
+    }
+    if (settingsKeys.contains("directSampling")) {
+        m_directSampling = settings.m_directSampling;
+    }
+    if (settingsKeys.contains("attenuator")) {
+        m_attenuator = settings.m_attenuator;
+    }
+    if (settingsKeys.contains("frontEndFlags")) {
+        m_frontEndFlags = settings.m_frontEndFlags;
+    }
+    if (settingsKeys.contains("amplifierBypass")) {
+        m_amplifierBypass = settings.m_amplifierBypass;
     }
     if (settingsKeys.contains("iqOrder")) {
         m_iqOrder = settings.m_iqOrder;
@@ -247,6 +298,30 @@ QString SDRPlaySettings::getDebugString(const QStringList& settingsKeys, bool fo
     }
     if (settingsKeys.contains("basebandGain") || force) {
         ostr << " m_basebandGain: " << m_basebandGain;
+    }
+    if (settingsKeys.contains("tunerIndex") || force) {
+        ostr << " m_tunerIndex: " << m_tunerIndex;
+    }
+    if (settingsKeys.contains("antenna") || force) {
+        ostr << " m_antenna: " << m_antenna;
+    }
+    if (settingsKeys.contains("biasT") || force) {
+        ostr << " m_biasT: " << m_biasT;
+    }
+    if (settingsKeys.contains("notchMask") || force) {
+        ostr << " m_notchMask: " << m_notchMask;
+    }
+    if (settingsKeys.contains("directSampling") || force) {
+        ostr << " m_directSampling: " << m_directSampling;
+    }
+    if (settingsKeys.contains("attenuator") || force) {
+        ostr << " m_attenuator: " << m_attenuator;
+    }
+    if (settingsKeys.contains("frontEndFlags") || force) {
+        ostr << " m_frontEndFlags: " << m_frontEndFlags;
+    }
+    if (settingsKeys.contains("amplifierBypass") || force) {
+        ostr << " m_amplifierBypass: " << m_amplifierBypass;
     }
     if (settingsKeys.contains("iqOrder") || force) {
         ostr << " m_iqOrder: " << m_iqOrder;

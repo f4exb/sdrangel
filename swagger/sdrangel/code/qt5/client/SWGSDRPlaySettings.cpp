@@ -60,6 +60,22 @@ SWGSDRPlaySettings::SWGSDRPlaySettings() {
     m_mixer_amp_on_isSet = false;
     baseband_gain = 0;
     m_baseband_gain_isSet = false;
+    tuner_index = 0;
+    m_tuner_index_isSet = false;
+    antenna = 0;
+    m_antenna_isSet = false;
+    bias_t = 0;
+    m_bias_t_isSet = false;
+    notch_mask = 0;
+    m_notch_mask_isSet = false;
+    direct_sampling = 0;
+    m_direct_sampling_isSet = false;
+    attenuator = 0;
+    m_attenuator_isSet = false;
+    front_end_flags = 0;
+    m_front_end_flags_isSet = false;
+    amplifier_bypass = 0;
+    m_amplifier_bypass_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
     use_reverse_api = 0;
@@ -110,6 +126,22 @@ SWGSDRPlaySettings::init() {
     m_mixer_amp_on_isSet = false;
     baseband_gain = 0;
     m_baseband_gain_isSet = false;
+    tuner_index = 0;
+    m_tuner_index_isSet = false;
+    antenna = 0;
+    m_antenna_isSet = false;
+    bias_t = 0;
+    m_bias_t_isSet = false;
+    notch_mask = 0;
+    m_notch_mask_isSet = false;
+    direct_sampling = 0;
+    m_direct_sampling_isSet = false;
+    attenuator = 0;
+    m_attenuator_isSet = false;
+    front_end_flags = 0;
+    m_front_end_flags_isSet = false;
+    amplifier_bypass = 0;
+    m_amplifier_bypass_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
     use_reverse_api = 0;
@@ -127,6 +159,14 @@ SWGSDRPlaySettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -193,6 +233,22 @@ SWGSDRPlaySettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&mixer_amp_on, pJson["mixerAmpOn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&baseband_gain, pJson["basebandGain"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tuner_index, pJson["tunerIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&antenna, pJson["antenna"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&notch_mask, pJson["notchMask"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&direct_sampling, pJson["directSampling"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&attenuator, pJson["attenuator"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&front_end_flags, pJson["frontEndFlags"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&amplifier_bypass, pJson["amplifierBypass"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
@@ -267,6 +323,30 @@ SWGSDRPlaySettings::asJsonObject() {
     }
     if(m_baseband_gain_isSet){
         obj->insert("basebandGain", QJsonValue(baseband_gain));
+    }
+    if(m_tuner_index_isSet){
+        obj->insert("tunerIndex", QJsonValue(tuner_index));
+    }
+    if(m_antenna_isSet){
+        obj->insert("antenna", QJsonValue(antenna));
+    }
+    if(m_bias_t_isSet){
+        obj->insert("biasT", QJsonValue(bias_t));
+    }
+    if(m_notch_mask_isSet){
+        obj->insert("notchMask", QJsonValue(notch_mask));
+    }
+    if(m_direct_sampling_isSet){
+        obj->insert("directSampling", QJsonValue(direct_sampling));
+    }
+    if(m_attenuator_isSet){
+        obj->insert("attenuator", QJsonValue(attenuator));
+    }
+    if(m_front_end_flags_isSet){
+        obj->insert("frontEndFlags", QJsonValue(front_end_flags));
+    }
+    if(m_amplifier_bypass_isSet){
+        obj->insert("amplifierBypass", QJsonValue(amplifier_bypass));
     }
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
@@ -448,6 +528,86 @@ SWGSDRPlaySettings::setBasebandGain(qint32 baseband_gain) {
 }
 
 qint32
+SWGSDRPlaySettings::getTunerIndex() {
+    return tuner_index;
+}
+void
+SWGSDRPlaySettings::setTunerIndex(qint32 tuner_index) {
+    this->tuner_index = tuner_index;
+    this->m_tuner_index_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getAntenna() {
+    return antenna;
+}
+void
+SWGSDRPlaySettings::setAntenna(qint32 antenna) {
+    this->antenna = antenna;
+    this->m_antenna_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getBiasT() {
+    return bias_t;
+}
+void
+SWGSDRPlaySettings::setBiasT(qint32 bias_t) {
+    this->bias_t = bias_t;
+    this->m_bias_t_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getNotchMask() {
+    return notch_mask;
+}
+void
+SWGSDRPlaySettings::setNotchMask(qint32 notch_mask) {
+    this->notch_mask = notch_mask;
+    this->m_notch_mask_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getDirectSampling() {
+    return direct_sampling;
+}
+void
+SWGSDRPlaySettings::setDirectSampling(qint32 direct_sampling) {
+    this->direct_sampling = direct_sampling;
+    this->m_direct_sampling_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getAttenuator() {
+    return attenuator;
+}
+void
+SWGSDRPlaySettings::setAttenuator(qint32 attenuator) {
+    this->attenuator = attenuator;
+    this->m_attenuator_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getFrontEndFlags() {
+    return front_end_flags;
+}
+void
+SWGSDRPlaySettings::setFrontEndFlags(qint32 front_end_flags) {
+    this->front_end_flags = front_end_flags;
+    this->m_front_end_flags_isSet = true;
+}
+
+qint32
+SWGSDRPlaySettings::getAmplifierBypass() {
+    return amplifier_bypass;
+}
+void
+SWGSDRPlaySettings::setAmplifierBypass(qint32 amplifier_bypass) {
+    this->amplifier_bypass = amplifier_bypass;
+    this->m_amplifier_bypass_isSet = true;
+}
+
+qint32
 SWGSDRPlaySettings::getIqOrder() {
     return iq_order;
 }
@@ -548,6 +708,30 @@ SWGSDRPlaySettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_baseband_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tuner_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_antenna_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_t_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_notch_mask_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_direct_sampling_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_attenuator_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_front_end_flags_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_amplifier_bypass_isSet){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){

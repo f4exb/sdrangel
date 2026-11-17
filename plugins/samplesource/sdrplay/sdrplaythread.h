@@ -24,7 +24,12 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include <atomic>
+#include <vector>
+
 #include <mirisdr.h>
+
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
@@ -37,7 +42,7 @@ public:
     SDRPlayThread(mirisdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
     ~SDRPlayThread();
 
-    void startWork();
+    bool startWork();
     void stopWork();
     void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
@@ -47,10 +52,18 @@ public:
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    enum class StartState {
+        Stopped,
+        WaitingForSamples,
+        Running,
+        Failed
+    };
+    StartState m_startState;
+    std::atomic_bool m_running;
 
     mirisdr_dev_t *m_dev;
     SampleVector m_convertBuffer;
+    std::vector<qint16> m_floatConvertBuffer;
     SampleSinkFifo* m_sampleFifo;
 
     int m_samplerate;
@@ -58,12 +71,13 @@ private:
     int m_fcPos;
     bool m_iqOrder;
 
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, false> m_decimatorsQI;
 
     void run();
     void callbackIQ(const qint16* buf, qint32 len);
     void callbackQI(const qint16* buf, qint32 len);
+    void reportFirstSamples();
 
     static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
 };

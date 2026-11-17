@@ -90,6 +90,30 @@ public:
     qint32 getBasebandGain();
     void setBasebandGain(qint32 baseband_gain);
 
+    qint32 getTunerIndex();
+    void setTunerIndex(qint32 tuner_index);
+
+    qint32 getAntenna();
+    void setAntenna(qint32 antenna);
+
+    qint32 getBiasT();
+    void setBiasT(qint32 bias_t);
+
+    qint32 getNotchMask();
+    void setNotchMask(qint32 notch_mask);
+
+    qint32 getDirectSampling();
+    void setDirectSampling(qint32 direct_sampling);
+
+    qint32 getAttenuator();
+    void setAttenuator(qint32 attenuator);
+
+    qint32 getFrontEndFlags();
+    void setFrontEndFlags(qint32 front_end_flags);
+
+    qint32 getAmplifierBypass();
+    void setAmplifierBypass(qint32 amplifier_bypass);
+
     qint32 getIqOrder();
     void setIqOrder(qint32 iq_order);
 
@@ -156,6 +180,30 @@ private:
 
     qint32 baseband_gain;
     bool m_baseband_gain_isSet;
+
+    qint32 tuner_index;
+    bool m_tuner_index_isSet;
+
+    qint32 antenna;
+    bool m_antenna_isSet;
+
+    qint32 bias_t;
+    bool m_bias_t_isSet;
+
+    qint32 notch_mask;
+    bool m_notch_mask_isSet;
+
+    qint32 direct_sampling;
+    bool m_direct_sampling_isSet;
+
+    qint32 attenuator;
+    bool m_attenuator_isSet;
+
+    qint32 front_end_flags;
+    bool m_front_end_flags_isSet;
+
+    qint32 amplifier_bypass;
+    bool m_amplifier_bypass_isSet;
 
     qint32 iq_order;
     bool m_iq_order_isSet;

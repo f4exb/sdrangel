@@ -502,8 +502,8 @@ modules:
       - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/f4exb/libmirisdr-4/archive/refs/tags/v2.0.0.tar.gz
-        sha256: c9fa00737f37de788873248c71dd653b0e9c043aed70620ea17cfde8894be2df
+        url: https://github.com/BertoldVdb/libmirisdr-6/archive/refs/tags/v1.2.0.tar.gz
+        sha256: 9eb8db95ecc9bf97592df0d3845657743f060f42d41af1a3b4aabf75d3a721da
 
   - name: soapy
     buildsystem: cmake-ninja

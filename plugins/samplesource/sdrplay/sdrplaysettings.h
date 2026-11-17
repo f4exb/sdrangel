@@ -37,7 +37,7 @@ struct SDRPlaySettings {
 	uint64_t m_centerFrequency;
 	qint32 m_tunerGain;
 	int32_t  m_LOppmTenths;
-    uint32_t m_frequencyBandIndex;
+    uint32_t m_frequencyBandIndex; //!< Legacy serialized/API field; libmirisdr-6 selects the band from frequency
     uint32_t m_ifFrequencyIndex;
     uint32_t m_bandwidthIndex;
 	uint32_t m_devSampleRateIndex;
@@ -49,6 +49,14 @@ struct SDRPlaySettings {
 	bool m_lnaOn;
 	bool m_mixerAmpOn;
 	int  m_basebandGain;
+    uint32_t m_tunerIndex;
+    int m_antenna;
+    bool m_biasT;
+    int m_notchMask;
+    int m_directSampling;
+    int m_attenuator;
+    uint32_t m_frontEndFlags;
+    bool m_amplifierBypass;
     bool m_iqOrder;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

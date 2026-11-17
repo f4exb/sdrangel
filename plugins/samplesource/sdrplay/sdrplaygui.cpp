@@ -19,6 +19,14 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QSignalBlocker>
+
+#include <algorithm>
+#include <limits>
 
 #include "sdrplaygui.h"
 
@@ -47,17 +55,13 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (SDRPlayInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setupFrontEndControls();
+    setupTooltips();
     sizeToContents();
     getContents()->setStyleSheet("#SDRPlayGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/sdrplay/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 10U, 999999999U);
-
-    ui->fBand->clear();
-    for (unsigned int i = 0; i < SDRPlayBands::getNbBands(); i++)
-    {
-        ui->fBand->addItem(SDRPlayBands::getBandName(i));
-    }
 
     ui->ifFrequency->clear();
     for (unsigned int i = 0; i < SDRPlayIF::getNbIFs(); i++)
@@ -66,9 +70,19 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     }
 
     ui->samplerate->clear();
+    std::vector<unsigned int> sampleRateIndexes;
     for (unsigned int i = 0; i < SDRPlaySampleRates::getNbRates(); i++)
     {
-        ui->samplerate->addItem(QString::number(SDRPlaySampleRates::getRate(i)/1000));
+        sampleRateIndexes.push_back(i);
+    }
+    std::sort(sampleRateIndexes.begin(), sampleRateIndexes.end(), [](unsigned int lhs, unsigned int rhs) {
+        return SDRPlaySampleRates::getRate(lhs) < SDRPlaySampleRates::getRate(rhs);
+    });
+    for (unsigned int index : sampleRateIndexes)
+    {
+        ui->samplerate->addItem(
+            QString::number(SDRPlaySampleRates::getRate(index) / 1000),
+            index);
     }
 
     ui->bandwidth->clear();
@@ -155,24 +169,35 @@ bool SDRPlayGui::handleMessage(const Message& message)
     	qDebug() << "SDRPlayGui::handleMessage: MsgReportSDRPlayGains";
 
     	SDRPlayInput::MsgReportSDRPlayGains msg = (SDRPlayInput::MsgReportSDRPlayGains&) message;
+        const QSignalBlocker tunerBlocker(ui->gainTuner);
+        const QSignalBlocker lnaBlocker(ui->gainLNA);
+        const QSignalBlocker mixerBlocker(ui->gainMixer);
+        const QSignalBlocker basebandBlocker(ui->gainBaseband);
 
     	if (m_settings.m_tunerGainMode)
     	{
+            ui->gainTuner->setValue(msg.getTunerGain());
+
+            QString gainText = QString::number(msg.getTunerGain());
+            ui->gainTunerText->setText(gainText);
+        }
+        else
+        {
             ui->gainLNA->setChecked(msg.getLNAGain() != 0);
             ui->gainMixer->setChecked(msg.getMixerGain() != 0);
             ui->gainBaseband->setValue(msg.getBasebandGain());
 
-            QString gainText = QStringLiteral("%1").arg(msg.getBasebandGain(), 2, 10, QLatin1Char('0'));
+            QString gainText = QString::number(msg.getBasebandGain());
             ui->gainBasebandText->setText(gainText);
     	}
-    	else
-    	{
-    	    ui->gainTuner->setValue(msg.getTunerGain());
 
-            QString gainText = QStringLiteral("%1").arg(msg.getTunerGain(), 3, 10, QLatin1Char('0'));
-            ui->gainTunerText->setText(gainText);
-    	}
-
+        return true;
+    }
+    else if (SDRPlayInput::MsgReportSDRPlayCapabilities::match(message))
+    {
+        const SDRPlayInput::MsgReportSDRPlayCapabilities& report =
+            (const SDRPlayInput::MsgReportSDRPlayCapabilities&) message;
+        displayCapabilities(report);
         return true;
     }
     else if (SDRPlayInput::MsgStartStop::match(message))
@@ -228,6 +253,22 @@ void SDRPlayGui::updateSampleRateAndFrequency()
 
 void SDRPlayGui::displaySettings()
 {
+    const QSignalBlocker centerFrequencyBlocker(ui->centerFrequency);
+    const QSignalBlocker ppmBlocker(ui->ppm);
+    const QSignalBlocker sampleRateBlocker(ui->samplerate);
+    const QSignalBlocker dcOffsetBlocker(ui->dcOffset);
+    const QSignalBlocker iqImbalanceBlocker(ui->iqImbalance);
+    const QSignalBlocker bandwidthBlocker(ui->bandwidth);
+    const QSignalBlocker ifBlocker(ui->ifFrequency);
+    const QSignalBlocker decimBlocker(ui->decim);
+    const QSignalBlocker fcPosBlocker(ui->fcPos);
+    const QSignalBlocker gainModeBlocker(ui->gainTunerOn);
+    const QSignalBlocker manualModeBlocker(ui->gainManualOn);
+    const QSignalBlocker tunerGainBlocker(ui->gainTuner);
+    const QSignalBlocker lnaBlocker(ui->gainLNA);
+    const QSignalBlocker mixerBlocker(ui->gainMixer);
+    const QSignalBlocker basebandGainBlocker(ui->gainBaseband);
+
     setTitle(m_settings.m_title);
     getDeviceUISet()->m_mainSpectrumGUI->setTitle(m_settings.m_title);
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
@@ -235,20 +276,18 @@ void SDRPlayGui::displaySettings()
     ui->ppm->setValue(m_settings.m_LOppmTenths);
     ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
-    ui->samplerate->setCurrentIndex(m_settings.m_devSampleRateIndex);
-
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
-    ui->fBand->setCurrentIndex(m_settings.m_frequencyBandIndex);
     ui->bandwidth->setCurrentIndex(m_settings.m_bandwidthIndex);
     ui->ifFrequency->setCurrentIndex(m_settings.m_ifFrequencyIndex);
-    ui->samplerate->setCurrentIndex(m_settings.m_devSampleRateIndex);
+    ui->samplerate->setCurrentIndex(ui->samplerate->findData(m_settings.m_devSampleRateIndex));
 
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
     ui->gainTunerOn->setChecked(m_settings.m_tunerGainMode);
+    ui->gainManualOn->setChecked(!m_settings.m_tunerGainMode);
 
     if (m_settings.m_tunerGainMode)
     {
@@ -259,7 +298,7 @@ void SDRPlayGui::displaySettings()
 
         int gain = m_settings.m_tunerGain;
         ui->gainTuner->setValue(gain);
-        QString gainText = QStringLiteral("%1").arg(gain, 3, 10, QLatin1Char('0'));
+        QString gainText = QString::number(gain);
         ui->gainTunerText->setText(gainText);
         m_settings.m_tunerGain = gain;
     }
@@ -275,9 +314,205 @@ void SDRPlayGui::displaySettings()
 
         int gain = m_settings.m_basebandGain;
         ui->gainBaseband->setValue(gain);
-        QString gainText = QStringLiteral("%1").arg(gain, 2, 10, QLatin1Char('0'));
+        QString gainText = QString::number(gain);
         ui->gainBasebandText->setText(gainText);
     }
+
+    displayFrontEndSettings();
+}
+
+void SDRPlayGui::setupFrontEndControls()
+{
+    QWidget *frontEndWidget = new QWidget(getContents());
+    QGridLayout *layout = new QGridLayout(frontEndWidget);
+    layout->setContentsMargins(3, 3, 3, 3);
+    layout->setHorizontalSpacing(4);
+    layout->setVerticalSpacing(2);
+
+    m_boardLabel = new QLabel(tr("Detecting device..."), frontEndWidget);
+    m_tuner = new QComboBox(frontEndWidget);
+    m_antenna = new QComboBox(frontEndWidget);
+    m_attenuator = new QComboBox(frontEndWidget);
+    m_directSampling = new QComboBox(frontEndWidget);
+    m_biasT = new QCheckBox(tr("Bias-T"), frontEndWidget);
+    m_notchFM = new QCheckBox(tr("FM"), frontEndWidget);
+    m_notchDAB = new QCheckBox(tr("DAB"), frontEndWidget);
+    m_notchMW = new QCheckBox(tr("MW"), frontEndWidget);
+    m_amplifierBypass = new QCheckBox(tr("Amp bypass"), frontEndWidget);
+    m_portTie = new QCheckBox(tr("Port tie"), frontEndWidget);
+    m_referenceOutput = new QCheckBox(tr("24 MHz out"), frontEndWidget);
+
+    m_directSampling->addItem(tr("Off"), MIRISDR_DS_OFF);
+    m_directSampling->addItem(tr("On"), MIRISDR_DS_ON);
+    m_directSampling->addItem(tr("Auto"), MIRISDR_DS_AUTO);
+
+    layout->addWidget(m_boardLabel, 0, 0, 1, 4);
+    layout->addWidget(new QLabel(tr("Tuner"), frontEndWidget), 1, 0);
+    layout->addWidget(m_tuner, 1, 1);
+    layout->addWidget(new QLabel(tr("Antenna"), frontEndWidget), 1, 2);
+    layout->addWidget(m_antenna, 1, 3);
+    layout->addWidget(new QLabel(tr("Attenuation"), frontEndWidget), 2, 0);
+    layout->addWidget(m_attenuator, 2, 1);
+    layout->addWidget(new QLabel(tr("Direct"), frontEndWidget), 2, 2);
+    layout->addWidget(m_directSampling, 2, 3);
+    layout->addWidget(m_biasT, 3, 0);
+    layout->addWidget(m_amplifierBypass, 3, 1);
+    layout->addWidget(m_portTie, 3, 2);
+    layout->addWidget(m_referenceOutput, 3, 3);
+    layout->addWidget(new QLabel(tr("Notches"), frontEndWidget), 4, 0);
+    layout->addWidget(m_notchFM, 4, 1);
+    layout->addWidget(m_notchDAB, 4, 2);
+    layout->addWidget(m_notchMW, 4, 3);
+    ui->verticalLayout->addWidget(frontEndWidget);
+}
+
+void SDRPlayGui::setupTooltips()
+{
+    ui->startStop->setToolTip(tr("Start or stop sample acquisition from the receiver."));
+    ui->deviceRateText->setToolTip(tr("Actual complex sample rate delivered to SDRangel after decimation."));
+    ui->centerFrequency->setToolTip(tr("RF center frequency in kHz."));
+    ui->ppm->setToolTip(tr("Correct the receiver reference oscillator in 0.1 ppm steps."));
+    ui->ppmText->setToolTip(ui->ppm->toolTip());
+    ui->dcOffset->setToolTip(tr("Remove the DC spike produced at zero IF. Enable this before IQ correction."));
+    ui->iqImbalance->setToolTip(tr("Correct amplitude and phase imbalance between I and Q. DC correction must also be enabled."));
+    ui->bandwidth->setToolTip(tr("Select the receiver IF filter bandwidth in kHz. Use a bandwidth wide enough for the wanted signal."));
+    ui->ifFrequency->setToolTip(tr("Select zero IF or a low IF in kHz. libmirisdr-6 shifts a selected low IF to 0 Hz in the output stream."));
+    ui->samplerate->setToolTip(tr("Request the complex baseband sample rate before SDRangel decimation. libmirisdr-6 selects the converter and resampling plan."));
+    ui->decim->setToolTip(tr("Divide the device sample rate by this power-of-two factor before sending samples to SDRangel."));
+    ui->fcPos->setToolTip(tr("Choose where the tuned frequency appears after decimation: Inf below center, Sup above center, or Cen at center."));
+
+    ui->gainTunerOn->setToolTip(tr("Total-gain mode: set one gain value and let libmirisdr-6 distribute it across the available gain stages."));
+    ui->gainTuner->setToolTip(tr("Requested total receive gain in dB. The available maximum includes any board-level front-end amplifier."));
+    ui->gainTunerText->setToolTip(ui->gainTuner->toolTip());
+    ui->gainManualOn->setToolTip(tr("Manual-gain mode: control the LNA or mixer buffer, mixer amplifier, and baseband gain independently."));
+    ui->gainLNA->setToolTip(tr("Enable the nominal 24 dB LNA above 50 MHz, or the mixer buffer below 50 MHz. Actual gain depends on frequency."));
+    ui->gainMixer->setToolTip(tr("Enable the mixer amplifier, adding approximately 19 dB of gain."));
+    ui->gainBaseband->setToolTip(tr("Set baseband amplifier gain from 0 to 59 dB."));
+    ui->gainBasebandText->setToolTip(ui->gainBaseband->toolTip());
+
+    m_boardLabel->setToolTip(tr("Detected receiver model, active tuner, and number of tuners reported by libmirisdr-6."));
+    m_tuner->setToolTip(tr("Select the active RSPduo tuner. One tuner is streamed by this SDRangel device set at a time."));
+    m_antenna->setToolTip(tr("Select the receiver antenna input. Available inputs depend on the device and tuner; Hi-Z is limited to tuner LOs below 30 MHz."));
+    m_attenuator->setToolTip(tr("Apply front-end attenuation before the tuner. Available dB steps depend on the receiver and selected input."));
+    m_directSampling->setToolTip(tr("Control direct sampling on supported RSPdx-family receivers. On uses it at or below 2 MHz; Auto uses it only when the complete requested band fits below 2 MHz; Off uses the tuner."));
+    m_biasT->setToolTip(tr("Supply DC power through the supported antenna connector. Enable only when the connected antenna or accessory accepts Bias-T power."));
+    m_notchFM->setToolTip(tr("Enable the broadcast-FM rejection filter, approximately 85 to 100 MHz."));
+    m_notchDAB->setToolTip(tr("Enable the DAB rejection filter, approximately 165 to 230 MHz."));
+    m_notchMW->setToolTip(tr("Enable the medium-wave rejection filter, approximately 0.4 to 1.6 MHz."));
+    m_amplifierBypass->setToolTip(tr("Bypass the board-level front-end amplifier on supported receivers. This option is available in manual-gain mode."));
+    m_portTie->setToolTip(tr("RSPduo only: tie the two 50-ohm antenna ports so either tuner can receive from either port. This can reduce signal level and increase noise."));
+    m_referenceOutput->setToolTip(tr("Enable the receiver's 24 MHz reference output for clocking another compatible device."));
+}
+
+void SDRPlayGui::displayCapabilities(const SDRPlayInput::MsgReportSDRPlayCapabilities& report)
+{
+    const QSignalBlocker tunerBlocker(m_tuner);
+    const QSignalBlocker antennaBlocker(m_antenna);
+    const QSignalBlocker attenuatorBlocker(m_attenuator);
+    m_frontendCaps = report.getCaps();
+
+    ui->gainTuner->setMaximum(102 + m_frontendCaps.amp_max_db);
+    m_boardLabel->setText(tr("%1 — tuner %2 of %3")
+        .arg(report.getBoardName())
+        .arg(report.getTunerIndex() + 1)
+        .arg(report.getTunerCount()));
+
+    m_tuner->clear();
+    for (int i = 0; i < report.getTunerCount(); ++i) {
+        m_tuner->addItem(tr("%1").arg(i + 1), i);
+    }
+    m_tuner->setCurrentIndex(report.getTunerIndex());
+    m_tuner->setEnabled(report.getTunerCount() > 1);
+
+    m_antenna->clear();
+    const char *antennaNames[] = {"A", "B", "C", "Test"};
+    for (int i = 0; i <= MIRISDR_ANTENNA_TEST; ++i)
+    {
+        if (m_frontendCaps.antennas & (1U << i)) {
+            const QString name = i == m_frontendCaps.antenna_hiz ? tr("Hi-Z") : QString::fromLatin1(antennaNames[i]);
+            m_antenna->addItem(name, i);
+        }
+    }
+    m_antenna->setEnabled(m_antenna->count() > 1);
+    updateCenterFrequencyRange();
+
+    m_attenuator->clear();
+    for (int i = 0; i < m_frontendCaps.attenuator_count; ++i) {
+        m_attenuator->addItem(tr("%1 dB").arg(m_frontendCaps.attenuator[i]), m_frontendCaps.attenuator[i]);
+    }
+    m_attenuator->setEnabled(m_attenuator->count() > 1);
+    m_biasT->setEnabled(m_frontendCaps.bias != 0);
+    m_notchFM->setEnabled(m_frontendCaps.notches & MIRISDR_NOTCH_FM);
+    m_notchDAB->setEnabled(m_frontendCaps.notches & MIRISDR_NOTCH_DAB);
+    m_notchMW->setEnabled(m_frontendCaps.notches & MIRISDR_NOTCH_MW);
+    m_directSampling->setEnabled(m_frontendCaps.direct_sampling != 0);
+    m_amplifierBypass->setEnabled(m_frontendCaps.amp_bypass_hz != 0);
+    m_portTie->setEnabled(m_frontendCaps.flags & MIRISDR_FRONTEND_PORT_TIE);
+    m_referenceOutput->setEnabled(m_frontendCaps.flags & MIRISDR_FRONTEND_REF_OUT);
+    displayFrontEndSettings();
+    sizeToContents();
+}
+
+void SDRPlayGui::updateCenterFrequencyRange()
+{
+    if (m_frontendCaps.range_count <= 0) {
+        return;
+    }
+
+    uint32_t minimumFrequency = std::numeric_limits<uint32_t>::max();
+    uint32_t maximumFrequency = 0;
+
+    for (int i = 0; i < m_frontendCaps.range_count; ++i)
+    {
+        minimumFrequency = std::min(minimumFrequency, m_frontendCaps.range[i][0]);
+        maximumFrequency = std::max(maximumFrequency, m_frontendCaps.range[i][1]);
+    }
+
+    if (m_frontendCaps.antenna_hiz >= 0 && m_settings.m_antenna == m_frontendCaps.antenna_hiz) {
+        maximumFrequency = std::min<uint32_t>(maximumFrequency, 30000000U);
+    }
+
+    if (maximumFrequency > minimumFrequency)
+    {
+        const QSignalBlocker centerFrequencyBlocker(ui->centerFrequency);
+        const quint64 minimumFrequencyKHz = (static_cast<quint64>(minimumFrequency) + 999U) / 1000U;
+        const quint64 maximumFrequencyKHz = (static_cast<quint64>(maximumFrequency) - 1U) / 1000U;
+        ui->centerFrequency->setValueRange(9, minimumFrequencyKHz, maximumFrequencyKHz);
+        ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000U);
+    }
+}
+
+void SDRPlayGui::displayFrontEndSettings()
+{
+    if (!m_tuner) {
+        return;
+    }
+
+    const QSignalBlocker tunerBlocker(m_tuner);
+    const QSignalBlocker antennaBlocker(m_antenna);
+    const QSignalBlocker attenuatorBlocker(m_attenuator);
+    const QSignalBlocker directBlocker(m_directSampling);
+    const QSignalBlocker biasBlocker(m_biasT);
+    const QSignalBlocker fmBlocker(m_notchFM);
+    const QSignalBlocker dabBlocker(m_notchDAB);
+    const QSignalBlocker mwBlocker(m_notchMW);
+    const QSignalBlocker ampBlocker(m_amplifierBypass);
+    const QSignalBlocker tieBlocker(m_portTie);
+    const QSignalBlocker refBlocker(m_referenceOutput);
+
+    m_tuner->setCurrentIndex(m_tuner->findData(m_settings.m_tunerIndex));
+    m_antenna->setCurrentIndex(m_antenna->findData(m_settings.m_antenna));
+    updateCenterFrequencyRange();
+    m_attenuator->setCurrentIndex(m_attenuator->findData(m_settings.m_attenuator));
+    m_directSampling->setCurrentIndex(m_directSampling->findData(m_settings.m_directSampling));
+    m_biasT->setChecked(m_settings.m_biasT);
+    m_notchFM->setChecked(m_settings.m_notchMask & MIRISDR_NOTCH_FM);
+    m_notchDAB->setChecked(m_settings.m_notchMask & MIRISDR_NOTCH_DAB);
+    m_notchMW->setChecked(m_settings.m_notchMask & MIRISDR_NOTCH_MW);
+    m_amplifierBypass->setChecked(m_settings.m_amplifierBypass);
+    m_portTie->setChecked(m_settings.m_frontEndFlags & MIRISDR_FRONTEND_PORT_TIE);
+    m_referenceOutput->setChecked(m_settings.m_frontEndFlags & MIRISDR_FRONTEND_REF_OUT);
+    m_amplifierBypass->setEnabled(m_frontendCaps.amp_bypass_hz != 0 && !m_settings.m_tunerGainMode);
 }
 
 void SDRPlayGui::sendSettings()
@@ -356,22 +591,6 @@ void SDRPlayGui::on_iqImbalance_toggled(bool checked)
     sendSettings();
 }
 
-void SDRPlayGui::on_fBand_currentIndexChanged(int index)
-{
-    ui->centerFrequency->setValueRange(
-            9,
-            SDRPlayBands::getBandLow(index),
-            SDRPlayBands::getBandHigh(index));
-
-    ui->centerFrequency->setValue((SDRPlayBands::getBandLow(index)+SDRPlayBands::getBandHigh(index)) / 2);
-    m_settings.m_centerFrequency = (SDRPlayBands::getBandLow(index)+SDRPlayBands::getBandHigh(index)) * 500;
-    m_settings.m_frequencyBandIndex = index;
-    m_settingsKeys.append("centerFrequency");
-    m_settingsKeys.append("frequencyBandIndex");
-
-    sendSettings();
-}
-
 void SDRPlayGui::on_bandwidth_currentIndexChanged(int index)
 {
     m_settings.m_bandwidthIndex = index;
@@ -381,7 +600,11 @@ void SDRPlayGui::on_bandwidth_currentIndexChanged(int index)
 
 void SDRPlayGui::on_samplerate_currentIndexChanged(int index)
 {
-    m_settings.m_devSampleRateIndex = index;
+    if (index < 0) {
+        return;
+    }
+
+    m_settings.m_devSampleRateIndex = ui->samplerate->itemData(index).toUInt();
     m_settingsKeys.append("devSampleRateIndex");
     sendSettings();
 }
@@ -410,12 +633,16 @@ void SDRPlayGui::on_fcPos_currentIndexChanged(int index)
 void SDRPlayGui::on_gainTunerOn_toggled(bool checked)
 {
     qDebug("SDRPlayGui::on_gainTunerOn_toggled: %s", checked ? "on" : "off");
+    if (!checked) {
+        return;
+    }
     m_settings.m_tunerGainMode = true;
     m_settingsKeys.append("tunerGainMode");
     ui->gainTuner->setEnabled(true);
     ui->gainLNA->setEnabled(false);
     ui->gainMixer->setEnabled(false);
     ui->gainBaseband->setEnabled(false);
+    m_amplifierBypass->setEnabled(false);
 
     sendSettings();
 }
@@ -423,7 +650,7 @@ void SDRPlayGui::on_gainTunerOn_toggled(bool checked)
 void SDRPlayGui::on_gainTuner_valueChanged(int value)
 {
     int gain = value;
-    QString gainText = QStringLiteral("%1").arg(gain, 3, 10, QLatin1Char('0'));
+    QString gainText = QString::number(gain);
     ui->gainTunerText->setText(gainText);
     m_settings.m_tunerGain = gain;
     m_settingsKeys.append("tunerGain");
@@ -434,12 +661,16 @@ void SDRPlayGui::on_gainTuner_valueChanged(int value)
 void SDRPlayGui::on_gainManualOn_toggled(bool checked)
 {
     qDebug("SDRPlayGui::on_gainManualOn_toggled: %s", checked ? "on" : "off");
+    if (!checked) {
+        return;
+    }
     m_settings.m_tunerGainMode = false;
     m_settingsKeys.append("tunerGainMode");
     ui->gainTuner->setEnabled(false);
     ui->gainLNA->setEnabled(true);
     ui->gainMixer->setEnabled(true);
     ui->gainBaseband->setEnabled(true);
+    m_amplifierBypass->setEnabled(m_frontendCaps.amp_bypass_hz != 0);
 
     sendSettings();
 }
@@ -463,10 +694,98 @@ void SDRPlayGui::on_gainBaseband_valueChanged(int value)
 	m_settings.m_basebandGain = value;
     m_settingsKeys.append("basebandGain");
 
-    QString gainText = QStringLiteral("%1").arg(value, 2, 10, QLatin1Char('0'));
+    QString gainText = QString::number(value);
     ui->gainBasebandText->setText(gainText);
 
 	sendSettings();
+}
+
+void SDRPlayGui::on_tuner_currentIndexChanged(int index)
+{
+    if (!m_doApplySettings || index < 0) {
+        return;
+    }
+    m_settings.m_tunerIndex = m_tuner->itemData(index).toUInt();
+    m_settingsKeys.append("tunerIndex");
+    sendSettings();
+}
+
+void SDRPlayGui::on_antenna_currentIndexChanged(int index)
+{
+    if (!m_doApplySettings || index < 0) {
+        return;
+    }
+    m_settings.m_antenna = m_antenna->itemData(index).toInt();
+    updateCenterFrequencyRange();
+    m_settingsKeys.append("antenna");
+    sendSettings();
+}
+
+void SDRPlayGui::on_attenuator_currentIndexChanged(int index)
+{
+    if (!m_doApplySettings || index < 0) {
+        return;
+    }
+    m_settings.m_attenuator = m_attenuator->itemData(index).toInt();
+    m_settingsKeys.append("attenuator");
+    sendSettings();
+}
+
+void SDRPlayGui::on_directSampling_currentIndexChanged(int index)
+{
+    if (!m_doApplySettings || index < 0) {
+        return;
+    }
+    m_settings.m_directSampling = m_directSampling->itemData(index).toInt();
+    m_settingsKeys.append("directSampling");
+    sendSettings();
+}
+
+void SDRPlayGui::on_biasT_toggled(bool checked)
+{
+    if (!m_doApplySettings) {
+        return;
+    }
+    m_settings.m_biasT = checked;
+    m_settingsKeys.append("biasT");
+    sendSettings();
+}
+
+void SDRPlayGui::on_notch_toggled(bool checked)
+{
+    (void) checked;
+    if (!m_doApplySettings) {
+        return;
+    }
+    m_settings.m_notchMask =
+        (m_notchFM->isChecked() ? MIRISDR_NOTCH_FM : 0) |
+        (m_notchDAB->isChecked() ? MIRISDR_NOTCH_DAB : 0) |
+        (m_notchMW->isChecked() ? MIRISDR_NOTCH_MW : 0);
+    m_settingsKeys.append("notchMask");
+    sendSettings();
+}
+
+void SDRPlayGui::on_amplifierBypass_toggled(bool checked)
+{
+    if (!m_doApplySettings) {
+        return;
+    }
+    m_settings.m_amplifierBypass = checked;
+    m_settingsKeys.append("amplifierBypass");
+    sendSettings();
+}
+
+void SDRPlayGui::on_frontEndFlag_toggled(bool checked)
+{
+    (void) checked;
+    if (!m_doApplySettings) {
+        return;
+    }
+    m_settings.m_frontEndFlags =
+        (m_portTie->isChecked() ? MIRISDR_FRONTEND_PORT_TIE : 0) |
+        (m_referenceOutput->isChecked() ? MIRISDR_FRONTEND_REF_OUT : 0);
+    m_settingsKeys.append("frontEndFlags");
+    sendSettings();
 }
 
 void SDRPlayGui::on_startStop_toggled(bool checked)
@@ -519,7 +838,6 @@ void SDRPlayGui::makeUIConnections()
     QObject::connect(ui->ppm, &QSlider::valueChanged, this, &SDRPlayGui::on_ppm_valueChanged);
     QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &SDRPlayGui::on_dcOffset_toggled);
     QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &SDRPlayGui::on_iqImbalance_toggled);
-    QObject::connect(ui->fBand, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_fBand_currentIndexChanged);
     QObject::connect(ui->bandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_bandwidth_currentIndexChanged);
     QObject::connect(ui->samplerate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_samplerate_currentIndexChanged);
     QObject::connect(ui->ifFrequency, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_ifFrequency_currentIndexChanged);
@@ -531,5 +849,16 @@ void SDRPlayGui::makeUIConnections()
     QObject::connect(ui->gainLNA, &ButtonSwitch::toggled, this, &SDRPlayGui::on_gainLNA_toggled);
     QObject::connect(ui->gainMixer, &ButtonSwitch::toggled, this, &SDRPlayGui::on_gainMixer_toggled);
     QObject::connect(ui->gainBaseband, &QDial::valueChanged, this, &SDRPlayGui::on_gainBaseband_valueChanged);
+    QObject::connect(m_tuner, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_tuner_currentIndexChanged);
+    QObject::connect(m_antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_antenna_currentIndexChanged);
+    QObject::connect(m_attenuator, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_attenuator_currentIndexChanged);
+    QObject::connect(m_directSampling, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayGui::on_directSampling_currentIndexChanged);
+    QObject::connect(m_biasT, &QCheckBox::toggled, this, &SDRPlayGui::on_biasT_toggled);
+    QObject::connect(m_notchFM, &QCheckBox::toggled, this, &SDRPlayGui::on_notch_toggled);
+    QObject::connect(m_notchDAB, &QCheckBox::toggled, this, &SDRPlayGui::on_notch_toggled);
+    QObject::connect(m_notchMW, &QCheckBox::toggled, this, &SDRPlayGui::on_notch_toggled);
+    QObject::connect(m_amplifierBypass, &QCheckBox::toggled, this, &SDRPlayGui::on_amplifierBypass_toggled);
+    QObject::connect(m_portTie, &QCheckBox::toggled, this, &SDRPlayGui::on_frontEndFlag_toggled);
+    QObject::connect(m_referenceOutput, &QCheckBox::toggled, this, &SDRPlayGui::on_frontEndFlag_toggled);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SDRPlayGui::on_startStop_toggled);
 }

@@ -25,7 +25,7 @@ else()
 endif()
 set(AIRSPYHF_TAG "9b7ef82cf37e732b9d2b2adbdd9d9ce8fee446ca")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
-set(MIRISDR_TAG "v2.0.0")
+set(MIRISDR_TAG "v1.2.0")
 set(LIBSIGMF_TAG "new-namespaces")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
@@ -1387,7 +1387,7 @@ if (LINUX)
         set(LIBMIRISDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr/src/libmirisdr/include" CACHE INTERNAL "")
         set(LIBMIRISDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmirisdr.so" CACHE INTERNAL "")
         ExternalProject_Add(libmirisdr
-                GIT_REPOSITORY https://github.com/f4exb/libmirisdr-4.git
+                GIT_REPOSITORY https://github.com/BertoldVdb/libmirisdr-6
                 GIT_TAG ${MIRISDR_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
