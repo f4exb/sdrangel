@@ -31,8 +31,8 @@
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QStringLiteral("SDRPlay"),
-    QStringLiteral("SDRPlay RSP1 Input"),
-    QStringLiteral("8.0.0"),
+    QStringLiteral("SDRPlay RSP Input (libmirisdr-6)"),
+    QStringLiteral("8.3.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
@@ -80,8 +80,13 @@ void SDRPlayPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& o
 			continue;
 		}
 
-		qDebug("SDRPlayPlugin::enumSampleSources: found %s:%s (%s)", vendor, product, serial);
-		QString displayableName(QString("SDRPlay[%1] %2").arg(i).arg(serial));
+		const char *deviceName = mirisdr_get_device_name(i);
+		qDebug("SDRPlayPlugin::enumSampleSources: found %s:%s (%s), %s",
+            vendor, product, serial, deviceName ? deviceName : "unknown board");
+		QString displayableName(QString("SDRPlay[%1] %2 %3")
+            .arg(i)
+            .arg(deviceName ? QString::fromUtf8(deviceName) : QString::fromUtf8(product))
+            .arg(serial));
 
         originDevices.append(OriginDevice(
             displayableName,
@@ -115,7 +120,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources(const OriginDe
                 1,
                 0
             ));
-            qDebug("SDRPlayPlugin::enumSampleSources: enumerated SDRPlay RSP1 device #%d", it->sequence);
+            qDebug("SDRPlayPlugin::enumSampleSources: enumerated SDRPlay device #%d", it->sequence);
         }
     }
 

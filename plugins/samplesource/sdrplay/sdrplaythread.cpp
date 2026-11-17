@@ -17,14 +17,19 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <algorithm>
+#include <cmath>
+
 #include "sdrplaythread.h"
 #include "dsp/samplesinkfifo.h"
 
 SDRPlayThread::SDRPlayThread(mirisdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
+    m_startState(StartState::Stopped),
     m_running(false),
     m_dev(dev),
     m_convertBuffer(SDRPLAY_INIT_NBSAMPLES),
+    m_floatConvertBuffer(SDRPLAY_INIT_NBSAMPLES),
     m_sampleFifo(sampleFifo),
     m_samplerate(288000),
     m_log2Decim(0),
@@ -39,19 +44,48 @@ SDRPlayThread::~SDRPlayThread()
     stopWork();
 }
 
-void SDRPlayThread::startWork()
+bool SDRPlayThread::startWork()
 {
-    m_startWaitMutex.lock();
+    QMutexLocker locker(&m_startWaitMutex);
+    m_startState = StartState::WaitingForSamples;
+    m_running.store(true);
     start();
-    while(!m_running)
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    m_startWaitMutex.unlock();
+
+    while (m_startState == StartState::WaitingForSamples)
+    {
+        if (!m_startWaiter.wait(&m_startWaitMutex, 5000))
+        {
+            qCritical("SDRPlayThread::startWork: timed out waiting for the first sample buffer");
+            m_startState = StartState::Failed;
+            m_running.store(false);
+            locker.unlock();
+            mirisdr_cancel_async(m_dev);
+            wait();
+            return false;
+        }
+    }
+
+    const bool started = m_startState == StartState::Running;
+    locker.unlock();
+
+    if (!started) {
+        wait();
+    }
+
+    return started;
 }
 
 void SDRPlayThread::stopWork()
 {
-    m_running = false;
+    m_running.store(false);
+    if (isRunning()) {
+        mirisdr_cancel_async(m_dev);
+    }
     wait();
+
+    QMutexLocker locker(&m_startWaitMutex);
+    m_startState = StartState::Stopped;
+    m_startWaiter.wakeAll();
 }
 
 void SDRPlayThread::setSamplerate(int samplerate)
@@ -73,29 +107,70 @@ void SDRPlayThread::run()
 {
     int res;
 
-    m_running = true;
-    m_startWaiter.wakeAll();
+    bool readError = false;
 
-    while (m_running)
+    while (m_running.load())
     {
         if ((res = mirisdr_read_async(m_dev, &SDRPlayThread::callbackHelper, this, 32, SDRPLAY_INIT_NBSAMPLES)) < 0)
         {
-            qCritical("SDRPlayThread::run: async read error: rc %d: %s", res, strerror(errno));
+            if (m_running.load()) {
+                qCritical("SDRPlayThread::run: async read error: rc %d: %s", res, strerror(errno));
+                readError = true;
+            }
             break;
         }
     }
 
-    m_running = false;
+    m_running.store(false);
+
+    QMutexLocker locker(&m_startWaitMutex);
+    if (readError || m_startState == StartState::WaitingForSamples) {
+        m_startState = StartState::Failed;
+    } else if (m_startState != StartState::Failed) {
+        m_startState = StartState::Stopped;
+    }
+    m_startWaiter.wakeAll();
+}
+
+void SDRPlayThread::reportFirstSamples()
+{
+    QMutexLocker locker(&m_startWaitMutex);
+    if (m_startState == StartState::WaitingForSamples)
+    {
+        m_startState = StartState::Running;
+        m_startWaiter.wakeAll();
+    }
 }
 
 void SDRPlayThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
 {
     SDRPlayThread* thread = (SDRPlayThread*) ctx;
+    thread->reportFirstSamples();
+    mirisdr_buffer_info_t info;
+    const qint16 *samples = reinterpret_cast<const qint16*>(buf);
+    qint32 sampleWords = len / sizeof(qint16);
+
+    if (mirisdr_get_buffer_info(thread->m_dev, &info) == 0 && info.type == MIRISDR_SAMPLE_F32)
+    {
+        const float *floatSamples = reinterpret_cast<const float*>(buf);
+        sampleWords = len / sizeof(float);
+
+        if (thread->m_floatConvertBuffer.size() < static_cast<size_t>(sampleWords)) {
+            thread->m_floatConvertBuffer.resize(sampleWords);
+        }
+
+        for (qint32 i = 0; i < sampleWords; ++i) {
+            const float sample = std::max(-1.0f, std::min(1.0f, floatSamples[i]));
+            thread->m_floatConvertBuffer[i] = static_cast<qint16>(std::lrint(sample * 32767.0f));
+        }
+
+        samples = thread->m_floatConvertBuffer.data();
+    }
 
     if (thread->m_iqOrder) {
-        thread->callbackIQ((const qint16*) buf, len/2);
+        thread->callbackIQ(samples, sampleWords);
     } else {
-        thread->callbackQI((const qint16*) buf, len/2);
+        thread->callbackQI(samples, sampleWords);
     }
 
 }
@@ -192,7 +267,7 @@ void SDRPlayThread::callbackIQ(const qint16* buf, qint32 len)
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 
-    if(!m_running)
+    if(!m_running.load())
     {
         mirisdr_cancel_async(m_dev);
     }
@@ -290,7 +365,7 @@ void SDRPlayThread::callbackQI(const qint16* buf, qint32 len)
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 
-    if(!m_running)
+    if(!m_running.load())
     {
         mirisdr_cancel_async(m_dev);
     }

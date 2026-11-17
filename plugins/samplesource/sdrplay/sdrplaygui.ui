@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>202</height>
+    <height>330</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>202</height>
+    <height>330</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>380</width>
-    <height>251</height>
+    <height>500</height>
    </size>
   </property>
   <property name="font">
@@ -222,13 +222,6 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_corr">
-     <item row="1" column="7">
-      <widget class="QComboBox" name="fBand">
-       <property name="toolTip">
-        <string>Frequency band</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="corrLabel">
        <property name="text">
@@ -266,13 +259,6 @@
        </property>
        <property name="text">
         <string>IQ</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="6">
-      <widget class="QLabel" name="fBandLabel">
-       <property name="text">
-        <string>Band</string>
        </property>
       </widget>
      </item>

@@ -41,7 +41,48 @@ public:
         SDRPlayUndef,
         SDRPlayRSP1,
         SDRPlayRSP1A,
-        SDRPlayRSP2
+        SDRPlayRSP1B,
+        SDRPlayRSP2,
+        SDRPlayRSPduo,
+        SDRPlayRSPdxR2,
+        SDRPlayMiricsTV
+    };
+
+    class MsgReportSDRPlayCapabilities : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgReportSDRPlayCapabilities* create(
+            const QString& boardName,
+            int tunerCount,
+            int tunerIndex,
+            const mirisdr_frontend_caps_t& caps)
+        {
+            return new MsgReportSDRPlayCapabilities(boardName, tunerCount, tunerIndex, caps);
+        }
+
+        const QString& getBoardName() const { return m_boardName; }
+        int getTunerCount() const { return m_tunerCount; }
+        int getTunerIndex() const { return m_tunerIndex; }
+        const mirisdr_frontend_caps_t& getCaps() const { return m_caps; }
+
+    private:
+        QString m_boardName;
+        int m_tunerCount;
+        int m_tunerIndex;
+        mirisdr_frontend_caps_t m_caps;
+
+        MsgReportSDRPlayCapabilities(
+            const QString& boardName,
+            int tunerCount,
+            int tunerIndex,
+            const mirisdr_frontend_caps_t& caps) :
+            Message(),
+            m_boardName(boardName),
+            m_tunerCount(tunerCount),
+            m_tunerIndex(tunerIndex),
+            m_caps(caps)
+        { }
     };
 
     class MsgConfigureSDRPlay : public Message {
@@ -128,7 +169,7 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    virtual void setMessageQueueToGUI(MessageQueue *queue);
     virtual const QString& getDeviceDescription() const;
     virtual int getSampleRate() const;
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
@@ -170,16 +211,21 @@ public:
             SWGSDRangel::SWGDeviceSettings& response);
 
     SDRPlayVariant getVariant() const { return m_variant; }
+    const QString& getBoardName() const { return m_boardName; }
 
 private:
     DeviceAPI *m_deviceAPI;
     QRecursiveMutex m_mutex;
     SDRPlayVariant m_variant;
+    QString m_boardName;
+    int m_tunerCount;
+    mirisdr_frontend_caps_t m_frontendCaps;
     SDRPlaySettings m_settings;
     mirisdr_dev_t* m_dev;
     SDRPlayThread* m_sdrPlayThread;
     QString m_deviceDescription;
     int m_devNumber;
+    uint32_t m_streamSampleRate;
     bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -188,6 +234,14 @@ private:
     void closeDevice();
     bool applySettings(const SDRPlaySettings& settings, const QList<QString>& settingsKeys, bool forwardChange, bool force);
     bool setDeviceCenterFrequency(quint64 freq);
+    bool configureStream();
+    bool applyTunerSettings(const SDRPlaySettings& settings, qint64 deviceCenterFrequency);
+    qint64 calculateDeviceCenterFrequency(const SDRPlaySettings& settings, quint64 centerFrequency) const;
+    qint64 calculateTunerLO(const SDRPlaySettings& settings, quint64 centerFrequency) const;
+    bool sanitizeCenterFrequency(SDRPlaySettings& settings) const;
+    void updateCapabilities(unsigned int tunerIndex);
+    void sanitizeFrontEndSettings(SDRPlaySettings& settings) const;
+    void reportCapabilities();
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
@@ -204,7 +258,7 @@ public:
     static unsigned int getRateIndex(unsigned int rate);
     static unsigned int getNbRates();
 private:
-    static const unsigned int m_nb_rates = 18;
+    static const unsigned int m_nb_rates = 28;
     static unsigned int m_rates[m_nb_rates];
 };
 

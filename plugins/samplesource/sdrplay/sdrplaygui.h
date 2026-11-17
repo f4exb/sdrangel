@@ -30,6 +30,9 @@
 #include "sdrplaysettings.h"
 
 class DeviceUISet;
+class QCheckBox;
+class QComboBox;
+class QLabel;
 
 namespace Ui {
     class SDRPlayGui;
@@ -62,6 +65,19 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
+    QLabel *m_boardLabel = nullptr;
+    QComboBox *m_tuner = nullptr;
+    QComboBox *m_antenna = nullptr;
+    QComboBox *m_attenuator = nullptr;
+    QComboBox *m_directSampling = nullptr;
+    QCheckBox *m_biasT = nullptr;
+    QCheckBox *m_notchFM = nullptr;
+    QCheckBox *m_notchDAB = nullptr;
+    QCheckBox *m_notchMW = nullptr;
+    QCheckBox *m_amplifierBypass = nullptr;
+    QCheckBox *m_portTie = nullptr;
+    QCheckBox *m_referenceOutput = nullptr;
+    mirisdr_frontend_caps_t m_frontendCaps {};
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
@@ -69,6 +85,11 @@ private:
     void updateSampleRateAndFrequency();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void setupFrontEndControls();
+    void setupTooltips();
+    void updateCenterFrequencyRange();
+    void displayFrontEndSettings();
+    void displayCapabilities(const SDRPlayInput::MsgReportSDRPlayCapabilities& report);
 
 private slots:
     void updateHardware();
@@ -78,7 +99,6 @@ private slots:
     void on_ppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
-    void on_fBand_currentIndexChanged(int index);
     void on_bandwidth_currentIndexChanged(int index);
     void on_samplerate_currentIndexChanged(int index);
     void on_ifFrequency_currentIndexChanged(int index);
@@ -90,6 +110,14 @@ private slots:
     void on_gainLNA_toggled(bool checked);
     void on_gainMixer_toggled(bool checked);
     void on_gainBaseband_valueChanged(int value);
+    void on_tuner_currentIndexChanged(int index);
+    void on_antenna_currentIndexChanged(int index);
+    void on_attenuator_currentIndexChanged(int index);
+    void on_directSampling_currentIndexChanged(int index);
+    void on_biasT_toggled(bool checked);
+    void on_notch_toggled(bool checked);
+    void on_amplifierBypass_toggled(bool checked);
+    void on_frontEndFlag_toggled(bool checked);
     void on_startStop_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 };

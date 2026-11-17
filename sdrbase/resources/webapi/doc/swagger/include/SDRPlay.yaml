@@ -16,7 +16,7 @@ SDRPlaySettings:
       description: "Local-oscillator correction in tenths of a part per million."
     frequencyBandIndex:
       type: integer
-      description: "Selected frequency band index."
+      description: "Deprecated compatibility field; ignored because libmirisdr-6 selects the hardware band from centerFrequency."
     ifFrequencyIndex:
       type: integer
       description: "Selected if frequency index."
@@ -56,6 +56,38 @@ SDRPlaySettings:
     basebandGain:
       type: integer
       description: "Baseband gain setting for Sdr play."
+    tunerIndex:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Tuner index (RSPduo has tuners 0 and 1)."
+    antenna:
+      type: integer
+      minimum: 0
+      maximum: 3
+      description: "libmirisdr-6 antenna input (A, B, C, or test input)."
+    biasT:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Enable the antenna bias-T."
+    notchMask:
+      type: integer
+      description: "libmirisdr-6 notch-filter mask (FM=1, DAB=2, MW=4)."
+    directSampling:
+      type: integer
+      description: "Direct-sampling mode (off=0, on=1, auto=3)."
+    attenuator:
+      type: integer
+      description: "Front-end attenuation in dB; supported steps depend on the device."
+    frontEndFlags:
+      type: integer
+      description: "Front-end option mask (RSPduo port tie=1, 24 MHz reference output=2)."
+    amplifierBypass:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Bypass the board-level front-end amplifier."
     iqOrder:
       type: integer
       minimum: 0
