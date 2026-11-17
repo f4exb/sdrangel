@@ -176,6 +176,14 @@ SWGSDRPlaySettings::cleanup() {
 
 
 
+
+
+
+
+
+
+
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -225,14 +233,21 @@ SWGSDRPlaySettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&mixer_amp_on, pJson["mixerAmpOn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&baseband_gain, pJson["basebandGain"], "qint32", "");
-
+    
     ::SWGSDRangel::setValue(&tuner_index, pJson["tunerIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&antenna, pJson["antenna"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&notch_mask, pJson["notchMask"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&direct_sampling, pJson["directSampling"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&attenuator, pJson["attenuator"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&front_end_flags, pJson["frontEndFlags"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&amplifier_bypass, pJson["amplifierBypass"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
@@ -513,44 +528,84 @@ SWGSDRPlaySettings::setBasebandGain(qint32 baseband_gain) {
 }
 
 qint32
-SWGSDRPlaySettings::getTunerIndex() { return tuner_index; }
+SWGSDRPlaySettings::getTunerIndex() {
+    return tuner_index;
+}
 void
-SWGSDRPlaySettings::setTunerIndex(qint32 value) { tuner_index = value; m_tuner_index_isSet = true; }
+SWGSDRPlaySettings::setTunerIndex(qint32 tuner_index) {
+    this->tuner_index = tuner_index;
+    this->m_tuner_index_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getAntenna() { return antenna; }
+SWGSDRPlaySettings::getAntenna() {
+    return antenna;
+}
 void
-SWGSDRPlaySettings::setAntenna(qint32 value) { antenna = value; m_antenna_isSet = true; }
+SWGSDRPlaySettings::setAntenna(qint32 antenna) {
+    this->antenna = antenna;
+    this->m_antenna_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getBiasT() { return bias_t; }
+SWGSDRPlaySettings::getBiasT() {
+    return bias_t;
+}
 void
-SWGSDRPlaySettings::setBiasT(qint32 value) { bias_t = value; m_bias_t_isSet = true; }
+SWGSDRPlaySettings::setBiasT(qint32 bias_t) {
+    this->bias_t = bias_t;
+    this->m_bias_t_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getNotchMask() { return notch_mask; }
+SWGSDRPlaySettings::getNotchMask() {
+    return notch_mask;
+}
 void
-SWGSDRPlaySettings::setNotchMask(qint32 value) { notch_mask = value; m_notch_mask_isSet = true; }
+SWGSDRPlaySettings::setNotchMask(qint32 notch_mask) {
+    this->notch_mask = notch_mask;
+    this->m_notch_mask_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getDirectSampling() { return direct_sampling; }
+SWGSDRPlaySettings::getDirectSampling() {
+    return direct_sampling;
+}
 void
-SWGSDRPlaySettings::setDirectSampling(qint32 value) { direct_sampling = value; m_direct_sampling_isSet = true; }
+SWGSDRPlaySettings::setDirectSampling(qint32 direct_sampling) {
+    this->direct_sampling = direct_sampling;
+    this->m_direct_sampling_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getAttenuator() { return attenuator; }
+SWGSDRPlaySettings::getAttenuator() {
+    return attenuator;
+}
 void
-SWGSDRPlaySettings::setAttenuator(qint32 value) { attenuator = value; m_attenuator_isSet = true; }
+SWGSDRPlaySettings::setAttenuator(qint32 attenuator) {
+    this->attenuator = attenuator;
+    this->m_attenuator_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getFrontEndFlags() { return front_end_flags; }
+SWGSDRPlaySettings::getFrontEndFlags() {
+    return front_end_flags;
+}
 void
-SWGSDRPlaySettings::setFrontEndFlags(qint32 value) { front_end_flags = value; m_front_end_flags_isSet = true; }
+SWGSDRPlaySettings::setFrontEndFlags(qint32 front_end_flags) {
+    this->front_end_flags = front_end_flags;
+    this->m_front_end_flags_isSet = true;
+}
 
 qint32
-SWGSDRPlaySettings::getAmplifierBypass() { return amplifier_bypass; }
+SWGSDRPlaySettings::getAmplifierBypass() {
+    return amplifier_bypass;
+}
 void
-SWGSDRPlaySettings::setAmplifierBypass(qint32 value) { amplifier_bypass = value; m_amplifier_bypass_isSet = true; }
+SWGSDRPlaySettings::setAmplifierBypass(qint32 amplifier_bypass) {
+    this->amplifier_bypass = amplifier_bypass;
+    this->m_amplifier_bypass_isSet = true;
+}
 
 qint32
 SWGSDRPlaySettings::getIqOrder() {
@@ -655,9 +710,28 @@ SWGSDRPlaySettings::isSet(){
         if(m_baseband_gain_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_tuner_index_isSet || m_antenna_isSet || m_bias_t_isSet || m_notch_mask_isSet ||
-           m_direct_sampling_isSet || m_attenuator_isSet || m_front_end_flags_isSet ||
-           m_amplifier_bypass_isSet){
+        if(m_tuner_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_antenna_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_t_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_notch_mask_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_direct_sampling_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_attenuator_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_front_end_flags_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_amplifier_bypass_isSet){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){
