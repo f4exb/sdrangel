@@ -1,0 +1,12 @@
+RadioPagingCharset:
+  description: "Codepage of the alphanumeric messages of a paging protocol (the protocol of the field or of the message): vendor, model and codepage of the pager. generic, generic, ascii is the default of each protocol"
+  properties:
+    vendor:
+      description: "Vendor of the pager: generic, motorola, nec, philips, swissphone, partner, truly, multitone"
+      type: string
+    model:
+      description: "Model of the pager: generic, advisor, maxima-compact, linguist, ..."
+      type: string
+    codepage:
+      description: "Codepage of the model: ascii, latin-german, cyrillic, ..."
+      type: string

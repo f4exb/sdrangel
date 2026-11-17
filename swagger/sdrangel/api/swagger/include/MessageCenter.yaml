@@ -1,0 +1,205 @@
+MessageCenterSettings:
+  description: "Message Center settings. The lists are JSON texts."
+  properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
+      format: int64
+    logSize:
+      description: "Messages kept in the log (in memory), 100 to 10000; the live view of the GUI shows the newest 100 its filters select, a query goes over the history"
+      type: integer
+    historyEnabled:
+      description: "1 every message stored is kept in the history (messagecenter/history in the application data folder: a file for each day, up to 4 MB each), for historyDays and historyMaxMB; the log is the newest of it when the message center starts, and the queries go over all of it. 0 the log is in memory only. One message center keeps the history"
+      type: integer
+    historyMaxMB:
+      description: "Size kept of the history in MB (1 to 10000): over it the oldest files go. Default 500"
+      type: integer
+    historyDays:
+      description: "Days kept of the history (1 to 3650): the files of older days go. Default 30"
+      type: integer
+    claimTimeoutSec:
+      description: "A page given to a transmitter that does not claim it in this time goes back to the queue"
+      type: integer
+    silentSec:
+      description: "A channel that does not announce itself for this time is offline"
+      type: integer
+    routes:
+      description: "JSON array of the rules, in order: name, enabled, filter and action, with what the action takes. Filter: protocols, channels (names of channels or transmitters of pages), contacts (names of contacts of the address book), sources (channels, api or a source name), direction, kind, polarity, speeds, address (a regular expression the whole address must match), text (a regular expression found anywhere in the text, not case sensitive; its captures are ${1}... in the texts of the sinks), msgType, quality (notDamaged, clean, corrected, damaged or none), conditions (a JSON array of conditions on any field of the record or of its protocol data, as those of the contacts, all of them met), hideFragments, frequencyMin, frequencyMax, timeFrom, timeTo, hideDuplicates, voiceOnly. Action: log (keep it in the log and the history), send (target: the name of a sink), page (pageTo transmitter, the default: a message for a transmitter becomes a page of the queue; pageTo contact with target a contact name, or messageContact: the message is paged by the send to of that contact, a relay, e.g. POCSAG received paged as FLEX; filter received messages, direction 0), mark (mark: icon, color of the text, background of the row, ARGB integers, each optional; the log shows them), decode (decodeCharset: vendor, model and codepage; decodeType: alphanumeric or numeric), transform (pattern: a regular expression; template: the new text when it is found, with ${1} or ${name} for its groups and ${address}, ${time}, ${field}... for the fields of the message), replace (pattern and template: each match replaced, \\1 or ${1} for a group; all false: the first one only), drop (the rules after it do not see the message); caseInsensitive for transform and replace. The rules are walked in order for each message: the changes (mark, decode, transform, replace) are for the rules after them, the deliveries (log, send, page) are made at the end of the walk with the message as the changes left it (a sink takes it once), drop ends the walk (the deliveries before it are made). A transform or a replace keeps the text before in protocolData original_text. A route of before (stop, sinks, decodeCharset, decodeType) is read as a rule for each, with a drop for stop. Default: one rule without a filter that logs"
+      type: string
+    contacts:
+      description: "JSON array of the contacts of the address book: name (unique), rules, icon (a built-in icon :name or the path of an image file), color (ARGB integer) and note. A rule is a JSON array of conditions, all of which a message must meet; a message is the contact's when it meets one of its rules. A condition: field (a field of the record: protocol, address, msgType, channel, frequency, mode... or of its protocolData: ric, function, capcode, group_capcodes...) and an operator with its value: is (numbers compared as numbers), isNot (another value, or none), matches (a regular expression of the whole value), lt, le, gt or ge (numbers), or present or absent (true); a list field when one of its values does (isNot: none of them). E.g. [[{\"field\":\"protocol\",\"is\":\"pocsag\"},{\"field\":\"ric\",\"is\":\"1234567\"}],[{\"field\":\"protocol\",\"is\":\"flex\"},{\"field\":\"capcode\",\"matches\":\"12345..\"}]]. A message of a contact has its name in protocolData contact (and contact_icon, contact_color): the log shows it, the filters of the routes select by it (contacts). The first contact a message is of names it. sendTo: how a page is sent to the contact, in order: when (conditions as those of a rule, on the fields of the page as a post has them: protocol, type, text, priority...; none: always) and page (the fields it sets: transmitter, protocol, address, function...). A post to the contact takes the first one whose conditions it meets, e.g. [{\"when\":[{\"field\":\"type\",\"is\":\"voice\"}],\"page\":{\"transmitter\":\"tx-gsc\",\"protocol\":\"gsc\",\"address\":\"012345\",\"function\":1}},{\"page\":{\"transmitter\":\"tx1\",\"protocol\":\"pocsag\",\"address\":\"1234567\",\"function\":3}}]"
+      type: string
+    sinks:
+      description: "JSON array of the sinks (destinations) the rules send records to (action send, target its name): name and type. file (the default): path and format (0 JSON lines, 1 CSV, 2 the CSV log of the Pager demodulator). udp: address, port and format (0 the Pager demodulator fields each ended by a NUL, 1 the record as one line of JSON). command: text, a command whose arguments get the message (${address}, ${message}, ${protocol}, ${type}, ${channel}, ${mode}, ${id}, ${frequency}, ${time}, ${0}, ${1}... the captures of the text expression of the rule, and ${field} for any other field; ${name:base64}, ${name:json}, ${name:url} encoded), run without a shell; env true: the fields in environment variables MC_ID, MC_TIME, MC_PROTOCOL, MC_ADDRESS, MC_TYPE, MC_TEXT, MC_CHANNEL, MC_FREQUENCY, MC_POLARITY, MC_QUALITY, MC_CONTACT and MC_RECORD (the record as JSON); stdin true: the record as one line of JSON on its standard input. speech: text said by the GUI. map: the position (latitude and longitude) in the text of the message is plotted on the Map, named by the address. Any sink: rateCount (at most so many messages, commands: runs, 0 or none for no limit), ratePeriod (in 1, 60 or 3600 s) and rateMode (hold: they wait and go as the limit allows, at most 100 waiting; drop); a command without a limit set has 5 in 1 s. A mark sink of before (type mark) is read as a mark rule"
+      type: string
+    sources:
+      description: "JSON array of the sources records are read from: name and type. file (the default): a JSON lines file, path. csv: a CSV log of a message center or of the Pager demodulator, path. udp: address (default 127.0.0.1) and port to listen on, datagrams as JSON lines or in the Pager demodulator format; what is received is a message received, never a page to transmit"
+      type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIFeatureSetIndex:
+      type: integer
+      description: "Feature-set index used by the reverse API peer."
+    reverseAPIFeatureIndex:
+      type: integer
+      description: "Feature index used by the reverse API peer."
+
+MessageCenterReport:
+  description: "Message Center report. The lists are JSON texts."
+  properties:
+    logged:
+      description: "Records stored in the log since the start"
+      type: integer
+    routed:
+      description: "Records a route selected since the start"
+      type: integer
+    endpoints:
+      description: "JSON array of the channels that announced themselves: channel (its name), role (rx, tx), status (offline, idle, busy), protocols, speeds, polarities, queueDepth, capacity, frequency, lastSeen"
+      type: string
+    pages:
+      description: "JSON array of the pages: id, transmitter, protocol, address, text, state (pending, queued, claimed, transmitted, sent, dead), attempts, retransmits, reason"
+      type: string
+    log:
+      description: "JSON array of the last 50 records of the log (MessageRecord)"
+      type: string
+    errors:
+      description: "Errors of the sinks and sources since the last report, one a line"
+      type: string
+    sinks:
+      description: "JSON array of what each sink took: name, accepted, failed (the dropped ones too), dropped (over its limit) and waiting (held by its limit, now); log and queue too"
+      type: string
+    query:
+      description: "The result of the last query action, as a JSON object: query (the query, from and to resolved), total (the messages it selects) and records (the page, newest first). Empty before the first"
+      type: string
+
+MessageCenterPost:
+  description: "A page to transmit. The transmitter is the channel name it announced. A page is for a modulator that handles its protocol. No live voice: a voice page is a sound file"
+  properties:
+    id:
+      description: "Id of the page, optional (generated if empty). The records of the message have this id"
+      type: string
+    contact:
+      description: "A contact of the address book instead of a transmitter and an address: its first send to whose conditions the page meets gives them (and the other fields it sets)"
+      type: string
+    transmitter:
+      description: "Name (title) of the transmitter channel"
+      type: string
+    protocol:
+      description: "pocsag, flex or gsc"
+      type: string
+    address:
+      description: "POCSAG: the address. FLEX: the capcode, digits or a form with letters of STD-43A Appendix A ([P|Q|R|S][fff][b]<letter><address>, e.g. 3E005237593); only the address is sent. GSC: the cap code, up to 6 digits zero padded (index, group, 3 address digits; 5 digits: index 0) or 7 digits with the suffix digit, that gives the function (1-4 and 5-8: A-D, 9 and 0: A and B) over function"
+      type: string
+    function:
+      description: "POCSAG function 0 to 3 (A to D). GSC function 0 to 3 (A to D), the address number 1 to 4"
+      type: integer
+    priority:
+      description: "FLEX: priority address (1 for yes)"
+      type: integer
+    type:
+      description: "alphanumeric, numeric, tone, voice (GSC), short_message (FLEX, see shortType), special_numeric, numbered_numeric, numbered_special_numeric (FLEX numeric vectors 100 and 111), binary (FLEX HEX/binary, text of hex digits) or secure (FLEX, see secureType)"
+      type: string
+    shortType:
+      description: "FLEX short_message type (STD-43A Table 3.9.2-1): 0 numeric, text up to 3 digits (8 for a long address), no text is the tone only payload; 1 source code; 2 source code and message number"
+      type: integer
+    source:
+      description: "FLEX short_message types 1 and 2: source code 0 to 7"
+      type: integer
+    blocking:
+      description: "FLEX binary: blocking length B, bits of a character 1 to 16; 0 or omitted: 1"
+      type: integer
+    mailDrop:
+      description: "FLEX binary: mail drop flag M (1 for yes)"
+      type: integer
+    rightToLeft:
+      description: "FLEX binary: display direction D, 1 right to left (not with a blocking length of 1)"
+      type: integer
+    headerMessage:
+      description: "FLEX binary: header message flag H (1 for yes)"
+      type: integer
+    statusInfo:
+      description: "FLEX binary: status information field enabler I (1 for yes)"
+      type: integer
+    secureType:
+      description: "FLEX secure type t1 t0 (STD-43A 3.10.1.4): 0 alphanumeric, 1 data defined separately (hex digits), 2 binary (hex digits)"
+      type: integer
+    groupMembers:
+      description: "FLEX group message (STD-43A 5.2): the capcodes of the pagers, 2 to 5461, separated by commas (digits or the forms with letters of STD-43A Appendix A, only the address is used). The address is not used. The transmitter sends a short instruction to each pager, then the message to a temporary address"
+      type: string
+    retransmit:
+      description: "Transmitter in network mode: copies sent after the message (POCSAG 0 to 10; FLEX 0 to 15, numbered types with message numbering, same number and R = 0). The page is sent with its first transmission"
+      type: integer
+    retransmitInterval:
+      description: "Seconds between the copies, 0 to 3600. Negative or omitted: the default of the transmitter (POCSAG 10 s, FLEX 128 frames)"
+      type: number
+      format: float
+    sendDelay:
+      description: "Transmitter in network mode: seconds from its queueing to the first transmission, 0 to 3600"
+      type: number
+      format: float
+    text:
+      description: "The text of the message"
+      type: string
+    charset:
+      description: "Alphanumeric: the codepage of the text in the protocol of the page. Omitted: the codepage of the transmitter for the protocol"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    voiceFile:
+      description: "voice: the path of the WAV file, on the host of SDRangel"
+      type: string
+    speed:
+      description: "POCSAG speed in baud: 512, 1200 or 2400. 0: the channel setting"
+      type: integer
+    polarity:
+      description: "normal or inverted. Empty: the channel setting"
+      type: string
+
+MessageCenterActions:
+  description: "Message Center actions. One at a time"
+  properties:
+    post:
+      $ref: "http://swgserver:8081/api/swagger/include/MessageCenter.yaml#/MessageCenterPost"
+    requeue:
+      description: "Id of a dead page: it goes back to pending with its attempts reset"
+      type: string
+    cancel:
+      description: "Id of a page nobody has claimed or a dead page: it is withdrawn"
+      type: string
+    clearSent:
+      description: "1: the pages that were sent are forgotten"
+      type: integer
+    ingest:
+      description: "A message record as JSON (one or more lines): it goes through the routes as if a channel had published it, as a message received"
+      type: string
+    importFile:
+      description: "Path of a JSON lines or CSV file (a log of a message center or of the Pager demodulator) read once into the log: not routed, so no action is taken on it"
+      type: string
+    query:
+      description: "A query of the messages, as a JSON object: over the history when it is kept, else over the log. from and to (ms since the epoch) or last (seconds back from now), filter (as the filter of a route), offset and limit (default 100, at most 1000) of the messages it selects, newest first. Made at once: its result is in the report (query)"
+      type: string
+    redecode:
+      $ref: "http://swgserver:8081/api/swagger/include/MessageCenter.yaml#/MessageCenterRedecode"
+
+MessageCenterRedecode:
+  description: "A received message of the log decoded again: POCSAG and GSC from their message bits, with another codepage or as the other type; FLEX alphanumeric from its characters, with another codepage. The record of the log is replaced"
+  properties:
+    id:
+      description: "Id of the record"
+      type: string
+    charset:
+      description: "Codepage of the protocol of the record. Omitted: the codepage of the record"
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    type:
+      description: "alphanumeric or numeric (POCSAG and GSC). Omitted: the type of the record"
+      type: string

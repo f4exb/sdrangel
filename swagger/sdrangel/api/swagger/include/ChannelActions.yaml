@@ -63,6 +63,9 @@ ChannelActions:
     RadioAstronomyActions:
       $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomyActions"
       description: "Radio astronomy actions configuration for Channel."
+    RadioPagingModActions:
+      $ref: "http://swgserver:8081/api/swagger/include/RadioPagingMod.yaml#/RadioPagingModActions"
+      description: "Radio paging mod actions configuration for Channel."
     RTTYModActions:
       $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModActions"
       description: "Rtty mod actions configuration for Channel."

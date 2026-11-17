@@ -36,6 +36,8 @@ FeatureReport:
     MapReport:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapReport"
       description: "Map report data for Feature."
+    MessageCenterReport:
+      $ref: "http://swgserver:8081/api/swagger/include/MessageCenter.yaml#/MessageCenterReport"
     PERTesterReport:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterReport"
       description: "Per tester report data for Feature."

@@ -149,6 +149,12 @@ else()
     message(STATUS "Not building denoiser (ENABLE_FEATURE_DENOISER=${ENABLE_FEATURE_DENOISER} RNNOISE_FOUND=${RNNOISE_FOUND})")
 endif()
 
+if (ENABLE_FEATURE_MESSAGECENTER)
+    add_subdirectory(messagecenter)
+else()
+    message(STATUS "Not building messagecenter (ENABLE_FEATURE_MESSAGECENTER=${ENABLE_FEATURE_MESSAGECENTER})")
+endif()
+
 if (ENABLE_FEATURE_FREQDISPLAY)
     add_subdirectory(freqdisplay)
 else()

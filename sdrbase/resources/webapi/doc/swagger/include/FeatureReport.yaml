@@ -36,6 +36,8 @@ FeatureReport:
     MapReport:
       $ref: "/doc/swagger/include/Map.yaml#/MapReport"
       description: "Map report data for Feature."
+    MessageCenterReport:
+      $ref: "/doc/swagger/include/MessageCenter.yaml#/MessageCenterReport"
     PERTesterReport:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterReport"
       description: "Per tester report data for Feature."

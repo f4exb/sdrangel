@@ -1,0 +1,1043 @@
+// Frames of a reference transmitter: inputs and the sync part (18 bytes) and data part
+// (second sync and phase data) of the frame for them, as hex strings.
+// mode: 0 1600/2, 1 3200/2, 2 3200/4, 3 6400/4. type: 0 tone, 1 numeric, 2 alphanumeric.
+// phase: index of the phase carrying the messages.
+{
+	"idle 1600/2", 0, 0, 0, 0, 0, 0,
+	{},
+	15,
+		"aaaaaaaa78f359395555870ca6c600007842",
+		"aed845127baaaa2aaa2a2a2a2a2a2aaa2a2a2a2a2a2a2a2a2a2a2aaa2aaa2aaa"
+		"aa2aaaaa2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"idle 3200/2", 1, 7, 99, 3, 0, 0,
+	{},
+	15,
+		"aaaaaaaa84e7593955557b18a6c60ec67ae7",
+		"aaaaaaed84555555127bcccccccccccccccc0ccc0ccc0ccc0ccc0ccc0ccccccc"
+		"0ccc0ccc0ccc0ccc0ccc0ccc0ccccccccccc0ccccccccccc0ccccccccccccccc"
+		"cccc0ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccc"
+},
+{
+	"idle 3200/4", 2, 14, 127, 7, 0, 0,
+	{},
+	15,
+		"aaaaaaaa4f9759395555b068a6c637fe7c0e",
+		"888888ed84222222127b0888c888c888c888088808880888088808880888c888"
+		"0888088808880888088808880888c888c888c888c888c888c8880888c8880888"
+		"0888c888c8880888c88888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"88888888888888888888"
+},
+{
+	"idle 6400/4", 3, 1, 2, 5, 0, 0,
+	{},
+	15,
+		"aaaaaaaa215f59395555dea0a6c6b840796a",
+		"8888888888888888ed842222222222222222127b00a0a0a0f0a0a0a0f0a0a0a0"
+		"00a0a0a000a0a0a000a0a0a000a0a0a000a0a0a000a0a0a000a0a0a0f0a0a0a0"
+		"00a0a0a000a0a0a000a0a0a000a0a0a000a0a0a000a0a0a000a0a0a0f0a0a0a0"
+		"00a0a0a0f0a0a0a000a0a0a0f0a0a0a0f0a0a0a0f0a0a0a000a0a0a0f0a0a0a0"
+		"f0a0a0a0f0a0a0a0f0a0a0a0f0a0a0a0f0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"alpha short", 0, 3, 45, 0, 0, 1,
+	{{1234567ULL, 2, "Hello World", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c67cb47c11",
+		"aed845127bd8d9e434311f3d7222574d92551f6e066f46001f4f47be2d8d1221"
+		"92d613225eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha 1 char", 0, 3, 46, 0, 0, 1,
+	{{100ULL, 2, "A", 0, 2}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6bc747ca9",
+		"aed845127bb28aca2a2a4a622a22120292120a1a6a020202120262ca1ae2424a"
+		"8af25a3a6aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha 2 chars", 0, 4, 46, 0, 0, 1,
+	{{101ULL, 2, "AB", 0, 63}},
+	15,
+		"aaaaaaaa78f359395555870ca6c632747dce",
+		"aed845127be282da3a2a4a7a2a32020292121a127a121212120a229252ea0a1a"
+		"82b2423222aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha 3 chars", 0, 4, 47, 1, 0, 1,
+	{{102ULL, 2, "ABC", 0, 0}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6d2f47f71",
+		"aed845127baed6620a3a5a763e26020292120a266e020282120afe26ea8652a2"
+		"5ac69e9a9aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha max", 0, 5, 3, 0, 0, 1,
+	{{1933312ULL, 2, "0123456789abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRS", 0, 9}},
+	15,
+		"aaaaaaaa78f359395555870ca6c61ac07b25",
+		"aed845127ba2b49a213f1738353602019f1f100b0236406e5f6100a831a16523"
+		"94b9227d0e55994b3807ffffaacc5a3907ffff5566d2310fffff2ee8212cb950"
+		"5deeb28fc92acc259c8380ff55662d1c03807faa3369180700ff9774ef9623a8"
+		"d188d9c71badc99b40f83fc712241289b87f87ad361289f87f877607495b093f"
+		"2ace2aff36569849c43cfcffa9ce59c43cfcff5263d1c838fcfbdfdbdf1d4f9b"
+		"62e0b98b0caacca4621f01fe55662ce21f01fea83168e41d03fc6eee128f5acf"
+		"cd8e5ec6f9b5d94b27e0ff1f6a4cda06c1ff3f9526924ec1ff3fd9e7df236f01"
+		"1bc63a6eb04a8c4523e0f0efb5c64d23e0e0ff4a73c927e0e0ff3c1320c1a8b0"
+		"b2fcad8727a2c4a291770ff055662211ff0ff0ab326610fe0ff1988069e92dd3"
+		"2c895a4de655994b3807ffffaacc5a3907ffff5566d2310fffff2ee8212cb950"
+		"5deeb28fc92acc249c8280fe54662c1c02807eaa3268180600fe9674ee9622a8"
+		"d088d8c61a"
+},
+{
+	"alpha long set 1-2 min", 0, 6, 10, 0, 0, 1,
+	{{2101249ULL, 2, "long address one", 0, 3}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6065079cd",
+		"aed845127bd5b62e22382f3f3a223fa4a82f2f3c343524202f255ed35ba445d8"
+		"35dab13ad44aea2a2acaeaeaaa0aaa0a0aeaaaeaea4a4a8acaca2a8a4a6a6a0a"
+		"8aaa8aaa4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha long set 1-2 max", 0, 6, 11, 0, 0, 1,
+	{{1075843072ULL, 2, "x", 0, 4}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6f6d07cf6",
+		"aed845127ba6a62e3a3a223a32223aa6ae2e26265e2222222a223eda3ede46ce"
+		"4ac2b652aeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha long set 1-3 min", 0, 6, 12, 0, 0, 1,
+	{{1075843073ULL, 2, "abcdefg", 0, 5}},
+	15,
+		"aaaaaaaa78f359395555870ca6c676307e15",
+		"aed845127bfe971918100b1f1d011b80880f0f030d1220202e2673f06a8555f5"
+		"07fc9339eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha long set 1-3 max", 0, 6, 13, 0, 0, 1,
+	{{3223326720ULL, 2, "ab", 0, 6}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6b6b07d71",
+		"aed845127b8a8a061e1e06121e0a12828a0e060a5e2222222e2636f21ada6ec6"
+		"66c2b672a6aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha long set 2-3 min", 0, 6, 14, 0, 0, 1,
+	{{3223326721ULL, 2, "Message to set two three", 0, 7}},
+	15,
+		"aaaaaaaa78f359395555870ca6c636707e7c",
+		"aed845127be79b110c1e031b170215848a0b0f0e584470606f6628ee74ce5db0"
+		"03abd933b55652961ac2fedec68ee2822afaea2e267a0272fa7a5a16aa1a465e"
+		"9a46fa8eb6aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"alpha long set 2-3 max", 0, 6, 15, 0, 0, 1,
+	{{4297068542ULL, 2, "zz", 0, 8}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6d6f07cc3",
+		"aed845127b86c6425e5a4a5a5a465ac6ce4e4642764a66666e661ab21efe02ae"
+		"66aade5a8aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric short", 0, 8, 20, 0, 0, 1,
+	{{1000ULL, 1, "0123456789", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6c1287875",
+		"aed845127b92baa24a22625a6a624a0a9a020232520a0a02223a4282729a726a"
+		"dab26a3a7aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric short all chars", 0, 8, 21, 0, 0, 1,
+	{{1001ULL, 1, "12 U-]5[.9_u", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c641a878a4",
+		"aed845127bfe929e6e2e6e427e624a0e8e1a121e760a3a16061a02ea168a2a0e"
+		"c6ee6a1616aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric short 1 digit", 0, 8, 22, 0, 0, 1,
+	{{1002ULL, 1, "7", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c68168781c",
+		"aed845127b8afa9a7a3a6a4a6a7a5a0a8a1a1a0a4a1a1a0a2a2a5afa0afa7a0a"
+		"8a9a3a1a1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric short max", 0, 8, 23, 0, 0, 1,
+	{{1003ULL, 1, "12345678901234567890123456789012345678901", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c601e878cd",
+		"aed845127be6e2b86b226e497964441292090827603d203403310ba369ef227a"
+		"a8ec2010542aea8a8a4a4a2a2a8a8a6a0aca0a4a2a0aca4a0a4aea8a6a0a4aea"
+		"4a2a6aea8aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric long 1 word", 0, 9, 24, 0, 0, 1,
+	{{2101250ULL, 1, "1234", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c679187cf0",
+		"aed845127b92ea2a223232222a2232aaaa222222222a2222323212ca4aea12ca"
+		"729ae232daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric long 2 words", 0, 9, 25, 0, 0, 1,
+	{{2101251ULL, 1, "1234567890", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6b9987f94",
+		"aed845127bdaea2e363236263e2232aaaa262632222e223a223a4e9206ee4a8e"
+		"7eceea3a8aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"numeric long max", 0, 9, 26, 0, 0, 1,
+	{{4000000000ULL, 1, "12345678901234567890123456789012345678901", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c639587c99",
+		"aed845127ba3b13c153117043c0212a9e9640433505e707a617845c144d7119d"
+		"5486e028ba1a7a4aca2a2a9a9a4a4a3a0aea0aaa1a8a6a2a8aaafacaba8a2a7a"
+		"2a1a3a7a4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"tone short", 0, 10, 30, 0, 0, 1,
+	{{4242ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6e5787b64",
+		"aed845127baaeaaa2a6a2a2a6a2a2a2aaa6a2a2a6a2a2a2a2a2a6aea6aea2a2a"
+		"aaea2a2a2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"tone long", 0, 10, 31, 0, 0, 1,
+	{{2200000ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c665f87bb5",
+		"aed845127baaaa0a2a2a2a6a6a6a2aaaaa2a2a2a2a2a2a2a2a2a6aaa4a8a4aaa"
+		"4acaea4a8aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"mixed priority", 0, 11, 40, 2, 0, 6,
+	{{2000ULL, 2, "normal alpha", 0, 1}, {2001ULL, 0, "", 0, 1}, {2002ULL, 2, "priority alpha", 1, 2}, {2101300ULL, 1, "5551234", 0, 1}, {2003ULL, 1, "123", 1, 1}, {2004ULL, 0, "", 1, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c6dd147d56",
+		"aed845127ba2e40d047f8c777777777704048404770404048404d931436d5042"
+		"9ea3170543bbf26a01fe51afc55da199760f031ca3a000431f4370dea55018a7"
+		"5270fd4d8e8812118926eba75a0c863698efeea70454d480efe7eb678f128337"
+		"00e8671a8c4a2aaa8a0acaca6a4a0a0aaaaa8a4a6a2a8a0aaaaa0acaea6a0aea"
+		"eaaaaaaa8aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"long and short mix", 0, 11, 41, 0, 0, 4,
+	{{3000000000ULL, 2, "hello long", 0, 5}, {77ULL, 2, "hello short", 0, 6}, {2101249ULL, 1, "42", 0, 7}, {3223326721ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c65d947d87",
+		"aed845127bbb049494042434042444644404a464360627272727a92b0b364a09"
+		"44d9a605d9bc9ca246bc13a2a800d397604f4fa743af1b004717967fe2e7f0bc"
+		"d93e5c491726e696b6229ed68aced2324efebef2d2361a067e3e32f6d676c2ae"
+		"ca3e6a8a76aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"nine tones", 0, 12, 50, 0, 0, 9,
+	{{500ULL, 0, "", 0, 1}, {501ULL, 0, "", 0, 1}, {502ULL, 0, "", 0, 1}, {503ULL, 0, "", 0, 1}, {504ULL, 0, "", 0, 1}, {505ULL, 0, "", 0, 1}, {506ULL, 0, "", 0, 1}, {507ULL, 0, "", 0, 1}, {508ULL, 0, "", 0, 1}},
+	0,
+		"aaaaaaaa78f359395555870ca6c6734c054d",
+		"aed845127baa19f8077f7f7f7f7f0000800080007f0000000000ad4b4c192d4c"
+		"e12de18734aaaa6aeaeaeaeaeaea2a2a2a2a2a2aea2a2a2a2a2a6a2aaaea2aea"
+		"ea2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"seven tones", 0, 12, 51, 0, 0, 7,
+	{{500ULL, 0, "", 0, 1}, {501ULL, 0, "", 0, 1}, {502ULL, 0, "", 0, 1}, {503ULL, 0, "", 0, 1}, {504ULL, 0, "", 0, 1}, {505ULL, 0, "", 0, 1}, {506ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa78f359395555870ca6c673cc7ab7",
+		"aed845127baa19f8877f7f7f7f7f0000000080007f0000000000ad4b4c192d4c"
+		"61ade107b4aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		"aaaaaaaaaa"
+},
+{
+	"3200/2 alpha phase A", 1, 2, 60, 0, 0, 1,
+	{{300ULL, 2, "phase A message", 0, 1}},
+	15,
+		"aaaaaaaa84e7593955557b18a6c6f43c7ba4",
+		"aaaaaaed84555555127bc666c444ae4666c60c44246e0c660e6e2e6406464444"
+		"86e406e606ee0c662c460c6404c4044606ee04e62ce4ccc626cee6640c6e44ec"
+		"ec668ce66e4e444e064eeccccccc6ccc4ccccccceccceccceccc6ccc4ccc4ccc"
+		"4ccccccccccceccceccccccc4ccc4ccccccccccccccceccc4ccc4ccceccc6ccc"
+		"cccc6ccc4ccceccc6ccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccc"
+},
+{
+	"3200/2 numeric phase C", 1, 2, 61, 4, 1, 1,
+	{{304ULL, 1, "98765", 0, 1}},
+	15,
+		"aaaaaaaa84e7593955557b18a6c674bc7b75",
+		"aaaaaaed84555555127b098ccc8c498c88cc1ccc1d8c088c0ccc1ccc098c898c"
+		"49cc09cc088c0c8c19cc09cc088c0d8c0ccccdcc0d8ccc8cc98c098c0d8c49cc"
+		"0c8c9ccc88cc48cc188ccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccc"
+},
+{
+	"3200/2 multi phase A", 1, 2, 62, 0, 0, 3,
+	{{300ULL, 2, "first", 0, 1}, {301ULL, 1, "2", 0, 1}, {302ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa84e7593955557b18a6c6b47c7bcd",
+		"aaaaaaed84555555127b4ccec6eeae66eee404ee2e6404c6046c2ece04c64464"
+		"044c844e044e04c62ec4044404660444044e0446264c4e66a4666ce48c6c4eee"
+		"6ccc8c44ece444660eee4ccccccc4ccc6ccccccccccccccccccceccc6ccc4ccc"
+		"cccceccceccc4ccc4ccceccc6ccccccccccccccc6ccc6ccc6ccccccceccceccc"
+		"cccccccccccceccc6ccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+		"cccccccccccccccccccc"
+},
+{
+	"3200/4 alpha phase A", 2, 13, 70, 0, 0, 1,
+	{{300ULL, 2, "four level A", 0, 1}},
+	15,
+		"aaaaaaaa4f9759395555b068a6c69b627e4d",
+		"888888ed84222222127bc222c080a02a68880a2022aa0a2a0a082aa0008a4002"
+		"822002aa02aa0080288808880080000802aa00882808c22a280ae88a08a848a2"
+		"e8a88200688a480a080a88880888088808880888088888888888888808880888"
+		"0888088808888888888808880888088808880888888808888888088808888888"
+		"8888888808880888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"88888888888888888888"
+},
+{
+	"3200/4 alpha phase C", 2, 13, 71, 0, 1, 1,
+	{{304ULL, 2, "four level C", 0, 1}},
+	15,
+		"aaaaaaaa4f9759395555b068a6c61be27e9c",
+		"888888ed84222222127bc999c888489d8ccc1d9819dd0d9d0d8c1dd808cd8889"
+		"499809dd09dd08c81ccc0ccc08c8088c09dd08cc0c8cc9dd0ccdcc8d0cdc8c99"
+		"cc9c59888c8d8c8d1ccdc888c8888888888888888888c888c888c88888888888"
+		"888888888888c888c88888888888888888888888c888c8888888c88888888888"
+		"8888c888c8888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"88888888888888888888"
+},
+{
+	"3200/4 long numeric phase C", 2, 13, 72, 0, 1, 1,
+	{{2101250ULL, 1, "123456", 0, 1}},
+	15,
+		"aaaaaaaa4f9759395555b068a6c6eb127e0a",
+		"888888ed84222222127bc9c8dd880cd88d980d880d880c880dd80c980d88ccc8"
+		"4cd80c980c880d880c980cd80d880cc80c980dd809c8d8d818c8dc8809c8d898"
+		"9c9848c8dc988cd8589888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"8888888888888888888888888888888888888888888888888888888888888888"
+		"88888888888888888888"
+},
+{
+	"6400/4 alpha phase A", 3, 5, 80, 0, 0, 1,
+	{{300ULL, 2, "six four A", 0, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c66a0a7bf9",
+		"8888888888888888ed842222222222222222127bf02020a0f020a0a088a0a0a0"
+		"78a8a8a000a828200820a8a800a8a8a000a8a0a808a8a020002020a070202020"
+		"8028a0a00028a8a00028a0a800a0a028082028a800a028200020a020002020a0"
+		"0028a8a00020a8a008282828f0a0a0a008a0a028f82020a00028a82070a8a820"
+		"f8202028802820287828a82870a028280020a0a8a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"6400/4 numeric phase B", 3, 5, 81, 0, 1, 1,
+	{{304ULL, 1, "1357", 0, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c6aa8a789d",
+		"8888888888888888ed842222222222222222127bf0e0a0a0f0e4a0a040a4a0a0"
+		"b0e0a0a004e0a0a004e0a0a000a4a0a000e4a0a004e0a0a000a0a0a0b0a4a0a0"
+		"40a0a0a000a4a0a000a0a0a000a4a0a004a4a0a000a4a0a000a0a0a000a0a0a0"
+		"00e0a0a000a0a0a000a4a0a0f0e0a0a000e0a0a0f0a4a0a000e4a0a0b0e0a0a0"
+		"f0e4a0a044e4a0a0b0e0a0a0b0e4a0a004a4a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"6400/4 alpha phase C", 3, 5, 82, 6, 2, 1,
+	{{308ULL, 2, "six four C", 0, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c62a4a7b90",
+		"8888888888888888ed842222222222222222127b008280a0f08080a022a0a0a0"
+		"20a2a2a002a282800280a2a200a2a2a000a2a0a202a2a082008080a0d0808080"
+		"2082a0a00082a2a00082a0a200a0a082028082a200a082800080a080008080a0"
+		"f082a2a0f080a2a0f0808280f0a280a2f2a28080f280a0a2f280a280d0a08282"
+		"f280a080d0808080d0828282d2a08282008280a2a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"6400/4 tone phase D", 3, 5, 83, 0, 3, 1,
+	{{312ULL, 0, "", 0, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c6caca792f",
+		"8888888888888888ed842222222222222222127bf0a0a0a0f0a0a0a010a0a0a0"
+		"e1a0a0a001a0a0a001a0a0a000a0a0a000a0a0a001a0a0a000a0a0a0e0a0a0a0"
+		"10a0a0a000a0a0a000a0a0a000a0a0a001a0a0a000a0a0a000a0a0a000a0a0a0"
+		"00a0a0a000a0a0a001a0a0a0f1a0a0a001a0a0a0f1a0a0a000a0a0a0e0a0a0a0"
+		"f0a0a0a011a0a0a0e1a0a0a0e0a0a0a001a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"6400/4 long alpha phase D", 3, 5, 84, 0, 3, 1,
+	{{3000000012ULL, 2, "long on D", 0, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c64a2a7bcc",
+		"8888888888888888ed842222222222222222127bf0b1a0a1f0a1a1b101a0b1b1"
+		"e1a1a1b100a1a0a000b0b1b100b1b1b100a1b0b000b0a0b101a1b1b1f1b0a1a1"
+		"11a0b0a000a0b1b100b0b1b101b1a1a000b0a1a000a1a1a000b0a1a000b0a0a0"
+		"00b0b1b100b0a1a001b0a1b0f1b1b0b000a0b0b0f0b0a0a000a1a0a0f0a0a1a1"
+		"e0a0b1a010a0b1b1f1b0b1a1e1a0a0b110a1a0a0a0a0a0a0a0a0a0a0b0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0b0a0a0a0b0a0a0a0b0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0b0a0a0a0b0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0b0a0a0a0b0a0a0a0b0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0b0a0a0a0a0a0a0a0b0a0a0a0b0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},
+{
+	"6400/4 multi phase A", 3, 5, 85, 0, 0, 4,
+	{{300ULL, 2, "a", 0, 1}, {301ULL, 2, "bb", 0, 2}, {302ULL, 1, "33", 0, 3}, {303ULL, 0, "", 1, 1}},
+	15,
+		"aaaaaaaa215f59395555dea0a6c68aaa78a8",
+		"8888888888888888ed842222222222222222127b70a0a0a8f028a82808a8a8a0"
+		"f8a8a8a8002028a808a8a028002028a00020202008a8a0a000202028f02028a8"
+		"0020202080202020002020200020202008a8a8a0002020200020202800202020"
+		"0020202800202028082828a070a828288820a0a078a0202880a0a820f0a82820"
+		"f8a028a080a0a8a878a020a87020202880a828a8a0a8a0a028a8a0a02820a0a0"
+		"28a8a0a0a8a820a0a02820a02020a0a028a0a0a0202820a0a0a020a0202020a0"
+		"a0a020a0a8a8a0a0a828a0a028a020a0282820a02020a0a02020a0a0202020a0"
+		"a0a820a0202820a0a0a8a0a020a820a028a820a0a020a0a020a8a0a02028a0a0"
+		"28a020a0a8a820a020a0a0a0a0a0a0a0202820a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+		"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+},

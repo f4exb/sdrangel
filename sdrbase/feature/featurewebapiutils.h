@@ -57,6 +57,9 @@ public:
     static bool aircraftSelect(const QString& key, const QString& value,
                                int featureSetIndex=-1, int featureIndex=-1);
     static bool openSkyMapAndFind(const QString& target);
+    //!< The Message Center that logs the messages of the radio paging channels: added to feature set 0 when no
+    //!< feature set has one. False if it can not be added
+    static bool openMessageCenter();
     static Feature *getFeature(int& featureSetIndex, int& featureIndex, const QString& uri);
     static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
     static bool satelliteLOS(const QString name);

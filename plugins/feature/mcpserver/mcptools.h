@@ -178,6 +178,11 @@ private:
     void registerWorkspaceTools();
     void registerCaptureTools();
     void registerIntentTools();
+    void registerMessageCenterTools();
+    //! Index of the Message Center feature; throws if there is none
+    int messageCenterIndex();
+    //! A Message Center action (one key of MessageCenterActions)
+    QJsonObject messageCenterAction(const QJsonObject& actions);
 
     //!< Polls until the condition holds, at most timeoutMs. False on timeout; throws when the
     //!< server is stopping, as nothing waited for on the main thread will happen then

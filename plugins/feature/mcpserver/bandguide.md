@@ -144,6 +144,7 @@ read the report more than once before judging it; a `syncState` that keeps retur
 | Meshtastic | `MeshtasticDemod` | 433 MHz (EU_433), 868 MHz (EU_868), 902 MHz (US) | Set the region to match the network |
 | MeshCore | `MeshcoreDemod` | Same ISM bands as Meshtastic | |
 | POCSAG pagers | `PagerDemod` | Regional, commonly 138 to 160 MHz. 153.350 MHz in UK. | FSK with a 4.5 kHz shift |
+| POCSAG, FLEX and GSC pagers | `RadioPagingDemod` (`listen` mode `paging`) | POCSAG and GSC as above; FLEX 929 to 932 MHz in North America, 169.650 MHz (P2000) in the Netherlands | Decodes the three protocols at once, both polarities. Its messages are in `get_paging_messages` and in the log of the Message Center |
 | End of train devices | `EndOfTrainDemod` | 457.9375 MHz North America and India, 477.7 MHz Australia, 450.2625 MHz New Zealand | |
 
 ## Scanning for activity
@@ -165,7 +166,7 @@ usual for the mode.
 | Airband voice | `am` | 118 to 137 MHz | 25 kHz | Europe also uses 8.33 kHz channels (`stepFrequency` 8333 from a 25 kHz frequency lands on all of them). The whole band at 8.33 kHz is over the 2000 frequency limit, so take it in sub bands |
 | Marine VHF, PMR446, amateur FM | `nfm` | 156 to 162 MHz marine, 446.0 to 446.2 MHz PMR, 144 to 146 and 430 to 440 MHz amateur | 12.5 kHz (PMR446 6.25 kHz, marine 25 kHz) | |
 | Digital voice | `dmr`, `dpmr`, `dstar`, `ysf`, `nxdn` | Same bands as `nfm` | 12.5 kHz (dPMR and NXDN 2400 baud 6.25 kHz) | Each sets the DSD demodulator's FM deviation and baud rate for the standard (DMR 5.4 kHz, dPMR 2.7 kHz at 2400 baud, D-Star 3.5 kHz, YSF 7 kHz, NXDN 2.7 kHz; `nxdn24` for the 2400 baud variant), which the decoder needs to recover symbols; `dsd` alone is the plugin's defaults, D-Star's. DMR gets both time slots on. Detects the carrier; decoding voice needs the AMBE feature or hardware |
-| POCSAG pagers | `pager` | Regional, commonly 138 to 160 MHz | 12.5 kHz | Finds the carriers; the messages themselves are shown only in the GUI, the API carries none |
+| POCSAG pagers | `pager` | Regional, commonly 138 to 160 MHz | 12.5 kHz | Finds the carriers; the messages themselves are shown only in the GUI, the API carries none. Pagers transmit in bursts: a channel quiet for a minute may still be in use. Once found, `listen` with mode `paging` on it reads the messages |
 | Radiosondes (RS41) | `sonde` | 400 to 406 MHz | 10 kHz | Only worth it around launch times, 00:00 and 12:00 UTC. Decoded frames come from `get_packets` |
 | SSB and CW | `ssb`, `usb`, `lsb` | HF band segments | 3 kHz | The scanner measures power in a 3 kHz channel; a busy band segment needs the threshold raised |
 
@@ -230,7 +231,8 @@ looks like an empty band.
 | AIS, APRS and AX.25, LoRa, M17, Meshtastic, MeshCore, Inmarsat, radiosondes | Packet buffer | `get_packets`, which decodes AIS position reports, APRS positions and RS41 frames. Ships, stations and sondes also appear in `get_map_items` when the Map feature is present |
 | DroneID | Packet buffer and map items | `get_packets` decodes serial number, model, drone position, altitude and speed, and pilot and home positions. `get_map_items` lists the drone, pilot and home point when the Map feature is present |
 | VOR | Channel report | `VORDemodReport.radial` with `validRadial`, and the Morse ident |
-| Pagers, DSC, NAVTEX, RTTY, FT8 | GUI only | The decoded messages are shown in the plugin's window; the API carries the channel power only. Say so rather than reporting the band as empty |
+| Pagers through `paging` (Radio Paging demodulator) | Paging messages | `get_paging_messages`: protocol, address, type, text, errors and the channel name, newest last; `sinceSequence` reads only the new ones. `get_message_center` gives the log of the Message Center and the channels heard |
+| Pagers through `pager` (Pager demodulator), DSC, NAVTEX, RTTY, FT8 | GUI only | The decoded messages are shown in the plugin's window; the API carries the channel power only. Say so rather than reporting the band as empty |
 
 How long to wait before reading: RDS a few seconds, the full station name up to ten; DAB sync
 about two seconds and the programme list five to ten; DRM lock a few seconds and the service
