@@ -36,7 +36,7 @@ FileOutputWorker::FileOutputWorker(std::ofstream *samplesStream, SampleSourceFif
     m_log2Interpolation(0),
     m_throttlems(FILEOUTPUT_THROTTLE_MS),
     m_maxThrottlems(50),
-    m_throttleToggle(false),
+    m_pacedSamples(0),
     m_spectrumSink(nullptr),
     m_buf(nullptr)
 {
@@ -60,6 +60,7 @@ void FileOutputWorker::startWork()
         qDebug() << "FileOutputWorker::startWork: file stream open, starting...";
         m_maxThrottlems = 0;
         m_elapsedTimer.start();
+        m_pacedSamples = 0;
         m_running = true;
     }
     else
@@ -151,14 +152,19 @@ void FileOutputWorker::tick()
 {
 	if (m_running)
 	{
-        qint64 throttlems = m_elapsedTimer.restart();
+        // the samples due since the start, from the elapsed time: the rounding of each tick
+        // does not add up to a rate error
+        const uint64_t due = static_cast<uint64_t>(m_elapsedTimer.nsecsElapsed() * 1e-9 * m_samplerate);
+        uint64_t chunk = due > m_pacedSamples ? due - m_pacedSamples : 0;
 
-        if (throttlems != m_throttlems)
+        if (chunk > static_cast<uint64_t>(m_samplerate))
         {
-            m_throttlems = throttlems;
-            m_samplesChunkSize = (m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
-            m_throttleToggle = !m_throttleToggle;
+            // the output buffer and the FIFO hold one second: a longer stall is skipped
+            m_pacedSamples = due - m_samplerate;
+            chunk = m_samplerate;
         }
+        m_pacedSamples += chunk;
+        m_samplesChunkSize = static_cast<unsigned int>(chunk);
 
         unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
         SampleVector& data = m_sampleFifo->getData();
