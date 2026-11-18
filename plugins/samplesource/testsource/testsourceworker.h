@@ -103,7 +103,8 @@ private:
     int m_throttlems;
     QTimer m_timer;
     QElapsedTimer m_elapsedTimer;
-    bool m_throttleToggle;
+    QElapsedTimer m_paceTimer;
+    quint64 m_pacedSamples;         // samples generated since m_paceTimer started
     QRecursiveMutex m_mutex;
 
     MessageQueue m_inputMessageQueue;

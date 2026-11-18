@@ -63,7 +63,7 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
     m_timer(this),
-    m_throttleToggle(false),
+    m_pacedSamples(0),
     m_histoCounter(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -81,6 +81,11 @@ TestSourceWorker::~TestSourceWorker()
 void TestSourceWorker::startWork()
 {
     qDebug("TestSourceWorker::startWork");
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        m_paceTimer.start();
+        m_pacedSamples = 0;
+    }
     m_timer.start(50);
 }
 
@@ -95,8 +100,10 @@ void TestSourceWorker::setSamplerate(int samplerate)
     QMutexLocker mutexLocker(&m_mutex);
 
 	m_samplerate = samplerate;
-    m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
-    m_throttleToggle = !m_throttleToggle;
+    m_chunksize = 4 * ((m_samplerate * m_throttlems) / 1000);
+    // the pace starts again at the new rate
+    m_paceTimer.start();
+    m_pacedSamples = 0;
 	m_nco.setFreq(m_frequencyShift, m_samplerate);
 	m_toneNco.setFreq(m_toneFrequency, m_samplerate);
 }
@@ -388,15 +395,27 @@ void TestSourceWorker::tick()
         m_histoCounter = 0;
     }
 
-    if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        m_throttlems = throttlems;
-        m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
-        m_throttleToggle = !m_throttleToggle;
+        // the samples due since the start, from the elapsed time: the rounding of each tick
+        // does not add up to a rate error
+        const quint64 rate = m_samplerate > 0 ? static_cast<quint64>(m_samplerate) : 0;
+        const quint64 due = static_cast<quint64>(m_paceTimer.nsecsElapsed() * 1e-9 * rate);
+        quint64 samples = due > m_pacedSamples ? due - m_pacedSamples : 0;
+
+        if (samples > rate)
+        {
+            // at most one second at a time: a longer stall is skipped
+            m_pacedSamples = due - rate;
+            samples = rate;
+        }
+        m_pacedSamples += samples;
+        m_chunksize = static_cast<quint32>(4 * samples);
     }
 
-    generate(m_chunksize);
+    if (m_chunksize > 0) {
+        generate(m_chunksize);
+    }
 }
 
 void TestSourceWorker::handleInputMessages()

@@ -77,7 +77,7 @@ private:
     int m_throttlems;
     int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;
-    bool m_throttleToggle;
+    uint64_t m_pacedSamples;        // samples output since the start of the work
 	BasebandSampleSink* m_spectrumSink;
 	IncrementalVector<Sample> m_samplesVector;
 
