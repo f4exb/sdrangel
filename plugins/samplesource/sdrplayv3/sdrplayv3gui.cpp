@@ -203,7 +203,7 @@ bool SDRPlayV3Gui::handleMessage(const Message& message)
         const SDRPlayV3Input::MsgOverload& notif = (const SDRPlayV3Input::MsgOverload&) message;
 
         // Highlight the RF gain control while the ADC is overloaded
-        if (notif.getOverload()) 
+        if (notif.getOverload())
         {
             ui->gainLNA->setStyleSheet("QComboBox { background-color : red; }");
             ui->gainLNA->setToolTip("RF (LNA and mixer) gain in dB\n\nADC is overloaded. Reduce RF or IF gain.");
