@@ -23,6 +23,8 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRPLAYV3_SDRPLAYV3THREAD_H_
 #define PLUGINS_SAMPLESOURCE_SDRPLAYV3_SDRPLAYV3THREAD_H_
 
+#include <atomic>
+
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -33,15 +35,17 @@
 
 #define SDRPLAYV3_INIT_NBSAMPLES (1<<14)
 
+class SDRPlayV3Input;
+
 class SDRPlayV3Thread : public QThread {
     Q_OBJECT
 
 public:
-    SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, QObject* parent = NULL);
+    SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, SDRPlayV3Input *input, QObject* parent = NULL);
     ~SDRPlayV3Thread();
 
     void startWork();
-    void stopWork();
+    bool stopWork(); //!< Returns false if sdrplay_api_Uninit failed, in which case the API may still call the callbacks
     bool isRunning() const { return m_running; }
     void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
@@ -54,12 +58,21 @@ public:
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    std::atomic<bool> m_running;
+
+    // Watchdog that reports when the API stops delivering samples
+    QMutex m_watchdogMutex;
+    QWaitCondition m_watchdogWaiter;
+    std::atomic<quint64> m_sampleCount;
+    int m_overloadCount;
+    std::atomic<bool> m_deviceLost; // Device removed or failed - don't also report the resulting stall
+    static constexpr unsigned long m_watchdogPeriodMs = 1000;
 
     sdrplay_api_DeviceT *m_dev;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
 	ReplayBuffer<qint16> *m_replayBuffer;
+    SDRPlayV3Input *m_input;
 
     int m_samplerate;
     unsigned int m_log2Decim;
@@ -69,7 +82,7 @@ private:
     qint16 m_iq[8192];
     int m_iqCount;
 
-    int m_rfChanged;
+    std::atomic<int> m_rfChanged;
     static const unsigned int m_rfChangedTimeout = 500;
 
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;

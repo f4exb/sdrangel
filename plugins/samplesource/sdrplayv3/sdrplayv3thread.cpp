@@ -22,18 +22,23 @@
 #include <chrono>
 #include <thread>
 #include "sdrplayv3thread.h"
+#include "sdrplayv3input.h"
 #include "dsp/samplesinkfifo.h"
 #include "util/poweroftwo.h"
 
 #include <QDebug>
 
-SDRPlayV3Thread::SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, QObject* parent) :
+SDRPlayV3Thread::SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, SDRPlayV3Input *input, QObject* parent) :
     QThread(parent),
     m_running(false),
+    m_sampleCount(0),
+    m_overloadCount(0),
+    m_deviceLost(false),
     m_dev(dev),
     m_convertBuffer(SDRPLAYV3_INIT_NBSAMPLES),
     m_sampleFifo(sampleFifo),
     m_replayBuffer(replayBuffer),
+    m_input(input),
     m_samplerate(2000000),
     m_log2Decim(0),
     m_fcPos(0),
@@ -74,20 +79,29 @@ void SDRPlayV3Thread::startWork()
     m_startWaitMutex.unlock();
 }
 
-void SDRPlayV3Thread::stopWork()
+bool SDRPlayV3Thread::stopWork()
 {
     sdrplay_api_ErrT err;
+    bool ok = true;
 
     if (m_running)
     {
+        // Stop the watchdog in run()
+        m_watchdogMutex.lock();
         m_running = false;
+        m_watchdogWaiter.wakeAll();
+        m_watchdogMutex.unlock();
 
-        if ((err = sdrplay_api_Uninit(m_dev->dev)) != sdrplay_api_Success) {
-            qWarning() << "SDRPlayV3Thread::callbackHelper: sdrplay_api_Uninit error: " << sdrplay_api_GetErrorString(err);
+        if ((err = sdrplay_api_Uninit(m_dev->dev)) != sdrplay_api_Success)
+        {
+            qWarning() << "SDRPlayV3Thread::stopWork: sdrplay_api_Uninit error: " << sdrplay_api_GetErrorString(err);
+            ok = false;
         }
     }
 
     wait();
+
+    return ok;
 }
 
 void SDRPlayV3Thread::setSamplerate(int samplerate)
@@ -117,21 +131,117 @@ bool SDRPlayV3Thread::waitForRfChanged()
     return m_rfChanged != 0;
 }
 
-// Don't really need a thread here - just using same structure as other plugins
+// Samples are delivered by the API's callbacks, so this thread only runs a watchdog
+// that reports when the API stops delivering samples (USB drop, API service stall)
 void SDRPlayV3Thread::run()
 {
+    QMutexLocker watchdogLocker(&m_watchdogMutex);
+
     m_running = true;
     m_startWaiter.wakeAll();
+
+    quint64 lastSampleCount = m_sampleCount;
+    bool stalled = false;
+
+    while (m_running)
+    {
+        m_watchdogWaiter.wait(&m_watchdogMutex, m_watchdogPeriodMs);
+
+        if (!m_running) {
+            break;
+        }
+
+        quint64 sampleCount = m_sampleCount;
+
+        if (sampleCount == lastSampleCount)
+        {
+            if (!stalled)
+            {
+                qWarning() << "SDRPlayV3Thread::run: no samples received from the device for" << m_watchdogPeriodMs
+                    << "ms. Check the USB connection and the SDRplay API service";
+                stalled = true;
+
+                if (!m_deviceLost)
+                {
+                    m_input->reportError(QString("No samples have been received from the device for %1 ms.\n\n"
+                        "Check the USB connection. Restarting the SDRplay API service, then stopping and starting the device, may help.")
+                        .arg(m_watchdogPeriodMs));
+                }
+            }
+        }
+        else if (stalled)
+        {
+            qInfo() << "SDRPlayV3Thread::run: samples are being received again";
+            stalled = false;
+        }
+
+        lastSampleCount = sampleCount;
+    }
 }
 
 void SDRPlayV3Thread::eventCallback(sdrplay_api_EventT eventId, sdrplay_api_TunerSelectT tuner, sdrplay_api_EventParamsT *params, void *cbContext)
 {
-    // Could possibly report params->gainParams.currGain for eventId == sdrplay_api_GainChange
-    // or indicate ADC overload for eventId ==  sdrplay_api_PowerOverloadChange
-    (void) eventId;
-    (void) tuner;
-    (void) params;
-    (void) cbContext;
+    SDRPlayV3Thread* thread = (SDRPlayV3Thread*) cbContext;
+    sdrplay_api_ErrT err;
+
+    switch (eventId)
+    {
+    case sdrplay_api_PowerOverloadChange:
+        if (params->powerOverloadParams.powerOverloadChangeType == sdrplay_api_Overload_Detected)
+        {
+            // Log the first one loudly, as they can repeat rapidly with a strong signal
+            if (thread->m_overloadCount++ == 0) {
+                qWarning() << "SDRPlayV3Thread::eventCallback: ADC overload detected. Consider reducing the gain";
+            } else {
+                qDebug() << "SDRPlayV3Thread::eventCallback: ADC overload detected:" << thread->m_overloadCount;
+            }
+            thread->m_input->reportOverload(true);
+        }
+        else
+        {
+            qDebug() << "SDRPlayV3Thread::eventCallback: ADC overload corrected";
+            thread->m_input->reportOverload(false);
+        }
+        // The API requires overload events to be acknowledged, but rejects updates
+        // once sdrplay_api_Uninit has been called (it sends overload corrected while stopping)
+        if (thread->m_running && (err = sdrplay_api_Update(thread->m_dev->dev, tuner, sdrplay_api_Update_Ctrl_OverloadMsgAck, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success) {
+            qWarning() << "SDRPlayV3Thread::eventCallback: could not acknowledge overload:" << sdrplay_api_GetErrorString(err);
+        }
+        break;
+    case sdrplay_api_DeviceRemoved:
+        // The API can send this event repeatedly, so only report the first removal or failure
+        if (!thread->m_deviceLost.exchange(true))
+        {
+            qCritical() << "SDRPlayV3Thread::eventCallback: device removed. Samples will no longer be received";
+            thread->m_input->reportDeviceLost();
+            thread->m_input->reportError("The SDRplay API reports that the device has been removed. Samples will no longer be received.\n\n"
+                "Check the USB connection, then stop and start the device.");
+        }
+        else
+        {
+            qDebug() << "SDRPlayV3Thread::eventCallback: device removed";
+        }
+        break;
+    case sdrplay_api_DeviceFailure:
+        if (!thread->m_deviceLost.exchange(true))
+        {
+            qCritical() << "SDRPlayV3Thread::eventCallback: device failure. Samples will no longer be received";
+            thread->m_input->reportDeviceLost();
+            thread->m_input->reportError("The SDRplay API reports that the device has failed. Samples will no longer be received.\n\n"
+                "Check the USB connection. Restarting the SDRplay API service, then stopping and starting the device, may help.");
+        }
+        else
+        {
+            qDebug() << "SDRPlayV3Thread::eventCallback: device failure";
+        }
+        break;
+    case sdrplay_api_RspDuoModeChange:
+        qDebug() << "SDRPlayV3Thread::eventCallback: RSPduo mode change:" << (int) params->rspDuoModeParams.modeChangeType;
+        break;
+    default:
+        // sdrplay_api_GainChange - could report params->gainParams.currGain
+        break;
+    }
 }
 
 void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbParamsT *params, unsigned int numSamples, unsigned int reset, void *ctx)
@@ -139,6 +249,8 @@ void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbP
     (void) params;
     (void) reset;
     SDRPlayV3Thread* thread = (SDRPlayV3Thread*) ctx;
+
+    thread->m_sampleCount += numSamples;
 
     if (params->rfChanged)
         thread->m_rfChanged = params->rfChanged;
