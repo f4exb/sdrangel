@@ -42,6 +42,8 @@
 MESSAGE_CLASS_DEFINITION(SDRPlayV3Input::MsgConfigureSDRPlayV3, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayV3Input::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayV3Input::MsgSaveReplay, Message)
+MESSAGE_CLASS_DEFINITION(SDRPlayV3Input::MsgOverload, Message)
+MESSAGE_CLASS_DEFINITION(SDRPlayV3Input::MsgError, Message)
 
 SDRPlayV3Input::SDRPlayV3Input(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -49,9 +51,12 @@ SDRPlayV3Input::SDRPlayV3Input(DeviceAPI *deviceAPI) :
     m_dev(nullptr),
     m_devParams(nullptr),
     m_sdrPlayThread(nullptr),
+    m_stoppedThread(nullptr),
     m_deviceDescription("SDRPlayV3"),
     m_devNumber(0),
-    m_running(false)
+    m_running(false),
+    m_deviceLost(false),
+    m_apiFailed(false)
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
@@ -90,8 +95,8 @@ void SDRPlayV3Input::destroy()
 
 bool SDRPlayV3Input::openDevice()
 {
-    qDebug() << "SDRPlayV3Input::openDevice";
-    m_devNumber = m_deviceAPI->getSamplingDeviceSequence();
+    const QString serial = m_deviceAPI->getSamplingDeviceSerial();
+    qDebug() << "SDRPlayV3Input::openDevice: serial" << serial;
 
     if (m_dev != 0)
     {
@@ -108,7 +113,38 @@ bool SDRPlayV3Input::openDevice()
 
     sdrplay_api_ErrT err;
     unsigned int count;
-    if ((err = sdrplay_api_GetDevices(m_devs, &count, sizeof(m_devs) / sizeof(sdrplay_api_DeviceT))) == sdrplay_api_Success)
+    if ((err = sdrplay_api_GetDevices(m_devs, &count, sizeof(m_devs) / sizeof(sdrplay_api_DeviceT))) != sdrplay_api_Success)
+    {
+        qCritical() << "SDRPlayV3Input::openDevice: could not get devices: " << sdrplay_api_GetErrorString(err);
+        sdrplay_api_UnlockDeviceApi();
+        return false;
+    }
+
+    // Find the device by serial number, not by its position in the list. GetDevices only
+    // returns devices that aren't already selected (by this or another application), so
+    // positions change once a device is open, and differ from those seen at enumeration
+    m_devNumber = -1;
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if (serial == QString(m_devs[i].SerNo))
+        {
+            m_devNumber = (int) i;
+            break;
+        }
+    }
+
+    if (m_devNumber < 0)
+    {
+        // E.g. the device has been unplugged, or is in use by another application
+        QStringList available;
+        for (unsigned int i = 0; i < count; i++) {
+            available.append(QString(m_devs[i].SerNo));
+        }
+        qCritical() << "SDRPlayV3Input::openDevice: device with serial" << serial << "not found. Available:" << available;
+        sdrplay_api_UnlockDeviceApi();
+        return false;
+    }
+    else
     {
         m_dev = &m_devs[m_devNumber];
         m_dev->tuner = sdrplay_api_Tuner_A;
@@ -129,15 +165,10 @@ bool SDRPlayV3Input::openDevice()
         else
         {
             qCritical() << "SDRPlayV3Input::openDevice: could not select device: " << sdrplay_api_GetErrorString(err);
+            m_dev = nullptr;
             sdrplay_api_UnlockDeviceApi();
             return false;
         }
-    }
-    else
-    {
-        qCritical() << "SDRPlayV3Input::openDevice: could not get devices: " << sdrplay_api_GetErrorString(err);
-        sdrplay_api_UnlockDeviceApi();
-        return false;
     }
 
     sdrplay_api_UnlockDeviceApi();
@@ -153,17 +184,45 @@ bool SDRPlayV3Input::start()
         return true;
     }
 
-    if (!m_dev) {
+    if (m_apiFailed)
+    {
+        reportError("The SDRplay API service stopped responding when the device was stopped, so the device can't be restarted.\n\n"
+            "Restart the SDRplay API service, then restart SDRangel.");
         return false;
+    }
+
+    // After the device has been removed or has failed, the API keeps reporting it as removed
+    // until it is released and selected again, so reopen it (once it has been plugged back in)
+    if (m_deviceLost || !m_dev)
+    {
+        qDebug() << "SDRPlayV3Input::start: reopening device";
+        QString deviceDescription = m_deviceDescription; // closeDevice() clears it
+
+        if (!openDevice())
+        {
+            m_deviceDescription = deviceDescription;
+            reportError("Could not open the device. Check that it is plugged in and not in use by another application, then start it again.");
+            return false;
+        }
+
+        m_deviceDescription = deviceDescription;
+        m_deviceLost = false;
     }
 
     qDebug() << "SDRPlayV3Input::start";
 
-    m_sdrPlayThread = new SDRPlayV3Thread(m_dev, &m_sampleFifo, &m_replayBuffer);
+    m_sdrPlayThread = new SDRPlayV3Thread(m_dev, &m_sampleFifo, &m_replayBuffer, this);
     m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
     m_sdrPlayThread->startWork();
     m_running = m_sdrPlayThread->isRunning();
+
+    // sdrplay_api_Init has replaced the callback context, so the API no longer uses the old thread
+    if (m_running && m_stoppedThread)
+    {
+        delete m_stoppedThread;
+        m_stoppedThread = nullptr;
+    }
 
     mutexLocker.unlock();
     applySettings(m_settings, QList<QString>(), true, true);
@@ -174,10 +233,23 @@ bool SDRPlayV3Input::start()
 void SDRPlayV3Input::closeDevice()
 {
     qDebug() << "SDRPlayV3Input::closeDevice";
+    if (m_apiFailed)
+    {
+        // Don't call into the failed API. The stopped thread is deliberately leaked,
+        // as without a successful Uninit or release the API may still call its event callback
+        m_dev = nullptr;
+        m_stoppedThread = nullptr;
+    }
     if (m_dev != 0)
     {
         sdrplay_api_ReleaseDevice(m_dev);
         m_dev = 0;
+    }
+    // Once released, the API no longer calls the stopped thread's event callback
+    if (m_stoppedThread)
+    {
+        delete m_stoppedThread;
+        m_stoppedThread = nullptr;
     }
     m_deviceDescription.clear();
 }
@@ -200,9 +272,30 @@ void SDRPlayV3Input::stop()
 
     if(m_sdrPlayThread)
     {
-        m_sdrPlayThread->stopWork();
-        delete m_sdrPlayThread;
+        if (!m_sdrPlayThread->stopWork()) {
+            m_apiFailed = true;
+        }
+        // Not deleted yet, as the API may still call its event callback - see m_stoppedThread
+        delete m_stoppedThread;
+        m_stoppedThread = m_sdrPlayThread;
         m_sdrPlayThread = nullptr;
+    }
+
+    // No overload correction event will arrive once stopped, so clear any indication
+    reportOverload(false);
+}
+
+void SDRPlayV3Input::reportOverload(bool overload)
+{
+    if (m_guiMessageQueue) {
+        m_guiMessageQueue->push(MsgOverload::create(overload));
+    }
+}
+
+void SDRPlayV3Input::reportError(const QString& error)
+{
+    if (m_guiMessageQueue) {
+        m_guiMessageQueue->push(MsgError::create(error));
     }
 }
 
@@ -490,11 +583,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 m_devParams->rxChannelA->tunerParams.bwType = SDRPlayV3Bandwidths::getBandwidthEnum(settings.m_bandwidthIndex);
             else
                 m_devParams->rxChannelB->tunerParams.bwType = SDRPlayV3Bandwidths::getBandwidthEnum(settings.m_bandwidthIndex);
-            m_sdrPlayThread->resetRfChanged();
             if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_BwType, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
                 qCritical() << "SDRPlayV3Input::applySettings: could not set bandwidth: " << sdrplay_api_GetErrorString(err);
-            if (!m_sdrPlayThread->waitForRfChanged())
-                qCritical() << "SDRPlayV3Input::applySettings: could not set bandwidth: Rf update timed out";
         }
     }
 
@@ -506,11 +596,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 m_devParams->rxChannelA->tunerParams.ifType = SDRPlayV3IF::getIFEnum(settings.m_ifFrequencyIndex);
             else
                 m_devParams->rxChannelB->tunerParams.ifType = SDRPlayV3IF::getIFEnum(settings.m_ifFrequencyIndex);
-            m_sdrPlayThread->resetRfChanged();
             if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_IfType, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
                 qCritical() << "SDRPlayV3Input::applySettings: could not set IF frequency: " << sdrplay_api_GetErrorString(err);
-            if (!m_sdrPlayThread->waitForRfChanged())
-                qCritical() << "SDRPlayV3Input::applySettings: could not set IF frequency: Rf update timed out";
         }
     }
 

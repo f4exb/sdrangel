@@ -2,11 +2,11 @@
 
 <h2>Introduction</h2>
 
-This plugin supports input from SDRplay RSP devices using V3 of SDRplay's API, including RSP1, RSP1A, RSP2, RSPduo and RSPdx.
+This plugin supports input from SDRplay RSP devices using V3 of SDRplay's API, including RSP1, RSP1A, RSP1B, RSP2, RSPduo, RSPdx and RSPdxR2.
 
 <h2>Driver Prerequisites</h2>
 
-This plugin requires the SDRplay API V3.14 to have been installed and for the service to be running. It can be downloaded for Windows, Linux and Mac from: https://www.sdrplay.com/softwarehome/
+This plugin requires the SDRplay API V3.15 to have been installed and for the service to be running. It can be downloaded for Windows, Linux and Mac from: https://www.sdrplay.com/
 
 <h2>Interface</h2>
 
@@ -143,6 +143,8 @@ With SR as the sample rate before decimation Fc is calculated as:
 <h3>20. RF gain setting</h3>
 
 Sets the LNA and mixer gain dB. The settings available depended upon the RSP device and frequency band.
+
+If the device detects the ADC is overloaded, the background will be red. Try reducing either the RF or IF gain.
 
 <h3>21. IF AGC</h3>
 

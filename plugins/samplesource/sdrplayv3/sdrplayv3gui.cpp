@@ -198,6 +198,33 @@ bool SDRPlayV3Gui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (SDRPlayV3Input::MsgOverload::match(message))
+    {
+        const SDRPlayV3Input::MsgOverload& notif = (const SDRPlayV3Input::MsgOverload&) message;
+
+        // Highlight the RF gain control while the ADC is overloaded
+        if (notif.getOverload())
+        {
+            ui->gainLNA->setStyleSheet("QComboBox { background-color : red; }");
+            ui->gainLNA->setToolTip("RF (LNA and mixer) gain in dB\n\nADC is overloaded. Reduce RF or IF gain.");
+        }
+        else
+        {
+            ui->gainLNA->setStyleSheet("");
+            ui->gainLNA->setToolTip("RF (LNA and mixer) gain in dB");
+        }
+
+        return true;
+    }
+    else if (SDRPlayV3Input::MsgError::match(message))
+    {
+        const SDRPlayV3Input::MsgError& notif = (const SDRPlayV3Input::MsgError&) message;
+
+        // Non-blocking, so further messages are still handled while it is open
+        MessageDialog::critical(this, tr("SDRplay V3"), notif.getError());
+
+        return true;
+    }
     else
     {
         return false;

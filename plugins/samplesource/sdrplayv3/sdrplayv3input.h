@@ -20,6 +20,7 @@
 #define PLUGINS_SAMPLESOURCE_SDRPLAYV3_SDRPLAYV3INPUT_H_
 
 #include <stdint.h>
+#include <atomic>
 
 #include <QString>
 #include <QByteArray>
@@ -102,6 +103,46 @@ public:
         { }
     };
 
+    // Sent to the GUI when the API reports an ADC overload has been detected or corrected
+    class MsgOverload : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getOverload() const { return m_overload; }
+
+        static MsgOverload* create(bool overload) {
+            return new MsgOverload(overload);
+        }
+
+    protected:
+        bool m_overload;
+
+        MsgOverload(bool overload) :
+            Message(),
+            m_overload(overload)
+        { }
+    };
+
+    // Sent to the GUI when the device stops working (removed, failed or stopped sending samples)
+    class MsgError : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getError() const { return m_error; }
+
+        static MsgError* create(const QString& error) {
+            return new MsgError(error);
+        }
+
+    protected:
+        QString m_error;
+
+        MsgError(const QString& error) :
+            Message(),
+            m_error(error)
+        { }
+    };
+
     SDRPlayV3Input(DeviceAPI *deviceAPI);
     virtual ~SDRPlayV3Input();
     virtual void destroy();
@@ -155,6 +196,9 @@ public:
             SWGSDRangel::SWGDeviceSettings& response);
 
     int getDeviceId() const;
+    void reportOverload(bool overload); // Called from the API's event callback thread
+    void reportError(const QString& error); // Called from the API's event callback thread or the watchdog
+    void reportDeviceLost() { m_deviceLost = true; } // Called from the API's event callback thread
 
 private:
     DeviceAPI *m_deviceAPI;
@@ -164,9 +208,18 @@ private:
     sdrplay_api_DeviceT* m_dev;
     sdrplay_api_DeviceParamsT *m_devParams;
     SDRPlayV3Thread* m_sdrPlayThread;
+    // The API keeps calling the event callback with the context given to sdrplay_api_Init
+    // after sdrplay_api_Uninit, until the device is released or initialised again,
+    // so the stopped thread can only be deleted after one of those
+    SDRPlayV3Thread* m_stoppedThread;
     QString m_deviceDescription;
     int m_devNumber;
     bool m_running;
+    std::atomic<bool> m_deviceLost; // Device removed or failed, so it must be reopened before it can be restarted
+    // sdrplay_api_Uninit failed (e.g. sdrplay_api_ServiceNotResponding after the device was removed).
+    // Calling the API after this can crash inside it (seen in sdrplay_api_GetDevices with API 3.15),
+    // so it isn't called again
+    bool m_apiFailed;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     ReplayBuffer<qint16> m_replayBuffer;
