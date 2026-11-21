@@ -50,6 +50,7 @@ set(mcpserver_SOURCES
     mcprequesthandler.cpp
     mcpprotocol.cpp
     mcptools.cpp
+    mcptoolcatalog.cpp
     mcpdocs.cpp
     mcpdatafeed.cpp
     mcpcapture.cpp
@@ -66,6 +67,7 @@ set(mcpserver_HEADERS
     mcprequesthandler.h
     mcpprotocol.h
     mcptools.h
+    mcptoolcatalog.h
     mcpdocs.h
     mcpdatafeed.h
     mcpcapture.h
@@ -128,4 +130,18 @@ install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 # Install debug symbols
 if (WIN32)
     install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()
+
+# Optional native discovery regression tests, without adding dependencies to normal builds.
+option(BUILD_MCPSERVER_TESTS "Build MCP server discovery tests" OFF)
+if(BUILD_MCPSERVER_TESTS AND NOT TARGET mcp-catalog-test)
+    if(Qt6_FOUND)
+        find_package(Qt6 REQUIRED COMPONENTS Test)
+        set(MCP_TEST_QT_MAJOR 6)
+    else()
+        find_package(Qt5 REQUIRED COMPONENTS Test)
+        set(MCP_TEST_QT_MAJOR 5)
+    endif()
+    enable_testing()
+    add_subdirectory(tests)
 endif()
