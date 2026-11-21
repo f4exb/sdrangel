@@ -85,13 +85,15 @@ This is useful if you want to record a bunch of transient bursts or just make su
 
 <h3>12: Enable/disable spectrum squelch triggered recording</h3>
 
-Use this button to effectively apply spectrum squelch to recording. In this mode recording on and off will be under the control of the squelch system. Thus when active the normal record button (13) is disabled. However its color changes to reflect the recording status as described next.
+Use this button to effectively apply spectrum squelch to recording. Each squelch-triggered recording interval creates a separate file. In this mode recording on and off will be under the control of the squelch system. When active, the normal record button (13) is disabled. Its color changes to reflect the current recording status, as described next.
 
 <h3>13: Record button</h3>
 
-Use this button to start/stop recording unconditionally. Note that start/stop recording is opening/closing a new file in the same session. Until the file is changed with (14) the same file root will be used until the device is stopped or channel plugin is dismissed.
+Use this button to start/stop recording unconditionally. Recording can be enabled before samples are received, in which case recording begins with the first available samples, or while the sample stream is already running. Stopping the sample stream also stops any active recording.
 
-The button turns red if recording is active.
+Each start/stop cycle opens and closes a separate recording file. Multiple recordings can be made during the same session. The filename root remains unchanged until it is changed with (14), the File Sink channel is removed, or the device is stopped.
+
+The button turns red when recording is enabled. If no samples are flowing, recording waits until they become available. When the sample stream stops, recording stops and the button returns to grey. To record again, click the button to enable recording.
 
 <h3>14: Select output file</h3>
 

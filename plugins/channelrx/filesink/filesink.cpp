@@ -56,6 +56,7 @@ FileSink::FileSink(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_basebandSink(nullptr),
         m_running(false),
+        m_recordRequested(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
         m_frequencyOffset(0),
@@ -193,6 +194,13 @@ void FileSink::start()
     }
 
     m_running = true;
+
+    if (m_recordRequested)
+    {
+        FileSinkBaseband::MsgConfigureFileSinkWork *msg =
+            FileSinkBaseband::MsgConfigureFileSinkWork::create(true);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 }
 
 void FileSink::stop()
@@ -205,6 +213,7 @@ void FileSink::stop()
 
     qDebug("FileSink::stop:");
     m_running = false;
+    m_recordRequested = false;
 
 	m_thread->quit();
 	m_thread->wait();
@@ -378,6 +387,9 @@ void FileSink::applySettings(const QStringList& settingsKeys, const FileSinkSett
 
 void FileSink::record(bool record)
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    m_recordRequested = record;
     if (m_running)
     {
         FileSinkBaseband::MsgConfigureFileSinkWork *msg = FileSinkBaseband::MsgConfigureFileSinkWork::create(record);
