@@ -5200,6 +5200,18 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getRadioClockSettings()->init();
             channelSettings->getRadioClockSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "RadioPagingDemodSettings")
+        {
+            channelSettings->setRadioPagingDemodSettings(new SWGSDRangel::SWGRadioPagingDemodSettings());
+            channelSettings->getRadioPagingDemodSettings()->init();
+            channelSettings->getRadioPagingDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "RadioPagingModSettings")
+        {
+            channelSettings->setRadioPagingModSettings(new SWGSDRangel::SWGRadioPagingModSettings());
+            channelSettings->getRadioPagingModSettings()->init();
+            channelSettings->getRadioPagingModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RadiosondeDemodSettings")
         {
             channelSettings->setRadiosondeDemodSettings(new SWGSDRangel::SWGRadiosondeDemodSettings());
@@ -5397,6 +5409,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setPacketModActions(new SWGSDRangel::SWGPacketModActions());
             channelActions->getPacketModActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "RadioPagingModActions")
+        {
+            channelActions->setRadioPagingModActions(new SWGSDRangel::SWGRadioPagingModActions());
+            channelActions->getRadioPagingModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "PSK31ModActions")
         {
@@ -5848,6 +5865,12 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setMorseDecoderSettings(new SWGSDRangel::SWGMorseDecoderSettings());
             featureSettings->getMorseDecoderSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "MessageCenterSettings")
+        {
+            featureSettings->setMessageCenterSettings(new SWGSDRangel::SWGMessageCenterSettings());
+            featureSettings->getMessageCenterSettings()->init();
+            featureSettings->getMessageCenterSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "PERTesterSettings")
         {
             featureSettings->setPerTesterSettings(new SWGSDRangel::SWGPERTesterSettings());
@@ -5957,6 +5980,12 @@ bool WebAPIRequestMapper::getFeatureActions(
         {
             featureActions->setMapActions(new SWGSDRangel::SWGMapActions());
             featureActions->getMapActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "MessageCenterActions")
+        {
+            featureActions->setMessageCenterActions(new SWGSDRangel::SWGMessageCenterActions());
+            featureActions->getMessageCenterActions()->init();
+            featureActions->getMessageCenterActions()->fromJsonObject(actionsJsonObject);
         }
         else if (featureActionsKey == "PERTesterActions")
         {
@@ -6172,6 +6201,8 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setPsk31ModSettings(nullptr);
     channelSettings.setRadioAstronomySettings(nullptr);
     channelSettings.setRadioClockSettings(nullptr);
+    channelSettings.setRadioPagingDemodSettings(nullptr);
+    channelSettings.setRadioPagingModSettings(nullptr);
     channelSettings.setRadiosondeDemodSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
@@ -6224,6 +6255,8 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setPsk31ModReport(nullptr);
     channelReport.setRadioAstronomyReport(nullptr);
     channelReport.setRadioClockReport(nullptr);
+    channelReport.setRadioPagingDemodReport(nullptr);
+    channelReport.setRadioPagingModReport(nullptr);
     channelReport.setRadiosondeDemodReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setRttyDemodReport(nullptr);
@@ -6254,6 +6287,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setPacketModActions(nullptr);
     channelActions.setPsk31ModActions(nullptr);
     channelActions.setRadioAstronomyActions(nullptr);
+    channelActions.setRadioPagingModActions(nullptr);
     channelActions.setRttyModActions(nullptr);
 }
 
@@ -6281,6 +6315,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setFreqDisplaySettings(nullptr);
     featureSettings.setGs232ControllerSettings(nullptr);
     featureSettings.setMapSettings(nullptr);
+    featureSettings.setMessageCenterSettings(nullptr);
     featureSettings.setPerTesterSettings(nullptr);
     featureSettings.setSatelliteTrackerSettings(nullptr);
     featureSettings.setSidSettings(nullptr);
@@ -6300,6 +6335,7 @@ void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& feat
     featureReport.setAircraftReport(nullptr);
     featureReport.setFreqDisplayReport(nullptr);
     featureReport.setGs232ControllerReport(nullptr);
+    featureReport.setMessageCenterReport(nullptr);
     featureReport.setPerTesterReport(nullptr);
     featureReport.setRigCtlServerReport(nullptr);
     featureReport.setMcpServerReport(nullptr);
@@ -6319,6 +6355,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.setAircraftActions(nullptr);
     featureActions.setGs232ControllerActions(nullptr);
     featureActions.setMapActions(nullptr);
+    featureActions.setMessageCenterActions(nullptr);
     featureActions.setPerTesterActions(nullptr);
     featureActions.setRigCtlServerActions(nullptr);
     featureActions.setMcpServerActions(nullptr);

@@ -137,6 +137,12 @@ else()
     message(STATUS "Not building demodpager (ENABLE_CHANNELRX_DEMODPAGER=${ENABLE_CHANNELRX_DEMODPAGER})")
 endif()
 
+if (ENABLE_CHANNELRX_DEMODRADIOPAGING)
+    add_subdirectory(demodradiopaging)
+else()
+    message(STATUS "Not building demodradiopaging (ENABLE_CHANNELRX_DEMODRADIOPAGING=${ENABLE_CHANNELRX_DEMODRADIOPAGING})")
+endif()
+
 if (ENABLE_CHANNELRX_RADIOCLOCK)
     add_subdirectory(radioclock)
 else()

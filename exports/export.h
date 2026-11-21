@@ -155,6 +155,18 @@
 #  define MODEMM17_API
 #endif
 
+/* the 'MODEMRADIOPAGING_API' controls the import/export of 'modemradiopaging' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef modemradiopaging_EXPORTS
+#    define MODEMRADIOPAGING_API __SDR_EXPORT
+#  else
+#    define MODEMRADIOPAGING_API __SDR_IMPORT
+#  endif
+#else
+#  define MODEMRADIOPAGING_API
+#endif
+
 /* the 'MODEMMESHTASTIC_API' controls the import/export of 'modemmeshtastic' symbols
  */
 #if !defined(sdrangel_STATIC)

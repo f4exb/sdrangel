@@ -38,6 +38,7 @@
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "util/aircraftreport.h"
+#include "util/messagerecord.h"
 #include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
 #include "channel/channelapi.h"
@@ -907,6 +908,32 @@ public:
             m_pipeSource(pipeSource),
             m_packet(packet),
             m_dateTime(dateTime)
+        {
+        }
+    };
+
+    // Message to pass a received or transmitted message record between channels & features,
+    // through the MessageRecord::m_pipeName message pipe
+    class SDRBASE_API MsgMessageRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QObject *getPipeSource() const { return m_pipeSource; }
+        const MessageRecord& getRecord() const { return m_record; }
+
+        static MsgMessageRecord* create(const QObject *pipeSource, const MessageRecord& record)
+        {
+            return new MsgMessageRecord(pipeSource, record);
+        }
+
+    private:
+        const QObject *m_pipeSource;
+        MessageRecord m_record;
+
+        MsgMessageRecord(const QObject *pipeSource, const MessageRecord& record) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_record(record)
         {
         }
     };

@@ -50,6 +50,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_lime_rfe_report_isSet = false;
     map_report = nullptr;
     m_map_report_isSet = false;
+    message_center_report = nullptr;
+    m_message_center_report_isSet = false;
     per_tester_report = nullptr;
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = nullptr;
@@ -96,6 +98,8 @@ SWGFeatureReport::init() {
     m_lime_rfe_report_isSet = false;
     map_report = new SWGMapReport();
     m_map_report_isSet = false;
+    message_center_report = new SWGMessageCenterReport();
+    m_message_center_report_isSet = false;
     per_tester_report = new SWGPERTesterReport();
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = new SWGRigCtlServerReport();
@@ -148,6 +152,9 @@ SWGFeatureReport::cleanup() {
     }
     if(map_report != nullptr) { 
         delete map_report;
+    }
+    if(message_center_report != nullptr) { 
+        delete message_center_report;
     }
     if(per_tester_report != nullptr) { 
         delete per_tester_report;
@@ -207,6 +214,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_rfe_report, pJson["LimeRFEReport"], "SWGLimeRFEReport", "SWGLimeRFEReport");
     
     ::SWGSDRangel::setValue(&map_report, pJson["MapReport"], "SWGMapReport", "SWGMapReport");
+    
+    ::SWGSDRangel::setValue(&message_center_report, pJson["MessageCenterReport"], "SWGMessageCenterReport", "SWGMessageCenterReport");
     
     ::SWGSDRangel::setValue(&per_tester_report, pJson["PERTesterReport"], "SWGPERTesterReport", "SWGPERTesterReport");
     
@@ -272,6 +281,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((map_report != nullptr) && (map_report->isSet())){
         toJsonValue(QString("MapReport"), map_report, obj, QString("SWGMapReport"));
+    }
+    if((message_center_report != nullptr) && (message_center_report->isSet())){
+        toJsonValue(QString("MessageCenterReport"), message_center_report, obj, QString("SWGMessageCenterReport"));
     }
     if((per_tester_report != nullptr) && (per_tester_report->isSet())){
         toJsonValue(QString("PERTesterReport"), per_tester_report, obj, QString("SWGPERTesterReport"));
@@ -411,6 +423,16 @@ SWGFeatureReport::setMapReport(SWGMapReport* map_report) {
     this->m_map_report_isSet = true;
 }
 
+SWGMessageCenterReport*
+SWGFeatureReport::getMessageCenterReport() {
+    return message_center_report;
+}
+void
+SWGFeatureReport::setMessageCenterReport(SWGMessageCenterReport* message_center_report) {
+    this->message_center_report = message_center_report;
+    this->m_message_center_report_isSet = true;
+}
+
 SWGPERTesterReport*
 SWGFeatureReport::getPerTesterReport() {
     return per_tester_report;
@@ -527,6 +549,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(map_report && map_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(message_center_report && message_center_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_report && per_tester_report->isSet()){

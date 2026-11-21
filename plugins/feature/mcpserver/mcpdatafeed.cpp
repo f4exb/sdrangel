@@ -49,6 +49,12 @@ static const QStringList packetURIs = {
 };
 static const QStringList packetPipes = {"packets", "ais", "radiosonde"};
 
+// Channels that publish paging messages as message records
+static const QStringList messageURIs = {
+    QStringLiteral("sdrangel.channel.radiopagingdemod"),
+    QStringLiteral("sdrangel.channeltx.modradiopaging"),
+};
+
 // Channels and features that publish map items (same list as the Map feature)
 static const QStringList mapURIs = {
     QStringLiteral("sdrangel.channel.acarsdemod"),
@@ -63,6 +69,8 @@ static const QStringList mapURIs = {
     QStringLiteral("sdrangel.channel.ilsdemod"),
     QStringLiteral("sdrangel.channel.inmarsatdemod"),
     QStringLiteral("sdrangel.channel.pagerdemod"),
+    QStringLiteral("sdrangel.channel.radiopagingdemod"),
+    QStringLiteral("sdrangel.feature.messagecenter"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker"),
@@ -74,17 +82,20 @@ MCPDataFeed::MCPDataFeed(QObject *parent) :
     QObject(parent),
     m_packetHandler(packetURIs, packetPipes),
     m_mapHandler(mapURIs, QStringList{"mapitems"}),
+    m_messageHandler(messageURIs, QStringList{MessageRecord::m_pipeName}),
     m_packetSequence(0),
     m_packetsDropped(0),
     m_mapItemUpdates(0)
 {
     connect(&m_packetHandler, &AvailableChannelOrFeatureHandler::messageEnqueued, this, &MCPDataFeed::handlePacketMessages);
     connect(&m_mapHandler, &AvailableChannelOrFeatureHandler::messageEnqueued, this, &MCPDataFeed::handleMapMessages);
+    connect(&m_messageHandler, &AvailableChannelOrFeatureHandler::messageEnqueued, this, &MCPDataFeed::handleMessageRecords);
     connect(&m_mapHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleMapSourcesChanged);
     connect(&m_packetHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleSourcesChanged);
     connect(&m_mapHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleSourcesChanged);
     m_packetHandler.scanAvailableChannelsAndFeatures();
     m_mapHandler.scanAvailableChannelsAndFeatures();
+    m_messageHandler.scanAvailableChannelsAndFeatures();
     refreshSources();
 }
 
@@ -154,6 +165,127 @@ void MCPDataFeed::handleMapMessages(MessageQueue *queue)
         handleMapItem(*message);
         delete message;
     }
+}
+
+void MCPDataFeed::handleMessageRecords(MessageQueue *queue)
+{
+    Message *message;
+
+    while ((message = queue->pop()) != nullptr)
+    {
+        handleMessageRecord(*message);
+        delete message;
+    }
+}
+
+// The messages only: the announcements of the channels and the states of the pages are not
+void MCPDataFeed::handleMessageRecord(const Message& message)
+{
+    if (!MainCore::MsgMessageRecord::match(message)) {
+        return;
+    }
+
+    const MainCore::MsgMessageRecord& msg = (const MainCore::MsgMessageRecord&) message;
+
+    if (msg.getRecord().m_kind != MessageRecord::KindMessage) {
+        return;
+    }
+
+    StoredMessage stored;
+    QString type;
+    findSource(m_messageHandler, msg.getPipeSource(), stored.m_source, type);
+    stored.m_record = msg.getRecord();
+
+    QMutexLocker locker(&m_mutex);
+
+    // An update of a message (the end of a voice page) replaces it
+    for (int i = m_messages.size() - 1; i >= 0; i--)
+    {
+        if (!stored.m_record.m_id.isEmpty() && (m_messages[i].m_record.m_id == stored.m_record.m_id))
+        {
+            MessageRecord merged = m_messages[i].m_record;
+
+            for (auto it = stored.m_record.m_protocolData.begin(); it != stored.m_record.m_protocolData.end(); ++it) {
+                merged.m_protocolData.insert(it.key(), it.value());
+            }
+            if (!stored.m_record.m_text.isEmpty()) {
+                merged.m_text = stored.m_record.m_text;
+            }
+
+            merged.m_partial = stored.m_record.m_partial;
+            m_messages.removeAt(i);
+            stored.m_record = merged;
+            break;
+        }
+    }
+
+    stored.m_sequence = ++m_messageSequence;
+    m_messages.append(stored);
+
+    while (m_messages.size() > m_maxMessages)
+    {
+        m_messages.removeFirst();
+        m_messagesDropped++;
+    }
+}
+
+QJsonObject MCPDataFeed::getMessages(const QString& protocol, const QString& address, const QString& text, const QString& alias,
+    const QString& direction, int limit, qint64 sinceSequence)
+{
+    // Regular expressions on the whole field, as the filters of the channels and of the Message Center
+    QRegularExpression addressExpression(QRegularExpression::anchoredPattern(address));
+    QRegularExpression textExpression(QRegularExpression::anchoredPattern(text), QRegularExpression::DotMatchesEverythingOption);
+
+    if (!address.isEmpty() && !addressExpression.isValid()) {
+        return QJsonObject{{"error", QString("address is not a valid regular expression: %1").arg(addressExpression.errorString())}};
+    }
+    if (!text.isEmpty() && !textExpression.isValid()) {
+        return QJsonObject{{"error", QString("text is not a valid regular expression: %1").arg(textExpression.errorString())}};
+    }
+
+    QMutexLocker locker(&m_mutex);
+    QJsonArray messages;
+
+    for (int i = m_messages.size() - 1; (i >= 0) && (messages.size() < limit); i--)
+    {
+        const StoredMessage& stored = m_messages[i];
+        const MessageRecord& r = stored.m_record;
+
+        if (stored.m_sequence <= sinceSequence) {
+            break;
+        }
+        if (!protocol.isEmpty() && (r.m_protocol.compare(protocol, Qt::CaseInsensitive) != 0)) {
+            continue;
+        }
+        const QStringList addresses = r.addresses();
+
+        if (!address.isEmpty() && !std::any_of(addresses.begin(), addresses.end(),
+            [&addressExpression](const QString& a) { return addressExpression.match(a).hasMatch(); })) {
+            continue;
+        }
+        if (!text.isEmpty() && !textExpression.match(r.m_text).hasMatch()) {
+            continue;
+        }
+        if (!alias.isEmpty() && (r.m_channel != alias)) {
+            continue;
+        }
+        if (!direction.isEmpty() && (MessageRecord::directionToString(r.m_direction) != direction.toLower())) {
+            continue;
+        }
+
+        QJsonObject json = r.toJson();
+        json["sequence"] = (double) stored.m_sequence;
+        json["source"] = stored.m_source;
+        messages.prepend(json);
+    }
+
+    QJsonObject result;
+    result["messages"] = messages;
+    result["count"] = messages.size();
+    result["totalStored"] = m_messages.size();
+    result["lastSequence"] = (double) m_messageSequence;
+    result["dropped"] = (double) m_messagesDropped;
+    return result;
 }
 
 void MCPDataFeed::handlePacket(const Message& message)
@@ -631,6 +763,8 @@ QJsonObject MCPDataFeed::getStatus()
     status["packetsReceived"] = (double) m_packetSequence;
     status["mapItems"] = m_mapItems.size();
     status["mapItemUpdates"] = (double) m_mapItemUpdates;
+    status["messagesStored"] = m_messages.size();
+    status["messagesReceived"] = (double) m_messageSequence;
 
     status["packetSources"] = QJsonArray::fromStringList(m_packetSources);
     status["mapItemSources"] = QJsonArray::fromStringList(m_mapSources);

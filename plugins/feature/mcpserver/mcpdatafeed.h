@@ -30,6 +30,7 @@
 #include <QString>
 
 #include "availablechannelorfeaturehandler.h"
+#include "util/messagerecord.h"
 
 class MessageQueue;
 class Message;
@@ -73,6 +74,11 @@ public:
     QJsonObject getPackets(const QString& source, const QString& type, int limit, qint64 sinceSequence);
     void clearPackets();
     QJsonObject getMapItems(const QString& source, const QString& name, int limit, bool includeTrack);
+    //! The paging messages the channels published (the "messages" pipe), most recent last. Filters are optional: protocol,
+    //! address and text (regular expressions the whole field must match), channel alias, direction (rx or tx)
+    QJsonObject getMessages(const QString& protocol, const QString& address, const QString& text, const QString& alias,
+        const QString& direction, int limit, qint64 sinceSequence);
+    static constexpr int m_maxMessages = 1000;
     QJsonObject getStatus();
 
     static constexpr int m_maxPackets = 1000;
@@ -80,6 +86,16 @@ public:
 private:
     AvailableChannelOrFeatureHandler m_packetHandler;
     AvailableChannelOrFeatureHandler m_mapHandler;
+    AvailableChannelOrFeatureHandler m_messageHandler;
+    struct StoredMessage
+    {
+        qint64 m_sequence;
+        QString m_source;      //!< Channel id, e.g. "R0:1"
+        MessageRecord m_record;
+    };
+    QList<StoredMessage> m_messages;
+    qint64 m_messageSequence = 0;
+    qint64 m_messagesDropped = 0;
     QMutex m_mutex;
     QList<Packet> m_packets;
     qint64 m_packetSequence;
@@ -97,6 +113,7 @@ private:
     bool findSource(const AvailableChannelOrFeatureHandler& handler, const QObject *object, QString& id, QString& type) const;
     void handlePacket(const Message& message);
     void handleMapItem(const Message& message);
+    void handleMessageRecord(const Message& message);
     static QJsonObject decodePacket(const QString& sourceType, const QByteArray& bytes);
     static QString printable(const QByteArray& bytes);
     static QString stripHtml(const QString& html);
@@ -110,6 +127,7 @@ signals:
 private slots:
     void handlePacketMessages(MessageQueue *queue);
     void handleMapMessages(MessageQueue *queue);
+    void handleMessageRecords(MessageQueue *queue);
     void handleMapSourcesChanged(const QStringList& renameFrom, const QStringList& renameTo, const QStringList& removed, const QStringList& added);
     void handleSourcesChanged();
 };

@@ -48,6 +48,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_map_actions_isSet = false;
     morse_decoder_actions = nullptr;
     m_morse_decoder_actions_isSet = false;
+    message_center_actions = nullptr;
+    m_message_center_actions_isSet = false;
     per_tester_actions = nullptr;
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = nullptr;
@@ -96,6 +98,8 @@ SWGFeatureActions::init() {
     m_map_actions_isSet = false;
     morse_decoder_actions = new SWGMorseDecoderActions();
     m_morse_decoder_actions_isSet = false;
+    message_center_actions = new SWGMessageCenterActions();
+    m_message_center_actions_isSet = false;
     per_tester_actions = new SWGPERTesterActions();
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = new SWGRigCtlServerActions();
@@ -145,6 +149,9 @@ SWGFeatureActions::cleanup() {
     }
     if(morse_decoder_actions != nullptr) { 
         delete morse_decoder_actions;
+    }
+    if(message_center_actions != nullptr) { 
+        delete message_center_actions;
     }
     if(per_tester_actions != nullptr) { 
         delete per_tester_actions;
@@ -208,6 +215,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&map_actions, pJson["MapActions"], "SWGMapActions", "SWGMapActions");
     
     ::SWGSDRangel::setValue(&morse_decoder_actions, pJson["MorseDecoderActions"], "SWGMorseDecoderActions", "SWGMorseDecoderActions");
+    
+    ::SWGSDRangel::setValue(&message_center_actions, pJson["MessageCenterActions"], "SWGMessageCenterActions", "SWGMessageCenterActions");
     
     ::SWGSDRangel::setValue(&per_tester_actions, pJson["PERTesterActions"], "SWGPERTesterActions", "SWGPERTesterActions");
     
@@ -274,6 +283,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((morse_decoder_actions != nullptr) && (morse_decoder_actions->isSet())){
         toJsonValue(QString("MorseDecoderActions"), morse_decoder_actions, obj, QString("SWGMorseDecoderActions"));
+    }
+    if((message_center_actions != nullptr) && (message_center_actions->isSet())){
+        toJsonValue(QString("MessageCenterActions"), message_center_actions, obj, QString("SWGMessageCenterActions"));
     }
     if((per_tester_actions != nullptr) && (per_tester_actions->isSet())){
         toJsonValue(QString("PERTesterActions"), per_tester_actions, obj, QString("SWGPERTesterActions"));
@@ -409,6 +421,16 @@ SWGFeatureActions::setMorseDecoderActions(SWGMorseDecoderActions* morse_decoder_
     this->m_morse_decoder_actions_isSet = true;
 }
 
+SWGMessageCenterActions*
+SWGFeatureActions::getMessageCenterActions() {
+    return message_center_actions;
+}
+void
+SWGFeatureActions::setMessageCenterActions(SWGMessageCenterActions* message_center_actions) {
+    this->message_center_actions = message_center_actions;
+    this->m_message_center_actions_isSet = true;
+}
+
 SWGPERTesterActions*
 SWGFeatureActions::getPerTesterActions() {
     return per_tester_actions;
@@ -542,6 +564,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(morse_decoder_actions && morse_decoder_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(message_center_actions && message_center_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_actions && per_tester_actions->isSet()){

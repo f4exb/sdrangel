@@ -132,6 +132,10 @@ SWGChannelReport::SWGChannelReport() {
     m_radio_astronomy_report_isSet = false;
     radio_clock_report = nullptr;
     m_radio_clock_report_isSet = false;
+    radio_paging_demod_report = nullptr;
+    m_radio_paging_demod_report_isSet = false;
+    radio_paging_mod_report = nullptr;
+    m_radio_paging_mod_report_isSet = false;
     radiosonde_demod_report = nullptr;
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = nullptr;
@@ -280,6 +284,10 @@ SWGChannelReport::init() {
     m_radio_astronomy_report_isSet = false;
     radio_clock_report = new SWGRadioClockReport();
     m_radio_clock_report_isSet = false;
+    radio_paging_demod_report = new SWGRadioPagingDemodReport();
+    m_radio_paging_demod_report_isSet = false;
+    radio_paging_mod_report = new SWGRadioPagingModReport();
+    m_radio_paging_mod_report_isSet = false;
     radiosonde_demod_report = new SWGRadiosondeDemodReport();
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = new SWGRemoteSourceReport();
@@ -474,6 +482,12 @@ SWGChannelReport::cleanup() {
     if(radio_clock_report != nullptr) { 
         delete radio_clock_report;
     }
+    if(radio_paging_demod_report != nullptr) { 
+        delete radio_paging_demod_report;
+    }
+    if(radio_paging_mod_report != nullptr) { 
+        delete radio_paging_mod_report;
+    }
     if(radiosonde_demod_report != nullptr) { 
         delete radiosonde_demod_report;
     }
@@ -644,6 +658,10 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&radio_astronomy_report, pJson["RadioAstronomyReport"], "SWGRadioAstronomyReport", "SWGRadioAstronomyReport");
     
     ::SWGSDRangel::setValue(&radio_clock_report, pJson["RadioClockReport"], "SWGRadioClockReport", "SWGRadioClockReport");
+    
+    ::SWGSDRangel::setValue(&radio_paging_demod_report, pJson["RadioPagingDemodReport"], "SWGRadioPagingDemodReport", "SWGRadioPagingDemodReport");
+    
+    ::SWGSDRangel::setValue(&radio_paging_mod_report, pJson["RadioPagingModReport"], "SWGRadioPagingModReport", "SWGRadioPagingModReport");
     
     ::SWGSDRangel::setValue(&radiosonde_demod_report, pJson["RadiosondeDemodReport"], "SWGRadiosondeDemodReport", "SWGRadiosondeDemodReport");
     
@@ -852,6 +870,12 @@ SWGChannelReport::asJsonObject() {
     }
     if((radio_clock_report != nullptr) && (radio_clock_report->isSet())){
         toJsonValue(QString("RadioClockReport"), radio_clock_report, obj, QString("SWGRadioClockReport"));
+    }
+    if((radio_paging_demod_report != nullptr) && (radio_paging_demod_report->isSet())){
+        toJsonValue(QString("RadioPagingDemodReport"), radio_paging_demod_report, obj, QString("SWGRadioPagingDemodReport"));
+    }
+    if((radio_paging_mod_report != nullptr) && (radio_paging_mod_report->isSet())){
+        toJsonValue(QString("RadioPagingModReport"), radio_paging_mod_report, obj, QString("SWGRadioPagingModReport"));
     }
     if((radiosonde_demod_report != nullptr) && (radiosonde_demod_report->isSet())){
         toJsonValue(QString("RadiosondeDemodReport"), radiosonde_demod_report, obj, QString("SWGRadiosondeDemodReport"));
@@ -1431,6 +1455,26 @@ SWGChannelReport::setRadioClockReport(SWGRadioClockReport* radio_clock_report) {
     this->m_radio_clock_report_isSet = true;
 }
 
+SWGRadioPagingDemodReport*
+SWGChannelReport::getRadioPagingDemodReport() {
+    return radio_paging_demod_report;
+}
+void
+SWGChannelReport::setRadioPagingDemodReport(SWGRadioPagingDemodReport* radio_paging_demod_report) {
+    this->radio_paging_demod_report = radio_paging_demod_report;
+    this->m_radio_paging_demod_report_isSet = true;
+}
+
+SWGRadioPagingModReport*
+SWGChannelReport::getRadioPagingModReport() {
+    return radio_paging_mod_report;
+}
+void
+SWGChannelReport::setRadioPagingModReport(SWGRadioPagingModReport* radio_paging_mod_report) {
+    this->radio_paging_mod_report = radio_paging_mod_report;
+    this->m_radio_paging_mod_report_isSet = true;
+}
+
 SWGRadiosondeDemodReport*
 SWGChannelReport::getRadiosondeDemodReport() {
     return radiosonde_demod_report;
@@ -1770,6 +1814,12 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(radio_clock_report && radio_clock_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_paging_demod_report && radio_paging_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_paging_mod_report && radio_paging_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(radiosonde_demod_report && radiosonde_demod_report->isSet()){

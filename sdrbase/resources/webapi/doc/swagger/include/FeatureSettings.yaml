@@ -54,6 +54,9 @@ FeatureSettings:
     MorseDecoderSettings:
       $ref: "/doc/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
       description: "Morse decoder settings configuration for Feature."
+    MessageCenterSettings:
+      $ref: "/doc/swagger/include/MessageCenter.yaml#/MessageCenterSettings"
+      description: "Message center settings configuration for Feature."
     PERTesterSettings:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterSettings"
       description: "Per tester settings configuration for Feature."

@@ -33,6 +33,9 @@ FeatureActions:
     MorseDecoderActions:
       $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderActions"
       description: "Morse decoder actions configuration for Feature."
+    MessageCenterActions:
+      $ref: "http://swgserver:8081/api/swagger/include/MessageCenter.yaml#/MessageCenterActions"
+      description: "Message center actions configuration for Feature."
     PERTesterActions:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterActions"
       description: "Per tester actions configuration for Feature."

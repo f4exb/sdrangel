@@ -156,6 +156,10 @@ SWGChannelSettings::SWGChannelSettings() {
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
     m_radio_clock_settings_isSet = false;
+    radio_paging_demod_settings = nullptr;
+    m_radio_paging_demod_settings_isSet = false;
+    radio_paging_mod_settings = nullptr;
+    m_radio_paging_mod_settings_isSet = false;
     radiosonde_demod_settings = nullptr;
     m_radiosonde_demod_settings_isSet = false;
     remote_sink_settings = nullptr;
@@ -324,6 +328,10 @@ SWGChannelSettings::init() {
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = new SWGRadioClockSettings();
     m_radio_clock_settings_isSet = false;
+    radio_paging_demod_settings = new SWGRadioPagingDemodSettings();
+    m_radio_paging_demod_settings_isSet = false;
+    radio_paging_mod_settings = new SWGRadioPagingModSettings();
+    m_radio_paging_mod_settings_isSet = false;
     radiosonde_demod_settings = new SWGRadiosondeDemodSettings();
     m_radiosonde_demod_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
@@ -546,6 +554,12 @@ SWGChannelSettings::cleanup() {
     if(radio_clock_settings != nullptr) { 
         delete radio_clock_settings;
     }
+    if(radio_paging_demod_settings != nullptr) { 
+        delete radio_paging_demod_settings;
+    }
+    if(radio_paging_mod_settings != nullptr) { 
+        delete radio_paging_mod_settings;
+    }
     if(radiosonde_demod_settings != nullptr) { 
         delete radiosonde_demod_settings;
     }
@@ -734,6 +748,10 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&radio_astronomy_settings, pJson["RadioAstronomySettings"], "SWGRadioAstronomySettings", "SWGRadioAstronomySettings");
     
     ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
+    
+    ::SWGSDRangel::setValue(&radio_paging_demod_settings, pJson["RadioPagingDemodSettings"], "SWGRadioPagingDemodSettings", "SWGRadioPagingDemodSettings");
+    
+    ::SWGSDRangel::setValue(&radio_paging_mod_settings, pJson["RadioPagingModSettings"], "SWGRadioPagingModSettings", "SWGRadioPagingModSettings");
     
     ::SWGSDRangel::setValue(&radiosonde_demod_settings, pJson["RadiosondeDemodSettings"], "SWGRadiosondeDemodSettings", "SWGRadiosondeDemodSettings");
     
@@ -974,6 +992,12 @@ SWGChannelSettings::asJsonObject() {
     }
     if((radio_clock_settings != nullptr) && (radio_clock_settings->isSet())){
         toJsonValue(QString("RadioClockSettings"), radio_clock_settings, obj, QString("SWGRadioClockSettings"));
+    }
+    if((radio_paging_demod_settings != nullptr) && (radio_paging_demod_settings->isSet())){
+        toJsonValue(QString("RadioPagingDemodSettings"), radio_paging_demod_settings, obj, QString("SWGRadioPagingDemodSettings"));
+    }
+    if((radio_paging_mod_settings != nullptr) && (radio_paging_mod_settings->isSet())){
+        toJsonValue(QString("RadioPagingModSettings"), radio_paging_mod_settings, obj, QString("SWGRadioPagingModSettings"));
     }
     if((radiosonde_demod_settings != nullptr) && (radiosonde_demod_settings->isSet())){
         toJsonValue(QString("RadiosondeDemodSettings"), radiosonde_demod_settings, obj, QString("SWGRadiosondeDemodSettings"));
@@ -1667,6 +1691,26 @@ SWGChannelSettings::setRadioClockSettings(SWGRadioClockSettings* radio_clock_set
     this->m_radio_clock_settings_isSet = true;
 }
 
+SWGRadioPagingDemodSettings*
+SWGChannelSettings::getRadioPagingDemodSettings() {
+    return radio_paging_demod_settings;
+}
+void
+SWGChannelSettings::setRadioPagingDemodSettings(SWGRadioPagingDemodSettings* radio_paging_demod_settings) {
+    this->radio_paging_demod_settings = radio_paging_demod_settings;
+    this->m_radio_paging_demod_settings_isSet = true;
+}
+
+SWGRadioPagingModSettings*
+SWGChannelSettings::getRadioPagingModSettings() {
+    return radio_paging_mod_settings;
+}
+void
+SWGChannelSettings::setRadioPagingModSettings(SWGRadioPagingModSettings* radio_paging_mod_settings) {
+    this->radio_paging_mod_settings = radio_paging_mod_settings;
+    this->m_radio_paging_mod_settings_isSet = true;
+}
+
 SWGRadiosondeDemodSettings*
 SWGChannelSettings::getRadiosondeDemodSettings() {
     return radiosonde_demod_settings;
@@ -2022,6 +2066,12 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(radio_clock_settings && radio_clock_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_paging_demod_settings && radio_paging_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_paging_mod_settings && radio_paging_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(radiosonde_demod_settings && radiosonde_demod_settings->isSet()){
