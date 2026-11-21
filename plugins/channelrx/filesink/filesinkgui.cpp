@@ -28,6 +28,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
+#include "gui/helpnotifications.h"
 #include "dsp/dspcommands.h"
 
 #include "filesinkmessages.h"
@@ -519,6 +520,19 @@ void FileSinkGUI::on_postSquelchTime_valueChanged(int value)
 
 void FileSinkGUI::on_squelchedRecording_toggled(bool checked)
 {
+    if (checked && !m_settings.m_spectrumSquelchMode)
+    {
+        if (HelpNotifications::display(this,
+            "Spectrum squelch required",
+            "Spectrum squelch must be enabled to record.",
+            "FileSink/SpectrumSquelchRequired"))
+        {
+            QSignalBlocker blocker(ui->squelchedRecording);
+            ui->squelchedRecording->setChecked(false);
+            return;
+        }
+    }
+
     ui->record->setEnabled(!checked);
     m_settings.m_squelchRecordingEnable = checked;
     applySettings(QStringList("squelchRecordingEnable"));
