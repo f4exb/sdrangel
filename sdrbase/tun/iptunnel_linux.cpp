@@ -295,7 +295,11 @@ private:
         sockaddr_nl kernel {};
         kernel.nl_family = AF_NETLINK;
         iovec iov {header, header->nlmsg_len};
-        msghdr message {&kernel, sizeof(kernel), &iov, 1, nullptr, 0, 0};
+        msghdr message {};
+        message.msg_name = &kernel;
+        message.msg_namelen = sizeof(kernel);
+        message.msg_iov = &iov;
+        message.msg_iovlen = 1;
 
         if (::sendmsg(m_netlinkFd, &message, 0) < 0) {
             return errno;
