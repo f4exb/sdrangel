@@ -18,6 +18,7 @@
 
 #include <QLocale>
 #include <QFileDialog>
+#include <QSignalBlocker>
 #include <QTime>
 #include <QMessageBox>
 
@@ -27,6 +28,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
+#include "gui/helpnotifications.h"
 #include "dsp/dspcommands.h"
 
 #include "filesinkmessages.h"
@@ -116,11 +118,12 @@ bool FileSinkGUI::handleMessage(const Message& message)
     {
         const FileSink::MsgReportStartStop& cfg = (FileSink::MsgReportStartStop&) message;
         m_running = cfg.getStartStop();
-        blockSignals(true);
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        ui->record->setChecked(false);
-        ui->record->setEnabled(m_running && !m_settings.m_squelchRecordingEnable);
-        blockSignals(false);
+        {
+            QSignalBlocker blocker(ui->record);
+            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            ui->record->setChecked(false);
+        }
+        ui->record->setEnabled(!m_settings.m_squelchRecordingEnable);
 
         return true;
     }
@@ -517,6 +520,19 @@ void FileSinkGUI::on_postSquelchTime_valueChanged(int value)
 
 void FileSinkGUI::on_squelchedRecording_toggled(bool checked)
 {
+    if (checked && !m_settings.m_spectrumSquelchMode)
+    {
+        if (HelpNotifications::display(this,
+            "Spectrum squelch required",
+            "Spectrum squelch must be enabled to record.",
+            "FileSink/SpectrumSquelchRequired"))
+        {
+            QSignalBlocker blocker(ui->squelchedRecording);
+            ui->squelchedRecording->setChecked(false);
+            return;
+        }
+    }
+
     ui->record->setEnabled(!checked);
     m_settings.m_squelchRecordingEnable = checked;
     applySettings(QStringList("squelchRecordingEnable"));
@@ -524,6 +540,11 @@ void FileSinkGUI::on_squelchedRecording_toggled(bool checked)
 
 void FileSinkGUI::on_record_toggled(bool checked)
 {
+    if (checked) {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+    } else {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
     m_fileSink->record(checked);
 }
 

@@ -170,6 +170,7 @@ private:
     FileSinkBaseband *m_basebandSink;
     QRecursiveMutex m_mutex;
     bool m_running;
+    bool m_recordRequested;
     FileSinkSettings m_settings;
     SpectrumVis m_spectrumVis;
 

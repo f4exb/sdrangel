@@ -82,6 +82,10 @@ void FileSinkBaseband::startWork()
         this,
         &FileSinkBaseband::handleInputMessages
     );
+    // Process any messages that might be in the queue
+    if (m_inputMessageQueue.size() > 0) {
+        handleInputMessages();
+    }
 }
 
 void FileSinkBaseband::stopWork()
