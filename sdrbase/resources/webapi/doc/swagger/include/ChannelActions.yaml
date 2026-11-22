@@ -63,6 +63,9 @@ ChannelActions:
     RadioAstronomyActions:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomyActions"
       description: "Radio astronomy actions configuration for Channel."
+    RadioPagingModActions:
+      $ref: "/doc/swagger/include/RadioPagingMod.yaml#/RadioPagingModActions"
+      description: "Radio paging mod actions configuration for Channel."
     RTTYModActions:
       $ref: "/doc/swagger/include/RTTYMod.yaml#/RTTYModActions"
       description: "Rtty mod actions configuration for Channel."

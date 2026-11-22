@@ -92,7 +92,7 @@ bool CSV::readRow(QTextStream &in, QStringList *row, char separator)
         return false;
 
     int state = 0, t;
-    char ch;
+    QChar ch;
     QString cell;
 
     while (state >= 0)
@@ -104,7 +104,7 @@ bool CSV::readRow(QTextStream &in, QStringList *row, char separator)
         else
         {
             in >> ch;
-            if (ch == separator) {
+            if (ch == QLatin1Char(separator)) {
                 t = 0;
             } else if (ch == '\"') {
                 t = 1;

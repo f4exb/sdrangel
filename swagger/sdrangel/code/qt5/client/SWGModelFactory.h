@@ -296,6 +296,11 @@
 #include "SWGMeshtasticDemodSettings.h"
 #include "SWGMeshtasticModReport.h"
 #include "SWGMeshtasticModSettings.h"
+#include "SWGMessageCenterActions.h"
+#include "SWGMessageCenterPost.h"
+#include "SWGMessageCenterRedecode.h"
+#include "SWGMessageCenterReport.h"
+#include "SWGMessageCenterSettings.h"
 #include "SWGMetisMISOSettings.h"
 #include "SWGMorseDecoderActions.h"
 #include "SWGMorseDecoderSettings.h"
@@ -356,6 +361,13 @@
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadioClockSettings.h"
+#include "SWGRadioPagingCharset.h"
+#include "SWGRadioPagingDemodReport.h"
+#include "SWGRadioPagingDemodSettings.h"
+#include "SWGRadioPagingModActions.h"
+#include "SWGRadioPagingModReport.h"
+#include "SWGRadioPagingModSettings.h"
+#include "SWGRadioPagingModTx.h"
 #include "SWGRadiosonde.h"
 #include "SWGRadiosondeDemodReport.h"
 #include "SWGRadiosondeDemodSettings.h"
@@ -1894,6 +1906,31 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGMessageCenterActions").compare(type) == 0) {
+      SWGMessageCenterActions *obj = new SWGMessageCenterActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMessageCenterPost").compare(type) == 0) {
+      SWGMessageCenterPost *obj = new SWGMessageCenterPost();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMessageCenterRedecode").compare(type) == 0) {
+      SWGMessageCenterRedecode *obj = new SWGMessageCenterRedecode();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMessageCenterReport").compare(type) == 0) {
+      SWGMessageCenterReport *obj = new SWGMessageCenterReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMessageCenterSettings").compare(type) == 0) {
+      SWGMessageCenterSettings *obj = new SWGMessageCenterSettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGMetisMISOSettings").compare(type) == 0) {
       SWGMetisMISOSettings *obj = new SWGMetisMISOSettings();
       obj->init();
@@ -2191,6 +2228,41 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRadioClockSettings").compare(type) == 0) {
       SWGRadioClockSettings *obj = new SWGRadioClockSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingCharset").compare(type) == 0) {
+      SWGRadioPagingCharset *obj = new SWGRadioPagingCharset();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingDemodReport").compare(type) == 0) {
+      SWGRadioPagingDemodReport *obj = new SWGRadioPagingDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingDemodSettings").compare(type) == 0) {
+      SWGRadioPagingDemodSettings *obj = new SWGRadioPagingDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingModActions").compare(type) == 0) {
+      SWGRadioPagingModActions *obj = new SWGRadioPagingModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingModReport").compare(type) == 0) {
+      SWGRadioPagingModReport *obj = new SWGRadioPagingModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingModSettings").compare(type) == 0) {
+      SWGRadioPagingModSettings *obj = new SWGRadioPagingModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioPagingModTx").compare(type) == 0) {
+      SWGRadioPagingModTx *obj = new SWGRadioPagingModTx();
       obj->init();
       return obj;
     }

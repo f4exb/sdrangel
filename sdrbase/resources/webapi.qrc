@@ -105,6 +105,7 @@
         <file>webapi/doc/swagger/include/PacketMod.yaml</file>
         <file>webapi/doc/swagger/include/PagerDemod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
+        <file>webapi/doc/swagger/include/MessageCenter.yaml</file>
         <file>webapi/doc/swagger/include/PERTester.yaml</file>
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/Preferences.yaml</file>
@@ -112,6 +113,9 @@
         <file>webapi/doc/swagger/include/PSK31Mod.yaml</file>
         <file>webapi/doc/swagger/include/RadioAstronomy.yaml</file>
         <file>webapi/doc/swagger/include/RadioClock.yaml</file>
+        <file>webapi/doc/swagger/include/RadioPagingCharset.yaml</file>
+        <file>webapi/doc/swagger/include/RadioPagingDemod.yaml</file>
+        <file>webapi/doc/swagger/include/RadioPagingMod.yaml</file>
         <file>webapi/doc/swagger/include/RadiosondeDemod.yaml</file>
         <file>webapi/doc/swagger/include/Radiosonde.yaml</file>
         <file>webapi/doc/swagger/include/RemoteInput.yaml</file>

@@ -62,6 +62,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_map_settings_isSet = false;
     morse_decoder_settings = nullptr;
     m_morse_decoder_settings_isSet = false;
+    message_center_settings = nullptr;
+    m_message_center_settings_isSet = false;
     per_tester_settings = nullptr;
     m_per_tester_settings_isSet = false;
     radiosonde_settings = nullptr;
@@ -124,6 +126,8 @@ SWGFeatureSettings::init() {
     m_map_settings_isSet = false;
     morse_decoder_settings = new SWGMorseDecoderSettings();
     m_morse_decoder_settings_isSet = false;
+    message_center_settings = new SWGMessageCenterSettings();
+    m_message_center_settings_isSet = false;
     per_tester_settings = new SWGPERTesterSettings();
     m_per_tester_settings_isSet = false;
     radiosonde_settings = new SWGRadiosondeSettings();
@@ -194,6 +198,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(morse_decoder_settings != nullptr) { 
         delete morse_decoder_settings;
+    }
+    if(message_center_settings != nullptr) { 
+        delete message_center_settings;
     }
     if(per_tester_settings != nullptr) { 
         delete per_tester_settings;
@@ -271,6 +278,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&map_settings, pJson["MapSettings"], "SWGMapSettings", "SWGMapSettings");
     
     ::SWGSDRangel::setValue(&morse_decoder_settings, pJson["MorseDecoderSettings"], "SWGMorseDecoderSettings", "SWGMorseDecoderSettings");
+    
+    ::SWGSDRangel::setValue(&message_center_settings, pJson["MessageCenterSettings"], "SWGMessageCenterSettings", "SWGMessageCenterSettings");
     
     ::SWGSDRangel::setValue(&per_tester_settings, pJson["PERTesterSettings"], "SWGPERTesterSettings", "SWGPERTesterSettings");
     
@@ -358,6 +367,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((morse_decoder_settings != nullptr) && (morse_decoder_settings->isSet())){
         toJsonValue(QString("MorseDecoderSettings"), morse_decoder_settings, obj, QString("SWGMorseDecoderSettings"));
+    }
+    if((message_center_settings != nullptr) && (message_center_settings->isSet())){
+        toJsonValue(QString("MessageCenterSettings"), message_center_settings, obj, QString("SWGMessageCenterSettings"));
     }
     if((per_tester_settings != nullptr) && (per_tester_settings->isSet())){
         toJsonValue(QString("PERTesterSettings"), per_tester_settings, obj, QString("SWGPERTesterSettings"));
@@ -563,6 +575,16 @@ SWGFeatureSettings::setMorseDecoderSettings(SWGMorseDecoderSettings* morse_decod
     this->m_morse_decoder_settings_isSet = true;
 }
 
+SWGMessageCenterSettings*
+SWGFeatureSettings::getMessageCenterSettings() {
+    return message_center_settings;
+}
+void
+SWGFeatureSettings::setMessageCenterSettings(SWGMessageCenterSettings* message_center_settings) {
+    this->message_center_settings = message_center_settings;
+    this->m_message_center_settings_isSet = true;
+}
+
 SWGPERTesterSettings*
 SWGFeatureSettings::getPerTesterSettings() {
     return per_tester_settings;
@@ -717,6 +739,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(morse_decoder_settings && morse_decoder_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(message_center_settings && message_center_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_settings && per_tester_settings->isSet()){

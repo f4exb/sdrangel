@@ -195,6 +195,12 @@ ChannelSettings:
     RadioClockSettings:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockSettings"
       description: "Radio clock settings configuration for Channel."
+    RadioPagingDemodSettings:
+      $ref: "/doc/swagger/include/RadioPagingDemod.yaml#/RadioPagingDemodSettings"
+      description: "Radio paging demodulator settings configuration for Channel."
+    RadioPagingModSettings:
+      $ref: "/doc/swagger/include/RadioPagingMod.yaml#/RadioPagingModSettings"
+      description: "Radio paging modulator settings configuration for Channel."
     RadiosondeDemodSettings:
       $ref: "/doc/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodSettings"
       description: "Radiosonde demod settings configuration for Channel."

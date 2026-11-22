@@ -37,6 +37,7 @@
 #include "SWGPacketModActions.h"
 #include "SWGRTTYModActions.h"
 #include "SWGRadioAstronomyActions.h"
+#include "SWGRadioPagingModActions.h"
 #include "SWGSigMFFileSinkActions.h"
 #include "SWGWefaxDemodActions.h"
 #include <QString>
@@ -116,6 +117,9 @@ public:
     SWGRadioAstronomyActions* getRadioAstronomyActions();
     void setRadioAstronomyActions(SWGRadioAstronomyActions* radio_astronomy_actions);
 
+    SWGRadioPagingModActions* getRadioPagingModActions();
+    void setRadioPagingModActions(SWGRadioPagingModActions* radio_paging_mod_actions);
+
     SWGRTTYModActions* getRttyModActions();
     void setRttyModActions(SWGRTTYModActions* rtty_mod_actions);
 
@@ -182,6 +186,9 @@ private:
 
     SWGRadioAstronomyActions* radio_astronomy_actions;
     bool m_radio_astronomy_actions_isSet;
+
+    SWGRadioPagingModActions* radio_paging_mod_actions;
+    bool m_radio_paging_mod_actions_isSet;
 
     SWGRTTYModActions* rtty_mod_actions;
     bool m_rtty_mod_actions_isSet;

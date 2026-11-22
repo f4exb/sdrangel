@@ -54,6 +54,9 @@ FeatureSettings:
     MorseDecoderSettings:
       $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
       description: "Morse decoder settings configuration for Feature."
+    MessageCenterSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/MessageCenter.yaml#/MessageCenterSettings"
+      description: "Message center settings configuration for Feature."
     PERTesterSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterSettings"
       description: "Per tester settings configuration for Feature."

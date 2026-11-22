@@ -36,6 +36,7 @@
 #include "SWGLimeRFESettings.h"
 #include "SWGMCPServerSettings.h"
 #include "SWGMapSettings.h"
+#include "SWGMessageCenterSettings.h"
 #include "SWGMorseDecoderSettings.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGRadiosondeSettings.h"
@@ -116,6 +117,9 @@ public:
 
     SWGMorseDecoderSettings* getMorseDecoderSettings();
     void setMorseDecoderSettings(SWGMorseDecoderSettings* morse_decoder_settings);
+
+    SWGMessageCenterSettings* getMessageCenterSettings();
+    void setMessageCenterSettings(SWGMessageCenterSettings* message_center_settings);
 
     SWGPERTesterSettings* getPerTesterSettings();
     void setPerTesterSettings(SWGPERTesterSettings* per_tester_settings);
@@ -201,6 +205,9 @@ private:
 
     SWGMorseDecoderSettings* morse_decoder_settings;
     bool m_morse_decoder_settings_isSet;
+
+    SWGMessageCenterSettings* message_center_settings;
+    bool m_message_center_settings_isSet;
 
     SWGPERTesterSettings* per_tester_settings;
     bool m_per_tester_settings_isSet;

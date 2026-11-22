@@ -1,0 +1,225 @@
+RadioPagingDemodSettings:
+  description: "Radio paging demodulator: POCSAG, FLEX and GSC; a protocol that is on is decoded at every speed, mode and polarity"
+  type: object
+  properties:
+    inputFrequencyOffset:
+      description: Channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: Channel filter bandwidth in Hz. Each protocol filters further at its Carson bandwidth
+      type: number
+      format: float
+    pocsagEnabled:
+      description: "Decode POCSAG (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    pocsagDeviation:
+      description: POCSAG frequency deviation in Hz
+      type: number
+      format: float
+    flexEnabled:
+      description: "Decode FLEX (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    flexDeviation:
+      description: FLEX outer symbol frequency deviation in Hz
+      type: number
+      format: float
+    flexMaxMessageNumber:
+      description: "FLEX largest message number of the network, 0 to 63 (default 63): the messages with R = 1 of each address are checked for skipped numbers (missed_numbers of the record), after it the sequence starts from 0 again"
+      type: integer
+      format: int32
+    pocsagFill:
+      description: "POCSAG fill at the end of an alphanumeric message, the last character and the one before if it is the same code: 0 NUL, 1 NUL, ETX and EOT (default), 2 the codes without a glyph in the codepage, 3 the codes of pocsagFillCodes"
+      type: integer
+      format: int32
+    pocsagFillCodes:
+      description: "pocsagFill 3: hex codes 00 to 7F separated by spaces or commas (default 00 03 04)"
+      type: string
+    pocsagCustomCodes:
+      description: "POCSAG custom codepage (charset generic/generic/custom): the codes of ASCII mapped to other characters, hex code = hex Unicode code point separated by spaces, rtl for a right-to-left text, e.g. rtl 60=05D0 61=05D1"
+      type: string
+    flexCustomCodes:
+      description: "FLEX custom codepage (charset generic/generic/custom), as pocsagCustomCodes"
+      type: string
+    gscCustomCodes:
+      description: "GSC custom codepage (charset generic/generic/custom), as pocsagCustomCodes, codes 00 to 3F of the GSC table"
+      type: string
+    gscEnabled:
+      description: "Decode GSC (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    gscDeviation:
+      description: GSC frequency deviation in Hz
+      type: number
+      format: float
+    gscVoiceTimeout:
+      description: Maximum length of a GSC voice message in seconds
+      type: integer
+      format: int32
+    gscAudio:
+      description: "Play the voice of GSC voice pages (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    gscVoiceRecord:
+      description: "Record the voice of GSC voice pages to a WAV file, the path is voice_file in the protocol data of the message record (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    gscVoiceDirectory:
+      description: "Directory of the voice files. Empty: radiopaging/voice in the application data directory"
+      type: string
+    gscVoiceKeepDays:
+      description: "Voice files older than this many days are deleted when a new voice file is written (0 to keep them all). The newest gscVoiceKeepMin files are kept whatever their age"
+      type: integer
+      format: int32
+    gscVoiceKeepMin:
+      description: "The number of the newest voice files that are not deleted"
+      type: integer
+      format: int32
+    pocsagDcCorrection:
+      description: "POCSAG DC offset correction: the carrier frequency offset, measured as the DC offset of the discriminator, is corrected (1 for yes, the default, 0 for no)"
+      type: integer
+      format: int32
+    flexDcCorrection:
+      description: "FLEX DC offset correction (1 for yes, the default, 0 for no)"
+      type: integer
+      format: int32
+    gscDcCorrection:
+      description: "GSC DC offset correction (1 for yes, the default, 0 for no)"
+      type: integer
+      format: int32
+    volume:
+      description: Voice audio gain
+      type: number
+      format: float
+    audioDeviceName:
+      type: string
+    udpEnabled:
+      description: "Send each message received to a UDP address (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    udpAddress:
+      description: "UDP address the messages are sent to"
+      type: string
+    udpPort:
+      description: "UDP port the messages are sent to"
+      type: integer
+      format: int32
+    udpFormat:
+      description: "Format of the UDP datagrams: 0 the fields of the Pager demodulator (date, time, address, function bits, alphanumeric, numeric, protocol, type, each ended by a NUL), 1 the message record as one line of JSON"
+      type: integer
+      format: int32
+    logEnabled:
+      description: "Write each message received to a CSV log file, the columns of the message record (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    logFilename:
+      description: "Log file name or path"
+      type: string
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    pocsagCharset:
+      description: "Codepage of the POCSAG alphanumeric messages (default generic, generic, ascii)"
+      $ref: "/doc/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    flexCharset:
+      description: "Codepage of the FLEX alphanumeric messages"
+      $ref: "/doc/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    gscCharset:
+      description: "Codepage of the GSC alphanumeric messages"
+      $ref: "/doc/swagger/include/RadioPagingCharset.yaml#/RadioPagingCharset"
+    rgbColor:
+      type: integer
+      format: int32
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+      format: int32
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      format: int32
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+      format: int32
+    reverseAPIDeviceIndex:
+      type: integer
+      format: int32
+    reverseAPIChannelIndex:
+      type: integer
+      format: int32
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+RadioPagingDemodReport:
+  description: Radio paging demodulator
+  type: object
+  properties:
+    channelPowerDB:
+      description: Power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      format: int32
+    pocsag512Sync:
+      description: "POCSAG 512 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+      type: integer
+      format: int32
+    pocsag1200Sync:
+      description: "POCSAG 1200 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+      type: integer
+      format: int32
+    pocsag2400Sync:
+      description: "POCSAG 2400 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+      type: integer
+      format: int32
+    flexSync:
+      description: "FLEX decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+      type: integer
+      format: int32
+    flexMode:
+      description: FLEX mode of the last frame
+      type: string
+    flexQuality:
+      description: FLEX decode quality of the last frame, 0 to 1
+      type: number
+      format: float
+    flexErs:
+      description: "A FLEX emergency re-synchronization is being received (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    flexErsSeconds:
+      description: Length of the current or last FLEX emergency re-synchronization in seconds
+      type: number
+      format: float
+    flexErsCount:
+      description: Number of FLEX emergency re-synchronizations received since start
+      type: integer
+      format: int64
+    gscSync:
+      description: "GSC decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+      type: integer
+      format: int32
+    gscVoice:
+      description: "A GSC voice message is being received (1 for yes, 0 for no)"
+      type: integer
+      format: int32
+    pocsagMessages:
+      description: Number of POCSAG messages decoded since start
+      type: integer
+      format: int64
+    flexMessages:
+      description: Number of FLEX messages decoded since start
+      type: integer
+      format: int64
+    gscMessages:
+      description: Number of GSC messages decoded since start
+      type: integer
+      format: int64

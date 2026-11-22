@@ -5392,6 +5392,10 @@ margin-bottom: 20px;
       "description" : "Radio astronomy actions configuration for Channel.",
       "$ref" : "#/definitions/RadioAstronomyActions"
     },
+    "RadioPagingModActions" : {
+      "description" : "Radio paging mod actions configuration for Channel.",
+      "$ref" : "#/definitions/RadioPagingModActions"
+    },
     "RTTYModActions" : {
       "description" : "Rtty mod actions configuration for Channel.",
       "$ref" : "#/definitions/RTTYModActions"
@@ -5928,6 +5932,14 @@ margin-bottom: 20px;
       "description" : "Radio clock report data for Channel.",
       "$ref" : "#/definitions/RadioClockReport"
     },
+    "RadioPagingDemodReport" : {
+      "description" : "Radio paging demodulator report data for Channel.",
+      "$ref" : "#/definitions/RadioPagingDemodReport"
+    },
+    "RadioPagingModReport" : {
+      "description" : "Radio paging modulator report data for Channel.",
+      "$ref" : "#/definitions/RadioPagingModReport"
+    },
     "RadiosondeDemodReport" : {
       "description" : "Radiosonde demod report data for Channel.",
       "$ref" : "#/definitions/RadiosondeDemodReport"
@@ -6259,6 +6271,14 @@ margin-bottom: 20px;
     "RadioClockSettings" : {
       "description" : "Radio clock settings configuration for Channel.",
       "$ref" : "#/definitions/RadioClockSettings"
+    },
+    "RadioPagingDemodSettings" : {
+      "description" : "Radio paging demodulator settings configuration for Channel.",
+      "$ref" : "#/definitions/RadioPagingDemodSettings"
+    },
+    "RadioPagingModSettings" : {
+      "description" : "Radio paging modulator settings configuration for Channel.",
+      "$ref" : "#/definitions/RadioPagingModSettings"
     },
     "RadiosondeDemodSettings" : {
       "description" : "Radiosonde demod settings configuration for Channel.",
@@ -11964,6 +11984,10 @@ margin-bottom: 20px;
       "description" : "Morse decoder actions configuration for Feature.",
       "$ref" : "#/definitions/MorseDecoderActions"
     },
+    "MessageCenterActions" : {
+      "description" : "Message center actions configuration for Feature.",
+      "$ref" : "#/definitions/MessageCenterActions"
+    },
     "PERTesterActions" : {
       "description" : "Per tester actions configuration for Feature.",
       "$ref" : "#/definitions/PERTesterActions"
@@ -12153,6 +12177,9 @@ margin-bottom: 20px;
       "description" : "Map report data for Feature.",
       "$ref" : "#/definitions/MapReport"
     },
+    "MessageCenterReport" : {
+      "$ref" : "#/definitions/MessageCenterReport"
+    },
     "PERTesterReport" : {
       "description" : "Per tester report data for Feature.",
       "$ref" : "#/definitions/PERTesterReport"
@@ -12295,6 +12322,10 @@ margin-bottom: 20px;
     "MorseDecoderSettings" : {
       "description" : "Morse decoder settings configuration for Feature.",
       "$ref" : "#/definitions/MorseDecoderSettings"
+    },
+    "MessageCenterSettings" : {
+      "description" : "Message center settings configuration for Feature.",
+      "$ref" : "#/definitions/MessageCenterSettings"
     },
     "PERTesterSettings" : {
       "description" : "Per tester settings configuration for Feature.",
@@ -19128,6 +19159,278 @@ margin-bottom: 20px;
   },
   "description" : "MeshtasticMod"
 };
+            defs.MessageCenterActions = {
+  "properties" : {
+    "post" : {
+      "$ref" : "#/definitions/MessageCenterPost"
+    },
+    "requeue" : {
+      "type" : "string",
+      "description" : "Id of a dead page: it goes back to pending with its attempts reset"
+    },
+    "cancel" : {
+      "type" : "string",
+      "description" : "Id of a page nobody has claimed or a dead page: it is withdrawn"
+    },
+    "clearSent" : {
+      "type" : "integer",
+      "description" : "1: the pages that were sent are forgotten"
+    },
+    "ingest" : {
+      "type" : "string",
+      "description" : "A message record as JSON (one or more lines): it goes through the routes as if a channel had published it, as a message received"
+    },
+    "importFile" : {
+      "type" : "string",
+      "description" : "Path of a JSON lines or CSV file (a log of a message center or of the Pager demodulator) read once into the log: not routed, so no action is taken on it"
+    },
+    "query" : {
+      "type" : "string",
+      "description" : "A query of the messages, as a JSON object: over the history when it is kept, else over the log. from and to (ms since the epoch) or last (seconds back from now), filter (as the filter of a route), offset and limit (default 100, at most 1000) of the messages it selects, newest first. Made at once: its result is in the report (query)"
+    },
+    "redecode" : {
+      "$ref" : "#/definitions/MessageCenterRedecode"
+    }
+  },
+  "description" : "Message Center actions. One at a time"
+};
+            defs.MessageCenterPost = {
+  "properties" : {
+    "id" : {
+      "type" : "string",
+      "description" : "Id of the page, optional (generated if empty). The records of the message have this id"
+    },
+    "contact" : {
+      "type" : "string",
+      "description" : "A contact of the address book instead of a transmitter and an address: its first send to whose conditions the page meets gives them (and the other fields it sets)"
+    },
+    "transmitter" : {
+      "type" : "string",
+      "description" : "Name (title) of the transmitter channel"
+    },
+    "protocol" : {
+      "type" : "string",
+      "description" : "pocsag, flex or gsc"
+    },
+    "address" : {
+      "type" : "string",
+      "description" : "POCSAG: the address. FLEX: the capcode, digits or a form with letters of STD-43A Appendix A ([P|Q|R|S][fff][b]<letter><address>, e.g. 3E005237593); only the address is sent. GSC: the cap code, up to 6 digits zero padded (index, group, 3 address digits; 5 digits: index 0) or 7 digits with the suffix digit, that gives the function (1-4 and 5-8: A-D, 9 and 0: A and B) over function"
+    },
+    "function" : {
+      "type" : "integer",
+      "description" : "POCSAG function 0 to 3 (A to D). GSC function 0 to 3 (A to D), the address number 1 to 4"
+    },
+    "priority" : {
+      "type" : "integer",
+      "description" : "FLEX: priority address (1 for yes)"
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "alphanumeric, numeric, tone, voice (GSC), short_message (FLEX, see shortType), special_numeric, numbered_numeric, numbered_special_numeric (FLEX numeric vectors 100 and 111), binary (FLEX HEX/binary, text of hex digits) or secure (FLEX, see secureType)"
+    },
+    "shortType" : {
+      "type" : "integer",
+      "description" : "FLEX short_message type (STD-43A Table 3.9.2-1): 0 numeric, text up to 3 digits (8 for a long address), no text is the tone only payload; 1 source code; 2 source code and message number"
+    },
+    "source" : {
+      "type" : "integer",
+      "description" : "FLEX short_message types 1 and 2: source code 0 to 7"
+    },
+    "blocking" : {
+      "type" : "integer",
+      "description" : "FLEX binary: blocking length B, bits of a character 1 to 16; 0 or omitted: 1"
+    },
+    "mailDrop" : {
+      "type" : "integer",
+      "description" : "FLEX binary: mail drop flag M (1 for yes)"
+    },
+    "rightToLeft" : {
+      "type" : "integer",
+      "description" : "FLEX binary: display direction D, 1 right to left (not with a blocking length of 1)"
+    },
+    "headerMessage" : {
+      "type" : "integer",
+      "description" : "FLEX binary: header message flag H (1 for yes)"
+    },
+    "statusInfo" : {
+      "type" : "integer",
+      "description" : "FLEX binary: status information field enabler I (1 for yes)"
+    },
+    "secureType" : {
+      "type" : "integer",
+      "description" : "FLEX secure type t1 t0 (STD-43A 3.10.1.4): 0 alphanumeric, 1 data defined separately (hex digits), 2 binary (hex digits)"
+    },
+    "groupMembers" : {
+      "type" : "string",
+      "description" : "FLEX group message (STD-43A 5.2): the capcodes of the pagers, 2 to 5461, separated by commas (digits or the forms with letters of STD-43A Appendix A, only the address is used). The address is not used. The transmitter sends a short instruction to each pager, then the message to a temporary address"
+    },
+    "retransmit" : {
+      "type" : "integer",
+      "description" : "Transmitter in network mode: copies sent after the message (POCSAG 0 to 10; FLEX 0 to 15, numbered types with message numbering, same number and R = 0). The page is sent with its first transmission"
+    },
+    "retransmitInterval" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Seconds between the copies, 0 to 3600. Negative or omitted: the default of the transmitter (POCSAG 10 s, FLEX 128 frames)"
+    },
+    "sendDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Transmitter in network mode: seconds from its queueing to the first transmission, 0 to 3600"
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "The text of the message"
+    },
+    "charset" : {
+      "description" : "Alphanumeric: the codepage of the text in the protocol of the page. Omitted: the codepage of the transmitter for the protocol",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "voiceFile" : {
+      "type" : "string",
+      "description" : "voice: the path of the WAV file, on the host of SDRangel"
+    },
+    "speed" : {
+      "type" : "integer",
+      "description" : "POCSAG speed in baud: 512, 1200 or 2400. 0: the channel setting"
+    },
+    "polarity" : {
+      "type" : "string",
+      "description" : "normal or inverted. Empty: the channel setting"
+    }
+  },
+  "description" : "A page to transmit. The transmitter is the channel name it announced. A page is for a modulator that handles its protocol. No live voice: a voice page is a sound file"
+};
+            defs.MessageCenterRedecode = {
+  "properties" : {
+    "id" : {
+      "type" : "string",
+      "description" : "Id of the record"
+    },
+    "charset" : {
+      "description" : "Codepage of the protocol of the record. Omitted: the codepage of the record",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "alphanumeric or numeric (POCSAG and GSC). Omitted: the type of the record"
+    }
+  },
+  "description" : "A received message of the log decoded again: POCSAG and GSC from their message bits, with another codepage or as the other type; FLEX alphanumeric from its characters, with another codepage. The record of the log is replaced"
+};
+            defs.MessageCenterReport = {
+  "properties" : {
+    "logged" : {
+      "type" : "integer",
+      "description" : "Records stored in the log since the start"
+    },
+    "routed" : {
+      "type" : "integer",
+      "description" : "Records a route selected since the start"
+    },
+    "endpoints" : {
+      "type" : "string",
+      "description" : "JSON array of the channels that announced themselves: channel (its name), role (rx, tx), status (offline, idle, busy), protocols, speeds, polarities, queueDepth, capacity, frequency, lastSeen"
+    },
+    "pages" : {
+      "type" : "string",
+      "description" : "JSON array of the pages: id, transmitter, protocol, address, text, state (pending, queued, claimed, transmitted, sent, dead), attempts, retransmits, reason"
+    },
+    "log" : {
+      "type" : "string",
+      "description" : "JSON array of the last 50 records of the log (MessageRecord)"
+    },
+    "errors" : {
+      "type" : "string",
+      "description" : "Errors of the sinks and sources since the last report, one a line"
+    },
+    "sinks" : {
+      "type" : "string",
+      "description" : "JSON array of what each sink took: name, accepted, failed (the dropped ones too), dropped (over its limit) and waiting (held by its limit, now); log and queue too"
+    },
+    "query" : {
+      "type" : "string",
+      "description" : "The result of the last query action, as a JSON object: query (the query, from and to resolved), total (the messages it selects) and records (the page, newest first). Empty before the first"
+    }
+  },
+  "description" : "Message Center report. The lists are JSON texts."
+};
+            defs.MessageCenterSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "logSize" : {
+      "type" : "integer",
+      "description" : "Messages kept in the log (in memory), 100 to 10000; the live view of the GUI shows the newest 100 its filters select, a query goes over the history"
+    },
+    "historyEnabled" : {
+      "type" : "integer",
+      "description" : "1 every message stored is kept in the history (messagecenter/history in the application data folder: a file for each day, up to 4 MB each), for historyDays and historyMaxMB; the log is the newest of it when the message center starts, and the queries go over all of it. 0 the log is in memory only. One message center keeps the history"
+    },
+    "historyMaxMB" : {
+      "type" : "integer",
+      "description" : "Size kept of the history in MB (1 to 10000): over it the oldest files go. Default 500"
+    },
+    "historyDays" : {
+      "type" : "integer",
+      "description" : "Days kept of the history (1 to 3650): the files of older days go. Default 30"
+    },
+    "claimTimeoutSec" : {
+      "type" : "integer",
+      "description" : "A page given to a transmitter that does not claim it in this time goes back to the queue"
+    },
+    "silentSec" : {
+      "type" : "integer",
+      "description" : "A channel that does not announce itself for this time is offline"
+    },
+    "routes" : {
+      "type" : "string",
+      "description" : "JSON array of the rules, in order: name, enabled, filter and action, with what the action takes. Filter: protocols, channels (names of channels or transmitters of pages), contacts (names of contacts of the address book), sources (channels, api or a source name), direction, kind, polarity, speeds, address (a regular expression the whole address must match), text (a regular expression found anywhere in the text, not case sensitive; its captures are ${1}... in the texts of the sinks), msgType, quality (notDamaged, clean, corrected, damaged or none), conditions (a JSON array of conditions on any field of the record or of its protocol data, as those of the contacts, all of them met), hideFragments, frequencyMin, frequencyMax, timeFrom, timeTo, hideDuplicates, voiceOnly. Action: log (keep it in the log and the history), send (target: the name of a sink), page (pageTo transmitter, the default: a message for a transmitter becomes a page of the queue; pageTo contact with target a contact name, or messageContact: the message is paged by the send to of that contact, a relay, e.g. POCSAG received paged as FLEX; filter received messages, direction 0), mark (mark: icon, color of the text, background of the row, ARGB integers, each optional; the log shows them), decode (decodeCharset: vendor, model and codepage; decodeType: alphanumeric or numeric), transform (pattern: a regular expression; template: the new text when it is found, with ${1} or ${name} for its groups and ${address}, ${time}, ${field}... for the fields of the message), replace (pattern and template: each match replaced, \\1 or ${1} for a group; all false: the first one only), drop (the rules after it do not see the message); caseInsensitive for transform and replace. The rules are walked in order for each message: the changes (mark, decode, transform, replace) are for the rules after them, the deliveries (log, send, page) are made at the end of the walk with the message as the changes left it (a sink takes it once), drop ends the walk (the deliveries before it are made). A transform or a replace keeps the text before in protocolData original_text. A route of before (stop, sinks, decodeCharset, decodeType) is read as a rule for each, with a drop for stop. Default: one rule without a filter that logs"
+    },
+    "contacts" : {
+      "type" : "string",
+      "description" : "JSON array of the contacts of the address book: name (unique), rules, icon (a built-in icon :name or the path of an image file), color (ARGB integer) and note. A rule is a JSON array of conditions, all of which a message must meet; a message is the contact's when it meets one of its rules. A condition: field (a field of the record: protocol, address, msgType, channel, frequency, mode... or of its protocolData: ric, function, capcode, group_capcodes...) and an operator with its value: is (numbers compared as numbers), isNot (another value, or none), matches (a regular expression of the whole value), lt, le, gt or ge (numbers), or present or absent (true); a list field when one of its values does (isNot: none of them). E.g. [[{\"field\":\"protocol\",\"is\":\"pocsag\"},{\"field\":\"ric\",\"is\":\"1234567\"}],[{\"field\":\"protocol\",\"is\":\"flex\"},{\"field\":\"capcode\",\"matches\":\"12345..\"}]]. A message of a contact has its name in protocolData contact (and contact_icon, contact_color): the log shows it, the filters of the routes select by it (contacts). The first contact a message is of names it. sendTo: how a page is sent to the contact, in order: when (conditions as those of a rule, on the fields of the page as a post has them: protocol, type, text, priority...; none: always) and page (the fields it sets: transmitter, protocol, address, function...). A post to the contact takes the first one whose conditions it meets, e.g. [{\"when\":[{\"field\":\"type\",\"is\":\"voice\"}],\"page\":{\"transmitter\":\"tx-gsc\",\"protocol\":\"gsc\",\"address\":\"012345\",\"function\":1}},{\"page\":{\"transmitter\":\"tx1\",\"protocol\":\"pocsag\",\"address\":\"1234567\",\"function\":3}}]"
+    },
+    "sinks" : {
+      "type" : "string",
+      "description" : "JSON array of the sinks (destinations) the rules send records to (action send, target its name): name and type. file (the default): path and format (0 JSON lines, 1 CSV, 2 the CSV log of the Pager demodulator). udp: address, port and format (0 the Pager demodulator fields each ended by a NUL, 1 the record as one line of JSON). command: text, a command whose arguments get the message (${address}, ${message}, ${protocol}, ${type}, ${channel}, ${mode}, ${id}, ${frequency}, ${time}, ${0}, ${1}... the captures of the text expression of the rule, and ${field} for any other field; ${name:base64}, ${name:json}, ${name:url} encoded), run without a shell; env true: the fields in environment variables MC_ID, MC_TIME, MC_PROTOCOL, MC_ADDRESS, MC_TYPE, MC_TEXT, MC_CHANNEL, MC_FREQUENCY, MC_POLARITY, MC_QUALITY, MC_CONTACT and MC_RECORD (the record as JSON); stdin true: the record as one line of JSON on its standard input. speech: text said by the GUI. map: the position (latitude and longitude) in the text of the message is plotted on the Map, named by the address. Any sink: rateCount (at most so many messages, commands: runs, 0 or none for no limit), ratePeriod (in 1, 60 or 3600 s) and rateMode (hold: they wait and go as the limit allows, at most 100 waiting; drop); a command without a limit set has 5 in 1 s. A mark sink of before (type mark) is read as a mark rule"
+    },
+    "sources" : {
+      "type" : "string",
+      "description" : "JSON array of the sources records are read from: name and type. file (the default): a JSON lines file, path. csv: a CSV log of a message center or of the Pager demodulator, path. udp: address (default 127.0.0.1) and port to listen on, datagrams as JSON lines or in the Pager demodulator format; what is received is a message received, never a page to transmit"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address or host name of the reverse API peer."
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "TCP port of the reverse API peer.",
+      "minimum" : 1,
+      "maximum" : 65535
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer",
+      "description" : "Feature-set index used by the reverse API peer."
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer",
+      "description" : "Feature index used by the reverse API peer."
+    }
+  },
+  "description" : "Message Center settings. The lists are JSON texts."
+};
             defs.MetisMISOSettings = {
   "properties" : {
     "title" : {
@@ -22501,6 +22804,794 @@ margin-bottom: 20px;
   },
   "description" : "RadioClock"
 };
+            defs.RadioPagingCharset = {
+  "properties" : {
+    "vendor" : {
+      "type" : "string",
+      "description" : "Vendor of the pager: generic, motorola, nec, philips, swissphone, partner, truly, multitone"
+    },
+    "model" : {
+      "type" : "string",
+      "description" : "Model of the pager: generic, advisor, maxima-compact, linguist, ..."
+    },
+    "codepage" : {
+      "type" : "string",
+      "description" : "Codepage of the model: ascii, latin-german, cyrillic, ..."
+    }
+  },
+  "description" : "Codepage of the alphanumeric messages of a paging protocol (the protocol of the field or of the message): vendor, model and codepage of the pager. generic, generic, ascii is the default of each protocol"
+};
+            defs.RadioPagingDemodReport = {
+  "type" : "object",
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "pocsag512Sync" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG 512 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+    },
+    "pocsag1200Sync" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG 1200 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+    },
+    "pocsag2400Sync" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG 2400 bit/s decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+    },
+    "flexSync" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+    },
+    "flexMode" : {
+      "type" : "string",
+      "description" : "FLEX mode of the last frame"
+    },
+    "flexQuality" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "FLEX decode quality of the last frame, 0 to 1"
+    },
+    "flexErs" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "A FLEX emergency re-synchronization is being received (1 for yes, 0 for no)"
+    },
+    "flexErsSeconds" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Length of the current or last FLEX emergency re-synchronization in seconds"
+    },
+    "flexErsCount" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Number of FLEX emergency re-synchronizations received since start"
+    },
+    "gscSync" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "GSC decoder: 0 not synchronised, 1 synchronised, 2 synchronised on inverted polarity"
+    },
+    "gscVoice" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "A GSC voice message is being received (1 for yes, 0 for no)"
+    },
+    "pocsagMessages" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Number of POCSAG messages decoded since start"
+    },
+    "flexMessages" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Number of FLEX messages decoded since start"
+    },
+    "gscMessages" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Number of GSC messages decoded since start"
+    }
+  },
+  "description" : "Radio paging demodulator"
+};
+            defs.RadioPagingDemodSettings = {
+  "type" : "object",
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Channel filter bandwidth in Hz. Each protocol filters further at its Carson bandwidth"
+    },
+    "pocsagEnabled" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Decode POCSAG (1 for yes, 0 for no)"
+    },
+    "pocsagDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "POCSAG frequency deviation in Hz"
+    },
+    "flexEnabled" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Decode FLEX (1 for yes, 0 for no)"
+    },
+    "flexDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "FLEX outer symbol frequency deviation in Hz"
+    },
+    "flexMaxMessageNumber" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX largest message number of the network, 0 to 63 (default 63): the messages with R = 1 of each address are checked for skipped numbers (missed_numbers of the record), after it the sequence starts from 0 again"
+    },
+    "pocsagFill" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG fill at the end of an alphanumeric message, the last character and the one before if it is the same code: 0 NUL, 1 NUL, ETX and EOT (default), 2 the codes without a glyph in the codepage, 3 the codes of pocsagFillCodes"
+    },
+    "pocsagFillCodes" : {
+      "type" : "string",
+      "description" : "pocsagFill 3: hex codes 00 to 7F separated by spaces or commas (default 00 03 04)"
+    },
+    "pocsagCustomCodes" : {
+      "type" : "string",
+      "description" : "POCSAG custom codepage (charset generic/generic/custom): the codes of ASCII mapped to other characters, hex code = hex Unicode code point separated by spaces, rtl for a right-to-left text, e.g. rtl 60=05D0 61=05D1"
+    },
+    "flexCustomCodes" : {
+      "type" : "string",
+      "description" : "FLEX custom codepage (charset generic/generic/custom), as pocsagCustomCodes"
+    },
+    "gscCustomCodes" : {
+      "type" : "string",
+      "description" : "GSC custom codepage (charset generic/generic/custom), as pocsagCustomCodes, codes 00 to 3F of the GSC table"
+    },
+    "gscEnabled" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Decode GSC (1 for yes, 0 for no)"
+    },
+    "gscDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "GSC frequency deviation in Hz"
+    },
+    "gscVoiceTimeout" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Maximum length of a GSC voice message in seconds"
+    },
+    "gscAudio" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Play the voice of GSC voice pages (1 for yes, 0 for no)"
+    },
+    "gscVoiceRecord" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Record the voice of GSC voice pages to a WAV file, the path is voice_file in the protocol data of the message record (1 for yes, 0 for no)"
+    },
+    "gscVoiceDirectory" : {
+      "type" : "string",
+      "description" : "Directory of the voice files. Empty: radiopaging/voice in the application data directory"
+    },
+    "gscVoiceKeepDays" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Voice files older than this many days are deleted when a new voice file is written (0 to keep them all). The newest gscVoiceKeepMin files are kept whatever their age"
+    },
+    "gscVoiceKeepMin" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "The number of the newest voice files that are not deleted"
+    },
+    "pocsagDcCorrection" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG DC offset correction: the carrier frequency offset, measured as the DC offset of the discriminator, is corrected (1 for yes, the default, 0 for no)"
+    },
+    "flexDcCorrection" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX DC offset correction (1 for yes, the default, 0 for no)"
+    },
+    "gscDcCorrection" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "GSC DC offset correction (1 for yes, the default, 0 for no)"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Voice audio gain"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Send each message received to a UDP address (1 for yes, 0 for no)"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address the messages are sent to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "UDP port the messages are sent to"
+    },
+    "udpFormat" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Format of the UDP datagrams: 0 the fields of the Pager demodulator (date, time, address, function bits, alphanumeric, numeric, protocol, type, each ended by a NUL), 1 the message record as one line of JSON"
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Write each message received to a CSV log file, the columns of the message record (1 for yes, 0 for no)"
+    },
+    "logFilename" : {
+      "type" : "string",
+      "description" : "Log file name or path"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "pocsagCharset" : {
+      "description" : "Codepage of the POCSAG alphanumeric messages (default generic, generic, ascii)",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "flexCharset" : {
+      "description" : "Codepage of the FLEX alphanumeric messages",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "gscCharset" : {
+      "description" : "Codepage of the GSC alphanumeric messages",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Radio paging demodulator: POCSAG, FLEX and GSC; a protocol that is on is decoded at every speed, mode and polarity"
+};
+            defs.RadioPagingModActions = {
+  "type" : "object",
+  "properties" : {
+    "tx" : {
+      "$ref" : "#/definitions/RadioPagingModTx"
+    },
+    "clear" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Drop the messages waiting (1 for yes, 0 for no)"
+    },
+    "abort" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Drop the messages waiting; one-shot: end the transmission being sent (1 for yes, 0 for no)"
+    },
+    "systemEvent" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX network: System Event Notification (STD-43A 3.8.2.4), the event flags e10-e0 (1 to 2047; e0 traffic split by SSID TMF, e1 traffic split by NID TMF, e2 change of the Channel Set Up Instruction, e3 a new frequency of the NID, e4 a new frequency of the SSID coverage zone, e5-e10 reserved) announced in every phase of each frame for systemEventFrames; 0 stops it"
+    },
+    "systemEventFrames" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Frames of the System Event Notification, 128 (one cycle, the default) to 512 (the 4 cycles of the notice)"
+    }
+  },
+  "description" : "Radio paging modulator"
+};
+            defs.RadioPagingModReport = {
+  "type" : "object",
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "state" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "0 idle, 1 ramp up, 2 transmitting, 3 ramp down"
+    },
+    "queued" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Messages waiting"
+    },
+    "inFlight" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Messages being sent"
+    },
+    "currentId" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Id of the message being sent, 0 if none"
+    },
+    "lastSentId" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Id of the last message sent completely, 0 if none"
+    },
+    "sent" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Messages sent completely since the channel was created"
+    },
+    "dropped" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Messages cleared, aborted or dropped by a change of protocol or mode since the channel was created"
+    },
+    "refused" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Requests refused (not valid, queue full) since the channel was created, from the GUI, the Message Center or the WebAPI"
+    },
+    "sampleCounter" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel samples produced since the channel was created (not while muted)"
+    },
+    "ers" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX emergency re-synchronization on air (1 for yes, 0 for no)"
+    },
+    "ersMs" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Length of the last FLEX emergency re-synchronization in milliseconds"
+    },
+    "ersCount" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "FLEX emergency re-synchronizations sent since the channel was created"
+    }
+  },
+  "description" : "Radio paging modulator"
+};
+            defs.RadioPagingModSettings = {
+  "type" : "object",
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel center frequency shift from baseband center in Hz"
+    },
+    "protocol" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Protocol transmitted: 0 POCSAG, 1 FLEX, 2 GSC"
+    },
+    "mode" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "0 one-shot (carrier on for each transmission, off after it), 1 network (carrier on all the time, idle signal between messages). GSC has no network mode: it is one-shot whatever the setting"
+    },
+    "deviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Frequency deviation of the outer symbol in Hz, 500 to 10000"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Gain in dB, -60 to 0"
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mute the channel (1 for yes, 0 for no)"
+    },
+    "rampUpMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power ramp at the start of a transmission in milliseconds, 0 to 100"
+    },
+    "rampDownMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power ramp at the end of a transmission in milliseconds, 0 to 100"
+    },
+    "rampRange" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Range of the power ramps in dB"
+    },
+    "pocsagSpeed" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG speed in baud: 512, 1200 or 2400"
+    },
+    "pocsagInverted" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG polarity: 0 normal (binary 1 is a negative deviation), 1 inverted"
+    },
+    "flexMode" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX mode: 0 1600/2, 1 3200/2, 2 3200/4, 3 6400/4"
+    },
+    "flexInverted" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX polarity: 0 normal (symbol 3 is the highest frequency), 1 inverted"
+    },
+    "flexCollapse" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX collapse 0 to 7: the emergency re-synchronization lasts at least 2^collapse frames. Network: pagers listen to one frame in 2^collapse. One-shot: the frames are sent with collapse 0"
+    },
+    "flexRoaming" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX roaming: send the system ID words (STD-43A 3.7.2 and 6.1.1): the first in every frame, the second in frames 0 to 3, and set the roaming flag of the frame information word. The frames 0 to 3 have to be sent (1 for yes, 0 for no)"
+    },
+    "ssidLocalId" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Roaming: local ID, 0 to 511"
+    },
+    "ssidCoverageZone" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Roaming: coverage zone, 0 to 31"
+    },
+    "ssidCountryCode" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Roaming: country code (ITU-T E.212), 0 to 1023"
+    },
+    "ssidTrafficFlags" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Roaming: traffic management flags announced in the second system ID word, 0 to 15 (bit 0 is T0). Only announced, the addresses are not filtered"
+    },
+    "flexTime" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX: send the date and time in block information words 001 (date), 010 (time) and 101 (time zone) (STD-43A 3.7.2): 1 for yes. They fill the block information words left free in every frame, taking turns when they do not all fit"
+    },
+    "flexTimeFrameZero" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: 1 the time of frame 0 of the cycle (the standard), 0 the time of the frame that carries it"
+    },
+    "flexTimeZoneMinutes" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: offset of the standard time of the zone from UTC in minutes, one of STD-43A Table 3.7.2-3 (-660 to 720, with 210, 270, 330, 345, 390, 570, -210)"
+    },
+    "flexTimeSendZone" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: send the time zone word (zone, daylight saving flag, extended seconds), 1 for yes"
+    },
+    "flexTimeDaylightSaving" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: 1 the time is daylight saving time, one hour ahead of the standard time (L0 = 0)"
+    },
+    "flexTimeOffsetSeconds" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "FLEX time: seconds added to the time of the frame grid (UTC from the computer clock), to send any date and time"
+    },
+    "flexTimeEquivalentYear" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: 1 a year outside 1994-2025 (the period of the year field) is sent as the latest year of the period with the same calendar (leap year, weekday of January 1), so the pager shows the right weekday; 0 the year modulo 32"
+    },
+    "flexTimeExtendedSeconds" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX time: extended second S5-S3 of the time zone word, 0-7 steps of 1/64 minute (0.9375 s), to correct the time a pager shows when the frames are not aligned to the second"
+    },
+    "maxQueued" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Queue size: messages not sent yet before new ones are refused, 1 to 100000 (default 10000). Lowered below the messages queued: they stay, new ones are refused until the queue is down"
+    },
+    "flexNumbering" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX message numbering of the network (STD-43A 8.4, optional): 1 the alphanumeric, HEX/binary and numbered short messages of each address are numbered 0, 1 ... flexMaxMessageNumber, 0 ... with R = 1; 0 the network does not number them: N = 0 and R = 0 (a message in fragments takes a number apart from the other messages of the address in progress) and numbered short messages are refused"
+    },
+    "flexMaxMessageNumber" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX largest message number of the network, 0 to 63 (the pagers are set to it): after it the numbers of an address start from 0 again"
+    },
+    "pocsagCharset" : {
+      "description" : "Codepage of the POCSAG alphanumeric messages of the pages without one (default generic, generic, ascii)",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "flexCharset" : {
+      "description" : "Codepage of the FLEX alphanumeric messages of the pages without one",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "gscCharset" : {
+      "description" : "Codepage of the GSC alphanumeric messages of the pages without one",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "gscMode" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "GSC transmissions (one-shot only, GSC has no network mode): 0 auto (a batch of messages of the same preamble value, a message alone after its own preamble), 1 single (one message per transmission), 2 batch (a batch even for one message), 3 non battery saver (all queued messages of a polarity after one 1100 pattern)"
+    },
+    "gscInverted" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "GSC polarity: 0 normal (binary 1 is a positive deviation), 1 inverted"
+    },
+    "gscVoiceSeconds" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "GSC voice pages: the length of the voice in seconds (1 to 50). A longer sound file is cut at this length, a voice from the microphone ends at this length"
+    },
+    "gscVoiceDirectory" : {
+      "type" : "string",
+      "description" : "Directory of the files of the voice sent. Empty: radiopaging/voice/tx in the application data directory"
+    },
+    "gscVoiceKeepDays" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Files of the voice sent older than this many days are deleted when a new one is written (0 to keep them all). The newest gscVoiceKeepMin files are kept whatever their age"
+    },
+    "gscVoiceKeepMin" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "The number of the newest files of the voice sent that are not deleted"
+    },
+    "mixPocsag" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX network: mixing with POCSAG (1 for yes, 0 for no). POCSAG messages are sent in the time between FLEX frames with the POCSAG settings (STD-43A Chapter 7). Frames 0 to 3 of the cycle are always FLEX"
+    },
+    "pocsagDeviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Frequency deviation of POCSAG when mixed with FLEX in Hz, 500 to 10000 (FLEX: the deviation setting)"
+    },
+    "mixFramesPerMinute" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mixing: 0 the first 2^flexCollapse frames of each minute are FLEX (7.1.1); N (1 to 32, 128 on a shared channel) the first N frames, with system collapse 5 (7 shared), capcodes of the other frames refused (7.1.2)"
+    },
+    "mixShared" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mixing: shared channel, the minute is 4 minutes (128 frames) (1 for yes, 0 for no)"
+    },
+    "mixSwitchMs512" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mixing: duration in ms of the 750 bps 1,0 pattern before 512 bps POCSAG after FLEX (STD-43A 7.2.1: at least 400)"
+    },
+    "mixSwitchMs1200" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mixing: duration in ms of the 750 bps 1,0 pattern before 1200 bps POCSAG after FLEX (STD-43A 7.2.2: at least 200)"
+    },
+    "mixSwitchMs2400" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Mixing: duration in ms of the 750 bps 1,0 pattern before 2400 bps POCSAG after FLEX (not in the standard: 100, extrapolated from 512 and 1200)"
+    },
+    "rgbColor" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Radio paging modulator: one protocol per channel; the protocol settings are the defaults of the messages sent"
+};
+            defs.RadioPagingModTx = {
+  "type" : "object",
+  "properties" : {
+    "address" : {
+      "type" : "string",
+      "description" : "The address as a string, as in the posts of the Message Center. POCSAG: the 21-bit address 0 to 2097151. FLEX: the capcode, short 1 to 1933312 or long 2101249 to 4297068542, digits or a form with letters of STD-43A Appendix A ([P|Q|R|S][fff][b]<letter><address>, e.g. 3E005237593); only the address is sent. GSC: the cap code, up to 6 digits zero padded (index, group, 3 address digits; 5 digits: index 0) or 7 digits with the suffix digit, that gives the function (1-4 and 5-8: A-D, 9 and 0: A and B) over function"
+    },
+    "function" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG: function 0 to 3 (A to D). GSC: function 0 to 3 (A to D), the address number 1 to 4"
+    },
+    "priority" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX: address in the priority part of the address field (1 for yes, 0 for no)"
+    },
+    "protocol" : {
+      "type" : "string",
+      "description" : "pocsag, flex or gsc: the protocol of the message. Omitted: the protocol of the channel. A FLEX channel in network mode with mixing also takes pocsag messages"
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "tone, numeric or alphanumeric. GSC also voice: text is the path of a WAV file, sent after a 2 s alert, cut at gscVoiceSeconds. FLEX also short_message (STD-43A 3.9.2, see shortType), special_numeric, numbered_numeric and numbered_special_numeric (3.9.6, numbered ones with message numbering), binary (HEX/binary message, 3.10.1.2) and secure (3.10.1.4, see secureType); FLEX tone is a short message with the tone only payload, every digit a space (3.9.2)"
+    },
+    "shortType" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX short_message type (STD-43A Table 3.9.2-1): 0 numeric, text up to 3 numeric characters (8 for a long address), an empty text is the tone only payload; 1 source code; 2 source code and the message number of the address, with the retrieval flag"
+    },
+    "source" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX short_message types 1 and 2: source code 0 to 7"
+    },
+    "blocking" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX binary: blocking length B, bits of a character 1 to 16 (16 is sent as 0000). 0 or omitted: 1, the default of the standard. The bits of the text (4 a hex digit) are a multiple of it"
+    },
+    "mailDrop" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX binary: mail drop flag M (1 for yes, 0 for no)"
+    },
+    "rightToLeft" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX binary: display direction D, 1 right to left, 0 left to right; not allowed with a blocking length of 1"
+    },
+    "headerMessage" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX binary: header message flag H, 1 if a transparent message of the same number follows"
+    },
+    "statusInfo" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX binary: status information field enabler I, 1 if the first 8 data bits name the encoding method (reserved in the standard)"
+    },
+    "secureType" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "FLEX secure type t1 t0 (STD-43A 3.10.1.4): 0 alphanumeric (7-bit characters), 1 data defined separately (hex digits, not terminated), 2 binary (hex digits)"
+    },
+    "groupMembers" : {
+      "type" : "string",
+      "description" : "FLEX group message (STD-43A 5.2): the capcodes of the pagers, 2 to 5461, separated by commas (digits or the forms with letters of STD-43A Appendix A, only the address is used). The address is not used. The message (numeric, alphanumeric, tone or a short message that is not numbered) goes to a temporary address that a short instruction tells the pagers; one temporary address for each phase of the pagers, so a group is limited by the 16 addresses of the network. Network collapse 6 or less, no copies"
+    },
+    "retransmit" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Network mode only. Number of copies sent after the message: POCSAG 0 to 10; FLEX 0 to 15, numbered types (alphanumeric, binary, numbered short message) on a channel with message numbering, sent with the same message number and R = 0 (STD-43A 3.10.1.1). 0 or omitted: none"
+    },
+    "retransmitInterval" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Network mode only. Seconds between the copies, 0 to 3600. Negative or omitted: 10 s for POCSAG, 128 frames (240 s) for FLEX. FLEX is rounded up to whole frames of 1.875 s, at least 1"
+    },
+    "sendDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Network mode only. Seconds from the queueing to the first transmission, 0 to 3600. 0 or omitted: none. FLEX is rounded up to whole frames of 1.875 s"
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "Numeric: 0-9, space, U, -, ], [ (GSC: 0-9 A-H J L N P R U space -). Alphanumeric: the characters of the codepage (charset), <0xNN> for any code. FLEX binary and secure types 1 and 2: hex digits, digit i the data bits 4i to 4i+3, the least significant bit sent first"
+    },
+    "charset" : {
+      "description" : "Alphanumeric (and FLEX secure type 0): the codepage of the text in the protocol of the message. Omitted: the codepage of the channel for the protocol. A character without a code in it is refused",
+      "$ref" : "#/definitions/RadioPagingCharset"
+    },
+    "speed" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "POCSAG speed in baud: 512, 1200 or 2400. 0 or omitted: the channel setting"
+    },
+    "id" : {
+      "type" : "string",
+      "description" : "Id of the page of the message center this message is: the records of the message have this id, and its states (transmitted, sent, aborted, released, rejected) are reported on the messages pipe"
+    },
+    "polarity" : {
+      "type" : "string",
+      "description" : "normal or inverted. Empty or omitted: the channel setting. FLEX: the other polarity than the network's is sent in the frames the network has nothing mandatory in. GSC: a transmission has one polarity"
+    }
+  },
+  "description" : "A message to transmit in the protocol of the channel. Speed and polarity default to the channel settings; FLEX is sent in the mode of the network (channel setting)"
+};
             defs.Radiosonde = {
   "properties" : {
     "serial" : {
@@ -24155,8 +25246,8 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int32",
       "description" : "Use a detected residual USB carrier within +/-100 Hz as the tone offset; otherwise tones are searched for within +/-6 Hz of the manual offset",
-      "default" : 1,
-      "enum" : [ 0, 1 ]
+      "enum" : [ 0, 1 ],
+      "default" : 1
     },
     "threshold" : {
       "type" : "number",
@@ -74744,7 +75835,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-11-17T15:33:17.289+01:00
+              Generated 2026-11-21T22:32:35.231Z
             </div>
           </div>
       </div>
