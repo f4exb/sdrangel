@@ -109,13 +109,26 @@ MCPStreams::~MCPStreams()
     closeAll();
 }
 
-QString MCPStreams::createSession()
+QString MCPStreams::createSession(bool compactTools)
 {
     QMutexLocker locker(&m_mutex);
     QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    m_sessions.insert(id, QDateTime::currentDateTimeUtc());
-    expireSessions();
+    m_sessions.insert(id, {QDateTime::currentDateTimeUtc(), compactTools});
+    expireSessions(id);
     return id;
+}
+
+MCPStreams::ToolProfile MCPStreams::toolProfile(const QString& sessionId) const
+{
+    if (sessionId.isEmpty()) {
+        return ToolProfile::Full; // Anonymous requests retain the legacy full interface.
+    }
+    QMutexLocker locker(&m_mutex);
+    const auto it = m_sessions.constFind(sessionId);
+    if (it == m_sessions.cend()) {
+        return ToolProfile::Unknown;
+    }
+    return it.value().m_compactTools ? ToolProfile::Compact : ToolProfile::Full;
 }
 
 bool MCPStreams::sessionExists(const QString& sessionId)
@@ -126,19 +139,23 @@ bool MCPStreams::sessionExists(const QString& sessionId)
         return false;
     }
 
-    m_sessions[sessionId] = QDateTime::currentDateTimeUtc();
+    m_sessions[sessionId].m_lastUsed = QDateTime::currentDateTimeUtc();
     return true;
 }
 
 // Clients are not obliged to end their session, and a bridge that reconnects starts a new one
 // every time, so idle sessions are dropped rather than kept for the life of the process.
 // Sessions with an open stream are never dropped. Call with the mutex held.
-void MCPStreams::expireSessions()
+void MCPStreams::expireSessions(const QString& newSession)
 {
-    QSet<QString> streaming;
-
-    for (const StreamPtr& stream : m_streams) {
-        streaming.insert(stream->getSessionId());
+    // Timestamps have millisecond resolution. Sorting ties by UUID must not evict the
+    // session initialize is about to return, even when every idle client was just used.
+    QSet<QString> protectedSessions{newSession};
+    for (const StreamPtr& stream : m_streams)
+    {
+        if (m_sessions.contains(stream->getSessionId())) {
+            protectedSessions.insert(stream->getSessionId());
+        }
     }
 
     QDateTime now = QDateTime::currentDateTimeUtc();
@@ -146,22 +163,22 @@ void MCPStreams::expireSessions()
 
     for (auto it = m_sessions.begin(); it != m_sessions.end(); ++it)
     {
-        if (!streaming.contains(it.key())) {
+        if (!protectedSessions.contains(it.key())) {
             candidates.append(it.key());
         }
     }
 
     // Oldest first, so that trimming to the cap drops the least recently used
     std::sort(candidates.begin(), candidates.end(), [this](const QString& a, const QString& b) {
-        return m_sessions[a] < m_sessions[b];
+        return m_sessions[a].m_lastUsed < m_sessions[b].m_lastUsed;
     });
 
-    int droppable = candidates.size() - qMax(0, m_maxSessions - (int) streaming.size());
+    int droppable = candidates.size() - qMax(0, m_maxSessions - (int) protectedSessions.size());
 
     for (int i = 0; i < candidates.size(); i++)
     {
         const QString& id = candidates[i];
-        bool tooOld = m_sessions[id].msecsTo(now) > m_sessionIdleMs;
+        bool tooOld = m_sessions[id].m_lastUsed.msecsTo(now) > m_sessionIdleMs;
         bool overCap = i < droppable;
 
         if (tooOld || overCap)
