@@ -116,7 +116,8 @@ ADSBDemod::~ADSBDemod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this, true);
-    delete m_basebandSink; // This results in a call to ADSBDemod::stop(), so need to delete before worker and thread
+    stop();
+    delete m_basebandSink;
     delete m_thread;
 
     // Nothing pushes to the tracker any more, so the thread can go. The tracker and
@@ -178,11 +179,11 @@ void ADSBDemod::start()
 void ADSBDemod::stop()
 {
     qDebug() << "ADSBDemod::stop";
-    m_basebandSink->stopWork();
     m_thread->exit();
 #ifndef __EMSCRIPTEN__
     m_thread->wait();
 #endif
+    m_basebandSink->stopWork();
 }
 
 bool ADSBDemod::handleMessage(const Message& cmd)
