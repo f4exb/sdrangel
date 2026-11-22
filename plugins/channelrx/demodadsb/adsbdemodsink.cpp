@@ -49,6 +49,7 @@ ADSBDemodSink::ADSBDemodSink() :
 
 ADSBDemodSink::~ADSBDemodSink()
 {
+    stopWorker();
     for (int i = 0; i < m_buffers; i++)
         delete[] m_sampleBuffer[i];
 }
