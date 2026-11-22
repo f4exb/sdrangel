@@ -112,6 +112,7 @@ void FileSinkSink::stopRecording()
     if (m_record)
     {
         m_preRecordBuffer.reset();
+        m_preRecordFill = 0;
 
         if (!m_fileSink->stopRecording())
         {

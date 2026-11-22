@@ -72,6 +72,7 @@
 #include "gui/aboutdialog.h"
 #include "gui/audiodialog.h"
 #include "gui/graphicsdialog.h"
+#include "gui/helpnotifications.h"
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"
 #include "gui/sdrangelsplash.h"
@@ -2253,6 +2254,30 @@ void MainWindow::createMenuBar(QToolButton *button) const
     QAction *loggingAction = preferencesMenu->addAction("&Logging...");
     loggingAction->setToolTip("Logging preferences");
     QObject::connect(loggingAction, &QAction::triggered, this, &MainWindow::on_action_Logging_triggered);
+
+    QMenu *helpNotificationsMenu = preferencesMenu->addMenu("&Help and Notifications");
+    QAction *hideAllAction = helpNotificationsMenu->addAction("&Hide all");
+    hideAllAction->setCheckable(true);
+    hideAllAction->setChecked(!HelpNotifications::isHelpNotificationsEnabled());
+    QObject::connect(hideAllAction, &QAction::toggled, this, [](bool hideAll)
+    {
+        HelpNotifications::setHelpNotificationsEnabled(!hideAll);
+    });
+    QObject::connect(preferencesMenu, &QMenu::aboutToShow, this, [hideAllAction]()
+    {
+        hideAllAction->setChecked(!HelpNotifications::isHelpNotificationsEnabled());
+    });
+    QObject::connect(helpNotificationsMenu, &QMenu::aboutToShow, this, [hideAllAction]()
+    {
+        hideAllAction->setChecked(!HelpNotifications::isHelpNotificationsEnabled());
+    });
+    QAction *resetAllAction = helpNotificationsMenu->addAction("&Reset all");
+    QObject::connect(resetAllAction, &QAction::triggered, this, [hideAllAction]()
+    {
+        HelpNotifications::resetAllDontRemind();
+        hideAllAction->setChecked(false);
+    });
+
     QAction *myPositionAction = preferencesMenu->addAction("My &Position...");
     myPositionAction->setToolTip("Set station position");
     QObject::connect(myPositionAction, &QAction::triggered, this, &MainWindow::on_action_My_Position_triggered);

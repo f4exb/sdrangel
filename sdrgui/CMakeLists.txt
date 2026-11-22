@@ -75,6 +75,7 @@ set(sdrgui_SOURCES
     gui/glspectrumview.cpp
     gui/graphicsdialog.cpp
     gui/graphicsviewzoom.cpp
+    gui/helpnotifications.cpp
     gui/httpdownloadmanagergui.cpp
     gui/indicator.cpp
     gui/int64delegate.cpp
@@ -227,6 +228,7 @@ set(sdrgui_HEADERS
     gui/glspectrumview.h
     gui/graphicsdialog.h
     gui/graphicsviewzoom.h
+    gui/helpnotifications.h
     gui/httpdownloadmanagergui.h
     gui/indicator.h
     gui/int64delegate.h
