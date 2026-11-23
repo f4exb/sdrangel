@@ -651,9 +651,11 @@ Aircraft3DModels::Aircraft3DModels(bool verbose, bool liveryIcons) :
     // A pattern names the type the aircraft is, and modelFor() steps to a relative where
     // that has no model - so these name the A320neo, 787-9 and so on as what they are.
     // First match wins, so each specific pattern comes before the general one it is in
-    m_3DModelMatch.append(new ModelMatch("A.?319.?1\\d\\dN", "A19N"));
-    m_3DModelMatch.append(new ModelMatch("A.?320.?2\\d\\dN", "A20N"));
-    m_3DModelMatch.append(new ModelMatch("A.?321.?2\\d\\dN", "A21N"));
+    // The \b keeps an Airbus number from matching inside an Aerospatiale one: the
+    // SA319 is an Alouette III helicopter
+    m_3DModelMatch.append(new ModelMatch("\\bA.?319.?1\\d\\dN", "A19N"));
+    m_3DModelMatch.append(new ModelMatch("\\bA.?320.?2\\d\\dN", "A20N"));
+    m_3DModelMatch.append(new ModelMatch("\\bA.?321.?2\\d\\dN", "A21N"));
     m_3DModelMatch.append(new ModelMatch("A350.?10\\d\\d", "A35K"));
     m_3DModelMatch.append(new ModelMatch("A220.?100|C.?Series.*100|CS100", "BCS1"));
     m_3DModelMatch.append(new ModelMatch("A220.?300|C.?Series.*300|CS300", "BCS3"));
@@ -677,12 +679,14 @@ Aircraft3DModels::Aircraft3DModels(bool verbose, bool liveryIcons) :
     m_3DModelMatch.append(new ModelMatch("DHC-8.?3\\d\\d", "DH8C"));
     m_3DModelMatch.append(new ManufacturerModelMatch("^208", "Cessna|Textron", "C208"));
 
-    m_3DModelMatch.append(new ModelMatch("A300.*", "A306")); // A300 B4 is A300-600, but use for others as closest match
+    // A300 B4 is A300-600, but use for others as closest match. Not "A-300", which is a
+    // Cameron balloon, nor within EA300 or SA300 - an Extra and a Starduster
+    m_3DModelMatch.append(new ModelMatch("\\bA300.*", "A306"));
     m_3DModelMatch.append(new ModelMatch("A310.*", "A310"));
     m_3DModelMatch.append(new ModelMatch("A318.*", "A318"));
-    m_3DModelMatch.append(new ModelMatch("A.?319.*", "A319"));
-    m_3DModelMatch.append(new ModelMatch("A.?320.*", "A320"));
-    m_3DModelMatch.append(new ModelMatch("A.?321.*", "A321"));
+    m_3DModelMatch.append(new ModelMatch("\\bA.?319.*", "A319"));
+    m_3DModelMatch.append(new ModelMatch("\\bA.?320.*", "A320"));
+    m_3DModelMatch.append(new ModelMatch("\\bA.?321.*", "A321"));
     m_3DModelMatch.append(new ModelMatch("A330.2.*", "A332"));
     m_3DModelMatch.append(new ModelMatch("A330.3.*", "A333"));
     m_3DModelMatch.append(new ModelMatch("A330.7.*", "A333")); // BelugaXL
@@ -750,19 +754,29 @@ Aircraft3DModels::Aircraft3DModels(bool verbose, bool liveryIcons) :
 
     m_3DModelMatch.append(new ModelMatch(".*MD.11.*", "MD11"));
     m_3DModelMatch.append(new ModelMatch(".*MD.83.*", "MD83"));
-    m_3DModelMatch.append(new ModelMatch(".*MD.90.*", "MD90"));
+    // Not the MD 900 helicopter, nor the "IL-76 MD-90"
+    m_3DModelMatch.append(new ManufacturerModelMatch("MD.?90(?!\\d)", "(?i)douglas|boeing", "MD90"));
 
-    m_3DModelMatch.append(new ModelMatch(".*F28.*", "F28"));
+    // The Fokker 70 and 100 were certified as F28 Mk 0070 and Mk 0100, and are often
+    // named so. The F28 itself only from Fokker: the Enstrom F-28 is a helicopter, and
+    // "F28" turns up inside balloon and glider names too
+    m_3DModelMatch.append(new ModelMatch("(?i)F.?28\\D*0*70\\b", "F70"));
+    m_3DModelMatch.append(new ModelMatch("(?i)F.?28\\D*0*100\\b", "F100"));
+    m_3DModelMatch.append(new ManufacturerModelMatch("\\bF.?28(?!\\d)", "(?i)fokker", "F28"));
     m_3DModelMatch.append(new ModelMatch(".*F70.*", "F70"));
     m_3DModelMatch.append(new ModelMatch(".*F100.*", "F100"));
 
     // GA
-    m_3DModelMatch.append(new ModelMatch(".*B200.*", "BE20"));
-    m_3DModelMatch.append(new ManufacturerModelMatch(".*200.*", ".*Beech.*", "BE20"));
-    m_3DModelMatch.append(new ModelMatch(".*150.*", "C150"));
-    m_3DModelMatch.append(new ModelMatch(".*172.*", "C172"));
-    m_3DModelMatch.append(new ModelMatch(".*421.*", "C421"));
-    m_3DModelMatch.append(new ModelMatch(".*125.*", "H25B"));
+    // Not the Socata TB200 Tobago, the Beech Sierra "B24R 200" or the Starship 2000
+    m_3DModelMatch.append(new ModelMatch("\\bB200", "BE20"));
+    m_3DModelMatch.append(new ManufacturerModelMatch("King Air|^[AB]?200", "(?i)beech|raytheon|textron", "BE20"));
+    // A bare number names a different aircraft from every manufacturer that uses it - an
+    // Airbus H125 is a helicopter, a Gulfstream G150 a jet and a Piper PA-18-150 a Cub - so
+    // these only hold for the manufacturer whose type it is
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*150.*", "(?i)cessna|reims", "C150"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*172.*", "(?i)cessna|reims|textron", "C172"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*421.*", "(?i)cessna", "C421"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*125.*", "(?i)hawker|raytheon|british aerospace|^bae|de ?havilland|israel aircraft", "H25B"));
     m_3DModelMatch.append(new ManufacturerModelMatch(".*400.*", "Hawker.*", "H25B"));
     m_3DModelMatch.append(new ManufacturerModelMatch(".*400.*", "Raytheon.*", "H25B"));
     m_3DModelMatch.append(new ModelMatch(".*Learjet.*", "LJ45"));
@@ -772,7 +786,9 @@ Aircraft3DModels::Aircraft3DModels(bool verbose, bool liveryIcons) :
     m_3DModelMatch.append(new ModelMatch("ATR.*72.*", "AT72"));
     m_3DModelMatch.append(new ModelMatch("Do 328.*", "D328"));
     m_3DModelMatch.append(new ModelMatch("DHC-8.*", "DH8D"));
-    m_3DModelMatch.append(new ModelMatch(".*F50.*", "F50"));
+    // Not the Cirrus SF50 jet or the Beech Twin Bonanza F50. The Fokker 50 is also named
+    // "F27 Mk 050", as a development of the F27
+    m_3DModelMatch.append(new ModelMatch("^F.?50\\b|Fokker.*\\b0?50\\b", "F50"));
     m_3DModelMatch.append(new ModelMatch("Jetstream 41.*", "JS41"));
     m_3DModelMatch.append(new ModelMatch(".*L.410.*", "L410"));
     m_3DModelMatch.append(new ModelMatch("SAAB.2000.*", "SB20"));
@@ -845,11 +861,97 @@ void Aircraft3DModels::offsetsForType(const QString &type, float &altitudeOffset
 // wrong-but-plausible aircraft reads far better than a billboard among modelled ones.
 // The models span both sets: the Bluebell one has the business jets and Cessnas, the
 // FSLTL one the Learjet 25, Caravan, TBM and DA62 instead.
+// Helicopter ICAO types, by the stand-in they look most like: the three helicopters the
+// livery icons have are a Bell 206 (light single), an EC135 (light twin) and an S-76
+// (medium and larger). Without these every helicopter that wasn't one of those three was
+// drawn as an airliner, or as whatever fixed-wing type a name pattern found in its model
+// name. The Bluebell set ships only textures for those three, no models, so with a model
+// pack a helicopter has no stand-in and the ADS-B demodulator uses helicopter.glb
+static const QStringList& lightHelicopters()
+{
+    static const QStringList types = {
+        "R22", "R44", "R66", "B06", "B06T", "B407", "B505", "B47G", "B47J", "AS50", "EC20",
+        "EC30", "H500", "MD52", "MD60", "H269", "S330", "EN28", "EN48", "G2CA", "A119",
+        "ALO2", "ALO3", "GAZL", "KMAX"};
+    return types;
+}
+
+static const QStringList& twinHelicopters()
+{
+    static const QStringList types = {
+        "EC35", "EC45", "BK17", "B105", "A109", "B427", "B429", "B430", "B222", "B230",
+        "AS55", "EXPL", "MI2"};
+    return types;
+}
+
+static const QStringList& largeHelicopters()
+{
+    static const QStringList types = {
+        "S76", "S92", "S61", "S64", "H60", "H53", "H47", "H64", "UH1", "B212", "B412",
+        "B214", "AS32", "AS65", "EC25", "EC55", "EC75", "A139", "A149", "A169", "A189",
+        "H160", "NH90", "LYNX", "KA32", "MI8", "MI24", "MI26", "PUMA", "EH10", "TIGR"};
+    return types;
+}
+
+bool Aircraft3DModels::isHelicopterType(const QString &icaoType)
+{
+    const QString type = icaoType.trimmed().toUpper();
+    return lightHelicopters().contains(type) || twinHelicopters().contains(type)
+        || largeHelicopters().contains(type);
+}
+
+bool Aircraft3DModels::isHelicopterModel(const QString &model)
+{
+    if (model.isEmpty()) {
+        return false;
+    }
+    // The ADS-B demodulator's own stand-in for the Rotorcraft category
+    if (QFileInfo(model).completeBaseName().compare("helicopter", Qt::CaseInsensitive) == 0) {
+        return true;
+    }
+    // Bluebell models, FSLTL models and the livery icons are all named <type>_<operator>
+    // once liveryIconName() has the path, prefix and suffix off
+    QString type;
+    QString operatorICAO;
+    bool variant;
+    return typeAndOperator(liveryIconName(model), type, operatorICAO, variant)
+        && isHelicopterType(type);
+}
+
 bool Aircraft3DModels::defaultModel(const QString &icaoType, QString &model,
                                     float &altitudeOffset, float &labelOffset,
                                     bool knownTypesOnly) const
 {
     if (m_3DModelsByType.isEmpty()) {
+        return false;
+    }
+
+    // A helicopter only ever stands in for a helicopter. With none installed there is no
+    // stand-in at all - an airliner, the fallback below, is worse than the plain icon
+    static const QStringList lightModels = {"B06", "EC35", "S76"};
+    static const QStringList twinModels  = {"EC35", "B06", "S76"};
+    static const QStringList largeModels = {"S76", "EC35", "B06"};
+    const QString heliType = icaoType.trimmed().toUpper();
+    const QStringList *helicopterModels = nullptr;
+    if (lightHelicopters().contains(heliType)) {
+        helicopterModels = &lightModels;
+    } else if (twinHelicopters().contains(heliType)) {
+        helicopterModels = &twinModels;
+    } else if (largeHelicopters().contains(heliType)) {
+        helicopterModels = &largeModels;
+    }
+    if (helicopterModels)
+    {
+        for (const QString &candidate : *helicopterModels)
+        {
+            const QString found = modelForType(candidate);
+            if (!found.isEmpty())
+            {
+                model = found;
+                offsetsForType(candidate, altitudeOffset, labelOffset, model);
+                return true;
+            }
+        }
         return false;
     }
 

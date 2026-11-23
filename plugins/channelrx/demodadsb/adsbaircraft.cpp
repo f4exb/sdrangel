@@ -48,6 +48,9 @@ QString ADSBAircraft::getImage() const
             return QString("apache.png");
         } else if (m_aircraftInfo->m_type == "H47") {
             return QString("chinook.png");
+        } else if (Aircraft3DModels::isHelicopterType(m_aircraftInfo->m_type)) {
+            // Without waiting for the Rotorcraft category, which may come later or not at all
+            return QString("aircraft_helicopter.png");
         }
     }
 

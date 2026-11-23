@@ -827,7 +827,17 @@ ADSBAircraft *ADSBDemodTracker::getAircraft(int icao, bool &newAircraft)
             }
         }
 
-        if (aircraft->m_aircraft3DModel.isEmpty() && aircraft->m_liveryIcon.isEmpty())
+        if (   aircraft->m_aircraft3DModel.isEmpty() && aircraft->m_aircraftInfo
+            && Aircraft3DModels::isHelicopterType(aircraft->m_aircraftInfo->m_type))
+        {
+            // A helicopter type with no model installed - gets the Rotorcraft category's
+            // model without waiting for the category. With no model pack it is the 3D model
+            // beside the helicopter livery icon get3DModel() chose for the 2D map
+            aircraft->m_aircraftCat3DModel = "helicopter.glb";
+            aircraft->m_modelAltitudeOffset = 4.0f;
+            aircraft->m_labelAltitudeOffset = 4.0f;
+        }
+        else if (aircraft->m_aircraft3DModel.isEmpty() && aircraft->m_liveryIcon.isEmpty())
         {
             // Default to A320 until we get some more info - its icon, with no model pack
             // (see get3DModel())
@@ -1176,6 +1186,19 @@ void ADSBDemodTracker::handleADSB(
             updatedCallsign = aircraft->m_callsign != callsign;
             if (updatedCallsign) {
                 setCallsign(aircraft, callsign);
+            }
+
+            // A helicopter says so itself, and that is better than a fixed-wing model
+            const QString &typeModel = aircraft->m_aircraft3DModel.isEmpty()
+                ? aircraft->m_liveryIcon : aircraft->m_aircraft3DModel;
+            if (   (aircraft->m_emitterCategory == "Rotorcraft")
+                && (prevEmitterCategory != aircraft->m_emitterCategory)
+                && !typeModel.isEmpty()
+                && !Aircraft3DModels::isHelicopterModel(typeModel)
+                && !typeHasOwnModel(aircraft))
+            {
+                aircraft->m_aircraft3DModel.clear();
+                aircraft->m_liveryIcon.clear();
             }
 
             // Select 3D model based on category, if we don't already have one based on ICAO
@@ -4707,6 +4730,23 @@ void ADSBDemodTracker::get3DModel(ADSBAircraft *aircraft)
             aircraft->m_labelAltitudeOffset = labelOffset;
         }
     }
+}
+
+// Whether the type the database gives the aircraft has a model (or, with no model pack, a
+// livery icon) of its own - rather than one get3DModel() could only reach through a name
+// pattern, a related type or a stand-in
+bool ADSBDemodTracker::typeHasOwnModel(const ADSBAircraft *aircraft) const
+{
+    if (!aircraft->m_aircraftInfo) {
+        return false;
+    }
+    const QString type = aircraft->m_aircraftInfo->m_type.trimmed().toUpper();
+    if (type.isEmpty()) {
+        return false;
+    }
+    const Aircraft3DModels &installed = Aircraft3DModels::instance();
+    const Aircraft3DModels &models = installed.isEmpty() ? Aircraft3DModels::liveryIcons() : installed;
+    return !models.modelForType(type).isEmpty();
 }
 
 void ADSBDemodTracker::get3DModelBasedOnCategory(ADSBAircraft *aircraft)
