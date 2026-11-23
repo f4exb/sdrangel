@@ -229,6 +229,7 @@ private:
 
     void get3DModel(ADSBAircraft *aircraft);
     void get3DModelBasedOnCategory(ADSBAircraft *aircraft);
+    bool typeHasOwnModel(const ADSBAircraft *aircraft) const;
     QHash<int, ADSBAircraft *> m_aircraft;  // Hashed on ICAO
     QSharedPointer<const QHash<int, AircraftInformation *>> m_aircraftInfo;
     QSharedPointer<const QHash<QString, AircraftRouteInformation *>> m_routeInfo; // Hashed on callsign

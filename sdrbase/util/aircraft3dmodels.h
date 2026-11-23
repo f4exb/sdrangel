@@ -152,6 +152,11 @@ public:
                       float &altitudeOffset, float &labelOffset,
                       bool knownTypesOnly = false) const;
 
+    // Whether an ICAO type designator is a helicopter's, as far as the stand-in groups
+    // know, and whether a model (or livery icon) chosen for an aircraft is one
+    static bool isHelicopterType(const QString &icaoType);
+    static bool isHelicopterModel(const QString &model);
+
     static QString dataDir();
 
     // The 2D livery icon name for a model. The icons are named after the Bluebell
