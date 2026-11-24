@@ -62,6 +62,10 @@ AMBEEngine::AMBEEngine()
 AMBEEngine::~AMBEEngine()
 {
     qDebug("AMBEEngine::~AMBEEngine: %lu controllers", m_controllers.size());
+
+    // The feature framework destroys the engine without calling releaseAll();
+    // leave no controller threads running against freed audio FIFOs.
+    releaseAll();
 }
 
 #if defined(_WIN32)
@@ -277,7 +281,8 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
         {
             disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
             it->worker->stop();
-            it->thread->wait(100);
+            // AMBEWorker::process sleeps for one second per poll; 100 ms always timed out
+            it->thread->wait(2000);
             it->worker->m_inputMessageQueue.clear();
             it->worker->close();
             qDebug() << "AMBEEngine::releaseController: closed device at: " << it->device.c_str();
@@ -297,7 +302,8 @@ void AMBEEngine::releaseAll()
     {
         disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
         it->worker->stop();
-        it->thread->wait(100);
+        // AMBEWorker::process sleeps for one second per poll; 100 ms always timed out
+        it->thread->wait(2000);
         it->worker->m_inputMessageQueue.clear();
         it->worker->close();
         qDebug() << "AMBEEngine::release: closed device at: " << it->device.c_str();
