@@ -5301,7 +5301,7 @@ void MCPTools::registerIntentTools()
                              "Paging demodulator, messages in get_paging_messages and the Message Center), sonde (RS41 radiosondes), packet (AX.25), aprs (APRS with its feature), or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
             {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},
-            {"tuneGain", prop("boolean", "Measure and set the receiver gain, as tune_gain does, when the device set is new or the retune is to another band (more than a tenth of the frequency away). Adds several seconds in those cases and none otherwise. false leaves the gain as it is. Default true")}
+            {"tuneGain", prop("boolean", "Measure and set the receiver gain, as tune_gain does, when the device set is new or the retune is to another band (more than a tenth of the frequency away). Adds several seconds in those cases and none otherwise. false skips the measurement; a new RTL-SDR device set still gets the fixed 40 dB receiver profile. Default true")}
         }, {"frequency"}),
         [this](const QJsonObject& args)
         {
@@ -5714,7 +5714,7 @@ void MCPTools::registerIntentTools()
             {"seconds", bounded(numProp("How long to watch before replying, 3 to 30. Default 10"), 3, 30)},
             {"device", strProp(deviceHint)},
             {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set first, as listen does. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},
-            {"tuneGain", prop("boolean", "Measure and set the receiver gain first, as tune_gain does, when the device set is new or the retune is to another band. Adds several seconds in those cases and none otherwise. false leaves the gain as it is. Default true")}
+            {"tuneGain", prop("boolean", "Measure and set the receiver gain first, as tune_gain does, when the device set is new or the retune is to another band. Adds several seconds in those cases and none otherwise. false skips the measurement; a new RTL-SDR device set still gets the fixed 40 dB receiver profile. Default true")}
         }),
         [this](const QJsonObject& args)
         {
