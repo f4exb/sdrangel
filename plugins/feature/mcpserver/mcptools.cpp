@@ -4519,6 +4519,8 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
     QJsonObject chosen;
     QJsonObject fallback;
     QString wanted = argString(args, "device", false).trimmed();
+    // A name that resolved to a specific device by displayed name, not by hardware type
+    bool byDisplayedName = false;
 
     for (const QJsonValue& v : devices)
     {
@@ -4526,9 +4528,18 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
 
         if (!wanted.isEmpty())
         {
-            if ((d["serial"].toString().compare(wanted, Qt::CaseInsensitive) == 0)
-                || (d["displayedName"].toString().compare(wanted, Qt::CaseInsensitive) == 0)
-                || (d["hwType"].toString().compare(wanted, Qt::CaseInsensitive) == 0))
+            if (d["serial"].toString().compare(wanted, Qt::CaseInsensitive) == 0)
+            {
+                chosen = d;
+                break;
+            }
+            if (d["displayedName"].toString().compare(wanted, Qt::CaseInsensitive) == 0)
+            {
+                chosen = d;
+                byDisplayedName = true;
+                break;
+            }
+            if (d["hwType"].toString().compare(wanted, Qt::CaseInsensitive) == 0)
             {
                 chosen = d;
                 break;
@@ -4566,7 +4577,10 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
             continue;
         }
 
-        bool same = serial.isEmpty() ? (sd["hwType"].toString() == hwType) : (sd["serial"].toString() == serial);
+        // With no serial, hwType alone cannot tell two devices apart. A device the caller
+        // named by displayed name must not silently retune some other set of that type.
+        bool same = !serial.isEmpty() ? (sd["serial"].toString() == serial)
+                                      : (!byDisplayedName && (sd["hwType"].toString() == hwType));
 
         if (same)
         {
@@ -4604,6 +4618,8 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
 
         if (!serial.isEmpty()) {
             select["serial"] = serial;
+        } else if (byDisplayedName) {
+            select["displayedName"] = wanted;
         }
 
         selectDevice(deviceSetIndex, select);
