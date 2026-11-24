@@ -92,7 +92,6 @@ MCPDataFeed::MCPDataFeed(QObject *parent) :
     connect(&m_messageHandler, &AvailableChannelOrFeatureHandler::messageEnqueued, this, &MCPDataFeed::handleMessageRecords);
     connect(&m_mapHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleMapSourcesChanged);
     connect(&m_packetHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleSourcesChanged);
-    connect(&m_mapHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &MCPDataFeed::handleSourcesChanged);
     m_packetHandler.scanAvailableChannelsAndFeatures();
     m_mapHandler.scanAvailableChannelsAndFeatures();
     m_messageHandler.scanAvailableChannelsAndFeatures();
