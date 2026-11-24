@@ -260,7 +260,9 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     // m_textOverlayFont.setPointSize(font().pointSize() - 1);
     resetFrequencyZoom();
 
-    m_timer.setTimerType(Qt::PreciseTimer);
+    // FPS capping at 50 ms does not need millisecond precision; a precise
+    // timer would raise the Windows system timer resolution to 1 ms.
+    m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(m_fpsPeriodMs);
 

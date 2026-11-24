@@ -86,7 +86,10 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgSkyMapTarget, Message)
 
 MainCore::MainCore()
 {
-	m_masterTimer.setTimerType(Qt::PreciseTimer);
+	// A 50 ms housekeeping tick needs no millisecond precision. On Windows a
+	// Qt::PreciseTimer uses timeSetEvent(), which raises the system-wide timer
+	// resolution to 1 ms for as long as it runs.
+	m_masterTimer.setTimerType(Qt::CoarseTimer);
 	m_masterTimer.start(50);
     m_startMsecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     m_masterElapsedTimer.start();
