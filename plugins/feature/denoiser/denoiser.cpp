@@ -803,10 +803,26 @@ void Denoiser::webapiFormatFeatureSettings(
     response.getDenoiserSettings()->setEnableDenoiser(settings.m_enableDenoiser ? 1 : 0);
     response.getDenoiserSettings()->setNvidiaIntensity(settings.m_nvidiaIntensity);
     response.getDenoiserSettings()->setNvidiaVad(settings.m_nvidiaVad ? 1 : 0);
-    *response.getDenoiserSettings()->getVst3ModulePath() = settings.m_vst3ModulePath;
-    *response.getDenoiserSettings()->getVst3ClassId() = QString::fromLatin1(settings.m_vst3ClassId.toHex());
-    *response.getDenoiserSettings()->getVst3Parameters() = vst3ParametersJson(settings.m_vst3Parameters);
-    *response.getDenoiserSettings()->getVst3State() = QString::fromLatin1(settings.m_vst3State.toBase64());
+    if (response.getDenoiserSettings()->getVst3ModulePath()) {
+        *response.getDenoiserSettings()->getVst3ModulePath() = settings.m_vst3ModulePath;
+    } else {
+        response.getDenoiserSettings()->setVst3ModulePath(new QString(settings.m_vst3ModulePath));
+    }
+    if (response.getDenoiserSettings()->getVst3ClassId()) {
+        *response.getDenoiserSettings()->getVst3ClassId() = QString::fromLatin1(settings.m_vst3ClassId.toHex());
+    } else {
+        response.getDenoiserSettings()->setVst3ClassId(new QString(QString::fromLatin1(settings.m_vst3ClassId.toHex())));
+    }
+    if (response.getDenoiserSettings()->getVst3Parameters()) {
+        *response.getDenoiserSettings()->getVst3Parameters() = vst3ParametersJson(settings.m_vst3Parameters);
+    } else {
+        response.getDenoiserSettings()->setVst3Parameters(new QString(vst3ParametersJson(settings.m_vst3Parameters)));
+    }
+    if (response.getDenoiserSettings()->getVst3State()) {
+        *response.getDenoiserSettings()->getVst3State() = QString::fromLatin1(settings.m_vst3State.toBase64());
+    } else {
+        response.getDenoiserSettings()->setVst3State(new QString(QString::fromLatin1(settings.m_vst3State.toBase64())));
+    }
     response.getDenoiserSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getDenoiserSettings()->setVolumeTenths(settings.m_volumeTenths);
     if (response.getDenoiserSettings()->getAudioDeviceName()) {
