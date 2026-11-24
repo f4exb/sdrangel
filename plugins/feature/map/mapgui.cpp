@@ -2322,7 +2322,9 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
                 // otherwise they are overwritten. Is there a signal we should use instead?
                 //newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
                 //newMap->setProperty("center", QVariant::fromValue(coords));
-                QTimer::singleShot(200, [this, zoom, coords]() {
+                // A context-less timer survives MapGUI deletion and would then
+                // dereference a freed 'this' (crash in applyMap2DSettings).
+                QTimer::singleShot(200, this, [this, zoom, coords]() {
                     QQuickItem *root = ui->map->rootObject();
                     if (root)
                     {
@@ -2423,7 +2425,7 @@ void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
 
     // Need a delay before geometry() reflects new orientation
     // https://bugreports.qt.io/browse/QTBUG-109127
-    QTimer::singleShot(200, [this]() {
+    QTimer::singleShot(200, this, [this]() {
         displayToolbar();
     });
 }
