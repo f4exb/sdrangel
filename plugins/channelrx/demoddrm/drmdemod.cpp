@@ -818,12 +818,26 @@ void DRMDemod::webapiFormatChannelSettings(
     api->setSelectedServiceIdentifier(settings.m_selectedServiceIdentifier);
     api->setVolume(settings.m_volume);
     api->setAudioMute(settings.m_audioMute ? 1 : 0);
-    *api->getAudioDeviceName() = settings.m_audioDeviceName;
+    // Empty optional strings are omitted from JSON by the SWG serializer, so a
+    // settings PATCH round-trip can leave these pointers null (as in #3118).
+    if (api->getAudioDeviceName()) {
+        *api->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        api->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
     api->setRgbColor(settings.m_rgbColor);
-    *api->getTitle() = settings.m_title;
+    if (api->getTitle()) {
+        *api->getTitle() = settings.m_title;
+    } else {
+        api->setTitle(new QString(settings.m_title));
+    }
     api->setStreamIndex(settings.m_streamIndex);
     api->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
-    *api->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (api->getReverseApiAddress()) {
+        *api->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        api->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
     api->setReverseApiPort(settings.m_reverseAPIPort);
     api->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     api->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
