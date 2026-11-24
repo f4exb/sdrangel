@@ -51,6 +51,8 @@ public:
         init();
     }
 
+    ~AvailableChannelOrFeatureHandler();
+
     void scanAvailableChannelsAndFeatures();
 
     const AvailableChannelOrFeatureList& getAvailableChannelOrFeatureList() const {

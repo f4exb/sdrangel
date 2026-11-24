@@ -30,6 +30,16 @@ void AvailableChannelOrFeatureHandler::init()
     // Owner should call scanAvailableChannelsAndFeatures after connection
 }
 
+AvailableChannelOrFeatureHandler::~AvailableChannelOrFeatureHandler()
+{
+    // Pipes registered in MainCore outlive this handler. If a feature that owns a
+    // handler is deleted, a producer pushing to one of those pipes would emit into
+    // the destroyed handler. Unregister them all while the keys are still valid.
+    for (const auto& channelOrFeature : m_availableChannelOrFeatureList) {
+        deregisterPipes(channelOrFeature.m_object, m_pipeNames);
+    }
+}
+
 void AvailableChannelOrFeatureHandler::scanAvailableChannelsAndFeatures()
 {
     // Get current list of channels and features with specified URIs
