@@ -500,10 +500,12 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -Wno-dev
+      - -DSOAPY_PROBE_SERIAL=ON
+      - -DSOAPY_ROM_ON_CLOSE=ON
     sources:
-      - type: archive
-        url: https://github.com/BertoldVdb/libmirisdr-6/archive/refs/tags/v1.2.0.tar.gz
-        sha256: 9eb8db95ecc9bf97592df0d3845657743f060f42d41af1a3b4aabf75d3a721da
+      - type: git
+        url: https://github.com/BertoldVdb/libmirisdr-6.git
+        commit: 1d57ab26026520326cd4adb93386b1090074bb5a
 
   - name: soapy
     buildsystem: cmake-ninja
