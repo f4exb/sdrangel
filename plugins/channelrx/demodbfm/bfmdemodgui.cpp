@@ -145,10 +145,55 @@ void BFMDemodGUI::handleInputMessages()
     }
 }
 
+qint64 BFMDemodGUI::snapOffset(qint64 offset) const
+{
+    if (m_snapSpacing <= 0) {
+        return offset;
+    }
+
+    const qint64 absolute = m_deviceCenterFrequency + offset;
+    const qint64 snapped = ((absolute + (m_snapSpacing / 2)) / m_snapSpacing) * m_snapSpacing;
+    return snapped - m_deviceCenterFrequency;
+}
+
+void BFMDemodGUI::snapClicked()
+{
+    if (m_snapSpacing == 100000) {
+        m_snapSpacing = 200000;
+    } else if (m_snapSpacing == 200000) {
+        m_snapSpacing = 0;
+    } else {
+        m_snapSpacing = 100000;
+    }
+
+    const QString mode = m_snapSpacing == 0 ? "off" : QString("%1 kHz").arg(m_snapSpacing / 1000);
+    ui->deltaFrequencyLabel->setStyleSheet(m_snapSpacing ? QString("QLabel{background-color: %1;}")
+        .arg(palette().highlight().color().darker(150).name()) : "");
+    ui->deltaFrequencyLabel->setToolTip(QString("Broadcast channel snap: %1. Right click to cycle off / 100 kHz / 200 kHz").arg(mode));
+
+    const qint64 offset = snapOffset(m_settings.m_inputFrequencyOffset);
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(offset);
+    m_channelMarker.blockSignals(false);
+    ui->deltaFrequency->blockSignals(true);
+    ui->deltaFrequency->setValue(offset);
+    ui->deltaFrequency->blockSignals(false);
+    m_settings.m_inputFrequencyOffset = offset;
+    applySettings(QStringList({"inputFrequencyOffset"}));
+}
+
 void BFMDemodGUI::channelMarkerChangedByCursor()
 {
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    const qint64 offset = snapOffset(m_channelMarker.getCenterFrequency());
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(offset);
+    m_channelMarker.blockSignals(false);
+    ui->deltaFrequency->blockSignals(true);
+    ui->deltaFrequency->setValue(offset);
+    ui->deltaFrequency->blockSignals(false);
+    m_settings.m_inputFrequencyOffset = offset;
     applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
@@ -159,8 +204,19 @@ void BFMDemodGUI::channelMarkerHighlightedByCursor()
 
 void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    const qint64 offset = snapOffset(value);
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(offset);
+    m_channelMarker.blockSignals(false);
+    m_settings.m_inputFrequencyOffset = offset;
+
+    if (offset != value) {
+        ui->deltaFrequency->blockSignals(true);
+        ui->deltaFrequency->setValue(offset);
+        ui->deltaFrequency->blockSignals(false);
+    }
+
     updateAbsoluteCenterFrequency();
     applySettings(QStringList({"inputFrequencyOffset"}));
 }
@@ -405,6 +461,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_radiotext_AB_flag(false),
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
+    m_snapSpacing(100000),
 	m_rate(625000)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -416,12 +473,16 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequencyLabel->setToolTip("Broadcast channel snap: 100 kHz. Right click to cycle off / 100 kHz / 200 kHz");
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioStereo);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
+
+    CRightClickEnabler *snapRightClickEnabler = new CRightClickEnabler(ui->deltaFrequencyLabel);
+    connect(snapRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(snapClicked()));
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
