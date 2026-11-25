@@ -2272,7 +2272,7 @@ void MCPTools::registerInstanceTools()
 
     add("list_available_devices",
         "List the SDR hardware and software sources/sinks that can be selected in a device set. Each entry gives hwType (used by "
-        "set_device and describe_settings), serial, sequence and index. Physical devices must be plugged in before SDRangel starts.",
+        "set_device and describe_settings), serial, sequence and index. Devices plugged in after startup are detected on the next call.",
         schema({{"direction", directionProp("Only list devices for this direction (rx, tx or mimo). Default: all directions")}}),
         [this](const QJsonObject& args) { return getAvailableDevices(argDirection(args, "direction", false, -1)); });
 
