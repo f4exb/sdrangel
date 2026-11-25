@@ -25,7 +25,7 @@ else()
 endif()
 set(AIRSPYHF_TAG "9b7ef82cf37e732b9d2b2adbdd9d9ce8fee446ca")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
-set(MIRISDR_TAG "v1.2.0")
+set(MIRISDR_TAG "1d57ab26026520326cd4adb93386b1090074bb5a")
 set(LIBSIGMF_TAG "new-namespaces")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
@@ -1390,7 +1390,7 @@ if (LINUX)
                 GIT_REPOSITORY https://github.com/BertoldVdb/libmirisdr-6
                 GIT_TAG ${MIRISDR_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DSOAPY_PROBE_SERIAL=ON -DSOAPY_ROM_ON_CLOSE=ON
                 BUILD_BYPRODUCTS "${LIBMIRISDR_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""

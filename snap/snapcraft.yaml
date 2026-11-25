@@ -164,18 +164,6 @@ parts:
             sdrangel_wrapper.sh: bin/
             locale-gen: bin/
 
-    libmirisdr:
-        plugin: cmake
-        source: https://github.com/BertoldVdb/libmirisdr-6.git
-        source-type: git
-        source-tag: v1.2.0
-        build-packages:
-            - libusb-1.0-0-dev
-        cmake-parameters:
-            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
-            - -DCMAKE_INSTALL_LIBDIR=lib
-            - -DENABLE_SOAPY=OFF
-
     sdrangel:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
@@ -582,6 +570,19 @@ parts:
 #        source-branch: new-namespaces
 #        cmake-parameters:
 #            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    libmirisdr:
+        plugin: cmake
+        source: https://github.com/BertoldVdb/libmirisdr-6.git
+        source-type: git
+        source-commit: 1d57ab26026520326cd4adb93386b1090074bb5a
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCMAKE_INSTALL_LIBDIR=lib
+            - -DSOAPY_PROBE_SERIAL=ON 
+            - -DSOAPY_ROM_ON_CLOSE=ON
 
     airspy:
         plugin: cmake
