@@ -38,6 +38,11 @@
 #include <VideoToolbox/VideoToolbox.h>
 #endif
 
+// Match the platforms where the OpenGL display supports CUDA interop.
+#if defined(_WIN32) || (defined(__linux__) && !defined(ANDROID))
+#define DTV_CUDA_INTEROP
+#endif
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -51,6 +56,7 @@ extern "C"
 #if defined(__APPLE__)
 #include <libavutil/hwcontext_videotoolbox.h>
 #endif
+#ifdef DTV_CUDA_INTEROP
 // CUDA frames' context, without the CUDA SDK: its first member is the CUcontext
 #ifndef CUDA_VERSION
 #define CUDA_VERSION 11000
@@ -58,6 +64,7 @@ typedef struct CUctx_st *CUcontext;
 typedef struct CUstream_st *CUstream;
 #endif
 #include <libavutil/hwcontext_cuda.h>
+#endif
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
@@ -1021,8 +1028,9 @@ void DTVVideoPlayer::unwrapTimestamps(AVPacket *packet)
         return;
     }
 
-    const int64_t wrap = 1LL << 33;
-    auto unwrap = [this, wrap](int64_t& ts) {
+    auto unwrap = [this](int64_t& ts) {
+        constexpr int64_t wrap = 1LL << 33;
+
         if (ts == AV_NOPTS_VALUE) {
             return;
         }
@@ -2011,7 +2019,9 @@ int DTVVideoPlayer::gpuFrameType(const AVFrame *frame) const
     switch (frame->format)
     {
     case AV_PIX_FMT_D3D11: return GLVideoFrame::D3D11;
+#ifdef DTV_CUDA_INTEROP
     case AV_PIX_FMT_CUDA: return GLVideoFrame::CUDA;
+#endif
     case AV_PIX_FMT_VAAPI: return GLVideoFrame::DMABuf;
     case AV_PIX_FMT_VIDEOTOOLBOX: return GLVideoFrame::IOSurface;
     default: return -1;
@@ -2067,6 +2077,7 @@ GLVideoFramePtr DTVVideoPlayer::makeFrame(AVFrame *frame)
             out->m_linesize[i] = out->m_frame->linesize[i];
         }
     }
+#ifdef DTV_CUDA_INTEROP
     else if (format == AV_PIX_FMT_CUDA)
     {
         out = std::make_shared<FFmpegVideoFrame>(frame);
@@ -2081,6 +2092,7 @@ GLVideoFramePtr DTVVideoPlayer::makeFrame(AVFrame *frame)
             av_buffer_unref(&ref);
         });
     }
+#endif
 #if defined(_WIN32)
     else if (format == AV_PIX_FMT_D3D11)
     {
