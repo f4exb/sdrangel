@@ -75,6 +75,9 @@ public:
     qint32 getAgc();
     void setAgc(qint32 agc);
 
+    qint32 getTunerAgc();
+    void setTunerAgc(qint32 tuner_agc);
+
     qint32 getNoModMode();
     void setNoModMode(qint32 no_mod_mode);
 
@@ -144,6 +147,9 @@ private:
 
     qint32 agc;
     bool m_agc_isSet;
+
+    qint32 tuner_agc;
+    bool m_tuner_agc_isSet;
 
     qint32 no_mod_mode;
     bool m_no_mod_mode_isSet;
