@@ -995,6 +995,14 @@ bool GLSpectrumView::writeImage(const QString& filename)
 // Get center frequency for currently displayed spectrum (which is selected via the scroll bar)
 qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 {
+    // At the live edge, follow the current device frequency immediately. The spectrum
+    // buffer entry is stamped from m_centerFrequency when a new FFT frame arrives, so
+    // while the device is idle (or before the next frame) it can still hold a previous
+    // centre - leaving the axis, header and peak frequencies stale after a retune.
+    if (scrollBarValue() == 0) {
+        return m_centerFrequency;
+    }
+
     int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
     if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size())) {
@@ -1007,6 +1015,13 @@ qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 // Get sample rate for currently displayed spectrum (which is selected via the scroll bar)
 quint32 GLSpectrumView::getDisplayedSampleRate() const
 {
+    // Same as getDisplayedCenterFrequency(): at the live edge, use the current sample
+    // rate rather than the last buffered frame's, which lags decimation changes when
+    // no new frame has arrived yet.
+    if (scrollBarValue() == 0) {
+        return m_sampleRate;
+    }
+
     int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
     if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size())) {
