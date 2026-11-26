@@ -36,6 +36,7 @@ void RTLSDRSettings::resetToDefaults()
 	m_dcBlock = false;
 	m_iqImbalance = false;
 	m_agc = false;
+	m_tunerAgc = false;
 	m_noModMode = false;
     m_transverterMode = false;
     m_iqOrder = true;
@@ -83,6 +84,7 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeFloat(24, m_replayStep);
     s.writeBool(25, m_replayLoop);
     s.writeString(26, m_title);
+    s.writeBool(27, m_tunerAgc);
 
 	return s.final();
 }
@@ -136,6 +138,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readFloat(24, &m_replayStep, 5.0f);
         d.readBool(25, &m_replayLoop, false);
         d.readString(26, &m_title, "RTL-SDR");
+        d.readBool(27, &m_tunerAgc, false);
 
 		return true;
 	}
@@ -177,6 +180,9 @@ void RTLSDRSettings::applySettings(const QStringList& settingsKeys, const RTLSDR
     }
     if (settingsKeys.contains("agc")) {
         m_agc = settings.m_agc;
+    }
+    if (settingsKeys.contains("tunerAgc")) {
+        m_tunerAgc = settings.m_tunerAgc;
     }
     if (settingsKeys.contains("noModMode")) {
         m_noModMode = settings.m_noModMode;
@@ -267,6 +273,9 @@ QString RTLSDRSettings::getDebugString(const QStringList& settingsKeys, bool for
     }
     if (settingsKeys.contains("mgc") || force) {
         ostr << " m_agc: " << m_agc;
+    }
+    if (settingsKeys.contains("tunerAgc") || force) {
+        ostr << " m_tunerAgc: " << m_tunerAgc;
     }
     if (settingsKeys.contains("noModMode") || force) {
         ostr << " m_noModMode: " << m_noModMode;

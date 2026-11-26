@@ -656,6 +656,16 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="4">
+      <widget class="QCheckBox" name="tunerAgc">
+       <property name="toolTip">
+        <string>Toggles R820T tuner AGC (manual gain disabled)</string>
+       </property>
+       <property name="text">
+        <string>Tuner AGC</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

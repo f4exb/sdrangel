@@ -40,6 +40,7 @@ struct RTLSDRSettings {
 	bool m_dcBlock;
 	bool m_iqImbalance;
 	bool m_agc;
+	bool m_tunerAgc; //!< R820T tuner AGC (manual gain disabled)
 	bool m_noModMode;
     bool m_transverterMode;
     bool m_iqOrder;

@@ -95,6 +95,7 @@ private slots:
 	void on_gain_valueChanged(int value);
 	void on_checkBox_stateChanged(int state);
     void on_agc_stateChanged(int state);
+    void on_tunerAgc_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_transverter_clicked();
     void on_sampleRateMode_toggled(bool checked);

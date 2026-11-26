@@ -498,17 +498,32 @@ bool RTLSDRThread::applySettings(const RTLSDRSettings& settings, const QStringLi
         }
     }
 
-    if ((settingsKeys.contains("gain") && (settings.m_gain != m_settings.m_gain)) || force)
+    if ((settingsKeys.contains("tunerAgc") && (settings.m_tunerAgc != m_settings.m_tunerAgc)) || force)
     {
-        // Nooelec E4000 SDRs appear to require tuner_gain_mode to be reset to manual before
-        // each call to set_tuner_gain, otherwise tuner AGC seems to be reenabled
-        if (rtlsdr_set_tuner_gain_mode(m_dev, 1) < 0) {
-            qCritical("RTLSDRThread::applySettings: error setting tuner gain mode to manual");
-        }
-        if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
-            qCritical("RTLSDRThread::applySettings: rtlsdr_set_tuner_gain() failed");
+        if (rtlsdr_set_tuner_gain_mode(m_dev, settings.m_tunerAgc ? 0 : 1) < 0) {
+            qCritical("RTLSDRThread::applySettings: could not set tuner gain mode");
         } else {
-            qDebug("RTLSDRThread::applySettings: rtlsdr_set_tuner_gain() to %d", settings.m_gain);
+            qDebug("RTLSDRThread::applySettings: tuner gain mode %s", settings.m_tunerAgc ? "auto" : "manual");
+        }
+    }
+
+    if ((settingsKeys.contains("gain") && (settings.m_gain != m_settings.m_gain))
+        || (settingsKeys.contains("tunerAgc") && m_settings.m_tunerAgc && !settings.m_tunerAgc)
+        || force)
+    {
+        if (settings.m_tunerAgc) {
+            qDebug("RTLSDRThread::applySettings: manual gain suppressed while tuner AGC is on");
+        } else {
+            // Nooelec E4000 SDRs appear to require tuner_gain_mode to be reset to manual before
+            // each call to set_tuner_gain, otherwise tuner AGC seems to be reenabled
+            if (rtlsdr_set_tuner_gain_mode(m_dev, 1) < 0) {
+                qCritical("RTLSDRThread::applySettings: error setting tuner gain mode to manual");
+            }
+            if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
+                qCritical("RTLSDRThread::applySettings: rtlsdr_set_tuner_gain() failed");
+            } else {
+                qDebug("RTLSDRThread::applySettings: rtlsdr_set_tuner_gain() to %d", settings.m_gain);
+            }
         }
     }
 

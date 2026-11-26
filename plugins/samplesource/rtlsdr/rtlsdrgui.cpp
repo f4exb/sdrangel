@@ -330,6 +330,10 @@ void RTLSDRGui::displaySettings()
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->checkBox->setChecked(m_settings.m_noModMode);
 	ui->agc->setChecked(m_settings.m_agc);
+	ui->tunerAgc->setChecked(m_settings.m_tunerAgc);
+	ui->gain->setEnabled(!m_settings.m_tunerAgc);
+	ui->gain->setStyleSheet(m_settings.m_tunerAgc ?
+	    "QSlider::groove:horizontal { background: #404040; } QSlider::handle:horizontal { background: #707070; }" : "");
 	ui->lowSampleRate->setChecked(m_settings.m_lowSampleRate);
 	ui->offsetTuning->setChecked(m_settings.m_offsetTuning);
 	ui->biasT->setChecked(m_settings.m_biasTee);
@@ -517,6 +521,16 @@ void RTLSDRGui::on_agc_stateChanged(int state)
 {
     m_settings.m_agc = (state == Qt::Checked);
     m_settingsKeys.append("agc");
+    sendSettings();
+}
+
+void RTLSDRGui::on_tunerAgc_stateChanged(int state)
+{
+    m_settings.m_tunerAgc = (state == Qt::Checked);
+    ui->gain->setEnabled(!m_settings.m_tunerAgc);
+    ui->gain->setStyleSheet(m_settings.m_tunerAgc ?
+        "QSlider::groove:horizontal { background: #404040; } QSlider::handle:horizontal { background: #707070; }" : "");
+    m_settingsKeys.append("tunerAgc");
     sendSettings();
 }
 
@@ -719,6 +733,7 @@ void RTLSDRGui::makeUIConnections() const
     QObject::connect(ui->gain, &QSlider::valueChanged, this, &RTLSDRGui::on_gain_valueChanged);
     QObject::connect(ui->checkBox, &QCheckBox::stateChanged, this, &RTLSDRGui::on_checkBox_stateChanged);
     QObject::connect(ui->agc, &QCheckBox::stateChanged, this, &RTLSDRGui::on_agc_stateChanged);
+    QObject::connect(ui->tunerAgc, &QCheckBox::stateChanged, this, &RTLSDRGui::on_tunerAgc_stateChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &RTLSDRGui::on_startStop_toggled);
     QObject::connect(ui->transverter, &TransverterButton::clicked, this, &RTLSDRGui::on_transverter_clicked);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &RTLSDRGui::on_sampleRateMode_toggled);
