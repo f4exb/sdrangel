@@ -159,6 +159,8 @@ set(sdrgui_SOURCES
     soapygui/arginfogui.cpp
 
     resources/res.qrc
+
+    releasecheck/releaseupdatewidget.cpp
 )
 
 set(sdrgui_HEADERS
@@ -317,6 +319,8 @@ set(sdrgui_HEADERS
     soapygui/intervalslidergui.h
     soapygui/complexfactorgui.h
     soapygui/arginfogui.h
+
+    releasecheck/releaseupdatewidget.h
 )
 
 set(sdrgui_FORMS
@@ -406,6 +410,31 @@ if(FFMPEG_FOUND)
     endif()
 endif()
 
+set(ENABLE_RELEASE_CHECK "" CACHE STRING "Release update service")
+set_property(CACHE ENABLE_RELEASE_CHECK PROPERTY STRINGS "" GITHUB)
+
+if(ENABLE_RELEASE_CHECK)
+  message(STATUS "sdrgui : release check provider ${ENABLE_RELEASE_CHECK}")
+  list(APPEND sdrgui_SOURCES
+    releasecheck/releaseupdatechecker.cpp
+    releasecheck/releaseupdateservice.cpp
+  )
+
+  list(APPEND sdrgui_HEADERS
+    releasecheck/releaseupdatechecker.h
+    releasecheck/releaseupdateservice.h
+  )
+
+  if(ENABLE_RELEASE_CHECK STREQUAL "GITHUB")
+    list(APPEND sdrgui_SOURCES releasecheck/releaseupdateservicegithub.cpp)
+    list(APPEND sdrgui_HEADERS releasecheck/releaseupdateservicegithub.h)
+  else()
+    message(FATAL_ERROR "sdrgui : Unsupported ENABLE_RELEASE_CHECK: ${ENABLE_RELEASE_CHECK}")
+  endif()
+else(ENABLE_RELEASE_CHECK)
+  message(STATUS "Not building release checking (ENABLE_RELEASE_CHECK=${ENABLE_RELEASE_CHECK})")
+endif(ENABLE_RELEASE_CHECK)
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/exports
   ${CMAKE_SOURCE_DIR}/sdrbase
@@ -423,6 +452,14 @@ add_library(sdrgui
   ${sdrgui_SOURCES}
   ${sdrgui_FORMS_HEADERS}
   )
+
+if(ENABLE_RELEASE_CHECK)
+  target_compile_definitions(sdrgui PRIVATE ENABLE_RELEASE_CHECK)
+  if(ENABLE_RELEASE_CHECK STREQUAL "GITHUB")
+    target_compile_definitions(sdrgui PRIVATE ENABLE_RELEASE_CHECK_GITHUB)
+    target_link_libraries(sdrgui Qt::Network)
+  endif()
+endif()
 
 if(FFMPEG_FOUND)
   target_include_directories(sdrgui PRIVATE ${sdrgui_DTV_INCLUDE_DIRS})
