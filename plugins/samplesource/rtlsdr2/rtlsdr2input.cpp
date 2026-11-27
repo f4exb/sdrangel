@@ -546,6 +546,9 @@ void RTLSDR2Input::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
     }
+    if (deviceSettingsKeys.contains("tunerAgc")) {
+        settings.m_tunerAgc = response.getRtlSdrSettings()->getTunerAgc() != 0;
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getRtlSdrSettings()->getCenterFrequency();
     }
@@ -617,6 +620,7 @@ void RTLSDR2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     }
 
     response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getRtlSdrSettings()->setTunerAgc(settings.m_tunerAgc ? 1 : 0);
     response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getRtlSdrSettings()->setDevSampleRate(settings.m_devSampleRate);
@@ -718,6 +722,7 @@ void RTLSDR2Input::webapiReverseSendSettings(const QList<QString>& deviceSetting
     }
     if (deviceSettingsKeys.contains("agc") || force) {
         swgRtlSdrSettings->setAgc(settings.m_agc ? 1 : 0);
+        swgRtlSdrSettings->setTunerAgc(settings.m_tunerAgc ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgRtlSdrSettings->setCenterFrequency(settings.m_centerFrequency);
