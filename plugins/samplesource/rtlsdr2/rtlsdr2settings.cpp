@@ -26,12 +26,12 @@ RTLSDR2Settings::RTLSDR2Settings()
 
 void RTLSDR2Settings::resetToDefaults()
 {
-	m_devSampleRate = 1024*1000;
+	m_devSampleRate = 2400*1000;
 	m_lowSampleRate = false;
 	m_centerFrequency = 435000*1000;
-	m_gain = 0;
+	m_gain = 297;
 	m_loPpmCorrection = 0;
-	m_log2Decim = 4;
+	m_log2Decim = 2;
 	m_fcPos = FC_POS_CENTER;
 	m_dcBlock = false;
 	m_iqImbalance = false;
