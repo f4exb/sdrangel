@@ -3,6 +3,10 @@
 # Override with "debuild -eQT_VERSION=6 ..." to build the Qt6 package.
 QT_VERSION ?= 5
 
+# Override with "debuild -eENABLE_RELEASE_CHECK=GITHUB ..." to enable the
+# release update check. Empty (the default) leaves it disabled.
+ENABLE_RELEASE_CHECK ?=
+
 include /usr/share/dpkg/architecture.mk
 
 ARCH_OPT :=
@@ -26,7 +30,7 @@ endif
 	dh $@ --parallel --buildsystem=cmake+ninja
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DARCH_OPT=$(ARCH_OPT) $(QT_CMAKE_OPTION) -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
+	dh_auto_configure -- -DARCH_OPT=$(ARCH_OPT) $(QT_CMAKE_OPTION) -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF -DENABLE_RELEASE_CHECK=$(ENABLE_RELEASE_CHECK)
 
 override_dh_gencontrol:
 	dh_gencontrol -- -Vqt:Depends='$(QT_RUNTIME_DEPENDS)'
