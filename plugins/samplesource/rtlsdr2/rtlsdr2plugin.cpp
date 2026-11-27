@@ -160,7 +160,7 @@ void RTLSDR2Plugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& o
 
 		if(rtlsdr_get_device_usb_strings((uint32_t)i, vendor, product, serial) != 0)
 			continue;
-		QString displayableName(QString("RTL-SDR[%1] %2").arg(i).arg(serial));
+		QString displayableName(QString("RTL-SDR2[%1] %2").arg(i).arg(serial));
 
         originDevices.append(OriginDevice(
             displayableName,
