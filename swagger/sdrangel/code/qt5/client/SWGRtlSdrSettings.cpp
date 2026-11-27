@@ -50,6 +50,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_iq_imbalance_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    tuner_agc = 0;
+    m_tuner_agc_isSet = false;
     no_mod_mode = 0;
     m_no_mod_mode_isSet = false;
     offset_tuning = 0;
@@ -102,6 +104,8 @@ SWGRtlSdrSettings::init() {
     m_iq_imbalance_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    tuner_agc = 0;
+    m_tuner_agc_isSet = false;
     no_mod_mode = 0;
     m_no_mod_mode_isSet = false;
     offset_tuning = 0;
@@ -189,6 +193,8 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&tuner_agc, pJson["tunerAgc"], "qint32", "");
+
     ::SWGSDRangel::setValue(&no_mod_mode, pJson["noModMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&offset_tuning, pJson["offsetTuning"], "qint32", "");
@@ -259,6 +265,9 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
+    }
+    if(m_tuner_agc_isSet){
+        obj->insert("tunerAgc", QJsonValue(tuner_agc));
     }
     if(m_no_mod_mode_isSet){
         obj->insert("noModMode", QJsonValue(no_mod_mode));
@@ -408,6 +417,16 @@ SWGRtlSdrSettings::setAgc(qint32 agc) {
 }
 
 qint32
+SWGRtlSdrSettings::getTunerAgc() {
+    return tuner_agc;
+}
+void
+SWGRtlSdrSettings::setTunerAgc(qint32 tuner_agc) {
+    this->tuner_agc = tuner_agc;
+    this->m_tuner_agc_isSet = true;
+}
+
+qint32
 SWGRtlSdrSettings::getNoModMode() {
     return no_mod_mode;
 }
@@ -553,6 +572,9 @@ SWGRtlSdrSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tuner_agc_isSet){
             isObjectUpdated = true; break;
         }
         if(m_no_mod_mode_isSet){
