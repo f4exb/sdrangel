@@ -454,9 +454,9 @@ void testPages()
 
     // Capacity: the pages are dispatched as far as the transmitter has room
     MessageCenterEngine capacity;
-    MessageEndpoint small = transmitter("small", {"pocsag"});
-    small.m_capacity = 2;
-    capacity.ingest(MessageEndpoint::toRecord(small, "register"), "x", 1);
+    MessageEndpoint smallTx = transmitter("small", {"pocsag"});
+    smallTx.m_capacity = 2;
+    capacity.ingest(MessageEndpoint::toRecord(smallTx, "register"), "x", 1);
 
     for (int i = 0; i < 5; i++) {
         capacity.addPage(pageRecord("small", "pocsag", QString::number(i), "x"), 1);
