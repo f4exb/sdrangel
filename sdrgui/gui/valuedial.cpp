@@ -489,7 +489,13 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
     {
         m_cursor = m_hightlightedDigit;
 
-        if ((m_cursor < 0) || (m_cursor >= m_text.size())) {
+        if ((m_cursor < 0) || (m_cursor >= m_text.size()))
+        {
+            m_cursor = -1;
+            m_hightlightedDigit = -1;
+            m_cursorState = false;
+            m_blinkTimer.stop();
+            update();
             return;
         }
 
@@ -507,6 +513,17 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
     }
 
     if (m_cursor < 0) {
+        return;
+    }
+
+    // A range reduction can leave the cursor pointing past the end of m_text.
+    // Clear it before any arrow-key path reads m_text[m_cursor].
+    if (m_cursor >= m_text.size())
+    {
+        m_cursor = -1;
+        m_cursorState = false;
+        m_blinkTimer.stop();
+        update();
         return;
     }
 
