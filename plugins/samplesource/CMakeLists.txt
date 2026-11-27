@@ -86,6 +86,7 @@ endif()
 
 if(ENABLE_RTLSDR AND LIBRTLSDR_FOUND)
     add_subdirectory(rtlsdr)
+    add_subdirectory(rtlsdr2)
 else()
     message(STATUS "Not building rtlsdr (ENABLE_RTLSDR=${ENABLE_RTLSDR} LIBRTLSDR_FOUND=${LIBRTLSDR_FOUND})")
 endif()
