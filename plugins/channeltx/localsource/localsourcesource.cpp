@@ -31,7 +31,10 @@ LocalSourceSource::LocalSourceSource() :
 }
 
 LocalSourceSource::~LocalSourceSource()
-{}
+{
+    // Ensure the worker thread is joined even if the owner forgot to call stop()
+    stop();
+}
 
 void LocalSourceSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {

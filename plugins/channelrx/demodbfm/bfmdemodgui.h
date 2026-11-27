@@ -81,6 +81,7 @@ private:
     bool m_radiotext_AB_flag;
     bool m_squelchOpen;
     int m_audioSampleRate;
+    int m_snapSpacing; //!< 0 off, 100000 or 200000 Hz broadcast raster
 
 	SpectrumVis* m_spectrumVis;
 
@@ -105,8 +106,10 @@ private:
 	void enterEvent(EnterEventType*);
 
 	void changeFrequency(qint64 f);
+    qint64 snapOffset(qint64 offset) const;
 
 private slots:
+	void snapClicked();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);

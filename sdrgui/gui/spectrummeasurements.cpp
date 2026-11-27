@@ -322,9 +322,9 @@ void SpectrumMeasurements::createPeakTable(int peaks)
 
 void SpectrumMeasurements::createTableMenus()
 {
-    // Add context menu to allow hiding/showing of columns
+    // Add context menu to allow hiding/showing of rows
     m_rowMenu = new QMenu(m_table);
-    for (int i = 0; i < m_table->verticalHeader()->count() - 1; i++) // -1 to skip empty column
+    for (int i = 0; i < m_table->verticalHeader()->count(); i++)
     {
         QString text = m_table->verticalHeaderItem(i)->text();
         m_rowMenu->addAction(createCheckableItem(text, i, true, true));
@@ -332,9 +332,10 @@ void SpectrumMeasurements::createTableMenus()
     m_table->verticalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_table->verticalHeader(), &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::rowSelectMenu);
 
-    // Add context menu to allow hiding/showing of rows
+    // Add context menu to allow hiding/showing of columns. The last column is
+    // the empty stretch section and has no heading, so it is not offered.
     m_columnMenu = new QMenu(m_table);
-    for (int i = 0; i < m_table->horizontalHeader()->count(); i++)
+    for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
     {
         QString text = m_table->horizontalHeaderItem(i)->text();
         m_columnMenu->addAction(createCheckableItem(text, i, true, false));
@@ -542,7 +543,7 @@ void SpectrumMeasurements::maskTableContextMenu(QPoint pos)
         tableContextMenu->addAction(copyAction);
         tableContextMenu->addSeparator();
 
-        tableContextMenu->popup(m_peakTable->viewport()->mapToGlobal(pos));
+        tableContextMenu->popup(m_maskTable->viewport()->mapToGlobal(pos));
     }
 }
 

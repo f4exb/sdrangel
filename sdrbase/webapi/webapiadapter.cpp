@@ -266,6 +266,11 @@ int WebAPIAdapter::instanceDevices(
     (void) error;
     response.init();
 
+    // PluginManager enumerates devices once while plugins load. A dongle plugged
+    // in afterwards stays marked removed until the GUI dialog refreshes. Refresh
+    // here so API consumers see devices attached after startup.
+    DeviceEnumerator::instance()->enumerateAllDevices(m_mainCore->getPluginManager());
+
     int nbSamplingDevices;
 
     if (direction == 0) { // Single Rx stream device

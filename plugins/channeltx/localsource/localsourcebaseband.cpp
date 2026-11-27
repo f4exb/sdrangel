@@ -48,6 +48,8 @@ LocalSourceBaseband::LocalSourceBaseband() :
 
 LocalSourceBaseband::~LocalSourceBaseband()
 {
+    // Stop the sample pump before its QThread value member is destroyed
+    m_source.stop();
     delete m_channelizer;
 }
 

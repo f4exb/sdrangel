@@ -53,7 +53,12 @@ RtlSdrSettings:
       maximum: 1
     agc:
       type: integer
-      description: "Enable automatic gain control (1 enabled, 0 disabled)."
+      description: "Enable RTL2838 automatic gain control (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    tunerAgc:
+      type: integer
+      description: "Enable R820T tuner automatic gain control, disabling manual tuner gain (1 enabled, 0 disabled)."
       minimum: 0
       maximum: 1
     noModMode:

@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QPointer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGRtlSdrSettings.h"
@@ -243,6 +244,23 @@ bool RTLSDRInput::start()
 
     m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo, &m_replayBuffer, m_settings);
     connect(m_rtlSDRThread, &QThread::finished, m_rtlSDRThread, &QObject::deleteLater);
+
+    // rtlsdr_read_async() can return after a USB glitch, ending the worker on its
+    // own. Stop the engine so the GUI does not show a running device with no data.
+    // Ignore a late signal from a worker already stopped normally, and do not take
+    // m_mutex here: the DSP thread may hold it while waiting for the GUI thread.
+    QPointer<RTLSDRThread> worker = m_rtlSDRThread;
+    connect(m_rtlSDRThread, &QThread::finished, this, [this, worker]() {
+        if (m_rtlSDRThread != worker) {
+            return;
+        }
+        m_rtlSDRThread = nullptr;
+        m_deviceAPI->stopDeviceEngine();
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(MsgStartStop::create(false));
+        }
+    });
+
 	m_rtlSDRThread->startWork();
 	m_running = true;
 
@@ -528,6 +546,9 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
     }
+    if (deviceSettingsKeys.contains("tunerAgc")) {
+        settings.m_tunerAgc = response.getRtlSdrSettings()->getTunerAgc() != 0;
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getRtlSdrSettings()->getCenterFrequency();
     }
@@ -599,6 +620,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     }
 
     response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getRtlSdrSettings()->setTunerAgc(settings.m_tunerAgc ? 1 : 0);
     response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getRtlSdrSettings()->setDevSampleRate(settings.m_devSampleRate);
@@ -700,6 +722,7 @@ void RTLSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSettings
     }
     if (deviceSettingsKeys.contains("agc") || force) {
         swgRtlSdrSettings->setAgc(settings.m_agc ? 1 : 0);
+        swgRtlSdrSettings->setTunerAgc(settings.m_tunerAgc ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgRtlSdrSettings->setCenterFrequency(settings.m_centerFrequency);

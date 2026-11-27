@@ -22,6 +22,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QLocale>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -702,7 +703,15 @@ void AMDemodGUI::applySnap()
     // Snap to nearest centre frequency
     if (m_settings.m_frequencyMode == AMDemodSettings::MediumWave)
     {
-        const int spacing = 1000;
+        // AM broadcast channel spacing: 10 kHz in the Americas, 9 kHz in Europe.
+        // 1 kHz was never a broadcast raster and made marker snapping unusable.
+        const QString country = QLocale::system().name().section('_', 1, 1);
+        const QStringList europeanCountries = {
+            "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB", "GR",
+            "HR", "HU", "IE", "IS", "IT", "LI", "LT", "LU", "LV", "MT", "NL", "NO", "PL", "PT",
+            "RO", "RS", "SE", "SI", "SK", "SM", "TR", "UA"
+        };
+        const int spacing = europeanCountries.contains(country, Qt::CaseInsensitive) ? 9000 : 10000;
         frequency = ((frequency + (spacing / 2)) / spacing) * spacing;
     }
     else if (m_settings.m_frequencyMode == AMDemodSettings::Airband25k)
