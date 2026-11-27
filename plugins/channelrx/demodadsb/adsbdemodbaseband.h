@@ -69,6 +69,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
+    ADSBDemodStats getDemodStats() { return m_sink.getDemodStats(); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_sink.setMessageQueueToWorker(messageQueue); }
     void setBasebandSampleRate(int sampleRate);

@@ -179,6 +179,45 @@ ADSBDemodReport:
       description: "Current states of aircraft tracked by the ADS-B demodulator."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodAircraftState"
+    demodStats:
+      $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodStats"
+      description: "Demodulator frame and error statistics since the last reset."
+
+ADSBDemodStats:
+  description: ADS-B demodulator statistics
+  properties:
+    correlatorMatches:
+      type: integer
+      format: int64
+      description: "Total number of correlator matches."
+    adsbFrames:
+      type: integer
+      format: int64
+      description: "ADS-B frames with a correct CRC."
+    modesFrames:
+      type: integer
+      format: int64
+      description: "Non-ADS-B Mode-S frames with a correct CRC."
+    preambleFails:
+      type: integer
+      format: int64
+      description: "Frames rejected for preamble errors."
+    crcFails:
+      type: integer
+      format: int64
+      description: "Frames with an incorrect CRC."
+    typeFails:
+      type: integer
+      format: int64
+      description: "Frames with an unknown DF type so the CRC cannot be checked."
+    invalidFails:
+      type: integer
+      format: int64
+      description: "Frames with reserved bits set."
+    icaoFails:
+      type: integer
+      format: int64
+      description: "Frames with a reserved ICAO address."
 
 ADSBDemodAircraftState:
   properties:
@@ -206,3 +245,93 @@ ADSBDemodAircraftState:
     groundSpeed:
       description: "Groundspeed of aircraft in knots"
       type: integer
+    flight:
+      description: "Guess at the flight number"
+      type: string
+    pressureAltitude:
+      description: "Pressure altitude in feet"
+      type: integer
+    heading:
+      description: "Heading in degrees magnetic"
+      type: number
+      format: float
+    track:
+      description: "Track in degrees true"
+      type: number
+      format: float
+    verticalRate:
+      description: "Vertical climb rate in feet per minute"
+      type: integer
+    emitterCategory:
+      description: "Aircraft emitter category"
+      type: string
+    status:
+      description: "Aircraft status"
+      type: string
+    squawk:
+      description: "Mode-A squawk code"
+      type: integer
+    ident:
+      description: "Special position identification (IDENT) active"
+      type: integer
+      minimum: 0
+      maximum: 1
+    onSurface:
+      description: "Aircraft is on the surface"
+      type: integer
+      minimum: 0
+      maximum: 1
+    selectedAltitude:
+      description: "Selected altitude in feet"
+      type: integer
+    selectedHeading:
+      description: "Selected heading in degrees"
+      type: integer
+    trueAirspeed:
+      description: "True airspeed in knots"
+      type: integer
+    indicatedAirspeed:
+      description: "Indicated airspeed in knots"
+      type: integer
+    mach:
+      description: "Mach number"
+      type: number
+      format: float
+    roll:
+      description: "Roll angle in degrees"
+      type: number
+      format: float
+    turnRate:
+      description: "Turn rate in degrees per second"
+      type: number
+      format: float
+    range:
+      description: "Distance from station to aircraft"
+      type: number
+      format: float
+    azimuth:
+      description: "Azimuth from station to aircraft in degrees"
+      type: number
+      format: float
+    elevation:
+      description: "Elevation from station to aircraft in degrees"
+      type: number
+      format: float
+    adsbFrames:
+      description: "Number of ADS-B frames received from this aircraft"
+      type: integer
+    modesFrames:
+      description: "Number of non-ADS-B Mode-S frames received from this aircraft"
+      type: integer
+    minCorrelation:
+      description: "Minimum preamble correlation in dB"
+      type: number
+      format: float
+    maxCorrelation:
+      description: "Maximum preamble correlation in dB"
+      type: number
+      format: float
+    correlation:
+      description: "Latest preamble correlation in dB"
+      type: number
+      format: float

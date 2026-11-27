@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
+ * This is the web REST/JSON API of SDRangel SDR software.
  *
  * OpenAPI spec version: 7.0.0
  * Contact: f4exb06@gmail.com
@@ -12,18 +12,13 @@
 
 /*
  * SWGADSBDemodAircraftState.h
- *
- * 
  */
 
 #ifndef SWGADSBDemodAircraftState_H_
 #define SWGADSBDemodAircraftState_H_
 
 #include <QJsonObject>
-
-
 #include <QString>
-
 #include "SWGObject.h"
 #include "export.h"
 
@@ -44,46 +39,103 @@ public:
 
     QString* getIcao();
     void setIcao(QString* icao);
-
     QString* getCallsign();
     void setCallsign(QString* callsign);
-
     float getLatitude();
     void setLatitude(float latitude);
-
     float getLongitude();
     void setLongitude(float longitude);
-
     qint32 getAltitude();
     void setAltitude(qint32 altitude);
-
     qint32 getGroundSpeed();
     void setGroundSpeed(qint32 ground_speed);
 
+    QString* getFlight();
+    void setFlight(QString* flight);
+    qint32 getPressureAltitude();
+    void setPressureAltitude(qint32 pressure_altitude);
+    float getHeading();
+    void setHeading(float heading);
+    float getTrack();
+    void setTrack(float track);
+    qint32 getVerticalRate();
+    void setVerticalRate(qint32 vertical_rate);
+    QString* getEmitterCategory();
+    void setEmitterCategory(QString* emitter_category);
+    QString* getStatus();
+    void setStatus(QString* status);
+    qint32 getSquawk();
+    void setSquawk(qint32 squawk);
+    qint32 getIdent();
+    void setIdent(qint32 ident);
+    qint32 getOnSurface();
+    void setOnSurface(qint32 on_surface);
+    qint32 getSelectedAltitude();
+    void setSelectedAltitude(qint32 selected_altitude);
+    qint32 getSelectedHeading();
+    void setSelectedHeading(qint32 selected_heading);
+    qint32 getTrueAirspeed();
+    void setTrueAirspeed(qint32 true_airspeed);
+    qint32 getIndicatedAirspeed();
+    void setIndicatedAirspeed(qint32 indicated_airspeed);
+    float getMach();
+    void setMach(float mach);
+    float getRoll();
+    void setRoll(float roll);
+    float getTurnRate();
+    void setTurnRate(float turn_rate);
+    float getRange();
+    void setRange(float range);
+    float getAzimuth();
+    void setAzimuth(float azimuth);
+    float getElevation();
+    void setElevation(float elevation);
+    qint32 getAdsbFrames();
+    void setAdsbFrames(qint32 adsb_frames);
+    qint32 getModesFrames();
+    void setModesFrames(qint32 modes_frames);
+    float getMinCorrelation();
+    void setMinCorrelation(float min_correlation);
+    float getMaxCorrelation();
+    void setMaxCorrelation(float max_correlation);
+    float getCorrelation();
+    void setCorrelation(float correlation);
 
     virtual bool isSet() override;
 
 private:
-    QString* icao;
-    bool m_icao_isSet;
-
-    QString* callsign;
-    bool m_callsign_isSet;
-
-    float latitude;
-    bool m_latitude_isSet;
-
-    float longitude;
-    bool m_longitude_isSet;
-
-    qint32 altitude;
-    bool m_altitude_isSet;
-
-    qint32 ground_speed;
-    bool m_ground_speed_isSet;
-
+    QString* icao; bool m_icao_isSet;
+    QString* callsign; bool m_callsign_isSet;
+    float latitude; bool m_latitude_isSet;
+    float longitude; bool m_longitude_isSet;
+    qint32 altitude; bool m_altitude_isSet;
+    qint32 ground_speed; bool m_ground_speed_isSet;
+    QString* flight; bool m_flight_isSet;
+    qint32 pressure_altitude; bool m_pressure_altitude_isSet;
+    float heading; bool m_heading_isSet;
+    float track; bool m_track_isSet;
+    qint32 vertical_rate; bool m_vertical_rate_isSet;
+    QString* emitter_category; bool m_emitter_category_isSet;
+    QString* status; bool m_status_isSet;
+    qint32 squawk; bool m_squawk_isSet;
+    qint32 ident; bool m_ident_isSet;
+    qint32 on_surface; bool m_on_surface_isSet;
+    qint32 selected_altitude; bool m_selected_altitude_isSet;
+    qint32 selected_heading; bool m_selected_heading_isSet;
+    qint32 true_airspeed; bool m_true_airspeed_isSet;
+    qint32 indicated_airspeed; bool m_indicated_airspeed_isSet;
+    float mach; bool m_mach_isSet;
+    float roll; bool m_roll_isSet;
+    float turn_rate; bool m_turn_rate_isSet;
+    float range; bool m_range_isSet;
+    float azimuth; bool m_azimuth_isSet;
+    float elevation; bool m_elevation_isSet;
+    qint32 adsb_frames; bool m_adsb_frames_isSet;
+    qint32 modes_frames; bool m_modes_frames_isSet;
+    float min_correlation; bool m_min_correlation_isSet;
+    float max_correlation; bool m_max_correlation_isSet;
+    float correlation; bool m_correlation_isSet;
 };
 
 }
-
 #endif /* SWGADSBDemodAircraftState_H_ */

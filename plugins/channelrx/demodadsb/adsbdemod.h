@@ -81,6 +81,52 @@ public:
             bool m_positionValid;
             bool m_altitudeValid;
             bool m_groundSpeedValid;
+
+            // Extended state from ADS-B and Mode-S frames. Each has its own validity flag
+            // so an unknown value is never reported as a real zero.
+            QString m_flight;
+            int m_pressureAltitude;        bool m_pressureAltitudeValid;
+            float m_heading;               bool m_headingValid;
+            float m_track;                 bool m_trackValid;
+            int m_verticalRate;            bool m_verticalRateValid;
+            QString m_emitterCategory;
+            QString m_status;
+            int m_squawk;
+            bool m_spi;
+            bool m_onSurface;              bool m_onSurfaceValid;
+            int m_selAltitude;             bool m_selAltitudeValid;
+            int m_selHeading;              bool m_selHeadingValid;
+            int m_trueAirspeed;            bool m_trueAirspeedValid;
+            int m_indicatedAirspeed;       bool m_indicatedAirspeedValid;
+            float m_mach;                  bool m_machValid;
+            float m_roll;                  bool m_rollValid;
+            float m_turnRate;              bool m_turnRateValid;
+            float m_range;
+            float m_azimuth;
+            float m_elevation;
+            int m_adsbFrameCount;
+            int m_modesFrameCount;
+            float m_minCorrelation;
+            float m_maxCorrelation;
+            float m_correlation;
+
+            AircraftReport() :
+                m_latitude(0.0f), m_longitude(0.0f), m_altitude(0), m_groundSpeed(0),
+                m_positionValid(false), m_altitudeValid(false), m_groundSpeedValid(false),
+                m_pressureAltitude(0), m_pressureAltitudeValid(false),
+                m_heading(0.0f), m_headingValid(false), m_track(0.0f), m_trackValid(false),
+                m_verticalRate(0), m_verticalRateValid(false),
+                m_squawk(-1), m_spi(false), m_onSurface(false), m_onSurfaceValid(false),
+                m_selAltitude(0), m_selAltitudeValid(false),
+                m_selHeading(0), m_selHeadingValid(false),
+                m_trueAirspeed(0), m_trueAirspeedValid(false),
+                m_indicatedAirspeed(0), m_indicatedAirspeedValid(false),
+                m_mach(0.0f), m_machValid(false),
+                m_roll(0.0f), m_rollValid(false), m_turnRate(0.0f), m_turnRateValid(false),
+                m_range(0.0f), m_azimuth(0.0f), m_elevation(0.0f),
+                m_adsbFrameCount(0), m_modesFrameCount(0),
+                m_minCorrelation(0.0f), m_maxCorrelation(0.0f), m_correlation(0.0f)
+            {}
         };
 
         QList<AircraftReport>& getReport() { return m_report; }

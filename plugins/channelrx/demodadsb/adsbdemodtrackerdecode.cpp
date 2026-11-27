@@ -4960,17 +4960,53 @@ void ADSBDemodTracker::sendAircraftReport()
     {
         ADSBAircraft *aircraft = i.value();
 
-        ADSBDemod::MsgAircraftReport::AircraftReport aircraftReport {
-            aircraft->m_icaoHex,
-            aircraft->m_callsign,
-            aircraft->m_latitude,
-            aircraft->m_longitude,
-            aircraft->m_altitude,
-            aircraft->m_groundspeed,
-            aircraft->m_positionValid,
-            aircraft->m_altitudeValid,
-            aircraft->m_groundspeedValid
-        };
+        ADSBDemod::MsgAircraftReport::AircraftReport aircraftReport;
+        aircraftReport.m_icao = aircraft->m_icaoHex;
+        aircraftReport.m_callsign = aircraft->m_callsign;
+        aircraftReport.m_latitude = aircraft->m_latitude;
+        aircraftReport.m_longitude = aircraft->m_longitude;
+        aircraftReport.m_altitude = aircraft->m_altitude;
+        aircraftReport.m_groundSpeed = aircraft->m_groundspeed;
+        aircraftReport.m_positionValid = aircraft->m_positionValid;
+        aircraftReport.m_altitudeValid = aircraft->m_altitudeValid;
+        aircraftReport.m_groundSpeedValid = aircraft->m_groundspeedValid;
+        aircraftReport.m_flight = aircraft->m_flight;
+        aircraftReport.m_pressureAltitude = aircraft->m_pressureAltitude;
+        aircraftReport.m_pressureAltitudeValid = aircraft->m_pressureAltitudeValid;
+        aircraftReport.m_heading = aircraft->m_heading;
+        aircraftReport.m_headingValid = aircraft->m_headingValid;
+        aircraftReport.m_track = aircraft->m_track;
+        aircraftReport.m_trackValid = aircraft->m_trackValid;
+        aircraftReport.m_verticalRate = aircraft->m_verticalRate;
+        aircraftReport.m_verticalRateValid = aircraft->m_verticalRateValid;
+        aircraftReport.m_emitterCategory = aircraft->m_emitterCategory;
+        aircraftReport.m_status = aircraft->m_status;
+        aircraftReport.m_squawk = aircraft->m_squawk;
+        aircraftReport.m_spi = aircraft->m_spi;
+        aircraftReport.m_onSurface = aircraft->m_onSurface;
+        aircraftReport.m_onSurfaceValid = aircraft->m_onSurfaceValid;
+        aircraftReport.m_selAltitude = aircraft->m_selAltitude;
+        aircraftReport.m_selAltitudeValid = aircraft->m_selAltitudeValid;
+        aircraftReport.m_selHeading = aircraft->m_selHeading;
+        aircraftReport.m_selHeadingValid = aircraft->m_selHeadingValid;
+        aircraftReport.m_trueAirspeed = aircraft->m_trueAirspeed;
+        aircraftReport.m_trueAirspeedValid = aircraft->m_trueAirspeedValid;
+        aircraftReport.m_indicatedAirspeed = aircraft->m_indicatedAirspeed;
+        aircraftReport.m_indicatedAirspeedValid = aircraft->m_indicatedAirspeedValid;
+        aircraftReport.m_mach = aircraft->m_mach;
+        aircraftReport.m_machValid = aircraft->m_machValid;
+        aircraftReport.m_roll = aircraft->m_roll;
+        aircraftReport.m_rollValid = aircraft->m_rollValid;
+        aircraftReport.m_turnRate = aircraft->m_turnRate;
+        aircraftReport.m_turnRateValid = aircraft->m_turnRateValid;
+        aircraftReport.m_range = aircraft->m_range;
+        aircraftReport.m_azimuth = aircraft->m_azimuth;
+        aircraftReport.m_elevation = aircraft->m_elevation;
+        aircraftReport.m_adsbFrameCount = aircraft->m_adsbFrameCount;
+        aircraftReport.m_modesFrameCount = aircraft->m_modesFrameCount;
+        aircraftReport.m_minCorrelation = aircraft->m_minCorrelation;
+        aircraftReport.m_maxCorrelation = aircraft->m_maxCorrelation;
+        aircraftReport.m_correlation = aircraft->m_correlation;
 
         report.append(aircraftReport);
 

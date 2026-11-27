@@ -42,6 +42,8 @@ SWGADSBDemodReport::SWGADSBDemodReport() {
     m_target_range_isSet = false;
     aircraft_state = nullptr;
     m_aircraft_state_isSet = false;
+    demod_stats = nullptr;
+    m_demod_stats_isSet = false;
 }
 
 SWGADSBDemodReport::~SWGADSBDemodReport() {
@@ -64,6 +66,8 @@ SWGADSBDemodReport::init() {
     m_target_range_isSet = false;
     aircraft_state = new QList<SWGADSBDemodAircraftState*>();
     m_aircraft_state_isSet = false;
+    demod_stats = new SWGADSBDemodStats();
+    m_demod_stats_isSet = false;
 }
 
 void
@@ -82,6 +86,9 @@ SWGADSBDemodReport::cleanup() {
             delete o;
         }
         delete aircraft_state;
+    }
+    if(demod_stats != nullptr) {
+        delete demod_stats;
     }
 }
 
@@ -110,6 +117,7 @@ SWGADSBDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     
     ::SWGSDRangel::setValue(&aircraft_state, pJson["aircraftState"], "QList", "SWGADSBDemodAircraftState");
+    ::SWGSDRangel::setValue(&demod_stats, pJson["demodStats"], "SWGADSBDemodStats", "SWGADSBDemodStats");
 }
 
 QString
@@ -146,6 +154,9 @@ SWGADSBDemodReport::asJsonObject() {
     }
     if(aircraft_state && aircraft_state->size() > 0){
         toJsonArray((QList<void*>*)aircraft_state, obj, "aircraftState", "SWGADSBDemodAircraftState");
+    }
+    if(demod_stats != nullptr){
+        toJsonValue(QString("demodStats"), demod_stats, obj, QString("SWGADSBDemodStats"));
     }
 
     return obj;
@@ -222,6 +233,16 @@ SWGADSBDemodReport::setAircraftState(QList<SWGADSBDemodAircraftState*>* aircraft
 }
 
 
+SWGADSBDemodStats*
+SWGADSBDemodReport::getDemodStats() {
+    return demod_stats;
+}
+void
+SWGADSBDemodReport::setDemodStats(SWGADSBDemodStats* demod_stats) {
+    this->demod_stats = demod_stats;
+    this->m_demod_stats_isSet = true;
+}
+
 bool
 SWGADSBDemodReport::isSet(){
     bool isObjectUpdated = false;
@@ -245,6 +266,9 @@ SWGADSBDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(aircraft_state && (aircraft_state->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(demod_stats != nullptr && demod_stats->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

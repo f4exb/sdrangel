@@ -24,6 +24,7 @@
 #include "dsp/interpolator.h"
 
 #include "adsbdemodsettings.h"
+#include "adsbdemodstats.h"
 #include "adsbdemodsinkworker.h"
 
 class ADSBDemodSink : public ChannelSampleSink {
@@ -60,6 +61,17 @@ public:
     void startWorker();
     void stopWorker();
     void resetStats();
+
+    ADSBDemodStats getDemodStats()
+    {
+        QMutexLocker locker(&m_statsMutex);
+        return m_demodStats;
+    }
+    void setDemodStats(const ADSBDemodStats& stats)
+    {
+        QMutexLocker locker(&m_statsMutex);
+        m_demodStats = stats;
+    }
 
 private:
     friend ADSBDemodSinkWorker;
@@ -110,6 +122,8 @@ private:
     MagSqLevelsStore m_magSqLevelStore;
 
     QMutex m_magsqMutex;
+    QMutex m_statsMutex;
+    ADSBDemodStats m_demodStats;        //!< Latest stats for the WebAPI report
 
     MessageQueue *m_messageQueueToGUI;
     MessageQueue *m_messageQueueToWorker;
