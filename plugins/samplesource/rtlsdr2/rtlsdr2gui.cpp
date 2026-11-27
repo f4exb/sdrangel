@@ -321,6 +321,8 @@ void RTLSDR2Gui::displayFcTooltip()
         DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
     );
     ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number((float) fShift / 1000.0f, 'g', 5)));
+    const QString sign = fShift < 0 ? QChar(0x2212) : QString("+");
+    ui->fcPosOffset->setText(tr("%1%2 kHz").arg(sign).arg(QString::number(qAbs((double) fShift) / 1000.0, 'f', 0)));
 }
 
 void RTLSDR2Gui::displaySettings()

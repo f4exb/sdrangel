@@ -315,6 +315,16 @@
       </widget>
      </item>
      <item row="0" column="7">
+      <widget class="QLabel" name="fcPosOffset">
+       <property name="toolTip">
+        <string>Shift applied by Fp: baseband centre = device centre + this offset.</string>
+       </property>
+       <property name="text">
+        <string>+0 kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
       <widget class="TransverterButton" name="transverter">
        <property name="maximumSize">
         <size>
