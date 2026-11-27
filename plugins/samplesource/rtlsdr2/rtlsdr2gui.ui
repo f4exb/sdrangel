@@ -277,29 +277,29 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>70</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Relative position of device center frequency</string>
+        <string>Where the device centre frequency sits in the received band. Below/Above move the DC spike out of the band you want; Centre leaves it in the middle. With an offset, the RF bandwidth must be wider than the baseband: at least 2x the baseband for decimation 4 or less, 3x for decimation 8 or more.</string>
        </property>
        <property name="currentIndex">
         <number>2</number>
        </property>
        <item>
         <property name="text">
-         <string>Inf</string>
+         <string>Below</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Sup</string>
+         <string>Above</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Cen</string>
+         <string>Centre</string>
         </property>
        </item>
       </widget>
@@ -310,7 +310,7 @@
         <string>Position of the device centre frequency within the decimated band: below, above, or at the centre.</string>
        </property>
        <property name="text">
-        <string>Fp</string>
+        <string>IF:</string>
        </property>
       </widget>
      </item>
