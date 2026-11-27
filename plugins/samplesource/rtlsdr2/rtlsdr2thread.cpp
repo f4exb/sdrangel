@@ -364,7 +364,7 @@ void RTLSDR2Thread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
 	RTLSDR2Thread* thread = (RTLSDR2Thread*) ctx;
 
     if (thread->m_settings.m_iqOrder) {
-    	thread->callbackIQ(buf, len);
+        thread->callbackIQ(buf, len);
     } else {
         thread->callbackQI(buf, len);
     }
