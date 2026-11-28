@@ -337,11 +337,15 @@ void ValueDial::mousePressEvent(QMouseEvent *event)
 
     i = (event->x() - 1) / m_digitWidth;
 
+    if ((i < 0) || (i >= m_text.size())) {
+        return;
+    }
+
     if (m_text[i] == m_groupSeparator)
     {
         i++;
 
-        if (i > m_numDigits + m_numDecimalPoints) {
+        if (i >= m_text.size()) {
             return;
         }
     }
@@ -398,6 +402,13 @@ void ValueDial::wheelEvent(QWheelEvent *event)
 {
     int i;
     i = (event->position().x() - 1) / m_digitWidth;
+
+    if ((i < 0) || (i >= m_text.size()))
+    {
+        m_hightlightedDigit = -1;
+        update();
+        return;
+    }
 
     if (m_text[i] != m_groupSeparator) {
         m_hightlightedDigit = i;
@@ -478,11 +489,21 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
     {
         m_cursor = m_hightlightedDigit;
 
+        if ((m_cursor < 0) || (m_cursor >= m_text.size()))
+        {
+            m_cursor = -1;
+            m_hightlightedDigit = -1;
+            m_cursorState = false;
+            m_blinkTimer.stop();
+            update();
+            return;
+        }
+
         if (m_text[m_cursor] == m_groupSeparator) {
             m_cursor++;
         }
 
-        if (m_cursor >= m_numDigits + m_numDecimalPoints) {
+        if (m_cursor >= m_text.size()) {
             return;
         }
 
@@ -495,13 +516,26 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
         return;
     }
 
+    // A range reduction can leave the cursor pointing past the end of m_text.
+    // Clear it before any arrow-key path reads m_text[m_cursor].
+    if (m_cursor >= m_text.size())
+    {
+        m_cursor = -1;
+        m_cursorState = false;
+        m_blinkTimer.stop();
+        update();
+        return;
+    }
+
     if ((value->key() == Qt::Key_Left) || (value->key() == Qt::Key_Backspace))
     {
         if (m_cursor > 0)
         {
             m_cursor--;
 
-            if (m_text[m_cursor] == m_groupSeparator) {
+            if (m_cursor < 0) {
+                m_cursor = 0;
+            } else if (m_text[m_cursor] == m_groupSeparator) {
                 m_cursor--;
             }
 
@@ -520,11 +554,13 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
         {
             m_cursor++;
 
-            if (m_text[m_cursor] == m_groupSeparator) {
+            if (m_cursor >= m_text.size()) {
+                m_cursor--;
+            } else if (m_text[m_cursor] == m_groupSeparator) {
                 m_cursor++;
             }
 
-            if (m_cursor >= m_numDecimalPoints + m_numDigits) {
+            if (m_cursor >= m_text.size()) {
                 m_cursor--;
             }
 
