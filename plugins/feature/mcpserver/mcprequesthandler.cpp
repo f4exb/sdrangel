@@ -372,6 +372,27 @@ void MCPRequestHandler::handlePost(qtwebapp::HttpRequest& request, qtwebapp::Htt
         return;
     }
 
+    // One Context is shared by every member of a batch. More than one initialize
+    // would create several sessions but only the last id could be returned.
+    if (batch)
+    {
+        int initializeCount = 0;
+
+        for (const auto& value : messages) {
+            if (value.isObject() && (value.toObject()["method"].toString() == "initialize")) {
+                ++initializeCount;
+            }
+        }
+
+        if (initializeCount > 1)
+        {
+            QJsonObject error = MCPProtocol::makeError(QJsonValue(), MCPProtocol::InvalidRequest,
+                "Invalid request: at most one initialize per batch");
+            sendJson(response, 400, QJsonDocument(error));
+            return;
+        }
+    }
+
     QJsonArray responses;
 
     for (const auto& value : messages)
@@ -393,6 +414,12 @@ void MCPRequestHandler::handlePost(qtwebapp::HttpRequest& request, qtwebapp::Htt
 
         if (m_protocol->handleMessage(message, reply, context)) {
             responses.append(reply);
+        }
+
+        // A later batch member must use the session initialize just created, not
+        // the (usually empty) session id from the request header.
+        if (!context.m_newSessionId.isEmpty()) {
+            context.m_sessionId = context.m_newSessionId;
         }
     }
 
