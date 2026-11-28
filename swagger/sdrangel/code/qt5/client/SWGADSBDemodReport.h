@@ -23,6 +23,7 @@
 
 
 #include "SWGADSBDemodAircraftState.h"
+#include "SWGADSBDemodStats.h"
 #include <QList>
 #include <QString>
 
@@ -65,6 +66,8 @@ public:
     QList<SWGADSBDemodAircraftState*>* getAircraftState();
     void setAircraftState(QList<SWGADSBDemodAircraftState*>* aircraft_state);
 
+    SWGADSBDemodStats* getDemodStats();
+    void setDemodStats(SWGADSBDemodStats* demod_stats);
 
     virtual bool isSet() override;
 
@@ -89,6 +92,9 @@ private:
 
     QList<SWGADSBDemodAircraftState*>* aircraft_state;
     bool m_aircraft_state_isSet;
+
+    SWGADSBDemodStats* demod_stats;
+    bool m_demod_stats_isSet;
 
 };
 

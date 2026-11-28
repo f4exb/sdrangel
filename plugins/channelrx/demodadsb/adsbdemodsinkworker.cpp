@@ -604,7 +604,8 @@ void ADSBDemodSinkWorker::run()
             // Update amount of time spent processing (don't include time spend in acquire)
             PROFILER_STOP("ADS-B demod");
 
-            // Send stats to GUI
+            // Send stats to GUI and keep a copy for the WebAPI/MCP channel report
+            m_sink->setDemodStats(m_demodStats);
             if (m_sink->getMessageQueueToGUI())
             {
                 ADSBDemodReport::MsgReportDemodStats *msg = ADSBDemodReport::MsgReportDemodStats::create(m_demodStats);

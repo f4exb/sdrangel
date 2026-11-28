@@ -614,6 +614,19 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getAdsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getAdsbDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 
+    // Demodulator statistics
+    ADSBDemodStats stats = m_basebandSink->getDemodStats();
+    SWGSDRangel::SWGADSBDemodStats *swgStats = new SWGSDRangel::SWGADSBDemodStats();
+    swgStats->setCorrelatorMatches(stats.m_correlatorMatches);
+    swgStats->setAdsbFrames(stats.m_adsbFrames);
+    swgStats->setModesFrames(stats.m_modesFrames);
+    swgStats->setPreambleFails(stats.m_preambleFails);
+    swgStats->setCrcFails(stats.m_crcFails);
+    swgStats->setTypeFails(stats.m_typeFails);
+    swgStats->setInvalidFails(stats.m_invalidFails);
+    swgStats->setIcaoFails(stats.m_icaoFails);
+    response.getAdsbDemodReport()->setDemodStats(swgStats);
+
     if (m_targetAzElValid)
     {
         if (response.getAdsbDemodReport()->getTargetName()) {
@@ -655,6 +668,68 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
         if (report.m_groundSpeedValid) {
             aircraftState->setGroundSpeed(report.m_groundSpeed);
         }
+
+        // Extended state: only set fields that were actually received
+        if (!report.m_flight.isEmpty()) {
+            aircraftState->setFlight(new QString(report.m_flight));
+        }
+        if (report.m_pressureAltitudeValid) {
+            aircraftState->setPressureAltitude(report.m_pressureAltitude);
+        }
+        if (report.m_headingValid) {
+            aircraftState->setHeading(report.m_heading);
+        }
+        if (report.m_trackValid) {
+            aircraftState->setTrack(report.m_track);
+        }
+        if (report.m_verticalRateValid) {
+            aircraftState->setVerticalRate(report.m_verticalRate);
+        }
+        if (!report.m_emitterCategory.isEmpty()) {
+            aircraftState->setEmitterCategory(new QString(report.m_emitterCategory));
+        }
+        if (!report.m_status.isEmpty()) {
+            aircraftState->setStatus(new QString(report.m_status));
+        }
+        if (report.m_squawk >= 0) {
+            aircraftState->setSquawk(report.m_squawk);
+        }
+        aircraftState->setIdent(report.m_spi ? 1 : 0);
+        if (report.m_onSurfaceValid) {
+            aircraftState->setOnSurface(report.m_onSurface ? 1 : 0);
+        }
+        if (report.m_selAltitudeValid) {
+            aircraftState->setSelectedAltitude(report.m_selAltitude);
+        }
+        if (report.m_selHeadingValid) {
+            aircraftState->setSelectedHeading(report.m_selHeading);
+        }
+        if (report.m_trueAirspeedValid) {
+            aircraftState->setTrueAirspeed(report.m_trueAirspeed);
+        }
+        if (report.m_indicatedAirspeedValid) {
+            aircraftState->setIndicatedAirspeed(report.m_indicatedAirspeed);
+        }
+        if (report.m_machValid) {
+            aircraftState->setMach(report.m_mach);
+        }
+        if (report.m_rollValid) {
+            aircraftState->setRoll(report.m_roll);
+        }
+        if (report.m_turnRateValid) {
+            aircraftState->setTurnRate(report.m_turnRate);
+        }
+        if (report.m_positionValid) {
+            aircraftState->setRange(report.m_range);
+            aircraftState->setAzimuth(report.m_azimuth);
+            aircraftState->setElevation(report.m_elevation);
+        }
+        aircraftState->setAdsbFrames(report.m_adsbFrameCount);
+        aircraftState->setModesFrames(report.m_modesFrameCount);
+        aircraftState->setMinCorrelation(report.m_minCorrelation);
+        aircraftState->setMaxCorrelation(report.m_maxCorrelation);
+        aircraftState->setCorrelation(report.m_correlation);
+
         list->append(aircraftState);
     }
 }
