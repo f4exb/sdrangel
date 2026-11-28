@@ -50,7 +50,9 @@ QJsonObject MCPProtocol::makeError(const QJsonValue& id, int code, const QString
     error["message"] = message;
     QJsonObject response;
     response["jsonrpc"] = "2.0";
-    response["id"] = id.isUndefined() ? QJsonValue() : id;
+    // A default-constructed QJsonValue is Undefined; QJsonObject drops such keys.
+    // JSON-RPC requires an explicit null id when the request id cannot be identified.
+    response["id"] = id.isUndefined() ? QJsonValue(QJsonValue::Null) : id;
     response["error"] = error;
     return response;
 }
