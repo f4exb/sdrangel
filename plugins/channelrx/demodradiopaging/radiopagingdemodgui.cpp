@@ -1593,10 +1593,10 @@ const QList<DetailRow>& detailRows(int protocol)
 //   FLEX group slots
 void RadioPagingDemodGUI::layoutProtocols()
 {
-    QFont small = font();
+    QFont smallFont = font();
 
-    if (small.pointSizeF() > 1) {
-        small.setPointSizeF(small.pointSizeF() - 1.0);
+    if (smallFont.pointSizeF() > 1) {
+        smallFont.setPointSizeF(smallFont.pointSizeF() - 1.0);
     }
 
     // The widgets leave the grid of the form
@@ -1868,7 +1868,7 @@ void RadioPagingDemodGUI::layoutProtocols()
             for (int s = 0; s < 16; s++)
             {
                 QLabel *cell = new QLabel(QString::number(s, 16).toUpper(), m_flexGroupBar[pol]);
-                cell->setFont(small);
+                cell->setFont(smallFont);
                 cell->setAlignment(Qt::AlignCenter);
                 cell->setFixedWidth(cell->fontMetrics().horizontalAdvance("00") + 4);
                 m_flexGroupCell[pol][s] = cell;
