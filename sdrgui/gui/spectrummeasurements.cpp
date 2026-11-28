@@ -542,7 +542,7 @@ void SpectrumMeasurements::maskTableContextMenu(QPoint pos)
         tableContextMenu->addAction(copyAction);
         tableContextMenu->addSeparator();
 
-        tableContextMenu->popup(m_peakTable->viewport()->mapToGlobal(pos));
+        tableContextMenu->popup(m_maskTable->viewport()->mapToGlobal(pos));
     }
 }
 
