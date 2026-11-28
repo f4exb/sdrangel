@@ -107,6 +107,7 @@
 #include "webapi/webapiadapter.h"
 #include "SWGFeatureSettings.h"
 #include "commands/command.h"
+#include "releasecheck/releaseupdatewidget.h"
 #include "settings/serializableinterface.h"
 #ifdef ANDROID
 #include "util/android.h"
@@ -140,6 +141,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_lastEngineState(DeviceAPI::StNotStarted),
     m_dateTimeWidget(nullptr),
     m_showSystemWidget(nullptr),
+    m_releaseUpdateWidget(nullptr),
     m_commandKeyReceiver(nullptr),
     m_profileDialog(nullptr),
 #if QT_CONFIG(process)
@@ -2336,6 +2338,9 @@ void MainWindow::createStatusBar()
 	m_dateTimeWidget = new QLabel(tr("Date"), this);
 	m_dateTimeWidget->setToolTip(tr("Current date/time"));
 	statusBar()->addPermanentWidget(m_dateTimeWidget);
+
+    m_releaseUpdateWidget = new ReleaseUpdateWidget(this);
+    statusBar()->addPermanentWidget(m_releaseUpdateWidget);
 }
 
 void MainWindow::closeEvent(QCloseEvent *closeEvent)

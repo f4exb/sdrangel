@@ -58,10 +58,10 @@ jobs:
             mkdir -p /tmp/build
             rsync -a --delete . /tmp/build/sdrangel/
             cd /tmp/build/sdrangel
-            debuild -eQT_VERSION=6 -i -us -uc -b
+            debuild -eQT_VERSION=6 -eENABLE_RELEASE_CHECK=GITHUB -i -us -uc -b
             cp ../sdrangel_*_${{ matrix.arch }}.deb "$GITHUB_WORKSPACE"/
           else
-            debuild -eQT_VERSION=6 -i -us -uc -b
+            debuild -eQT_VERSION=6 -eENABLE_RELEASE_CHECK=GITHUB -i -us -uc -b
           fi
       - name: Get version
         id: get_version

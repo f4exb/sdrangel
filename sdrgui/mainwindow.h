@@ -74,6 +74,7 @@ class ConfigurationsDialog;
 class ProfileDialog;
 class SerializableInterface;
 class SDRangelSplash;
+class ReleaseUpdateWidget;
 
 class QMenuBar;
 class QMenu;
@@ -340,6 +341,8 @@ private:
     QMenuBar *m_menuBar;
 	QLabel* m_dateTimeWidget;
 	QLabel* m_showSystemWidget;
+
+    ReleaseUpdateWidget *m_releaseUpdateWidget;
 
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
