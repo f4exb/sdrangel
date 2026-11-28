@@ -281,11 +281,13 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
         {
             disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
             it->worker->stop();
-            // AMBEWorker::process sleeps for one second per poll; 100 ms always timed out
-            it->thread->wait(2000);
             it->worker->m_inputMessageQueue.clear();
+            it->thread->quit();
+            it->thread->wait();
             it->worker->close();
             qDebug() << "AMBEEngine::releaseController: closed device at: " << it->device.c_str();
+            delete it->worker;
+            delete it->thread;
             m_controllers.erase(it);
             break;
         }
@@ -302,11 +304,13 @@ void AMBEEngine::releaseAll()
     {
         disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
         it->worker->stop();
-        // AMBEWorker::process sleeps for one second per poll; 100 ms always timed out
-        it->thread->wait(2000);
         it->worker->m_inputMessageQueue.clear();
+        it->thread->quit();
+        it->thread->wait();
         it->worker->close();
         qDebug() << "AMBEEngine::release: closed device at: " << it->device.c_str();
+        delete it->worker;
+        delete it->thread;
         ++it;
     }
 
