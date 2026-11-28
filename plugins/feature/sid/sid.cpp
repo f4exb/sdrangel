@@ -58,6 +58,10 @@ SIDMain::SIDMain(WebAPIAdapterInterface *webAPIAdapterInterface) :
 
 SIDMain::~SIDMain()
 {
+    // The feature framework only calls destroy(), which is delete this. Stop the
+    // worker here so its polling timer cannot outlive the feature and its queues.
+    stop();
+
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
