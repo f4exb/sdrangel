@@ -412,10 +412,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
     setSizePolicy(rollupContents->sizePolicy());
-    // The RDS data strip has a 760 px minimum width. Without a matching minimum
-    // on the top-level window, Workspace::stackSubWindows() shrinks the panel
-    // and clips the right-hand controls (notably Clear RDS data).
-    setMinimumWidth(ui->rdsContainer->minimumWidth());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

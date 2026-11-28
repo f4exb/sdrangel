@@ -375,9 +375,6 @@ void ChannelGUI::sizeToContents()
     size = getRollupContents()->minimumSize();
     size = size.expandedTo(getRollupContents()->minimumSizeHint());
     size = size.expandedTo(m_topLayout->minimumSize());
-    // Preserve a minimum explicitly set by a channel (for example BFMDemodGUI's
-    // 760 px RDS strip) rather than shrinking back to the rollup contents only.
-    size = size.expandedTo(minimumSize());
     size.setHeight(size.height() + getAdditionalHeight());
     size.setWidth(size.width() + m_resizer.m_gripSize * 2);
     setMinimumSize(size);
